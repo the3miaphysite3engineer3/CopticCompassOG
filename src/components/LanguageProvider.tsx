@@ -28,6 +28,8 @@ const translations = {
     "home.publications": "My Publications",
     "home.publications.desc": "A curated collection of my academic works and ongoing research.",
     "home.comingSoon": "Coming Soon",
+    "home.app.title": "Coptic Learner",
+    "home.app.desc": "Learn Coptic grammar and vocabulary on the go with interactive, Duolingo-style bite-sized lessons, intelligent search, and native integration for iPhone and iPad.",
     "home.copticDict": "Coptic Dictionary",
     "home.copticDict.desc": "A lightning-fast digital lexicon explicitly designed for beginner students and linguists alike.",
 
@@ -70,6 +72,8 @@ const translations = {
     "home.publications": "Mijn Publicaties",
     "home.publications.desc": "Een zorgvuldig samengestelde verzameling van mijn academische werken en lopend onderzoek.",
     "home.comingSoon": "Binnenkort Beschikbaar",
+    "home.app.title": "Coptic Learner",
+    "home.app.desc": "Leer Koptische grammatica en woordenschat onderweg met interactieve, Duolingo-achtige stapsgewijze lessen, intelligente zoekfuncties en native integratie voor iPhone en iPad.",
     "home.copticDict": "Koptisch Woordenboek",
     "home.copticDict.desc": "Een bliksemsnel digitaal lexicon expliciet ontworpen voor zowel beginnende studenten als taalkundigen.",
 

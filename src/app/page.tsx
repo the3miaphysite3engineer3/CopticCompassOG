@@ -95,6 +95,37 @@ export default function GlobalLandingPage() {
           </Link>
 
         </div>
+
+        {/* iOS App Promo Section */}
+        <div className="mt-16 sm:mt-24 w-full bg-gradient-to-r from-stone-900 to-stone-800 dark:from-stone-950 dark:to-stone-900 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 border border-stone-800 animate-in fade-in slide-in-from-bottom-10 duration-1000 delay-300">
+          
+          {/* Background effect */}
+          <div className="absolute top-0 right-0 w-64 h-64 bg-sky-500/20 rounded-full blur-[80px] pointer-events-none"></div>
+
+          <div className="text-center md:text-left z-10 flex-1">
+            <span className="inline-block px-3 py-1 bg-sky-500/20 text-sky-400 text-xs font-bold uppercase tracking-widest rounded-full mb-4">
+              {t("home.comingSoon")}
+            </span>
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-white mb-3">
+              {t("home.app.title")}
+            </h2>
+            <p className="text-stone-400 text-lg max-w-xl mx-auto md:mx-0">
+              {t("home.app.desc")}
+            </p>
+          </div>
+
+          <div className="z-10 flex-shrink-0">
+            <a href="#" className="inline-block opacity-75 cursor-not-allowed hover:opacity-100 transition-opacity duration-300 transform hover:scale-105" title="Coming Soon">
+              {/* Authentic Apple CDN App Store Badge */}
+              <img 
+                src="https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/en-us?size=250x83&amp;releaseDate=1276560000&h=7e7b68fad19738b5649a1bfb78ff46e9" 
+                alt="Download on the App Store" 
+                className="h-14 md:h-16 drop-shadow-md"
+              />
+            </a>
+          </div>
+        </div>
+
       </div>
     </main>
   );
