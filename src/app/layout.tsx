@@ -31,8 +31,8 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Coptic Dictionary",
-  description: "Advanced digital Coptic-English dictionary and lexicon analyzer.",
+  title: "Wannes Portfolio",
+  description: "Explore Kyrillos Wannes' publications, Coptic dictionary, and interactive grammar lessons.",
 };
 
 export default function RootLayout({
