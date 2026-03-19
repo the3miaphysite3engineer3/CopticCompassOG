@@ -102,6 +102,10 @@ const translations = {
     "login.passwordPlaceholder": "••••••••",
     "login.signIn": "Sign In",
     "login.createAccount": "Create an Account",
+    "login.notice.loginError": "Could not authenticate user. Check your email and password and try again.",
+    "login.notice.signupCheckEmail": "Account created. Please confirm your email address using the message we sent, then sign in with the same email and password.",
+    "login.notice.signupConfirmed": "Your email has been confirmed. You can now sign in with the same email and password.",
+    "login.notice.signupError": "Could not create your account. If you already signed up, try signing in instead.",
   },
   nl: {
     "nav.home": "Thuis",
@@ -190,6 +194,10 @@ const translations = {
     "login.passwordPlaceholder": "••••••••",
     "login.signIn": "Inloggen",
     "login.createAccount": "Account aanmaken",
+    "login.notice.loginError": "Inloggen is niet gelukt. Controleer je e-mailadres en wachtwoord en probeer het opnieuw.",
+    "login.notice.signupCheckEmail": "Account aangemaakt. Bevestig eerst je e-mailadres via de e-mail die we hebben gestuurd en log daarna in met hetzelfde e-mailadres en wachtwoord.",
+    "login.notice.signupConfirmed": "Je e-mailadres is bevestigd. Je kunt nu inloggen met hetzelfde e-mailadres en wachtwoord.",
+    "login.notice.signupError": "Je account kon niet worden aangemaakt. Als je al geregistreerd bent, probeer dan in te loggen.",
   }
 };
 

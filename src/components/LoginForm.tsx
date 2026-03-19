@@ -3,8 +3,40 @@
 import { login, signup } from "@/actions/auth";
 import { useLanguage } from "@/components/LanguageProvider";
 
-export function LoginForm({ message }: { message?: string }) {
+const NOTICE_TRANSLATION_KEYS = {
+  "login-error": "login.notice.loginError",
+  "signup-check-email": "login.notice.signupCheckEmail",
+  "signup-confirmed": "login.notice.signupConfirmed",
+  "signup-error": "login.notice.signupError",
+} as const;
+
+type NoticeState = keyof typeof NOTICE_TRANSLATION_KEYS;
+type NoticeType = "error" | "success" | "info";
+
+export function LoginForm({
+  message,
+  messageType = "error",
+  redirectTo,
+  state,
+}: {
+  message?: string;
+  messageType?: NoticeType;
+  redirectTo?: string;
+  state?: string;
+}) {
   const { t } = useLanguage();
+  const noticeKey =
+    state && state in NOTICE_TRANSLATION_KEYS
+      ? NOTICE_TRANSLATION_KEYS[state as NoticeState]
+      : undefined;
+  const noticeMessage = noticeKey ? t(noticeKey) : message;
+  const noticeVariant = noticeKey ? "success" : messageType;
+  const noticeClassName =
+    noticeVariant === "success"
+      ? "rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/80 dark:bg-emerald-950/20 px-4 py-3 text-emerald-700 dark:text-emerald-400 text-sm font-medium text-center"
+      : noticeVariant === "info"
+        ? "rounded-2xl border border-sky-200 dark:border-sky-900/50 bg-sky-50/80 dark:bg-sky-950/20 px-4 py-3 text-sky-700 dark:text-sky-400 text-sm font-medium text-center"
+        : "rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50/80 dark:bg-red-950/20 px-4 py-3 text-red-600 dark:text-red-400 text-sm font-medium text-center";
 
   return (
     <div className="min-h-screen relative overflow-hidden px-6 py-16 md:px-10">
@@ -23,6 +55,14 @@ export function LoginForm({ message }: { message?: string }) {
 
         <div className="max-w-xl mx-auto">
           <form className="space-y-6 rounded-3xl border border-stone-200 dark:border-stone-800 bg-white/70 dark:bg-stone-900/50 backdrop-blur-md p-8 md:p-10 shadow-md dark:shadow-xl dark:shadow-black/20 text-stone-800 dark:text-stone-200">
+            {redirectTo && (
+              <input
+                type="hidden"
+                name="redirectTo"
+                value={redirectTo}
+              />
+            )}
+
             <div className="space-y-2">
               <label className="text-sm font-semibold block" htmlFor="email">
                 {t("login.email")}
@@ -64,9 +104,9 @@ export function LoginForm({ message }: { message?: string }) {
               </button>
             </div>
 
-            {message && (
-              <p className="rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50/80 dark:bg-red-950/20 px-4 py-3 text-red-600 dark:text-red-400 text-sm font-medium text-center">
-                {message}
+            {noticeMessage && (
+              <p className={noticeClassName}>
+                {noticeMessage}
               </p>
             )}
           </form>
