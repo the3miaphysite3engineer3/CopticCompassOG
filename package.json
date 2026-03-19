@@ -1,7 +1,28 @@
 {
   "name": "coptic-dictionary",
+  "description": "Scholarly portfolio and digital Coptic-English dictionary with bilingual UI, analytics, and learning tools.",
   "version": "0.1.0",
   "private": true,
+  "author": "Kyrillos Wannes",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/KyroHub/portfolio.git"
+  },
+  "homepage": "https://kyrilloswannes.com",
+  "bugs": {
+    "url": "https://github.com/KyroHub/portfolio/issues"
+  },
+  "keywords": [
+    "coptic",
+    "linguistics",
+    "dictionary",
+    "digital-humanities",
+    "nextjs",
+    "typescript",
+    "tailwindcss",
+    "recharts"
+  ],
   "scripts": {
     "dev": "next dev",
     "build": "next build",
