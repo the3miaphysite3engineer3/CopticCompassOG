@@ -26,7 +26,7 @@ export default function ContactPageClient() {
       <div className="absolute bottom-0 right-0 w-[420px] h-[420px] bg-emerald-500/10 dark:bg-emerald-900/10 rounded-full blur-[120px] -z-10 pointer-events-none transition-colors duration-500" />
 
       <div className="max-w-3xl mx-auto pt-8">
-        <div className="text-center mb-12 space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <div className="text-center mb-12 space-y-4">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-tr from-sky-600 to-emerald-500 dark:from-sky-400 dark:to-emerald-400 bg-clip-text text-transparent drop-shadow-sm">
             {t("contact.title")}
           </h1>
@@ -37,7 +37,7 @@ export default function ContactPageClient() {
 
         <form
           action={formAction}
-          className="space-y-8 bg-white/70 dark:bg-stone-900/50 backdrop-blur-md border border-stone-200 dark:border-stone-800 rounded-3xl p-8 md:p-10 shadow-md dark:shadow-xl dark:shadow-black/20 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150"
+          className="space-y-8 bg-white/70 dark:bg-stone-900/50 backdrop-blur-md border border-stone-200 dark:border-stone-800 rounded-3xl p-8 md:p-10 shadow-md dark:shadow-xl dark:shadow-black/20"
         >
           <input type="text" name="website" className="hidden" tabIndex={-1} autoComplete="off" />
 
@@ -54,7 +54,7 @@ export default function ContactPageClient() {
                   name="name"
                   required
                   autoComplete="name"
-                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-white/80 dark:bg-stone-950/70 py-3 pl-12 pr-4 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                  className="input-base pl-12"
                   placeholder={t("contact.namePlaceholder")}
                 />
               </div>
@@ -72,7 +72,7 @@ export default function ContactPageClient() {
                   name="email"
                   required
                   autoComplete="email"
-                  className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-white/80 dark:bg-stone-950/70 py-3 pl-12 pr-4 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                  className="input-base pl-12"
                   placeholder={t("contact.emailPlaceholder")}
                 />
               </div>
@@ -88,7 +88,7 @@ export default function ContactPageClient() {
               name="inquiryType"
               required
               defaultValue=""
-              className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-white/80 dark:bg-stone-950/70 py-3 px-4 text-stone-900 dark:text-stone-100 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+              className="select-base"
             >
               <option value="" disabled>
                 {t("contact.select")}
@@ -115,7 +115,7 @@ export default function ContactPageClient() {
                 name="message"
                 required
                 rows={7}
-                className="w-full rounded-2xl border border-stone-200 dark:border-stone-800 bg-white/80 dark:bg-stone-950/70 py-3 pl-12 pr-4 text-stone-900 dark:text-stone-100 placeholder:text-stone-400 dark:placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40 resize-y"
+                className="textarea-base resize-y pl-12"
                 placeholder={t("contact.messagePlaceholder")}
               />
             </div>
@@ -124,20 +124,20 @@ export default function ContactPageClient() {
           <button
             type="submit"
             disabled={isPending}
-            className="w-full rounded-2xl bg-sky-600 hover:bg-sky-500 disabled:bg-sky-600/70 text-white font-semibold py-4 px-6 flex items-center justify-center gap-3 transition-colors shadow-sm"
+            className="btn-primary w-full gap-3"
           >
             {isPending ? t("contact.sending") : t("contact.send")}
             <ArrowRight size={20} />
           </button>
 
           {state?.success && (
-            <p className="text-center font-medium text-emerald-700 dark:text-emerald-400">
+            <p className="rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50 dark:bg-emerald-950/20 px-4 py-3 text-center font-medium text-emerald-700 dark:text-emerald-400">
               {t("contact.success")}
             </p>
           )}
 
           {state?.error && (
-            <p className="text-center font-medium text-red-700 dark:text-red-400">
+            <p className="rounded-2xl border border-red-200 dark:border-red-900/50 bg-red-50 dark:bg-red-950/20 px-4 py-3 text-center font-medium text-red-700 dark:text-red-400">
               {state.error}
             </p>
           )}

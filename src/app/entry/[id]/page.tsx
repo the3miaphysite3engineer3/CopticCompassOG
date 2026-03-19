@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import DictionaryEntryCard from '@/components/DictionaryEntry';
 import StructuredData from '@/components/StructuredData';
 import Link from 'next/link';
+import { ArrowLeft } from 'lucide-react';
 import { getDictionary } from '@/lib/dictionary';
 import { buildPageTitle, siteConfig } from '@/lib/site';
 import {
@@ -72,17 +73,19 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
     <main className="min-h-screen relative overflow-hidden pb-20 pt-16 px-6">
       <StructuredData data={createDefinedTermStructuredData(entry)} />
       
-      {/* Background Elements */}
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-sky-900/10 rounded-b-full blur-[120px] -z-10 pointer-events-none"></div>
+      <div className="absolute top-0 left-0 w-full h-[520px] bg-sky-500/10 dark:bg-sky-900/10 rounded-b-full blur-[120px] -z-10 pointer-events-none" />
+      <div className="absolute top-28 right-[-10%] w-[440px] h-[440px] bg-emerald-500/10 dark:bg-emerald-900/10 rounded-full blur-[100px] -z-10 pointer-events-none" />
 
-      <div className="max-w-3xl mx-auto">
-        <div className="mb-8">
-          <Link href="/dictionary" className="inline-flex items-center text-stone-400 hover:text-sky-400 transition-colors bg-stone-900/50 px-4 py-2 rounded-lg border border-stone-800">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8 flex items-center justify-between gap-4 flex-wrap">
+          <Link href="/dictionary" className="btn-secondary gap-2 px-4">
+            <ArrowLeft className="h-4 w-4" />
             Back to Dictionary Search
           </Link>
+
+          <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold uppercase tracking-widest text-sky-700 dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-400">
+            Dictionary Entry
+          </span>
         </div>
         
         <DictionaryEntryCard entry={entry} headingLevel="h1" linkHeadword={false} />

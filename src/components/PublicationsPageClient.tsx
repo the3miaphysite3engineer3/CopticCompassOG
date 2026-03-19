@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { LanguageBadge, Publication, publications } from "@/lib/publications";
 
@@ -61,9 +62,7 @@ function TileInner({ pub, comingSoonLabel }: { pub: Publication; comingSoonLabel
         {pub.link && !pub.comingSoon && (
           <p className="text-stone-500 dark:text-stone-400 text-sm z-10 flex items-center font-medium mt-1">
             Available on Amazon
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1 opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0 duration-300" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-            </svg>
+            <ArrowUpRight className="h-4 w-4 ml-1 opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0 duration-300" />
           </p>
         )}
       </div>
@@ -101,10 +100,11 @@ export default function PublicationsPageClient() {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col items-center p-6 md:p-10">
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 dark:bg-emerald-900/10 rounded-full blur-[120px] -z-10 pointer-events-none transition-colors duration-500"></div>
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-emerald-500/10 dark:bg-emerald-900/10 rounded-full blur-[120px] -z-10 pointer-events-none transition-colors duration-500" />
+      <div className="absolute top-20 left-[-5%] w-[420px] h-[420px] bg-sky-500/10 dark:bg-sky-900/10 rounded-full blur-[110px] -z-10 pointer-events-none transition-colors duration-500" />
 
       <div className="max-w-5xl w-full space-y-12 z-10 pt-10">
-        <div className="text-center space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-1000">
+        <div className="text-center space-y-4">
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight bg-gradient-to-tr from-stone-800 to-stone-500 dark:from-stone-100 dark:to-stone-400 bg-clip-text text-transparent drop-shadow-sm mb-4">
             {t("nav.publications")}
           </h1>
@@ -113,7 +113,7 @@ export default function PublicationsPageClient() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto w-full animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-150">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto w-full">
           {publications.map((pub, i) => (
             <PublicationTile key={i} pub={pub} comingSoonLabel={t("home.comingSoon")} />
           ))}

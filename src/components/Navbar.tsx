@@ -4,11 +4,13 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import { useLanguage } from "./LanguageProvider";
+import type { User } from "@supabase/supabase-js";
 
-export function Navbar() {
+export function Navbar({ user }: { user: User | null }) {
   const pathname = usePathname();
   const { t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -20,108 +22,91 @@ export function Navbar() {
     { href: "/contact", label: t("nav.contact") },
   ];
 
-  return (
-    <header className="sticky top-0 z-50 w-full backdrop-blur-md bg-white/70 dark:bg-stone-950/70 border-b border-stone-200 dark:border-stone-800 shadow-sm transition-colors duration-300">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          
-          {/* Logo & Home Link */}
-          {pathname === "/" ? (
-            <div className="flex items-center gap-3">
-              <div className="relative w-10 h-10">
-                <Image 
-                  src="/logo/logo-colored.svg" 
-                  alt="Wannes Logo" 
-                  fill 
-                  className="object-contain drop-shadow" 
-                  priority
-                />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-stone-800 to-stone-500 dark:from-stone-100 dark:to-stone-400 bg-clip-text text-transparent font-coptic">
-                {t("nav.home")}
-              </span>
-            </div>
-          ) : (
-            <Link href="/" className="flex items-center gap-3 group transition-transform hover:scale-105">
-              <div className="relative w-10 h-10">
-                <Image 
-                  src="/logo/logo-colored.svg" 
-                  alt="Wannes Logo" 
-                  fill 
-                  className="object-contain drop-shadow" 
-                  priority
-                />
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-stone-800 to-stone-500 dark:from-stone-100 dark:to-stone-400 bg-clip-text text-transparent font-coptic">
-                {t("nav.home")}
-              </span>
-            </Link>
-          )}
+  const authLink = user
+    ? { href: "/dashboard", label: t("nav.dashboard") }
+    : { href: "/login", label: t("nav.login") || "Log In" };
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex space-x-8">
-            {links.map((link) => {
-              const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
+  return (
+    <header className="sticky top-0 z-50 w-full border-b border-stone-200 bg-white/70 backdrop-blur-md shadow-sm transition-colors duration-300 dark:border-stone-800 dark:bg-stone-950/70">
+      <div className="site-container">
+        <div className="flex min-h-[4.75rem] items-center justify-between gap-4 py-3">
+          <Link
+            href="/"
+            className="group flex min-w-0 items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25"
+          >
+            <div className="relative h-10 w-10 shrink-0">
+              <Image
+                src="/logo/logo-colored.svg"
+                alt="Wannes Logo"
+                fill
+                className="object-contain drop-shadow"
+                priority
+              />
+            </div>
+            <span className="truncate font-coptic text-xl font-bold text-transparent bg-gradient-to-r from-stone-800 to-stone-500 bg-clip-text transition-colors dark:from-stone-100 dark:to-stone-400">
+              {t("nav.home")}
+            </span>
+          </Link>
+
+          <nav className="hidden items-center gap-1 md:flex">
+            {[...links, authLink].map((link) => {
+              const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
               return (
                 <Link
                   key={link.href}
                   href={link.href}
-                  className={`text-sm font-semibold tracking-wide transition-colors duration-200 ${
-                    isActive 
-                      ? "text-sky-600 dark:text-sky-400" 
-                      : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200"
+                  data-label={link.label}
+                  className={`group inline-grid h-10 items-center rounded-full px-4 text-sm tracking-[0.02em] transition-all duration-200 before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25 ${
+                    isActive
+                      ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
+                      : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
                   }`}
                 >
-                  {link.label}
+                  <span className={`col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`}>
+                    {link.label}
+                  </span>
                 </Link>
               );
             })}
           </nav>
 
-          {/* Toggles and Mobile Hamburger */}
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-2">
             <ThemeToggle />
             <LanguageToggle />
             <button
-              className="md:hidden p-2 ml-1 text-stone-600 dark:text-stone-400 focus:outline-none hover:bg-stone-100 dark:hover:bg-stone-800 rounded-full transition-colors"
+              className="icon-button md:hidden"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label="Toggle Menu"
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isMobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
+              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
-
         </div>
 
-        {/* Mobile Menu Dropdown */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden py-4 border-t border-stone-200 dark:border-stone-800 flex flex-col space-y-2 animate-in fade-in slide-in-from-top-4 duration-300">
-            {links.map((link) => {
-              const isActive = pathname === link.href || pathname.startsWith(link.href + '/');
+          <nav className="mb-3 flex flex-col gap-1 rounded-2xl border border-stone-200 bg-white/80 p-2 shadow-md backdrop-blur-md md:hidden dark:border-stone-800 dark:bg-stone-900/70 dark:shadow-black/20">
+            {[...links, authLink].map((link) => {
+              const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`text-base font-semibold tracking-wide px-4 py-3 rounded-xl transition-all duration-200 ${
-                    isActive 
-                      ? "text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/40" 
-                      : "text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-900/50"
+                  data-label={link.label}
+                  className={`group grid rounded-xl px-4 py-3 text-sm tracking-[0.02em] transition-colors before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] ${
+                    isActive
+                      ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
+                      : "text-stone-600 hover:bg-stone-50 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-900/60 dark:hover:text-stone-200"
                   }`}
                 >
-                  {link.label}
+                  <span className={`col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`}>
+                    {link.label}
+                  </span>
                 </Link>
               );
             })}
           </nav>
         )}
-
       </div>
     </header>
   );

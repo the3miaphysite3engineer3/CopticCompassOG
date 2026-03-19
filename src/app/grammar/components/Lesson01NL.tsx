@@ -1,5 +1,6 @@
 import React from "react";
 import { Footnote } from "@/components/Footnote";
+import { ExerciseForm } from "@/components/ExerciseForm";
 
 export function Lesson01NL() {
   return (
@@ -288,18 +289,21 @@ export function Lesson01NL() {
       <section className="bg-sky-50 dark:bg-sky-900/20 p-6 rounded-xl border border-sky-100 dark:border-sky-900 mt-10">
         <h2 className="text-xl font-bold mb-4 text-sky-700 dark:text-sky-400">🎓 Oefeningen</h2>
         <p className="mb-4">Vertaal de volgende nominale uitdrukkingen in het Koptisch (één oplossing is voldoende).</p>
-        <ol className="list-decimal list-inside space-y-2 font-medium">
-          <li>Zij is mijn dochter.</li>
-          <li>Zij is mijn echtgenote.</li>
-          <li>Het is de hemel.</li>
-          <li>Zij is een dame.</li>
-          <li>Zij zijn de dames.</li>
-          <li>Hij is een geest.</li>
-          <li>Het is de geest.</li>
-          <li>Iedere stad.</li>
-          <li>Iedere man.</li>
-          <li>De heer, de verlosser.</li>
-        </ol>
+        <ExerciseForm 
+          lessonSlug="lesson-1"
+          questions={[
+            "Zij is mijn dochter.",
+            "Zij is mijn echtgenote.",
+            "Het is de hemel.",
+            "Zij is een dame.",
+            "Zij zijn de dames.",
+            "Hij is een geest.",
+            "Het is de geest.",
+            "Iedere stad.",
+            "Iedere man.",
+            "De heer, de verlosser."
+          ]}
+        />
       </section>
 
     </div>

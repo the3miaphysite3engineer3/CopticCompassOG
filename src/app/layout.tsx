@@ -7,6 +7,7 @@ import { getSiteUrl, siteConfig } from "@/lib/site";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { createClient } from "@/lib/supabase/server";
 
 const siteUrl = getSiteUrl();
 const socialImages = siteUrl
@@ -56,20 +57,22 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const supabase = await createClient();
+  const { data: { session } } = await supabase.auth.getSession();
+  const user = session?.user || null;
+
   return (
-    <html lang="en" className="dark" suppressHydrationWarning>
-      <body
-        className={`${inter.variable} ${antinoou.variable} font-sans antialiased`}
-      >
+    <html lang="en" suppressHydrationWarning>
+      <body className={`${inter.variable} ${antinoou.variable}`}>
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
           <LanguageProvider>
             <div className="flex flex-col min-h-screen">
-              <Navbar />
+              <Navbar user={user} />
               <main className="flex-1">
                 {children}
               </main>

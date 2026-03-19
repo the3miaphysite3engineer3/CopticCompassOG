@@ -1,5 +1,6 @@
 import React from "react";
 import { Footnote } from "@/components/Footnote";
+import { ExerciseForm } from "@/components/ExerciseForm";
 
 export function Lesson01EN() {
   return (
@@ -288,18 +289,21 @@ export function Lesson01EN() {
       <section className="bg-sky-50 dark:bg-sky-900/20 p-6 rounded-xl border border-sky-100 dark:border-sky-900 mt-10">
         <h2 className="text-xl font-bold mb-4 text-sky-700 dark:text-sky-400">🎓 Exercise 01</h2>
         <p className="mb-4">Translate the following nominal expressions into Coptic (one solution is sufficient).</p>
-        <ol className="list-decimal list-inside space-y-2 font-medium">
-          <li>She is my daughter.</li>
-          <li>She is my wife.</li>
-          <li>It is heaven.</li>
-          <li>She is a lady.</li>
-          <li>They are the ladies.</li>
-          <li>He is a spirit.</li>
-          <li>It is the spirit.</li>
-          <li>Every city.</li>
-          <li>Every man.</li>
-          <li>The lord, the savior.</li>
-        </ol>
+        <ExerciseForm 
+          lessonSlug="lesson-1"
+          questions={[
+            "She is my daughter.",
+            "She is my wife.",
+            "It is heaven.",
+            "She is a lady.",
+            "They are the ladies.",
+            "He is a spirit.",
+            "It is the spirit.",
+            "Every city.",
+            "Every man.",
+            "The lord, the savior."
+          ]}
+        />
       </section>
 
     </div>

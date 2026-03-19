@@ -1,6 +1,8 @@
 "use client";
 
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { BarChart3, Keyboard, Search, SlidersHorizontal, X } from "lucide-react";
 import DictionaryEntryCard from "@/components/DictionaryEntry";
 import { LexicalEntry } from "../../scripts/parseExcel";
 import { searchDictionary } from "../../lib/searchEngine";
@@ -61,12 +63,27 @@ function DictionaryResultsSection({
   return (
     <>
       {!loading && (
-        <div className="flex justify-between items-center mb-6 text-stone-500 dark:text-stone-400">
-          <span className="text-sm font-medium">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <span className="inline-flex items-center rounded-full border border-stone-200 bg-white/70 px-4 py-2 text-sm font-medium text-stone-600 shadow-sm backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/50 dark:text-stone-400">
             {query.trim().length === 0 && selectedPOS === "ALL" && selectedDialect === "ALL"
               ? `${t("dict.showing")} ${visibleResults.length} ${t("dict.outOf")} ${dictionaryLength} ${t("dict.entries")}`
               : `${t("dict.found")} ${filteredResults.length} ${t("dict.results")}`}
           </span>
+
+          {(selectedPOS !== "ALL" || selectedDialect !== "ALL") && (
+            <div className="flex flex-wrap gap-2 text-xs font-semibold">
+              {selectedPOS !== "ALL" && (
+                <span className="inline-flex items-center rounded-full border border-stone-200 bg-stone-100 px-3 py-1 text-stone-600 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300">
+                  {t("dict.pos")} {selectedPOS}
+                </span>
+              )}
+              {selectedDialect !== "ALL" && (
+                <span className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-sky-700 dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-400">
+                  {t("dict.dialect")} {selectedDialect}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -77,9 +94,9 @@ function DictionaryResultsSection({
       )}
 
       {!loading && filteredResults.length === 0 && (
-        <div className="text-center py-20 bg-stone-50/80 dark:bg-stone-900/30 rounded-2xl border border-stone-200 dark:border-stone-800/50 backdrop-blur-sm">
-          <p className="text-2xl text-stone-600 dark:text-stone-500 font-medium">{t("dict.noMatch")}</p>
-          <p className="text-stone-500 dark:text-stone-600 mt-2">{t("dict.tryFuzzy")}</p>
+        <div className="text-center py-20 bg-white/70 dark:bg-stone-900/40 rounded-3xl border border-stone-200 dark:border-stone-800/60 backdrop-blur-md shadow-sm">
+          <p className="text-2xl text-stone-700 dark:text-stone-300 font-medium">{t("dict.noMatch")}</p>
+          <p className="text-stone-500 dark:text-stone-500 mt-2">{t("dict.tryFuzzy")}</p>
         </div>
       )}
 
@@ -194,17 +211,15 @@ function DictionaryPageBody({ dictionaryPath, t }: DictionaryPageBodyProps) {
 
   return (
     <main className="min-h-screen relative overflow-hidden pb-20">
-      <div className="absolute top-0 left-0 w-full h-[500px] bg-sky-500/10 dark:bg-sky-900/10 rounded-b-full blur-[120px] -z-10 pointer-events-none transition-colors duration-500"></div>
-      <div className="absolute top-20 right-[-10%] w-[500px] h-[500px] bg-emerald-500/10 dark:bg-emerald-900/10 rounded-full blur-[100px] -z-10 pointer-events-none transition-colors duration-500"></div>
+      <div className="absolute top-0 left-0 w-full h-[520px] bg-sky-500/10 dark:bg-sky-900/10 rounded-b-full blur-[120px] -z-10 pointer-events-none transition-colors duration-500" />
+      <div className="absolute top-20 right-[-10%] w-[500px] h-[500px] bg-emerald-500/10 dark:bg-emerald-900/10 rounded-full blur-[100px] -z-10 pointer-events-none transition-colors duration-500" />
 
-      <div className="max-w-5xl mx-auto px-6 pt-20">
-        <div className="flex justify-end mb-4 items-center">
-          <a href="/analytics" className="text-sm font-semibold tracking-widest uppercase text-stone-600 dark:text-stone-400 hover:text-sky-500 dark:hover:text-sky-400 transition-colors bg-white/50 dark:bg-stone-900/50 px-4 py-2 rounded-lg border border-stone-200 dark:border-stone-800 flex items-center shadow-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
-            {t("nav.analytics")}
-          </a>
+      <div className="max-w-5xl mx-auto px-6 pt-16 md:pt-20">
+        <div className="mb-5 flex justify-end items-center">
+          <Link href="/analytics" className="btn-secondary gap-2 px-4">
+            <BarChart3 className="h-4 w-4" />
+            <span className="text-sm tracking-wide">{t("nav.analytics")}</span>
+          </Link>
         </div>
 
         <div className="text-center mb-16 space-y-4">
@@ -216,59 +231,66 @@ function DictionaryPageBody({ dictionaryPath, t }: DictionaryPageBodyProps) {
           </p>
         </div>
 
-        <div className="relative sticky top-6 z-20 mb-12 flex flex-col gap-4">
-          <div className="relative w-full group flex items-center">
-            <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none text-stone-500 group-focus-within:text-sky-400 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
+        <div className="relative sticky top-5 z-20 mb-12 flex flex-col gap-4">
+          <div className="relative rounded-[1.75rem] bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border border-stone-200 dark:border-stone-700/80 shadow-xl dark:shadow-2xl">
+            <div className="relative flex items-center">
+              <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none text-stone-500 group-focus-within:text-sky-400 transition-colors">
+                <Search className="h-6 w-6" />
+              </div>
 
-            <input
-              ref={searchInputRef}
-              type="text"
-              placeholder={t("dict.searchPlaceholder")}
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className={`${antinoou.className} w-full bg-white/80 dark:bg-stone-900/80 backdrop-blur-xl border border-stone-200 dark:border-stone-700/80 text-stone-900 dark:text-stone-100 text-lg md:text-2xl rounded-2xl p-6 pl-16 pr-24 focus:outline-none focus:ring-2 focus:ring-sky-500/50 shadow-xl dark:shadow-2xl transition-all placeholder:font-sans placeholder:text-stone-400 dark:placeholder:text-stone-500`}
-            />
+              <input
+                ref={searchInputRef}
+                type="text"
+                placeholder={t("dict.searchPlaceholder")}
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className={`${antinoou.className} w-full bg-transparent text-stone-900 dark:text-stone-100 text-lg md:text-2xl rounded-[1.75rem] p-6 pl-16 pr-28 focus:outline-none focus:ring-2 focus:ring-sky-500/50 transition-all placeholder:font-sans placeholder:text-stone-400 dark:placeholder:text-stone-500`}
+              />
 
-            <div className="absolute inset-y-0 right-4 flex items-center gap-2">
-              {query && (
+              <div className="absolute inset-y-0 right-4 flex items-center gap-2">
+                {query && (
+                  <button
+                    onClick={() => setQuery("")}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-stone-100 text-stone-500 transition-colors hover:text-stone-700 dark:bg-stone-800/70 dark:text-stone-400 dark:hover:text-stone-200"
+                    aria-label="Clear Search"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                )}
                 <button
-                  onClick={() => setQuery("")}
-                  className="p-2 text-stone-400 hover:text-stone-600 dark:text-stone-500 dark:hover:text-stone-300 transition-colors bg-stone-100 dark:bg-stone-800/50 rounded-full"
-                  aria-label="Clear Search"
+                  onClick={() => setKeyboardOpen(!isKeyboardOpen)}
+                  className={`inline-flex h-10 w-10 items-center justify-center rounded-full transition-colors ${
+                    isKeyboardOpen
+                      ? "bg-sky-100 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400"
+                      : "bg-stone-100 text-stone-500 hover:text-stone-700 dark:bg-stone-800/70 dark:text-stone-400 dark:hover:text-stone-200"
+                  }`}
+                  aria-label="Toggle Virtual Keyboard"
+                  title="Open Coptic Keyboard"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <Keyboard className="h-5 w-5" />
                 </button>
-              )}
-              <button
-                onClick={() => setKeyboardOpen(!isKeyboardOpen)}
-                className={`p-2 transition-colors rounded-full ${isKeyboardOpen ? "bg-sky-100 dark:bg-sky-500/20 text-sky-600 dark:text-sky-400" : "text-stone-400 hover:text-stone-600 dark:text-stone-500 dark:hover:text-stone-300 bg-stone-100 dark:bg-stone-800/50"}`}
-                aria-label="Toggle Virtual Keyboard"
-                title="Open Coptic Keyboard"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h12A2.25 2.25 0 0120.25 6v12a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18V6zM6 9h.008v.008H6V9zm3 0h.008v.008H9V9zm3 0h.008v.008H12V9zm3 0h.008v.008H15V9zm3 0h.008v.008H18V9zm-9 3h.008v.008H9V12zm3 0h.008v.008H12V12zm3 0h.008v.008H15V12zm-3 3h.008v.008H12V15z" />
-                </svg>
-              </button>
-            </div>
+              </div>
 
-            <CopticKeyboard
-              isOpen={isKeyboardOpen}
-              onClose={() => setKeyboardOpen(false)}
-              onAppend={handleKeyboardAppend}
-              onBackspace={handleKeyboardBackspace}
-            />
+              <CopticKeyboard
+                isOpen={isKeyboardOpen}
+                onClose={() => setKeyboardOpen(false)}
+                onAppend={handleKeyboardAppend}
+                onBackspace={handleKeyboardBackspace}
+              />
+            </div>
           </div>
 
-          <div className="flex flex-wrap gap-4 items-center justify-center p-4 bg-white/60 dark:bg-stone-900/60 backdrop-blur-md border border-stone-200 dark:border-stone-800 rounded-xl relative z-10 shadow-sm">
+          <div className="flex flex-wrap gap-4 items-center justify-center p-4 bg-white/60 dark:bg-stone-900/60 backdrop-blur-md border border-stone-200 dark:border-stone-800 rounded-2xl relative z-10 shadow-sm">
+            <div className="flex items-center gap-2 text-stone-500 dark:text-stone-400">
+              <SlidersHorizontal className="h-4 w-4" />
+              <span className="text-xs font-semibold uppercase tracking-widest">Filters</span>
+            </div>
+
+            <div className="h-6 w-px bg-stone-300 dark:bg-stone-700 hidden md:block" />
+
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-widest">{t("dict.pos")}</span>
-              <select className="bg-white dark:bg-stone-950 border border-stone-300 dark:border-stone-700 rounded-md text-sm p-1.5 focus:ring-sky-500 text-stone-700 dark:text-stone-300 outline-none cursor-pointer" value={selectedPOS} onChange={(e) => setSelectedPOS(e.target.value)}>
+              <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-widest">{t("dict.pos")}</span>
+              <select className="bg-white dark:bg-stone-950 border border-stone-300 dark:border-stone-700 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-500/30 text-stone-700 dark:text-stone-300 cursor-pointer" value={selectedPOS} onChange={(e) => setSelectedPOS(e.target.value)}>
                 <option value="ALL">{t("dict.any")}</option>
                 <option value="V">{t("dict.verb")}</option>
                 <option value="N">{t("dict.noun")}</option>
@@ -279,8 +301,8 @@ function DictionaryPageBody({ dictionaryPath, t }: DictionaryPageBodyProps) {
             </div>
             <div className="w-px h-6 bg-stone-300 dark:bg-stone-700 hidden sm:block"></div>
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-widest">{t("dict.dialect")}</span>
-              <select className="bg-white dark:bg-stone-950 border border-stone-300 dark:border-stone-700 rounded-md text-sm p-1.5 focus:ring-sky-500 text-stone-700 dark:text-stone-300 outline-none cursor-pointer" value={selectedDialect} onChange={(e) => setSelectedDialect(e.target.value)}>
+              <span className="text-xs font-semibold text-stone-500 dark:text-stone-400 uppercase tracking-widest">{t("dict.dialect")}</span>
+              <select className="bg-white dark:bg-stone-950 border border-stone-300 dark:border-stone-700 rounded-lg px-3 py-2 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-sky-500/30 text-stone-700 dark:text-stone-300 cursor-pointer" value={selectedDialect} onChange={(e) => setSelectedDialect(e.target.value)}>
                 <option value="ALL">{t("dict.any")}</option>
                 <option value="S">Sahidic (S)</option>
                 <option value="B">Bohairic (B)</option>
