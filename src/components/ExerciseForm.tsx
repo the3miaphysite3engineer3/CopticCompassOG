@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useActionState } from "react";
-import { createClient } from "@/lib/supabase/client";
+import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
 import { submitExercise } from "@/actions/exercises";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
@@ -15,19 +15,34 @@ export function ExerciseForm({
   questions: string[];
 }) {
   const [user, setUser] = useState<User | null>(null);
+  const authAvailable = hasSupabaseEnv();
   const supabase = createClient();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(authAvailable);
 
   const [state, formAction, isPending] = useActionState(submitExercise, null);
 
   useEffect(() => {
+    if (!supabase) {
+      return;
+    }
+
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
       setLoading(false);
     });
-  }, [supabase.auth]);
+  }, [supabase]);
 
   if (loading) return <div className="animate-pulse h-20 bg-sky-50 dark:bg-sky-900/20 rounded-xl mt-6"></div>;
+
+  if (!authAvailable) {
+    return (
+      <div className="mt-6 p-6 rounded-2xl border border-stone-200 dark:border-stone-800 bg-white/60 dark:bg-stone-900/50 text-center shadow-sm backdrop-blur-md">
+        <p className="text-stone-600 dark:text-stone-400 mb-4 font-medium">
+          Login-based exercise submission is temporarily unavailable.
+        </p>
+      </div>
+    );
+  }
 
   if (!user) {
     return (
