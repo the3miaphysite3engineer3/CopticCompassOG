@@ -1,8 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
+import { getAuthUnavailableLoginPath, hasSupabaseRuntimeEnv } from '@/lib/supabase/config'
 import { redirect } from 'next/navigation'
 import { logout } from '@/actions/auth'
 
 export default async function DashboardPage() {
+  if (!hasSupabaseRuntimeEnv()) {
+    return redirect(getAuthUnavailableLoginPath('/dashboard'))
+  }
+
   const supabase = await createClient()
 
   // Verify authentication server-side

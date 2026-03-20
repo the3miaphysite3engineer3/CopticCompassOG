@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import AnalyticsPageClient from "@/components/AnalyticsPageClient";
+import { createAnalyticsSnapshots } from "@/lib/analytics";
+import { getDictionary } from "@/lib/dictionary";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
@@ -10,5 +12,5 @@ export const metadata: Metadata = createPageMetadata({
 });
 
 export default function AnalyticsPage() {
-  return <AnalyticsPageClient />;
+  return <AnalyticsPageClient snapshots={createAnalyticsSnapshots(getDictionary())} />;
 }

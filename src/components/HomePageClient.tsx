@@ -35,7 +35,6 @@ export default function HomePageClient() {
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto w-full">
           <Link
             href="/publications"
-            prefetch={false}
             className="group relative h-full rounded-3xl bg-white/70 dark:bg-stone-900/50 backdrop-blur-md border border-stone-200 dark:border-stone-800 p-8 md:p-10 shadow-md dark:shadow-xl dark:shadow-black/20 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-emerald-500/10 transition-all duration-300 flex flex-col items-center min-h-[280px] overflow-hidden cursor-pointer transform hover:-translate-y-1"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -63,7 +62,6 @@ export default function HomePageClient() {
 
           <Link
             href="/dictionary"
-            prefetch={false}
             className="group relative h-full rounded-3xl bg-white/70 dark:bg-stone-900/50 backdrop-blur-md border border-stone-200 dark:border-stone-800 p-8 md:p-10 shadow-md dark:shadow-xl dark:shadow-black/20 hover:border-sky-300 dark:hover:border-sky-700 hover:shadow-sky-500/10 transition-all duration-300 flex flex-col items-center min-h-[280px] overflow-hidden cursor-pointer transform hover:-translate-y-1"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -91,7 +89,6 @@ export default function HomePageClient() {
 
           <Link
             href="/grammar"
-            prefetch={false}
             className="group relative h-full rounded-3xl bg-white/70 dark:bg-stone-900/50 backdrop-blur-md border border-stone-200 dark:border-stone-800 p-8 md:p-10 shadow-md dark:shadow-xl dark:shadow-black/20 hover:border-sky-300 dark:hover:border-sky-700 hover:shadow-sky-500/10 transition-all duration-300 flex flex-col items-center min-h-[280px] overflow-hidden cursor-pointer transform hover:-translate-y-1"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />

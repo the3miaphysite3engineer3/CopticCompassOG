@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { LexicalEntry } from "../../scripts/parseExcel";
+import type { LexicalEntry } from "@/lib/dictionaryTypes";
 
 export function getDictionary(): LexicalEntry[] {
   const filePath = path.join(process.cwd(), "public/data/dictionary.json");

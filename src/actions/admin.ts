@@ -1,9 +1,23 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { hasSupabaseRuntimeEnv } from '@/lib/supabase/config'
 import { revalidatePath } from 'next/cache'
+import {
+  getFormString,
+  hasLengthInRange,
+  isUuid,
+  normalizeMultiline,
+  normalizeWhitespace,
+  parseBoundedInteger,
+} from '@/lib/validation'
 
 export async function submitFeedback(formData: FormData) {
+  if (!hasSupabaseRuntimeEnv()) {
+    console.warn('Admin feedback submission skipped because Supabase is not configured.')
+    return
+  }
+
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
@@ -11,9 +25,22 @@ export async function submitFeedback(formData: FormData) {
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') return
 
-  const submissionId = formData.get('submission_id') as string
-  const rating = parseInt(formData.get('rating') as string) || 0
-  const feedback = formData.get('feedback') as string
+  const submissionId = normalizeWhitespace(getFormString(formData, 'submission_id'))
+  const rating = parseBoundedInteger(normalizeWhitespace(getFormString(formData, 'rating')), {
+    min: 1,
+    max: 5,
+  })
+  const feedback = normalizeMultiline(getFormString(formData, 'feedback'))
+
+  if (!isUuid(submissionId) || rating === null || !hasLengthInRange(feedback, { min: 1, max: 5000 })) {
+    console.warn('Rejected invalid admin feedback submission', {
+      userId: user.id,
+      submissionId,
+      rating,
+      feedbackLength: feedback.length,
+    })
+    return
+  }
 
   const { error } = await supabase
     .from('submissions')

@@ -1,31 +1,13 @@
-import * as XLSX from 'xlsx';
+import XLSX from 'xlsx';
 import * as fs from 'fs';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+import type { DialectForms, LexicalEntry } from '../src/lib/dictionaryTypes.ts';
+import { normalizeDialectKey } from '../src/lib/dialects.ts';
 
 interface WordData {
   word: string;
   meaning: string;
-}
-
-export interface DialectForms {
-  absolute: string;
-  nominal: string;
-  pronominal: string;
-  stative: string;
-}
-
-export interface LexicalEntry {
-  id: string;
-  headword: string;
-  dialects: Record<string, DialectForms>; // e.g. { S: { absolute: "ⲙⲟⲩϩ", nominal: "ⲙⲉϩ-", pronominal: "ⲙⲁϩ=", stative: "ⲙⲉϩ†" } }
-  pos: string; // V, N, ADJ, etc.
-  gender: string; // F, M, BOTH, ''
-  english_meanings: string[];
-  greek_equivalents: string[];
-  raw: {
-    word: string;
-    meaning: string;
-  }
 }
 
 // Reuse logic from data-analysis.ts
@@ -79,7 +61,7 @@ function extractDialectsAndHeadword(wordRaw: string): { headword: string, dialec
   for (const line of lines) {
     const parentheticalMatch = line.match(/^\(([^)]+)\)\s*(.*)/);
     if (parentheticalMatch) {
-      const dialectKeys = parentheticalMatch[1].split(',').map(d => d.trim().toUpperCase());
+      const dialectKeys = parentheticalMatch[1].split(',').map((d) => normalizeDialectKey(d));
       let wordTokens = parentheticalMatch[2].trim();
       
       // Strip out corpus ext references for the clean headword e.g. {ext codex...}
@@ -122,15 +104,40 @@ function extractDialectsAndHeadword(wordRaw: string): { headword: string, dialec
 
 import * as os from 'os';
 
-function main() {
-  const excelPaths = [
-    path.join(os.homedir(), 'Desktop/Coptic/marcion-test.xlsx')
-  ];
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-  let rawData: WordData[] = [];
+function getExcelPaths(): string[] {
+  const cliPaths = process.argv.slice(2).map((value) => value.trim()).filter(Boolean);
+
+  if (cliPaths.length > 0) {
+    return cliPaths.map((value) => path.resolve(value));
+  }
+
+  const envPath = process.env.DICTIONARY_SOURCE_PATH?.trim();
+  if (envPath) {
+    return [path.resolve(envPath)];
+  }
+
+  return [];
+}
+
+function main() {
+  const excelPaths = getExcelPaths();
+
+  if (excelPaths.length === 0) {
+    console.error("No source spreadsheet provided.");
+    console.error("Pass one or more paths with `npm run data:parse -- /path/to/source.xlsx`");
+    console.error("or set the `DICTIONARY_SOURCE_PATH` environment variable.");
+    process.exit(1);
+  }
+
+  const rawData: WordData[] = [];
+  let foundAnySource = false;
 
   for (const p of excelPaths) {
     if (fs.existsSync(p)) {
+      foundAnySource = true;
       console.log(`Reading ${p}...`);
       const wb = XLSX.readFile(p);
       const sheet = wb.Sheets[wb.SheetNames[0]];
@@ -139,6 +146,11 @@ function main() {
     } else {
       console.warn(`File not found: ${p}`);
     }
+  }
+
+  if (!foundAnySource) {
+    console.error("None of the provided spreadsheet paths could be found.");
+    process.exit(1);
   }
 
   const dictionary: LexicalEntry[] = [];

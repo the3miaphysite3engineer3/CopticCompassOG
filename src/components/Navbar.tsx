@@ -3,17 +3,49 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import { useLanguage } from "./LanguageProvider";
 import type { User } from "@supabase/supabase-js";
+import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
 
-export function Navbar({ user }: { user: User | null }) {
+export function Navbar() {
   const pathname = usePathname();
   const { t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    if (!hasSupabaseEnv()) {
+      return;
+    }
+
+    const supabase = createClient();
+    if (!supabase) {
+      return;
+    }
+
+    let isMounted = true;
+
+    void supabase.auth.getSession().then(({ data }) => {
+      if (isMounted) {
+        setUser(data.session?.user ?? null);
+      }
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const links = [
     { href: "/publications", label: t("nav.publications") },

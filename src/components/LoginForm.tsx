@@ -4,10 +4,15 @@ import { login, signup } from "@/actions/auth";
 import { useLanguage } from "@/components/LanguageProvider";
 
 const NOTICE_TRANSLATION_KEYS = {
+  "auth-unavailable": "login.notice.authUnavailable",
+  "login-invalid-input": "login.notice.loginInvalidInput",
   "login-error": "login.notice.loginError",
+  "login-rate-limited": "login.notice.loginRateLimited",
   "signup-check-email": "login.notice.signupCheckEmail",
   "signup-confirmed": "login.notice.signupConfirmed",
   "signup-error": "login.notice.signupError",
+  "signup-invalid-input": "login.notice.signupInvalidInput",
+  "signup-rate-limited": "login.notice.signupRateLimited",
 } as const;
 
 type NoticeState = keyof typeof NOTICE_TRANSLATION_KEYS;

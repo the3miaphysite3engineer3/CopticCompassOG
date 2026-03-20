@@ -13,25 +13,24 @@ Thanks for helping improve the dictionary and portfolio.
 
 The current source-of-truth workflow is Excel-first.
 
-1. Update the spreadsheet expected by `scripts/parseExcel.ts`.
-   The parser currently reads `~/Desktop/Coptic/marcion-test.xlsx`.
+1. Update your local source spreadsheet.
 2. Regenerate the dictionary JSON:
 
    ```bash
-   npx ts-node scripts/parseExcel.ts
+   npm run data:parse -- /absolute/path/to/source.xlsx
    ```
+
+   Alternatively, set `DICTIONARY_SOURCE_PATH` before running the script.
 
 3. If you also need to refresh the Dutch dataset, run:
 
    ```bash
-   npx ts-node scripts/translateDictionary.ts
+   npm run data:translate
    ```
 
 4. Review the generated diffs in:
    - `public/data/dictionary.json`
    - `public/data/woordenboek.json`
-
-If your local Excel source lives somewhere else, update the path inside `scripts/parseExcel.ts` before regenerating data.
 
 ## Pull Request Notes
 

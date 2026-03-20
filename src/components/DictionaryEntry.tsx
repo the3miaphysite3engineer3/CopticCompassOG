@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { antinoou } from '@/lib/fonts';
-import { LexicalEntry } from '../../scripts/parseExcel';
+import type { LexicalEntry } from '@/lib/dictionaryTypes';
 import HighlightText from './HighlightText';
 
 type DictionaryEntryCardProps = {

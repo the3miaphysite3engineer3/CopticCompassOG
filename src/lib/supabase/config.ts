@@ -1,0 +1,29 @@
+const AUTH_UNAVAILABLE_STATE = "auth-unavailable";
+
+export function getSupabaseRuntimeEnv() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !anonKey) {
+    return null;
+  }
+
+  return { url, anonKey };
+}
+
+export function hasSupabaseRuntimeEnv() {
+  return getSupabaseRuntimeEnv() !== null;
+}
+
+export function getAuthUnavailableLoginPath(redirectTo?: string) {
+  const params = new URLSearchParams({
+    state: AUTH_UNAVAILABLE_STATE,
+    messageType: "error",
+  });
+
+  if (redirectTo && redirectTo.startsWith("/")) {
+    params.set("redirect_to", redirectTo);
+  }
+
+  return `/login?${params.toString()}`;
+}

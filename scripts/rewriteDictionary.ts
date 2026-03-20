@@ -1,12 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-
-export interface DialectForms {
-  absolute: string;
-  nominal: string;
-  pronominal: string;
-  stative: string;
-}
+import { fileURLToPath } from 'url';
+import type { DialectForms, LexicalEntry } from '../src/lib/dictionaryTypes.ts';
+import { normalizeDialectKey } from '../src/lib/dialects.ts';
 
 export interface LegacyLexicalEntry {
   id: string;
@@ -22,19 +18,8 @@ export interface LegacyLexicalEntry {
   }
 }
 
-export interface NewLexicalEntry {
-  id: string;
-  headword: string;
-  dialects: Record<string, DialectForms>;
-  pos: string;
-  gender: string;
-  english_meanings: string[];
-  greek_equivalents: string[];
-  raw: {
-    word: string;
-    meaning: string;
-  }
-}
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 function extractDialectsAndHeadword(wordRaw: string): { headword: string, dialects: Record<string, DialectForms> } {
   const lines = wordRaw.split('\n');
@@ -44,7 +29,7 @@ function extractDialectsAndHeadword(wordRaw: string): { headword: string, dialec
   for (const line of lines) {
     const parentheticalMatch = line.match(/^\(([^)]+)\)\s*(.*)/);
     if (parentheticalMatch) {
-      const dialectKeys = parentheticalMatch[1].split(',').map(d => d.trim().toUpperCase());
+      const dialectKeys = parentheticalMatch[1].split(',').map((d) => normalizeDialectKey(d));
       let wordTokens = parentheticalMatch[2].trim();
       
       wordTokens = wordTokens.replace(/\{.*?\}/g, '').trim();
@@ -84,23 +69,29 @@ function extractDialectsAndHeadword(wordRaw: string): { headword: string, dialec
 }
 
 function main() {
-  const dictPath = path.join(__dirname, '../public/data/dictionary.json');
-  console.log(`Reading existing dictionary from ${dictPath}...`);
-  
-  const rawData = fs.readFileSync(dictPath, 'utf8');
-  const legacyEntries: LegacyLexicalEntry[] = JSON.parse(rawData);
+  const dictionaryPaths = [
+    path.join(__dirname, "../public/data/dictionary.json"),
+    path.join(__dirname, "../public/data/woordenboek.json"),
+  ];
 
-  const newEntries: NewLexicalEntry[] = legacyEntries.map(entry => {
-    const { headword, dialects } = extractDialectsAndHeadword(entry.raw.word);
-    return {
-      ...entry,
-      headword,
-      dialects
-    };
-  });
+  for (const dictionaryPath of dictionaryPaths) {
+    console.log(`Reading existing dictionary from ${dictionaryPath}...`);
 
-  fs.writeFileSync(dictPath, JSON.stringify(newEntries, null, 2));
-  console.log(`Successfully migrated ${newEntries.length} entries to their exact grammatical bindings!`);
+    const rawData = fs.readFileSync(dictionaryPath, "utf8");
+    const legacyEntries: LegacyLexicalEntry[] = JSON.parse(rawData);
+
+    const newEntries: LexicalEntry[] = legacyEntries.map((entry) => {
+      const { headword, dialects } = extractDialectsAndHeadword(entry.raw.word);
+      return {
+        ...entry,
+        headword,
+        dialects,
+      };
+    });
+
+    fs.writeFileSync(dictionaryPath, JSON.stringify(newEntries, null, 2));
+    console.log(`Successfully migrated ${newEntries.length} entries to their exact grammatical bindings!`);
+  }
 }
 
 main();

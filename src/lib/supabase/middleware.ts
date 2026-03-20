@@ -1,34 +1,34 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import {
+  getAuthUnavailableLoginPath,
+  getSupabaseRuntimeEnv,
+} from '@/lib/supabase/config'
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
   })
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  const env = getSupabaseRuntimeEnv()
 
   // Fail open for public pages if auth env vars are missing in a deployment.
   // This keeps the site online and limits the impact to auth-protected routes.
-  if (!supabaseUrl || !supabaseAnonKey) {
+  if (!env) {
     const { pathname } = request.nextUrl
     const protectedRoutes = ['/dashboard', '/admin']
     const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
 
     if (isProtectedRoute) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/login'
-      url.searchParams.set('message', 'Authentication is temporarily unavailable.')
-      return NextResponse.redirect(url)
+      return NextResponse.redirect(new URL(getAuthUnavailableLoginPath(pathname), request.url))
     }
 
     return supabaseResponse
   }
 
   const supabase = createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
+    env.url,
+    env.anonKey,
     {
       cookies: {
         getAll() {

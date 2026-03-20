@@ -1,8 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
+import { getAuthUnavailableLoginPath, hasSupabaseRuntimeEnv } from '@/lib/supabase/config'
 import { redirect } from 'next/navigation'
 import { submitFeedback } from '@/actions/admin'
 
 export default async function AdminDashboard() {
+  if (!hasSupabaseRuntimeEnv()) {
+    return redirect(getAuthUnavailableLoginPath('/admin'))
+  }
+
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()

@@ -1,4 +1,4 @@
-import { LexicalEntry } from "../../scripts/parseExcel";
+import type { LexicalEntry } from "@/lib/dictionaryTypes";
 import { Publication } from "@/lib/publications";
 import { siteConfig } from "@/lib/site";
 

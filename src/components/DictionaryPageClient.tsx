@@ -1,11 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { BarChart3, Keyboard, Search, SlidersHorizontal, X } from "lucide-react";
 import DictionaryEntryCard from "@/components/DictionaryEntry";
-import { LexicalEntry } from "../../scripts/parseExcel";
-import { searchDictionary } from "../../lib/searchEngine";
+import type { LexicalEntry } from "@/lib/dictionaryTypes";
+import {
+  prepareDictionaryForSearch,
+  searchPreparedDictionary,
+  type PreparedLexicalEntry,
+} from "../../lib/searchEngine";
 import CopticKeyboard from "@/components/CopticKeyboard";
 import { useLanguage } from "@/components/LanguageProvider";
 import { antinoou } from "@/lib/fonts";
@@ -117,12 +121,14 @@ function DictionaryResultsSection({
 
 function DictionaryPageBody({ dictionaryPath, t }: DictionaryPageBodyProps) {
   const [dictionary, setDictionary] = useState<LexicalEntry[]>([]);
+  const [preparedDictionary, setPreparedDictionary] = useState<PreparedLexicalEntry[]>([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [isKeyboardOpen, setKeyboardOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [selectedPOS, setSelectedPOS] = useState<string>("ALL");
   const [selectedDialect, setSelectedDialect] = useState<string>("B");
+  const deferredQuery = useDeferredValue(query);
 
   useEffect(() => {
     let cancelled = false;
@@ -146,6 +152,7 @@ function DictionaryPageBody({ dictionaryPath, t }: DictionaryPageBodyProps) {
             setSelectedDialect("ALL");
           }
           setDictionary(data);
+          setPreparedDictionary(prepareDictionaryForSearch(data));
           setLoading(false);
         }
       } catch {
@@ -161,11 +168,13 @@ function DictionaryPageBody({ dictionaryPath, t }: DictionaryPageBodyProps) {
               setSelectedDialect("ALL");
             }
             setDictionary(data);
+            setPreparedDictionary(prepareDictionaryForSearch(data));
             setLoading(false);
           }
         } catch {
           if (!cancelled) {
             setDictionary([]);
+            setPreparedDictionary([]);
             setLoading(false);
           }
         }
@@ -180,7 +189,10 @@ function DictionaryPageBody({ dictionaryPath, t }: DictionaryPageBodyProps) {
   }, [dictionaryPath]);
 
   const filteredResults = useMemo(() => {
-    let results = query.trim().length > 0 ? searchDictionary(query, dictionary) : dictionary;
+    let results =
+      deferredQuery.trim().length > 0
+        ? searchPreparedDictionary(deferredQuery, preparedDictionary)
+        : dictionary;
 
     if (selectedPOS !== "ALL") {
       results = results.filter((result) => result.pos === selectedPOS);
@@ -191,7 +203,7 @@ function DictionaryPageBody({ dictionaryPath, t }: DictionaryPageBodyProps) {
     }
 
     return results;
-  }, [query, dictionary, selectedPOS, selectedDialect]);
+  }, [deferredQuery, dictionary, preparedDictionary, selectedPOS, selectedDialect]);
 
   const handleKeyboardAppend = useCallback((char: string) => {
     setQuery((prev) => {
@@ -207,7 +219,7 @@ function DictionaryPageBody({ dictionaryPath, t }: DictionaryPageBodyProps) {
     setQuery((prev) => prev.slice(0, -1));
     setTimeout(() => searchInputRef.current?.focus(), 0);
   }, []);
-  const resultsKey = `${query}\u0000${selectedPOS}\u0000${selectedDialect}`;
+  const resultsKey = `${deferredQuery}\u0000${selectedPOS}\u0000${selectedDialect}`;
 
   return (
     <main className="min-h-screen relative overflow-hidden pb-20">
@@ -307,7 +319,7 @@ function DictionaryPageBody({ dictionaryPath, t }: DictionaryPageBodyProps) {
                 <option value="S">Sahidic (S)</option>
                 <option value="B">Bohairic (B)</option>
                 <option value="A">Akhmimic (A)</option>
-                <option value="sA">Sub-Sahidic (sA)</option>
+                <option value="L">Lycopolitan (L)</option>
                 <option value="F">Fayyumic (F)</option>
               </select>
             </div>
@@ -319,7 +331,7 @@ function DictionaryPageBody({ dictionaryPath, t }: DictionaryPageBodyProps) {
           dictionaryLength={dictionary.length}
           filteredResults={filteredResults}
           loading={loading}
-          query={query}
+          query={deferredQuery}
           selectedDialect={selectedDialect}
           selectedPOS={selectedPOS}
           t={t}

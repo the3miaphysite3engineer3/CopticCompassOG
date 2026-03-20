@@ -3,15 +3,8 @@
 import { useActionState } from "react";
 import { ArrowRight, Mail, MessageSquare, User } from "lucide-react";
 import { sendContactEmail, type ContactFormState } from "@/actions/contact";
+import { contactInquiryOptions } from "@/lib/contact";
 import { useLanguage } from "@/components/LanguageProvider";
-
-const inquiryOptions = [
-  "contact.option.dictionary",
-  "contact.option.grammar",
-  "contact.option.research",
-  "contact.option.publication",
-  "contact.option.general",
-] as const;
 
 export default function ContactPageClient() {
   const { t } = useLanguage();
@@ -93,10 +86,10 @@ export default function ContactPageClient() {
               <option value="" disabled>
                 {t("contact.select")}
               </option>
-              {inquiryOptions.map((optionKey) => {
-                const optionLabel = t(optionKey);
+              {contactInquiryOptions.map((option) => {
+                const optionLabel = t(option.labelKey);
                 return (
-                  <option key={optionKey} value={optionLabel}>
+                  <option key={option.value} value={option.value}>
                     {optionLabel}
                   </option>
                 );
