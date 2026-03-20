@@ -78,11 +78,92 @@ export function Lesson01NL() {
       {/* Significant Letters */}
       <section className="bg-stone-100 dark:bg-stone-900 p-6 rounded-xl border border-stone-200 dark:border-stone-800">
         <h3 className="font-bold text-lg mb-3">Significante letters:</h3>
-        <ul className="space-y-2">
-          <li><strong>Mannelijk <span style={{ fontVariant: 'small-caps' }}>m</span>:</strong> <span className="font-coptic text-lg">ⲡ</span> /p/, <span className="font-coptic text-lg">ⲫ</span> /pʰ/, <span className="font-coptic text-lg">ϥ</span> /f/</li>
-          <li><strong>Vrouwelijk <span style={{ fontVariant: 'small-caps' }}>v</span>:</strong> <span className="font-coptic text-lg">ⲧ</span> /t/, <span className="font-coptic text-lg">ⲑ</span> /tʰ/, <span className="font-coptic text-lg">ⲥ</span> /s/</li>
-          <li><strong>Meervoud <span style={{ fontVariant: 'small-caps' }}>p</span><Footnote number={1} content={<><span style={{ fontVariant: 'small-caps' }}>p</span> voor pluralis (meervoud).</>} />:</strong> <span className="font-coptic text-lg">ⲛ</span> /n/, <span className="font-coptic text-lg">ⲟⲩ</span> /u/</li>
-        </ul>
+        <p className="mb-4 text-sm text-stone-600 dark:text-stone-400">
+          Deze letters heten significant omdat ze voortdurend terugkeren in de Koptische grammatica en vaak de basis vormen van de Koptische patroongrammatica. De volgende paragraaf over de determinatoren toont meteen een eerste concrete toepassing.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full table-fixed border-separate border-spacing-y-2 text-left">
+            <thead className="sr-only">
+              <tr>
+                <th scope="col">Categorie</th>
+                <th scope="col">Eerste significante letter</th>
+                <th scope="col">Tweede significante letter</th>
+                <th scope="col">Derde significante letter</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" className="w-44 pr-4 align-middle font-semibold">
+                  Mannelijk <span style={{ fontVariant: 'small-caps' }}>m</span>:
+                </th>
+                <td className="pr-2">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲡ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/p/</div>
+                  </div>
+                </td>
+                <td className="px-1">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲫ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/pʰ/</div>
+                  </div>
+                </td>
+                <td className="pl-2">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ϥ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/f/</div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" className="w-44 pr-4 align-middle font-semibold">
+                  Vrouwelijk <span style={{ fontVariant: 'small-caps' }}>v</span>:
+                </th>
+                <td className="pr-2">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲧ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/t/</div>
+                  </div>
+                </td>
+                <td className="px-1">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲑ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/tʰ/</div>
+                  </div>
+                </td>
+                <td className="pl-2">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲥ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/s/</div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" className="w-44 pr-4 align-middle font-semibold">
+                  Meervoud <span style={{ fontVariant: 'small-caps' }}>p</span><Footnote number={1} align="left" content={<><span style={{ fontVariant: 'small-caps' }}>p</span> voor pluralis (meervoud).</>} />:
+                </th>
+                <td className="pr-2">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲛ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/n/</div>
+                  </div>
+                </td>
+                <td className="px-1">
+                  <div className="rounded-lg border border-dashed border-stone-200 bg-white/50 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/30">
+                    <div className="text-2xl text-stone-400 dark:text-stone-500">—</div>
+                    <div className="mt-1 text-sm text-stone-400 dark:text-stone-500">geen vorm</div>
+                  </div>
+                </td>
+                <td className="pl-2">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲟⲩ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/u, w/</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       {/* Determiner Selection */}
@@ -154,13 +235,16 @@ export function Lesson01NL() {
       <section>
         <h2 className="text-2xl font-bold border-b border-stone-200 dark:border-stone-800 pb-2 text-sky-700 dark:text-sky-400">Tweeledige nominale zin (gezegde + onderwerp)</h2>
         <p className="mt-4 mb-3">
-          Er zijn drie verbindingsvoornaamwoorden in het Koptisch. Ze verschijnen pas na het eerste woord (of de eerste woordgroep) van de zin. We noemen deze woorden postpositief (achter geplaatst) of enclitisch (aanleunend tegen het voorgaande woord). We markeren deze met het symbool ‘≡’.
+          Er zijn drie verbindingsvoornaamwoorden in het Koptisch. Ze verschijnen pas na het eerste woord (of de eerste woordgroep) van de zin. We noemen deze woorden postpositief (achter geplaatst) of enclitisch (aanleunend tegen het voorgaande woord), wat betekent dat ze in de schrijfwijze ook als één geheel aan het voorgaande woord vast kunnen staan. We markeren deze met het symbool ‘≡’.
         </p>
         <ul className="space-y-2 mb-4 text-emerald-600 dark:text-emerald-400">
           <li>≡<span className="font-coptic text-lg">ⲡⲉ</span> <span style={{ fontVariant: 'small-caps' }}>m</span> “hij, het”<Footnote number={5} content={<>In het Koptisch is er geen specifiek woord voor “het”.</>} /></li>
           <li>≡<span className="font-coptic text-lg">ⲧⲉ</span> <span style={{ fontVariant: 'small-caps' }}>v</span> “zij, het”</li>
           <li>≡<span className="font-coptic text-lg">ⲛⲉ</span> <span style={{ fontVariant: 'small-caps' }}>p</span> “zij, het”</li>
         </ul>
+        <p className="mb-4 text-sm text-stone-600 dark:text-stone-400">
+          Volgens de conventie laten we er meestal een spatie voor staan, ook al kunnen ze ook direct aan het vorige woord vast geschreven worden. Dus <span className="font-coptic">ⲟⲩⲓⲱⲧ ⲡⲉ</span> en <span className="font-coptic">ⲟⲩⲓⲱⲧⲡⲉ</span> betekenen hetzelfde.
+        </p>
         <div className="bg-sky-50 dark:bg-sky-900/30 p-5 rounded-xl border border-sky-100 dark:border-sky-800">
           <h3 className="font-bold text-lg mb-3">Toepassingen:</h3>
           <p className="mb-4 text-sm">
@@ -193,10 +277,25 @@ export function Lesson01NL() {
         <div className="bg-stone-50 dark:bg-stone-900 p-4 rounded-lg border border-stone-200 dark:border-stone-800">
           <h3 className="font-bold mb-3 text-sm uppercase tracking-widest text-stone-500">Voorbeelden</h3>
           <ul className="space-y-3">
-            <li><span className="font-coptic text-xl">Ⲛ̀ⲑⲟϥ</span>, <span className="font-coptic text-lg">ⲡⲁⲓⲱⲧ ⲡⲉ.</span> “<i>Hij</i> is mijn vader.”</li>
-            <li><span className="font-coptic text-xl">Ⲛ̀ⲑⲟⲥ</span>, <span className="font-coptic text-lg">ⲧⲁⲙⲁⲩ ⲧⲉ.</span> “<i>Zij</i> is mijn moeder.”</li>
-            <li><span className="font-coptic text-xl">Ⲛ̀ⲑⲱⲟⲩ</span>, <span className="font-coptic text-lg">ⲛⲁⲥⲱⲛⲓ ⲛⲉ.</span> “<i>Zij</i> zijn mijn zussen.”</li>
+            <li>
+              <span className="font-coptic text-xl">Ⲛ̀ⲑⲟ<span className="underline decoration-2 underline-offset-4">ϥ</span></span>,{" "}
+              <span className="font-coptic text-lg"><span className="underline decoration-2 underline-offset-4">ⲡ</span>ⲁⲓⲱⲧ <span className="underline decoration-2 underline-offset-4">ⲡ</span>ⲉ.</span>{" "}
+              “<i>Hij</i> is mijn vader.”
+            </li>
+            <li>
+              <span className="font-coptic text-xl">Ⲛ̀ⲑⲟ<span className="underline decoration-2 underline-offset-4">ⲥ</span></span>,{" "}
+              <span className="font-coptic text-lg"><span className="underline decoration-2 underline-offset-4">ⲧ</span>ⲁⲙⲁⲩ <span className="underline decoration-2 underline-offset-4">ⲧ</span>ⲉ.</span>{" "}
+              “<i>Zij</i> is mijn moeder.”
+            </li>
+            <li>
+              <span className="font-coptic text-xl">Ⲛ̀ⲑⲱ<span className="underline decoration-2 underline-offset-4">ⲟⲩ</span></span>,{" "}
+              <span className="font-coptic text-lg"><span className="underline decoration-2 underline-offset-4">ⲛ</span>ⲁⲥⲱⲛⲓ <span className="underline decoration-2 underline-offset-4">ⲛ</span>ⲉ.</span>{" "}
+              “<i>Zij</i> zijn mijn zussen.”
+            </li>
           </ul>
+          <p className="mt-4 text-xs text-stone-500 dark:text-stone-400">
+            De onderlijnde letters zijn significante letters.
+          </p>
         </div>
       </section>
 
@@ -204,7 +303,7 @@ export function Lesson01NL() {
       <section>
         <h2 className="text-2xl font-bold border-b border-stone-200 dark:border-stone-800 pb-2 text-sky-700 dark:text-sky-400">Afkortingen</h2>
         <p className="mt-4 mb-3">
-          In de Koptische literatuur worden enkele veelvoorkomende afkortingen gebruikt, meestal om heilige namen ("nomina sacra"). De conventionele manier om afkortingen in het Koptisch weer te geven, is door een horizontale lijn boven het afgekorte woord te plaatsen.
+          In de Koptische literatuur worden enkele veelvoorkomende afkortingen gebruikt, meestal om heilige namen (“nomina sacra”). De conventionele manier om afkortingen in het Koptisch weer te geven, is door een horizontale lijn boven het afgekorte woord te plaatsen.
         </p>
         <p className="mb-4 text-sm text-stone-600 dark:text-stone-400 italic">
           In een liturgische context kunnen woordafkortingen ook soms naar veelvoorkomende zinnen verwijzen:
@@ -237,17 +336,17 @@ export function Lesson01NL() {
                 <td className="p-3">“amen”</td>
               </tr>
               <tr className="hover:bg-stone-50 dark:hover:bg-stone-900/50">
-                <td className="p-3 font-coptic text-xl text-emerald-600 dark:text-emerald-400">Ⲥⲱⲧⲏⲣ</td>
+                <td className="p-3 text-emerald-600 dark:text-emerald-400"><span className="font-coptic text-xl">Ⲥⲱⲧⲏⲣ</span> <span style={{ fontVariant: 'small-caps' }}>m</span></td>
                 <td className="p-3 font-coptic text-xl">ⲥ̅ⲱ̅ⲣ̅, ⲥ̅ⲣ̅</td>
                 <td className="p-3">“verlosser”</td>
               </tr>
               <tr className="hover:bg-stone-50 dark:hover:bg-stone-900/50">
-                <td className="p-3 font-coptic text-xl text-emerald-600 dark:text-emerald-400">Ϭⲱⲓⲥ<Footnote number={6} content={<>In kerkelijke boeken en presentaties wordt dit vaak (altijd) verouderd geschreven als <span className="font-coptic">ϭⲟⲓⲥ</span>. De standaard Bohairische spelling is <span className="font-coptic">ϭⲱⲓⲥ</span>.</>} /></td>
+                <td className="p-3 text-emerald-600 dark:text-emerald-400"><span className="font-coptic text-xl">Ϭⲱⲓⲥ</span> <span style={{ fontVariant: 'small-caps' }}>m</span><Footnote number={6} content={<>In kerkelijke boeken en presentaties wordt dit vaak (altijd) verouderd geschreven als <span className="font-coptic">ϭⲟⲓⲥ</span>. De standaard Bohairische spelling is <span className="font-coptic">ϭⲱⲓⲥ</span>.</>} /></td>
                 <td className="p-3 font-coptic text-xl">͞⳪̅, ϭ̅ⲥ̅</td>
                 <td className="p-3">“heer, dame”</td>
               </tr>
               <tr className="hover:bg-stone-50 dark:hover:bg-stone-900/50">
-                <td className="p-3 font-coptic text-xl text-emerald-600 dark:text-emerald-400">Ⲕⲩⲣⲓⲟⲥ (-ⲉ̀)</td>
+                <td className="p-3 text-emerald-600 dark:text-emerald-400"><span className="font-coptic text-xl">Ⲕⲩⲣⲓⲟⲥ (-ⲉ̀)</span> <span style={{ fontVariant: 'small-caps' }}>m</span></td>
                 <td className="p-3 font-coptic text-xl">ⲕ̅ⲉ̅</td>
                 <td className="p-3">“heer”</td>
               </tr>
@@ -257,17 +356,17 @@ export function Lesson01NL() {
                 <td className="p-3">“gegroet”</td>
               </tr>
               <tr className="hover:bg-stone-50 dark:hover:bg-stone-900/50">
-                <td className="p-3 font-coptic text-xl text-emerald-600 dark:text-emerald-400">Ⲓⲏⲥⲟⲩⲥ N<sup className="italic" style={{ fontVariant: 'small-caps' }}>m</sup><Footnote number={7} content={<>N<sup className="italic" style={{ fontVariant: 'small-caps' }}>m</sup> is de afkorting/symbool voor een Nomen (eigennaam).</>} /></td>
+                <td className="p-3 text-emerald-600 dark:text-emerald-400"><span className="font-coptic text-xl">Ⲓⲏⲥⲟⲩⲥ</span> <span>N<sup className="italic" style={{ fontVariant: 'small-caps' }}>m</sup></span><Footnote number={7} content={<>N<sup className="italic" style={{ fontVariant: 'small-caps' }}>m</sup> is de afkorting/symbool voor een Nomen (eigennaam).</>} /></td>
                 <td className="p-3 font-coptic text-xl">Ⲓⲏ̅ⲥ̅, Ⲓⲥ̅, Ⲓ᷍ⲥ</td>
                 <td className="p-3"><i>Jezus</i></td>
               </tr>
               <tr className="hover:bg-stone-50 dark:hover:bg-stone-900/50">
-                <td className="p-3 font-coptic text-xl text-emerald-600 dark:text-emerald-400">Ⲡⲓⲭⲣⲓⲥⲧⲟⲥ N<sup className="italic" style={{ fontVariant: 'small-caps' }}>m</sup></td>
+                <td className="p-3 text-emerald-600 dark:text-emerald-400"><span className="font-coptic text-xl">Ⲡⲓⲭⲣⲓⲥⲧⲟⲥ</span> <span>N<sup className="italic" style={{ fontVariant: 'small-caps' }}>m</sup></span></td>
                 <td className="p-3 font-coptic text-xl">Ⲡⲭ̅ⲥ̅, Ⲡⲭ᷍ⲥ</td>
                 <td className="p-3"><i>Christus</i></td>
               </tr>
               <tr className="hover:bg-stone-50 dark:hover:bg-stone-900/50">
-                <td className="p-3 font-coptic text-xl text-emerald-600 dark:text-emerald-400">Ⲡ̀ⲛⲉⲩⲙⲁ</td>
+                <td className="p-3 text-emerald-600 dark:text-emerald-400"><span className="font-coptic text-xl">Ⲡ̀ⲛⲉⲩⲙⲁ</span> <span style={{ fontVariant: 'small-caps' }}>m</span></td>
                 <td className="p-3 font-coptic text-xl">ⲡ̅ⲛ̅ⲁ̅</td>
                 <td className="p-3">“geest”</td>
               </tr>

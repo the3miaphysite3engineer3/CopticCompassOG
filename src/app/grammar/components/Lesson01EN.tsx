@@ -78,11 +78,92 @@ export function Lesson01EN() {
       {/* Significant Letters */}
       <section className="bg-stone-100 dark:bg-stone-900 p-6 rounded-xl border border-stone-200 dark:border-stone-800">
         <h3 className="font-bold text-lg mb-3">Significant Letters:</h3>
-        <ul className="space-y-2">
-          <li><strong>Masculine <span style={{ fontVariant: 'small-caps' }}>m</span>:</strong> <span className="font-coptic text-lg">ⲡ</span> /p/, <span className="font-coptic text-lg">ⲫ</span> /pʰ/, <span className="font-coptic text-lg">ϥ</span> /f/</li>
-          <li><strong>Feminine <span style={{ fontVariant: 'small-caps' }}>f</span>:</strong> <span className="font-coptic text-lg">ⲧ</span> /t/, <span className="font-coptic text-lg">ⲑ</span> /tʰ/, <span className="font-coptic text-lg">ⲥ</span> /s/</li>
-          <li><strong>Plural <span style={{ fontVariant: 'small-caps' }}>p</span><Footnote number={1} content={<><span style={{ fontVariant: 'small-caps' }}>p</span> stands for plural.</>} />:</strong> <span className="font-coptic text-lg">ⲛ</span> /n/, <span className="font-coptic text-lg">ⲟⲩ</span> /u/</li>
-        </ul>
+        <p className="mb-4 text-sm text-stone-600 dark:text-stone-400">
+          These letters are called significant because they keep recurring throughout Coptic grammar and often form the basis of Coptic pattern grammar. The next section on determiners already offers a first practical application of them.
+        </p>
+        <div className="overflow-x-auto">
+          <table className="w-full table-fixed border-separate border-spacing-y-2 text-left">
+            <thead className="sr-only">
+              <tr>
+                <th scope="col">Category</th>
+                <th scope="col">First significant letter</th>
+                <th scope="col">Second significant letter</th>
+                <th scope="col">Third significant letter</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row" className="w-44 pr-4 align-middle font-semibold">
+                  Masculine <span style={{ fontVariant: 'small-caps' }}>m</span>:
+                </th>
+                <td className="pr-2">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲡ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/p/</div>
+                  </div>
+                </td>
+                <td className="px-1">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲫ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/pʰ/</div>
+                  </div>
+                </td>
+                <td className="pl-2">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ϥ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/f/</div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" className="w-44 pr-4 align-middle font-semibold">
+                  Feminine <span style={{ fontVariant: 'small-caps' }}>f</span>:
+                </th>
+                <td className="pr-2">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲧ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/t/</div>
+                  </div>
+                </td>
+                <td className="px-1">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲑ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/tʰ/</div>
+                  </div>
+                </td>
+                <td className="pl-2">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲥ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/s/</div>
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row" className="w-44 pr-4 align-middle font-semibold">
+                  Plural <span style={{ fontVariant: 'small-caps' }}>p</span><Footnote number={1} align="left" content={<><span style={{ fontVariant: 'small-caps' }}>p</span> stands for plural.</>} />:
+                </th>
+                <td className="pr-2">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲛ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/n/</div>
+                  </div>
+                </td>
+                <td className="px-1">
+                  <div className="rounded-lg border border-dashed border-stone-200 bg-white/50 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/30">
+                    <div className="text-2xl text-stone-400 dark:text-stone-500">—</div>
+                    <div className="mt-1 text-sm text-stone-400 dark:text-stone-500">no form</div>
+                  </div>
+                </td>
+                <td className="pl-2">
+                  <div className="rounded-lg border border-stone-200 bg-white/70 px-3 py-2 text-center dark:border-stone-800 dark:bg-stone-950/40">
+                    <div className="font-coptic text-2xl text-emerald-600 dark:text-emerald-400">ⲟⲩ</div>
+                    <div className="mt-1 text-sm text-stone-500 dark:text-stone-400">/u, w/</div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </section>
 
       {/* Determiner Selection */}
@@ -154,17 +235,20 @@ export function Lesson01EN() {
       <section>
         <h2 className="text-2xl font-bold border-b border-stone-200 dark:border-stone-800 pb-2 text-sky-700 dark:text-sky-400">Bipartite Nominal Sentence (Predicate + Subject)</h2>
         <p className="mt-4 mb-3">
-          There are three connecting pronouns (copulas) in Coptic. They only appear after the first word (or the first phrase) of the sentence. We call these words postpositive (placed after) or enclitic (leaning on the preceding word). We mark these with the symbol '≡'.
+          There are three nexus pronouns in Coptic. They only appear after the first word (or the first phrase) of the sentence. We call these words postpositive (placed after) or enclitic (leaning on the preceding word), which means that in writing they can also be attached as a single unit to the preceding word. We mark these with the symbol ‘≡’.
         </p>
         <ul className="space-y-2 mb-4 text-emerald-600 dark:text-emerald-400">
           <li>≡<span className="font-coptic text-lg">ⲡⲉ</span> <span style={{ fontVariant: 'small-caps' }}>m</span> “he, it”<Footnote number={5} content={<>In Coptic, there is no specific word for the neuter “it”.</>} /></li>
           <li>≡<span className="font-coptic text-lg">ⲧⲉ</span> <span style={{ fontVariant: 'small-caps' }}>f</span> “she, it”</li>
           <li>≡<span className="font-coptic text-lg">ⲛⲉ</span> <span style={{ fontVariant: 'small-caps' }}>p</span> “they”</li>
         </ul>
+        <p className="mb-4 text-sm text-stone-600 dark:text-stone-400">
+          By convention, we usually leave a space before them, even though they may also be written together with the previous word. So <span className="font-coptic">ⲟⲩⲓⲱⲧ ⲡⲉ</span> and <span className="font-coptic">ⲟⲩⲓⲱⲧⲡⲉ</span> mean the same thing.
+        </p>
         <div className="bg-sky-50 dark:bg-sky-900/30 p-5 rounded-xl border border-sky-100 dark:border-sky-800">
           <h3 className="font-bold text-lg mb-3">Applications:</h3>
           <p className="mb-4 text-sm">
-            In Coptic (just like in Semitic languages such as Hebrew or Arabic), there is no verb 'to be' in the present tense. However, in English, we are required to use it, otherwise the translation is incorrect.
+            In Coptic (just like in Semitic languages such as Hebrew or Arabic), there is no verb ‘to be’ in the present tense. However, in English, we are required to use it, otherwise the translation is incorrect.
           </p>
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <li><span className="font-coptic text-xl">Ⲟⲩⲓⲱⲧ ⲡⲉ.</span> <br />“He is a father.”</li>
@@ -183,7 +267,7 @@ export function Lesson01EN() {
       <section>
         <h2 className="text-2xl font-bold border-b border-stone-200 dark:border-stone-800 pb-2 text-sky-700 dark:text-sky-400">Independent Personal Pronouns</h2>
         <p className="mt-4 mb-3">
-          Besides the connecting pronouns, there are also independent personal pronouns. In a bipartite nominal sentence, using the connecting pronouns is the standard (mandatory) rule. To emphasize such nominal sentences, one can also incorporate the independent personal pronouns. These are prepositive (placed before):
+          Besides the nexus pronouns, there are also independent personal pronouns. In a bipartite nominal sentence, using the nexus pronouns is the standard (mandatory) rule. To emphasize such nominal sentences, one can also incorporate the independent personal pronouns. These are prepositive (placed before):
         </p>
         <ul className="flex flex-wrap gap-4 mb-6">
           <li className="bg-stone-100 dark:bg-stone-800 px-4 py-2 rounded-lg"><span className="font-coptic text-xl text-emerald-600 dark:text-emerald-400">Ⲛ̀ⲑⲟϥ</span> <span style={{ fontVariant: 'small-caps' }}>m</span> “he, it”</li>
@@ -193,10 +277,25 @@ export function Lesson01EN() {
         <div className="bg-stone-50 dark:bg-stone-900 p-4 rounded-lg border border-stone-200 dark:border-stone-800">
           <h3 className="font-bold mb-3 text-sm uppercase tracking-widest text-stone-500">Examples</h3>
           <ul className="space-y-3">
-            <li><span className="font-coptic text-xl">Ⲛ̀ⲑⲟϥ</span>, <span className="font-coptic text-lg">ⲡⲁⲓⲱⲧ ⲡⲉ.</span> “<i>He</i> is my father.”</li>
-            <li><span className="font-coptic text-xl">Ⲛ̀ⲑⲟⲥ</span>, <span className="font-coptic text-lg">ⲧⲁⲙⲁⲩ ⲧⲉ.</span> “<i>She</i> is my mother.”</li>
-            <li><span className="font-coptic text-xl">Ⲛ̀ⲑⲱⲟⲩ</span>, <span className="font-coptic text-lg">ⲛⲁⲥⲱⲛⲓ ⲛⲉ.</span> “<i>They</i> are my sisters.”</li>
+            <li>
+              <span className="font-coptic text-xl">Ⲛ̀ⲑⲟ<span className="underline decoration-2 underline-offset-4">ϥ</span></span>,{" "}
+              <span className="font-coptic text-lg"><span className="underline decoration-2 underline-offset-4">ⲡ</span>ⲁⲓⲱⲧ <span className="underline decoration-2 underline-offset-4">ⲡ</span>ⲉ.</span>{" "}
+              “<i>He</i> is my father.”
+            </li>
+            <li>
+              <span className="font-coptic text-xl">Ⲛ̀ⲑⲟ<span className="underline decoration-2 underline-offset-4">ⲥ</span></span>,{" "}
+              <span className="font-coptic text-lg"><span className="underline decoration-2 underline-offset-4">ⲧ</span>ⲁⲙⲁⲩ <span className="underline decoration-2 underline-offset-4">ⲧ</span>ⲉ.</span>{" "}
+              “<i>She</i> is my mother.”
+            </li>
+            <li>
+              <span className="font-coptic text-xl">Ⲛ̀ⲑⲱ<span className="underline decoration-2 underline-offset-4">ⲟⲩ</span></span>,{" "}
+              <span className="font-coptic text-lg"><span className="underline decoration-2 underline-offset-4">ⲛ</span>ⲁⲥⲱⲛⲓ <span className="underline decoration-2 underline-offset-4">ⲛ</span>ⲉ.</span>{" "}
+              “<i>They</i> are my sisters.”
+            </li>
           </ul>
+          <p className="mt-4 text-xs text-stone-500 dark:text-stone-400">
+            The underlined letters are significant letters.
+          </p>
         </div>
       </section>
 
@@ -204,7 +303,7 @@ export function Lesson01EN() {
       <section>
         <h2 className="text-2xl font-bold border-b border-stone-200 dark:border-stone-800 pb-2 text-sky-700 dark:text-sky-400">Abbreviations</h2>
         <p className="mt-4 mb-3">
-          In Coptic literature, several common abbreviations are used, mostly to indicate holy names ("nomina sacra"). The conventional way to represent abbreviations in Coptic is by placing a horizontal line above the abbreviated word.
+          In Coptic literature, several common abbreviations are used, mostly to indicate holy names (“nomina sacra”). The conventional way to represent abbreviations in Coptic is by placing a horizontal line above the abbreviated word.
         </p>
         <p className="mb-4 text-sm text-stone-600 dark:text-stone-400 italic">
           In a liturgical context, word abbreviations can also sometimes refer to common phrases:
@@ -237,17 +336,17 @@ export function Lesson01EN() {
                 <td className="p-3">“amen”</td>
               </tr>
               <tr className="hover:bg-stone-50 dark:hover:bg-stone-900/50">
-                <td className="p-3 font-coptic text-xl text-emerald-600 dark:text-emerald-400">Ⲥⲱⲧⲏⲣ</td>
+                <td className="p-3 text-emerald-600 dark:text-emerald-400"><span className="font-coptic text-xl">Ⲥⲱⲧⲏⲣ</span> <span style={{ fontVariant: 'small-caps' }}>m</span></td>
                 <td className="p-3 font-coptic text-xl">ⲥ̅ⲱ̅ⲣ̅, ⲥ̅ⲣ̅</td>
                 <td className="p-3">“savior”</td>
               </tr>
               <tr className="hover:bg-stone-50 dark:hover:bg-stone-900/50">
-                <td className="p-3 font-coptic text-xl text-emerald-600 dark:text-emerald-400">Ϭⲱⲓⲥ<Footnote number={6} content={<>In older church books and presentations, this is often archaically written as <span className="font-coptic">ϭⲟⲓⲥ</span>. The standard modern Bohairic spelling is <span className="font-coptic">ϭⲱⲓⲥ</span>.</>} /></td>
+                <td className="p-3 text-emerald-600 dark:text-emerald-400"><span className="font-coptic text-xl">Ϭⲱⲓⲥ</span> <span style={{ fontVariant: 'small-caps' }}>m</span><Footnote number={6} content={<>In older church books and presentations, this is often archaically written as <span className="font-coptic">ϭⲟⲓⲥ</span>. The standard modern Bohairic spelling is <span className="font-coptic">ϭⲱⲓⲥ</span>.</>} /></td>
                 <td className="p-3 font-coptic text-xl">͞⳪̅, ϭ̅ⲥ̅</td>
                 <td className="p-3">“lord, lady”</td>
               </tr>
               <tr className="hover:bg-stone-50 dark:hover:bg-stone-900/50">
-                <td className="p-3 font-coptic text-xl text-emerald-600 dark:text-emerald-400">Ⲕⲩⲣⲓⲟⲥ (-ⲉ̀)</td>
+                <td className="p-3 text-emerald-600 dark:text-emerald-400"><span className="font-coptic text-xl">Ⲕⲩⲣⲓⲟⲥ (-ⲉ̀)</span> <span style={{ fontVariant: 'small-caps' }}>m</span></td>
                 <td className="p-3 font-coptic text-xl">ⲕ̅ⲉ̅</td>
                 <td className="p-3">“lord”</td>
               </tr>
@@ -257,17 +356,17 @@ export function Lesson01EN() {
                 <td className="p-3">“hail / greetings”</td>
               </tr>
               <tr className="hover:bg-stone-50 dark:hover:bg-stone-900/50">
-                <td className="p-3 font-coptic text-xl text-emerald-600 dark:text-emerald-400">Ⲓⲏⲥⲟⲩⲥ N<sup className="italic" style={{ fontVariant: 'small-caps' }}>m</sup><Footnote number={7} content={<>N<sup className="italic" style={{ fontVariant: 'small-caps' }}>m</sup> is the abbreviation/symbol for a Nomen (proper noun/name).</>} /></td>
+                <td className="p-3 text-emerald-600 dark:text-emerald-400"><span className="font-coptic text-xl">Ⲓⲏⲥⲟⲩⲥ</span> <span>N<sup className="italic" style={{ fontVariant: 'small-caps' }}>m</sup></span><Footnote number={7} content={<>N<sup className="italic" style={{ fontVariant: 'small-caps' }}>m</sup> is the abbreviation/symbol for a Nomen (proper noun/name).</>} /></td>
                 <td className="p-3 font-coptic text-xl">Ⲓⲏ̅ⲥ̅, Ⲓⲥ̅, Ⲓ᷍ⲥ</td>
                 <td className="p-3"><i>Jesus</i></td>
               </tr>
               <tr className="hover:bg-stone-50 dark:hover:bg-stone-900/50">
-                <td className="p-3 font-coptic text-xl text-emerald-600 dark:text-emerald-400">Ⲡⲓⲭⲣⲓⲥⲧⲟⲥ N<sup className="italic" style={{ fontVariant: 'small-caps' }}>m</sup></td>
+                <td className="p-3 text-emerald-600 dark:text-emerald-400"><span className="font-coptic text-xl">Ⲡⲓⲭⲣⲓⲥⲧⲟⲥ</span> <span>N<sup className="italic" style={{ fontVariant: 'small-caps' }}>m</sup></span></td>
                 <td className="p-3 font-coptic text-xl">Ⲡⲭ̅ⲥ̅, Ⲡⲭ᷍ⲥ</td>
                 <td className="p-3"><i>Christ</i></td>
               </tr>
               <tr className="hover:bg-stone-50 dark:hover:bg-stone-900/50">
-                <td className="p-3 font-coptic text-xl text-emerald-600 dark:text-emerald-400">Ⲡ̀ⲛⲉⲩⲙⲁ</td>
+                <td className="p-3 text-emerald-600 dark:text-emerald-400"><span className="font-coptic text-xl">Ⲡ̀ⲛⲉⲩⲙⲁ</span> <span style={{ fontVariant: 'small-caps' }}>m</span></td>
                 <td className="p-3 font-coptic text-xl">ⲡ̅ⲛ̅ⲁ̅</td>
                 <td className="p-3">“spirit”</td>
               </tr>
