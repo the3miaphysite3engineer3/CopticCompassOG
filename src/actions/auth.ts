@@ -234,13 +234,19 @@ export async function signInWithGoogle() {
   }
 
   const supabase = await createClient();
-  let baseUrl = getSiteUrl()?.toString() || "http://localhost:3000";
+  
+  const headersList = await import("next/headers").then((m) => m.headers());
+  const origin = headersList.get("origin");
+  const host = headersList.get("host");
+  const protocol = headersList.get("x-forwarded-proto") || "https";
+  let baseUrl = origin || (host ? `${protocol}://${host}` : getSiteUrl()?.toString() || "http://localhost:3000");
+  
   if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${baseUrl}/auth/callback`,
+      redirectTo: `${baseUrl}/auth/callback?next=/dashboard`,
     },
   });
 
