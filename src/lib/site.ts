@@ -1,6 +1,6 @@
 export const siteConfig = {
-  name: "Wannes Portfolio",
-  title: "Wannes Portfolio | Coptic Dictionary & Digital Humanities",
+  name: "The Wannes Portfolio",
+  title: "The Wannes Portfolio | Digital Humanities",
   description:
     "Scholarly portfolio and digital Coptic-English dictionary by Kyrillos Wannes, featuring 3,330 entries, bilingual UI, analytics, and learning tools.",
   liveUrl: "https://kyrilloswannes.com",

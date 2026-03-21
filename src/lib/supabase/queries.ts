@@ -4,7 +4,7 @@ import type {
   ProfileRole,
   SubmissionRow,
 } from '@/features/submissions/types'
-import type { Database } from '@/types/supabase'
+import type { Database, Tables } from '@/types/supabase'
 
 export type AppSupabaseClient = SupabaseClient<Database>
 
@@ -19,6 +19,23 @@ export async function getAuthenticatedUser(supabase: AppSupabaseClient) {
   } = await supabase.auth.getUser()
 
   return user
+}
+
+export async function getProfile(
+  supabase: AppSupabaseClient,
+  userId: string
+): Promise<Tables<'profiles'> | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .single()
+
+  if (error) {
+    return null
+  }
+
+  return data
 }
 
 export async function getProfileRole(

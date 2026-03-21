@@ -75,7 +75,7 @@ export function Navbar() {
                 priority
               />
             </div>
-            <span className="truncate font-coptic text-xl font-bold text-transparent bg-gradient-to-r from-stone-800 to-stone-500 bg-clip-text transition-colors dark:from-stone-100 dark:to-stone-400">
+            <span className="whitespace-nowrap font-coptic text-xl font-bold text-transparent bg-gradient-to-r from-stone-800 to-stone-500 bg-clip-text transition-colors dark:from-stone-100 dark:to-stone-400">
               {t("nav.home")}
             </span>
           </Link>

@@ -7,7 +7,7 @@ export const size = {
 };
 
 export const alt =
-  "Wannes Portfolio - Coptic Dictionary and digital humanities platform";
+  "The Wannes Portfolio - Digital humanities platform";
 
 export const contentType = "image/png";
 
@@ -87,7 +87,7 @@ export default function OpenGraphImage() {
                   letterSpacing: -2,
                 }}
               >
-                Coptic Dictionary
+                The Wannes Portfolio
               </div>
               <div
                 style={{

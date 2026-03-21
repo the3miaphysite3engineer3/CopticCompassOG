@@ -8,6 +8,7 @@ import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { Lesson01Content } from "@/features/grammar/components/Lesson01Content";
 import { getGrammarLessonBySlug } from "@/features/grammar/lessons";
+import { DownloadPdfButton } from "@/components/DownloadPdfButton";
 
 export default function GrammarPage() {
   const { language, t } = useLanguage();
@@ -26,30 +27,33 @@ export default function GrammarPage() {
         pageShellAccents.bottomLeftEmeraldOrbSoft,
       ]}
     >
-        <div className="mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <Link href="/grammar" className="btn-secondary gap-2 px-4">
             <ArrowLeft className="h-4 w-4" />
             {t("grammar.back")}
           </Link>
+          <DownloadPdfButton targetId="lesson-1-pdf-content" fileName="Coptic_Lesson_1.pdf" />
         </div>
 
-        <PageHeader
-          eyebrow={t("grammar.lessonBadge")}
-          eyebrowVariant="badge"
-          title={`${t("nav.grammar")} - ${t(lesson.titleKey)}`}
-          description={t(lesson.descriptionKey)}
-          tone="sky"
-          size="compact"
-          className="mb-10"
-        />
+        <div id="lesson-1-pdf-content" className="bg-transparent dark:bg-transparent pb-4">
+          <PageHeader
+            eyebrow={t("grammar.lessonBadge")}
+            eyebrowVariant="badge"
+            title={`${t("nav.grammar")} - ${t(lesson.titleKey)}`}
+            description={t(lesson.descriptionKey)}
+            tone="sky"
+            size="compact"
+            className="mb-10"
+          />
 
-        <SurfacePanel
-          rounded="3xl"
-          variant="elevated"
-          className="p-6 transition-colors duration-300 md:p-10"
-        >
-          <Lesson01Content language={language} />
-        </SurfacePanel>
+          <SurfacePanel
+            rounded="3xl"
+            variant="elevated"
+            className="p-6 transition-colors duration-300 md:p-10"
+          >
+            <Lesson01Content language={language} />
+          </SurfacePanel>
+        </div>
     </PageShell>
   );
 }
