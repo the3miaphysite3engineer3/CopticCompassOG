@@ -1,59 +1,22 @@
-"use client";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { GrammarLessonPageClient } from "@/features/grammar/components/GrammarLessonPageClient";
+import { getPublishedGrammarLessonBundleBySlug } from "@/features/grammar/lib/grammarDataset";
+import { createPageMetadata } from "@/lib/metadata";
 
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { useLanguage } from "@/components/LanguageProvider";
-import { PageHeader } from "@/components/PageHeader";
-import { PageShell, pageShellAccents } from "@/components/PageShell";
-import { SurfacePanel } from "@/components/SurfacePanel";
-import { Lesson01Content } from "@/features/grammar/components/Lesson01Content";
-import { getGrammarLessonBySlug } from "@/features/grammar/lessons";
-import { DownloadPdfButton } from "@/components/DownloadPdfButton";
+const lessonBundle = getPublishedGrammarLessonBundleBySlug("lesson-1");
+
+export const metadata: Metadata = createPageMetadata({
+  title: lessonBundle ? `Coptic Grammar ${lessonBundle.lesson.title.en}` : "Coptic Grammar Lesson",
+  description: lessonBundle?.lesson.summary.en
+    ?? "Interactive Coptic grammar lesson with structured notes, exercises, and study aids.",
+  path: "/grammar/lesson-1",
+});
 
 export default function GrammarPage() {
-  const { language, t } = useLanguage();
-  const lesson = getGrammarLessonBySlug("lesson-1");
-
-  if (!lesson) {
-    return null;
+  if (!lessonBundle) {
+    notFound();
   }
 
-  return (
-    <PageShell
-      className="min-h-screen px-6 py-16 md:px-10"
-      contentClassName="max-w-5xl mx-auto"
-      accents={[
-        pageShellAccents.topRightSkyOrb,
-        pageShellAccents.bottomLeftEmeraldOrbSoft,
-      ]}
-    >
-        <div className="mb-8 flex items-center justify-between">
-          <Link href="/grammar" className="btn-secondary gap-2 px-4">
-            <ArrowLeft className="h-4 w-4" />
-            {t("grammar.back")}
-          </Link>
-          <DownloadPdfButton targetId="lesson-1-pdf-content" fileName="Coptic_Lesson_1.pdf" />
-        </div>
-
-        <div id="lesson-1-pdf-content" className="bg-transparent dark:bg-transparent pb-4">
-          <PageHeader
-            eyebrow={t("grammar.lessonBadge")}
-            eyebrowVariant="badge"
-            title={`${t("nav.grammar")} - ${t(lesson.titleKey)}`}
-            description={t(lesson.descriptionKey)}
-            tone="sky"
-            size="compact"
-            className="mb-10"
-          />
-
-          <SurfacePanel
-            rounded="3xl"
-            variant="elevated"
-            className="p-6 transition-colors duration-300 md:p-10"
-          >
-            <Lesson01Content language={language} />
-          </SurfacePanel>
-        </div>
-    </PageShell>
-  );
+  return <GrammarLessonPageClient lessonBundle={lessonBundle} />;
 }

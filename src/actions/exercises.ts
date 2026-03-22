@@ -1,5 +1,9 @@
 'use server'
 
+import {
+  getGrammarExerciseDocumentById,
+  getGrammarLessonDocumentBySlug,
+} from '@/content/grammar/registry'
 import { hasSupabaseRuntimeEnv } from '@/lib/supabase/config'
 import { createClient } from '@/lib/supabase/server'
 import {
@@ -8,16 +12,13 @@ import {
 } from '@/lib/rateLimit'
 import { revalidatePath } from 'next/cache'
 import {
-  getLessonExerciseDefinition,
-  isExerciseLanguage,
-} from '@/features/grammar/lib/lessonExercises'
-import {
   getFormString,
   hasLengthInRange,
   normalizeMultiline,
   normalizeWhitespace,
 } from '@/lib/validation'
 import type { SubmissionInsert } from '@/features/submissions/types'
+import type { Language } from '@/types/i18n'
 
 export type ExerciseActionState =
   | {
@@ -25,6 +26,10 @@ export type ExerciseActionState =
       error?: string
     }
   | null
+
+function isExerciseLanguage(value: string): value is Language {
+  return value === 'en' || value === 'nl'
+}
 
 export async function submitExercise(_prevState: ExerciseActionState, formData: FormData): Promise<ExerciseActionState> {
   if (!hasSupabaseRuntimeEnv()) {
@@ -40,15 +45,22 @@ export async function submitExercise(_prevState: ExerciseActionState, formData: 
   if (!user) return { success: false, error: 'Unauthorized. Please log in first.' }
 
   const lessonSlug = normalizeWhitespace(getFormString(formData, 'lessonSlug'))
+  const exerciseId = normalizeWhitespace(getFormString(formData, 'exerciseId'))
   const exerciseLanguage = normalizeWhitespace(getFormString(formData, 'exerciseLanguage'))
-  const lessonDefinition = getLessonExerciseDefinition(lessonSlug)
+  const lessonDefinition = getGrammarLessonDocumentBySlug(lessonSlug)
+  const exerciseDefinition = getGrammarExerciseDocumentById(exerciseId)
 
-  if (!lessonDefinition || !isExerciseLanguage(exerciseLanguage)) {
+  if (
+    !lessonDefinition ||
+    !exerciseDefinition ||
+    exerciseDefinition.lessonId !== lessonDefinition.id ||
+    !isExerciseLanguage(exerciseLanguage)
+  ) {
     return { success: false, error: 'Invalid exercise submission.' }
   }
 
   const expectedAnswerKeys = new Set(
-    lessonDefinition.questions.map((question) => `answer_${question.id}`)
+    exerciseDefinition.items.map((question) => `answer_${question.id}`)
   )
   const providedAnswerKeys = new Set(
     Array.from(formData.keys()).filter((key) => key.startsWith('answer_'))
@@ -61,17 +73,22 @@ export async function submitExercise(_prevState: ExerciseActionState, formData: 
     return { success: false, error: 'Exercise answers were incomplete or malformed.' }
   }
 
-  const answers = lessonDefinition.questions.map((question) => {
+  const answers = exerciseDefinition.items.map((question) => {
     const answer = normalizeMultiline(getFormString(formData, `answer_${question.id}`))
     return {
       prompt: question.prompt[exerciseLanguage],
       answer,
+      answerSchema: question.answerSchema,
     }
   })
 
   if (
     answers.some(
-      ({ answer }) => !hasLengthInRange(answer, { min: 1, max: 500 })
+      ({ answer, answerSchema }) =>
+        !hasLengthInRange(answer, {
+          min: answerSchema?.minLength ?? 1,
+          max: answerSchema?.maxLength ?? 500,
+        })
     )
   ) {
     return {
@@ -83,7 +100,7 @@ export async function submitExercise(_prevState: ExerciseActionState, formData: 
   const exerciseRateLimit = await consumeRateLimit({
     identifier: getUserRateLimitIdentifier(user.id),
     limit: 6,
-    namespace: `exercise:${lessonSlug}`,
+    namespace: `exercise:${exerciseDefinition.id}`,
     windowMs: 60 * 60 * 1000,
   })
 
@@ -100,7 +117,7 @@ export async function submitExercise(_prevState: ExerciseActionState, formData: 
 
   const submission: SubmissionInsert = {
     user_id: user.id,
-    lesson_slug: lessonSlug,
+    lesson_slug: lessonDefinition.slug,
     submitted_text: submittedText.trim(),
     status: 'pending',
   }
@@ -115,6 +132,7 @@ export async function submitExercise(_prevState: ExerciseActionState, formData: 
       message: error.message,
       details: error.details,
       hint: error.hint,
+      exerciseId,
       lessonSlug,
       userId: user.id,
     })
@@ -141,7 +159,7 @@ export async function submitExercise(_prevState: ExerciseActionState, formData: 
   }
 
   revalidatePath('/dashboard')
-  revalidatePath(`/grammar/${lessonSlug}`)
+  revalidatePath(`/grammar/${lessonDefinition.slug}`)
 
   return { success: true }
 }

@@ -1,13 +1,19 @@
 "use client";
 
+import type { GrammarLessonIndexItem } from "@/content/grammar/schema";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { GrammarLessonCard } from "./GrammarLessonCard";
-import { grammarLessons } from "@/features/grammar/lessons";
 
-export default function GrammarHubPageClient() {
-  const { t } = useLanguage();
+type GrammarHubPageClientProps = {
+  lessons: GrammarLessonIndexItem[];
+};
+
+export default function GrammarHubPageClient({
+  lessons,
+}: GrammarHubPageClientProps) {
+  const { language, t } = useLanguage();
 
   return (
     <PageShell
@@ -25,8 +31,13 @@ export default function GrammarHubPageClient() {
       />
 
         <div className="grid grid-cols-1 gap-6 mx-auto max-w-5xl w-full md:grid-cols-2 lg:grid-cols-3">
-          {grammarLessons.map((lesson) => (
-            <GrammarLessonCard key={lesson.slug} lesson={lesson} t={t} />
+          {lessons.map((lesson) => (
+            <GrammarLessonCard
+              key={lesson.slug}
+              lesson={lesson}
+              language={language}
+              t={t}
+            />
           ))}
         </div>
     </PageShell>

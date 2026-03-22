@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetVersion": "2026-03-22",
+  "generatedAt": "2026-03-22T00:00:00.000Z",
+  "data": [
+    {
+      "id": "grammar.source.basisgrammatica-bohairisch-koptisch",
+      "title": "Inleiding tot het Bohairisch Koptisch: Basisgrammatica",
+      "subtitle": "Deel I (3 delen)",
+      "author": "Kyrillos Wannes",
+      "url": "/publications#basisgrammatica-bohairisch-koptisch",
+      "publicationId": "basisgrammatica-bohairisch-koptisch",
+      "comingSoon": true
+    }
+  ]
+}

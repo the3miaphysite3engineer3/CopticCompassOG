@@ -12,8 +12,17 @@ import { SubmissionCard } from '@/features/submissions/components/SubmissionCard
 import { SubmissionEmptyState } from '@/features/submissions/components/SubmissionEmptyState'
 import { SubmissionFeedbackPanel } from '@/features/submissions/components/SubmissionFeedbackPanel'
 import { SubmissionStatusBadge } from '@/features/submissions/components/SubmissionStatusBadge'
+import { GrammarDashboardOverview } from '@/features/grammar/components/GrammarDashboardOverview'
+import { buildGrammarLessonLearnerSummary } from '@/features/grammar/lib/grammarLearnerState'
+import { getPublishedGrammarLessonBundleBySlug, listPublishedGrammarLessons } from '@/features/grammar/lib/grammarDataset'
 import { ProfileForm } from '@/features/profile/components/ProfileForm'
-import { getProfile } from '@/lib/supabase/queries'
+import {
+  getProfile,
+  getUserLessonBookmarks,
+  getUserLessonNotes,
+  getUserLessonProgressRows,
+  getUserSectionProgressRows,
+} from '@/lib/supabase/queries'
 
 export default async function DashboardPage() {
   if (!hasSupabaseRuntimeEnv()) {
@@ -33,7 +42,31 @@ export default async function DashboardPage() {
     return redirect('/login')
   }
 
-  const submissions = await getUserSubmissions(supabase, user.id)
+  const [
+    submissions,
+    lessonProgressRows,
+    sectionProgressRows,
+    lessonBookmarks,
+    lessonNotes,
+  ] = await Promise.all([
+    getUserSubmissions(supabase, user.id),
+    getUserLessonProgressRows(supabase, user.id),
+    getUserSectionProgressRows(supabase, user.id),
+    getUserLessonBookmarks(supabase, user.id),
+    getUserLessonNotes(supabase, user.id),
+  ])
+  const grammarLessonSummaries = listPublishedGrammarLessons()
+    .map((lesson) => getPublishedGrammarLessonBundleBySlug(lesson.slug))
+    .filter((lessonBundle): lessonBundle is NonNullable<typeof lessonBundle> => lessonBundle !== null)
+    .map((lessonBundle) =>
+      buildGrammarLessonLearnerSummary({
+        lessonBundle,
+        lessonProgressRows,
+        sectionProgressRows,
+        bookmarkRows: lessonBookmarks,
+        lessonNoteRows: lessonNotes,
+      })
+    )
 
   return (
     <PageShell
@@ -82,6 +115,8 @@ export default async function DashboardPage() {
         </SurfacePanel>
 
         <ProfileForm profile={profile} />
+
+        <GrammarDashboardOverview lessonSummaries={grammarLessonSummaries} />
 
         <div className="space-y-8">
           <h3 className="text-2xl font-bold tracking-tight text-stone-800 dark:text-stone-200">Your Recent Exercises</h3>

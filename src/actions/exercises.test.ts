@@ -13,11 +13,16 @@ type ExercisesModuleContext = {
 function createExerciseFormData(overrides?: {
   answers?: Record<string, string>;
   exerciseLanguage?: string;
+  exerciseId?: string;
   extraAnswerKey?: string;
   lessonSlug?: string;
 }) {
   const formData = new FormData();
   formData.set("lessonSlug", overrides?.lessonSlug ?? "lesson-1");
+  formData.set(
+    "exerciseId",
+    overrides?.exerciseId ?? "grammar.exercise.lesson01.001",
+  );
   formData.set("exerciseLanguage", overrides?.exerciseLanguage ?? "en");
 
   for (let i = 1; i <= 10; i += 1) {
@@ -138,6 +143,38 @@ describe("exercise submission action", () => {
     ).resolves.toEqual({
       success: false,
       error: "Exercise answers were incomplete or malformed.",
+    });
+  });
+
+  it("rejects submissions for unknown canonical exercises", async () => {
+    const { submitExercise } = await loadExercisesModule();
+
+    await expect(
+      submitExercise(
+        null,
+        createExerciseFormData({
+          exerciseId: "grammar.exercise.unknown",
+        })
+      )
+    ).resolves.toEqual({
+      success: false,
+      error: "Invalid exercise submission.",
+    });
+  });
+
+  it("rejects submissions whose lesson slug does not match the canonical exercise", async () => {
+    const { submitExercise } = await loadExercisesModule();
+
+    await expect(
+      submitExercise(
+        null,
+        createExerciseFormData({
+          lessonSlug: "lesson-2",
+        })
+      )
+    ).resolves.toEqual({
+      success: false,
+      error: "Invalid exercise submission.",
     });
   });
 

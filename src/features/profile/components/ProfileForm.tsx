@@ -42,7 +42,17 @@ export function ProfileForm({ profile }: { profile: Tables<'profiles'> }) {
       setStatus({ message: 'Uploading to server...', type: 'success' })
 
       const fileExt = file.name.split('.').pop() || 'jpeg'
-      const filePath = `${profile.id}-${Math.random()}.${fileExt}`
+      const filePath = `${profile.id}/${crypto.randomUUID()}.${fileExt}`
+
+      const { data: existingFiles } = await supabase.storage
+        .from('avatars')
+        .list(profile.id, { limit: 100 })
+
+      if (existingFiles && existingFiles.length > 0) {
+        await supabase.storage
+          .from('avatars')
+          .remove(existingFiles.map((existingFile) => `${profile.id}/${existingFile.name}`))
+      }
 
       const { error: uploadError } = await supabase.storage
         .from('avatars')

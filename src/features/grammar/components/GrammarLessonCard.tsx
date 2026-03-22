@@ -4,20 +4,17 @@ import Link from "next/link";
 import { ArrowRight, BookOpenText, Clock3 } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { cx } from "@/lib/classes";
-import type { TranslationKey } from "@/lib/i18n";
-import {
-  getGrammarLessonRoute,
-  isAvailableGrammarLesson,
-  type GrammarLessonDefinition,
-} from "@/features/grammar/lessons";
+import type { GrammarLessonIndexItem } from "@/content/grammar/schema";
+import type { Language } from "@/types/i18n";
 
 type GrammarLessonCardProps = {
-  lesson: GrammarLessonDefinition;
-  t: (key: TranslationKey) => string;
+  lesson: GrammarLessonIndexItem;
+  language: Language;
+  t: (key: "grammar.lessonBadge" | "home.comingSoon" | "grammar.openLesson" | "grammar.inPreparation") => string;
 };
 
-export function GrammarLessonCard({ lesson, t }: GrammarLessonCardProps) {
-  const isAvailable = isAvailableGrammarLesson(lesson);
+export function GrammarLessonCard({ lesson, language, t }: GrammarLessonCardProps) {
+  const isAvailable = lesson.status === "published";
   const sharedClassName =
     "group relative min-h-[20rem] overflow-hidden rounded-3xl border p-8 shadow-md backdrop-blur-md transition-all duration-300 md:p-9 flex flex-col justify-between";
 
@@ -45,7 +42,7 @@ export function GrammarLessonCard({ lesson, t }: GrammarLessonCardProps) {
         </div>
 
         <Badge tone="neutral" size="xs" className="mb-4 tracking-[0.14em]">
-          {lesson.number}
+          {String(lesson.number).padStart(2, "0")}
         </Badge>
         <h2
           className={cx(
@@ -55,7 +52,7 @@ export function GrammarLessonCard({ lesson, t }: GrammarLessonCardProps) {
               : "text-stone-500 dark:text-stone-400"
           )}
         >
-          {t(lesson.titleKey)}
+          {lesson.title[language]}
         </h2>
         <p
           className={cx(
@@ -65,7 +62,7 @@ export function GrammarLessonCard({ lesson, t }: GrammarLessonCardProps) {
               : "text-stone-400 dark:text-stone-500"
           )}
         >
-          {t(lesson.descriptionKey)}
+          {lesson.summary[language]}
         </p>
       </div>
 
@@ -98,7 +95,7 @@ export function GrammarLessonCard({ lesson, t }: GrammarLessonCardProps) {
 
   return (
     <Link
-      href={getGrammarLessonRoute(lesson.slug)}
+      href={`/grammar/${lesson.slug}`}
       className={cx(
         sharedClassName,
         "cursor-pointer border-stone-200 bg-white/70 hover:-translate-y-1 hover:border-sky-300 hover:shadow-sky-500/10 dark:border-stone-800 dark:bg-stone-900/50 dark:shadow-xl dark:shadow-black/20 dark:hover:border-sky-700"

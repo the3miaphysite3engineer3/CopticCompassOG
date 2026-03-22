@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import GrammarHubPageClient from "@/features/grammar/components/GrammarHubPageClient";
+import { listGrammarLessons } from "@/features/grammar/lib/grammarDataset";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
@@ -10,5 +11,7 @@ export const metadata: Metadata = createPageMetadata({
 });
 
 export default function GrammarPage() {
-  return <GrammarHubPageClient />;
+  const lessons = listGrammarLessons();
+
+  return <GrammarHubPageClient lessons={lessons} />;
 }

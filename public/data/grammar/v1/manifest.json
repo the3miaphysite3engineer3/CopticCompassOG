@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetVersion": "2026-03-22",
+  "generatedAt": "2026-03-22T00:00:00.000Z",
+  "locales": [
+    "en",
+    "nl"
+  ],
+  "rights": {
+    "author": "Kyrillos Wannes",
+    "copyrightHolder": "Kyrillos Wannes",
+    "license": "all-rights-reserved",
+    "statement": {
+      "en": "Original grammar lesson content by Kyrillos Wannes. All rights reserved. Lesson 1 is based on the forthcoming publication Inleiding tot het Bohairisch Koptisch: Basisgrammatica.",
+      "nl": "Originele grammaticale lesinhoud van Kyrillos Wannes. Alle rechten voorbehouden. Les 1 is gebaseerd op de aankomende publicatie Inleiding tot het Bohairisch Koptisch: Basisgrammatica."
+    }
+  },
+  "lessons": [
+    {
+      "id": "grammar.lesson.01",
+      "slug": "lesson-1",
+      "number": 1,
+      "status": "published",
+      "title": {
+        "en": "Lesson 01",
+        "nl": "Les 01"
+      },
+      "summary": {
+        "en": "Master the basics of Coptic nouns, determiners, and independent personal pronouns.",
+        "nl": "Beheers de basis van Koptische zelfstandige naamwoorden, determinatoren en onafhankelijke persoonlijke voornaamwoorden."
+      },
+      "tags": [
+        "bohairic",
+        "foundations",
+        "nouns",
+        "determiners",
+        "pronouns"
+      ]
+    },
+    {
+      "id": "grammar.lesson.02",
+      "slug": "lesson-2",
+      "number": 2,
+      "status": "draft",
+      "title": {
+        "en": "Lesson 02",
+        "nl": "Les 02"
+      },
+      "summary": {
+        "en": "Dive into verbal prefixes, adjectives, and constructing complex nominal sentences.",
+        "nl": "Duik in werkwoordelijke voorvoegsels, bijvoeglijke naamwoorden en het construeren van complexe nominale zinnen."
+      },
+      "tags": [
+        "planned",
+        "draft"
+      ]
+    }
+  ]
+}

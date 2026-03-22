@@ -3,24 +3,30 @@
 import { useState, useEffect, useActionState } from "react";
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
 import { submitExercise } from "@/actions/exercises";
-import type {
-  ExerciseLanguage,
-  LessonExerciseQuestion,
-} from "@/features/grammar/lib/lessonExercises";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
+import type { Language } from "@/types/i18n";
+
+export type ExerciseFormQuestion = {
+  id: string;
+  prompt: string;
+  minLength?: number;
+  maxLength?: number;
+};
 
 export function ExerciseForm({
   lessonSlug,
+  exerciseId,
   language,
   questions,
 }: {
   lessonSlug: string;
-  language: ExerciseLanguage;
-  questions: LessonExerciseQuestion[];
+  exerciseId: string;
+  language: Language;
+  questions: ExerciseFormQuestion[];
 }) {
   const { t } = useLanguage();
   const [user, setUser] = useState<User | null>(null);
@@ -105,9 +111,10 @@ export function ExerciseForm({
   return (
     <form action={formAction} className="mt-6 space-y-8">
       <input type="hidden" name="lessonSlug" value={lessonSlug} />
+      <input type="hidden" name="exerciseId" value={exerciseId} />
       <input type="hidden" name="exerciseLanguage" value={language} />
       {questions.map((question, idx) => (
-        <div key={idx} className="space-y-3 rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/70 dark:bg-stone-950/30 p-5">
+        <div key={question.id} className="space-y-3 rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/70 dark:bg-stone-950/30 p-5">
           <label className="block text-stone-700 dark:text-stone-300 font-medium text-lg leading-8">
             <span className="mr-2 inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400 text-sm font-semibold tabular-nums px-2">{idx + 1}</span>
             {question.prompt}
@@ -118,6 +125,8 @@ export function ExerciseForm({
             className="input-base h-auto py-4 px-5 font-coptic text-xl"
             placeholder={t("exercise.answerPlaceholder")}
             autoComplete="off"
+            minLength={question.minLength}
+            maxLength={question.maxLength}
             required
           />
         </div>

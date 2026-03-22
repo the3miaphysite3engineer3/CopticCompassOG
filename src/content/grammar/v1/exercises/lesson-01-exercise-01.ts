@@ -1,0 +1,119 @@
+import type { GrammarExerciseDocument } from "../../schema.ts";
+
+export const grammarLesson01Exercise01: GrammarExerciseDocument = {
+  id: "grammar.exercise.lesson01.001",
+  lessonId: "grammar.lesson.01",
+  sectionId: "grammar.lesson.01.section.exercise-01",
+  kind: "reviewed",
+  title: {
+    en: "Exercise 01",
+    nl: "Oefening 01",
+  },
+  prompt: {
+    en: [
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "Translate the following nominal expressions into Coptic (one solution is sufficient).",
+          },
+        ],
+      },
+    ],
+    nl: [
+      {
+        type: "paragraph",
+        content: [
+          {
+            type: "text",
+            text: "Vertaal de volgende nominale uitdrukkingen in het Koptisch (een oplossing is voldoende).",
+          },
+        ],
+      },
+    ],
+  },
+  items: [
+    {
+      id: "q1",
+      prompt: {
+        en: "She is my daughter.",
+        nl: "Zij is mijn dochter.",
+      },
+      answerSchema: { kind: "free-text", minLength: 1, maxLength: 500 },
+    },
+    {
+      id: "q2",
+      prompt: {
+        en: "She is my wife.",
+        nl: "Zij is mijn echtgenote.",
+      },
+      answerSchema: { kind: "free-text", minLength: 1, maxLength: 500 },
+    },
+    {
+      id: "q3",
+      prompt: {
+        en: "It is heaven.",
+        nl: "Het is de hemel.",
+      },
+      answerSchema: { kind: "free-text", minLength: 1, maxLength: 500 },
+    },
+    {
+      id: "q4",
+      prompt: {
+        en: "She is a lady.",
+        nl: "Zij is een dame.",
+      },
+      answerSchema: { kind: "free-text", minLength: 1, maxLength: 500 },
+    },
+    {
+      id: "q5",
+      prompt: {
+        en: "They are the ladies.",
+        nl: "Zij zijn de dames.",
+      },
+      answerSchema: { kind: "free-text", minLength: 1, maxLength: 500 },
+    },
+    {
+      id: "q6",
+      prompt: {
+        en: "He is a spirit.",
+        nl: "Hij is een geest.",
+      },
+      answerSchema: { kind: "free-text", minLength: 1, maxLength: 500 },
+    },
+    {
+      id: "q7",
+      prompt: {
+        en: "It is the spirit.",
+        nl: "Het is de geest.",
+      },
+      answerSchema: { kind: "free-text", minLength: 1, maxLength: 500 },
+    },
+    {
+      id: "q8",
+      prompt: {
+        en: "Every city.",
+        nl: "Iedere stad.",
+      },
+      answerSchema: { kind: "free-text", minLength: 1, maxLength: 500 },
+    },
+    {
+      id: "q9",
+      prompt: {
+        en: "Every man.",
+        nl: "Iedere man.",
+      },
+      answerSchema: { kind: "free-text", minLength: 1, maxLength: 500 },
+    },
+    {
+      id: "q10",
+      prompt: {
+        en: "The lord, the savior.",
+        nl: "De heer, de verlosser.",
+      },
+      answerSchema: { kind: "free-text", minLength: 1, maxLength: 500 },
+    },
+  ],
+  tags: ["lesson-1", "exercise", "translation", "reviewed"],
+};

@@ -36,6 +36,140 @@ export type Database = {
         };
         Relationships: [];
       };
+      lesson_bookmarks: {
+        Row: {
+          created_at: string;
+          lesson_id: string;
+          lesson_slug: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          lesson_id: string;
+          lesson_slug: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          lesson_id?: string;
+          lesson_slug?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            columns: ["user_id"];
+            foreignKeyName: "lesson_bookmarks_user_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+        ];
+      };
+      lesson_notes: {
+        Row: {
+          created_at: string;
+          lesson_id: string;
+          lesson_slug: string;
+          note_text: string;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          lesson_id: string;
+          lesson_slug: string;
+          note_text: string;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          lesson_id?: string;
+          lesson_slug?: string;
+          note_text?: string;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            columns: ["user_id"];
+            foreignKeyName: "lesson_notes_user_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+        ];
+      };
+      lesson_progress: {
+        Row: {
+          completed_at: string | null;
+          last_viewed_at: string;
+          lesson_id: string;
+          lesson_slug: string;
+          started_at: string;
+          user_id: string;
+        };
+        Insert: {
+          completed_at?: string | null;
+          last_viewed_at?: string;
+          lesson_id: string;
+          lesson_slug: string;
+          started_at?: string;
+          user_id: string;
+        };
+        Update: {
+          completed_at?: string | null;
+          last_viewed_at?: string;
+          lesson_id?: string;
+          lesson_slug?: string;
+          started_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            columns: ["user_id"];
+            foreignKeyName: "lesson_progress_user_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+        ];
+      };
+      section_progress: {
+        Row: {
+          completed_at: string;
+          lesson_id: string;
+          lesson_slug: string;
+          section_id: string;
+          section_slug: string;
+          user_id: string;
+        };
+        Insert: {
+          completed_at?: string;
+          lesson_id: string;
+          lesson_slug: string;
+          section_id: string;
+          section_slug: string;
+          user_id: string;
+        };
+        Update: {
+          completed_at?: string;
+          lesson_id?: string;
+          lesson_slug?: string;
+          section_id?: string;
+          section_slug?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            columns: ["user_id"];
+            foreignKeyName: "section_progress_user_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+        ];
+      };
       submissions: {
         Row: {
           created_at: string;

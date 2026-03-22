@@ -1,0 +1,446 @@
+{
+  "schemaVersion": "1.0.0",
+  "datasetVersion": "2026-03-22",
+  "generatedAt": "2026-03-22T00:00:00.000Z",
+  "data": [
+    {
+      "id": "grammar.concept.bare-noun",
+      "title": {
+        "en": "Bare Noun",
+        "nl": "Kaal substantief"
+      },
+      "definition": {
+        "en": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "A base noun form without an overt determiner prefix. Lesson 1 uses bare nouns as the starting lexical form before determination is added."
+              }
+            ]
+          }
+        ],
+        "nl": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Een basisvorm van een zelfstandig naamwoord zonder expliciet determinerprefix. Les 1 gebruikt kale substantieven als vertrekvorm voordat determinatie wordt toegevoegd."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "lesson-1",
+        "nouns",
+        "terminology"
+      ],
+      "relatedConceptRefs": [
+        "grammar.concept.determined-noun",
+        "grammar.concept.determiner-selection",
+        "grammar.concept.zero-determination"
+      ],
+      "lessonRefs": [
+        "grammar.lesson.01"
+      ],
+      "sourceRefs": [
+        "grammar.source.basisgrammatica-bohairisch-koptisch"
+      ]
+    },
+    {
+      "id": "grammar.concept.determined-noun",
+      "title": {
+        "en": "Determined Noun",
+        "nl": "Gedetermineerd substantief"
+      },
+      "definition": {
+        "en": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "A noun supplied with a determiner, usually as a prefix. In Lesson 1 this covers indefinite, definite, possessive, and demonstrative formations."
+              }
+            ]
+          }
+        ],
+        "nl": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Een zelfstandig naamwoord dat voorzien is van een determinator, meestal als prefix. In Les 1 omvat dit onbepaalde, bepaalde, bezittelijke en aanwijzende vormen."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "lesson-1",
+        "nouns",
+        "determiners"
+      ],
+      "relatedConceptRefs": [
+        "grammar.concept.bare-noun",
+        "grammar.concept.determiner-selection",
+        "grammar.concept.zero-determination"
+      ],
+      "lessonRefs": [
+        "grammar.lesson.01"
+      ],
+      "sourceRefs": [
+        "grammar.source.basisgrammatica-bohairisch-koptisch"
+      ]
+    },
+    {
+      "id": "grammar.concept.significant-letters",
+      "title": {
+        "en": "Significant Letters",
+        "nl": "Significante letters"
+      },
+      "definition": {
+        "en": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Recurring masculine, feminine, and plural pattern letters that help predict determiner and pronoun behavior in Bohairic grammar."
+              }
+            ]
+          }
+        ],
+        "nl": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Terugkerende mannelijke, vrouwelijke en meervoudige patroonletters die helpen om determinator- en voornaamwoordgedrag in de Bohairische grammatica te voorspellen."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "lesson-1",
+        "patterns",
+        "letters"
+      ],
+      "relatedConceptRefs": [
+        "grammar.concept.determiner-selection",
+        "grammar.concept.independent-personal-pronouns"
+      ],
+      "lessonRefs": [
+        "grammar.lesson.01"
+      ],
+      "sourceRefs": [
+        "grammar.source.basisgrammatica-bohairisch-koptisch"
+      ]
+    },
+    {
+      "id": "grammar.concept.determiner-selection",
+      "title": {
+        "en": "Determiner Selection",
+        "nl": "Determinatorkeuze"
+      },
+      "definition": {
+        "en": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "The rule-governed selection of determiner prefixes according to masculine, feminine, or plural noun forms and the intended grammatical meaning."
+              }
+            ]
+          }
+        ],
+        "nl": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "De regelmatige keuze van determinerprefixen volgens mannelijke, vrouwelijke of meervoudige naamwoordsvormen en de bedoelde grammaticale betekenis."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "lesson-1",
+        "determiners",
+        "prefixes"
+      ],
+      "relatedConceptRefs": [
+        "grammar.concept.significant-letters",
+        "grammar.concept.zero-determination",
+        "grammar.concept.determined-noun"
+      ],
+      "lessonRefs": [
+        "grammar.lesson.01"
+      ],
+      "sourceRefs": [
+        "grammar.source.basisgrammatica-bohairisch-koptisch"
+      ]
+    },
+    {
+      "id": "grammar.concept.zero-determination",
+      "title": {
+        "en": "Zero-Determination",
+        "nl": "Nul-determinatie"
+      },
+      "definition": {
+        "en": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "A context in which a noun appears without an overt determiner prefix."
+              },
+              {
+                "type": "text",
+                "text": " Lesson 1 highlights "
+              },
+              {
+                "type": "coptic",
+                "text": "ⲛⲓⲃⲉⲛ"
+              },
+              {
+                "type": "text",
+                "text": " as a common trigger for this pattern."
+              }
+            ]
+          }
+        ],
+        "nl": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Een context waarin een zelfstandig naamwoord zonder expliciet determinerprefix verschijnt."
+              },
+              {
+                "type": "text",
+                "text": " Les 1 benadrukt "
+              },
+              {
+                "type": "coptic",
+                "text": "ⲛⲓⲃⲉⲛ"
+              },
+              {
+                "type": "text",
+                "text": " als een veelvoorkomende aanleiding voor dit patroon."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "lesson-1",
+        "determiners",
+        "exceptions"
+      ],
+      "relatedConceptRefs": [
+        "grammar.concept.determiner-selection",
+        "grammar.concept.bare-noun"
+      ],
+      "lessonRefs": [
+        "grammar.lesson.01"
+      ],
+      "sourceRefs": [
+        "grammar.source.basisgrammatica-bohairisch-koptisch"
+      ]
+    },
+    {
+      "id": "grammar.concept.nexus-pronouns",
+      "title": {
+        "en": "Nexus Pronouns",
+        "nl": "Verbindingsvoornaamwoorden"
+      },
+      "definition": {
+        "en": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Postpositive enclitic pronouns such as ≡ⲡⲉ, ≡ⲧⲉ, and ≡ⲛⲉ that structure the bipartite nominal sentence."
+              }
+            ]
+          }
+        ],
+        "nl": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Postpositieve enclitische voornaamwoorden zoals ≡ⲡⲉ, ≡ⲧⲉ en ≡ⲛⲉ die de tweeledige nominale zin structureren."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "lesson-1",
+        "pronouns",
+        "syntax"
+      ],
+      "relatedConceptRefs": [
+        "grammar.concept.bipartite-nominal-sentence",
+        "grammar.concept.independent-personal-pronouns"
+      ],
+      "lessonRefs": [
+        "grammar.lesson.01"
+      ],
+      "sourceRefs": [
+        "grammar.source.basisgrammatica-bohairisch-koptisch"
+      ]
+    },
+    {
+      "id": "grammar.concept.bipartite-nominal-sentence",
+      "title": {
+        "en": "Bipartite Nominal Sentence",
+        "nl": "Tweeledige nominale zin"
+      },
+      "definition": {
+        "en": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "A nominal clause pattern that uses a predicate phrase plus a nexus pronoun rather than a present-tense verb “to be”."
+              }
+            ]
+          }
+        ],
+        "nl": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Een nominaal zinsmodel dat een predicaatwoordgroep plus een verbindingsvoornaamwoord gebruikt in plaats van een tegenwoordige tijd van het werkwoord “zijn”."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "lesson-1",
+        "syntax",
+        "nominal-sentence"
+      ],
+      "relatedConceptRefs": [
+        "grammar.concept.nexus-pronouns",
+        "grammar.concept.independent-personal-pronouns"
+      ],
+      "lessonRefs": [
+        "grammar.lesson.01"
+      ],
+      "sourceRefs": [
+        "grammar.source.basisgrammatica-bohairisch-koptisch"
+      ]
+    },
+    {
+      "id": "grammar.concept.independent-personal-pronouns",
+      "title": {
+        "en": "Independent Personal Pronouns",
+        "nl": "Onafhankelijke persoonlijke voornaamwoorden"
+      },
+      "definition": {
+        "en": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Prepositive pronouns such as ⲛ̀ⲑⲟϥ, ⲛ̀ⲑⲟⲥ, and ⲛ̀ⲑⲱⲟⲩ that can be used for emphasis alongside the standard nexus-pronoun pattern."
+              }
+            ]
+          }
+        ],
+        "nl": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Prepositieve voornaamwoorden zoals ⲛ̀ⲑⲟϥ, ⲛ̀ⲑⲟⲥ en ⲛ̀ⲑⲱⲟⲩ die gebruikt kunnen worden voor nadruk naast het standaardpatroon met verbindingsvoornaamwoorden."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "lesson-1",
+        "pronouns",
+        "emphasis"
+      ],
+      "relatedConceptRefs": [
+        "grammar.concept.nexus-pronouns",
+        "grammar.concept.bipartite-nominal-sentence",
+        "grammar.concept.significant-letters"
+      ],
+      "lessonRefs": [
+        "grammar.lesson.01"
+      ],
+      "sourceRefs": [
+        "grammar.source.basisgrammatica-bohairisch-koptisch"
+      ]
+    },
+    {
+      "id": "grammar.concept.nomina-sacra",
+      "title": {
+        "en": "Nomina Sacra",
+        "nl": "Nomina sacra"
+      },
+      "definition": {
+        "en": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Traditional abbreviations of holy names and liturgical formulas, typically marked with an overline in Coptic manuscripts and church books."
+              }
+            ]
+          }
+        ],
+        "nl": [
+          {
+            "type": "paragraph",
+            "content": [
+              {
+                "type": "text",
+                "text": "Traditionele afkortingen van heilige namen en liturgische formules, meestal gemarkeerd met een bovenstreep in Koptische handschriften en kerkboeken."
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "lesson-1",
+        "abbreviations",
+        "liturgical"
+      ],
+      "relatedConceptRefs": [],
+      "lessonRefs": [
+        "grammar.lesson.01"
+      ],
+      "sourceRefs": [
+        "grammar.source.basisgrammatica-bohairisch-koptisch"
+      ]
+    }
+  ]
+}

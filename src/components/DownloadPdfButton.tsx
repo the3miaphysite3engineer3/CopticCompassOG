@@ -3,8 +3,31 @@
 import { useEffect, useState } from "react";
 import { Download, Lock } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import type { jsPDF as JsPdfInstance } from "jspdf";
 
-export function DownloadPdfButton({ targetId, fileName }: { targetId: string, fileName: string }) {
+type PdfLifecycleCallback = () => Promise<void> | void;
+
+type DownloadPdfButtonProps = {
+  targetId: string;
+  fileName: string;
+  beforeCapture?: PdfLifecycleCallback;
+  afterCapture?: PdfLifecycleCallback;
+};
+
+function waitForNextPaint() {
+  return new Promise<void>((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
+}
+
+export function DownloadPdfButton({
+  targetId,
+  fileName,
+  beforeCapture,
+  afterCapture,
+}: DownloadPdfButtonProps) {
   const [isReady, setIsReady] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -30,6 +53,11 @@ export function DownloadPdfButton({ targetId, fileName }: { targetId: string, fi
     setIsGenerating(true);
     
     try {
+      if (beforeCapture) {
+        await beforeCapture();
+        await waitForNextPaint();
+      }
+
       // Dynamically import modern PDF compilers
       const { toPng } = await import("html-to-image");
       const { jsPDF } = await import("jspdf");
@@ -61,7 +89,7 @@ export function DownloadPdfButton({ targetId, fileName }: { targetId: string, fi
       let heightLeft = imgHeight;
       let position = margin;
 
-      const addProtectedMarginsAndFooter = (doc: any) => {
+      const addProtectedMarginsAndFooter = (doc: JsPdfInstance) => {
         // Draw white rectangle to protect the top margin from image bleed
         doc.setFillColor(255, 255, 255);
         doc.rect(0, 0, pdfWidth, margin, "F");
@@ -95,10 +123,15 @@ export function DownloadPdfButton({ targetId, fileName }: { targetId: string, fi
       }
 
       pdf.save(fileName);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
       console.error("PDF Generation failed", err);
-      alert("PDF generation encountered an error: " + (err?.message || "Unknown error"));
+      alert(`PDF generation encountered an error: ${errorMessage}`);
     } finally {
+      if (afterCapture) {
+        await afterCapture();
+      }
+
       setIsGenerating(false);
     }
   };
