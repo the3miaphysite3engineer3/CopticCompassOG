@@ -11,6 +11,38 @@ type GrammarInlineRendererProps = {
   renderFootnoteRef?: (ref: string, key: string) => ReactNode;
 };
 
+function renderDictionaryEntryHref(dictionaryEntryId: string) {
+  return `/entry/${encodeURIComponent(dictionaryEntryId)}`;
+}
+
+function renderCopticNode(
+  key: string,
+  dictionaryEntryId: string | undefined,
+  className: string,
+  content: ReactNode,
+) {
+  if (!dictionaryEntryId) {
+    return (
+      <span key={key} className={className}>
+        {content}
+      </span>
+    );
+  }
+
+  return (
+    <a
+      key={key}
+      href={renderDictionaryEntryHref(dictionaryEntryId)}
+      target="_blank"
+      rel="noreferrer noopener"
+      data-dictionary-entry-id={dictionaryEntryId}
+      className={`${className} no-underline`}
+    >
+      {content}
+    </a>
+  );
+}
+
 function renderInlineNode(
   node: GrammarInline,
   language: Language,
@@ -21,26 +53,24 @@ function renderInlineNode(
     case "text":
       return <span key={key}>{node.text}</span>;
     case "coptic":
-      return (
-        <span
-          key={key}
-          className="font-coptic text-emerald-600 dark:text-emerald-400"
-        >
-          {node.text}
-        </span>
+      return renderCopticNode(
+        key,
+        node.dictionaryEntryId,
+        "font-coptic text-emerald-600 dark:text-emerald-400",
+        node.text,
       );
     case "copticSpan":
-      return (
-        <span
-          key={key}
-          className="font-coptic text-lg text-emerald-600 dark:text-emerald-400"
-        >
+      return renderCopticNode(
+        key,
+        node.dictionaryEntryId,
+        "font-coptic text-lg text-emerald-600 dark:text-emerald-400",
+        <>
           <GrammarInlineRenderer
             nodes={node.children}
             language={language}
             renderFootnoteRef={renderFootnoteRef}
           />
-        </span>
+        </>,
       );
     case "strong":
       return (

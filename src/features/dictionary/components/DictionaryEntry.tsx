@@ -26,6 +26,24 @@ type DialectEntryTuple = [
   NonNullable<LexicalEntry["dialects"][DictionaryDialectCode]>,
 ];
 
+function formatDialectForms(forms: DialectEntryTuple[1], headwordFallback: string) {
+  const parts: string[] = [];
+  const absoluteWithVariants = forms.absolute
+    ? [forms.absolute, ...(forms.absoluteVariants ?? [])].join(", ")
+    : headwordFallback;
+
+  parts.push(absoluteWithVariants);
+
+  const bound: string[] = [];
+  if (forms.nominal) bound.push(forms.nominal);
+  if (forms.pronominal) bound.push(forms.pronominal);
+
+  if (bound.length > 0) parts.push(bound.join("/"));
+  if (forms.stative) parts.push(forms.stative);
+
+  return parts.join(" ");
+}
+
 export default function DictionaryEntryCard({
   entry,
   query = "",
@@ -52,20 +70,9 @@ export default function DictionaryEntryCard({
     : undefined;
 
   if (primaryForms) {
-    // The heading compresses the absolute, bound, and stative spellings into
-    // the compact notation used throughout the dictionary UI.
-    const parts: string[] = [];
-    if (primaryForms.absolute) parts.push(primaryForms.absolute);
-    else parts.push(entry.headword);
-
-    const bound: string[] = [];
-    if (primaryForms.nominal) bound.push(primaryForms.nominal);
-    if (primaryForms.pronominal) bound.push(primaryForms.pronominal);
-
-    if (bound.length > 0) parts.push(bound.join("/"));
-    if (primaryForms.stative) parts.push(primaryForms.stative);
-
-    headerSpelling = parts.join(" ");
+    // The heading compresses the absolute, variant, bound, and stative
+    // spellings into the compact notation used throughout the dictionary UI.
+    headerSpelling = formatDialectForms(primaryForms, entry.headword);
   }
 
   const remainingDialects = Object.entries(entry.dialects).filter(
@@ -158,17 +165,7 @@ export default function DictionaryEntryCard({
           <h4 className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-widest font-semibold mb-3">{t("entry.dialectForms")}</h4>
           <div className="flex flex-wrap gap-3">
             {remainingDialects.map(([dialect, forms], index) => {
-              const parts: string[] = [];
-              if (forms.absolute) parts.push(forms.absolute);
-
-              const bound: string[] = [];
-              if (forms.nominal) bound.push(forms.nominal);
-              if (forms.pronominal) bound.push(forms.pronominal);
-
-              if (bound.length > 0) parts.push(bound.join("/"));
-              if (forms.stative) parts.push(forms.stative);
-
-              const spelling = parts.join(" ");
+              const spelling = formatDialectForms(forms, entry.headword);
 
               return (
                 <div key={index} className="flex items-center space-x-3 bg-stone-50/90 dark:bg-stone-950/50 px-3 py-2.5 rounded-xl border border-stone-200 dark:border-stone-800/60">

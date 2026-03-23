@@ -1,8 +1,26 @@
+import fs from "fs";
+import path from "path";
+
+function getDictionaryEntryCount() {
+  try {
+    const dictionaryPath = path.join(process.cwd(), "public/data/dictionary.json");
+    const rawData = fs.readFileSync(dictionaryPath, "utf8");
+    const dictionary = JSON.parse(rawData) as unknown;
+
+    return Array.isArray(dictionary) ? dictionary.length : 0;
+  } catch {
+    return 0;
+  }
+}
+
+const dictionaryEntryCount = getDictionaryEntryCount();
+
 export const siteConfig = {
   name: "The Wannes Portfolio",
   title: "The Wannes Portfolio | Digital Humanities",
-  description:
-    "Scholarly portfolio and digital Coptic-English dictionary by Kyrillos Wannes, featuring 3,330 entries, bilingual UI, analytics, and learning tools.",
+  description: dictionaryEntryCount
+    ? `Scholarly portfolio and digital Coptic-English dictionary by Kyrillos Wannes, featuring ${dictionaryEntryCount.toLocaleString()} entries, bilingual UI, analytics, and learning tools.`
+    : "Scholarly portfolio and digital Coptic-English dictionary by Kyrillos Wannes, with bilingual UI, analytics, and learning tools.",
   liveUrl: "https://kyrilloswannes.com",
   repoUrl: "https://github.com/KyroHub/portfolio",
   cloneUrl: "https://github.com/KyroHub/portfolio.git",
@@ -21,7 +39,7 @@ export const siteConfig = {
     "tailwindcss",
     "recharts",
   ],
-  dictionaryEntryCount: 3330,
+  dictionaryEntryCount,
 };
 
 export function buildPageTitle(title: string) {

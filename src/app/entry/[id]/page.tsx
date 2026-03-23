@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
-import DictionaryEntryCard from '@/features/dictionary/components/DictionaryEntry';
 import EntryPageHeader from '@/features/dictionary/components/EntryPageHeader';
+import EntryPageClient from '@/features/dictionary/components/EntryPageClient';
 import { PageShell, pageShellAccents } from '@/components/PageShell';
 import StructuredData from '@/components/StructuredData';
-import { getDictionary } from '@/features/dictionary/lib/dictionary';
+import {
+  getDictionary,
+  getDictionaryEntryRelations,
+} from '@/features/dictionary/lib/dictionary';
 import { buildPageTitle, siteConfig } from '@/lib/site';
 import {
   buildEntryDescription,
@@ -70,6 +73,11 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
     notFound();
   }
 
+  const { parentEntry, relatedEntries } = getDictionaryEntryRelations(
+    entry,
+    dictionary,
+  );
+
   return (
     <PageShell
       className="min-h-screen px-6 pb-20 pt-16"
@@ -82,7 +90,12 @@ export default async function EntryPage({ params }: { params: Promise<{ id: stri
       <StructuredData data={createDefinedTermStructuredData(entry)} />
 
       <EntryPageHeader />
-      <DictionaryEntryCard entry={entry} headingLevel="h1" linkHeadword={false} />
+      <EntryPageClient
+        entryId={entry.id}
+        initialEntry={entry}
+        initialParentEntry={parentEntry}
+        initialRelatedEntries={relatedEntries}
+      />
     </PageShell>
   );
 }

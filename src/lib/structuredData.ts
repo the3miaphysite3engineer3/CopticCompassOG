@@ -215,7 +215,13 @@ export function createDefinedTermStructuredData(entry: LexicalEntry): JsonLd {
   const alternateNames = Array.from(
     new Set(
       Object.values(entry.dialects)
-        .flatMap((forms) => Object.values(forms))
+        .flatMap((forms) => [
+          forms.absolute,
+          ...(forms.absoluteVariants ?? []),
+          forms.nominal,
+          forms.pronominal,
+          forms.stative,
+        ])
         .map((form) => toPlainText(form))
         .filter(Boolean)
     )

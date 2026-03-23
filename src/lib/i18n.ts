@@ -70,6 +70,11 @@ const en = {
   "entry.translation": "Translation",
   "entry.greekEquivalents": "Greek Equivalents",
   "entry.dialectForms": "Dialect Forms",
+  "entry.baseEntry": "Base Entry",
+  "entry.relatedEntries": "Related Entries",
+  "entry.relation.feminineCounterpart": "Feminine counterpart",
+  "entry.relation.derivedSubentry": "Derived subentry",
+  "entry.relation.paradigmMember": "Paradigm member",
 
   "analytics.back": "Back to Dictionary Search",
   "analytics.filter": "Filter Analytics",
@@ -217,6 +222,11 @@ const nl = {
   "entry.translation": "Vertaling",
   "entry.greekEquivalents": "Griekse equivalenten",
   "entry.dialectForms": "Dialectvormen",
+  "entry.baseEntry": "Basislemma",
+  "entry.relatedEntries": "Verwante lemma's",
+  "entry.relation.feminineCounterpart": "Vrouwelijke tegenhanger",
+  "entry.relation.derivedSubentry": "Afgeleid sublemma",
+  "entry.relation.paradigmMember": "Paradigmalid",
 
   "analytics.back": "Terug naar woordenboek",
   "analytics.filter": "Analytics filteren",

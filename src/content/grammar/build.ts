@@ -1,54 +1,108 @@
 import type {
   GrammarDatasetSnapshot,
-  GrammarExerciseDocument,
   GrammarManifest,
   GrammarLessonBundle,
   GrammarLessonDocument,
 } from "./schema.ts";
-import {
-  getGrammarDatasetSnapshot,
-  getGrammarExerciseDocumentById,
-} from "./registry.ts";
+import { enrichGrammarDatasetSnapshotWithDictionaryLinks } from "./dictionary-links.ts";
+import { getGrammarDatasetSnapshot } from "./registry.ts";
 
-function getExercisesForLessonDocument(lesson: GrammarLessonDocument): GrammarExerciseDocument[] {
-  return lesson.exerciseRefs
-    .map((exerciseId) => getGrammarExerciseDocumentById(exerciseId))
-    .filter((exercise): exercise is GrammarExerciseDocument => exercise !== null);
-}
-
-export function createGrammarLessonBundle(
+function createGrammarLessonBundleFromSnapshot(
   lesson: GrammarLessonDocument,
-  snapshot: GrammarDatasetSnapshot = getGrammarDatasetSnapshot(),
+  snapshot: GrammarDatasetSnapshot,
 ): GrammarLessonBundle {
-  const exerciseIds = new Set(lesson.exerciseRefs);
+  const enrichedLesson =
+    snapshot.lessons.find((candidate) => candidate.id === lesson.id) ?? lesson;
+
+  const exerciseIds = new Set(enrichedLesson.exerciseRefs);
   const sectionExerciseIds = new Set(
-    lesson.sections.flatMap((section) => section.exerciseRefs),
+    enrichedLesson.sections.flatMap((section) => section.exerciseRefs),
   );
   const bundledExercises = snapshot.exercises.filter(
     (exercise) => exerciseIds.has(exercise.id) || sectionExerciseIds.has(exercise.id),
   );
 
   return {
-    lesson,
+    lesson: enrichedLesson,
     concepts: snapshot.concepts.filter((concept) =>
-      lesson.conceptRefs.includes(concept.id),
+      enrichedLesson.conceptRefs.includes(concept.id),
     ),
-    examples: snapshot.examples.filter((example) => example.lessonId === lesson.id),
-    exercises: bundledExercises.length > 0 ? bundledExercises : getExercisesForLessonDocument(lesson),
-    footnotes: snapshot.footnotes.filter((footnote) => footnote.lessonId === lesson.id),
-    sources: snapshot.sources.filter((source) => lesson.sourceRefs.includes(source.id)),
+    examples: snapshot.examples.filter((example) => example.lessonId === enrichedLesson.id),
+    exercises: bundledExercises,
+    footnotes: snapshot.footnotes.filter((footnote) => footnote.lessonId === enrichedLesson.id),
+    sources: snapshot.sources.filter((source) => enrichedLesson.sourceRefs.includes(source.id)),
   };
+}
+
+export function createGrammarLessonBundle(
+  lesson: GrammarLessonDocument,
+  snapshot: GrammarDatasetSnapshot = getGrammarDatasetSnapshot(),
+): GrammarLessonBundle {
+  return createGrammarLessonBundleFromSnapshot(
+    lesson,
+    enrichGrammarDatasetSnapshotWithDictionaryLinks(snapshot),
+  );
 }
 
 export function createGrammarExportSnapshot(
   snapshot: GrammarDatasetSnapshot = getGrammarDatasetSnapshot(),
 ) {
+  const enrichedSnapshot = enrichGrammarDatasetSnapshotWithDictionaryLinks(snapshot);
+
   return {
-    manifest: snapshot.manifest,
+    manifest: enrichedSnapshot.manifest,
     lessons: Object.fromEntries(
-      snapshot.lessons.map((lesson) => [lesson.slug, createGrammarLessonBundle(lesson, snapshot)]),
+      enrichedSnapshot.lessons.map((lesson) => [
+        lesson.slug,
+        createGrammarLessonBundleFromSnapshot(lesson, enrichedSnapshot),
+      ]),
     ),
   };
+}
+
+export function createGrammarStaticExportFiles(
+  snapshot: GrammarDatasetSnapshot = getGrammarDatasetSnapshot(),
+): GrammarStaticExportFile[] {
+  const enrichedSnapshot = enrichGrammarDatasetSnapshotWithDictionaryLinks(snapshot);
+  const exportSnapshot = createGrammarExportSnapshot(enrichedSnapshot);
+  const files: GrammarStaticExportFile[] = [
+    {
+      outputPath: "grammar/v1/manifest.json",
+      payload: exportSnapshot.manifest,
+    },
+    {
+      outputPath: "grammar/v1/concepts.json",
+      payload: createGrammarVersionedExport(exportSnapshot.manifest, enrichedSnapshot.concepts),
+    },
+    {
+      outputPath: "grammar/v1/examples.json",
+      payload: createGrammarVersionedExport(exportSnapshot.manifest, enrichedSnapshot.examples),
+    },
+    {
+      outputPath: "grammar/v1/exercises.json",
+      payload: createGrammarVersionedExport(exportSnapshot.manifest, enrichedSnapshot.exercises),
+    },
+    {
+      outputPath: "grammar/v1/footnotes.json",
+      payload: createGrammarVersionedExport(exportSnapshot.manifest, enrichedSnapshot.footnotes),
+    },
+    {
+      outputPath: "grammar/v1/sources.json",
+      payload: createGrammarVersionedExport(exportSnapshot.manifest, enrichedSnapshot.sources),
+    },
+  ];
+
+  enrichedSnapshot.lessons.forEach((lesson) => {
+    files.push({
+      outputPath: `grammar/v1/lessons/${lesson.slug}.json`,
+      payload: createGrammarVersionedExport(
+        exportSnapshot.manifest,
+        exportSnapshot.lessons[lesson.slug],
+      ),
+    });
+  });
+
+  return files;
 }
 
 export type GrammarVersionedExport<T> = {
@@ -73,48 +127,4 @@ export function createGrammarVersionedExport<T>(
     generatedAt: manifest.generatedAt,
     data,
   };
-}
-
-export function createGrammarStaticExportFiles(
-  snapshot: GrammarDatasetSnapshot = getGrammarDatasetSnapshot(),
-): GrammarStaticExportFile[] {
-  const exportSnapshot = createGrammarExportSnapshot(snapshot);
-  const files: GrammarStaticExportFile[] = [
-    {
-      outputPath: "grammar/v1/manifest.json",
-      payload: exportSnapshot.manifest,
-    },
-    {
-      outputPath: "grammar/v1/concepts.json",
-      payload: createGrammarVersionedExport(exportSnapshot.manifest, snapshot.concepts),
-    },
-    {
-      outputPath: "grammar/v1/examples.json",
-      payload: createGrammarVersionedExport(exportSnapshot.manifest, snapshot.examples),
-    },
-    {
-      outputPath: "grammar/v1/exercises.json",
-      payload: createGrammarVersionedExport(exportSnapshot.manifest, snapshot.exercises),
-    },
-    {
-      outputPath: "grammar/v1/footnotes.json",
-      payload: createGrammarVersionedExport(exportSnapshot.manifest, snapshot.footnotes),
-    },
-    {
-      outputPath: "grammar/v1/sources.json",
-      payload: createGrammarVersionedExport(exportSnapshot.manifest, snapshot.sources),
-    },
-  ];
-
-  snapshot.lessons.forEach((lesson) => {
-    files.push({
-      outputPath: `grammar/v1/lessons/${lesson.slug}.json`,
-      payload: createGrammarVersionedExport(
-        exportSnapshot.manifest,
-        exportSnapshot.lessons[lesson.slug],
-      ),
-    });
-  });
-
-  return files;
 }

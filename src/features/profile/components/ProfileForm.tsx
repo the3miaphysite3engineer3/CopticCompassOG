@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/client'
 import { FormField } from '@/components/FormField'
 import { StatusNotice } from '@/components/StatusNotice'
 import { SurfacePanel } from '@/components/SurfacePanel'
+import { antinoou } from '@/lib/fonts'
 import type { Tables } from '@/types/supabase'
 
 export function ProfileForm({ profile }: { profile: Tables<'profiles'> }) {
@@ -127,7 +128,7 @@ export function ProfileForm({ profile }: { profile: Tables<'profiles'> }) {
               id="full_name"
               name="full_name"
               type="text"
-              className="input-base"
+              className={`input-base ${antinoou.className} tracking-wide`}
               defaultValue={profile.full_name || ''}
               placeholder="Your Name"
             />

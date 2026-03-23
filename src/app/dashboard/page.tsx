@@ -23,6 +23,7 @@ import {
   getUserLessonProgressRows,
   getUserSectionProgressRows,
 } from '@/lib/supabase/queries'
+import { antinoou } from '@/lib/fonts'
 
 export default async function DashboardPage() {
   if (!hasSupabaseRuntimeEnv()) {
@@ -99,7 +100,15 @@ export default async function DashboardPage() {
         <SurfacePanel rounded="3xl" className="p-6 md:p-8 flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-semibold mb-2 text-stone-800 dark:text-stone-200">
-              Welcome Back, {profile.full_name || 'Student'}!
+              Welcome Back,{" "}
+              {profile.full_name ? (
+                <span className={`${antinoou.className} tracking-wide`}>
+                  {profile.full_name}
+                </span>
+              ) : (
+                'Student'
+              )}
+              !
             </h2>
             <p className="text-stone-600 dark:text-stone-400 font-medium">
               Logged in as <span className="text-sky-600 dark:text-sky-400 font-bold">{profile.email}</span>

@@ -25,7 +25,13 @@ export function prepareDictionaryForSearch(dictionary: LexicalEntry[]): Prepared
     // Dialect forms are flattened once up front so interactive search does not
     // rebuild the same normalized strings on every keystroke.
     const dialectForms = Object.values(entry.dialects)
-      .flatMap((forms) => [forms.absolute, forms.nominal, forms.pronominal, forms.stative])
+      .flatMap((forms) => [
+        forms.absolute,
+        ...(forms.absoluteVariants ?? []),
+        forms.nominal,
+        forms.pronominal,
+        forms.stative,
+      ])
       .filter(Boolean)
       .join(" ");
 

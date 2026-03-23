@@ -32,6 +32,35 @@ function renderExampleCopticText(text: string) {
   return text;
 }
 
+function renderDictionaryEntryHref(dictionaryEntryId: string) {
+  return `/entry/${encodeURIComponent(dictionaryEntryId)}`;
+}
+
+function renderExampleCopticSegments(
+  coptic: string,
+  dictionaryEntryId: string | undefined,
+  index: number,
+) {
+  const content = renderExampleCopticText(coptic);
+
+  if (!dictionaryEntryId) {
+    return <span key={`segment-${index}`}>{content}</span>;
+  }
+
+  return (
+    <a
+      key={`segment-${index}`}
+      href={renderDictionaryEntryHref(dictionaryEntryId)}
+      target="_blank"
+      rel="noreferrer noopener"
+      data-dictionary-entry-id={dictionaryEntryId}
+      className="no-underline"
+    >
+      {content}
+    </a>
+  );
+}
+
 function renderFootnoteRef(
   ref: string,
   key: string,
@@ -131,7 +160,28 @@ function renderExampleGroup(
       {items.map((example) => (
         <li key={example.id} className="leading-7 text-stone-700 dark:text-stone-300">
           <span className="font-coptic text-xl text-emerald-600 dark:text-emerald-400">
-            {renderExampleCopticText(example.coptic)}
+            {example.copticSegments && example.copticSegments.length > 0
+              ? example.copticSegments.map((segment, segmentIndex) =>
+                  renderExampleCopticSegments(
+                    segment.text,
+                    segment.dictionaryEntryId,
+                    segmentIndex,
+                  ),
+                )
+              : example.dictionaryRefs.length === 1 &&
+                  !/\s/.test(example.coptic.trim()) ? (
+                  <a
+                    href={renderDictionaryEntryHref(example.dictionaryRefs[0] ?? "")}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    data-dictionary-entry-id={example.dictionaryRefs[0]}
+                    className="no-underline"
+                  >
+                    {renderExampleCopticText(example.coptic)}
+                  </a>
+                ) : (
+                  renderExampleCopticText(example.coptic)
+                )}
           </span>
           <span className="ml-3">{example.translation[language]}</span>
         </li>

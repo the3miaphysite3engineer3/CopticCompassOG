@@ -1,9 +1,14 @@
 import type { DictionaryDialectCode, PartOfSpeech } from "@/features/dictionary/config";
 
 export type LexicalGender = "" | "BOTH" | "F" | "M";
+export type LexicalRelationType =
+  | "feminine-counterpart"
+  | "derived-subentry"
+  | "paradigm-member";
 
 export interface DialectForms {
   absolute: string;
+  absoluteVariants?: string[];
   nominal: string;
   pronominal: string;
   stative: string;
@@ -17,6 +22,8 @@ export interface LexicalEntry {
   dialects: DictionaryDialectFormsMap;
   pos: PartOfSpeech;
   gender: LexicalGender;
+  parentEntryId?: string;
+  relationType?: LexicalRelationType;
   english_meanings: string[];
   greek_equivalents: string[];
   raw: {

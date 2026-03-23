@@ -70,7 +70,8 @@
               },
               {
                 "type": "coptic",
-                "text": "ⲟⲩⲁⲓ"
+                "text": "ⲟⲩⲁⲓ",
+                "dictionaryEntryId": "cd_68"
               },
               {
                 "type": "text",
@@ -93,7 +94,8 @@
               },
               {
                 "type": "coptic",
-                "text": "ⲟⲩⲁⲓ"
+                "text": "ⲟⲩⲁⲓ",
+                "dictionaryEntryId": "cd_68"
               },
               {
                 "type": "text",
@@ -117,7 +119,8 @@
             "content": [
               {
                 "type": "coptic",
-                "text": "Ϩⲁⲛ-"
+                "text": "Ϩⲁⲛ-",
+                "dictionaryEntryId": "cd_100"
               },
               {
                 "type": "text",
@@ -133,7 +136,8 @@
               },
               {
                 "type": "coptic",
-                "text": "ϩⲁⲛ-"
+                "text": "ϩⲁⲛ-",
+                "dictionaryEntryId": "cd_100"
               },
               {
                 "type": "text",
@@ -148,7 +152,8 @@
             "content": [
               {
                 "type": "coptic",
-                "text": "Ϩⲁⲛ-"
+                "text": "Ϩⲁⲛ-",
+                "dictionaryEntryId": "cd_100"
               },
               {
                 "type": "text",
@@ -164,7 +169,8 @@
               },
               {
                 "type": "coptic",
-                "text": "ϩⲁⲛ-"
+                "text": "ϩⲁⲛ-",
+                "dictionaryEntryId": "cd_100"
               },
               {
                 "type": "text",
@@ -196,7 +202,8 @@
               },
               {
                 "type": "coptic",
-                "text": "ϯⲥⲱⲛⲓ"
+                "text": "ϯⲥⲱⲛⲓ",
+                "dictionaryEntryId": "cd_173a"
               },
               {
                 "type": "text",
@@ -219,7 +226,8 @@
               },
               {
                 "type": "coptic",
-                "text": "ϯⲥⲱⲛⲓ"
+                "text": "ϯⲥⲱⲛⲓ",
+                "dictionaryEntryId": "cd_173a"
               },
               {
                 "type": "text",
@@ -286,7 +294,8 @@
               },
               {
                 "type": "coptic",
-                "text": "ϭⲱⲓⲥ"
+                "text": "ϭⲱⲓⲥ",
+                "dictionaryEntryId": "cd_17"
               },
               {
                 "type": "text",
@@ -313,7 +322,8 @@
               },
               {
                 "type": "coptic",
-                "text": "ϭⲱⲓⲥ"
+                "text": "ϭⲱⲓⲥ",
+                "dictionaryEntryId": "cd_17"
               },
               {
                 "type": "text",

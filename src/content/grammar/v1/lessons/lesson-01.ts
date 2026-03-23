@@ -15,7 +15,11 @@ import { grammarLesson01ZeroDeterminationExamples } from "../examples/lesson-01-
 import { grammarDatasetRights } from "../rights.ts";
 
 const text = (value: string): GrammarInline => ({ type: "text", text: value });
-const coptic = (value: string): GrammarInline => ({ type: "coptic", text: value });
+const coptic = (value: string, dictionaryEntryId?: string): GrammarInline => ({
+  type: "coptic",
+  text: value,
+  ...(dictionaryEntryId ? { dictionaryEntryId } : {}),
+});
 const copticSpan = (...children: GrammarInline[]): GrammarInline => ({
   type: "copticSpan",
   children,
@@ -45,6 +49,11 @@ const conceptRef = (ref: string, fallback: string): GrammarInline => ({
   ref,
   fallback,
 });
+const link = (href: string, ...children: GrammarInline[]): GrammarInline => ({
+  type: "link",
+  href,
+  children,
+});
 const paragraph = (...content: GrammarInline[]): GrammarBlock => ({
   type: "paragraph",
   content,
@@ -54,9 +63,8 @@ const paragraphCell = (...content: GrammarInline[]): GrammarBlock[] => [
 ];
 
 const lessonId = grammarLesson01Id;
-const zeroDeterminationExampleIds = grammarLesson01ZeroDeterminationExamples.map(
-  (example) => example.id,
-);
+const zeroDeterminationExampleIds =
+  grammarLesson01ZeroDeterminationExamples.map((example) => example.id);
 const nominalSentenceExampleIds = grammarLesson01NominalSentenceExamples.map(
   (example) => example.id,
 );
@@ -230,7 +238,10 @@ export const grammarLesson01Document: GrammarLessonDocument = {
         nl: "Woordenschat: Kale zelfstandige naamwoorden",
       },
       tags: ["vocabulary", "gender", "nouns"],
-      conceptRefs: [grammarLesson01ConceptIds.bareNoun],
+      conceptRefs: [
+        grammarLesson01ConceptIds.bareNoun,
+        grammarLesson01ConceptIds.determinerSelection,
+      ],
       exampleRefs: [],
       exerciseRefs: [],
       summary: {
@@ -239,6 +250,24 @@ export const grammarLesson01Document: GrammarLessonDocument = {
       },
       blocks: {
         en: [
+          paragraph(
+            text("Coptic distinguishes two genders, masculine "),
+            smallCaps("m"),
+            text(" and feminine "),
+            smallCaps("f"),
+            text(", and two numbers, singular "),
+            smallCaps("s"),
+            text(" and plural "),
+            smallCaps("p"),
+            text(
+              ". This information is often coded in the determiner prefix rather than in the bare noun itself. See the next section on ",
+            ),
+            link(
+              `#${lessonId}.section.determiner-selection`,
+              text("Determiner Selection"),
+            ),
+            text(" for the first practical application."),
+          ),
           {
             type: "table",
             id: `${lessonId}.section.vocabulary-bare-nouns.table`,
@@ -290,7 +319,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                 cells: {
                   masculineWord: paragraphCell(coptic("Ⲓⲱⲧ")),
                   masculineMeaning: paragraphCell(text("“father”")),
-                  feminineWord: paragraphCell(coptic("Ⲙⲁⲩ")),
+                  feminineWord: paragraphCell(coptic("Ⲙⲁⲩ", "cd_215")),
                   feminineMeaning: paragraphCell(text("“mother”")),
                 },
               },
@@ -306,7 +335,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               {
                 id: `${lessonId}.section.vocabulary-bare-nouns.row.4`,
                 cells: {
-                  masculineWord: paragraphCell(coptic("Ϣⲏⲣⲓ")),
+                  masculineWord: paragraphCell(coptic("Ϣⲏⲣⲓ", "cd_20")),
                   masculineMeaning: paragraphCell(text("“son”")),
                   feminineWord: paragraphCell(coptic("Ϣⲉⲣⲓ")),
                   feminineMeaning: paragraphCell(text("“daughter”")),
@@ -341,8 +370,37 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               },
             ],
           },
+          {
+            type: "callout",
+            tone: "note",
+            blocks: [
+              paragraph(
+                text(
+                  "Note: A neuter gender can occasionally occur, especially with etymologically Greek adjectives. Its productive role is limited, but it can still help distinguish animate from inanimate referents.",
+                ),
+              ),
+            ],
+          },
         ],
         nl: [
+          paragraph(
+            text("Het Koptisch onderscheidt twee geslachten, mannelijk "),
+            smallCaps("m"),
+            text(" en vrouwelijk "),
+            smallCaps("v"),
+            text(", en twee getallen, singularis "),
+            smallCaps("s"),
+            text(" en pluralis "),
+            smallCaps("p"),
+            text(
+              ". Zulke informatie zit vaak vervat in het determinerprefix eerder dan in het kale zelfstandig naamwoord zelf. Zie de volgende sectie over ",
+            ),
+            link(
+              `#${lessonId}.section.determiner-selection`,
+              text("determinatoren"),
+            ),
+            text(" voor een eerste praktische toepassing."),
+          ),
           {
             type: "table",
             id: `${lessonId}.section.vocabulary-bare-nouns.table`,
@@ -394,7 +452,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                 cells: {
                   masculineWord: paragraphCell(coptic("Ⲓⲱⲧ")),
                   masculineMeaning: paragraphCell(text("“vader”")),
-                  feminineWord: paragraphCell(coptic("Ⲙⲁⲩ")),
+                  feminineWord: paragraphCell(coptic("Ⲙⲁⲩ", "cd_215")),
                   feminineMeaning: paragraphCell(text("“moeder”")),
                 },
               },
@@ -410,7 +468,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               {
                 id: `${lessonId}.section.vocabulary-bare-nouns.row.4.nl`,
                 cells: {
-                  masculineWord: paragraphCell(coptic("Ϣⲏⲣⲓ")),
+                  masculineWord: paragraphCell(coptic("Ϣⲏⲣⲓ", "cd_20")),
                   masculineMeaning: paragraphCell(text("“zoon”")),
                   feminineWord: paragraphCell(coptic("Ϣⲉⲣⲓ")),
                   feminineMeaning: paragraphCell(text("“dochter”")),
@@ -445,6 +503,17 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               },
             ],
           },
+          {
+            type: "callout",
+            tone: "note",
+            blocks: [
+              paragraph(
+                text(
+                  "Opmerking: Een onzijdig geslacht kan af en toe voorkomen, vooral bij etymologisch Griekse adjectieven. De productieve functie ervan is beperkt, maar het kan wel helpen om animate en inanimate referenten van elkaar te onderscheiden.",
+                ),
+              ),
+            ],
+          },
         ],
       },
     },
@@ -472,7 +541,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               grammarLesson01ConceptIds.significantLetters,
               "These significant letters",
             ),
-            text(" keep recurring throughout Coptic grammar and often form the basis of Coptic pattern grammar. The next section on determiners already offers a first practical application of them."),
+            text(
+              " keep recurring throughout Coptic grammar and often form the basis of Coptic pattern grammar. The next section on determiners already offers a first practical application of them.",
+            ),
           ),
           {
             type: "table",
@@ -489,25 +560,37 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               {
                 id: `${lessonId}.section.significant-letters.row.masculine`,
                 cells: {
-                  label: paragraphCell(
-                    text("Masculine "),
-                    smallCaps("m"),
-                  ),
-                  first: [paragraph(copticSpan(text("ⲡ"))), paragraph(text("/p/"))],
-                  second: [paragraph(copticSpan(text("ⲫ"))), paragraph(text("/pʰ/"))],
-                  third: [paragraph(copticSpan(text("ϥ"))), paragraph(text("/f/"))],
+                  label: paragraphCell(text("Masculine "), smallCaps("m")),
+                  first: [
+                    paragraph(copticSpan(text("ⲡ"))),
+                    paragraph(text("/p/")),
+                  ],
+                  second: [
+                    paragraph(copticSpan(text("ⲫ"))),
+                    paragraph(text("/pʰ/")),
+                  ],
+                  third: [
+                    paragraph(copticSpan(text("ϥ"))),
+                    paragraph(text("/f/")),
+                  ],
                 },
               },
               {
                 id: `${lessonId}.section.significant-letters.row.feminine`,
                 cells: {
-                  label: paragraphCell(
-                    text("Feminine "),
-                    smallCaps("f"),
-                  ),
-                  first: [paragraph(copticSpan(text("ⲧ"))), paragraph(text("/t/"))],
-                  second: [paragraph(copticSpan(text("ⲑ"))), paragraph(text("/tʰ/"))],
-                  third: [paragraph(copticSpan(text("ⲥ"))), paragraph(text("/s/"))],
+                  label: paragraphCell(text("Feminine "), smallCaps("f")),
+                  first: [
+                    paragraph(copticSpan(text("ⲧ"))),
+                    paragraph(text("/t/")),
+                  ],
+                  second: [
+                    paragraph(copticSpan(text("ⲑ"))),
+                    paragraph(text("/tʰ/")),
+                  ],
+                  third: [
+                    paragraph(copticSpan(text("ⲥ"))),
+                    paragraph(text("/s/")),
+                  ],
                 },
               },
               {
@@ -518,9 +601,15 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                     smallCaps("p"),
                     footnoteRef("grammar.footnote.lesson01.001"),
                   ),
-                  first: [paragraph(copticSpan(text("ⲛ"))), paragraph(text("/n/"))],
+                  first: [
+                    paragraph(copticSpan(text("ⲛ"))),
+                    paragraph(text("/n/")),
+                  ],
                   second: [paragraph(text("-")), paragraph(text("no form"))],
-                  third: [paragraph(copticSpan(text("ⲟⲩ"))), paragraph(text("/u, w/"))],
+                  third: [
+                    paragraph(copticSpan(text("ⲟⲩ"))),
+                    paragraph(text("/u, w/")),
+                  ],
                 },
               },
             ],
@@ -532,7 +621,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               grammarLesson01ConceptIds.significantLetters,
               "Deze significante letters",
             ),
-            text(" keren voortdurend terug in de Koptische grammatica en vormen vaak de basis van de Koptische patroongrammatica. De volgende paragraaf over de determinatoren toont meteen een eerste concrete toepassing."),
+            text(
+              " keren voortdurend terug in de Koptische grammatica en vormen vaak de basis van de Koptische patroongrammatica. De volgende paragraaf over de determinatoren toont meteen een eerste concrete toepassing.",
+            ),
           ),
           {
             type: "table",
@@ -549,25 +640,37 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               {
                 id: `${lessonId}.section.significant-letters.row.masculine.nl`,
                 cells: {
-                  label: paragraphCell(
-                    text("Mannelijk "),
-                    smallCaps("m"),
-                  ),
-                  first: [paragraph(copticSpan(text("ⲡ"))), paragraph(text("/p/"))],
-                  second: [paragraph(copticSpan(text("ⲫ"))), paragraph(text("/pʰ/"))],
-                  third: [paragraph(copticSpan(text("ϥ"))), paragraph(text("/f/"))],
+                  label: paragraphCell(text("Mannelijk "), smallCaps("m")),
+                  first: [
+                    paragraph(copticSpan(text("ⲡ"))),
+                    paragraph(text("/p/")),
+                  ],
+                  second: [
+                    paragraph(copticSpan(text("ⲫ"))),
+                    paragraph(text("/pʰ/")),
+                  ],
+                  third: [
+                    paragraph(copticSpan(text("ϥ"))),
+                    paragraph(text("/f/")),
+                  ],
                 },
               },
               {
                 id: `${lessonId}.section.significant-letters.row.feminine.nl`,
                 cells: {
-                  label: paragraphCell(
-                    text("Vrouwelijk "),
-                    smallCaps("v"),
-                  ),
-                  first: [paragraph(copticSpan(text("ⲧ"))), paragraph(text("/t/"))],
-                  second: [paragraph(copticSpan(text("ⲑ"))), paragraph(text("/tʰ/"))],
-                  third: [paragraph(copticSpan(text("ⲥ"))), paragraph(text("/s/"))],
+                  label: paragraphCell(text("Vrouwelijk "), smallCaps("v")),
+                  first: [
+                    paragraph(copticSpan(text("ⲧ"))),
+                    paragraph(text("/t/")),
+                  ],
+                  second: [
+                    paragraph(copticSpan(text("ⲑ"))),
+                    paragraph(text("/tʰ/")),
+                  ],
+                  third: [
+                    paragraph(copticSpan(text("ⲥ"))),
+                    paragraph(text("/s/")),
+                  ],
                 },
               },
               {
@@ -578,9 +681,15 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                     smallCaps("p"),
                     footnoteRef("grammar.footnote.lesson01.001"),
                   ),
-                  first: [paragraph(copticSpan(text("ⲛ"))), paragraph(text("/n/"))],
+                  first: [
+                    paragraph(copticSpan(text("ⲛ"))),
+                    paragraph(text("/n/")),
+                  ],
                   second: [paragraph(text("-")), paragraph(text("geen vorm"))],
-                  third: [paragraph(copticSpan(text("ⲟⲩ"))), paragraph(text("/u, w/"))],
+                  third: [
+                    paragraph(copticSpan(text("ⲟⲩ"))),
+                    paragraph(text("/u, w/")),
+                  ],
                 },
               },
             ],
@@ -752,7 +861,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                 coptic("ⲡⲓ-"),
                 text(" and "),
                 coptic("ⲡ̀-"),
-                text(" are synonyms. We refer to them as long vs. short definite articles."),
+                text(
+                  " are synonyms. We refer to them as long vs. short definite articles.",
+                ),
               ),
             ],
           },
@@ -808,10 +919,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                     footnoteRef("grammar.footnote.lesson01.002"),
                     text(" “een broer”"),
                   ),
-                  feminine: paragraphCell(
-                    coptic("Ⲟⲩⲥⲱⲛⲓ"),
-                    text(" “een zus”"),
-                  ),
+                  feminine: paragraphCell(coptic("Ⲟⲩⲥⲱⲛⲓ"), text(" “een zus”")),
                   plural: paragraphCell(
                     coptic("Ϩⲁⲛⲥⲱⲛⲓ"),
                     footnoteRef("grammar.footnote.lesson01.003"),
@@ -832,24 +940,15 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                     footnoteRef("grammar.footnote.lesson01.004"),
                     text(" “de zus”"),
                   ),
-                  plural: paragraphCell(
-                    coptic("Ⲛⲓⲥⲱⲛⲓ"),
-                    text(" “de zussen”"),
-                  ),
+                  plural: paragraphCell(coptic("Ⲛⲓⲥⲱⲛⲓ"), text(" “de zussen”")),
                 },
               },
               {
                 id: `${lessonId}.section.determiner-selection.row.definite-short.nl`,
                 cells: {
                   type: paragraphCell(text("Bepaald (kort)")),
-                  masculine: paragraphCell(
-                    coptic("Ⲡ̀ⲥⲟⲛ"),
-                    text(" “de broer”"),
-                  ),
-                  feminine: paragraphCell(
-                    coptic("Ⲧ̀ⲥⲱⲛⲓ"),
-                    text(" “de zus”"),
-                  ),
+                  masculine: paragraphCell(coptic("Ⲡ̀ⲥⲟⲛ"), text(" “de broer”")),
+                  feminine: paragraphCell(coptic("Ⲧ̀ⲥⲱⲛⲓ"), text(" “de zus”")),
                   plural: paragraphCell(text("(Geen korte vorm)")),
                 },
               },
@@ -900,7 +999,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                 coptic("ⲡⲓ-"),
                 text(" en "),
                 coptic("ⲡ̀-"),
-                text(" zijn synoniemen. We spreken van lange vs. korte bepaalde lidwoorden."),
+                text(
+                  " zijn synoniemen. We spreken van lange vs. korte bepaalde lidwoorden.",
+                ),
               ),
             ],
           },
@@ -1008,7 +1109,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               grammarLesson01ConceptIds.nexusPronouns,
               "nexus pronouns",
             ),
-            text(" in Coptic. They only appear after the first word (or the first phrase) of the sentence. We call these words postpositive (placed after) or enclitic (leaning on the preceding word), which means that in writing they can also be attached as a single unit to the preceding word. We mark these with the symbol ‘≡’."),
+            text(
+              " in Coptic. They only appear after the first word (or the first phrase) of the sentence. We call these words postpositive (placed after) or enclitic (leaning on the preceding word), which means that in writing they can also be attached as a single unit to the preceding word. We mark these with the symbol ‘≡’.",
+            ),
           ),
           {
             type: "list",
@@ -1054,7 +1157,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
             ],
           },
           paragraph(
-            text("By convention, we usually leave a space before them, even though they may also be written together with the previous word. So "),
+            text(
+              "By convention, we usually leave a space before them, even though they may also be written together with the previous word. So ",
+            ),
             coptic("ⲟⲩⲓⲱⲧ ⲡⲉ"),
             text(" and "),
             coptic("ⲟⲩⲓⲱⲧⲡⲉ"),
@@ -1069,7 +1174,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
             },
             blocks: [
               paragraph(
-                text("In Coptic (just like in Semitic languages such as Hebrew or Arabic), there is no verb ‘to be’ in the present tense. However, in English, we are required to use it, otherwise the translation is incorrect."),
+                text(
+                  "In Coptic (just like in Semitic languages such as Hebrew or Arabic), there is no verb ‘to be’ in the present tense. However, in English, we are required to use it, otherwise the translation is incorrect.",
+                ),
               ),
               {
                 type: "exampleGroup",
@@ -1086,7 +1193,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               grammarLesson01ConceptIds.nexusPronouns,
               "verbindingsvoornaamwoorden",
             ),
-            text(" in het Koptisch. Ze verschijnen pas na het eerste woord (of de eerste woordgroep) van de zin. We noemen deze woorden postpositief (achter geplaatst) of enclitisch (aanleunend tegen het voorgaande woord), wat betekent dat ze in de schrijfwijze ook als een geheel aan het voorgaande woord vast kunnen staan. We markeren deze met het symbool ‘≡’."),
+            text(
+              " in het Koptisch. Ze verschijnen pas na het eerste woord (of de eerste woordgroep) van de zin. We noemen deze woorden postpositief (achter geplaatst) of enclitisch (aanleunend tegen het voorgaande woord), wat betekent dat ze in de schrijfwijze ook als een geheel aan het voorgaande woord vast kunnen staan. We markeren deze met het symbool ‘≡’.",
+            ),
           ),
           {
             type: "list",
@@ -1132,7 +1241,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
             ],
           },
           paragraph(
-            text("Volgens de conventie laten we er meestal een spatie voor staan, ook al kunnen ze ook direct aan het vorige woord vast geschreven worden. Dus "),
+            text(
+              "Volgens de conventie laten we er meestal een spatie voor staan, ook al kunnen ze ook direct aan het vorige woord vast geschreven worden. Dus ",
+            ),
             coptic("ⲟⲩⲓⲱⲧ ⲡⲉ"),
             text(" en "),
             coptic("ⲟⲩⲓⲱⲧⲡⲉ"),
@@ -1147,7 +1258,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
             },
             blocks: [
               paragraph(
-                text("In het Koptisch (net zoals in Semitische talen zoals Hebreeuws of Arabisch) is er geen werkwoord ‘zijn’. Maar in het Nederlands zijn we verplicht om het te gebruiken, anders is de vertaling fout."),
+                text(
+                  "In het Koptisch (net zoals in Semitische talen zoals Hebreeuws of Arabisch) is er geen werkwoord ‘zijn’. Maar in het Nederlands zijn we verplicht om het te gebruiken, anders is de vertaling fout.",
+                ),
               ),
               {
                 type: "exampleGroup",
@@ -1198,7 +1311,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               grammarLesson01ConceptIds.nexusPronouns,
               "nexus pronouns",
             ),
-            text(" is the standard (mandatory) rule. To emphasize such nominal sentences, one can also incorporate the independent personal pronouns. These are prepositive (placed before):"),
+            text(
+              " is the standard (mandatory) rule. To emphasize such nominal sentences, one can also incorporate the independent personal pronouns. These are prepositive (placed before):",
+            ),
           ),
           {
             type: "list",
@@ -1304,7 +1419,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                   },
                 ],
               },
-              paragraph(text("The underlined letters are significant letters.")),
+              paragraph(
+                text("The underlined letters are significant letters."),
+              ),
             ],
           },
         ],
@@ -1325,7 +1442,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               grammarLesson01ConceptIds.nexusPronouns,
               "verbindingsvoornaamwoorden",
             ),
-            text(" de standaard (verplicht). Voor het benadrukken van zulke nominale zinnen kan men ook de onafhankelijke persoonlijke voornaamwoorden inschakelen. Deze zijn prepositief:"),
+            text(
+              " de standaard (verplicht). Voor het benadrukken van zulke nominale zinnen kan men ook de onafhankelijke persoonlijke voornaamwoorden inschakelen. Deze zijn prepositief:",
+            ),
           ),
           {
             type: "list",
@@ -1431,7 +1550,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                   },
                 ],
               },
-              paragraph(text("De onderlijnde letters zijn significante letters.")),
+              paragraph(
+                text("De onderlijnde letters zijn significante letters."),
+              ),
             ],
           },
         ],
@@ -1457,14 +1578,19 @@ export const grammarLesson01Document: GrammarLessonDocument = {
       blocks: {
         en: [
           paragraph(
-            text("In Coptic literature, several common abbreviations are used, mostly to indicate holy names ("),
-            conceptRef(
-              grammarLesson01ConceptIds.nominaSacra,
-              "nomina sacra",
+            text(
+              "In Coptic literature, several common abbreviations are used, mostly to indicate holy names (",
             ),
-            text("). The conventional way to represent abbreviations in Coptic is by placing a horizontal line above the abbreviated word."),
+            conceptRef(grammarLesson01ConceptIds.nominaSacra, "nomina sacra"),
+            text(
+              "). The conventional way to represent abbreviations in Coptic is by placing a horizontal line above the abbreviated word.",
+            ),
           ),
-          paragraph(em("In a liturgical context, word abbreviations can also sometimes refer to common phrases:")),
+          paragraph(
+            em(
+              "In a liturgical context, word abbreviations can also sometimes refer to common phrases:",
+            ),
+          ),
           {
             type: "list",
             style: "unordered",
@@ -1497,7 +1623,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                   paragraph(
                     copticSpan(text("ⲛ︦ⲧ︦ⲉ︦ϥ︦")),
                     text(" = "),
-                    copticSpan(text("ⲛ̀ⲧⲉϥⲭⲁ ⲛⲉⲛⲛⲟⲃⲓⲛⲁⲛ ⲉ̀ⲃⲟⲗ")),
+                    copticSpan(text("ⲛ̀ⲧⲉϥⲭⲁ ⲛⲉⲛⲛⲟⲃⲓ ⲛⲁⲛ ⲉ̀ⲃⲟⲗ")),
                     text(" “to forgive us our sins”"),
                   ),
                 ],
@@ -1508,7 +1634,11 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                   paragraph(
                     copticSpan(text("ⲧ︦ⲱ︦ⲃ︦")),
                     text(" = "),
-                    copticSpan(text("ⲧⲱⲃϩ ⲙ̀Ⲡ̀ϭⲱⲓⲥ ⲉ̀ϩ̀ⲣⲏⲓ ⲉ̀ϫⲱⲛ")),
+                    copticSpan(
+                      text("ⲧⲱⲃϩ ⲙ̀Ⲡ̀"),
+                      coptic("ϭⲱⲓⲥ"),
+                      text(" ⲉ̀ϩ̀ⲣⲏⲓ ⲉ̀ϫⲱⲛ"),
+                    ),
                     text(" “pray to the Lord for us”"),
                   ),
                 ],
@@ -1520,7 +1650,10 @@ export const grammarLesson01Document: GrammarLessonDocument = {
             id: `${lessonId}.section.abbreviations.table`,
             columns: [
               { id: "fullWord", label: { en: "Full Word", nl: "Full Word" } },
-              { id: "abbreviation", label: { en: "Abbreviation", nl: "Abbreviation" } },
+              {
+                id: "abbreviation",
+                label: { en: "Abbreviation", nl: "Abbreviation" },
+              },
               { id: "meaning", label: { en: "Meaning", nl: "Meaning" } },
             ],
             rows: [
@@ -1543,7 +1676,13 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               {
                 id: `${lessonId}.section.abbreviations.row.3`,
                 cells: {
-                  fullWord: [paragraph(copticSpan(text("Ⲥⲱⲧⲏⲣ")), text(" "), smallCaps("m"))],
+                  fullWord: [
+                    paragraph(
+                      copticSpan(text("Ⲥⲱⲧⲏⲣ")),
+                      text(" "),
+                      smallCaps("m"),
+                    ),
+                  ],
                   abbreviation: [paragraph(copticSpan(text("ⲥ̅ⲱ̅ⲣ̅, ⲥ̅ⲣ̅")))],
                   meaning: [paragraph(text("“savior”"))],
                 },
@@ -1566,7 +1705,13 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               {
                 id: `${lessonId}.section.abbreviations.row.5`,
                 cells: {
-                  fullWord: [paragraph(copticSpan(text("Ⲕⲩⲣⲓⲟⲥ (-ⲉ̀)")), text(" "), smallCaps("m"))],
+                  fullWord: [
+                    paragraph(
+                      copticSpan(text("Ⲕⲩⲣⲓⲟⲥ (-ⲉ̀)")),
+                      text(" "),
+                      smallCaps("m"),
+                    ),
+                  ],
                   abbreviation: [paragraph(copticSpan(text("ⲕ̅ⲉ̅")))],
                   meaning: [paragraph(text("“lord”"))],
                 },
@@ -1595,7 +1740,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                     ),
                   ],
                   abbreviation: [paragraph(copticSpan(text("Ⲓⲏ̅ⲥ̅, Ⲓⲥ̅, Ⲓ᷍ⲥ")))],
-                  meaning: [paragraph({ type: "em", children: [text("Jesus")] })],
+                  meaning: [
+                    paragraph({ type: "em", children: [text("Jesus")] }),
+                  ],
                 },
               },
               {
@@ -1613,13 +1760,21 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                     ),
                   ],
                   abbreviation: [paragraph(copticSpan(text("Ⲡⲭ̅ⲥ̅, Ⲡⲭ᷍ⲥ")))],
-                  meaning: [paragraph({ type: "em", children: [text("Christ")] })],
+                  meaning: [
+                    paragraph({ type: "em", children: [text("Christ")] }),
+                  ],
                 },
               },
               {
                 id: `${lessonId}.section.abbreviations.row.9`,
                 cells: {
-                  fullWord: [paragraph(copticSpan(text("Ⲡ̀ⲛⲉⲩⲙⲁ")), text(" "), smallCaps("m"))],
+                  fullWord: [
+                    paragraph(
+                      copticSpan(text("Ⲡ̀ⲛⲉⲩⲙⲁ")),
+                      text(" "),
+                      smallCaps("m"),
+                    ),
+                  ],
                   abbreviation: [paragraph(copticSpan(text("ⲡ̅ⲛ̅ⲁ̅")))],
                   meaning: [paragraph(text("“spirit”"))],
                 },
@@ -1645,14 +1800,19 @@ export const grammarLesson01Document: GrammarLessonDocument = {
         ],
         nl: [
           paragraph(
-            text("In de Koptische literatuur worden enkele veelvoorkomende afkortingen gebruikt, meestal om heilige namen ("),
-            conceptRef(
-              grammarLesson01ConceptIds.nominaSacra,
-              "nomina sacra",
+            text(
+              "In de Koptische literatuur worden enkele veelvoorkomende afkortingen gebruikt, meestal om heilige namen (",
             ),
-            text(") aan te duiden. De conventionele manier om afkortingen in het Koptisch weer te geven, is door een horizontale lijn boven het afgekorte woord te plaatsen."),
+            conceptRef(grammarLesson01ConceptIds.nominaSacra, "nomina sacra"),
+            text(
+              ") aan te duiden. De conventionele manier om afkortingen in het Koptisch weer te geven, is door een horizontale lijn boven het afgekorte woord te plaatsen.",
+            ),
           ),
-          paragraph(em("In een liturgische context kunnen woordafkortingen ook soms naar veelvoorkomende zinnen verwijzen:")),
+          paragraph(
+            em(
+              "In een liturgische context kunnen woordafkortingen ook soms naar veelvoorkomende zinnen verwijzen:",
+            ),
+          ),
           {
             type: "list",
             style: "unordered",
@@ -1696,7 +1856,11 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                   paragraph(
                     copticSpan(text("ⲧ︦ⲱ︦ⲃ︦")),
                     text(" = "),
-                    copticSpan(text("ⲧⲱⲃϩ ⲙ̀Ⲡ̀ϭⲱⲓⲥ ⲉ̀ϩ̀ⲣⲏⲓ ⲉ̀ϫⲱⲛ")),
+                    copticSpan(
+                      text("ⲧⲱⲃϩ ⲙ̀Ⲡ̀"),
+                      coptic("ϭⲱⲓⲥ"),
+                      text(" ⲉ̀ϩ̀ⲣⲏⲓ ⲉ̀ϫⲱⲛ"),
+                    ),
                     text(" “bid tot de Heer voor ons”"),
                   ),
                 ],
@@ -1708,7 +1872,10 @@ export const grammarLesson01Document: GrammarLessonDocument = {
             id: `${lessonId}.section.abbreviations.table`,
             columns: [
               { id: "fullWord", label: { en: "Voluit", nl: "Voluit" } },
-              { id: "abbreviation", label: { en: "Afkorting", nl: "Afkorting" } },
+              {
+                id: "abbreviation",
+                label: { en: "Afkorting", nl: "Afkorting" },
+              },
               { id: "meaning", label: { en: "Betekenis", nl: "Betekenis" } },
             ],
             rows: [
@@ -1731,7 +1898,13 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               {
                 id: `${lessonId}.section.abbreviations.row.3.nl`,
                 cells: {
-                  fullWord: [paragraph(copticSpan(text("Ⲥⲱⲧⲏⲣ")), text(" "), smallCaps("m"))],
+                  fullWord: [
+                    paragraph(
+                      copticSpan(text("Ⲥⲱⲧⲏⲣ")),
+                      text(" "),
+                      smallCaps("m"),
+                    ),
+                  ],
                   abbreviation: [paragraph(copticSpan(text("ⲥ̅ⲱ̅ⲣ̅, ⲥ̅ⲣ̅")))],
                   meaning: [paragraph(text("“verlosser”"))],
                 },
@@ -1754,7 +1927,13 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               {
                 id: `${lessonId}.section.abbreviations.row.5.nl`,
                 cells: {
-                  fullWord: [paragraph(copticSpan(text("Ⲕⲩⲣⲓⲟⲥ (-ⲉ̀)")), text(" "), smallCaps("m"))],
+                  fullWord: [
+                    paragraph(
+                      copticSpan(text("Ⲕⲩⲣⲓⲟⲥ (-ⲉ̀)")),
+                      text(" "),
+                      smallCaps("m"),
+                    ),
+                  ],
                   abbreviation: [paragraph(copticSpan(text("ⲕ̅ⲉ̅")))],
                   meaning: [paragraph(text("“heer”"))],
                 },
@@ -1783,7 +1962,9 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                     ),
                   ],
                   abbreviation: [paragraph(copticSpan(text("Ⲓⲏ̅ⲥ̅, Ⲓⲥ̅, Ⲓ᷍ⲥ")))],
-                  meaning: [paragraph({ type: "em", children: [text("Jezus")] })],
+                  meaning: [
+                    paragraph({ type: "em", children: [text("Jezus")] }),
+                  ],
                 },
               },
               {
@@ -1801,13 +1982,21 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                     ),
                   ],
                   abbreviation: [paragraph(copticSpan(text("Ⲡⲭ̅ⲥ̅, Ⲡⲭ᷍ⲥ")))],
-                  meaning: [paragraph({ type: "em", children: [text("Christus")] })],
+                  meaning: [
+                    paragraph({ type: "em", children: [text("Christus")] }),
+                  ],
                 },
               },
               {
                 id: `${lessonId}.section.abbreviations.row.9.nl`,
                 cells: {
-                  fullWord: [paragraph(copticSpan(text("Ⲡ̀ⲛⲉⲩⲙⲁ")), text(" "), smallCaps("m"))],
+                  fullWord: [
+                    paragraph(
+                      copticSpan(text("Ⲡ̀ⲛⲉⲩⲙⲁ")),
+                      text(" "),
+                      smallCaps("m"),
+                    ),
+                  ],
                   abbreviation: [paragraph(copticSpan(text("ⲡ̅ⲛ̅ⲁ̅")))],
                   meaning: [paragraph(text("“geest”"))],
                 },

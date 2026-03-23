@@ -15,11 +15,27 @@
       "conceptRefs": [
         "grammar.concept.zero-determination"
       ],
-      "dictionaryRefs": [],
+      "dictionaryRefs": [
+        "cd_21",
+        "cd_1152"
+      ],
       "tags": [
         "lesson-1",
         "zero-determination",
         "quantifier"
+      ],
+      "copticSegments": [
+        {
+          "text": "Ø-ⲣⲱⲙⲓ",
+          "dictionaryEntryId": "cd_21"
+        },
+        {
+          "text": " "
+        },
+        {
+          "text": "ⲛⲓⲃⲉⲛ",
+          "dictionaryEntryId": "cd_1152"
+        }
       ]
     },
     {
@@ -34,11 +50,27 @@
       "conceptRefs": [
         "grammar.concept.zero-determination"
       ],
-      "dictionaryRefs": [],
+      "dictionaryRefs": [
+        "cd_142",
+        "cd_1152"
+      ],
       "tags": [
         "lesson-1",
         "zero-determination",
         "quantifier"
+      ],
+      "copticSegments": [
+        {
+          "text": "Ø-ⲥ̀ϩⲓⲙⲓ",
+          "dictionaryEntryId": "cd_142"
+        },
+        {
+          "text": " "
+        },
+        {
+          "text": "ⲛⲓⲃⲉⲛ",
+          "dictionaryEntryId": "cd_1152"
+        }
       ]
     },
     {
@@ -53,11 +85,25 @@
       "conceptRefs": [
         "grammar.concept.zero-determination"
       ],
-      "dictionaryRefs": [],
+      "dictionaryRefs": [
+        "cd_1152"
+      ],
       "tags": [
         "lesson-1",
         "zero-determination",
         "quantifier"
+      ],
+      "copticSegments": [
+        {
+          "text": "Ø-ⲁⲅⲓⲟⲥ"
+        },
+        {
+          "text": " "
+        },
+        {
+          "text": "ⲛⲓⲃⲉⲛ",
+          "dictionaryEntryId": "cd_1152"
+        }
       ]
     },
     {
@@ -72,11 +118,25 @@
       "conceptRefs": [
         "grammar.concept.zero-determination"
       ],
-      "dictionaryRefs": [],
+      "dictionaryRefs": [
+        "cd_1152"
+      ],
       "tags": [
         "lesson-1",
         "zero-determination",
         "quantifier"
+      ],
+      "copticSegments": [
+        {
+          "text": "Ø-ⲉⲕⲕ̀ⲗⲏⲥⲓⲁ̀"
+        },
+        {
+          "text": " "
+        },
+        {
+          "text": "ⲛⲓⲃⲉⲛ",
+          "dictionaryEntryId": "cd_1152"
+        }
       ]
     },
     {
@@ -92,11 +152,28 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [],
+      "dictionaryRefs": [
+        "cd_57"
+      ],
       "tags": [
         "lesson-1",
         "nominal-sentence",
         "nexus-pronoun"
+      ],
+      "copticSegments": [
+        {
+          "text": "Ⲟⲩⲓⲱⲧ",
+          "dictionaryEntryId": "cd_57"
+        },
+        {
+          "text": " "
+        },
+        {
+          "text": "ⲡⲉ"
+        },
+        {
+          "text": "."
+        }
       ]
     },
     {
@@ -117,6 +194,20 @@
         "lesson-1",
         "nominal-sentence",
         "nexus-pronoun"
+      ],
+      "copticSegments": [
+        {
+          "text": "Ⲡⲁⲓⲱⲧ"
+        },
+        {
+          "text": " "
+        },
+        {
+          "text": "ⲡⲉ"
+        },
+        {
+          "text": "."
+        }
       ]
     },
     {
@@ -132,11 +223,28 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [],
+      "dictionaryRefs": [
+        "cd_57"
+      ],
       "tags": [
         "lesson-1",
         "nominal-sentence",
         "nexus-pronoun"
+      ],
+      "copticSegments": [
+        {
+          "text": "Ⲡⲁⲓⲓⲱⲧ",
+          "dictionaryEntryId": "cd_57"
+        },
+        {
+          "text": " "
+        },
+        {
+          "text": "ⲡⲉ"
+        },
+        {
+          "text": "."
+        }
       ]
     },
     {
@@ -144,6 +252,9 @@
       "lessonId": "grammar.lesson.01",
       "sectionId": "grammar.lesson.01.section.bipartite-nominal-sentence",
       "coptic": "Ⲧⲁⲙⲁⲩ ⲧⲉ.",
+      "dictionaryTokenOverrides": {
+        "Ⲧⲁⲙⲁⲩ": "cd_215"
+      },
       "translation": {
         "en": "“She is my mother.”",
         "nl": "“Zij is mijn moeder.”"
@@ -152,11 +263,28 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [],
+      "dictionaryRefs": [
+        "cd_215"
+      ],
       "tags": [
         "lesson-1",
         "nominal-sentence",
         "nexus-pronoun"
+      ],
+      "copticSegments": [
+        {
+          "text": "Ⲧⲁⲙⲁⲩ",
+          "dictionaryEntryId": "cd_215"
+        },
+        {
+          "text": " "
+        },
+        {
+          "text": "ⲧⲉ"
+        },
+        {
+          "text": "."
+        }
       ]
     },
     {
@@ -172,11 +300,28 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [],
+      "dictionaryRefs": [
+        "cd_142"
+      ],
       "tags": [
         "lesson-1",
         "nominal-sentence",
         "nexus-pronoun"
+      ],
+      "copticSegments": [
+        {
+          "text": "Ⲟⲩⲥ̀ϩⲓⲙⲓ",
+          "dictionaryEntryId": "cd_142"
+        },
+        {
+          "text": " "
+        },
+        {
+          "text": "ⲧⲉ"
+        },
+        {
+          "text": "."
+        }
       ]
     },
     {
@@ -192,11 +337,28 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [],
+      "dictionaryRefs": [
+        "cd_173a"
+      ],
       "tags": [
         "lesson-1",
         "nominal-sentence",
         "nexus-pronoun"
+      ],
+      "copticSegments": [
+        {
+          "text": "Ϩⲁⲛⲥⲱⲛⲓ",
+          "dictionaryEntryId": "cd_173a"
+        },
+        {
+          "text": " "
+        },
+        {
+          "text": "ⲛⲉ"
+        },
+        {
+          "text": "."
+        }
       ]
     },
     {
@@ -212,11 +374,28 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [],
+      "dictionaryRefs": [
+        "cd_21"
+      ],
       "tags": [
         "lesson-1",
         "nominal-sentence",
         "nexus-pronoun"
+      ],
+      "copticSegments": [
+        {
+          "text": "Ϩⲁⲛⲣⲱⲙⲓ",
+          "dictionaryEntryId": "cd_21"
+        },
+        {
+          "text": " "
+        },
+        {
+          "text": "ⲛⲉ"
+        },
+        {
+          "text": "."
+        }
       ]
     },
     {
@@ -237,6 +416,20 @@
         "lesson-1",
         "nominal-sentence",
         "nexus-pronoun"
+      ],
+      "copticSegments": [
+        {
+          "text": "Ⲛⲓⲁⲅⲓⲟⲥ"
+        },
+        {
+          "text": " "
+        },
+        {
+          "text": "ⲛⲉ"
+        },
+        {
+          "text": "."
+        }
       ]
     }
   ]

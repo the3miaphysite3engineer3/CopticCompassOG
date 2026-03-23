@@ -83,12 +83,19 @@ export type GrammarExampleDocument = {
   lessonId: GrammarLessonId;
   sectionId: GrammarSectionId;
   coptic: string;
+  copticSegments?: GrammarExampleSegment[];
   transliteration?: string;
   translation: Localized<string>;
   notes?: Localized<GrammarBlock[]>;
   conceptRefs: GrammarConceptId[];
   dictionaryRefs: string[];
+  dictionaryTokenOverrides?: Record<string, string>;
   tags: string[];
+};
+
+export type GrammarExampleSegment = {
+  text: string;
+  dictionaryEntryId?: string;
 };
 
 export type GrammarExerciseDocument = {
@@ -132,8 +139,8 @@ export type GrammarSourceDocument = {
 
 export type GrammarInline =
   | { type: "text"; text: string }
-  | { type: "coptic"; text: string }
-  | { type: "copticSpan"; children: GrammarInline[] }
+  | { type: "coptic"; text: string; dictionaryEntryId?: string }
+  | { type: "copticSpan"; children: GrammarInline[]; dictionaryEntryId?: string }
   | { type: "strong"; children: GrammarInline[] }
   | { type: "em"; children: GrammarInline[] }
   | { type: "smallCaps"; children: GrammarInline[] }

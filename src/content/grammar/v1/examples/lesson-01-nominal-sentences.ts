@@ -56,6 +56,9 @@ export const grammarLesson01NominalSentenceExamples: readonly GrammarExampleDocu
     lessonId,
     sectionId,
     coptic: "Ⲧⲁⲙⲁⲩ ⲧⲉ.",
+    dictionaryTokenOverrides: {
+      "Ⲧⲁⲙⲁⲩ": "cd_215",
+    },
     translation: {
       en: "“She is my mother.”",
       nl: "“Zij is mijn moeder.”",
