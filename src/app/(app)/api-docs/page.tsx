@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import "swagger-ui-react/swagger-ui.css";
+import "swagger-ui-dist/swagger-ui.css";
 import "./swagger-overrides.css";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
