@@ -20,16 +20,12 @@ import { GrammarLessonOutline } from "@/features/grammar/components/GrammarLesso
 import { GrammarLessonRenderProvider } from "@/features/grammar/components/GrammarLessonRenderContext";
 import {
   GrammarLessonConceptSummary,
-  GrammarLessonDictionarySummary,
-  GrammarLessonSourceSummary,
 } from "@/features/grammar/components/GrammarLessonSemantics";
 import { getGrammarPath, getLocalizedHomePath } from "@/lib/locale";
 import { useGrammarLessonLearnerState } from "@/features/grammar/lib/useGrammarLessonLearnerState";
 import { GrammarLessonDocumentRenderer } from "@/features/grammar/renderers/GrammarLessonDocumentRenderer";
-import type { LexicalEntry } from "@/features/dictionary/types";
 
 type GrammarLessonPageClientProps = {
-  linkedEntries: readonly LexicalEntry[];
   lessonBundle: GrammarLessonBundle;
 };
 
@@ -46,7 +42,6 @@ function getOrderedSections(
 }
 
 export function GrammarLessonPageClient({
-  linkedEntries,
   lessonBundle,
 }: GrammarLessonPageClientProps) {
   const { language, t } = useLanguage();
@@ -61,9 +56,7 @@ export function GrammarLessonPageClient({
   const learnerState = useGrammarLessonLearnerState(lessonBundle);
   const hasSemanticSidebar =
     (renderMode === "web" && learnerState.status !== "unavailable") ||
-    lessonBundle.concepts.length > 0 ||
-    lessonBundle.sources.length > 0 ||
-    Boolean(lesson.rights?.statement[language]);
+    lessonBundle.concepts.length > 0;
 
   return (
     <PageShell
@@ -147,15 +140,7 @@ export function GrammarLessonPageClient({
                         summary={learnerState.summary}
                       />
                     ) : null}
-                    <GrammarLessonDictionarySummary
-                      entries={linkedEntries}
-                      language={language}
-                    />
                     <GrammarLessonConceptSummary
-                      lessonBundle={lessonBundle}
-                      language={language}
-                    />
-                    <GrammarLessonSourceSummary
                       lessonBundle={lessonBundle}
                       language={language}
                     />

@@ -1,13 +1,7 @@
 import type { ReactNode } from "react";
 import { Badge } from "@/components/Badge";
 import type { GrammarLessonBundle } from "@/content/grammar/schema";
-import {
-  getEntrySummary,
-  toPlainText,
-} from "@/features/dictionary/lib/entryText";
-import type { LexicalEntry } from "@/features/dictionary/types";
 import { cx } from "@/lib/classes";
-import { getEntryPath } from "@/lib/locale";
 import type { Language } from "@/types/i18n";
 import {
   getGrammarConceptAnchorId,
@@ -103,113 +97,6 @@ export function GrammarLessonConceptSummary({
             className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700 transition-colors hover:border-sky-300 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:border-sky-800 dark:hover:bg-sky-950/60 dark:hover:text-sky-200"
           >
             {concept.title[language]}
-          </a>
-        ))}
-      </div>
-    </SemanticPanel>
-  );
-}
-
-export function GrammarLessonSourceSummary({
-  lessonBundle,
-  language,
-  className,
-}: GrammarLessonSemanticsProps) {
-  const sources = getOrderedLessonSources(lessonBundle);
-  const rightsStatement = lessonBundle.lesson.rights?.statement[language];
-
-  if (sources.length === 0 && !rightsStatement) {
-    return null;
-  }
-
-  return (
-    <SemanticPanel
-      className={className}
-      eyebrow={language === "en" ? "Provenance" : "Herkomst"}
-      title={language === "en" ? "Source basis" : "Bronbasis"}
-      count={sources.length > 0 ? sources.length : undefined}
-    >
-      {!sources.length && rightsStatement ? (
-        <p className="mb-4 text-sm leading-7 text-stone-600 dark:text-stone-300">
-          {rightsStatement}
-        </p>
-      ) : null}
-
-      {sources.length > 0 ? (
-        <div className="space-y-3">
-          {sources.map((source) => (
-            <a
-              key={source.id}
-              href={source.publicationId
-                ? getPublicationPath(source.publicationId, language)
-                : `#${getGrammarSourceAnchorId(source.id)}`}
-              className="block rounded-xl border border-stone-200/80 bg-stone-50/70 px-4 py-3 transition-colors hover:border-sky-200 hover:bg-sky-50/70 dark:border-stone-800/80 dark:bg-stone-950/50 dark:hover:border-sky-900/70 dark:hover:bg-sky-950/20"
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div className="min-w-0">
-                  <p className="font-medium text-stone-900 dark:text-stone-100">
-                    {source.title}
-                  </p>
-                  {source.subtitle ? (
-                    <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-                      {source.subtitle}
-                    </p>
-                  ) : null}
-                </div>
-                {source.comingSoon ? (
-                  <Badge tone="surface" size="xs">
-                    {language === "en" ? "Coming soon" : "Binnenkort"}
-                  </Badge>
-                ) : null}
-              </div>
-            </a>
-          ))}
-        </div>
-      ) : null}
-    </SemanticPanel>
-  );
-}
-
-export function GrammarLessonDictionarySummary({
-  entries,
-  language,
-  className,
-}: {
-  entries: readonly LexicalEntry[];
-  language: Language;
-  className?: string;
-}) {
-  if (entries.length === 0) {
-    return null;
-  }
-
-  return (
-    <SemanticPanel
-      className={className}
-      eyebrow={language === "en" ? "Lexicon" : "Lexicon"}
-      title={language === "en" ? "Dictionary entries" : "Woordenboeklemma's"}
-      count={entries.length}
-    >
-      <div className="space-y-3">
-        {entries.map((entry) => (
-          <a
-            key={entry.id}
-            href={getEntryPath(entry.id, language)}
-            className="block rounded-xl border border-stone-200/80 bg-stone-50/70 px-4 py-3 transition-colors hover:border-sky-200 hover:bg-sky-50/70 dark:border-stone-800/80 dark:bg-stone-950/50 dark:hover:border-sky-900/70 dark:hover:bg-sky-950/20"
-          >
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="font-coptic text-lg text-stone-900 dark:text-stone-100">
-                  {toPlainText(entry.headword)}
-                </p>
-                <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-                  {getEntrySummary(entry)}
-                </p>
-              </div>
-              <Badge tone="surface" size="xs">
-                {entry.pos}
-              </Badge>
-            </div>
           </a>
         ))}
       </div>

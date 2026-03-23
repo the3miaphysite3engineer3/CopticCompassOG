@@ -10,6 +10,7 @@ type AuthModuleContext = {
   login: typeof import("./auth").login;
   signup: typeof import("./auth").signup;
   logout: typeof import("./auth").logout;
+  updatePasswordFromDashboard: typeof import("./auth").updatePasswordFromDashboard;
   consumeRateLimitMock: ReturnType<typeof vi.fn>;
   createClientMock: ReturnType<typeof vi.fn>;
   getClientRateLimitIdentifierMock: ReturnType<typeof vi.fn>;
@@ -20,6 +21,7 @@ type AuthModuleContext = {
   signInWithPasswordMock: ReturnType<typeof vi.fn>;
   signOutMock: ReturnType<typeof vi.fn>;
   signUpMock: ReturnType<typeof vi.fn>;
+  updateUserMock: ReturnType<typeof vi.fn>;
 };
 
 function createRedirectMock() {
@@ -43,6 +45,8 @@ function createLoginFormData(overrides?: Partial<Record<"email" | "password" | "
 async function loadAuthModule(options?: {
   hasEnv?: boolean;
   rateLimitOk?: boolean;
+  updateUserError?: unknown;
+  user?: { id: string } | null;
   signInError?: unknown;
   signOutError?: unknown;
   signUpError?: unknown;
@@ -74,11 +78,18 @@ async function loadAuthModule(options?: {
     error: options?.signUpError ?? null,
   });
   const signOutMock = vi.fn().mockResolvedValue({ error: options?.signOutError ?? null });
+  const updateUserMock = vi
+    .fn()
+    .mockResolvedValue({ error: options?.updateUserError ?? null });
   const createClientMock = vi.fn().mockResolvedValue({
     auth: {
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: options?.user === undefined ? { id: "user-1" } : options.user },
+      }),
       signInWithPassword: signInWithPasswordMock,
       signOut: signOutMock,
       signUp: signUpMock,
+      updateUser: updateUserMock,
     },
   });
 
@@ -117,7 +128,21 @@ async function loadAuthModule(options?: {
     signInWithPasswordMock,
     signOutMock,
     signUpMock,
+    updateUserMock,
   } satisfies AuthModuleContext;
+}
+
+function createPasswordUpdateFormData(
+  overrides?: Partial<Record<"password" | "confirm_password", string>>,
+) {
+  const formData = new FormData();
+  formData.set("password", overrides?.password ?? "password123");
+  formData.set(
+    "confirm_password",
+    overrides?.confirm_password ?? overrides?.password ?? "password123",
+  );
+
+  return formData;
 }
 
 describe("auth actions", () => {
@@ -241,5 +266,56 @@ describe("auth actions", () => {
 
     expect(signOutMock).toHaveBeenCalled();
     expect(revalidatePathMock).toHaveBeenCalledWith("/", "layout");
+  });
+
+  it("returns an inline error when dashboard password confirmation does not match", async () => {
+    const { createClientMock, updatePasswordFromDashboard } = await loadAuthModule();
+
+    await expect(
+      updatePasswordFromDashboard(
+        createPasswordUpdateFormData({
+          password: "password123",
+          confirm_password: "password124",
+        }),
+      ),
+    ).resolves.toEqual({
+      success: false,
+      error: "Passwords do not match.",
+    });
+
+    expect(createClientMock).not.toHaveBeenCalled();
+  });
+
+  it("updates the password from the dashboard without redirecting", async () => {
+    const {
+      revalidatePathMock,
+      updatePasswordFromDashboard,
+      updateUserMock,
+    } = await loadAuthModule();
+
+    await expect(
+      updatePasswordFromDashboard(createPasswordUpdateFormData()),
+    ).resolves.toEqual({
+      success: true,
+    });
+
+    expect(updateUserMock).toHaveBeenCalledWith({
+      password: "password123",
+    });
+    expect(revalidatePathMock).toHaveBeenCalledWith("/", "layout");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard");
+  });
+
+  it("returns a helpful dashboard password error when no authenticated user is present", async () => {
+    const { updatePasswordFromDashboard } = await loadAuthModule({
+      user: null,
+    });
+
+    await expect(
+      updatePasswordFromDashboard(createPasswordUpdateFormData()),
+    ).resolves.toEqual({
+      success: false,
+      error: "You must be logged in to update your password.",
+    });
   });
 });

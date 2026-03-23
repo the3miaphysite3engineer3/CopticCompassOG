@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import StructuredData from "@/components/StructuredData";
-import { getDictionary } from "@/features/dictionary/lib/dictionary";
 import { GrammarLessonPageClient } from "@/features/grammar/components/GrammarLessonPageClient";
 import {
   buildGrammarLessonSeoDescription,
@@ -9,7 +8,6 @@ import {
   getPublishedGrammarLessonBundleBySlug,
   listPublishedGrammarLessons,
 } from "@/features/grammar/lib/grammarDataset";
-import { listRankedDictionaryEntryIdsForPublishedLesson } from "@/features/grammar/lib/grammarContentGraph";
 import { getGrammarLessonPath } from "@/features/grammar/lib/grammarPaths";
 import {
   createLanguageAlternates,
@@ -94,14 +92,6 @@ export default async function GrammarLessonPage({
   }
 
   const lessonPath = getGrammarLessonPath(lessonBundle.lesson.slug, locale);
-  const dictionaryById = new Map(
-    getDictionary(locale).map((entry) => [entry.id, entry] as const),
-  );
-  const linkedEntries = listRankedDictionaryEntryIdsForPublishedLesson(
-    lessonBundle.lesson.slug,
-  )
-    .map((entryId) => dictionaryById.get(entryId))
-    .filter((entry) => entry !== undefined);
 
   return (
     <>
@@ -115,10 +105,7 @@ export default async function GrammarLessonPage({
           createGrammarLessonStructuredData(lessonBundle, locale),
         ]}
       />
-      <GrammarLessonPageClient
-        lessonBundle={lessonBundle}
-        linkedEntries={linkedEntries}
-      />
+      <GrammarLessonPageClient lessonBundle={lessonBundle} />
     </>
   );
 }

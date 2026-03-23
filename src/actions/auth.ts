@@ -39,6 +39,82 @@ function getPassword(formData: FormData) {
   return getFormString(formData, "password");
 }
 
+type PasswordUpdateResult =
+  | { success: true }
+  | {
+      success: false;
+      code:
+        | "auth-unavailable"
+        | "invalid-input"
+        | "rate-limited"
+        | "not-authenticated"
+        | "update-error";
+      message: string;
+    };
+
+async function updatePasswordWithResult(
+  password: string,
+): Promise<PasswordUpdateResult> {
+  if (!hasSupabaseRuntimeEnv()) {
+    return {
+      success: false,
+      code: "auth-unavailable",
+      message: "Authentication is currently unavailable.",
+    };
+  }
+
+  if (!hasLengthInRange(password, { min: 8, max: 128 })) {
+    return {
+      success: false,
+      code: "invalid-input",
+      message: "Password must be at least 8 characters long.",
+    };
+  }
+
+  const clientIdentifier = await getClientRateLimitIdentifier();
+  const updateRateLimit = await consumeRateLimit({
+    identifier: clientIdentifier,
+    limit: 5,
+    namespace: "auth:update",
+    windowMs: 60 * 60 * 1000,
+  });
+
+  if (!updateRateLimit.ok) {
+    return {
+      success: false,
+      code: "rate-limited",
+      message: "Too many attempts. Please wait a bit before trying again.",
+    };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return {
+      success: false,
+      code: "not-authenticated",
+      message: "You must be logged in to update your password.",
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+
+  if (error) {
+    return {
+      success: false,
+      code: "update-error",
+      message: "Could not update your password. The current session may have expired.",
+    };
+  }
+
+  revalidatePath("/", "layout");
+  revalidatePath("/dashboard");
+  return { success: true };
+}
+
 export async function login(formData: FormData) {
   const redirectTo = getSafeRedirectTarget(formData.get("redirectTo"));
   const email = getNormalizedEmail(formData);
@@ -192,44 +268,53 @@ export async function resetPassword(formData: FormData) {
 }
 
 export async function updatePassword(formData: FormData) {
-  if (!hasSupabaseRuntimeEnv()) {
-    redirect(getAuthUnavailableLoginPath());
-  }
-
   const password = getPassword(formData);
-  if (!hasLengthInRange(password, { min: 8, max: 128 })) {
-    redirect("/update-password?state=update-invalid-input&messageType=error");
-  }
+  const result = await updatePasswordWithResult(password);
 
-  const clientIdentifier = await getClientRateLimitIdentifier();
-  const updateRateLimit = await consumeRateLimit({
-    identifier: clientIdentifier,
-    limit: 5,
-    namespace: "auth:update",
-    windowMs: 60 * 60 * 1000,
-  });
+  if (!result.success) {
+    if (result.code === "auth-unavailable") {
+      redirect(getAuthUnavailableLoginPath());
+    }
 
-  if (!updateRateLimit.ok) {
-    redirect("/update-password?state=update-rate-limited&messageType=error");
-  }
+    if (result.code === "invalid-input") {
+      redirect("/update-password?state=update-invalid-input&messageType=error");
+    }
 
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    if (result.code === "rate-limited") {
+      redirect("/update-password?state=update-rate-limited&messageType=error");
+    }
 
-  if (!user) {
-    redirect("/login?state=login-error&messageType=error");
-  }
+    if (result.code === "not-authenticated") {
+      redirect("/login?state=login-error&messageType=error");
+    }
 
-  const { error } = await supabase.auth.updateUser({ password });
-
-  if (error) {
     redirect("/update-password?state=update-error&messageType=error");
   }
 
-  revalidatePath("/", "layout");
   redirect("/dashboard");
+}
+
+export async function updatePasswordFromDashboard(formData: FormData) {
+  const password = getPassword(formData);
+  const confirmPassword = getFormString(formData, "confirm_password");
+
+  if (password !== confirmPassword) {
+    return {
+      success: false,
+      error: "Passwords do not match.",
+    };
+  }
+
+  const result = await updatePasswordWithResult(password);
+
+  if (!result.success) {
+    return {
+      success: false,
+      error: result.message,
+    };
+  }
+
+  return { success: true };
 }
 
 export async function signInWithGoogle() {

@@ -16,7 +16,8 @@ import { SubmissionStatusBadge } from '@/features/submissions/components/Submiss
 import { GrammarDashboardOverview } from '@/features/grammar/components/GrammarDashboardOverview'
 import { buildGrammarLessonLearnerSummary } from '@/features/grammar/lib/grammarLearnerState'
 import { getPublishedGrammarLessonBundleBySlug, listPublishedGrammarLessons } from '@/features/grammar/lib/grammarDataset'
-import { ProfileForm } from '@/features/profile/components/ProfileForm'
+import { AccountSettingsPanel } from '@/features/profile/components/AccountSettingsPanel'
+import { getAccountAuthSettings } from '@/features/profile/lib/accountSettings'
 import {
   getProfile,
   getUserLessonBookmarks,
@@ -75,6 +76,9 @@ export default async function DashboardPage() {
         lessonNoteRows: lessonNotes,
       })
     )
+  const { canUpdatePassword, providerLabel } = getAccountAuthSettings(
+    user.app_metadata,
+  )
 
   return (
     <PageShell
@@ -129,8 +133,11 @@ export default async function DashboardPage() {
             />
           )}
         </SurfacePanel>
-
-        <ProfileForm profile={profile} />
+        <AccountSettingsPanel
+          canUpdatePassword={canUpdatePassword}
+          profile={profile}
+          providerLabel={providerLabel}
+        />
 
         <GrammarDashboardOverview lessonSummaries={grammarLessonSummaries} />
 
