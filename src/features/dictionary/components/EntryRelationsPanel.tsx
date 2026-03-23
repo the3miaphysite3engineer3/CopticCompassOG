@@ -9,6 +9,7 @@ import type {
   LexicalRelationType,
 } from "@/features/dictionary/types";
 import { antinoou } from "@/lib/fonts";
+import { getEntryPath } from "@/lib/locale";
 
 type EntryRelationsPanelProps = {
   entry: LexicalEntry;
@@ -46,13 +47,13 @@ function RelationEntryLink({
   entry: LexicalEntry;
   relationType?: LexicalRelationType;
 }) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const relationLabel = getRelationLabel(relationType, t);
   const firstMeaning = entry.english_meanings[0];
 
   return (
     <Link
-      href={`/entry/${entry.id}`}
+      href={getEntryPath(entry.id, language)}
       className="group block rounded-2xl border border-stone-200 bg-white/75 p-4 transition-colors hover:border-stone-300 hover:bg-white dark:border-stone-800 dark:bg-stone-950/45 dark:hover:border-stone-700 dark:hover:bg-stone-950/70"
     >
       <div className="flex items-start justify-between gap-3">

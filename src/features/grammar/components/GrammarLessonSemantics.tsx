@@ -1,7 +1,13 @@
 import type { ReactNode } from "react";
 import { Badge } from "@/components/Badge";
 import type { GrammarLessonBundle } from "@/content/grammar/schema";
+import {
+  getEntrySummary,
+  toPlainText,
+} from "@/features/dictionary/lib/entryText";
+import type { LexicalEntry } from "@/features/dictionary/types";
 import { cx } from "@/lib/classes";
+import { getEntryPath } from "@/lib/locale";
 import type { Language } from "@/types/i18n";
 import {
   getGrammarConceptAnchorId,
@@ -9,6 +15,7 @@ import {
   getOrderedLessonConcepts,
   getOrderedLessonSources,
 } from "@/features/grammar/lib/grammarPresentation";
+import { getPublicationPath } from "@/features/publications/lib/publications";
 import { GrammarBlockRenderer } from "@/features/grammar/renderers/GrammarBlockRenderer";
 
 type GrammarLessonSemanticsProps = {
@@ -133,7 +140,9 @@ export function GrammarLessonSourceSummary({
           {sources.map((source) => (
             <a
               key={source.id}
-              href={`#${getGrammarSourceAnchorId(source.id)}`}
+              href={source.publicationId
+                ? getPublicationPath(source.publicationId, language)
+                : `#${getGrammarSourceAnchorId(source.id)}`}
               className="block rounded-xl border border-stone-200/80 bg-stone-50/70 px-4 py-3 transition-colors hover:border-sky-200 hover:bg-sky-50/70 dark:border-stone-800/80 dark:bg-stone-950/50 dark:hover:border-sky-900/70 dark:hover:bg-sky-950/20"
             >
               <div className="flex items-start justify-between gap-3">
@@ -157,6 +166,53 @@ export function GrammarLessonSourceSummary({
           ))}
         </div>
       ) : null}
+    </SemanticPanel>
+  );
+}
+
+export function GrammarLessonDictionarySummary({
+  entries,
+  language,
+  className,
+}: {
+  entries: readonly LexicalEntry[];
+  language: Language;
+  className?: string;
+}) {
+  if (entries.length === 0) {
+    return null;
+  }
+
+  return (
+    <SemanticPanel
+      className={className}
+      eyebrow={language === "en" ? "Lexicon" : "Lexicon"}
+      title={language === "en" ? "Dictionary entries" : "Woordenboeklemma's"}
+      count={entries.length}
+    >
+      <div className="space-y-3">
+        {entries.map((entry) => (
+          <a
+            key={entry.id}
+            href={getEntryPath(entry.id, language)}
+            className="block rounded-xl border border-stone-200/80 bg-stone-50/70 px-4 py-3 transition-colors hover:border-sky-200 hover:bg-sky-50/70 dark:border-stone-800/80 dark:bg-stone-950/50 dark:hover:border-sky-900/70 dark:hover:bg-sky-950/20"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-coptic text-lg text-stone-900 dark:text-stone-100">
+                  {toPlainText(entry.headword)}
+                </p>
+                <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+                  {getEntrySummary(entry)}
+                </p>
+              </div>
+              <Badge tone="surface" size="xs">
+                {entry.pos}
+              </Badge>
+            </div>
+          </a>
+        ))}
+      </div>
     </SemanticPanel>
   );
 }
@@ -266,45 +322,51 @@ export function GrammarLessonBibliography({
 
       {sources.length > 0 ? (
         <ol className="space-y-4">
-          {sources.map((source) => (
-            <li
-              key={source.id}
-              id={getGrammarSourceAnchorId(source.id)}
-              className="scroll-mt-28 rounded-xl border border-stone-200/80 bg-stone-50/70 px-4 py-4 dark:border-stone-800/80 dark:bg-stone-950/40"
-            >
-              <div className="flex flex-wrap items-start justify-between gap-3">
-                <div className="min-w-0">
-                  {source.url ? (
-                    <a
-                      href={source.url}
-                      className="text-base font-semibold text-sky-700 underline underline-offset-4 transition-colors hover:text-sky-600 dark:text-sky-300 dark:hover:text-sky-200"
-                    >
-                      {source.title}
-                    </a>
-                  ) : (
-                    <p className="text-base font-semibold text-stone-900 dark:text-stone-100">
-                      {source.title}
-                    </p>
-                  )}
-                  {source.subtitle ? (
-                    <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
-                      {source.subtitle}
-                    </p>
-                  ) : null}
-                  {(source.author || source.year) ? (
-                    <p className="mt-2 text-sm text-stone-600 dark:text-stone-300">
-                      {[source.author, source.year].filter(Boolean).join(", ")}
-                    </p>
+          {sources.map((source) => {
+            const sourceHref = source.publicationId
+              ? getPublicationPath(source.publicationId, language)
+              : source.url;
+
+            return (
+              <li
+                key={source.id}
+                id={getGrammarSourceAnchorId(source.id)}
+                className="scroll-mt-28 rounded-xl border border-stone-200/80 bg-stone-50/70 px-4 py-4 dark:border-stone-800/80 dark:bg-stone-950/40"
+              >
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    {sourceHref ? (
+                      <a
+                        href={sourceHref}
+                        className="text-base font-semibold text-sky-700 underline underline-offset-4 transition-colors hover:text-sky-600 dark:text-sky-300 dark:hover:text-sky-200"
+                      >
+                        {source.title}
+                      </a>
+                    ) : (
+                      <p className="text-base font-semibold text-stone-900 dark:text-stone-100">
+                        {source.title}
+                      </p>
+                    )}
+                    {source.subtitle ? (
+                      <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+                        {source.subtitle}
+                      </p>
+                    ) : null}
+                    {source.author || source.year ? (
+                      <p className="mt-2 text-sm text-stone-600 dark:text-stone-300">
+                        {[source.author, source.year].filter(Boolean).join(", ")}
+                      </p>
+                    ) : null}
+                  </div>
+                  {source.comingSoon ? (
+                    <Badge tone="surface" size="xs">
+                      {language === "en" ? "Coming soon" : "Binnenkort"}
+                    </Badge>
                   ) : null}
                 </div>
-                {source.comingSoon ? (
-                  <Badge tone="surface" size="xs">
-                    {language === "en" ? "Coming soon" : "Binnenkort"}
-                  </Badge>
-                ) : null}
-              </div>
-            </li>
-          ))}
+              </li>
+            );
+          })}
         </ol>
       ) : null}
     </SemanticPanel>

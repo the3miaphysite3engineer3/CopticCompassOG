@@ -1,15 +1,19 @@
 "use client";
 
+import Link from "next/link";
 import Image from "next/image";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import {
+  getPublicationPath,
   LanguageBadge,
   Publication,
   publications,
 } from "@/features/publications/lib/publications";
+import { getLocalizedHomePath } from "@/lib/locale";
 
 const LANG_COLORS: Record<LanguageBadge, string> = {
   COP: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border-amber-200 dark:border-amber-800",
@@ -17,14 +21,22 @@ const LANG_COLORS: Record<LanguageBadge, string> = {
   EN: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400 border-sky-200 dark:border-sky-800",
 };
 
-function TileInner({ pub, comingSoonLabel }: { pub: Publication; comingSoonLabel: string }) {
+function TileInner({
+  pub,
+  comingSoonLabel,
+  viewDetailsLabel,
+}: {
+  pub: Publication;
+  comingSoonLabel: string;
+  viewDetailsLabel: string;
+}) {
   return (
     <>
       <span className={`absolute top-3 right-3 z-20 text-[10px] font-bold tracking-widest px-2 py-0.5 rounded-full border ${LANG_COLORS[pub.lang]}`}>
         {pub.lang}
       </span>
 
-      {!pub.comingSoon && (
+      {pub.status === "published" && (
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       )}
 
@@ -65,44 +77,51 @@ function TileInner({ pub, comingSoonLabel }: { pub: Publication; comingSoonLabel
             {pub.subtitle}
           </p>
         )}
-        {pub.link && !pub.comingSoon && (
+        {pub.link && pub.status === "published" ? (
           <p className="text-stone-500 dark:text-stone-400 text-sm z-10 flex items-center font-medium mt-1">
             Available on Amazon
             <ArrowUpRight className="h-4 w-4 ml-1 opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0 duration-300" />
           </p>
-        )}
+        ) : null}
+        <p className="text-sky-600 dark:text-sky-400 text-sm z-10 flex items-center font-semibold mt-4">
+          {viewDetailsLabel}
+          <ArrowRight className="ml-1 h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+        </p>
       </div>
     </>
   );
 }
 
-function PublicationTile({ pub, comingSoonLabel }: { pub: Publication; comingSoonLabel: string }) {
+function PublicationTile({
+  pub,
+  comingSoonLabel,
+  viewDetailsLabel,
+}: {
+  pub: Publication;
+  comingSoonLabel: string;
+  viewDetailsLabel: string;
+}) {
+  const { language } = useLanguage();
   const baseClass =
     "group relative rounded-3xl bg-white/70 dark:bg-stone-900/50 backdrop-blur-md border border-stone-200 dark:border-stone-800 p-5 md:p-6 shadow-md dark:shadow-xl dark:shadow-black/20 transition-all duration-300 flex flex-col justify-between overflow-hidden";
 
-  if (pub.link && !pub.comingSoon) {
-    return (
-      <a
-        href={pub.link}
-        target="_blank"
-        rel="noopener noreferrer"
-        id={pub.id}
-        className={`${baseClass} scroll-mt-32 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-emerald-500/10 cursor-pointer transform hover:-translate-y-1`}
-      >
-        <TileInner pub={pub} comingSoonLabel={comingSoonLabel} />
-      </a>
-    );
-  }
-
   return (
-    <div id={pub.id} className={`${baseClass} scroll-mt-32 opacity-90 cursor-default`}>
-      <TileInner pub={pub} comingSoonLabel={comingSoonLabel} />
-    </div>
+    <Link
+      href={getPublicationPath(pub.id, language)}
+      id={pub.id}
+      className={`${baseClass} scroll-mt-32 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-emerald-500/10 cursor-pointer transform hover:-translate-y-1`}
+    >
+      <TileInner
+        pub={pub}
+        comingSoonLabel={comingSoonLabel}
+        viewDetailsLabel={viewDetailsLabel}
+      />
+    </Link>
   );
 }
 
 export default function PublicationsPageClient() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
 
   return (
     <PageShell
@@ -113,16 +132,28 @@ export default function PublicationsPageClient() {
         pageShellAccents.topLeftSkyOrbInset,
       ]}
     >
+      <BreadcrumbTrail
+        items={[
+          { label: t("nav.home"), href: getLocalizedHomePath(language) },
+          { label: t("nav.publications") },
+        ]}
+      />
+
       <PageHeader
         title={t("nav.publications")}
         description={t("home.publications.desc")}
       />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto w-full">
-          {publications.map((pub, i) => (
-            <PublicationTile key={i} pub={pub} comingSoonLabel={t("home.comingSoon")} />
-          ))}
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto w-full">
+        {publications.map((pub, i) => (
+          <PublicationTile
+            key={i}
+            pub={pub}
+            comingSoonLabel={t("home.comingSoon")}
+            viewDetailsLabel={t("publications.viewDetails")}
+          />
+        ))}
+      </div>
     </PageShell>
   );
 }

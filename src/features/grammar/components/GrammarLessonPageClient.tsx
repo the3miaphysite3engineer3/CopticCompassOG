@@ -4,6 +4,7 @@ import { useState } from "react";
 import { flushSync } from "react-dom";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import type { GrammarLessonBundle, GrammarSectionDocument } from "@/content/grammar/schema";
 import { useLanguage } from "@/components/LanguageProvider";
 import { DownloadPdfButton } from "@/components/DownloadPdfButton";
@@ -19,12 +20,16 @@ import { GrammarLessonOutline } from "@/features/grammar/components/GrammarLesso
 import { GrammarLessonRenderProvider } from "@/features/grammar/components/GrammarLessonRenderContext";
 import {
   GrammarLessonConceptSummary,
+  GrammarLessonDictionarySummary,
   GrammarLessonSourceSummary,
 } from "@/features/grammar/components/GrammarLessonSemantics";
+import { getGrammarPath, getLocalizedHomePath } from "@/lib/locale";
 import { useGrammarLessonLearnerState } from "@/features/grammar/lib/useGrammarLessonLearnerState";
 import { GrammarLessonDocumentRenderer } from "@/features/grammar/renderers/GrammarLessonDocumentRenderer";
+import type { LexicalEntry } from "@/features/dictionary/types";
 
 type GrammarLessonPageClientProps = {
+  linkedEntries: readonly LexicalEntry[];
   lessonBundle: GrammarLessonBundle;
 };
 
@@ -41,6 +46,7 @@ function getOrderedSections(
 }
 
 export function GrammarLessonPageClient({
+  linkedEntries,
   lessonBundle,
 }: GrammarLessonPageClientProps) {
   const { language, t } = useLanguage();
@@ -68,25 +74,35 @@ export function GrammarLessonPageClient({
         pageShellAccents.bottomLeftEmeraldOrbSoft,
       ]}
     >
-      <div className="mb-8 flex items-center justify-between">
-        <Link href="/grammar" className="btn-secondary gap-2 px-4">
-          <ArrowLeft className="h-4 w-4" />
-          {t("grammar.back")}
-        </Link>
-        <DownloadPdfButton
-          targetId={lessonContentId}
-          fileName={`Coptic_${lesson.title.en.replace(/\s+/g, "_")}.pdf`}
-          beforeCapture={() => {
-            flushSync(() => {
-              setRenderMode("pdf");
-            });
-          }}
-          afterCapture={() => {
-            flushSync(() => {
-              setRenderMode("web");
-            });
-          }}
+      <div className="mb-8 space-y-4">
+        <BreadcrumbTrail
+          items={[
+            { label: t("nav.home"), href: getLocalizedHomePath(language) },
+            { label: t("nav.grammar"), href: getGrammarPath(language) },
+            { label: lesson.title[language] },
+          ]}
         />
+
+        <div className="flex items-center justify-between">
+          <Link href={getGrammarPath(language)} className="btn-secondary gap-2 px-4">
+            <ArrowLeft className="h-4 w-4" />
+            {t("grammar.back")}
+          </Link>
+          <DownloadPdfButton
+            targetId={lessonContentId}
+            fileName={`Coptic_${lesson.title.en.replace(/\s+/g, "_")}.pdf`}
+            beforeCapture={() => {
+              flushSync(() => {
+                setRenderMode("pdf");
+              });
+            }}
+            afterCapture={() => {
+              flushSync(() => {
+                setRenderMode("web");
+              });
+            }}
+          />
+        </div>
       </div>
 
       <div id={lesson.id} className="bg-transparent pb-4 dark:bg-transparent">
@@ -131,6 +147,10 @@ export function GrammarLessonPageClient({
                         summary={learnerState.summary}
                       />
                     ) : null}
+                    <GrammarLessonDictionarySummary
+                      entries={linkedEntries}
+                      language={language}
+                    />
                     <GrammarLessonConceptSummary
                       lessonBundle={lessonBundle}
                       language={language}

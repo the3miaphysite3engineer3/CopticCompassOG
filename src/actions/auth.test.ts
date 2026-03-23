@@ -186,6 +186,20 @@ describe("auth actions", () => {
     expect(revalidatePathMock).toHaveBeenCalledWith("/", "layout");
   });
 
+  it("rejects scheme-relative redirect targets during login", async () => {
+    const { login } = await loadAuthModule();
+
+    await expect(
+      login(
+        createLoginFormData({
+          redirectTo: "//evil.example",
+        }),
+      ),
+    ).rejects.toMatchObject({
+      destination: "/dashboard",
+    });
+  });
+
   it("rejects invalid signup input before contacting Supabase", async () => {
     const { createClientMock, signup } = await loadAuthModule();
 

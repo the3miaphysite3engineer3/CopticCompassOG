@@ -12,6 +12,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { cx } from "@/lib/classes";
+import { getDictionaryPath } from "@/lib/locale";
 import {
   type AnalyticsDialect,
   dialectFilterOptions,
@@ -101,7 +102,7 @@ type AnalyticsPageClientProps = {
 export default function AnalyticsPageClient({ snapshots }: AnalyticsPageClientProps) {
   const [selectedDialect, setSelectedDialect] = useState<AnalyticsDialect>("ALL");
   const { resolvedTheme } = useTheme();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const stats = snapshots[selectedDialect] ?? snapshots.ALL;
   const isThemeReady = resolvedTheme !== undefined;
   const isDark = resolvedTheme === "dark";
@@ -126,7 +127,7 @@ export default function AnalyticsPageClient({ snapshots }: AnalyticsPageClientPr
     >
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
           <div className="flex items-center gap-3">
-            <Link href="/dictionary" className="btn-secondary gap-2 px-4">
+            <Link href={getDictionaryPath(language)} className="btn-secondary gap-2 px-4">
               <ArrowLeft className="h-4 w-4" />
               {t("analytics.back")}
             </Link>

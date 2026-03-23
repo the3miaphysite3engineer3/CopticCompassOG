@@ -1,9 +1,15 @@
 import fs from "fs";
 import path from "path";
 import type { LexicalEntry } from "@/features/dictionary/types";
+import type { Language } from "@/types/i18n";
 
-export function getDictionary(): LexicalEntry[] {
-  const filePath = path.join(process.cwd(), "public/data/dictionary.json");
+function getDictionaryFilePath(language: Language) {
+  const fileName = language === "nl" ? "woordenboek.json" : "dictionary.json";
+  return path.join(process.cwd(), `public/data/${fileName}`);
+}
+
+export function getDictionary(language: Language = "en"): LexicalEntry[] {
+  const filePath = getDictionaryFilePath(language);
 
   if (!fs.existsSync(filePath)) {
     return [];

@@ -9,32 +9,58 @@ const en = {
   "nav.publications": "Publications",
   "nav.dictionary": "Dictionary",
   "nav.grammar": "Grammar",
+  "nav.developers": "Developers",
   "nav.contact": "Contact",
   "nav.analytics": "Analytics Dashboard",
   "nav.login": "Log In",
   "nav.dashboard": "Dashboard",
   "footer.rights": "All rights reserved.",
+  "footer.privacy": "Privacy Policy",
+  "footer.terms": "Terms of Service",
+  "footer.apiDocs": "API Docs",
+  "footer.developers": "Developers",
 
   "home.eyebrow": "Academic Portfolio and Coptic Research Tools",
   "home.title": "Wannes Portfolio",
-  "home.subtitle": "Explore my publications and interactive scholarly applications.",
+  "home.subtitle":
+    "Explore my publications and interactive scholarly applications.",
   "home.publications": "My Publications",
-  "home.publications.desc": "A curated collection of my academic works and ongoing research.",
+  "home.publications.desc":
+    "A curated collection of my academic works and ongoing research.",
   "home.publications.cta": "Explore publications",
   "home.comingSoon": "Coming Soon",
   "home.app.title": "Coptic Learner",
-  "home.app.desc": "Learn Coptic grammar and vocabulary on the go with interactive, Duolingo-style bite-sized lessons, intelligent search, and native integration for iPhone and iPad.",
+  "home.app.desc":
+    "Learn Coptic grammar and vocabulary on the go with interactive, Duolingo-style bite-sized lessons, intelligent search, and native integration for iPhone and iPad.",
   "home.app.focus": "Planned focus areas",
   "home.app.focusItem1": "Interactive exercises with instructor review",
   "home.app.focusItem2": "Structured lesson progression for learners",
   "home.app.focusItem3": "Research-informed study tools built around Coptic",
   "home.copticDict": "Coptic Dictionary",
-  "home.copticDict.desc": "A lightning-fast digital lexicon explicitly designed for beginner students and linguists alike.",
+  "home.copticDict.desc":
+    "A lightning-fast digital lexicon explicitly designed for beginner students and linguists alike.",
   "home.dictionary.cta": "Open dictionary",
   "home.grammar.cta": "Begin studying",
 
+  "publications.badge": "Publication",
+  "publications.back": "Back to Publications",
+  "publications.status": "Status",
+  "publications.status.published": "Published",
+  "publications.status.forthcoming": "Forthcoming",
+  "publications.language": "Language",
+  "publications.format": "Format",
+  "publications.viewDetails": "View details",
+  "publications.externalLink": "View external listing",
+  "publications.noExternalLink":
+    "A public purchase or reference link has not been added yet for this publication.",
+  "publications.related": "Related Publications",
+  "publications.relatedDesc":
+    "Explore more books and research projects from the same growing publication catalog.",
+  "publications.coverPlaceholder": "Preview coming soon",
+
   "dict.title": "Coptic Dictionary",
-  "dict.subtitle": "A lightning-fast digital lexicon explicitly designed for beginner students and linguists alike.",
+  "dict.subtitle":
+    "A lightning-fast digital lexicon explicitly designed for beginner students and linguists alike.",
   "dict.searchPlaceholder": "Search in Coptic, English, or Greek...",
   "dict.pos": "Part of Speech:",
   "dict.dialect": "Dialect:",
@@ -89,21 +115,27 @@ const en = {
   "analytics.totalMasculine": "Total Masculine Concept",
 
   "grammar.title": "Coptic Grammar",
-  "grammar.subtitle": "Interactive lessons and exercises to master the Coptic language.",
+  "grammar.subtitle":
+    "Interactive lessons and exercises to master the Coptic language.",
   "grammar.lessonBadge": "Lesson",
   "grammar.openLesson": "Open lesson",
   "grammar.inPreparation": "In preparation",
   "grammar.back": "Back to Grammar",
   "grammar.lesson1.title": "Lesson 01",
-  "grammar.lesson1.desc": "Master the basics of Coptic nouns, determiners, and independent personal pronouns.",
+  "grammar.lesson1.desc":
+    "Master the basics of Coptic nouns, determiners, and independent personal pronouns.",
   "grammar.lesson2.title": "Lesson 02",
-  "grammar.lesson2.desc": "Dive into verbal prefixes, adjectives, and constructing complex nominal sentences.",
+  "grammar.lesson2.desc":
+    "Dive into verbal prefixes, adjectives, and constructing complex nominal sentences.",
 
-  "exercise.authUnavailable": "Login-based exercise submission is temporarily unavailable.",
-  "exercise.loginPrompt": "Log in to type your answers and receive personalized feedback.",
+  "exercise.authUnavailable":
+    "Login-based exercise submission is temporarily unavailable.",
+  "exercise.loginPrompt":
+    "Log in to type your answers and receive personalized feedback.",
   "exercise.loginCta": "Log In to Practice",
   "exercise.submittedTitle": "Translations Submitted!",
-  "exercise.submittedBody": "Your answers have been securely saved. Kyrillos will review them shortly.",
+  "exercise.submittedBody":
+    "Your answers have been securely saved. Kyrillos will review them shortly.",
   "exercise.viewDashboard": "View My Dashboard",
   "exercise.answerPlaceholder": "Type your translation here...",
   "exercise.submitting": "Submitting securely...",
@@ -131,22 +163,31 @@ const en = {
   "contact.option.general": "General Message",
 
   "login.title": "Welcome to Wannes Portfolio",
-  "login.subtitle": "Sign in to save exercises, receive feedback, and continue your Coptic studies.",
+  "login.subtitle":
+    "Sign in to save exercises, receive feedback, and continue your Coptic studies.",
   "login.email": "Email Address",
   "login.emailPlaceholder": "you@email.com",
   "login.password": "Password",
   "login.passwordPlaceholder": "••••••••",
   "login.signIn": "Sign In",
   "login.createAccount": "Create an Account",
-  "login.notice.authUnavailable": "Authentication is temporarily unavailable. Please try again later.",
+  "login.notice.authUnavailable":
+    "Authentication is temporarily unavailable. Please try again later.",
   "login.notice.loginInvalidInput": "Enter a valid email address and password.",
-  "login.notice.loginError": "Could not authenticate user. Check your email and password and try again.",
-  "login.notice.loginRateLimited": "Too many sign-in attempts. Please wait a few minutes and try again.",
-  "login.notice.signupCheckEmail": "Account created. Please confirm your email address using the message we sent, then sign in with the same email and password.",
-  "login.notice.signupConfirmed": "Your email has been confirmed. You can now sign in with the same email and password.",
-  "login.notice.signupError": "Could not create your account. If you already signed up, try signing in instead.",
-  "login.notice.signupInvalidInput": "Use a valid email address and a password with at least 8 characters.",
-  "login.notice.signupRateLimited": "Too many account creation attempts. Please try again later.",
+  "login.notice.loginError":
+    "Could not authenticate user. Check your email and password and try again.",
+  "login.notice.loginRateLimited":
+    "Too many sign-in attempts. Please wait a few minutes and try again.",
+  "login.notice.signupCheckEmail":
+    "Account created. Please confirm your email address using the message we sent, then sign in with the same email and password.",
+  "login.notice.signupConfirmed":
+    "Your email has been confirmed. You can now sign in with the same email and password.",
+  "login.notice.signupError":
+    "Could not create your account. If you already signed up, try signing in instead.",
+  "login.notice.signupInvalidInput":
+    "Use a valid email address and a password with at least 8 characters.",
+  "login.notice.signupRateLimited":
+    "Too many account creation attempts. Please try again later.",
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -161,32 +202,58 @@ const nl = {
   "nav.publications": "Publicaties",
   "nav.dictionary": "Woordenboek",
   "nav.grammar": "Grammatica",
+  "nav.developers": "Developelaars",
   "nav.contact": "Contact",
   "nav.analytics": "Analytics-dashboard",
   "nav.login": "Inloggen",
   "nav.dashboard": "Dashboard",
   "footer.rights": "Alle rechten voorbehouden.",
+  "footer.privacy": "Privacybeleid",
+  "footer.terms": "Gebruiksvoorwaarden",
+  "footer.apiDocs": "API-docs",
+  "footer.developers": "Developelaars",
 
   "home.eyebrow": "Academisch portfolio en Koptische onderzoekstools",
   "home.title": "Wannes Portfolio",
-  "home.subtitle": "Verken mijn publicaties en interactieve academische toepassingen.",
+  "home.subtitle":
+    "Verken mijn publicaties en interactieve academische toepassingen.",
   "home.publications": "Mijn Publicaties",
-  "home.publications.desc": "Een zorgvuldig samengestelde verzameling van mijn academische werken en lopend onderzoek.",
+  "home.publications.desc":
+    "Een zorgvuldig samengestelde verzameling van mijn academische werken en lopend onderzoek.",
   "home.publications.cta": "Bekijk publicaties",
   "home.comingSoon": "Binnenkort Beschikbaar",
   "home.app.title": "Coptic Learner",
-  "home.app.desc": "Leer Koptische grammatica en woordenschat onderweg met interactieve, Duolingo-achtige stapsgewijze lessen, intelligente zoekfuncties en native integratie voor iPhone en iPad.",
+  "home.app.desc":
+    "Leer Koptische grammatica en woordenschat onderweg met interactieve, Duolingo-achtige stapsgewijze lessen, intelligente zoekfuncties en native integratie voor iPhone en iPad.",
   "home.app.focus": "Geplande onderdelen",
   "home.app.focusItem1": "Interactieve oefeningen met docentfeedback",
   "home.app.focusItem2": "Gestructureerde lesopbouw voor studenten",
   "home.app.focusItem3": "Onderzoeksgedreven studietools rond het Koptisch",
   "home.copticDict": "Koptisch Woordenboek",
-  "home.copticDict.desc": "Een bliksemsnel digitaal lexicon expliciet ontworpen voor zowel beginnende studenten als taalkundigen.",
+  "home.copticDict.desc":
+    "Een bliksemsnel digitaal lexicon expliciet ontworpen voor zowel beginnende studenten als taalkundigen.",
   "home.dictionary.cta": "Open woordenboek",
   "home.grammar.cta": "Begin met studeren",
 
+  "publications.badge": "Publicatie",
+  "publications.back": "Terug naar publicaties",
+  "publications.status": "Status",
+  "publications.status.published": "Gepubliceerd",
+  "publications.status.forthcoming": "Te verschijnen",
+  "publications.language": "Taal",
+  "publications.format": "Type",
+  "publications.viewDetails": "Bekijk details",
+  "publications.externalLink": "Bekijk externe vermelding",
+  "publications.noExternalLink":
+    "Er is nog geen openbare aankoop- of referentielink toegevoegd voor deze publicatie.",
+  "publications.related": "Verwante publicaties",
+  "publications.relatedDesc":
+    "Verken meer boeken en onderzoeksprojecten uit dezelfde groeiende publicatiecatalogus.",
+  "publications.coverPlaceholder": "Voorbeeld binnenkort beschikbaar",
+
   "dict.title": "Koptisch Woordenboek",
-  "dict.subtitle": "Een bliksemsnel digitaal lexicon expliciet ontworpen voor zowel beginnende studenten als taalkundigen.",
+  "dict.subtitle":
+    "Een bliksemsnel digitaal lexicon expliciet ontworpen voor zowel beginnende studenten als taalkundigen.",
   "dict.searchPlaceholder": "Zoek in het Koptisch, Engels of Grieks...",
   "dict.pos": "Woordsoort:",
   "dict.dialect": "Dialect:",
@@ -202,7 +269,8 @@ const nl = {
   "dict.found": "Gevonden:",
   "dict.results": "resulta(a)t(en)",
   "dict.noMatch": "Geen unieke vormen komen overeen met uw zoekopdracht.",
-  "dict.tryFuzzy": "Probeer de fuzzy search aan te passen of filters te verwijderen.",
+  "dict.tryFuzzy":
+    "Probeer de fuzzy search aan te passen of filters te verwijderen.",
 
   "dialect.ALL": "Alle dialecten",
   "dialect.A": "Achmimisch",
@@ -237,25 +305,32 @@ const nl = {
   "analytics.posBreakdown": "Verdeling van woordsoorten",
   "analytics.nounGenders": "Geslachten van zelfstandige naamwoorden",
   "analytics.total": "Totaal",
-  "analytics.verbalNouns": "Verbale zelfstandige naamwoorden (alle werkwoorden)",
+  "analytics.verbalNouns":
+    "Verbale zelfstandige naamwoorden (alle werkwoorden)",
   "analytics.totalMasculine": "Totaal mannelijk concept",
 
   "grammar.title": "Koptische Grammatica",
-  "grammar.subtitle": "Interactieve lessen en oefeningen om de Koptische taal te beheersen.",
+  "grammar.subtitle":
+    "Interactieve lessen en oefeningen om de Koptische taal te beheersen.",
   "grammar.lessonBadge": "Les",
   "grammar.openLesson": "Open les",
   "grammar.inPreparation": "In voorbereiding",
   "grammar.back": "Terug naar grammatica",
   "grammar.lesson1.title": "Les 01",
-  "grammar.lesson1.desc": "Beheers de basis van Koptische zelfstandige naamwoorden, determinatoren en onafhankelijke persoonlijke voornaamwoorden.",
+  "grammar.lesson1.desc":
+    "Beheers de basis van Koptische zelfstandige naamwoorden, determinatoren en onafhankelijke persoonlijke voornaamwoorden.",
   "grammar.lesson2.title": "Les 02",
-  "grammar.lesson2.desc": "Duik in werkwoordelijke voorvoegsels, bijvoeglijke naamwoorden en het construeren van complexe nominale zinnen.",
+  "grammar.lesson2.desc":
+    "Duik in werkwoordelijke voorvoegsels, bijvoeglijke naamwoorden en het construeren van complexe nominale zinnen.",
 
-  "exercise.authUnavailable": "Het indienen van oefeningen via login is tijdelijk niet beschikbaar.",
-  "exercise.loginPrompt": "Log in om je antwoorden te typen en persoonlijke feedback te ontvangen.",
+  "exercise.authUnavailable":
+    "Het indienen van oefeningen via login is tijdelijk niet beschikbaar.",
+  "exercise.loginPrompt":
+    "Log in om je antwoorden te typen en persoonlijke feedback te ontvangen.",
   "exercise.loginCta": "Log in om te oefenen",
   "exercise.submittedTitle": "Vertalingen verzonden!",
-  "exercise.submittedBody": "Je antwoorden zijn veilig opgeslagen. Kyrillos zal ze binnenkort nakijken.",
+  "exercise.submittedBody":
+    "Je antwoorden zijn veilig opgeslagen. Kyrillos zal ze binnenkort nakijken.",
   "exercise.viewDashboard": "Mijn dashboard bekijken",
   "exercise.answerPlaceholder": "Typ hier je vertaling...",
   "exercise.submitting": "Veilig verzenden...",
@@ -283,22 +358,32 @@ const nl = {
   "contact.option.general": "Algemeen bericht",
 
   "login.title": "Welkom bij Wannes Portfolio",
-  "login.subtitle": "Log in om oefeningen op te slaan, feedback te ontvangen en je Koptische studie voort te zetten.",
+  "login.subtitle":
+    "Log in om oefeningen op te slaan, feedback te ontvangen en je Koptische studie voort te zetten.",
   "login.email": "E-mailadres",
   "login.emailPlaceholder": "jij@email.com",
   "login.password": "Wachtwoord",
   "login.passwordPlaceholder": "••••••••",
   "login.signIn": "Inloggen",
   "login.createAccount": "Account aanmaken",
-  "login.notice.authUnavailable": "Authenticatie is tijdelijk niet beschikbaar. Probeer het later opnieuw.",
-  "login.notice.loginInvalidInput": "Voer een geldig e-mailadres en wachtwoord in.",
-  "login.notice.loginError": "Inloggen is niet gelukt. Controleer je e-mailadres en wachtwoord en probeer het opnieuw.",
-  "login.notice.loginRateLimited": "Te veel inlogpogingen. Wacht een paar minuten en probeer het opnieuw.",
-  "login.notice.signupCheckEmail": "Account aangemaakt. Bevestig eerst je e-mailadres via de e-mail die we hebben gestuurd en log daarna in met hetzelfde e-mailadres en wachtwoord.",
-  "login.notice.signupConfirmed": "Je e-mailadres is bevestigd. Je kunt nu inloggen met hetzelfde e-mailadres en wachtwoord.",
-  "login.notice.signupError": "Je account kon niet worden aangemaakt. Als je al geregistreerd bent, probeer dan in te loggen.",
-  "login.notice.signupInvalidInput": "Gebruik een geldig e-mailadres en een wachtwoord van minstens 8 tekens.",
-  "login.notice.signupRateLimited": "Te veel pogingen om een account aan te maken. Probeer het later opnieuw.",
+  "login.notice.authUnavailable":
+    "Authenticatie is tijdelijk niet beschikbaar. Probeer het later opnieuw.",
+  "login.notice.loginInvalidInput":
+    "Voer een geldig e-mailadres en wachtwoord in.",
+  "login.notice.loginError":
+    "Inloggen is niet gelukt. Controleer je e-mailadres en wachtwoord en probeer het opnieuw.",
+  "login.notice.loginRateLimited":
+    "Te veel inlogpogingen. Wacht een paar minuten en probeer het opnieuw.",
+  "login.notice.signupCheckEmail":
+    "Account aangemaakt. Bevestig eerst je e-mailadres via de e-mail die we hebben gestuurd en log daarna in met hetzelfde e-mailadres en wachtwoord.",
+  "login.notice.signupConfirmed":
+    "Je e-mailadres is bevestigd. Je kunt nu inloggen met hetzelfde e-mailadres en wachtwoord.",
+  "login.notice.signupError":
+    "Je account kon niet worden aangemaakt. Als je al geregistreerd bent, probeer dan in te loggen.",
+  "login.notice.signupInvalidInput":
+    "Gebruik een geldig e-mailadres en een wachtwoord van minstens 8 tekens.",
+  "login.notice.signupRateLimited":
+    "Te veel pogingen om een account aan te maken. Probeer het later opnieuw.",
 } satisfies TranslationDictionary;
 
 export const translations = {
@@ -313,6 +398,9 @@ export function isLanguage(value: string): value is Language {
   return value === "en" || value === "nl";
 }
 
-export function getTranslation(language: Language, key: TranslationKey): string {
+export function getTranslation(
+  language: Language,
+  key: TranslationKey,
+): string {
   return translations[language][key];
 }

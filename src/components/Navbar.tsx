@@ -9,11 +9,18 @@ import { ThemeToggle } from "./ThemeToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import { useLanguage } from "./LanguageProvider";
 import type { User } from "@supabase/supabase-js";
+import {
+  getContactPath,
+  getDictionaryPath,
+  getGrammarPath,
+  getLocalizedHomePath,
+  getPublicationsPath,
+} from "@/lib/locale";
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
 
 export function Navbar() {
   const pathname = usePathname();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [user, setUser] = useState<User | null>(null);
 
@@ -48,10 +55,10 @@ export function Navbar() {
   }, []);
 
   const links = [
-    { href: "/publications", label: t("nav.publications") },
-    { href: "/dictionary", label: t("nav.dictionary") },
-    { href: "/grammar", label: t("nav.grammar") },
-    { href: "/contact", label: t("nav.contact") },
+    { href: getPublicationsPath(language), label: t("nav.publications") },
+    { href: getDictionaryPath(language), label: t("nav.dictionary") },
+    { href: getGrammarPath(language), label: t("nav.grammar") },
+    { href: getContactPath(language), label: t("nav.contact") },
   ];
 
   const authLink = user
@@ -63,7 +70,7 @@ export function Navbar() {
       <div className="site-container">
         <div className="flex min-h-[4.75rem] items-center justify-between gap-4 py-3">
           <Link
-            href="/"
+            href={getLocalizedHomePath(language)}
             className="group flex min-w-0 items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25"
           >
             <div className="relative h-10 w-10 shrink-0">

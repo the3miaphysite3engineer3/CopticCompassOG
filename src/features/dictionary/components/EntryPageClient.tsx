@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/LanguageProvider";
+import { RelatedGrammarLessonsPanel } from "@/features/grammar/components/RelatedGrammarLessonsPanel";
+import type { GrammarLessonReference } from "@/features/grammar/lib/grammarContentGraph";
 import type { LexicalEntry } from "@/features/dictionary/types";
 import DictionaryEntryCard from "./DictionaryEntry";
 import EntryRelationsPanel from "./EntryRelationsPanel";
@@ -11,6 +13,7 @@ type EntryPageClientProps = {
   initialEntry: LexicalEntry;
   initialParentEntry: LexicalEntry | null;
   initialRelatedEntries: readonly LexicalEntry[];
+  relatedGrammarLessons: readonly GrammarLessonReference[];
 };
 
 function resolveEntryRelations(
@@ -41,6 +44,7 @@ export default function EntryPageClient({
   initialEntry,
   initialParentEntry,
   initialRelatedEntries,
+  relatedGrammarLessons,
 }: EntryPageClientProps) {
   const { language } = useLanguage();
   const [entry, setEntry] = useState(initialEntry);
@@ -100,6 +104,20 @@ export default function EntryPageClient({
         entry={entry}
         parentEntry={parentEntry}
         relatedEntries={relatedEntries}
+      />
+      <RelatedGrammarLessonsPanel
+        description={
+          language === "nl"
+            ? "Bekijk grammaticaonderdelen waarin dit lemma expliciet voorkomt of wordt toegelicht."
+            : "Explore grammar lessons where this entry appears explicitly or is discussed in context."
+        }
+        language={language}
+        lessons={relatedGrammarLessons}
+        title={
+          language === "nl"
+            ? "Gebruikt in grammaticahandleidingen"
+            : "Used in grammar lessons"
+        }
       />
     </>
   );

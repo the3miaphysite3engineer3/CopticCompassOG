@@ -6,11 +6,36 @@ import {
 } from "@/content/grammar/registry";
 import type {
   GrammarLessonBundle,
+  GrammarLessonDocument,
   GrammarLessonIndexItem,
   GrammarSectionDocument,
 } from "@/content/grammar/schema";
 
 export type GrammarLessonOutlineItem = Pick<GrammarSectionDocument, "id" | "slug" | "title">;
+
+function pluralize(count: number, singular: string, plural = `${singular}s`) {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+export function buildGrammarLessonSeoTitle(
+  lesson: Pick<GrammarLessonDocument, "number" | "summary">,
+) {
+  const normalizedSummary = lesson.summary.en.replace(/\.$/, "");
+
+  return `Coptic Grammar Lesson ${String(lesson.number).padStart(2, "0")}: ${normalizedSummary}`;
+}
+
+export function buildGrammarLessonSeoDescription(lessonBundle: GrammarLessonBundle) {
+  const lesson = lessonBundle.lesson;
+  const description = lesson.description?.en ?? lesson.summary.en;
+  const lessonFootprint = [
+    pluralize(lesson.sections.length, "section"),
+    pluralize(lessonBundle.concepts.length, "concept"),
+    pluralize(lessonBundle.exercises.length, "exercise"),
+  ].join(", ");
+
+  return `${description} Includes ${lessonFootprint} for structured Coptic study.`;
+}
 
 export function getGrammarManifestData() {
   return getGrammarManifest();

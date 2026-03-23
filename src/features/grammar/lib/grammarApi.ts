@@ -1,16 +1,10 @@
 import {
+  createPublishedGrammarDatasetSnapshot,
   createGrammarLessonBundle,
   createGrammarVersionedExport,
   type GrammarVersionedExport,
 } from "@/content/grammar/build";
-import {
-  getGrammarConceptDocumentById,
-  getGrammarDatasetSnapshot,
-  getGrammarLessonDocumentById,
-  getGrammarLessonDocumentBySlug,
-  getGrammarManifest,
-  getGrammarSourceDocumentById,
-} from "@/content/grammar/registry";
+import { getGrammarDatasetSnapshot } from "@/content/grammar/registry";
 import type {
   GrammarConceptDocument,
   GrammarExampleDocument,
@@ -19,13 +13,13 @@ import type {
   GrammarLessonBundle,
   GrammarLessonId,
   GrammarLessonIndexItem,
-  GrammarLessonStatus,
   GrammarManifest,
   GrammarRights,
   GrammarSourceDocument,
 } from "@/content/grammar/schema";
 
 export type GrammarApiEnvelope<T> = GrammarVersionedExport<T>;
+export type GrammarApiLessonStatus = "published";
 export type GrammarApiPathExample = {
   path: string;
   description: string;
@@ -53,16 +47,22 @@ export type GrammarApiIndex = {
   examples: GrammarApiPathExample[];
 };
 
+function getPublishedGrammarApiSnapshot() {
+  return createPublishedGrammarDatasetSnapshot(getGrammarDatasetSnapshot());
+}
+
 function getGrammarApiManifestSnapshot(): GrammarManifest {
-  return getGrammarManifest();
+  return getPublishedGrammarApiSnapshot().manifest;
 }
 
 export function getGrammarApiManifest() {
   return getGrammarApiManifestSnapshot();
 }
 
-export function isGrammarLessonStatus(value: string | null): value is GrammarLessonStatus {
-  return value === "draft" || value === "published" || value === "archived";
+export function isGrammarLessonStatus(
+  value: string | null,
+): value is GrammarApiLessonStatus {
+  return value === "published";
 }
 
 export function resolveGrammarLessonFilter(
@@ -78,17 +78,20 @@ export function resolveGrammarLessonFilter(
     return null;
   }
 
-  const lessonBySlug = getGrammarLessonDocumentBySlug(normalizedLessonFilter);
+  const snapshot = getPublishedGrammarApiSnapshot();
+  const lessonBySlug = snapshot.lessons.find(
+    (lesson) => lesson.slug === normalizedLessonFilter,
+  );
 
   if (lessonBySlug) {
     return lessonBySlug.id;
   }
 
-  return getGrammarLessonDocumentById(normalizedLessonFilter)?.id ?? null;
+  return snapshot.lessons.find((lesson) => lesson.id === normalizedLessonFilter)?.id ?? null;
 }
 
 export function listGrammarApiLessons(
-  status?: GrammarLessonStatus,
+  status?: GrammarApiLessonStatus,
 ): GrammarApiEnvelope<GrammarLessonIndexItem[]> {
   const manifest = getGrammarApiManifestSnapshot();
   const lessons = status
@@ -101,13 +104,12 @@ export function listGrammarApiLessons(
 export function getGrammarApiLessonBySlug(
   slug: string,
 ): GrammarApiEnvelope<GrammarLessonBundle> | null {
-  const lesson = getGrammarLessonDocumentBySlug(slug);
+  const snapshot = getPublishedGrammarApiSnapshot();
+  const lesson = snapshot.lessons.find((candidate) => candidate.slug === slug);
 
   if (!lesson) {
     return null;
   }
-
-  const snapshot = getGrammarDatasetSnapshot();
 
   return createGrammarVersionedExport(
     snapshot.manifest,
@@ -118,7 +120,7 @@ export function getGrammarApiLessonBySlug(
 export function listGrammarApiExamples(
   lessonId?: GrammarLessonId,
 ): GrammarApiEnvelope<GrammarExampleDocument[]> {
-  const snapshot = getGrammarDatasetSnapshot();
+  const snapshot = getPublishedGrammarApiSnapshot();
   const examples = lessonId
     ? snapshot.examples.filter((example) => example.lessonId === lessonId)
     : snapshot.examples;
@@ -129,7 +131,7 @@ export function listGrammarApiExamples(
 export function listGrammarApiExercises(
   lessonId?: GrammarLessonId,
 ): GrammarApiEnvelope<GrammarExerciseDocument[]> {
-  const snapshot = getGrammarDatasetSnapshot();
+  const snapshot = getPublishedGrammarApiSnapshot();
   const exercises = lessonId
     ? snapshot.exercises.filter((exercise) => exercise.lessonId === lessonId)
     : snapshot.exercises;
@@ -140,7 +142,7 @@ export function listGrammarApiExercises(
 export function listGrammarApiConcepts(
   lessonId?: GrammarLessonId,
 ): GrammarApiEnvelope<GrammarConceptDocument[]> {
-  const snapshot = getGrammarDatasetSnapshot();
+  const snapshot = getPublishedGrammarApiSnapshot();
   const concepts = lessonId
     ? snapshot.concepts.filter((concept) => concept.lessonRefs.includes(lessonId))
     : snapshot.concepts;
@@ -151,8 +153,8 @@ export function listGrammarApiConcepts(
 export function getGrammarApiConceptById(
   id: string,
 ): GrammarApiEnvelope<GrammarConceptDocument> | null {
-  const snapshot = getGrammarDatasetSnapshot();
-  const concept = getGrammarConceptDocumentById(id);
+  const snapshot = getPublishedGrammarApiSnapshot();
+  const concept = snapshot.concepts.find((candidate) => candidate.id === id);
 
   if (!concept) {
     return null;
@@ -164,7 +166,7 @@ export function getGrammarApiConceptById(
 export function listGrammarApiFootnotes(
   lessonId?: GrammarLessonId,
 ): GrammarApiEnvelope<GrammarFootnoteDocument[]> {
-  const snapshot = getGrammarDatasetSnapshot();
+  const snapshot = getPublishedGrammarApiSnapshot();
   const footnotes = lessonId
     ? snapshot.footnotes.filter((footnote) => footnote.lessonId === lessonId)
     : snapshot.footnotes;
@@ -175,13 +177,13 @@ export function listGrammarApiFootnotes(
 export function listGrammarApiSources(
   lessonId?: GrammarLessonId,
 ): GrammarApiEnvelope<GrammarSourceDocument[]> {
-  const snapshot = getGrammarDatasetSnapshot();
+  const snapshot = getPublishedGrammarApiSnapshot();
 
   if (!lessonId) {
     return createGrammarVersionedExport(snapshot.manifest, snapshot.sources);
   }
 
-  const lesson = getGrammarLessonDocumentById(lessonId);
+  const lesson = snapshot.lessons.find((candidate) => candidate.id === lessonId);
   const lessonSourceIds = new Set(lesson?.sourceRefs ?? []);
   const sources = snapshot.sources.filter((source) => lessonSourceIds.has(source.id));
 
@@ -191,8 +193,8 @@ export function listGrammarApiSources(
 export function getGrammarApiSourceById(
   id: string,
 ): GrammarApiEnvelope<GrammarSourceDocument> | null {
-  const snapshot = getGrammarDatasetSnapshot();
-  const source = getGrammarSourceDocumentById(id);
+  const snapshot = getPublishedGrammarApiSnapshot();
+  const source = snapshot.sources.find((candidate) => candidate.id === id);
 
   if (!source) {
     return null;
@@ -237,12 +239,12 @@ export function getGrammarApiIndex(): GrammarApiIndex {
       },
       {
         path: "/api/v1/grammar/lessons",
-        description: "Returns lesson index records.",
-        queryParameters: ["status=draft|published|archived"],
+        description: "Returns published lesson index records.",
+        queryParameters: ["status=published"],
       },
       {
         path: "/api/v1/grammar/lessons/[slug]",
-        description: "Returns a full lesson bundle, including sections, examples, exercises, and footnotes.",
+        description: "Returns a full published lesson bundle, including sections, examples, exercises, and footnotes.",
       },
       {
         path: "/api/v1/grammar/examples",

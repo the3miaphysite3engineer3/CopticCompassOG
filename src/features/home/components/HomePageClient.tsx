@@ -13,6 +13,11 @@ import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { cx } from "@/lib/classes";
+import {
+  getDictionaryPath,
+  getGrammarPath,
+  getPublicationsPath,
+} from "@/lib/locale";
 
 type FeatureCardTone = "emerald" | "sky";
 
@@ -108,10 +113,10 @@ function FeatureCard({
 }
 
 export default function HomePageClient() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const featureCards: FeatureCardProps[] = [
     {
-      href: "/publications",
+      href: getPublicationsPath(language),
       icon: LibraryBig,
       title: t("home.publications"),
       description: t("home.publications.desc"),
@@ -119,7 +124,7 @@ export default function HomePageClient() {
       tone: "emerald",
     },
     {
-      href: "/dictionary",
+      href: getDictionaryPath(language),
       icon: BookOpen,
       title: t("home.copticDict"),
       description: t("home.copticDict.desc"),
@@ -127,7 +132,7 @@ export default function HomePageClient() {
       tone: "sky",
     },
     {
-      href: "/grammar",
+      href: getGrammarPath(language),
       icon: GraduationCap,
       title: t("grammar.title"),
       description: t("grammar.subtitle"),

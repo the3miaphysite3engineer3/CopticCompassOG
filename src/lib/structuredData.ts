@@ -1,131 +1,137 @@
+import type {
+  GrammarLessonBundle,
+  GrammarLessonIndexItem,
+} from "@/content/grammar/schema";
+import {
+  buildEntryDescription,
+  toPlainText,
+} from "@/features/dictionary/lib/entryText";
 import type { LexicalEntry } from "@/features/dictionary/types";
-import type { Publication } from "@/features/publications/lib/publications";
+import { DEFAULT_LANGUAGE } from "@/lib/i18n";
+import {
+  getDictionaryPath,
+  getEntryPath,
+  getGrammarPath,
+  getLocalizedHomePath,
+  getPublicationsPath,
+} from "@/lib/locale";
+import {
+  buildGrammarLessonSeoDescription,
+  buildGrammarLessonSeoTitle,
+} from "@/features/grammar/lib/grammarDataset";
+import { getGrammarLessonPath } from "@/features/grammar/lib/grammarPaths";
+import {
+  buildPublicationDescription,
+  getPublicationPath,
+  type Publication,
+} from "@/features/publications/lib/publications";
 import { siteConfig } from "@/lib/site";
+import type { Language } from "@/types/i18n";
 
 type JsonLd = Record<string, unknown>;
-
-const dictionaryUrl = absoluteUrl("/dictionary");
-const dictionarySetId = `${dictionaryUrl}#defined-term-set`;
-const websiteId = `${absoluteUrl("/")}#website`;
-const publicationsPageId = `${absoluteUrl("/publications")}#collection-page`;
-const publicationsListId = `${absoluteUrl("/publications")}#item-list`;
-const entryLeadIns = [
-  "intr",
-  "tr",
-  "auxil",
-  "qual",
-  "vb",
-  "nn",
-  "adj",
-  "adv",
-  "prep",
-  "conj",
-  "interj",
-  "imperative",
-  "interrog",
-  "neg",
-  "obj",
-  "dat",
-  "ethic",
-  "ethical",
-  "suff",
-  "pref",
-  "pronom",
-  "subj",
-  "nom",
-  "acc",
-  "gen",
-  "pl",
-  "sg",
-  "art",
-  "def",
-  "indef",
-  "poss",
-  "rel",
-  "pron",
-  "gk",
-  "esp",
-  "lit",
-  "caus",
-  "sim",
-  "prob",
-  "rare",
-  "constr",
-  "vbal",
-  "p.c.",
-  "p c",
-  "m",
-  "f",
-];
+export type BreadcrumbStructuredDataItem = {
+  name: string;
+  path: string;
+};
 
 function absoluteUrl(path: string) {
   return new URL(path, siteConfig.liveUrl).toString();
 }
 
-export function toPlainText(value: string) {
-  return value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+function getWebsiteId(locale: Language) {
+  return `${absoluteUrl(getLocalizedHomePath(locale))}#website`;
 }
 
-function stripLeadIn(value: string) {
-  // Imported meanings often start with grammar shorthand such as "tr" or
-  // "nn"; strip those prefixes so metadata surfaces a real gloss.
-  let cleaned = toPlainText(value.replace(/\[[^\]]+\]/g, ""))
-    .replace(/^[|―—–-]+\s*/, "")
-    .trim();
-
-  while (cleaned) {
-    const lowered = cleaned.toLowerCase();
-    const matchedLeadIn = entryLeadIns.find(
-      (leadIn) =>
-        lowered === leadIn ||
-        lowered.startsWith(`${leadIn}:`) ||
-        lowered.startsWith(`${leadIn},`) ||
-        lowered.startsWith(`${leadIn} `)
-    );
-
-    if (!matchedLeadIn) {
-      break;
-    }
-
-    cleaned = cleaned
-      .slice(matchedLeadIn.length)
-      .replace(/^[:.,;)\]\s-]+/, "")
-      .trim();
-  }
-
-  return cleaned;
+function getDictionaryUrl(locale: Language) {
+  return absoluteUrl(getDictionaryPath(locale));
 }
 
-function isPureGrammarLeadIn(value: string) {
-  if (!value) {
-    return true;
-  }
-
-  return (
-    /^[(?[a-z]\)?.,\s:-]+$/i.test(value) &&
-    !/[\u03e2-\u03ef\u2c80-\u2cff]/i.test(value) &&
-    value.split(/\s+/).length <= 4
-  );
+function getDictionarySetId(locale: Language) {
+  return `${getDictionaryUrl(locale)}#defined-term-set`;
 }
 
-export function getEntrySummary(entry: LexicalEntry) {
-  for (const meaning of entry.english_meanings) {
-    const candidate = stripLeadIn(meaning);
-    if (candidate && !isPureGrammarLeadIn(candidate)) {
-      return candidate;
-    }
-  }
-
-  return "";
+function getGrammarHubUrl(locale: Language) {
+  return absoluteUrl(getGrammarPath(locale));
 }
 
-export function buildEntryDescription(entry: LexicalEntry) {
-  const headword = toPlainText(entry.headword);
-  const firstMeaning = getEntrySummary(entry);
+function getGrammarHubPageId(locale: Language) {
+  return `${getGrammarHubUrl(locale)}#collection-page`;
+}
 
-  return firstMeaning
-    ? `${headword} (${entry.pos}) in the Coptic dictionary. ${firstMeaning}.`
-    : `${headword} (${entry.pos}) in the Coptic dictionary by Kyrillos Wannes.`;
+function getGrammarHubListId(locale: Language) {
+  return `${getGrammarHubUrl(locale)}#item-list`;
+}
+
+function getPublicationsPageId(locale: Language) {
+  return `${absoluteUrl(getPublicationsPath(locale))}#collection-page`;
+}
+
+function getPublicationsListId(locale: Language) {
+  return `${absoluteUrl(getPublicationsPath(locale))}#item-list`;
+}
+
+function getPublicationAbsoluteUrl(publication: Publication, locale: Language) {
+  return absoluteUrl(getPublicationPath(publication.id, locale));
+}
+
+function getPublicationStructuredData(
+  publication: Publication,
+  locale: Language = DEFAULT_LANGUAGE,
+): JsonLd {
+  const publicationUrl = getPublicationAbsoluteUrl(publication, locale);
+
+  return {
+    "@context": "https://schema.org",
+    "@type": publication.schemaType,
+    "@id": `${publicationUrl}#work`,
+    url: publicationUrl,
+    name: publication.title,
+    ...(publication.subtitle
+      ? {
+          alternativeHeadline: publication.subtitle,
+        }
+      : {}),
+    description: buildPublicationDescription(publication, locale),
+    author: {
+      "@type": "Person",
+      name: siteConfig.author.name,
+    },
+    inLanguage: languageCode(publication.lang),
+    ...(publication.image
+      ? {
+          image: absoluteUrl(publication.image),
+        }
+      : {}),
+    ...(publication.link
+      ? {
+          sameAs: publication.link,
+        }
+      : {}),
+    ...(publication.status === "forthcoming"
+      ? {
+          creativeWorkStatus: "In preparation",
+        }
+      : {}),
+    isPartOf: {
+      "@id": getPublicationsPageId(locale),
+    },
+    mainEntityOfPage: publicationUrl,
+  };
+}
+
+export function createBreadcrumbStructuredData(
+  items: readonly BreadcrumbStructuredDataItem[],
+): JsonLd {
+  return {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: items.map((item, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      name: item.name,
+      item: absoluteUrl(item.path),
+    })),
+  };
 }
 
 function languageCode(lang: Publication["lang"]) {
@@ -141,12 +147,16 @@ function languageCode(lang: Publication["lang"]) {
   }
 }
 
-export function createWebSiteStructuredData(): JsonLd {
+export function createWebSiteStructuredData(
+  locale: Language = DEFAULT_LANGUAGE,
+): JsonLd {
+  const dictionaryUrl = getDictionaryUrl(locale);
+
   return {
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "@id": websiteId,
-    url: absoluteUrl("/"),
+    "@id": getWebsiteId(locale),
+    url: absoluteUrl(getLocalizedHomePath(locale)),
     name: siteConfig.name,
     alternateName: "Kyrillos Wannes",
     description: siteConfig.description,
@@ -167,7 +177,12 @@ export function createWebSiteStructuredData(): JsonLd {
   };
 }
 
-export function createDictionaryPageStructuredData(): JsonLd[] {
+export function createDictionaryPageStructuredData(
+  locale: Language = DEFAULT_LANGUAGE,
+): JsonLd[] {
+  const dictionaryUrl = getDictionaryUrl(locale);
+  const dictionarySetId = getDictionarySetId(locale);
+
   return [
     {
       "@context": "https://schema.org",
@@ -178,7 +193,7 @@ export function createDictionaryPageStructuredData(): JsonLd[] {
       description:
         "Search the Coptic-English dictionary by Coptic, English, or Greek, with dialect filters, grammatical detail, and a built-in virtual keyboard.",
       isPartOf: {
-        "@id": websiteId,
+        "@id": getWebsiteId(locale),
       },
       mainEntity: {
         "@id": dictionarySetId,
@@ -208,8 +223,104 @@ export function createDictionaryPageStructuredData(): JsonLd[] {
   ];
 }
 
-export function createDefinedTermStructuredData(entry: LexicalEntry): JsonLd {
+export function createGrammarHubStructuredData(
+  lessons: readonly GrammarLessonIndexItem[],
+  locale: Language = DEFAULT_LANGUAGE,
+): JsonLd[] {
+  const publishedLessons = lessons.filter((lesson) => lesson.status === "published");
+  const grammarHubUrl = getGrammarHubUrl(locale);
+  const grammarHubPageId = getGrammarHubPageId(locale);
+  const grammarHubListId = getGrammarHubListId(locale);
+
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      "@id": grammarHubPageId,
+      url: grammarHubUrl,
+      name: "Coptic Grammar Lessons",
+      description:
+        "Published Coptic grammar lessons with exercises, concept glossaries, and source notes by Kyrillos Wannes.",
+      isPartOf: {
+        "@id": getWebsiteId(locale),
+      },
+      mainEntity: {
+        "@id": grammarHubListId,
+      },
+      about: [
+        {
+          "@type": "Language",
+          name: "Coptic",
+          alternateName: "cop",
+        },
+      ],
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "@id": grammarHubListId,
+      url: grammarHubUrl,
+      name: "Published Coptic Grammar Lessons",
+      itemListElement: publishedLessons.map((lesson, index) => ({
+        "@type": "ListItem",
+        position: index + 1,
+        url: absoluteUrl(getGrammarLessonPath(lesson.slug, locale)),
+        name: buildGrammarLessonSeoTitle(lesson),
+      })),
+    },
+  ];
+}
+
+export function createGrammarLessonStructuredData(
+  lessonBundle: GrammarLessonBundle,
+  locale: Language = DEFAULT_LANGUAGE,
+): JsonLd {
+  const lesson = lessonBundle.lesson;
+  const lessonUrl = absoluteUrl(getGrammarLessonPath(lesson.slug, locale));
+
+  return {
+    "@context": "https://schema.org",
+    "@type": "LearningResource",
+    "@id": `${lessonUrl}#learning-resource`,
+    url: lessonUrl,
+    name: buildGrammarLessonSeoTitle(lesson),
+    description: buildGrammarLessonSeoDescription(lessonBundle),
+    author: {
+      "@type": "Person",
+      name: siteConfig.author.name,
+    },
+    educationalUse: "instruction",
+    learningResourceType: "Grammar lesson",
+    inLanguage: ["en", "nl", "cop"],
+    keywords: lesson.tags.join(", "),
+    isPartOf: {
+      "@id": getGrammarHubPageId(locale),
+    },
+    about: [
+      {
+        "@type": "Language",
+        name: "Coptic",
+        alternateName: "cop",
+      },
+      ...lessonBundle.concepts.slice(0, 6).map((concept) => ({
+        "@type": "DefinedTerm",
+        name: concept.title.en,
+      })),
+    ],
+    hasPart: lesson.sections.map((section) => ({
+      "@type": "WebPageElement",
+      name: section.title.en,
+      position: section.order,
+    })),
+  };
+}
+
+export function createDefinedTermStructuredData(
+  entry: LexicalEntry,
+  locale: Language = DEFAULT_LANGUAGE,
+): JsonLd {
   const headword = toPlainText(entry.headword);
+  const entryPath = getEntryPath(entry.id, locale);
   // Search engines benefit from seeing every distinct dialect spelling as an
   // alternate label for the same lexical entry.
   const alternateNames = Array.from(
@@ -251,73 +362,42 @@ export function createDefinedTermStructuredData(entry: LexicalEntry): JsonLd {
   return {
     "@context": "https://schema.org",
     "@type": "DefinedTerm",
-    "@id": `${absoluteUrl(`/entry/${entry.id}`)}#defined-term`,
-    url: absoluteUrl(`/entry/${entry.id}`),
+    "@id": `${absoluteUrl(entryPath)}#defined-term`,
+    url: absoluteUrl(entryPath),
     name: headword,
     alternateName: alternateNames,
     description: buildEntryDescription(entry),
     termCode: entry.id,
     inDefinedTermSet: {
-      "@id": dictionarySetId,
+      "@id": getDictionarySetId(locale),
     },
     inLanguage: "cop",
-    mainEntityOfPage: absoluteUrl(`/entry/${entry.id}`),
+    mainEntityOfPage: absoluteUrl(entryPath),
     additionalProperty,
   };
 }
 
-export function createPublicationsStructuredData(publications: Publication[]): JsonLd[] {
-  const works = publications.map((publication) => {
-    const anchorUrl = `${absoluteUrl("/publications")}#${publication.id}`;
-
-    return {
-      "@context": "https://schema.org",
-      "@type": publication.schemaType,
-      "@id": anchorUrl,
-      url: anchorUrl,
-      name: publication.title,
-      ...(publication.subtitle
-        ? {
-            alternativeHeadline: publication.subtitle,
-          }
-        : {}),
-      author: {
-        "@type": "Person",
-        name: siteConfig.author.name,
-      },
-      inLanguage: languageCode(publication.lang),
-      ...(publication.image
-        ? {
-            image: absoluteUrl(publication.image),
-          }
-        : {}),
-      ...(publication.link
-        ? {
-            sameAs: publication.link,
-          }
-        : {}),
-      ...(publication.comingSoon
-        ? {
-            creativeWorkStatus: "In preparation",
-          }
-        : {}),
-      isPartOf: {
-        "@id": publicationsPageId,
-      },
-    };
-  });
+export function createPublicationsStructuredData(
+  publications: Publication[],
+  locale: Language = DEFAULT_LANGUAGE,
+): JsonLd[] {
+  const publicationsPageId = getPublicationsPageId(locale);
+  const publicationsListId = getPublicationsListId(locale);
+  const works = publications.map((publication) =>
+    getPublicationStructuredData(publication, locale),
+  );
 
   return [
     {
       "@context": "https://schema.org",
       "@type": "CollectionPage",
       "@id": publicationsPageId,
-      url: absoluteUrl("/publications"),
+      url: absoluteUrl(getPublicationsPath(locale)),
       name: "Publications",
       description:
         "Books, reference works, and research projects by Kyrillos Wannes, including published and forthcoming Coptic language materials.",
       isPartOf: {
-        "@id": websiteId,
+        "@id": getWebsiteId(locale),
       },
       mainEntity: {
         "@id": publicationsListId,
@@ -327,17 +407,24 @@ export function createPublicationsStructuredData(publications: Publication[]): J
       "@context": "https://schema.org",
       "@type": "ItemList",
       "@id": publicationsListId,
-      url: absoluteUrl("/publications"),
+      url: absoluteUrl(getPublicationsPath(locale)),
       name: "Publications by Kyrillos Wannes",
-      itemListElement: works.map((work, index) => ({
+      itemListElement: publications.map((publication, index) => ({
         "@type": "ListItem",
         position: index + 1,
-        url: work.url,
+        url: getPublicationAbsoluteUrl(publication, locale),
         item: {
-          "@id": work["@id"],
+          "@id": `${getPublicationAbsoluteUrl(publication, locale)}#work`,
         },
       })),
     },
     ...works,
   ];
+}
+
+export function createPublicationStructuredData(
+  publication: Publication,
+  locale: Language = DEFAULT_LANGUAGE,
+): JsonLd {
+  return getPublicationStructuredData(publication, locale);
 }

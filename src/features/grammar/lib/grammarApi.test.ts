@@ -20,14 +20,11 @@ describe("grammar API helpers", () => {
     const manifest = getGrammarApiManifest();
 
     expect(manifest.datasetVersion).toBe("2026-03-22");
-    expect(manifest.lessons.map((lesson) => lesson.slug)).toEqual([
-      "lesson-1",
-      "lesson-2",
-    ]);
+    expect(manifest.lessons.map((lesson) => lesson.slug)).toEqual(["lesson-1"]);
   });
 
   it("filters lesson index results by status", () => {
-    const publishedLessons = listGrammarApiLessons("published");
+    const publishedLessons = listGrammarApiLessons();
 
     expect(publishedLessons).toMatchObject({
       schemaVersion: "1.0.0",
@@ -44,13 +41,14 @@ describe("grammar API helpers", () => {
   it("resolves lesson filters from either slug or canonical lesson id", () => {
     expect(resolveGrammarLessonFilter("lesson-1")).toBe("grammar.lesson.01");
     expect(resolveGrammarLessonFilter("grammar.lesson.01")).toBe("grammar.lesson.01");
+    expect(resolveGrammarLessonFilter("lesson-2")).toBeNull();
     expect(resolveGrammarLessonFilter("missing-lesson")).toBeNull();
   });
 
   it("validates supported lesson statuses for route parsing", () => {
     expect(isGrammarLessonStatus("published")).toBe(true);
-    expect(isGrammarLessonStatus("draft")).toBe(true);
-    expect(isGrammarLessonStatus("archived")).toBe(true);
+    expect(isGrammarLessonStatus("draft")).toBe(false);
+    expect(isGrammarLessonStatus("archived")).toBe(false);
     expect(isGrammarLessonStatus("preview")).toBe(false);
     expect(isGrammarLessonStatus(null)).toBe(false);
   });
@@ -69,6 +67,7 @@ describe("grammar API helpers", () => {
       copyrightHolder: "Kyrillos Wannes",
       license: "all-rights-reserved",
     });
+    expect(getGrammarApiLessonBySlug("lesson-2")).toBeNull();
   });
 
   it("filters examples, exercises, and footnotes by lesson", () => {
@@ -143,9 +142,9 @@ describe("grammar API helpers", () => {
       },
       lessonCounts: {
         published: 1,
-        draft: 1,
+        draft: 0,
         archived: 0,
-        total: 2,
+        total: 1,
       },
     });
     expect(apiIndex.endpoints.map((endpoint) => endpoint.path)).toEqual([

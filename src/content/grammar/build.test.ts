@@ -14,7 +14,6 @@ describe("grammar static export files", () => {
       "grammar/v1/footnotes.json",
       "grammar/v1/sources.json",
       "grammar/v1/lessons/lesson-1.json",
-      "grammar/v1/lessons/lesson-2.json",
     ]);
   });
 
@@ -78,4 +77,26 @@ describe("grammar static export files", () => {
       ]),
     );
   });
+
+  it("omits draft lessons from the public static export", () => {
+    const files = createGrammarStaticExportFiles();
+    const manifest = files.find((file) => file.outputPath === "grammar/v1/manifest.json");
+
+    expect(outputPathsContain(files, "grammar/v1/lessons/lesson-2.json")).toBe(false);
+    expect(manifest?.payload).toMatchObject({
+      lessons: [
+        {
+          slug: "lesson-1",
+          status: "published",
+        },
+      ],
+    });
+  });
 });
+
+function outputPathsContain(
+  files: ReturnType<typeof createGrammarStaticExportFiles>,
+  outputPath: string,
+) {
+  return files.some((file) => file.outputPath === outputPath);
+}

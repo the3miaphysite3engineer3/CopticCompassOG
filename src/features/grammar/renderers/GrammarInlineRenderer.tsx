@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import type { GrammarInline } from "@/content/grammar/schema";
 import { getGrammarConceptAnchorId } from "@/features/grammar/lib/grammarPresentation";
+import { getEntryPath } from "@/lib/locale";
 import type { Language } from "@/types/i18n";
 
 type GrammarInlineRendererProps = {
@@ -11,14 +12,18 @@ type GrammarInlineRendererProps = {
   renderFootnoteRef?: (ref: string, key: string) => ReactNode;
 };
 
-function renderDictionaryEntryHref(dictionaryEntryId: string) {
-  return `/entry/${encodeURIComponent(dictionaryEntryId)}`;
+function renderDictionaryEntryHref(
+  dictionaryEntryId: string,
+  language: Language,
+) {
+  return getEntryPath(encodeURIComponent(dictionaryEntryId), language);
 }
 
 function renderCopticNode(
   key: string,
   dictionaryEntryId: string | undefined,
   className: string,
+  language: Language,
   content: ReactNode,
 ) {
   if (!dictionaryEntryId) {
@@ -32,7 +37,7 @@ function renderCopticNode(
   return (
     <a
       key={key}
-      href={renderDictionaryEntryHref(dictionaryEntryId)}
+      href={renderDictionaryEntryHref(dictionaryEntryId, language)}
       target="_blank"
       rel="noreferrer noopener"
       data-dictionary-entry-id={dictionaryEntryId}
@@ -57,6 +62,7 @@ function renderInlineNode(
         key,
         node.dictionaryEntryId,
         "font-coptic text-emerald-600 dark:text-emerald-400",
+        language,
         node.text,
       );
     case "copticSpan":
@@ -64,6 +70,7 @@ function renderInlineNode(
         key,
         node.dictionaryEntryId,
         "font-coptic text-lg text-emerald-600 dark:text-emerald-400",
+        language,
         <>
           <GrammarInlineRenderer
             nodes={node.children}

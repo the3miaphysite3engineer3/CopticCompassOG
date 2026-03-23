@@ -1,6 +1,14 @@
 "use client";
 
-import { createContext, startTransition, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  startTransition,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
+import { usePathname, useRouter } from "next/navigation";
 import {
   DEFAULT_LANGUAGE,
   LANGUAGE_STORAGE_KEY,
@@ -8,6 +16,7 @@ import {
   isLanguage,
   type TranslationKey,
 } from "@/lib/i18n";
+import { switchLocalePath } from "@/lib/locale";
 import type { Language } from "@/types/i18n";
 
 interface LanguageContextType {
@@ -18,10 +27,30 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
-export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [language, setLanguageState] = useState<Language>(DEFAULT_LANGUAGE);
+type LanguageProviderProps = {
+  children: ReactNode;
+  initialLanguage?: Language;
+  localeRouting?: boolean;
+};
+
+export function LanguageProvider({
+  children,
+  initialLanguage = DEFAULT_LANGUAGE,
+  localeRouting = false,
+}: LanguageProviderProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const [language, setLanguageState] = useState<Language>(initialLanguage);
 
   useEffect(() => {
+    if (localeRouting) {
+      startTransition(() => {
+        setLanguageState(initialLanguage);
+      });
+      localStorage.setItem(LANGUAGE_STORAGE_KEY, initialLanguage);
+      return;
+    }
+
     const storedLanguage = localStorage.getItem(LANGUAGE_STORAGE_KEY);
     if (storedLanguage && isLanguage(storedLanguage)) {
       startTransition(() => {
@@ -37,13 +66,26 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
       });
       localStorage.setItem(LANGUAGE_STORAGE_KEY, preferredLanguage);
     }
-  }, []);
+  }, [initialLanguage, localeRouting]);
 
   const setLanguage = (lang: Language) => {
+    if (lang === language) {
+      return;
+    }
+
     startTransition(() => {
       setLanguageState(lang);
     });
     localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+
+    if (localeRouting && pathname) {
+      const nextPath = switchLocalePath(pathname, lang);
+      const nextQuery =
+        typeof window === "undefined"
+          ? ""
+          : new URLSearchParams(window.location.search).toString();
+      router.push(nextQuery ? `${nextPath}?${nextQuery}` : nextPath);
+    }
   };
 
   const t = (key: TranslationKey): string => {

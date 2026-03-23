@@ -13,7 +13,10 @@ function writeJsonFile(filePath: string, payload: unknown) {
 
 function main() {
   const outputRoot = path.resolve(__dirname, '../public/data');
+  const grammarOutputRoot = path.join(outputRoot, 'grammar/v1');
   const files = createGrammarStaticExportFiles();
+
+  fs.rmSync(grammarOutputRoot, { recursive: true, force: true });
 
   files.forEach((file) => {
     const absolutePath = path.join(outputRoot, file.outputPath);

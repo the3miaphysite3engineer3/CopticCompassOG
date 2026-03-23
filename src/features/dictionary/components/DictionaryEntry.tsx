@@ -10,6 +10,7 @@ import type {
 } from "@/features/dictionary/config";
 import type { LexicalEntry } from "@/features/dictionary/types";
 import { antinoou } from "@/lib/fonts";
+import { getEntryPath } from "@/lib/locale";
 import DialectSiglum from "./DialectSiglum";
 import HighlightText from "./HighlightText";
 
@@ -51,7 +52,7 @@ export default function DictionaryEntryCard({
   headingLevel = "h2",
   linkHeadword = true,
 }: DictionaryEntryCardProps) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const isDetailView = headingLevel === "h1";
   const dialectKeys = Object.keys(entry.dialects) as DictionaryDialectCode[];
   let primaryDialectKey: DictionaryDialectCode | undefined = "S";
@@ -104,7 +105,11 @@ export default function DictionaryEntryCard({
       <div className="relative flex flex-col sm:flex-row justify-between items-start gap-4 mb-5">
         <div>
           {linkHeadword ? (
-            <Link href={`/entry/${entry.id}`} prefetch={false} className="inline-block">
+            <Link
+              href={getEntryPath(entry.id, language)}
+              prefetch={false}
+              className="inline-block"
+            >
               {headingContent}
             </Link>
           ) : (

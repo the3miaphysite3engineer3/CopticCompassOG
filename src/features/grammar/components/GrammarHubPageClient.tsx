@@ -1,9 +1,11 @@
 "use client";
 
 import type { GrammarLessonIndexItem } from "@/content/grammar/schema";
+import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
+import { getLocalizedHomePath } from "@/lib/locale";
 import { GrammarLessonCard } from "./GrammarLessonCard";
 
 type GrammarHubPageClientProps = {
@@ -24,6 +26,13 @@ export default function GrammarHubPageClient({
         pageShellAccents.bottomLeftEmeraldOrb,
       ]}
     >
+      <BreadcrumbTrail
+        items={[
+          { label: t("nav.home"), href: getLocalizedHomePath(language) },
+          { label: t("nav.grammar") },
+        ]}
+      />
+
       <PageHeader
         title={t("grammar.title")}
         description={t("grammar.subtitle")}

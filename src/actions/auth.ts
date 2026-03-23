@@ -20,7 +20,11 @@ import {
 } from "@/lib/validation";
 
 function getSafeRedirectTarget(value: FormDataEntryValue | null) {
-  if (typeof value !== "string" || !value.startsWith("/")) {
+  if (
+    typeof value !== "string" ||
+    !value.startsWith("/") ||
+    value.startsWith("//")
+  ) {
     return "/dashboard";
   }
 

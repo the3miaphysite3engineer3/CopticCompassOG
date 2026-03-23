@@ -3,6 +3,7 @@
 import type { GrammarBlock, GrammarLessonBundle } from "@/content/grammar/schema";
 import type { Language } from "@/types/i18n";
 import { cx } from "@/lib/classes";
+import { getEntryPath } from "@/lib/locale";
 import {
   GrammarLessonCard,
   GrammarLessonTable,
@@ -32,14 +33,18 @@ function renderExampleCopticText(text: string) {
   return text;
 }
 
-function renderDictionaryEntryHref(dictionaryEntryId: string) {
-  return `/entry/${encodeURIComponent(dictionaryEntryId)}`;
+function renderDictionaryEntryHref(
+  dictionaryEntryId: string,
+  language: Language,
+) {
+  return getEntryPath(encodeURIComponent(dictionaryEntryId), language);
 }
 
 function renderExampleCopticSegments(
   coptic: string,
   dictionaryEntryId: string | undefined,
   index: number,
+  language: Language,
 ) {
   const content = renderExampleCopticText(coptic);
 
@@ -50,7 +55,7 @@ function renderExampleCopticSegments(
   return (
     <a
       key={`segment-${index}`}
-      href={renderDictionaryEntryHref(dictionaryEntryId)}
+      href={renderDictionaryEntryHref(dictionaryEntryId, language)}
       target="_blank"
       rel="noreferrer noopener"
       data-dictionary-entry-id={dictionaryEntryId}
@@ -166,12 +171,13 @@ function renderExampleGroup(
                     segment.text,
                     segment.dictionaryEntryId,
                     segmentIndex,
+                    language,
                   ),
                 )
               : example.dictionaryRefs.length === 1 &&
                   !/\s/.test(example.coptic.trim()) ? (
                   <a
-                    href={renderDictionaryEntryHref(example.dictionaryRefs[0] ?? "")}
+                    href={renderDictionaryEntryHref(example.dictionaryRefs[0] ?? "", language)}
                     target="_blank"
                     rel="noreferrer noopener"
                     data-dictionary-entry-id={example.dictionaryRefs[0]}

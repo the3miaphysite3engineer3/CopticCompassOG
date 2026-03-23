@@ -7,7 +7,7 @@ export const grammarLesson01CoreSources: readonly GrammarSourceDocument[] = [
     title: "Inleiding tot het Bohairisch Koptisch: Basisgrammatica",
     subtitle: "Deel I (3 delen)",
     author: "Kyrillos Wannes",
-    url: "/publications#basisgrammatica-bohairisch-koptisch",
+    url: "/publications/basisgrammatica-bohairisch-koptisch",
     publicationId: "basisgrammatica-bohairisch-koptisch",
     comingSoon: true,
   },

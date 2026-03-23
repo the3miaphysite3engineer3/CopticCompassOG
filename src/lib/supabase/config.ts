@@ -21,7 +21,7 @@ export function getAuthUnavailableLoginPath(redirectTo?: string) {
     messageType: "error",
   });
 
-  if (redirectTo && redirectTo.startsWith("/")) {
+  if (redirectTo && redirectTo.startsWith("/") && !redirectTo.startsWith("//")) {
     params.set("redirect_to", redirectTo);
   }
 

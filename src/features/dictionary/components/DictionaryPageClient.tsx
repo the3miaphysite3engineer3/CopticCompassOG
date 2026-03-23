@@ -5,6 +5,7 @@ import { BarChart3 } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
+import { getAnalyticsPath } from "@/lib/locale";
 import { DictionaryFilters } from "./DictionaryFilters";
 import { DictionaryResultsSection } from "./DictionaryResultsSection";
 import { DictionarySearchBar } from "./DictionarySearchBar";
@@ -15,7 +16,7 @@ type DictionaryPageBodyProps = {
 };
 
 function DictionaryPageBody({ dictionaryPath }: DictionaryPageBodyProps) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const {
     dictionaryLength,
     filteredResults,
@@ -46,7 +47,7 @@ function DictionaryPageBody({ dictionaryPath }: DictionaryPageBodyProps) {
       ]}
     >
       <div className="mb-5 flex items-center justify-end">
-        <Link href="/analytics" className="btn-secondary gap-2 px-4">
+        <Link href={getAnalyticsPath(language)} className="btn-secondary gap-2 px-4">
           <BarChart3 className="h-4 w-4" />
           <span className="text-sm tracking-wide">{t("nav.analytics")}</span>
         </Link>

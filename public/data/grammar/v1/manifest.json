@@ -36,24 +36,6 @@
         "determiners",
         "pronouns"
       ]
-    },
-    {
-      "id": "grammar.lesson.02",
-      "slug": "lesson-2",
-      "number": 2,
-      "status": "draft",
-      "title": {
-        "en": "Lesson 02",
-        "nl": "Les 02"
-      },
-      "summary": {
-        "en": "Dive into verbal prefixes, adjectives, and constructing complex nominal sentences.",
-        "nl": "Duik in werkwoordelijke voorvoegsels, bijvoeglijke naamwoorden en het construeren van complexe nominale zinnen."
-      },
-      "tags": [
-        "planned",
-        "draft"
-      ]
     }
   ]
 }

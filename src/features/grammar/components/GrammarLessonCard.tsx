@@ -5,6 +5,7 @@ import { ArrowRight, BookOpenText, Clock3 } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { cx } from "@/lib/classes";
 import type { GrammarLessonIndexItem } from "@/content/grammar/schema";
+import { getGrammarLessonPath } from "@/features/grammar/lib/grammarPaths";
 import type { Language } from "@/types/i18n";
 
 type GrammarLessonCardProps = {
@@ -95,7 +96,7 @@ export function GrammarLessonCard({ lesson, language, t }: GrammarLessonCardProp
 
   return (
     <Link
-      href={`/grammar/${lesson.slug}`}
+      href={getGrammarLessonPath(lesson.slug, language)}
       className={cx(
         sharedClassName,
         "cursor-pointer border-stone-200 bg-white/70 hover:-translate-y-1 hover:border-sky-300 hover:shadow-sky-500/10 dark:border-stone-800 dark:bg-stone-900/50 dark:shadow-xl dark:shadow-black/20 dark:hover:border-sky-700"

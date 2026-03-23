@@ -1,0 +1,86 @@
+.swagger-ui {
+  font-family: var(--font-sans);
+  color: rgb(var(--ink));
+}
+
+.swagger-ui .topbar {
+  display: none;
+}
+
+.swagger-ui .info {
+  margin: 0;
+}
+
+.swagger-ui .info .title,
+.swagger-ui .info h1,
+.swagger-ui .info h2,
+.swagger-ui .info h3,
+.swagger-ui .info h4,
+.swagger-ui .info h5,
+.swagger-ui .info p,
+.swagger-ui .info li,
+.swagger-ui .opblock-tag,
+.swagger-ui .opblock-summary-path,
+.swagger-ui .opblock-summary-description,
+.swagger-ui .responses-inner h4,
+.swagger-ui .responses-inner h5,
+.swagger-ui table thead tr td,
+.swagger-ui table thead tr th,
+.swagger-ui table tbody tr td,
+.swagger-ui .parameter__name,
+.swagger-ui .parameter__type,
+.swagger-ui .response-col_status,
+.swagger-ui .response-col_description,
+.swagger-ui .tab li,
+.swagger-ui label,
+.swagger-ui section.models h4,
+.swagger-ui section.models h5 {
+  color: rgb(var(--ink));
+}
+
+.swagger-ui .info a,
+.swagger-ui .opblock-summary-method,
+.swagger-ui .link,
+.swagger-ui a.nostyle {
+  color: rgb(var(--accent-strong));
+}
+
+.swagger-ui .scheme-container {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+  margin: 0 0 1.5rem;
+}
+
+.swagger-ui .opblock {
+  border-radius: 1rem;
+  overflow: hidden;
+  border-width: 1px;
+  box-shadow: 0 10px 30px rgba(24, 30, 27, 0.06);
+}
+
+.swagger-ui .opblock .opblock-section-header,
+.swagger-ui .model-box,
+.swagger-ui .responses-inner,
+.swagger-ui table tbody tr td {
+  background: rgba(255, 255, 255, 0.7);
+}
+
+.swagger-ui .btn,
+.swagger-ui select,
+.swagger-ui input[type="text"],
+.swagger-ui textarea {
+  border-radius: 0.75rem;
+}
+
+.dark .swagger-ui .opblock .opblock-section-header,
+.dark .swagger-ui .model-box,
+.dark .swagger-ui .responses-inner,
+.dark .swagger-ui table tbody tr td,
+.dark .swagger-ui .scheme-container {
+  background: rgba(28, 25, 23, 0.72);
+}
+
+.dark .swagger-ui svg {
+  fill: rgb(var(--ink));
+}

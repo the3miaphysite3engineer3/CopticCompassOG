@@ -17,10 +17,10 @@ const dictionaryEntryCount = getDictionaryEntryCount();
 
 export const siteConfig = {
   name: "The Wannes Portfolio",
-  title: "The Wannes Portfolio | Digital Humanities",
+  title: "Kyrillos Wannes | Coptic Dictionary, Grammar, and Publications",
   description: dictionaryEntryCount
-    ? `Scholarly portfolio and digital Coptic-English dictionary by Kyrillos Wannes, featuring ${dictionaryEntryCount.toLocaleString()} entries, bilingual UI, analytics, and learning tools.`
-    : "Scholarly portfolio and digital Coptic-English dictionary by Kyrillos Wannes, with bilingual UI, analytics, and learning tools.",
+    ? `Digital Coptic dictionary, grammar lessons, publications, and research tools by Kyrillos Wannes, featuring ${dictionaryEntryCount.toLocaleString()} searchable entries.`
+    : "Digital Coptic dictionary, grammar lessons, publications, and research tools by Kyrillos Wannes.",
   liveUrl: "https://kyrilloswannes.com",
   repoUrl: "https://github.com/KyroHub/portfolio",
   cloneUrl: "https://github.com/KyroHub/portfolio.git",
