@@ -117,6 +117,7 @@ function renderExampleGroup(
   exampleIds: readonly string[],
   lessonBundle: GrammarLessonBundle | undefined,
   language: Language,
+  columns: 1 | 2 = 1,
 ) {
   const examples =
     lessonBundle?.examples.filter((example) => exampleIds.includes(example.id)) ?? [];
@@ -125,20 +126,35 @@ function renderExampleGroup(
     return null;
   }
 
-  return (
-    <GrammarLessonCard className="space-y-3">
-      <ul className="space-y-3">
-        {examples.map((example) => (
-          <li key={example.id} className="leading-7 text-stone-700 dark:text-stone-300">
-            <span className="font-coptic text-xl text-emerald-600 dark:text-emerald-400">
-              {renderExampleCopticText(example.coptic)}
-            </span>
-            <span className="ml-3">{example.translation[language]}</span>
-          </li>
-        ))}
-      </ul>
-    </GrammarLessonCard>
+  const renderExampleList = (items: typeof examples) => (
+    <ul className="space-y-3">
+      {items.map((example) => (
+        <li key={example.id} className="leading-7 text-stone-700 dark:text-stone-300">
+          <span className="font-coptic text-xl text-emerald-600 dark:text-emerald-400">
+            {renderExampleCopticText(example.coptic)}
+          </span>
+          <span className="ml-3">{example.translation[language]}</span>
+        </li>
+      ))}
+    </ul>
   );
+
+  if (columns === 2 && examples.length > 1) {
+    const splitIndex = Math.ceil(examples.length / 2);
+    const firstColumn = examples.slice(0, splitIndex);
+    const secondColumn = examples.slice(splitIndex);
+
+    return (
+      <GrammarLessonCard className="space-y-3">
+        <div className="grid gap-6 md:grid-cols-2 md:gap-8">
+          <div>{renderExampleList(firstColumn)}</div>
+          <div>{renderExampleList(secondColumn)}</div>
+        </div>
+      </GrammarLessonCard>
+    );
+  }
+
+  return <GrammarLessonCard className="space-y-3">{renderExampleList(examples)}</GrammarLessonCard>;
 }
 
 function renderBlock(
@@ -220,33 +236,104 @@ function renderBlock(
       );
     }
     case "table":
+      const useRowHeaderLayout = Boolean(block.hideHeader && block.rowHeaderColumnId);
+      const useCustomHeaderRows = Boolean(block.headerRows && block.headerRows.length > 0);
+
       return (
-        <GrammarLessonTable key={`${block.type}-${block.id}`}>
-          <thead>
-            <tr className="bg-stone-100 dark:bg-stone-800">
-              {block.columns.map((column) => (
-                <th
-                  key={column.id}
-                  className="border-b p-3 font-semibold dark:border-stone-700"
+        <GrammarLessonTable
+          key={`${block.type}-${block.id}`}
+          tableClassName={useRowHeaderLayout ? "table-fixed" : undefined}
+        >
+          {useCustomHeaderRows ? (
+            <thead>
+              {block.headerRows?.map((headerRow) => (
+                <tr
+                  key={headerRow.id}
+                  className="bg-stone-100 dark:bg-stone-800"
                 >
-                  {column.label[language]}
-                </th>
+                  {headerRow.cells.map((cell) => (
+                    <th
+                      key={cell.id}
+                      colSpan={cell.colSpan}
+                      rowSpan={cell.rowSpan}
+                      className={cx(
+                        "border-b p-3 font-semibold dark:border-stone-700",
+                        cell.align === "center" && "text-center",
+                        cell.align === "right" && "text-right",
+                        (!cell.align || cell.align === "left") && "text-center",
+                      )}
+                    >
+                      {cell.inlineLabel ? (
+                        <GrammarInlineRenderer
+                          nodes={cell.inlineLabel[language]}
+                          language={language}
+                        />
+                      ) : (
+                        cell.label[language]
+                      )}
+                    </th>
+                  ))}
+                </tr>
               ))}
-            </tr>
-          </thead>
+            </thead>
+          ) : block.hideHeader ? null : (
+            <thead>
+              <tr className="bg-stone-100 dark:bg-stone-800">
+                {block.columns.map((column) => (
+                  <th
+                    key={column.id}
+                    className="border-b p-3 text-center font-semibold dark:border-stone-700"
+                  >
+                    {column.inlineLabel ? (
+                      <GrammarInlineRenderer
+                        nodes={column.inlineLabel[language]}
+                        language={language}
+                      />
+                    ) : (
+                      column.label[language]
+                    )}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+          )}
           <tbody className="divide-y divide-stone-200 dark:divide-stone-800">
             {block.rows.map((row) => (
-              <tr key={row.id} className="align-top">
-                {block.columns.map((column) => (
-                  <td key={column.id} className="p-3">
-                    <GrammarBlockRenderer
-                      blocks={row.cells[column.id] ?? []}
-                      language={language}
-                      lessonBundle={lessonBundle}
-                      inheritTextColor={inheritTextColor}
-                    />
-                  </td>
-                ))}
+              <tr key={row.id} className={useRowHeaderLayout ? "align-middle" : "align-top"}>
+                {block.columns.map((column) => {
+                  const isRowHeader = column.id === block.rowHeaderColumnId;
+
+                  if (isRowHeader) {
+                    return (
+                      <th
+                        key={column.id}
+                        scope="row"
+                        className="w-32 border-r border-stone-200 bg-stone-100 px-4 py-3 text-left font-semibold text-stone-900 dark:border-stone-700 dark:bg-stone-800/90 dark:text-stone-100"
+                      >
+                        <GrammarBlockRenderer
+                          blocks={row.cells[column.id] ?? []}
+                          language={language}
+                          lessonBundle={lessonBundle}
+                          inheritTextColor
+                        />
+                      </th>
+                    );
+                  }
+
+                  return (
+                    <td
+                      key={column.id}
+                      className={useRowHeaderLayout ? "w-[22.66%] px-4 py-3 text-center align-middle" : "p-3"}
+                    >
+                      <GrammarBlockRenderer
+                        blocks={row.cells[column.id] ?? []}
+                        language={language}
+                        lessonBundle={lessonBundle}
+                        inheritTextColor={inheritTextColor}
+                      />
+                    </td>
+                  );
+                })}
               </tr>
             ))}
           </tbody>
@@ -279,7 +366,7 @@ function renderBlock(
     case "exampleGroup":
       return (
         <div key={`${block.type}-${index}`}>
-          {renderExampleGroup(block.refs, lessonBundle, language)}
+          {renderExampleGroup(block.refs, lessonBundle, language, block.columns)}
         </div>
       );
     case "exerciseGroup":

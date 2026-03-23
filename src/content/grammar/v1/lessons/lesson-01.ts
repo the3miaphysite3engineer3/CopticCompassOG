@@ -242,11 +242,38 @@ export const grammarLesson01Document: GrammarLessonDocument = {
           {
             type: "table",
             id: `${lessonId}.section.vocabulary-bare-nouns.table`,
+            headerRows: [
+              {
+                id: `${lessonId}.section.vocabulary-bare-nouns.header-row`,
+                cells: [
+                  {
+                    id: "masculine-group",
+                    label: { en: "Masculine m", nl: "Masculine m" },
+                    inlineLabel: {
+                      en: [text("Masculine "), smallCaps("m")],
+                      nl: [text("Masculine "), smallCaps("m")],
+                    },
+                    colSpan: 2,
+                    align: "center",
+                  },
+                  {
+                    id: "feminine-group",
+                    label: { en: "Feminine f", nl: "Feminine f" },
+                    inlineLabel: {
+                      en: [text("Feminine "), smallCaps("f")],
+                      nl: [text("Feminine "), smallCaps("f")],
+                    },
+                    colSpan: 2,
+                    align: "center",
+                  },
+                ],
+              },
+            ],
             columns: [
-              { id: "masculineWord", label: { en: "Masculine (m)", nl: "Masculine (m)" } },
-              { id: "masculineMeaning", label: { en: "Meaning", nl: "Meaning" } },
-              { id: "feminineWord", label: { en: "Feminine (f)", nl: "Feminine (f)" } },
-              { id: "feminineMeaning", label: { en: "Meaning", nl: "Meaning" } },
+              { id: "masculineWord", label: { en: "", nl: "" } },
+              { id: "masculineMeaning", label: { en: "", nl: "" } },
+              { id: "feminineWord", label: { en: "", nl: "" } },
+              { id: "feminineMeaning", label: { en: "", nl: "" } },
             ],
             rows: [
               {
@@ -319,11 +346,38 @@ export const grammarLesson01Document: GrammarLessonDocument = {
           {
             type: "table",
             id: `${lessonId}.section.vocabulary-bare-nouns.table`,
+            headerRows: [
+              {
+                id: `${lessonId}.section.vocabulary-bare-nouns.header-row.nl`,
+                cells: [
+                  {
+                    id: "masculine-group.nl",
+                    label: { en: "Mannelijk m", nl: "Mannelijk m" },
+                    inlineLabel: {
+                      en: [text("Mannelijk "), smallCaps("m")],
+                      nl: [text("Mannelijk "), smallCaps("m")],
+                    },
+                    colSpan: 2,
+                    align: "center",
+                  },
+                  {
+                    id: "feminine-group.nl",
+                    label: { en: "Vrouwelijk v", nl: "Vrouwelijk v" },
+                    inlineLabel: {
+                      en: [text("Vrouwelijk "), smallCaps("v")],
+                      nl: [text("Vrouwelijk "), smallCaps("v")],
+                    },
+                    colSpan: 2,
+                    align: "center",
+                  },
+                ],
+              },
+            ],
             columns: [
-              { id: "masculineWord", label: { en: "Mannelijk (m)", nl: "Mannelijk (m)" } },
-              { id: "masculineMeaning", label: { en: "Betekenis", nl: "Betekenis" } },
-              { id: "feminineWord", label: { en: "Vrouwelijk (v)", nl: "Vrouwelijk (v)" } },
-              { id: "feminineMeaning", label: { en: "Betekenis", nl: "Betekenis" } },
+              { id: "masculineWord", label: { en: "", nl: "" } },
+              { id: "masculineMeaning", label: { en: "", nl: "" } },
+              { id: "feminineWord", label: { en: "", nl: "" } },
+              { id: "feminineMeaning", label: { en: "", nl: "" } },
             ],
             rows: [
               {
@@ -423,6 +477,8 @@ export const grammarLesson01Document: GrammarLessonDocument = {
           {
             type: "table",
             id: `${lessonId}.section.significant-letters.table`,
+            hideHeader: true,
+            rowHeaderColumnId: "label",
             columns: [
               { id: "label", label: { en: "Category", nl: "Category" } },
               { id: "first", label: { en: "First", nl: "First" } },
@@ -436,7 +492,6 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                   label: paragraphCell(
                     text("Masculine "),
                     smallCaps("m"),
-                    text(":"),
                   ),
                   first: [paragraph(copticSpan(text("ⲡ"))), paragraph(text("/p/"))],
                   second: [paragraph(copticSpan(text("ⲫ"))), paragraph(text("/pʰ/"))],
@@ -449,7 +504,6 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                   label: paragraphCell(
                     text("Feminine "),
                     smallCaps("f"),
-                    text(":"),
                   ),
                   first: [paragraph(copticSpan(text("ⲧ"))), paragraph(text("/t/"))],
                   second: [paragraph(copticSpan(text("ⲑ"))), paragraph(text("/tʰ/"))],
@@ -463,7 +517,6 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                     text("Plural "),
                     smallCaps("p"),
                     footnoteRef("grammar.footnote.lesson01.001"),
-                    text(":"),
                   ),
                   first: [paragraph(copticSpan(text("ⲛ"))), paragraph(text("/n/"))],
                   second: [paragraph(text("-")), paragraph(text("no form"))],
@@ -484,6 +537,8 @@ export const grammarLesson01Document: GrammarLessonDocument = {
           {
             type: "table",
             id: `${lessonId}.section.significant-letters.table`,
+            hideHeader: true,
+            rowHeaderColumnId: "label",
             columns: [
               { id: "label", label: { en: "Categorie", nl: "Categorie" } },
               { id: "first", label: { en: "Eerste", nl: "Eerste" } },
@@ -497,7 +552,6 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                   label: paragraphCell(
                     text("Mannelijk "),
                     smallCaps("m"),
-                    text(":"),
                   ),
                   first: [paragraph(copticSpan(text("ⲡ"))), paragraph(text("/p/"))],
                   second: [paragraph(copticSpan(text("ⲫ"))), paragraph(text("/pʰ/"))],
@@ -510,7 +564,6 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                   label: paragraphCell(
                     text("Vrouwelijk "),
                     smallCaps("v"),
-                    text(":"),
                   ),
                   first: [paragraph(copticSpan(text("ⲧ"))), paragraph(text("/t/"))],
                   second: [paragraph(copticSpan(text("ⲑ"))), paragraph(text("/tʰ/"))],
@@ -524,7 +577,6 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                     text("Meervoud "),
                     smallCaps("p"),
                     footnoteRef("grammar.footnote.lesson01.001"),
-                    text(":"),
                   ),
                   first: [paragraph(copticSpan(text("ⲛ"))), paragraph(text("/n/"))],
                   second: [paragraph(text("-")), paragraph(text("geen vorm"))],
@@ -573,9 +625,30 @@ export const grammarLesson01Document: GrammarLessonDocument = {
             id: `${lessonId}.section.determiner-selection.table`,
             columns: [
               { id: "type", label: { en: "Type", nl: "Type" } },
-              { id: "masculine", label: { en: "Masculine (m)", nl: "Masculine (m)" } },
-              { id: "feminine", label: { en: "Feminine (f)", nl: "Feminine (f)" } },
-              { id: "plural", label: { en: "Plural (p)", nl: "Plural (p)" } },
+              {
+                id: "masculine",
+                label: { en: "Masculine m", nl: "Masculine m" },
+                inlineLabel: {
+                  en: [text("Masculine "), smallCaps("m")],
+                  nl: [text("Masculine "), smallCaps("m")],
+                },
+              },
+              {
+                id: "feminine",
+                label: { en: "Feminine f", nl: "Feminine f" },
+                inlineLabel: {
+                  en: [text("Feminine "), smallCaps("f")],
+                  nl: [text("Feminine "), smallCaps("f")],
+                },
+              },
+              {
+                id: "plural",
+                label: { en: "Plural p", nl: "Plural p" },
+                inlineLabel: {
+                  en: [text("Plural "), smallCaps("p")],
+                  nl: [text("Plural "), smallCaps("p")],
+                },
+              },
             ],
             rows: [
               {
@@ -700,9 +773,30 @@ export const grammarLesson01Document: GrammarLessonDocument = {
             id: `${lessonId}.section.determiner-selection.table`,
             columns: [
               { id: "type", label: { en: "Type", nl: "Type" } },
-              { id: "masculine", label: { en: "Mannelijk (m)", nl: "Mannelijk (m)" } },
-              { id: "feminine", label: { en: "Vrouwelijk (v)", nl: "Vrouwelijk (v)" } },
-              { id: "plural", label: { en: "Meervoud (p)", nl: "Meervoud (p)" } },
+              {
+                id: "masculine",
+                label: { en: "Mannelijk m", nl: "Mannelijk m" },
+                inlineLabel: {
+                  en: [text("Mannelijk "), smallCaps("m")],
+                  nl: [text("Mannelijk "), smallCaps("m")],
+                },
+              },
+              {
+                id: "feminine",
+                label: { en: "Vrouwelijk v", nl: "Vrouwelijk v" },
+                inlineLabel: {
+                  en: [text("Vrouwelijk "), smallCaps("v")],
+                  nl: [text("Vrouwelijk "), smallCaps("v")],
+                },
+              },
+              {
+                id: "plural",
+                label: { en: "Meervoud p", nl: "Meervoud p" },
+                inlineLabel: {
+                  en: [text("Meervoud "), smallCaps("p")],
+                  nl: [text("Meervoud "), smallCaps("p")],
+                },
+              },
             ],
             rows: [
               {
@@ -980,6 +1074,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               {
                 type: "exampleGroup",
                 refs: [...nominalSentenceExampleIds],
+                columns: 2,
               },
             ],
           },
@@ -1057,6 +1152,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               {
                 type: "exampleGroup",
                 refs: [...nominalSentenceExampleIds],
+                columns: 2,
               },
             ],
           },

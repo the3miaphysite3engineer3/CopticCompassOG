@@ -212,33 +212,122 @@
               {
                 "type": "table",
                 "id": "grammar.lesson.01.section.vocabulary-bare-nouns.table",
+                "headerRows": [
+                  {
+                    "id": "grammar.lesson.01.section.vocabulary-bare-nouns.header-row",
+                    "cells": [
+                      {
+                        "id": "masculine-group",
+                        "label": {
+                          "en": "Masculine m",
+                          "nl": "Masculine m"
+                        },
+                        "inlineLabel": {
+                          "en": [
+                            {
+                              "type": "text",
+                              "text": "Masculine "
+                            },
+                            {
+                              "type": "smallCaps",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "m"
+                                }
+                              ]
+                            }
+                          ],
+                          "nl": [
+                            {
+                              "type": "text",
+                              "text": "Masculine "
+                            },
+                            {
+                              "type": "smallCaps",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "m"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "colSpan": 2,
+                        "align": "center"
+                      },
+                      {
+                        "id": "feminine-group",
+                        "label": {
+                          "en": "Feminine f",
+                          "nl": "Feminine f"
+                        },
+                        "inlineLabel": {
+                          "en": [
+                            {
+                              "type": "text",
+                              "text": "Feminine "
+                            },
+                            {
+                              "type": "smallCaps",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "f"
+                                }
+                              ]
+                            }
+                          ],
+                          "nl": [
+                            {
+                              "type": "text",
+                              "text": "Feminine "
+                            },
+                            {
+                              "type": "smallCaps",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "f"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "colSpan": 2,
+                        "align": "center"
+                      }
+                    ]
+                  }
+                ],
                 "columns": [
                   {
                     "id": "masculineWord",
                     "label": {
-                      "en": "Masculine (m)",
-                      "nl": "Masculine (m)"
+                      "en": "",
+                      "nl": ""
                     }
                   },
                   {
                     "id": "masculineMeaning",
                     "label": {
-                      "en": "Meaning",
-                      "nl": "Meaning"
+                      "en": "",
+                      "nl": ""
                     }
                   },
                   {
                     "id": "feminineWord",
                     "label": {
-                      "en": "Feminine (f)",
-                      "nl": "Feminine (f)"
+                      "en": "",
+                      "nl": ""
                     }
                   },
                   {
                     "id": "feminineMeaning",
                     "label": {
-                      "en": "Meaning",
-                      "nl": "Meaning"
+                      "en": "",
+                      "nl": ""
                     }
                   }
                 ],
@@ -593,33 +682,122 @@
               {
                 "type": "table",
                 "id": "grammar.lesson.01.section.vocabulary-bare-nouns.table",
+                "headerRows": [
+                  {
+                    "id": "grammar.lesson.01.section.vocabulary-bare-nouns.header-row.nl",
+                    "cells": [
+                      {
+                        "id": "masculine-group.nl",
+                        "label": {
+                          "en": "Mannelijk m",
+                          "nl": "Mannelijk m"
+                        },
+                        "inlineLabel": {
+                          "en": [
+                            {
+                              "type": "text",
+                              "text": "Mannelijk "
+                            },
+                            {
+                              "type": "smallCaps",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "m"
+                                }
+                              ]
+                            }
+                          ],
+                          "nl": [
+                            {
+                              "type": "text",
+                              "text": "Mannelijk "
+                            },
+                            {
+                              "type": "smallCaps",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "m"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "colSpan": 2,
+                        "align": "center"
+                      },
+                      {
+                        "id": "feminine-group.nl",
+                        "label": {
+                          "en": "Vrouwelijk v",
+                          "nl": "Vrouwelijk v"
+                        },
+                        "inlineLabel": {
+                          "en": [
+                            {
+                              "type": "text",
+                              "text": "Vrouwelijk "
+                            },
+                            {
+                              "type": "smallCaps",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "v"
+                                }
+                              ]
+                            }
+                          ],
+                          "nl": [
+                            {
+                              "type": "text",
+                              "text": "Vrouwelijk "
+                            },
+                            {
+                              "type": "smallCaps",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "text": "v"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "colSpan": 2,
+                        "align": "center"
+                      }
+                    ]
+                  }
+                ],
                 "columns": [
                   {
                     "id": "masculineWord",
                     "label": {
-                      "en": "Mannelijk (m)",
-                      "nl": "Mannelijk (m)"
+                      "en": "",
+                      "nl": ""
                     }
                   },
                   {
                     "id": "masculineMeaning",
                     "label": {
-                      "en": "Betekenis",
-                      "nl": "Betekenis"
+                      "en": "",
+                      "nl": ""
                     }
                   },
                   {
                     "id": "feminineWord",
                     "label": {
-                      "en": "Vrouwelijk (v)",
-                      "nl": "Vrouwelijk (v)"
+                      "en": "",
+                      "nl": ""
                     }
                   },
                   {
                     "id": "feminineMeaning",
                     "label": {
-                      "en": "Betekenis",
-                      "nl": "Betekenis"
+                      "en": "",
+                      "nl": ""
                     }
                   }
                 ],
@@ -1014,6 +1192,8 @@
               {
                 "type": "table",
                 "id": "grammar.lesson.01.section.significant-letters.table",
+                "hideHeader": true,
+                "rowHeaderColumnId": "label",
                 "columns": [
                   {
                     "id": "label",
@@ -1064,10 +1244,6 @@
                                   "text": "m"
                                 }
                               ]
-                            },
-                            {
-                              "type": "text",
-                              "text": ":"
                             }
                           ]
                         }
@@ -1168,10 +1344,6 @@
                                   "text": "f"
                                 }
                               ]
-                            },
-                            {
-                              "type": "text",
-                              "text": ":"
                             }
                           ]
                         }
@@ -1276,10 +1448,6 @@
                             {
                               "type": "footnoteRef",
                               "ref": "grammar.footnote.lesson01.001"
-                            },
-                            {
-                              "type": "text",
-                              "text": ":"
                             }
                           ]
                         }
@@ -1377,6 +1545,8 @@
               {
                 "type": "table",
                 "id": "grammar.lesson.01.section.significant-letters.table",
+                "hideHeader": true,
+                "rowHeaderColumnId": "label",
                 "columns": [
                   {
                     "id": "label",
@@ -1427,10 +1597,6 @@
                                   "text": "m"
                                 }
                               ]
-                            },
-                            {
-                              "type": "text",
-                              "text": ":"
                             }
                           ]
                         }
@@ -1531,10 +1697,6 @@
                                   "text": "v"
                                 }
                               ]
-                            },
-                            {
-                              "type": "text",
-                              "text": ":"
                             }
                           ]
                         }
@@ -1639,10 +1801,6 @@
                             {
                               "type": "footnoteRef",
                               "ref": "grammar.footnote.lesson01.001"
-                            },
-                            {
-                              "type": "text",
-                              "text": ":"
                             }
                           ]
                         }
@@ -1806,22 +1964,118 @@
                   {
                     "id": "masculine",
                     "label": {
-                      "en": "Masculine (m)",
-                      "nl": "Masculine (m)"
+                      "en": "Masculine m",
+                      "nl": "Masculine m"
+                    },
+                    "inlineLabel": {
+                      "en": [
+                        {
+                          "type": "text",
+                          "text": "Masculine "
+                        },
+                        {
+                          "type": "smallCaps",
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "m"
+                            }
+                          ]
+                        }
+                      ],
+                      "nl": [
+                        {
+                          "type": "text",
+                          "text": "Masculine "
+                        },
+                        {
+                          "type": "smallCaps",
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "m"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   },
                   {
                     "id": "feminine",
                     "label": {
-                      "en": "Feminine (f)",
-                      "nl": "Feminine (f)"
+                      "en": "Feminine f",
+                      "nl": "Feminine f"
+                    },
+                    "inlineLabel": {
+                      "en": [
+                        {
+                          "type": "text",
+                          "text": "Feminine "
+                        },
+                        {
+                          "type": "smallCaps",
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "f"
+                            }
+                          ]
+                        }
+                      ],
+                      "nl": [
+                        {
+                          "type": "text",
+                          "text": "Feminine "
+                        },
+                        {
+                          "type": "smallCaps",
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "f"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   },
                   {
                     "id": "plural",
                     "label": {
-                      "en": "Plural (p)",
-                      "nl": "Plural (p)"
+                      "en": "Plural p",
+                      "nl": "Plural p"
+                    },
+                    "inlineLabel": {
+                      "en": [
+                        {
+                          "type": "text",
+                          "text": "Plural "
+                        },
+                        {
+                          "type": "smallCaps",
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "p"
+                            }
+                          ]
+                        }
+                      ],
+                      "nl": [
+                        {
+                          "type": "text",
+                          "text": "Plural "
+                        },
+                        {
+                          "type": "smallCaps",
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "p"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   }
                 ],
@@ -2230,22 +2484,118 @@
                   {
                     "id": "masculine",
                     "label": {
-                      "en": "Mannelijk (m)",
-                      "nl": "Mannelijk (m)"
+                      "en": "Mannelijk m",
+                      "nl": "Mannelijk m"
+                    },
+                    "inlineLabel": {
+                      "en": [
+                        {
+                          "type": "text",
+                          "text": "Mannelijk "
+                        },
+                        {
+                          "type": "smallCaps",
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "m"
+                            }
+                          ]
+                        }
+                      ],
+                      "nl": [
+                        {
+                          "type": "text",
+                          "text": "Mannelijk "
+                        },
+                        {
+                          "type": "smallCaps",
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "m"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   },
                   {
                     "id": "feminine",
                     "label": {
-                      "en": "Vrouwelijk (v)",
-                      "nl": "Vrouwelijk (v)"
+                      "en": "Vrouwelijk v",
+                      "nl": "Vrouwelijk v"
+                    },
+                    "inlineLabel": {
+                      "en": [
+                        {
+                          "type": "text",
+                          "text": "Vrouwelijk "
+                        },
+                        {
+                          "type": "smallCaps",
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "v"
+                            }
+                          ]
+                        }
+                      ],
+                      "nl": [
+                        {
+                          "type": "text",
+                          "text": "Vrouwelijk "
+                        },
+                        {
+                          "type": "smallCaps",
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "v"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   },
                   {
                     "id": "plural",
                     "label": {
-                      "en": "Meervoud (p)",
-                      "nl": "Meervoud (p)"
+                      "en": "Meervoud p",
+                      "nl": "Meervoud p"
+                    },
+                    "inlineLabel": {
+                      "en": [
+                        {
+                          "type": "text",
+                          "text": "Meervoud "
+                        },
+                        {
+                          "type": "smallCaps",
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "p"
+                            }
+                          ]
+                        }
+                      ],
+                      "nl": [
+                        {
+                          "type": "text",
+                          "text": "Meervoud "
+                        },
+                        {
+                          "type": "smallCaps",
+                          "children": [
+                            {
+                              "type": "text",
+                              "text": "p"
+                            }
+                          ]
+                        }
+                      ]
                     }
                   }
                 ],
@@ -2925,7 +3275,8 @@
                       "grammar.example.lesson01.nominal-sentence.006",
                       "grammar.example.lesson01.nominal-sentence.007",
                       "grammar.example.lesson01.nominal-sentence.008"
-                    ]
+                    ],
+                    "columns": 2
                   }
                 ]
               }
@@ -3117,7 +3468,8 @@
                       "grammar.example.lesson01.nominal-sentence.006",
                       "grammar.example.lesson01.nominal-sentence.007",
                       "grammar.example.lesson01.nominal-sentence.008"
-                    ]
+                    ],
+                    "columns": 2
                   }
                 ]
               }

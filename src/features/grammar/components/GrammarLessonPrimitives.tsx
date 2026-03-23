@@ -24,6 +24,7 @@ type GrammarLessonCardProps = {
 type GrammarLessonTableProps = {
   children: ReactNode;
   className?: string;
+  tableClassName?: string;
 };
 
 type GrammarLessonOutlineProps = {
@@ -156,10 +157,11 @@ export function GrammarLessonCard({
 export function GrammarLessonTable({
   children,
   className,
+  tableClassName,
 }: GrammarLessonTableProps) {
   return (
     <div className={cx("mt-4 rounded-lg border border-stone-200 dark:border-stone-800", className)}>
-      <table className="w-full border-collapse text-left">{children}</table>
+      <table className={cx("w-full border-collapse text-left", tableClassName)}>{children}</table>
     </div>
   );
 }

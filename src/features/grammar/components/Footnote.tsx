@@ -240,7 +240,10 @@ export function Footnote({
           onMouseEnter={canHover ? openTooltip : undefined}
           onMouseLeave={canHover ? scheduleClose : undefined}
           className={cx(
-            "fixed z-[80] max-w-[min(18rem,calc(100vw-1.5rem))] rounded-xl bg-stone-900 px-3 py-2.5 text-left text-xs leading-relaxed text-stone-100 shadow-2xl dark:bg-stone-200 dark:text-stone-900",
+            "fixed z-[80] max-w-[min(18rem,calc(100vw-1.5rem))] rounded-xl bg-black px-3 py-2.5 text-left text-xs leading-relaxed text-white shadow-2xl",
+            "[&_p]:text-white [&_li]:text-white [&_strong]:text-white [&_em]:text-white [&_.small-caps]:text-white",
+            "[&_a]:text-sky-200 [&_a]:decoration-sky-400 [&_a:hover]:text-sky-100",
+            "[&_.font-coptic]:text-emerald-300 [&_sup]:text-white",
             tooltipPosition ? "opacity-100" : "opacity-0",
           )}
           style={{
@@ -252,7 +255,7 @@ export function Footnote({
           {content}
           <span
             className={cx(
-              "absolute h-3 w-3 rotate-45 bg-stone-900 dark:bg-stone-200",
+              "absolute h-3 w-3 rotate-45 bg-black",
               tooltipPosition?.placement === "bottom"
                 ? "bottom-full mb-[-6px]"
                 : "top-full mt-[-6px]",

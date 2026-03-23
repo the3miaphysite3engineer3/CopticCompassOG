@@ -153,19 +153,42 @@ export type GrammarBlock =
       style: "ordered" | "unordered";
       items: { id: string; blocks: GrammarBlock[] }[];
     }
-  | { type: "table"; id: string; columns: GrammarTableColumn[]; rows: GrammarTableRow[] }
+  | {
+      type: "table";
+      id: string;
+      columns: GrammarTableColumn[];
+      headerRows?: GrammarTableHeaderRow[];
+      rows: GrammarTableRow[];
+      hideHeader?: boolean;
+      rowHeaderColumnId?: string;
+    }
   | {
       type: "callout";
       tone: "info" | "note" | "warning";
       title?: Localized<string>;
       blocks: GrammarBlock[];
     }
-  | { type: "exampleGroup"; refs: GrammarExampleId[] }
+  | { type: "exampleGroup"; refs: GrammarExampleId[]; columns?: 1 | 2 }
   | { type: "exerciseGroup"; refs: GrammarExerciseId[] };
 
 export type GrammarTableColumn = {
   id: string;
   label: Localized<string>;
+  inlineLabel?: Localized<GrammarInline[]>;
+};
+
+export type GrammarTableHeaderRow = {
+  id: string;
+  cells: GrammarTableHeaderCell[];
+};
+
+export type GrammarTableHeaderCell = {
+  id: string;
+  label: Localized<string>;
+  inlineLabel?: Localized<GrammarInline[]>;
+  colSpan?: number;
+  rowSpan?: number;
+  align?: "left" | "center" | "right";
 };
 
 export type GrammarTableRow = {
