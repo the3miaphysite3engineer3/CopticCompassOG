@@ -9,9 +9,6 @@ import {
   publications,
 } from "@/features/publications/lib/publications";
 import {
-  getAnalyticsPath,
-  getContactPath,
-  getDevelopersPath,
   getDictionaryPath,
   getEntryPath,
   getGrammarPath,
@@ -76,56 +73,10 @@ const localizedStaticRoutes: readonly LocalizedStaticRouteConfig[] = [
       "src/features/publications/lib/publications.ts",
     ],
   },
-  {
-    getRoute: getContactPath,
-    changeFrequency: "monthly",
-    priority: 0.6,
-    sourcePaths: ["src/app/(site)/[locale]/contact/page.tsx"],
-  },
-  {
-    getRoute: getDevelopersPath,
-    changeFrequency: "monthly",
-    priority: 0.65,
-    sourcePaths: [
-      "src/app/(site)/[locale]/developers/page.tsx",
-      "src/app/(app)/api-docs/page.tsx",
-      "src/features/grammar/lib/grammarOpenApi.ts",
-    ],
-  },
-  {
-    getRoute: getAnalyticsPath,
-    changeFrequency: "monthly",
-    priority: 0.6,
-    sourcePaths: [
-      "src/app/(site)/[locale]/analytics/page.tsx",
-      "public/data/dictionary.json",
-    ],
-  },
 ];
 
-const staticRoutes: readonly StaticRouteConfig[] = [
-  {
-    route: "/api-docs",
-    changeFrequency: "monthly",
-    priority: 0.5,
-    sourcePaths: [
-      "src/app/(app)/api-docs/page.tsx",
-      "src/features/grammar/lib/grammarOpenApi.ts",
-    ],
-  },
-  {
-    route: "/privacy",
-    changeFrequency: "yearly",
-    priority: 0.2,
-    sourcePaths: ["src/app/(app)/privacy/page.tsx"],
-  },
-  {
-    route: "/terms",
-    changeFrequency: "yearly",
-    priority: 0.2,
-    sourcePaths: ["src/app/(app)/terms/page.tsx"],
-  },
-];
+// Keep the sitemap focused on the strongest public landing pages.
+const staticRoutes: readonly StaticRouteConfig[] = [];
 
 function getLastModified(sourcePaths: readonly string[]) {
   const modifiedTimestamps = sourcePaths
@@ -204,12 +155,14 @@ export default function sitemap(): MetadataRoute.Sitemap {
   );
 
   const publicationPages = PUBLIC_LOCALES.flatMap((locale) =>
-    publications.map((publication) => ({
-      url: `${siteConfig.liveUrl}${getPublicationPath(publication.id, locale)}`,
-      ...(publicationsLastModified ? { lastModified: publicationsLastModified } : {}),
-      changeFrequency: "monthly" as const,
-      priority: publication.status === "published" ? 0.75 : 0.65,
-    })),
+    publications
+      .filter((publication) => publication.status === "published")
+      .map((publication) => ({
+        url: `${siteConfig.liveUrl}${getPublicationPath(publication.id, locale)}`,
+        ...(publicationsLastModified ? { lastModified: publicationsLastModified } : {}),
+        changeFrequency: "monthly" as const,
+        priority: 0.75,
+      })),
   );
 
   return [

@@ -59,11 +59,18 @@ export async function generateMetadata({
   const imageUrl = publication.image
     ? `${siteConfig.liveUrl}${publication.image}`
     : undefined;
+  const shouldIndex = publication.status === "published";
 
   return {
     metadataBase: new URL(siteConfig.liveUrl),
     title,
     description,
+    robots: shouldIndex
+      ? undefined
+      : {
+          index: false,
+          follow: true,
+        },
     alternates: {
       canonical: path,
       languages: createLanguageAlternates(`/publications/${publication.id}`),
