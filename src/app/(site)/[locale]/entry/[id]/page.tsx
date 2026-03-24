@@ -21,6 +21,7 @@ import {
   getOpenGraphLocale,
   isPublicLocale,
 } from '@/lib/locale';
+import { getTranslation } from '@/lib/i18n';
 import { buildPageTitle, siteConfig } from '@/lib/site';
 import {
   createBreadcrumbStructuredData,
@@ -45,7 +46,7 @@ export async function generateMetadata({
 
   if (!entry) {
     return {
-      title: "Entry Not Found",
+      title: locale === "nl" ? "Lemma niet gevonden" : "Entry Not Found",
       robots: {
         index: false,
         follow: false,
@@ -58,7 +59,7 @@ export async function generateMetadata({
     locale === "nl"
       ? `${headword} (${entry.pos}) - Koptisch Woordenboek`
       : `${headword} (${entry.pos}) - Coptic Dictionary`;
-  const description = buildEntryDescription(entry);
+  const description = buildEntryDescription(entry, locale);
   const path = getEntryPath(entry.id, locale);
 
   return {
@@ -117,8 +118,8 @@ export default async function EntryPage({
       <StructuredData
         data={[
           createBreadcrumbStructuredData([
-            { name: "Home", path: getLocalizedHomePath(locale) },
-            { name: "Dictionary", path: getDictionaryPath(locale) },
+            { name: getTranslation(locale, "nav.home"), path: getLocalizedHomePath(locale) },
+            { name: getTranslation(locale, "nav.dictionary"), path: getDictionaryPath(locale) },
             { name: headword, path: getEntryPath(entry.id, locale) },
           ]),
           createDefinedTermStructuredData(entry, locale),

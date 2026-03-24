@@ -1,4 +1,5 @@
 import type { LexicalEntry } from "@/features/dictionary/types";
+import type { Language } from "@/types/i18n";
 
 const entryLeadIns = [
   "intr",
@@ -106,9 +107,18 @@ export function getEntrySummary(entry: LexicalEntry) {
   return "";
 }
 
-export function buildEntryDescription(entry: LexicalEntry) {
+export function buildEntryDescription(
+  entry: LexicalEntry,
+  locale: Language = "en",
+) {
   const headword = toPlainText(entry.headword);
   const firstMeaning = getEntrySummary(entry);
+
+  if (locale === "nl") {
+    return firstMeaning
+      ? `${headword} (${entry.pos}) in het Koptische woordenboek. ${firstMeaning}.`
+      : `${headword} (${entry.pos}) in het Koptische woordenboek van Kyrillos Wannes.`;
+  }
 
   return firstMeaning
     ? `${headword} (${entry.pos}) in the Coptic dictionary. ${firstMeaning}.`

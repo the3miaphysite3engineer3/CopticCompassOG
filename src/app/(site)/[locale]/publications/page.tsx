@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import StructuredData from "@/components/StructuredData";
 import PublicationsPageClient from "@/features/publications/components/PublicationsPageClient";
 import { publications } from "@/features/publications/lib/publications";
+import { getTranslation } from "@/lib/i18n";
 import { createLocalizedPageMetadata } from "@/lib/metadata";
 import { getLocalizedHomePath, getPublicationsPath, isPublicLocale } from "@/lib/locale";
 import {
@@ -47,8 +48,14 @@ export default async function PublicationsPage({
       <StructuredData
         data={[
           createBreadcrumbStructuredData([
-            { name: "Home", path: getLocalizedHomePath(resolvedLocale) },
-            { name: "Publications", path: getPublicationsPath(resolvedLocale) },
+            {
+              name: getTranslation(resolvedLocale, "nav.home"),
+              path: getLocalizedHomePath(resolvedLocale),
+            },
+            {
+              name: getTranslation(resolvedLocale, "nav.publications"),
+              path: getPublicationsPath(resolvedLocale),
+            },
           ]),
           ...createPublicationsStructuredData(publications, resolvedLocale),
         ]}

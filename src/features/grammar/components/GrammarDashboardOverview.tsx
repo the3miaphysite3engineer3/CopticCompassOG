@@ -2,44 +2,45 @@ import Link from "next/link";
 import { Badge } from "@/components/Badge";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import {
+  formatDashboardDate,
+  getDashboardCopy,
+} from "@/features/dashboard/lib/dashboardCopy";
+import {
   buildGrammarLearnerDashboardStats,
   type GrammarLessonLearnerSummary,
 } from "@/features/grammar/lib/grammarLearnerState";
+import { getGrammarLessonPath } from "@/features/grammar/lib/grammarPaths";
+import type { Language } from "@/types/i18n";
 
 type GrammarDashboardOverviewProps = {
+  language: Language;
   lessonSummaries: readonly GrammarLessonLearnerSummary[];
 };
 
-function formatDashboardDate(value: string | null) {
-  if (!value) {
-    return null;
-  }
-
-  return new Date(value).toLocaleDateString();
-}
-
 export function GrammarDashboardOverview({
+  language,
   lessonSummaries,
 }: GrammarDashboardOverviewProps) {
   const stats = buildGrammarLearnerDashboardStats(lessonSummaries);
+  const copy = getDashboardCopy(language);
 
   return (
     <section className="space-y-6">
       <div>
         <h3 className="text-2xl font-bold tracking-tight text-stone-800 dark:text-stone-200">
-          Grammar progress
+          {copy.grammar.title}
         </h3>
         <p className="mt-2 text-stone-600 dark:text-stone-400">
-          Track your lesson completion, saved lessons, and personal notes across the grammar course.
+          {copy.grammar.description}
         </p>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {[
-          ["Published lessons", stats.totalLessons],
-          ["Started", stats.startedLessons],
-          ["Completed", stats.completedLessons],
-          ["Saved / noted", stats.bookmarkedLessons + stats.notedLessons],
+          [copy.grammar.publishedLessons, stats.totalLessons],
+          [copy.grammar.startedLessons, stats.startedLessons],
+          [copy.grammar.completedLessons, stats.completedLessons],
+          [copy.grammar.savedLessons, stats.bookmarkedLessons + stats.notedLessons],
         ].map(([label, value]) => (
           <SurfacePanel key={label} rounded="2xl" className="p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
@@ -55,8 +56,8 @@ export function GrammarDashboardOverview({
       <div className="grid gap-4">
         {lessonSummaries.map((summary) => {
           const lessonHref = summary.nextSectionId
-            ? `/grammar/${summary.lessonSlug}#${summary.nextSectionId}`
-            : `/grammar/${summary.lessonSlug}`;
+            ? `${getGrammarLessonPath(summary.lessonSlug, language)}#${summary.nextSectionId}`
+            : getGrammarLessonPath(summary.lessonSlug, language);
 
           return (
             <SurfacePanel
@@ -72,29 +73,31 @@ export function GrammarDashboardOverview({
                     </Badge>
                     {summary.isCompleted ? (
                       <Badge tone="surface" size="xs">
-                        Completed
+                        {copy.grammar.completedBadge}
                       </Badge>
                     ) : null}
                     {summary.isBookmarked ? (
                       <Badge tone="surface" size="xs">
-                        Saved
+                        {copy.grammar.savedBadge}
                       </Badge>
                     ) : null}
                     {summary.hasNotes ? (
                       <Badge tone="surface" size="xs">
-                        Notes
+                        {copy.grammar.notesBadge}
                       </Badge>
                     ) : null}
                   </div>
 
                   <h4 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
-                    {summary.lessonTitle.en}
+                    {summary.lessonTitle[language]}
                   </h4>
 
                   <div className="mt-4 max-w-xl">
                     <div className="mb-2 flex items-center justify-between gap-4 text-sm">
                       <span className="font-medium text-stone-700 dark:text-stone-300">
-                        {summary.completedSections} of {summary.totalSections} sections complete
+                        {language === "nl"
+                          ? `${summary.completedSections} van ${summary.totalSections} onderdelen voltooid`
+                          : `${summary.completedSections} of ${summary.totalSections} sections complete`}
                       </span>
                       <span className="font-semibold text-sky-700 dark:text-sky-300">
                         {summary.progressPercent}%
@@ -110,19 +113,24 @@ export function GrammarDashboardOverview({
 
                   <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">
                     {summary.lastViewedAt
-                      ? `Last visited on ${formatDashboardDate(summary.lastViewedAt)}`
-                      : "Not started yet"}
+                      ? language === "nl"
+                        ? `Laatst bekeken op ${formatDashboardDate(summary.lastViewedAt, language)}`
+                        : `Last visited on ${formatDashboardDate(summary.lastViewedAt, language)}`
+                      : copy.grammar.notStartedYet}
                   </p>
                 </div>
 
                 <div className="flex shrink-0 flex-col items-start gap-3 md:items-end">
                   {summary.nextSectionTitle ? (
                     <p className="text-sm text-stone-500 dark:text-stone-400">
-                      Next up: {summary.nextSectionTitle.en}
+                      {language === "nl" ? "Volgende:" : "Next up:"}{" "}
+                      {summary.nextSectionTitle[language]}
                     </p>
                   ) : null}
                   <Link href={lessonHref} className="btn-primary px-5">
-                    {summary.isStarted ? "Continue lesson" : "Start lesson"}
+                    {summary.isStarted
+                      ? copy.grammar.continueLesson
+                      : copy.grammar.startLesson}
                   </Link>
                 </div>
               </div>

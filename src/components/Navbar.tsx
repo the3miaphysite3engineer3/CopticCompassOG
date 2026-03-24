@@ -11,11 +11,13 @@ import { LanguageToggle } from "./LanguageToggle";
 import { useLanguage } from "./LanguageProvider";
 import {
   getContactPath,
+  getDashboardPath,
   getDictionaryPath,
   getGrammarPath,
   getLocalizedHomePath,
   getPublicationsPath,
 } from "@/lib/locale";
+import { getLoginPath } from "@/lib/supabase/config";
 
 const NavbarAuthLink = dynamic(
   () =>
@@ -40,6 +42,8 @@ export function Navbar() {
   const pathname = usePathname() ?? "";
   const { language, t } = useLanguage();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const dashboardHref = getDashboardPath(language);
+  const loginHref = getLoginPath(dashboardHref);
 
   const links = [
     { href: getPublicationsPath(language), label: t("nav.publications") },
@@ -91,7 +95,9 @@ export function Navbar() {
               );
             })}
             <NavbarAuthLink
+              dashboardHref={dashboardHref}
               dashboardLabel={t("nav.dashboard")}
+              loginHref={loginHref}
               loginLabel={t("nav.login") || "Log In"}
               pathname={pathname}
               variant="desktop"
@@ -141,7 +147,9 @@ export function Navbar() {
               );
             })}
             <NavbarAuthLink
+              dashboardHref={dashboardHref}
               dashboardLabel={t("nav.dashboard")}
+              loginHref={loginHref}
               loginLabel={t("nav.login") || "Log In"}
               onNavigate={() => setIsMobileMenuOpen(false)}
               pathname={pathname}

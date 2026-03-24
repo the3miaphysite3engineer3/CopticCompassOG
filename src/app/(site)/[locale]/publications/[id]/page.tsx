@@ -11,6 +11,7 @@ import {
   publications,
 } from "@/features/publications/lib/publications";
 import { listPublishedGrammarLessonsForPublication } from "@/features/grammar/lib/grammarContentGraph";
+import { getTranslation } from "@/lib/i18n";
 import {
   createLanguageAlternates,
   getLocalizedHomePath,
@@ -45,7 +46,8 @@ export async function generateMetadata({
 
   if (!publication) {
     return {
-      title: "Publication Not Found",
+      title:
+        locale === "nl" ? "Publicatie niet gevonden" : "Publication Not Found",
       robots: {
         index: false,
         follow: false,
@@ -123,8 +125,8 @@ export default async function PublicationDetailPage({
       <StructuredData
         data={[
           createBreadcrumbStructuredData([
-            { name: "Home", path: getLocalizedHomePath(locale) },
-            { name: "Publications", path: getPublicationsPath(locale) },
+            { name: getTranslation(locale, "nav.home"), path: getLocalizedHomePath(locale) },
+            { name: getTranslation(locale, "nav.publications"), path: getPublicationsPath(locale) },
             { name: publication.title, path: publicationPath },
           ]),
           createPublicationStructuredData(publication, locale),

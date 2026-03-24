@@ -4,10 +4,12 @@
 import { useState } from 'react'
 import imageCompression from 'browser-image-compression'
 import { updateProfile } from '@/actions/profile'
+import { useLanguage } from "@/components/LanguageProvider";
 import { createClient } from '@/lib/supabase/client'
 import { FormField } from '@/components/FormField'
 import { StatusNotice } from '@/components/StatusNotice'
 import { SurfacePanel } from '@/components/SurfacePanel'
+import { getDashboardCopy } from "@/features/dashboard/lib/dashboardCopy";
 import { antinoou } from '@/lib/fonts'
 import type { Tables } from '@/types/supabase'
 
@@ -18,6 +20,8 @@ export function ProfileForm({
   profile: Tables<'profiles'>
   embedded?: boolean
 }) {
+  const { language } = useLanguage()
+  const copy = getDashboardCopy(language)
   const [isUploading, setIsUploading] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(profile.avatar_url)
   const [status, setStatus] = useState<{ message: string; type: 'success' | 'error' } | null>(null)
@@ -29,11 +33,11 @@ export function ProfileForm({
       setIsUploading(true)
 
       if (!event.target.files || event.target.files.length === 0) {
-        throw new Error('You must select an image to upload.')
+        throw new Error(copy.profile.selectImageError)
       }
 
       if (!supabase) {
-        throw new Error('Database connection disabled. Cannot upload file.')
+        throw new Error(copy.profile.uploadUnavailableError)
       }
 
       const file = event.target.files[0]
@@ -44,9 +48,9 @@ export function ProfileForm({
         useWebWorker: true,
       }
       
-      setStatus({ message: 'Compressing image...', type: 'success' })
+      setStatus({ message: copy.profile.compressingImage, type: 'success' })
       const compressedFile = await imageCompression(file, options)
-      setStatus({ message: 'Uploading to server...', type: 'success' })
+      setStatus({ message: copy.profile.uploadingImage, type: 'success' })
 
       const fileExt = file.name.split('.').pop() || 'jpeg'
       const filePath = `${profile.id}/${crypto.randomUUID()}.${fileExt}`
@@ -75,7 +79,9 @@ export function ProfileForm({
       // Auto-clear the "Uploading to server..." success message
       setTimeout(() => setStatus(null), 3000)
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Unknown upload error occurred'
+      const errorMessage = error instanceof Error
+        ? error.message
+        : copy.profile.uploadUnknownError
       setStatus({ message: errorMessage, type: 'error' })
     } finally {
       setIsUploading(false)
@@ -90,10 +96,13 @@ export function ProfileForm({
     
     const result = await updateProfile(formData)
     if (result.success) {
-      setStatus({ message: 'Profile updated successfully!', type: 'success' })
+      setStatus({ message: copy.profile.updatedSuccess, type: 'success' })
       setTimeout(() => setStatus(null), 3000)
     } else {
-      setStatus({ message: result.error || 'Failed to update profile.', type: 'error' })
+      setStatus({
+        message: result.error || copy.profile.updateFailed,
+        type: 'error',
+      })
     }
   }
 
@@ -102,14 +111,20 @@ export function ProfileForm({
       <div className="flex flex-col items-center gap-4">
         <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-stone-100 shadow-sm dark:border-stone-700 dark:bg-stone-800">
           {avatarUrl ? (
-            <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover" />
+            <img
+              src={avatarUrl}
+              alt={copy.profile.avatarAlt}
+              className="h-full w-full object-cover"
+            />
           ) : (
-            <span className="text-sm text-stone-400 dark:text-stone-500">No Avatar</span>
+            <span className="text-sm text-stone-400 dark:text-stone-500">
+              {copy.profile.noAvatar}
+            </span>
           )}
         </div>
         <div>
           <label className="btn-secondary relative cursor-pointer px-4 py-2 text-xs" htmlFor="single">
-            {isUploading ? 'Uploading...' : 'Upload Image'}
+            {isUploading ? copy.profile.uploadPending : copy.profile.uploadIdle}
           </label>
           <input
             style={{
@@ -126,18 +141,18 @@ export function ProfileForm({
       </div>
 
       <form action={handleSubmit} className="flex-1 w-full space-y-6 text-stone-800 dark:text-stone-200">
-        <FormField htmlFor="full_name" label="Full Name">
+        <FormField htmlFor="full_name" label={copy.profile.fullNameLabel}>
           <input
             id="full_name"
             name="full_name"
             type="text"
             className={`input-base ${antinoou.className} tracking-wide`}
             defaultValue={profile.full_name || ''}
-            placeholder="Your Name"
+            placeholder={copy.profile.fullNamePlaceholder}
           />
         </FormField>
 
-        <FormField htmlFor="email" label="Email Address">
+        <FormField htmlFor="email" label={copy.profile.emailLabel}>
           <input
             id="email"
             type="email"
@@ -145,11 +160,11 @@ export function ProfileForm({
             defaultValue={profile.email || ''}
             disabled
           />
-          <p className="mt-1 text-xs text-stone-500">Email cannot be changed currently.</p>
+          <p className="mt-1 text-xs text-stone-500">{copy.profile.emailHint}</p>
         </FormField>
 
         <button type="submit" className="btn-primary w-full px-8 md:w-auto" disabled={isUploading}>
-          Save Changes
+          {copy.profile.saveChanges}
         </button>
 
         {status && (
@@ -167,7 +182,9 @@ export function ProfileForm({
 
   return (
     <SurfacePanel rounded="3xl" className="p-6 md:p-8">
-      <h3 className="mb-6 text-xl font-semibold text-stone-800 dark:text-stone-200">Profile Settings</h3>
+      <h3 className="mb-6 text-xl font-semibold text-stone-800 dark:text-stone-200">
+        {copy.profile.sectionTitle}
+      </h3>
       {content}
     </SurfacePanel>
   )

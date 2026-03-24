@@ -31,7 +31,7 @@ export const sharedMessages = defineMessages({
     "nav.publications": "Publicaties",
     "nav.dictionary": "Woordenboek",
     "nav.grammar": "Grammatica",
-    "nav.developers": "Developelaars",
+    "nav.developers": "Ontwikkelaars",
     "nav.contact": "Contact",
     "nav.analytics": "Analytics-dashboard",
     "nav.login": "Inloggen",
@@ -41,6 +41,6 @@ export const sharedMessages = defineMessages({
     "footer.privacy": "Privacybeleid",
     "footer.terms": "Gebruiksvoorwaarden",
     "footer.apiDocs": "API-docs",
-    "footer.developers": "Developelaars",
+    "footer.developers": "Ontwikkelaars",
   },
 });

@@ -1,3 +1,5 @@
+import type { Language } from "@/types/i18n";
+
 type UserAppMetadata = {
   provider?: unknown;
   providers?: unknown;
@@ -24,13 +26,13 @@ function normalizeAuthProviders(appMetadata: UserAppMetadata) {
   );
 }
 
-function formatProviderLabel(provider: string) {
+function formatProviderLabel(provider: string, language: Language) {
   if (provider === "google") {
     return "Google";
   }
 
   if (provider === "email") {
-    return "email and password";
+    return language === "nl" ? "e-mail en wachtwoord" : "email and password";
   }
 
   return provider;
@@ -38,6 +40,7 @@ function formatProviderLabel(provider: string) {
 
 export function getAccountAuthSettings(
   appMetadata: UserAppMetadata,
+  language: Language = "en",
 ): AccountAuthSettings {
   const authProviders = normalizeAuthProviders(appMetadata);
   const canUpdatePassword =
@@ -50,6 +53,6 @@ export function getAccountAuthSettings(
   return {
     authProviders,
     canUpdatePassword,
-    providerLabel: formatProviderLabel(primaryProvider),
+    providerLabel: formatProviderLabel(primaryProvider, language),
   };
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Download, Lock } from "lucide-react";
+import { useLanguage } from "@/components/LanguageProvider";
 import { createClient } from "@/lib/supabase/client";
 import type { jsPDF as JsPdfInstance } from "jspdf";
 
@@ -13,6 +14,25 @@ type DownloadPdfButtonProps = {
   beforeCapture?: PdfLifecycleCallback;
   afterCapture?: PdfLifecycleCallback;
 };
+
+const PDF_BUTTON_COPY = {
+  en: {
+    download: "Download PDF",
+    generating: "Generating...",
+    loginPrompt: "Log in or sign up to download lessons as PDF",
+    footerLeadIn:
+      "Downloaded from The Wannes Portfolio (kyrilloswannes.com) on",
+    errorPrefix: "PDF generation encountered an error:",
+  },
+  nl: {
+    download: "PDF downloaden",
+    generating: "PDF wordt gemaakt...",
+    loginPrompt: "Log in of maak een account aan om lessen als pdf te downloaden",
+    footerLeadIn:
+      "Gedownload van The Wannes Portfolio (kyrilloswannes.com) op",
+    errorPrefix: "Er is een fout opgetreden bij het maken van de pdf:",
+  },
+} as const;
 
 function waitForNextPaint() {
   return new Promise<void>((resolve) => {
@@ -28,9 +48,11 @@ export function DownloadPdfButton({
   beforeCapture,
   afterCapture,
 }: DownloadPdfButtonProps) {
+  const { language } = useLanguage();
   const [isReady, setIsReady] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const copy = PDF_BUTTON_COPY[language];
 
   useEffect(() => {
     const supabase = createClient();
@@ -97,11 +119,13 @@ export function DownloadPdfButton({
         // Draw white rectangle to protect the bottom margin
         doc.rect(0, pageHeight - margin, pdfWidth, margin, "F");
 
-        const now = new Date().toLocaleString();
+        const now = new Date().toLocaleString(
+          language === "nl" ? "nl-BE" : "en-US",
+        );
         doc.setFontSize(9);
         doc.setTextColor(150);
         doc.text(
-          `Downloaded from The Wannes Portfolio (kyrilloswannes.com) on ${now}`,
+          `${copy.footerLeadIn} ${now}`,
           pdfWidth / 2,
           pageHeight - (margin / 2) + 2,
           { align: "center" }
@@ -126,7 +150,7 @@ export function DownloadPdfButton({
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : "Unknown error";
       console.error("PDF Generation failed", err);
-      alert(`PDF generation encountered an error: ${errorMessage}`);
+      alert(`${copy.errorPrefix} ${errorMessage}`);
     } finally {
       if (afterCapture) {
         await afterCapture();
@@ -146,10 +170,10 @@ export function DownloadPdfButton({
           className="btn-secondary gap-2 px-4 opacity-50 cursor-not-allowed"
         >
           <Lock className="h-4 w-4" />
-          Download PDF
+          {copy.download}
         </button>
         <div className="absolute top-full right-0 transform mt-2 w-max max-w-xs text-center text-xs bg-stone-800 text-white rounded p-2 opacity-0 group-hover:opacity-100 transition-opacity z-50 shadow-lg pointer-events-none">
-          Log in or sign up to download lessons as PDF
+          {copy.loginPrompt}
         </div>
       </div>
     );
@@ -162,7 +186,7 @@ export function DownloadPdfButton({
       className={`btn-secondary gap-2 px-4 ${isGenerating ? "opacity-70" : ""}`}
     >
       <Download className={`h-4 w-4 ${isGenerating ? "animate-bounce" : ""}`} />
-      {isGenerating ? "Generating..." : "Download PDF"}
+      {isGenerating ? copy.generating : copy.download}
     </button>
   );
 }

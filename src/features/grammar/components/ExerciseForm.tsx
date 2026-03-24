@@ -8,6 +8,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
+import { getDashboardPath } from "@/lib/locale";
 import type { Language } from "@/types/i18n";
 
 export type ExerciseFormQuestion = {
@@ -98,7 +99,10 @@ export function ExerciseForm({
         className="mt-6"
         title={t("exercise.submittedTitle")}
         actions={
-          <Link href="/dashboard" className="inline-flex h-11 items-center justify-center rounded-xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400">
+          <Link
+            href={getDashboardPath(language)}
+            className="inline-flex h-11 items-center justify-center rounded-xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400"
+          >
             {t("exercise.viewDashboard")}
           </Link>
         }

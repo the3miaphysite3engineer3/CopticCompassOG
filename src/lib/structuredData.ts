@@ -34,8 +34,81 @@ export type BreadcrumbStructuredDataItem = {
   path: string;
 };
 
+const STRUCTURED_DATA_COPY = {
+  en: {
+    copticLanguageName: "Coptic",
+    publicationCreativeWorkStatus: "In preparation",
+    websiteDescription: siteConfig.dictionaryEntryCount
+      ? `Digital Coptic dictionary, grammar lessons, publications, and research tools by Kyrillos Wannes, featuring ${siteConfig.dictionaryEntryCount.toLocaleString()} searchable entries.`
+      : "Digital Coptic dictionary, grammar lessons, publications, and research tools by Kyrillos Wannes.",
+    dictionary: {
+      pageName: "Coptic Dictionary",
+      pageDescription:
+        "Search the Coptic-English dictionary by Coptic, English, or Greek, with dialect filters, grammatical detail, and a built-in virtual keyboard.",
+      setName: "Coptic-English Dictionary",
+      setDescription:
+        "A digital Coptic dictionary with English and Greek glosses, dialect forms, and grammatical annotations.",
+    },
+    grammar: {
+      hubPageName: "Coptic Grammar Lessons",
+      hubPageDescription:
+        "Published Coptic grammar lessons with exercises, concept glossaries, and source notes by Kyrillos Wannes.",
+      hubListName: "Published Coptic Grammar Lessons",
+      learningResourceType: "Grammar lesson",
+    },
+    publications: {
+      pageName: "Publications",
+      pageDescription:
+        "Books, reference works, and research projects by Kyrillos Wannes, including published and forthcoming Coptic language materials.",
+      listName: "Publications by Kyrillos Wannes",
+    },
+    definedTerm: {
+      partOfSpeech: "Part of speech",
+      gender: "Gender",
+      greekEquivalents: "Greek equivalents",
+    },
+  },
+  nl: {
+    copticLanguageName: "Koptisch",
+    publicationCreativeWorkStatus: "In voorbereiding",
+    websiteDescription: siteConfig.dictionaryEntryCount
+      ? `Digitale Koptische woordenboeklemma's, grammaticalessen, publicaties en onderzoekstools van Kyrillos Wannes, met ${siteConfig.dictionaryEntryCount.toLocaleString()} doorzoekbare lemma's.`
+      : "Digitale Koptische woordenboeklemma's, grammaticalessen, publicaties en onderzoekstools van Kyrillos Wannes.",
+    dictionary: {
+      pageName: "Koptisch Woordenboek",
+      pageDescription:
+        "Doorzoek het Koptisch-Nederlandse woordenboek op Koptisch, Nederlands of Grieks, met dialectfilters, grammaticale details en een ingebouwd virtueel toetsenbord.",
+      setName: "Koptisch-Nederlands Woordenboek",
+      setDescription:
+        "Een digitaal Koptisch woordenboek met Nederlandse en Griekse glossen, dialectvormen en grammaticale annotaties.",
+    },
+    grammar: {
+      hubPageName: "Lessen Koptische Grammatica",
+      hubPageDescription:
+        "Gepubliceerde lessen Koptische grammatica met oefeningen, begrippenlijsten en bronnotities van Kyrillos Wannes.",
+      hubListName: "Gepubliceerde lessen Koptische grammatica",
+      learningResourceType: "Grammaticales",
+    },
+    publications: {
+      pageName: "Publicaties",
+      pageDescription:
+        "Boeken, naslagwerken en onderzoeksprojecten van Kyrillos Wannes, waaronder gepubliceerde en aankomende materialen voor de Koptische taal.",
+      listName: "Publicaties van Kyrillos Wannes",
+    },
+    definedTerm: {
+      partOfSpeech: "Woordsoort",
+      gender: "Geslacht",
+      greekEquivalents: "Griekse equivalenten",
+    },
+  },
+} as const;
+
 function absoluteUrl(path: string) {
   return new URL(path, siteConfig.liveUrl).toString();
+}
+
+function getStructuredDataCopy(locale: Language) {
+  return STRUCTURED_DATA_COPY[locale];
 }
 
 function getWebsiteId(locale: Language) {
@@ -79,6 +152,7 @@ function getPublicationStructuredData(
   locale: Language = DEFAULT_LANGUAGE,
 ): JsonLd {
   const publicationUrl = getPublicationAbsoluteUrl(publication, locale);
+  const copy = getStructuredDataCopy(locale);
 
   return {
     "@context": "https://schema.org",
@@ -109,7 +183,7 @@ function getPublicationStructuredData(
       : {}),
     ...(publication.status === "forthcoming"
       ? {
-          creativeWorkStatus: "In preparation",
+          creativeWorkStatus: copy.publicationCreativeWorkStatus,
         }
       : {}),
     isPartOf: {
@@ -151,6 +225,7 @@ export function createWebSiteStructuredData(
   locale: Language = DEFAULT_LANGUAGE,
 ): JsonLd {
   const dictionaryUrl = getDictionaryUrl(locale);
+  const copy = getStructuredDataCopy(locale);
 
   return {
     "@context": "https://schema.org",
@@ -159,7 +234,7 @@ export function createWebSiteStructuredData(
     url: absoluteUrl(getLocalizedHomePath(locale)),
     name: siteConfig.name,
     alternateName: "Kyrillos Wannes",
-    description: siteConfig.description,
+    description: copy.websiteDescription,
     inLanguage: ["en", "nl", "cop"],
     publisher: {
       "@type": "Person",
@@ -182,6 +257,7 @@ export function createDictionaryPageStructuredData(
 ): JsonLd[] {
   const dictionaryUrl = getDictionaryUrl(locale);
   const dictionarySetId = getDictionarySetId(locale);
+  const copy = getStructuredDataCopy(locale);
 
   return [
     {
@@ -189,9 +265,8 @@ export function createDictionaryPageStructuredData(
       "@type": "CollectionPage",
       "@id": `${dictionaryUrl}#collection-page`,
       url: dictionaryUrl,
-      name: "Coptic Dictionary",
-      description:
-        "Search the Coptic-English dictionary by Coptic, English, or Greek, with dialect filters, grammatical detail, and a built-in virtual keyboard.",
+      name: copy.dictionary.pageName,
+      description: copy.dictionary.pageDescription,
       isPartOf: {
         "@id": getWebsiteId(locale),
       },
@@ -201,7 +276,7 @@ export function createDictionaryPageStructuredData(
       about: [
         {
           "@type": "Language",
-          name: "Coptic",
+          name: copy.copticLanguageName,
           alternateName: "cop",
         },
       ],
@@ -211,9 +286,8 @@ export function createDictionaryPageStructuredData(
       "@type": "DefinedTermSet",
       "@id": dictionarySetId,
       url: dictionaryUrl,
-      name: "Coptic-English Dictionary",
-      description:
-        "A digital Coptic dictionary with English and Greek glosses, dialect forms, and grammatical annotations.",
+      name: copy.dictionary.setName,
+      description: copy.dictionary.setDescription,
       creator: {
         "@type": "Person",
         name: siteConfig.author.name,
@@ -231,6 +305,7 @@ export function createGrammarHubStructuredData(
   const grammarHubUrl = getGrammarHubUrl(locale);
   const grammarHubPageId = getGrammarHubPageId(locale);
   const grammarHubListId = getGrammarHubListId(locale);
+  const copy = getStructuredDataCopy(locale);
 
   return [
     {
@@ -238,9 +313,8 @@ export function createGrammarHubStructuredData(
       "@type": "CollectionPage",
       "@id": grammarHubPageId,
       url: grammarHubUrl,
-      name: "Coptic Grammar Lessons",
-      description:
-        "Published Coptic grammar lessons with exercises, concept glossaries, and source notes by Kyrillos Wannes.",
+      name: copy.grammar.hubPageName,
+      description: copy.grammar.hubPageDescription,
       isPartOf: {
         "@id": getWebsiteId(locale),
       },
@@ -250,7 +324,7 @@ export function createGrammarHubStructuredData(
       about: [
         {
           "@type": "Language",
-          name: "Coptic",
+          name: copy.copticLanguageName,
           alternateName: "cop",
         },
       ],
@@ -260,12 +334,12 @@ export function createGrammarHubStructuredData(
       "@type": "ItemList",
       "@id": grammarHubListId,
       url: grammarHubUrl,
-      name: "Published Coptic Grammar Lessons",
+      name: copy.grammar.hubListName,
       itemListElement: publishedLessons.map((lesson, index) => ({
         "@type": "ListItem",
         position: index + 1,
         url: absoluteUrl(getGrammarLessonPath(lesson.slug, locale)),
-        name: buildGrammarLessonSeoTitle(lesson),
+        name: buildGrammarLessonSeoTitle(lesson, locale),
       })),
     },
   ];
@@ -277,20 +351,21 @@ export function createGrammarLessonStructuredData(
 ): JsonLd {
   const lesson = lessonBundle.lesson;
   const lessonUrl = absoluteUrl(getGrammarLessonPath(lesson.slug, locale));
+  const copy = getStructuredDataCopy(locale);
 
   return {
     "@context": "https://schema.org",
     "@type": "LearningResource",
     "@id": `${lessonUrl}#learning-resource`,
     url: lessonUrl,
-    name: buildGrammarLessonSeoTitle(lesson),
-    description: buildGrammarLessonSeoDescription(lessonBundle),
+    name: buildGrammarLessonSeoTitle(lesson, locale),
+    description: buildGrammarLessonSeoDescription(lessonBundle, locale),
     author: {
       "@type": "Person",
       name: siteConfig.author.name,
     },
     educationalUse: "instruction",
-    learningResourceType: "Grammar lesson",
+    learningResourceType: copy.grammar.learningResourceType,
     inLanguage: ["en", "nl", "cop"],
     keywords: lesson.tags.join(", "),
     isPartOf: {
@@ -299,17 +374,17 @@ export function createGrammarLessonStructuredData(
     about: [
       {
         "@type": "Language",
-        name: "Coptic",
+        name: copy.copticLanguageName,
         alternateName: "cop",
       },
       ...lessonBundle.concepts.slice(0, 6).map((concept) => ({
         "@type": "DefinedTerm",
-        name: concept.title.en,
+        name: concept.title[locale],
       })),
     ],
     hasPart: lesson.sections.map((section) => ({
       "@type": "WebPageElement",
-      name: section.title.en,
+      name: section.title[locale],
       position: section.order,
     })),
   };
@@ -321,6 +396,7 @@ export function createDefinedTermStructuredData(
 ): JsonLd {
   const headword = toPlainText(entry.headword);
   const entryPath = getEntryPath(entry.id, locale);
+  const copy = getStructuredDataCopy(locale);
   // Search engines benefit from seeing every distinct dialect spelling as an
   // alternate label for the same lexical entry.
   const alternateNames = Array.from(
@@ -340,20 +416,20 @@ export function createDefinedTermStructuredData(
   const additionalProperty = [
     {
       "@type": "PropertyValue",
-      name: "Part of speech",
+      name: copy.definedTerm.partOfSpeech,
       value: entry.pos,
     },
     entry.gender
       ? {
           "@type": "PropertyValue",
-          name: "Gender",
+          name: copy.definedTerm.gender,
           value: entry.gender,
         }
       : null,
     entry.greek_equivalents.length > 0
       ? {
           "@type": "PropertyValue",
-          name: "Greek equivalents",
+          name: copy.definedTerm.greekEquivalents,
           value: entry.greek_equivalents.join("; "),
         }
       : null,
@@ -366,7 +442,7 @@ export function createDefinedTermStructuredData(
     url: absoluteUrl(entryPath),
     name: headword,
     alternateName: alternateNames,
-    description: buildEntryDescription(entry),
+    description: buildEntryDescription(entry, locale),
     termCode: entry.id,
     inDefinedTermSet: {
       "@id": getDictionarySetId(locale),
@@ -386,6 +462,7 @@ export function createPublicationsStructuredData(
   const works = publications.map((publication) =>
     getPublicationStructuredData(publication, locale),
   );
+  const copy = getStructuredDataCopy(locale);
 
   return [
     {
@@ -393,9 +470,8 @@ export function createPublicationsStructuredData(
       "@type": "CollectionPage",
       "@id": publicationsPageId,
       url: absoluteUrl(getPublicationsPath(locale)),
-      name: "Publications",
-      description:
-        "Books, reference works, and research projects by Kyrillos Wannes, including published and forthcoming Coptic language materials.",
+      name: copy.publications.pageName,
+      description: copy.publications.pageDescription,
       isPartOf: {
         "@id": getWebsiteId(locale),
       },
@@ -408,7 +484,7 @@ export function createPublicationsStructuredData(
       "@type": "ItemList",
       "@id": publicationsListId,
       url: absoluteUrl(getPublicationsPath(locale)),
-      name: "Publications by Kyrillos Wannes",
+      name: copy.publications.listName,
       itemListElement: publications.map((publication, index) => ({
         "@type": "ListItem",
         position: index + 1,

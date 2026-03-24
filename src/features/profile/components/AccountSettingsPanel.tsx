@@ -9,8 +9,14 @@ import { Badge } from '@/components/Badge'
 import { FormField } from '@/components/FormField'
 import { StatusNotice } from '@/components/StatusNotice'
 import { SurfacePanel } from '@/components/SurfacePanel'
+import { useLanguage } from "@/components/LanguageProvider";
+import {
+  formatDashboardProviderDescription,
+  getDashboardCopy,
+} from "@/features/dashboard/lib/dashboardCopy";
 import { cx } from '@/lib/classes'
 import { ProfileForm } from '@/features/profile/components/ProfileForm'
+import { getContactPath } from "@/lib/locale";
 import type { Tables } from '@/types/supabase'
 
 type AccountSettingsPanelProps = {
@@ -81,61 +87,86 @@ function PasswordSettingsForm({ canUpdatePassword, providerLabel }: {
   canUpdatePassword: boolean
   providerLabel: string
 }) {
+  const { language } = useLanguage()
+  const copy = getDashboardCopy(language)
   const [isPending, startTransition] = useTransition()
   const [status, setStatus] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
 
   function handleSubmit(formData: FormData) {
     setStatus(null)
+    const password = formData.get("password");
+    const confirmPassword = formData.get("confirm_password");
+
+    if (password !== confirmPassword) {
+      setStatus({ message: copy.account.passwordMismatch, type: "error" })
+      return
+    }
 
     startTransition(async () => {
       const result = await updatePasswordFromDashboard(formData)
       if (result.success) {
-        setStatus({ message: 'Password updated successfully.', type: 'success' })
+        setStatus({
+          message: copy.account.passwordUpdateSuccess,
+          type: 'success',
+        })
         return
       }
 
-      setStatus({ message: result.error || 'Could not update your password.', type: 'error' })
+      setStatus({
+        message: result.error || copy.account.passwordUpdateFailed,
+        type: 'error',
+      })
     })
   }
 
   if (!canUpdatePassword) {
     return (
       <StatusNotice tone="info" align="left">
-        {`This account signs in with ${providerLabel}, so password changes are not managed here.`}
+        {formatDashboardProviderDescription(
+          copy.account.passwordManagedElsewhere,
+          providerLabel,
+        )}
       </StatusNotice>
     )
   }
 
   return (
     <form action={handleSubmit} className="space-y-5 text-stone-800 dark:text-stone-200">
-      <FormField htmlFor="password" label="New Password">
+      <FormField htmlFor="password" label={copy.account.newPasswordLabel}>
         <input
           id="password"
           name="password"
           type="password"
           className="input-base"
-          placeholder="Must be at least 8 characters"
+          minLength={8}
+          placeholder={copy.account.newPasswordPlaceholder}
           required
         />
       </FormField>
 
-      <FormField htmlFor="confirm_password" label="Confirm New Password">
+      <FormField
+        htmlFor="confirm_password"
+        label={copy.account.confirmPasswordLabel}
+      >
         <input
           id="confirm_password"
           name="confirm_password"
           type="password"
           className="input-base"
-          placeholder="Repeat your new password"
+          minLength={8}
+          placeholder={copy.account.confirmPasswordPlaceholder}
           required
         />
       </FormField>
 
       <p className="text-sm leading-6 text-stone-500 dark:text-stone-400">
-        Use a password you do not reuse elsewhere. Updating it here keeps your dashboard login current without leaving this page.
+        {copy.account.passwordHint}
       </p>
 
       <button type="submit" className="btn-primary px-6" disabled={isPending}>
-        {isPending ? 'Updating...' : 'Update Password'}
+        {isPending
+          ? copy.account.updatePasswordPending
+          : copy.account.updatePasswordIdle}
       </button>
 
       {status ? (
@@ -148,24 +179,29 @@ function PasswordSettingsForm({ canUpdatePassword, providerLabel }: {
 }
 
 function DeleteProfileNotice() {
+  const { language } = useLanguage()
+  const copy = getDashboardCopy(language)
+
   return (
     <div className="space-y-5">
-      <StatusNotice tone="error" align="left" title="Permanent deletion">
-        Account deletion is currently handled manually so we can safely remove your profile and the learning data tied to it.
+      <StatusNotice
+        tone="error"
+        align="left"
+        title={copy.account.deleteNoticeTitle}
+      >
+        {copy.account.deleteNoticeLead}
       </StatusNotice>
 
       <div className="space-y-3 text-sm leading-6 text-stone-600 dark:text-stone-300">
-        <p>
-          Requesting deletion removes your profile together with associated dashboard data such as submissions, lesson progress, bookmarks, and notes.
-        </p>
+        <p>{copy.account.deleteNoticeBody}</p>
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <Link href="/contact" className="btn-primary px-6">
-          Request Deletion
+        <Link href={getContactPath(language)} className="btn-primary px-6">
+          {copy.account.requestDeletion}
         </Link>
         <Link href="/privacy" className="btn-secondary px-6">
-          Review Privacy Policy
+          {copy.account.reviewPrivacy}
         </Link>
       </div>
     </div>
@@ -177,32 +213,36 @@ export function AccountSettingsPanel({
   profile,
   providerLabel,
 }: AccountSettingsPanelProps) {
+  const { language } = useLanguage()
+  const copy = getDashboardCopy(language)
   const [openSection, setOpenSection] = useState<AccountSectionId | null>('profile')
-  const providerBadgeLabel = canUpdatePassword ? 'Available' : 'External sign-in'
+  const providerBadgeLabel = canUpdatePassword
+    ? copy.account.passwordAvailableBadge
+    : copy.account.passwordExternalBadge
 
   return (
     <SurfacePanel rounded="3xl" className="overflow-hidden p-0">
       <div className="border-b border-stone-200/80 px-6 py-5 dark:border-stone-800/80">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-          Account
+          {copy.account.eyebrow}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <h2 className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
-            Settings
+            {copy.account.title}
           </h2>
           <Badge tone="surface" size="xs">
-            Private
+            {copy.account.privateBadge}
           </Badge>
         </div>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600 dark:text-stone-300">
-          Manage your profile details, password access, and account-level requests without cluttering the rest of the dashboard.
+          {copy.account.description}
         </p>
       </div>
 
       <AccountSettingsSection
         icon={<UserRound className="h-5 w-5" />}
-        title="Profile Settings"
-        description="Update your display name and avatar while keeping your sign-in email visible for reference."
+        title={copy.account.profileTitle}
+        description={copy.account.profileDescription}
         isOpen={openSection === 'profile'}
         onToggle={() => setOpenSection((current) => current === 'profile' ? null : 'profile')}
       >
@@ -211,11 +251,14 @@ export function AccountSettingsPanel({
 
       <AccountSettingsSection
         icon={<KeyRound className="h-5 w-5" />}
-        title="Update Password"
+        title={copy.account.passwordTitle}
         description={
           canUpdatePassword
-            ? 'Change your dashboard password here instead of leaving the dashboard flow.'
-            : `This account uses ${providerLabel} for sign-in, so password changes are not managed locally.`
+            ? copy.account.passwordDescription
+            : formatDashboardProviderDescription(
+                copy.account.passwordExternalDescription,
+                providerLabel,
+              )
         }
         badge={
           <Badge tone={canUpdatePassword ? 'accent' : 'neutral'} size="xs">
@@ -233,11 +276,11 @@ export function AccountSettingsPanel({
 
       <AccountSettingsSection
         icon={<TriangleAlert className="h-5 w-5" />}
-        title="Delete Profile"
-        description="Review the permanent deletion path before removing your account and associated learning data."
+        title={copy.account.deleteTitle}
+        description={copy.account.deleteDescription}
         badge={
           <Badge tone="neutral" size="xs">
-            Manual review
+            {copy.account.deleteBadge}
           </Badge>
         }
         isOpen={openSection === 'delete'}

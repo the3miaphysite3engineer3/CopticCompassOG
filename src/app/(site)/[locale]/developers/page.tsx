@@ -4,6 +4,7 @@ import StructuredData from "@/components/StructuredData";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
+import { getTranslation } from "@/lib/i18n";
 import { createLocalizedPageMetadata } from "@/lib/metadata";
 import {
   getDevelopersPath,
@@ -102,7 +103,7 @@ const payload = await response.json();
 const lessonTitles = payload.data.map((lesson) => lesson.title.en);`,
   },
   nl: {
-    title: "Developelaars",
+    title: "Ontwikkelaars",
     seoTitle: "Koptische grammatica-API voor ontwikkelaars",
     description:
       "Verken de publieke Koptische grammatica-API, het OpenAPI-schema, statische JSON-exports en integratienotities voor ontwikkelaars.",
@@ -178,7 +179,7 @@ const lessonTitles = payload.data.map((lesson) => lesson.title.en);`,
         description: "Bekijk de publieke inhoud die de API ontsluit.",
       },
     ],
-    breadcrumbLabel: "Developelaars",
+    breadcrumbLabel: "Ontwikkelaars",
     code: `const response = await fetch(
   "https://kyrilloswannes.com/api/v1/grammar/lessons",
 );
@@ -225,7 +226,10 @@ export default async function DevelopersPage({
     >
       <StructuredData
         data={createBreadcrumbStructuredData([
-          { name: "Home", path: getLocalizedHomePath(resolvedLocale) },
+          {
+            name: getTranslation(resolvedLocale, "nav.home"),
+            path: getLocalizedHomePath(resolvedLocale),
+          },
           { name: copy.breadcrumbLabel, path: getDevelopersPath(resolvedLocale) },
         ])}
       />

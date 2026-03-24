@@ -15,6 +15,7 @@ type AuthModuleContext = {
   createClientMock: ReturnType<typeof vi.fn>;
   getClientRateLimitIdentifierMock: ReturnType<typeof vi.fn>;
   getAuthUnavailableLoginPathMock: ReturnType<typeof vi.fn>;
+  getLoginPathMock: ReturnType<typeof vi.fn>;
   hasSupabaseRuntimeEnvMock: ReturnType<typeof vi.fn>;
   revalidatePathMock: ReturnType<typeof vi.fn>;
   redirectMock: ReturnType<typeof vi.fn>;
@@ -69,6 +70,12 @@ async function loadAuthModule(options?: {
         ? `/login?state=auth-unavailable&messageType=error&redirect_to=${encodeURIComponent(redirectTo)}`
         : "/login?state=auth-unavailable&messageType=error"
     );
+  const getLoginPathMock = vi
+    .fn((redirectTo?: string) =>
+      redirectTo
+        ? `/login?redirect_to=${encodeURIComponent(redirectTo)}`
+        : "/login"
+    );
   const hasSupabaseRuntimeEnvMock = vi.fn(() => options?.hasEnv ?? true);
   const signInWithPasswordMock = vi
     .fn()
@@ -108,6 +115,7 @@ async function loadAuthModule(options?: {
   }));
   vi.doMock("@/lib/supabase/config", () => ({
     getAuthUnavailableLoginPath: getAuthUnavailableLoginPathMock,
+    getLoginPath: getLoginPathMock,
     hasSupabaseRuntimeEnv: hasSupabaseRuntimeEnvMock,
   }));
   vi.doMock("@/lib/supabase/server", () => ({
@@ -122,6 +130,7 @@ async function loadAuthModule(options?: {
     createClientMock,
     getClientRateLimitIdentifierMock,
     getAuthUnavailableLoginPathMock,
+    getLoginPathMock,
     hasSupabaseRuntimeEnvMock,
     revalidatePathMock,
     redirectMock,
@@ -231,7 +240,8 @@ describe("auth actions", () => {
     await expect(
       signup(createLoginFormData({ email: "invalid", password: "short" }))
     ).rejects.toMatchObject({
-      destination: "/login?state=signup-invalid-input&messageType=error",
+      destination:
+        "/login?state=signup-invalid-input&messageType=error&redirect_to=%2Fdashboard",
     });
 
     expect(createClientMock).not.toHaveBeenCalled();
@@ -243,7 +253,8 @@ describe("auth actions", () => {
     });
 
     await expect(signup(createLoginFormData())).rejects.toMatchObject({
-      destination: "/login?state=signup-check-email&messageType=success",
+      destination:
+        "/login?state=signup-check-email&messageType=success&redirect_to=%2Fdashboard",
     });
 
     expect(signUpMock).toHaveBeenCalledWith({
@@ -251,7 +262,7 @@ describe("auth actions", () => {
       password: "password123",
       options: {
         emailRedirectTo:
-          "https://example.com/login?state=signup-confirmed&messageType=success",
+          "https://example.com/login?state=signup-confirmed&messageType=success&redirect_to=%2Fdashboard",
       },
     });
     expect(revalidatePathMock).not.toHaveBeenCalled();
@@ -261,7 +272,7 @@ describe("auth actions", () => {
     const { logout, revalidatePathMock, signOutMock } = await loadAuthModule();
 
     await expect(logout()).rejects.toMatchObject({
-      destination: "/login",
+      destination: "/login?redirect_to=%2Fdashboard",
     });
 
     expect(signOutMock).toHaveBeenCalled();

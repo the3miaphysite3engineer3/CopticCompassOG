@@ -16,6 +16,7 @@ import {
   getOpenGraphLocale,
   isPublicLocale,
 } from "@/lib/locale";
+import { getTranslation } from "@/lib/i18n";
 import { buildPageTitle, siteConfig } from "@/lib/site";
 import {
   createBreadcrumbStructuredData,
@@ -43,7 +44,10 @@ export async function generateMetadata({
 
   if (!lessonBundle) {
     return {
-      title: "Grammar Lesson Not Found",
+      title:
+        locale === "nl"
+          ? "Grammaticales niet gevonden"
+          : "Grammar Lesson Not Found",
       robots: {
         index: false,
         follow: false,
@@ -51,8 +55,8 @@ export async function generateMetadata({
     };
   }
 
-  const title = buildGrammarLessonSeoTitle(lessonBundle.lesson);
-  const description = buildGrammarLessonSeoDescription(lessonBundle);
+  const title = buildGrammarLessonSeoTitle(lessonBundle.lesson, locale);
+  const description = buildGrammarLessonSeoDescription(lessonBundle, locale);
   const path = getGrammarLessonPath(lessonBundle.lesson.slug, locale);
 
   return {
@@ -98,9 +102,9 @@ export default async function GrammarLessonPage({
       <StructuredData
         data={[
           createBreadcrumbStructuredData([
-            { name: "Home", path: getLocalizedHomePath(locale) },
-            { name: "Grammar", path: getGrammarPath(locale) },
-            { name: lessonBundle.lesson.title.en, path: lessonPath },
+            { name: getTranslation(locale, "nav.home"), path: getLocalizedHomePath(locale) },
+            { name: getTranslation(locale, "nav.grammar"), path: getGrammarPath(locale) },
+            { name: lessonBundle.lesson.title[locale], path: lessonPath },
           ]),
           createGrammarLessonStructuredData(lessonBundle, locale),
         ]}

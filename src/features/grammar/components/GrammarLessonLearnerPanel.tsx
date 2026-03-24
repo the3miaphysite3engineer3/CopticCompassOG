@@ -5,6 +5,7 @@ import { Bookmark, CheckCircle2, NotebookPen } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { StatusNotice } from "@/components/StatusNotice";
 import { cx } from "@/lib/classes";
+import { getDashboardPath } from "@/lib/locale";
 import type { Language } from "@/types/i18n";
 import type { GrammarLessonLearnerSummary } from "@/features/grammar/lib/grammarLearnerState";
 
@@ -172,7 +173,10 @@ export function GrammarLessonLearnerPanel({
                 ? "Les opslaan"
                 : "Save lesson"}
           </button>
-          <Link href="/dashboard" className="btn-secondary px-4 py-2 text-sm">
+          <Link
+            href={getDashboardPath(language)}
+            className="btn-secondary px-4 py-2 text-sm"
+          >
             {language === "nl" ? "Dashboard" : "Dashboard"}
           </Link>
         </div>

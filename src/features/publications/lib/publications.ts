@@ -163,6 +163,7 @@ export function buildPublicationDescription(
       : publication.status === "published"
         ? "Available now."
         : "Forthcoming.";
+  const authorLabel = locale === "nl" ? "door" : "by";
 
-  return `${buildPublicationTitle(publication)}. ${publication.summary[locale]} ${availabilityLabel} ${formatLabel} by Kyrillos Wannes.`;
+  return `${buildPublicationTitle(publication)}. ${publication.summary[locale]} ${availabilityLabel} ${formatLabel} ${authorLabel} Kyrillos Wannes.`;
 }

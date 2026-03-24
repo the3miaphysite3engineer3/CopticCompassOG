@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { PUBLIC_LOCALES, getDashboardPath } from "@/lib/locale";
 import { getAuthenticatedServerContext } from "@/lib/supabase/auth";
 import { hasSupabaseRuntimeEnv } from "@/lib/supabase/config";
 
@@ -35,5 +36,8 @@ export async function updateProfile(formData: FormData) {
   }
 
   revalidatePath("/dashboard");
+  for (const locale of PUBLIC_LOCALES) {
+    revalidatePath(getDashboardPath(locale));
+  }
   return { success: true };
 }

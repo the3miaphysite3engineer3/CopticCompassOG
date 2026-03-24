@@ -17,6 +17,7 @@ import {
   normalizeMultiline,
   normalizeWhitespace,
 } from '@/lib/validation'
+import { PUBLIC_LOCALES, getDashboardPath } from "@/lib/locale";
 import type { SubmissionInsert } from '@/features/submissions/types'
 import type { Language } from '@/types/i18n'
 
@@ -158,6 +159,9 @@ export async function submitExercise(_prevState: ExerciseActionState, formData: 
   }
 
   revalidatePath('/dashboard')
+  for (const locale of PUBLIC_LOCALES) {
+    revalidatePath(getDashboardPath(locale))
+  }
   revalidatePath(`/grammar/${lessonDefinition.slug}`)
 
   return { success: true }

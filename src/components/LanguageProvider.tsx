@@ -27,6 +27,11 @@ interface LanguageContextType {
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+function persistLanguagePreference(language: Language) {
+  localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+  document.cookie = `${LANGUAGE_STORAGE_KEY}=${language}; path=/; max-age=31536000; samesite=lax`;
+}
+
 type LanguageProviderProps = {
   children: ReactNode;
   initialLanguage?: Language;
@@ -47,7 +52,7 @@ export function LanguageProvider({
       startTransition(() => {
         setLanguageState(initialLanguage);
       });
-      localStorage.setItem(LANGUAGE_STORAGE_KEY, initialLanguage);
+      persistLanguagePreference(initialLanguage);
       return;
     }
 
@@ -56,6 +61,7 @@ export function LanguageProvider({
       startTransition(() => {
         setLanguageState(storedLanguage);
       });
+      document.cookie = `${LANGUAGE_STORAGE_KEY}=${storedLanguage}; path=/; max-age=31536000; samesite=lax`;
     } else {
       const preferredLanguage = navigator.language.toLowerCase().startsWith("nl")
         ? "nl"
@@ -64,7 +70,7 @@ export function LanguageProvider({
       startTransition(() => {
         setLanguageState(preferredLanguage);
       });
-      localStorage.setItem(LANGUAGE_STORAGE_KEY, preferredLanguage);
+      persistLanguagePreference(preferredLanguage);
     }
   }, [initialLanguage, localeRouting]);
 
@@ -76,7 +82,7 @@ export function LanguageProvider({
     startTransition(() => {
       setLanguageState(lang);
     });
-    localStorage.setItem(LANGUAGE_STORAGE_KEY, lang);
+    persistLanguagePreference(lang);
 
     if (localeRouting && pathname) {
       const nextPath = switchLocalePath(pathname, lang);

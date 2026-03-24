@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { stripLocaleFromPathname } from "@/lib/locale";
 import {
   getAuthUnavailableLoginPath,
   getLoginPath,
@@ -12,8 +13,13 @@ export async function updateSession(request: NextRequest) {
     request,
   })
   const { pathname } = request.nextUrl
+  const normalizedPathname = stripLocaleFromPathname(pathname)
   const protectedRoutes = ['/dashboard', '/admin']
-  const isProtectedRoute = protectedRoutes.some((route) => pathname.startsWith(route))
+  const isProtectedRoute = protectedRoutes.some(
+    (route) =>
+      normalizedPathname === route ||
+      normalizedPathname.startsWith(`${route}/`),
+  )
 
   const env = getSupabaseRuntimeEnv()
 

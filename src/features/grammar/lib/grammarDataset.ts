@@ -10,31 +10,47 @@ import type {
   GrammarLessonIndexItem,
   GrammarSectionDocument,
 } from "@/content/grammar/schema";
+import type { Language } from "@/types/i18n";
 
 export type GrammarLessonOutlineItem = Pick<GrammarSectionDocument, "id" | "slug" | "title">;
 
-function pluralize(count: number, singular: string, plural = `${singular}s`) {
+function pluralize(count: number, singular: string, plural: string) {
   return `${count} ${count === 1 ? singular : plural}`;
 }
 
 export function buildGrammarLessonSeoTitle(
   lesson: Pick<GrammarLessonDocument, "number" | "summary">,
+  locale: Language = "en",
 ) {
-  const normalizedSummary = lesson.summary.en.replace(/\.$/, "");
+  const normalizedSummary = lesson.summary[locale].replace(/\.$/, "");
+  const lessonNumber = String(lesson.number).padStart(2, "0");
 
-  return `Coptic Grammar Lesson ${String(lesson.number).padStart(2, "0")}: ${normalizedSummary}`;
+  return locale === "nl"
+    ? `Les Koptische grammatica ${lessonNumber}: ${normalizedSummary}`
+    : `Coptic Grammar Lesson ${lessonNumber}: ${normalizedSummary}`;
 }
 
-export function buildGrammarLessonSeoDescription(lessonBundle: GrammarLessonBundle) {
+export function buildGrammarLessonSeoDescription(
+  lessonBundle: GrammarLessonBundle,
+  locale: Language = "en",
+) {
   const lesson = lessonBundle.lesson;
-  const description = lesson.description?.en ?? lesson.summary.en;
+  const description = lesson.description?.[locale] ?? lesson.summary[locale];
   const lessonFootprint = [
-    pluralize(lesson.sections.length, "section"),
-    pluralize(lessonBundle.concepts.length, "concept"),
-    pluralize(lessonBundle.exercises.length, "exercise"),
+    locale === "nl"
+      ? pluralize(lesson.sections.length, "onderdeel", "onderdelen")
+      : pluralize(lesson.sections.length, "section", "sections"),
+    locale === "nl"
+      ? pluralize(lessonBundle.concepts.length, "begrip", "begrippen")
+      : pluralize(lessonBundle.concepts.length, "concept", "concepts"),
+    locale === "nl"
+      ? pluralize(lessonBundle.exercises.length, "oefening", "oefeningen")
+      : pluralize(lessonBundle.exercises.length, "exercise", "exercises"),
   ].join(", ");
 
-  return `${description} Includes ${lessonFootprint} for structured Coptic study.`;
+  return locale === "nl"
+    ? `${description} Bevat ${lessonFootprint} voor gestructureerde studie van het Koptisch.`
+    : `${description} Includes ${lessonFootprint} for structured Coptic study.`;
 }
 
 export function getGrammarManifestData() {

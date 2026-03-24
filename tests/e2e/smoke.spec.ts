@@ -59,6 +59,17 @@ test("dashboard redirects unauthenticated visitors to login", async ({ page }) =
   expect(url.searchParams.get("redirect_to")).toBe("/dashboard");
 });
 
+test("localized dashboard redirects unauthenticated visitors to login with locale preserved", async ({
+  page,
+}) => {
+  await page.goto("/nl/dashboard");
+  await expect(page).toHaveURL(/\/login\?/);
+
+  const url = new URL(page.url());
+  expect(url.pathname).toBe("/login");
+  expect(url.searchParams.get("redirect_to")).toBe("/nl/dashboard");
+});
+
 test("grammar API index responds with the published dataset metadata", async ({
   request,
 }) => {

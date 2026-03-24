@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import StructuredData from "@/components/StructuredData";
 import GrammarHubPageClient from "@/features/grammar/components/GrammarHubPageClient";
 import { listGrammarLessons } from "@/features/grammar/lib/grammarDataset";
+import { getTranslation } from "@/lib/i18n";
 import { createLocalizedPageMetadata } from "@/lib/metadata";
 import { getGrammarPath, getLocalizedHomePath, isPublicLocale } from "@/lib/locale";
 import {
@@ -48,8 +49,14 @@ export default async function GrammarPage({
       <StructuredData
         data={[
           createBreadcrumbStructuredData([
-            { name: "Home", path: getLocalizedHomePath(resolvedLocale) },
-            { name: "Grammar", path: getGrammarPath(resolvedLocale) },
+            {
+              name: getTranslation(resolvedLocale, "nav.home"),
+              path: getLocalizedHomePath(resolvedLocale),
+            },
+            {
+              name: getTranslation(resolvedLocale, "nav.grammar"),
+              path: getGrammarPath(resolvedLocale),
+            },
           ]),
           ...createGrammarHubStructuredData(lessons, resolvedLocale),
         ]}

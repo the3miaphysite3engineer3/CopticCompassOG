@@ -6,7 +6,9 @@ import type { User } from "@supabase/supabase-js";
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
 
 type NavbarAuthLinkProps = {
+  dashboardHref: string;
   dashboardLabel: string;
+  loginHref: string;
   loginLabel: string;
   onNavigate?: () => void;
   pathname: string;
@@ -36,7 +38,9 @@ function getLinkClasses(variant: NavbarAuthLinkProps["variant"], isActive: boole
 }
 
 export function NavbarAuthLink({
+  dashboardHref,
   dashboardLabel,
+  loginHref,
   loginLabel,
   onNavigate,
   pathname,
@@ -74,9 +78,11 @@ export function NavbarAuthLink({
     };
   }, []);
 
-  const href = user ? "/dashboard" : "/login";
+  const href = user ? dashboardHref : loginHref;
   const label = user ? dashboardLabel : loginLabel;
-  const isActive = pathname === href || pathname.startsWith(`${href}/`);
+  const hrefPathname = href.split("?")[0] ?? href;
+  const isActive =
+    pathname === hrefPathname || pathname.startsWith(`${hrefPathname}/`);
   const { linkClassName, labelClassName } = getLinkClasses(variant, isActive);
 
   return (

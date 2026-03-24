@@ -6,8 +6,10 @@ import {
   formatLessonSlug,
   formatSubmissionDate,
 } from "@/features/submissions/utils";
+import type { Language } from "@/types/i18n";
 
 type SubmissionCardProps = {
+  language?: Language;
   submission: SubmissionRow;
   children?: ReactNode;
   contentClassName?: string;
@@ -16,6 +18,7 @@ type SubmissionCardProps = {
 };
 
 export function SubmissionCard({
+  language = "en",
   submission,
   children,
   contentClassName,
@@ -41,7 +44,7 @@ export function SubmissionCard({
           )}
         </div>
         <span className="rounded-lg bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-400 dark:bg-stone-800">
-          {formatSubmissionDate(submission.created_at)}
+          {formatSubmissionDate(submission.created_at, language)}
         </span>
       </div>
 

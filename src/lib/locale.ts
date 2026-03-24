@@ -49,6 +49,10 @@ export function getAnalyticsPath(locale?: Language) {
   return locale ? getLocalizedPath(locale, "/analytics") : "/analytics";
 }
 
+export function getDashboardPath(locale?: Language) {
+  return locale ? getLocalizedPath(locale, "/dashboard") : "/dashboard";
+}
+
 export function getDevelopersPath(locale?: Language) {
   return locale ? getLocalizedPath(locale, "/developers") : "/developers";
 }

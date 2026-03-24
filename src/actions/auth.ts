@@ -8,6 +8,7 @@ import {
 } from "@/lib/rateLimit";
 import {
   getAuthUnavailableLoginPath,
+  getLoginPath,
   hasSupabaseRuntimeEnv,
 } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -18,6 +19,7 @@ import {
   isValidEmail,
   normalizeWhitespace,
 } from "@/lib/validation";
+import { PUBLIC_LOCALES, getDashboardPath } from "@/lib/locale";
 
 function getSafeRedirectTarget(value: FormDataEntryValue | null) {
   if (
@@ -29,6 +31,13 @@ function getSafeRedirectTarget(value: FormDataEntryValue | null) {
   }
 
   return value;
+}
+
+function revalidateDashboardPaths() {
+  revalidatePath("/dashboard");
+  for (const locale of PUBLIC_LOCALES) {
+    revalidatePath(getDashboardPath(locale));
+  }
 }
 
 function getNormalizedEmail(formData: FormData) {
@@ -111,7 +120,7 @@ async function updatePasswordWithResult(
   }
 
   revalidatePath("/", "layout");
-  revalidatePath("/dashboard");
+  revalidateDashboardPaths();
   return { success: true };
 }
 
@@ -166,8 +175,10 @@ export async function login(formData: FormData) {
 }
 
 export async function signup(formData: FormData) {
+  const redirectTo = getSafeRedirectTarget(formData.get("redirectTo"));
+
   if (!hasSupabaseRuntimeEnv()) {
-    redirect(getAuthUnavailableLoginPath());
+    redirect(getAuthUnavailableLoginPath(redirectTo));
   }
 
   const loginUrl = new URL(
@@ -176,6 +187,7 @@ export async function signup(formData: FormData) {
   );
   loginUrl.searchParams.set("state", "signup-confirmed");
   loginUrl.searchParams.set("messageType", "success");
+  loginUrl.searchParams.set("redirect_to", redirectTo);
   const email = getNormalizedEmail(formData);
   const password = getPassword(formData);
 
@@ -183,7 +195,9 @@ export async function signup(formData: FormData) {
     !isValidEmail(email) ||
     !hasLengthInRange(password, { min: 8, max: 128 })
   ) {
-    redirect("/login?state=signup-invalid-input&messageType=error");
+    redirect(
+      `/login?state=signup-invalid-input&messageType=error&redirect_to=${encodeURIComponent(redirectTo)}`,
+    );
   }
 
   const clientIdentifier = await getClientRateLimitIdentifier();
@@ -195,7 +209,9 @@ export async function signup(formData: FormData) {
   });
 
   if (!signupRateLimit.ok) {
-    redirect("/login?state=signup-rate-limited&messageType=error");
+    redirect(
+      `/login?state=signup-rate-limited&messageType=error&redirect_to=${encodeURIComponent(redirectTo)}`,
+    );
   }
 
   const supabase = await createClient();
@@ -208,26 +224,35 @@ export async function signup(formData: FormData) {
   });
 
   if (error) {
-    redirect("/login?state=signup-error&messageType=error");
+    redirect(
+      `/login?state=signup-error&messageType=error&redirect_to=${encodeURIComponent(redirectTo)}`,
+    );
   }
 
   if (!data.session) {
-    redirect("/login?state=signup-check-email&messageType=success");
+    redirect(
+      `/login?state=signup-check-email&messageType=success&redirect_to=${encodeURIComponent(redirectTo)}`,
+    );
   }
 
   revalidatePath("/", "layout");
-  redirect("/dashboard");
+  redirect(redirectTo);
 }
 
-export async function logout() {
+export async function logout(formData?: FormData) {
+  const redirectTo =
+    formData instanceof FormData
+      ? getSafeRedirectTarget(formData.get("redirectTo"))
+      : "/dashboard";
+
   if (!hasSupabaseRuntimeEnv()) {
-    redirect(getAuthUnavailableLoginPath());
+    redirect(getAuthUnavailableLoginPath(redirectTo));
   }
 
   const supabase = await createClient();
   await supabase.auth.signOut();
   revalidatePath("/", "layout");
-  redirect("/login");
+  redirect(getLoginPath(redirectTo));
 }
 
 export async function resetPassword(formData: FormData) {
@@ -317,9 +342,11 @@ export async function updatePasswordFromDashboard(formData: FormData) {
   return { success: true };
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(formData: FormData) {
+  const redirectTo = getSafeRedirectTarget(formData.get("redirectTo"));
+
   if (!hasSupabaseRuntimeEnv()) {
-    redirect(getAuthUnavailableLoginPath());
+    redirect(getAuthUnavailableLoginPath(redirectTo));
   }
 
   const supabase = await createClient();
@@ -335,17 +362,21 @@ export async function signInWithGoogle() {
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${baseUrl}/auth/callback?next=/dashboard`,
+      redirectTo: `${baseUrl}/auth/callback?next=${encodeURIComponent(redirectTo)}`,
     },
   });
 
   if (error) {
-    redirect("/login?state=login-error&messageType=error");
+    redirect(
+      `/login?state=login-error&messageType=error&redirect_to=${encodeURIComponent(redirectTo)}`,
+    );
   }
 
   if (data?.url) {
     redirect(data.url);
   }
 
-  redirect("/login?state=login-error&messageType=error");
+  redirect(
+    `/login?state=login-error&messageType=error&redirect_to=${encodeURIComponent(redirectTo)}`,
+  );
 }
