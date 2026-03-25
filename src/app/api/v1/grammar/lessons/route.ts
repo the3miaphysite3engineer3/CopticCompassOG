@@ -1,8 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import {
   isGrammarLessonStatus,
   listGrammarApiLessons,
 } from "@/features/grammar/lib/grammarApi";
+import {
+  publicApiJsonResponse,
+  publicApiOptionsResponse,
+} from "@/lib/api/cors";
 
 export const dynamic = "force-static";
 
@@ -10,7 +14,7 @@ export function GET(request: NextRequest) {
   const status = request.nextUrl.searchParams.get("status");
 
   if (status && !isGrammarLessonStatus(status)) {
-    return NextResponse.json(
+    return publicApiJsonResponse(
       {
         error: `Invalid lesson status filter: ${status}`,
       },
@@ -20,5 +24,9 @@ export function GET(request: NextRequest) {
 
   const validatedStatus = status && isGrammarLessonStatus(status) ? status : undefined;
 
-  return NextResponse.json(listGrammarApiLessons(validatedStatus));
+  return publicApiJsonResponse(listGrammarApiLessons(validatedStatus));
+}
+
+export function OPTIONS() {
+  return publicApiOptionsResponse();
 }

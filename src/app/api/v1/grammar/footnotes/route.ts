@@ -1,8 +1,12 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import {
   listGrammarApiFootnotes,
   resolveGrammarLessonFilter,
 } from "@/features/grammar/lib/grammarApi";
+import {
+  publicApiJsonResponse,
+  publicApiOptionsResponse,
+} from "@/lib/api/cors";
 
 export const dynamic = "force-static";
 
@@ -11,7 +15,7 @@ export function GET(request: NextRequest) {
   const lessonId = resolveGrammarLessonFilter(lessonFilter);
 
   if (lessonFilter?.trim() && !lessonId) {
-    return NextResponse.json(
+    return publicApiJsonResponse(
       {
         error: `Unknown lesson filter: ${lessonFilter}`,
       },
@@ -19,5 +23,9 @@ export function GET(request: NextRequest) {
     );
   }
 
-  return NextResponse.json(listGrammarApiFootnotes(lessonId ?? undefined));
+  return publicApiJsonResponse(listGrammarApiFootnotes(lessonId ?? undefined));
+}
+
+export function OPTIONS() {
+  return publicApiOptionsResponse();
 }

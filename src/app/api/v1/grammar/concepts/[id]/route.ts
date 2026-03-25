@@ -1,5 +1,8 @@
-import { NextResponse } from "next/server";
 import { getGrammarApiConceptById } from "@/features/grammar/lib/grammarApi";
+import {
+  publicApiJsonResponse,
+  publicApiOptionsResponse,
+} from "@/lib/api/cors";
 
 export const dynamic = "force-static";
 
@@ -17,7 +20,7 @@ export async function GET(
   const concept = getGrammarApiConceptById(id);
 
   if (!concept) {
-    return NextResponse.json(
+    return publicApiJsonResponse(
       {
         error: `Grammar concept not found for id: ${id}`,
       },
@@ -25,5 +28,9 @@ export async function GET(
     );
   }
 
-  return NextResponse.json(concept);
+  return publicApiJsonResponse(concept);
+}
+
+export function OPTIONS() {
+  return publicApiOptionsResponse();
 }

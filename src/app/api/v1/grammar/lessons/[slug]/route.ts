@@ -1,5 +1,8 @@
-import { NextResponse } from "next/server";
 import { getGrammarApiLessonBySlug } from "@/features/grammar/lib/grammarApi";
+import {
+  publicApiJsonResponse,
+  publicApiOptionsResponse,
+} from "@/lib/api/cors";
 
 export const dynamic = "force-static";
 
@@ -17,7 +20,7 @@ export async function GET(
   const lesson = getGrammarApiLessonBySlug(slug);
 
   if (!lesson) {
-    return NextResponse.json(
+    return publicApiJsonResponse(
       {
         error: `Grammar lesson not found for slug: ${slug}`,
       },
@@ -25,5 +28,9 @@ export async function GET(
     );
   }
 
-  return NextResponse.json(lesson);
+  return publicApiJsonResponse(lesson);
+}
+
+export function OPTIONS() {
+  return publicApiOptionsResponse();
 }

@@ -1,5 +1,8 @@
-import { NextResponse } from "next/server";
 import { getGrammarApiSourceById } from "@/features/grammar/lib/grammarApi";
+import {
+  publicApiJsonResponse,
+  publicApiOptionsResponse,
+} from "@/lib/api/cors";
 
 export const dynamic = "force-static";
 
@@ -17,7 +20,7 @@ export async function GET(
   const source = getGrammarApiSourceById(id);
 
   if (!source) {
-    return NextResponse.json(
+    return publicApiJsonResponse(
       {
         error: `Grammar source not found for id: ${id}`,
       },
@@ -25,5 +28,9 @@ export async function GET(
     );
   }
 
-  return NextResponse.json(source);
+  return publicApiJsonResponse(source);
+}
+
+export function OPTIONS() {
+  return publicApiOptionsResponse();
 }
