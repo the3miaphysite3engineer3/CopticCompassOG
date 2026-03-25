@@ -156,6 +156,30 @@ describe("grammar content registry", () => {
     expect(dutchTable.headerRows?.[0]?.cells.map((cell) => cell.colSpan)).toEqual([2, 2]);
   });
 
+  it("marks lookup-style abbreviation tables for mobile card rendering", () => {
+    const lesson = getGrammarLessonDocumentBySlug("lesson-1");
+    const abbreviationsSection = lesson?.sections.find(
+      (section) => section.slug === "abbreviations",
+    );
+
+    const englishTable = abbreviationsSection?.blocks.en[3];
+    const dutchTable = abbreviationsSection?.blocks.nl[3];
+
+    expect(englishTable?.type).toBe("table");
+    expect(dutchTable?.type).toBe("table");
+
+    if (!englishTable || englishTable.type !== "table") {
+      return;
+    }
+
+    if (!dutchTable || dutchTable.type !== "table") {
+      return;
+    }
+
+    expect(englishTable.mobileLayout).toBe("cards");
+    expect(dutchTable.mobileLayout).toBe("cards");
+  });
+
   it("wires concept and source references into examples and footnotes", () => {
     const snapshot = getGrammarDatasetSnapshot();
     const zeroDeterminationExample = snapshot.examples.find(

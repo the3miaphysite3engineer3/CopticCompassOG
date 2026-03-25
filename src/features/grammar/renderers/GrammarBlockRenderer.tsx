@@ -1,6 +1,10 @@
 "use client";
 
-import type { GrammarBlock, GrammarLessonBundle } from "@/content/grammar/schema";
+import type {
+  GrammarBlock,
+  GrammarLessonBundle,
+  GrammarTableColumn,
+} from "@/content/grammar/schema";
 import type { Language } from "@/types/i18n";
 import { cx } from "@/lib/classes";
 import { getEntryPath } from "@/lib/locale";
@@ -8,6 +12,7 @@ import {
   GrammarLessonCard,
   GrammarLessonTable,
 } from "@/features/grammar/components/GrammarLessonPrimitives";
+import { useGrammarLessonRenderContext } from "@/features/grammar/components/GrammarLessonRenderContext";
 import { ExerciseForm } from "@/features/grammar/components/ExerciseForm";
 import { Footnote } from "@/features/grammar/components/Footnote";
 import { GrammarInlineRenderer } from "./GrammarInlineRenderer";
@@ -213,12 +218,95 @@ function renderExampleGroup(
   return <GrammarLessonCard className="space-y-3">{renderExampleList(examples)}</GrammarLessonCard>;
 }
 
+function getTableMobileMinWidthRem(
+  columnCount: number,
+  useRowHeaderLayout: boolean,
+) {
+  if (useRowHeaderLayout) {
+    return 34;
+  }
+
+  if (columnCount >= 4) {
+    return 40;
+  }
+
+  if (columnCount === 3) {
+    return 34;
+  }
+
+  return 28;
+}
+
+function renderTableColumnLabel(
+  column: GrammarTableColumn,
+  language: Language,
+  lessonBundle: GrammarLessonBundle | undefined,
+) {
+  return column.inlineLabel ? (
+    <GrammarInlineRenderer
+      nodes={column.inlineLabel[language]}
+      language={language}
+      lessonId={lessonBundle?.lesson.id}
+    />
+  ) : (
+    column.label[language]
+  );
+}
+
+function renderTableMobileCards(
+  block: Extract<GrammarBlock, { type: "table" }>,
+  language: Language,
+  lessonBundle: GrammarLessonBundle | undefined,
+  inheritTextColor: boolean,
+) {
+  return (
+    <div
+      data-grammar-table-id={block.id}
+      data-grammar-table-mobile-layout="cards"
+      data-grammar-table-rendering="cards"
+      className="space-y-3 sm:hidden"
+    >
+      {block.rows.map((row) => (
+        <GrammarLessonCard
+          key={row.id}
+          className="space-y-3 bg-stone-50/80 dark:bg-stone-950/45"
+        >
+          {block.columns.map((column, columnIndex) => (
+            <div
+              key={column.id}
+              className={cx(
+                "space-y-1.5",
+                columnIndex > 0 &&
+                  "border-t border-stone-200/80 pt-3 dark:border-stone-800/80",
+              )}
+            >
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+                {renderTableColumnLabel(column, language, lessonBundle)}
+              </p>
+              <div className="text-sm leading-6 text-stone-800 dark:text-stone-200 [&_.font-coptic]:text-base [&_p]:leading-6">
+                <GrammarBlockRenderer
+                  blocks={row.cells[column.id] ?? []}
+                  language={language}
+                  lessonBundle={lessonBundle}
+                  className="space-y-2"
+                  inheritTextColor={inheritTextColor}
+                />
+              </div>
+            </div>
+          ))}
+        </GrammarLessonCard>
+      ))}
+    </div>
+  );
+}
+
 function renderBlock(
   block: GrammarBlock,
   index: number,
   language: Language,
   lessonBundle: GrammarLessonBundle | undefined,
   inheritTextColor: boolean,
+  renderMode: "web" | "pdf",
 ) {
   switch (block.type) {
     case "paragraph":
@@ -296,13 +384,22 @@ function renderBlock(
     case "table":
       const useRowHeaderLayout = Boolean(block.hideHeader && block.rowHeaderColumnId);
       const useCustomHeaderRows = Boolean(block.headerRows && block.headerRows.length > 0);
-      const useFixedLayout =
-        block.tableLayout === "fixed" || useRowHeaderLayout;
+      const useFixedLayout = block.tableLayout === "fixed" || useRowHeaderLayout;
       const hasExplicitColumnWidths = block.columns.some((column) => column.width);
+      const mobileMinWidthRem = getTableMobileMinWidthRem(
+        block.columns.length,
+        useRowHeaderLayout,
+      );
+      const useMobileCards =
+        renderMode === "web" && block.mobileLayout === "cards";
 
-      return (
+      const tableElement = (
         <GrammarLessonTable
-          key={`${block.type}-${block.id}`}
+          className={useMobileCards ? "hidden sm:block" : undefined}
+          hasStickyLeadingColumn={useRowHeaderLayout}
+          mobileMinWidthRem={mobileMinWidthRem}
+          mobileLayout={block.mobileLayout ?? "scroll"}
+          tableId={block.id}
           tableClassName={useFixedLayout ? "table-fixed" : undefined}
         >
           {hasExplicitColumnWidths ? (
@@ -328,7 +425,7 @@ function renderBlock(
                       colSpan={cell.colSpan}
                       rowSpan={cell.rowSpan}
                       className={cx(
-                        "border-b p-3 font-semibold dark:border-stone-700",
+                        "border-b px-3 py-2 text-sm font-semibold leading-5 dark:border-stone-700 sm:p-3 sm:text-base",
                         cell.align === "center" && "text-center",
                         cell.align === "right" && "text-right",
                         (!cell.align || cell.align === "left") && "text-center",
@@ -354,17 +451,9 @@ function renderBlock(
                 {block.columns.map((column) => (
                   <th
                     key={column.id}
-                    className="border-b p-3 text-center font-semibold dark:border-stone-700"
+                    className="border-b px-3 py-2 text-center text-sm font-semibold leading-5 dark:border-stone-700 sm:p-3 sm:text-base"
                   >
-                    {column.inlineLabel ? (
-                      <GrammarInlineRenderer
-                        nodes={column.inlineLabel[language]}
-                        language={language}
-                        lessonId={lessonBundle?.lesson.id}
-                      />
-                    ) : (
-                      column.label[language]
-                    )}
+                    {renderTableColumnLabel(column, language, lessonBundle)}
                   </th>
                 ))}
               </tr>
@@ -381,7 +470,7 @@ function renderBlock(
                       <th
                         key={column.id}
                         scope="row"
-                        className="w-32 border-r border-stone-200 bg-stone-100 px-4 py-3 text-left font-semibold text-stone-900 dark:border-stone-700 dark:bg-stone-800/90 dark:text-stone-100"
+                        className="sticky left-0 z-10 w-28 border-r border-stone-200 bg-stone-100 px-3 py-2 text-left text-sm font-semibold text-stone-900 shadow-[10px_0_16px_-14px_rgba(28,25,23,0.45)] dark:border-stone-700 dark:bg-stone-800/95 dark:text-stone-100 dark:shadow-[10px_0_18px_-14px_rgba(0,0,0,0.7)] sm:static sm:w-32 sm:px-4 sm:py-3 sm:text-base sm:shadow-none [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7"
                       >
                         <GrammarBlockRenderer
                           blocks={row.cells[column.id] ?? []}
@@ -398,8 +487,8 @@ function renderBlock(
                       key={column.id}
                       className={
                         useRowHeaderLayout
-                          ? "w-[22.66%] px-4 py-3 text-center align-middle"
-                          : "p-3"
+                          ? "w-[22.66%] px-2.5 py-2 text-center align-middle text-sm sm:px-4 sm:py-3 sm:text-base [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7"
+                          : "px-3 py-2 text-sm sm:p-3 sm:text-base [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7"
                       }
                     >
                       <GrammarBlockRenderer
@@ -415,6 +504,20 @@ function renderBlock(
             ))}
           </tbody>
         </GrammarLessonTable>
+      );
+
+      return useMobileCards ? (
+        <div key={`${block.type}-${block.id}`} className="space-y-4">
+          {renderTableMobileCards(
+            block,
+            language,
+            lessonBundle,
+            inheritTextColor,
+          )}
+          {tableElement}
+        </div>
+      ) : (
+        <div key={`${block.type}-${block.id}`}>{tableElement}</div>
       );
     case "callout":
       return (
@@ -466,6 +569,8 @@ export function GrammarBlockRenderer({
   className,
   inheritTextColor = false,
 }: GrammarBlockRendererProps) {
+  const { renderMode } = useGrammarLessonRenderContext();
+
   if (blocks.length === 0) {
     return null;
   }
@@ -473,7 +578,14 @@ export function GrammarBlockRenderer({
   return (
     <div className={cx("space-y-4", className)}>
       {blocks.map((block, index) =>
-        renderBlock(block, index, language, lessonBundle, inheritTextColor),
+        renderBlock(
+          block,
+          index,
+          language,
+          lessonBundle,
+          inheritTextColor,
+          renderMode,
+        ),
       )}
     </div>
   );

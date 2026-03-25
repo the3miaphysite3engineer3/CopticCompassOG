@@ -1642,6 +1642,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
           {
             type: "table",
             id: `${lessonId}.section.abbreviations.table`,
+            mobileLayout: "cards",
             columns: [
               { id: "fullWord", label: { en: "Full Word", nl: "Full Word" } },
               {
@@ -1865,6 +1866,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
           {
             type: "table",
             id: `${lessonId}.section.abbreviations.table`,
+            mobileLayout: "cards",
             columns: [
               { id: "fullWord", label: { en: "Voluit", nl: "Voluit" } },
               {

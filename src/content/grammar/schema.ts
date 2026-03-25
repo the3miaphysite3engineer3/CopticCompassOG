@@ -167,6 +167,7 @@ export type GrammarBlock =
       headerRows?: GrammarTableHeaderRow[];
       rows: GrammarTableRow[];
       tableLayout?: "auto" | "fixed";
+      mobileLayout?: "scroll" | "cards";
       hideHeader?: boolean;
       rowHeaderColumnId?: string;
     }

@@ -75,7 +75,7 @@ export function GrammarLessonPageClient({
 
   return (
     <PageShell
-      className="min-h-screen px-6 py-16 md:px-10"
+      className="min-h-screen px-4 py-12 sm:px-5 sm:py-14 md:px-10 md:py-16"
       contentClassName="max-w-5xl mx-auto"
       accents={[
         pageShellAccents.topRightSkyOrb,
@@ -91,7 +91,7 @@ export function GrammarLessonPageClient({
           ]}
         />
 
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Link href={getGrammarPath(language)} className="btn-secondary gap-2 px-4">
             <ArrowLeft className="h-4 w-4" />
             {t("grammar.back")}
@@ -132,7 +132,7 @@ export function GrammarLessonPageClient({
             <SurfacePanel
               rounded="3xl"
               variant="elevated"
-              className="p-6 transition-colors duration-300 md:p-10"
+              className="p-4 transition-colors duration-300 sm:p-5 md:p-10"
             >
               {hasSemanticSidebar ? (
                 <div className="mb-8 grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(19rem,1fr)]">

@@ -4699,6 +4699,7 @@
               {
                 "type": "table",
                 "id": "grammar.lesson.01.section.abbreviations.table",
+                "mobileLayout": "cards",
                 "columns": [
                   {
                     "id": "fullWord",
@@ -5589,6 +5590,7 @@
               {
                 "type": "table",
                 "id": "grammar.lesson.01.section.abbreviations.table",
+                "mobileLayout": "cards",
                 "columns": [
                   {
                     "id": "fullWord",

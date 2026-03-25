@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
 import { cx } from "@/lib/classes";
+import { useLanguage } from "@/components/LanguageProvider";
 import { useGrammarLessonRenderContext } from "./GrammarLessonRenderContext";
 
 type GrammarLessonSectionProps = {
@@ -26,6 +27,10 @@ type GrammarLessonTableProps = {
   children: ReactNode;
   className?: string;
   tableClassName?: string;
+  mobileMinWidthRem?: number;
+  hasStickyLeadingColumn?: boolean;
+  tableId?: string;
+  mobileLayout?: "scroll" | "cards";
 };
 
 type GrammarLessonOutlineProps = {
@@ -98,18 +103,18 @@ export function GrammarLessonSection({
         className
       )}
     >
-      <summary className="flex cursor-pointer list-none items-start justify-between gap-4 px-5 py-4 [&::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer list-none items-start justify-between gap-4 px-4 py-3 [&::-webkit-details-marker]:hidden sm:px-5 sm:py-4">
         <div className="flex min-w-0 items-start gap-4">
           <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sky-100 bg-sky-50 text-xs font-semibold text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/50 dark:text-sky-300">
             {String(index).padStart(2, "0")}
           </span>
-          <h2 className="min-w-0 text-xl font-semibold text-stone-900 dark:text-stone-100 md:text-2xl">
+          <h2 className="min-w-0 text-lg font-semibold text-stone-900 dark:text-stone-100 sm:text-xl md:text-2xl">
             {title}
           </h2>
         </div>
         <ChevronDown className="mt-1 h-5 w-5 shrink-0 text-stone-400 transition-transform duration-200 group-open:rotate-180 dark:text-stone-500" />
       </summary>
-      <div className="border-t border-stone-200/80 px-5 pb-5 pt-4 dark:border-stone-800/80">
+      <div className="border-t border-stone-200/80 px-4 pb-4 pt-4 dark:border-stone-800/80 sm:px-5 sm:pb-5">
         {children}
         {renderMode !== "pdf" && footer ? (
           <div className="mt-5 border-t border-stone-200/80 pt-4 dark:border-stone-800/80">
@@ -138,7 +143,7 @@ export function GrammarLessonOutline({
         className
       )}
     >
-      <div className="border-b border-stone-200/80 px-5 py-4 dark:border-stone-800/80">
+      <div className="border-b border-stone-200/80 px-4 py-3 dark:border-stone-800/80 sm:px-5 sm:py-4">
         {eyebrow && (
           <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
             {eyebrow}
@@ -159,7 +164,7 @@ export function GrammarLessonOutline({
           <li key={section.id}>
             <a
               href={`#${section.id}`}
-              className="group flex items-start gap-4 px-5 py-3 transition-colors hover:bg-stone-50/80 dark:hover:bg-stone-900/60"
+              className="group flex items-start gap-4 px-4 py-3 transition-colors hover:bg-stone-50/80 dark:hover:bg-stone-900/60 sm:px-5"
             >
               <span className="w-6 shrink-0 pt-0.5 text-xs font-semibold text-stone-400 transition-colors group-hover:text-sky-600 dark:text-stone-500 dark:group-hover:text-sky-400">
                 {String(index + 1).padStart(2, "0")}
@@ -199,10 +204,126 @@ export function GrammarLessonTable({
   children,
   className,
   tableClassName,
+  mobileMinWidthRem,
+  hasStickyLeadingColumn = false,
+  tableId,
+  mobileLayout = "scroll",
 }: GrammarLessonTableProps) {
+  const { renderMode } = useGrammarLessonRenderContext();
+  const { language } = useLanguage();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [canScrollHorizontally, setCanScrollHorizontally] = useState(false);
+  const [isScrolledToStart, setIsScrolledToStart] = useState(true);
+  const [isScrolledToEnd, setIsScrolledToEnd] = useState(true);
+
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current;
+
+    if (!scrollContainer || renderMode === "pdf") {
+      return;
+    }
+
+    const updateScrollState = () => {
+      const maxScrollLeft = Math.max(
+        0,
+        scrollContainer.scrollWidth - scrollContainer.clientWidth,
+      );
+      const canScroll = maxScrollLeft > 8;
+
+      setCanScrollHorizontally(canScroll);
+      setIsScrolledToStart(!canScroll || scrollContainer.scrollLeft <= 4);
+      setIsScrolledToEnd(
+        !canScroll || scrollContainer.scrollLeft >= maxScrollLeft - 4,
+      );
+    };
+
+    const frame = window.requestAnimationFrame(updateScrollState);
+    scrollContainer.addEventListener("scroll", updateScrollState, {
+      passive: true,
+    });
+
+    let resizeObserver: ResizeObserver | undefined;
+
+    if (typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(() => {
+        updateScrollState();
+      });
+      resizeObserver.observe(scrollContainer);
+
+      const tableElement = scrollContainer.querySelector("table");
+
+      if (tableElement) {
+        resizeObserver.observe(tableElement);
+      }
+    } else {
+      window.addEventListener("resize", updateScrollState);
+    }
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      scrollContainer.removeEventListener("scroll", updateScrollState);
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", updateScrollState);
+    };
+  }, [language, mobileMinWidthRem, renderMode]);
+
+  const mobileScrollHint =
+    hasStickyLeadingColumn
+      ? language === "en"
+        ? "Swipe sideways. Labels stay pinned."
+        : "Veeg zijwaarts. Labels blijven staan."
+      : language === "en"
+        ? "Swipe sideways to compare"
+        : "Veeg zijwaarts om te vergelijken";
+  const tableStyle =
+    renderMode === "pdf" || !mobileMinWidthRem
+      ? undefined
+      : { minWidth: `max(100%, ${mobileMinWidthRem}rem)` };
+
   return (
-    <div className={cx("mt-4 rounded-lg border border-stone-200 dark:border-stone-800", className)}>
-      <table className={cx("w-full border-collapse text-left", tableClassName)}>{children}</table>
+    <div
+      data-grammar-table-id={tableId}
+      data-grammar-table-mobile-layout={mobileLayout}
+      data-grammar-table-rendering="table"
+      className={cx(
+        "mt-4 -mx-4 overflow-hidden border border-stone-200 dark:border-stone-800 sm:mx-0 sm:rounded-lg",
+        className,
+      )}
+    >
+      <div className="relative">
+        <div
+          ref={scrollContainerRef}
+          className={cx(
+            renderMode === "pdf"
+              ? "overflow-visible"
+              : "overflow-x-auto overscroll-x-contain touch-pan-x",
+          )}
+        >
+          <table
+            style={tableStyle}
+            className={cx("w-full border-collapse text-left", tableClassName)}
+          >
+            {children}
+          </table>
+        </div>
+
+        {renderMode !== "pdf" && canScrollHorizontally ? (
+          <>
+            {!hasStickyLeadingColumn && !isScrolledToStart ? (
+              <div className="pointer-events-none absolute inset-y-0 left-0 w-5 bg-gradient-to-r from-white via-white/80 to-transparent dark:from-stone-950 dark:via-stone-950/80 sm:hidden" />
+            ) : null}
+            {!isScrolledToEnd ? (
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white via-white/85 to-transparent dark:from-stone-950 dark:via-stone-950/85 sm:hidden" />
+            ) : null}
+          </>
+        ) : null}
+      </div>
+
+      {renderMode !== "pdf" && canScrollHorizontally && isScrolledToStart ? (
+        <div className="border-t border-stone-200/80 bg-stone-50/80 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.14em] text-stone-500 dark:border-stone-800/80 dark:bg-stone-950/45 dark:text-stone-400 sm:hidden">
+          {mobileScrollHint}
+        </div>
+      ) : null}
     </div>
   );
 }
