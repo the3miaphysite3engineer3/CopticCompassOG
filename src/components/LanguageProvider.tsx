@@ -61,17 +61,14 @@ export function LanguageProvider({
       startTransition(() => {
         setLanguageState(storedLanguage);
       });
-      document.cookie = `${LANGUAGE_STORAGE_KEY}=${storedLanguage}; path=/; max-age=31536000; samesite=lax`;
-    } else {
-      const preferredLanguage = navigator.language.toLowerCase().startsWith("nl")
-        ? "nl"
-        : DEFAULT_LANGUAGE;
-
-      startTransition(() => {
-        setLanguageState(preferredLanguage);
-      });
-      persistLanguagePreference(preferredLanguage);
+      persistLanguagePreference(storedLanguage);
+      return;
     }
+
+    startTransition(() => {
+      setLanguageState(initialLanguage);
+    });
+    persistLanguagePreference(initialLanguage);
   }, [initialLanguage, localeRouting]);
 
   const setLanguage = (lang: Language) => {

@@ -11,7 +11,9 @@ import {
   getEntryPath,
   getGrammarPath,
   getLocalizedHomePath,
+  getPrivacyPath,
   getPublicationsPath,
+  getTermsPath,
   PUBLIC_LOCALES,
 } from "@/lib/locale";
 import { getLatestProjectFileMtime } from "@/lib/server/projectFiles";
@@ -72,6 +74,26 @@ const localizedStaticRoutes: readonly LocalizedStaticRouteConfig[] = [
     sourcePaths: [
       "src/app/(site)/[locale]/publications/page.tsx",
       "src/features/publications/lib/publications.ts",
+    ],
+  },
+  {
+    getRoute: getPrivacyPath,
+    changeFrequency: "yearly",
+    priority: 0.3,
+    sourcePaths: [
+      "src/app/(site)/[locale]/privacy/page.tsx",
+      "src/features/legal/lib/legalDocuments.ts",
+      "src/features/legal/components/LegalDocumentPage.tsx",
+    ],
+  },
+  {
+    getRoute: getTermsPath,
+    changeFrequency: "yearly",
+    priority: 0.3,
+    sourcePaths: [
+      "src/app/(site)/[locale]/terms/page.tsx",
+      "src/features/legal/lib/legalDocuments.ts",
+      "src/features/legal/components/LegalDocumentPage.tsx",
     ],
   },
 ];

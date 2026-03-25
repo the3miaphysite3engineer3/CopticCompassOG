@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { getDevelopersPath } from "@/lib/locale";
+import { getDevelopersPath, getPrivacyPath, getTermsPath } from "@/lib/locale";
 import { useLanguage } from "./LanguageProvider";
 import { FaXTwitter, FaInstagram, FaGithub } from "react-icons/fa6";
 
@@ -17,8 +17,8 @@ export function Footer() {
             &copy; {currentYear} Kyrillos Wannes. {t("footer.rights")}
           </p>
           <div className="flex items-center gap-4 text-xs text-muted/70">
-            <Link href="/privacy" className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors">{t("footer.privacy")}</Link>
-            <Link href="/terms" className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors">{t("footer.terms")}</Link>
+            <Link href={getPrivacyPath(language)} className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors">{t("footer.privacy")}</Link>
+            <Link href={getTermsPath(language)} className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors">{t("footer.terms")}</Link>
             <Link href={getDevelopersPath(language)} className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors">{t("footer.developers")}</Link>
             <Link href="/api-docs" className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors">{t("footer.apiDocs")}</Link>
           </div>

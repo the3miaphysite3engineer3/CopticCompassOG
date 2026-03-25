@@ -1,11 +1,25 @@
 import { expect, test } from "@playwright/test";
 
+const DUTCH_LANGUAGE_COOKIE = {
+  name: "app-language",
+  value: "nl",
+  url: "http://127.0.0.1:3100",
+};
+
 test("root route redirects to the English homepage", async ({ page }) => {
   await page.goto("/");
 
   await expect(page).toHaveURL(/\/en$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(page.getByRole("heading", { name: "Wannes Portfolio" })).toBeVisible();
+});
+
+test("root route honors the Dutch language preference", async ({ page }) => {
+  await page.context().addCookies([DUTCH_LANGUAGE_COOKIE]);
+  await page.goto("/");
+
+  await expect(page).toHaveURL(/\/nl$/);
+  await expect(page.locator("html")).toHaveAttribute("lang", "nl");
 });
 
 test("English locale renders English navigation", async ({ page }) => {
@@ -68,6 +82,57 @@ test("localized dashboard redirects unauthenticated visitors to login with local
   const url = new URL(page.url());
   expect(url.pathname).toBe("/login");
   expect(url.searchParams.get("redirect_to")).toBe("/nl/dashboard");
+});
+
+test("login page honors the Dutch language preference", async ({ page }) => {
+  await page.context().addCookies([DUTCH_LANGUAGE_COOKIE]);
+  await page.goto("/login");
+
+  await expect(page.locator("html")).toHaveAttribute("lang", "nl");
+  await expect(
+    page.getByRole("heading", { name: "Welkom bij Wannes Portfolio" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("link", { name: "Wachtwoord vergeten?" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Inloggen met Google" }),
+  ).toBeVisible();
+});
+
+test("forgot-password page honors the Dutch language preference", async ({
+  page,
+}) => {
+  await page.context().addCookies([DUTCH_LANGUAGE_COOKIE]);
+  await page.goto("/forgot-password");
+
+  await expect(page.locator("html")).toHaveAttribute("lang", "nl");
+  await expect(
+    page.getByRole("heading", { name: "Wachtwoord opnieuw instellen" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Resetlink verzenden" }),
+  ).toBeVisible();
+});
+
+test("privacy route honors the Dutch language preference", async ({ page }) => {
+  await page.context().addCookies([DUTCH_LANGUAGE_COOKIE]);
+  await page.goto("/privacy");
+
+  await expect(page).toHaveURL(/\/nl\/privacy$/);
+  await expect(page.locator("html")).toHaveAttribute("lang", "nl");
+  await expect(page.getByRole("heading", { name: "Privacybeleid" })).toBeVisible();
+});
+
+test("terms route honors the Dutch language preference", async ({ page }) => {
+  await page.context().addCookies([DUTCH_LANGUAGE_COOKIE]);
+  await page.goto("/terms");
+
+  await expect(page).toHaveURL(/\/nl\/terms$/);
+  await expect(page.locator("html")).toHaveAttribute("lang", "nl");
+  await expect(
+    page.getByRole("heading", { name: "Gebruiksvoorwaarden" }),
+  ).toBeVisible();
 });
 
 test("grammar API index responds with the published dataset metadata", async ({

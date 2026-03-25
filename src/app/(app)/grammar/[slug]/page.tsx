@@ -1,5 +1,6 @@
-import { permanentRedirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { getGrammarLessonPath } from "@/features/grammar/lib/grammarPaths";
+import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
 
 export default async function LegacyGrammarLessonRedirectPage({
   params,
@@ -7,5 +8,6 @@ export default async function LegacyGrammarLessonRedirectPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  permanentRedirect(getGrammarLessonPath(slug, "en"));
+  const preferredLanguage = await getPreferredLanguage();
+  redirect(getGrammarLessonPath(slug, preferredLanguage));
 }

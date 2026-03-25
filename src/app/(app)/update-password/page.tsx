@@ -5,19 +5,19 @@ import { PageHeader } from '@/components/PageHeader'
 import { PageShell, pageShellAccents } from '@/components/PageShell'
 import { StatusNotice } from '@/components/StatusNotice'
 import { SurfacePanel } from '@/components/SurfacePanel'
+import { getTranslation } from "@/lib/i18n";
 import { createNoIndexMetadata } from '@/lib/metadata'
+import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
 import { requireAuthenticatedPageSession } from '@/lib/supabase/auth'
 
-const NOTICE_MESSAGES: Record<string, string> = {
-  'update-invalid-input': 'Password must be at least 8 characters long.',
-  'update-error': 'Could not update your password. The link may have expired.',
-  'update-rate-limited': 'Too many attempts. Please wait a bit before trying again.',
-}
+export async function generateMetadata(): Promise<Metadata> {
+  const language = await getPreferredLanguage();
 
-export const metadata: Metadata = createNoIndexMetadata({
-  title: 'Update Password',
-  description: 'Password update page for the Wannes learning workspace.',
-})
+  return createNoIndexMetadata({
+    title: getTranslation(language, "update.metaTitle"),
+    description: getTranslation(language, "update.metaDescription"),
+  });
+}
 
 export default async function UpdatePasswordPage({
   searchParams,
@@ -27,10 +27,16 @@ export default async function UpdatePasswordPage({
     state?: string
   }>
 }) {
+  const language = await getPreferredLanguage();
   await requireAuthenticatedPageSession('/update-password')
 
+  const noticeMessages: Record<string, string> = {
+    'update-invalid-input': getTranslation(language, "update.notice.invalidInput"),
+    'update-error': getTranslation(language, "update.notice.error"),
+    'update-rate-limited': getTranslation(language, "update.notice.rateLimited"),
+  };
   const { messageType = 'error', state } = await searchParams;
-  const noticeMessage = state && state in NOTICE_MESSAGES ? NOTICE_MESSAGES[state] : undefined;
+  const noticeMessage = state && state in noticeMessages ? noticeMessages[state] : undefined;
   const noticeVariant = messageType;
 
   return (
@@ -43,8 +49,8 @@ export default async function UpdatePasswordPage({
       ]}
     >
       <PageHeader
-        title="Create New Password"
-        description="Please choose a strong, new password for your account."
+        title={getTranslation(language, "update.title")}
+        description={getTranslation(language, "update.subtitle")}
         tone="brand"
         className="mb-12"
       />
@@ -52,13 +58,14 @@ export default async function UpdatePasswordPage({
       <div className="mx-auto max-w-xl">
         <SurfacePanel rounded="3xl" className="p-8 md:p-10">
           <form className="space-y-6 text-stone-800 dark:text-stone-200">
-            <FormField htmlFor="password" label="New Password">
+            <FormField htmlFor="password" label={getTranslation(language, "update.password")}>
               <input
                 id="password"
                 className="input-base"
                 type="password"
                 name="password"
-                placeholder="Must be at least 8 characters"
+                minLength={8}
+                placeholder={getTranslation(language, "update.passwordPlaceholder")}
                 required
               />
             </FormField>
@@ -68,7 +75,7 @@ export default async function UpdatePasswordPage({
                 formAction={updatePassword}
                 className="btn-primary w-full"
               >
-                Update Password
+                {getTranslation(language, "update.submit")}
               </button>
             </div>
 

@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
-import { permanentRedirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { getPublicationsPath } from "@/lib/locale";
 import { createNoIndexMetadata } from "@/lib/metadata";
+import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
 
 export const metadata: Metadata = createNoIndexMetadata({
   title: "Publications Redirect",
   description: "Redirects visitors to the primary localized publications route.",
 });
 
-export default function LegacyPublicationsRedirectPage() {
-  permanentRedirect(getPublicationsPath("en"));
+export default async function LegacyPublicationsRedirectPage() {
+  const preferredLanguage = await getPreferredLanguage();
+  redirect(getPublicationsPath(preferredLanguage));
 }

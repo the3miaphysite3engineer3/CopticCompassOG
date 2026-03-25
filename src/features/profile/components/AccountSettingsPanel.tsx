@@ -16,7 +16,7 @@ import {
 } from "@/features/dashboard/lib/dashboardCopy";
 import { cx } from '@/lib/classes'
 import { ProfileForm } from '@/features/profile/components/ProfileForm'
-import { getContactPath } from "@/lib/locale";
+import { getContactPath, getPrivacyPath } from "@/lib/locale";
 import type { Tables } from '@/types/supabase'
 
 type AccountSettingsPanelProps = {
@@ -200,7 +200,7 @@ function DeleteProfileNotice() {
         <Link href={getContactPath(language)} className="btn-primary px-6">
           {copy.account.requestDeletion}
         </Link>
-        <Link href="/privacy" className="btn-secondary px-6">
+        <Link href={getPrivacyPath(language)} className="btn-secondary px-6">
           {copy.account.reviewPrivacy}
         </Link>
       </div>

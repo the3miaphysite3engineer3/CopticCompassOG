@@ -1,5 +1,6 @@
-import { permanentRedirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { getEntryPath } from "@/lib/locale";
+import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
 
 export default async function LegacyEntryRedirectPage({
   params,
@@ -7,5 +8,6 @@ export default async function LegacyEntryRedirectPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  permanentRedirect(getEntryPath(id, "en"));
+  const preferredLanguage = await getPreferredLanguage();
+  redirect(getEntryPath(id, preferredLanguage));
 }

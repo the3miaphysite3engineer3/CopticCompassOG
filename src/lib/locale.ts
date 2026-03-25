@@ -57,6 +57,14 @@ export function getDevelopersPath(locale?: Language) {
   return locale ? getLocalizedPath(locale, "/developers") : "/developers";
 }
 
+export function getPrivacyPath(locale?: Language) {
+  return locale ? getLocalizedPath(locale, "/privacy") : "/privacy";
+}
+
+export function getTermsPath(locale?: Language) {
+  return locale ? getLocalizedPath(locale, "/terms") : "/terms";
+}
+
 export function stripLocaleFromPathname(pathname: string) {
   const normalizedPath = normalizePath(pathname);
 

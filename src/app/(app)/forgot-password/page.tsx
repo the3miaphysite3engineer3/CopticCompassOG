@@ -5,20 +5,19 @@ import { PageHeader } from '@/components/PageHeader'
 import { PageShell, pageShellAccents } from '@/components/PageShell'
 import { StatusNotice } from '@/components/StatusNotice'
 import { SurfacePanel } from '@/components/SurfacePanel'
+import { getTranslation } from "@/lib/i18n";
 import { createNoIndexMetadata } from '@/lib/metadata'
+import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
 import Link from 'next/link'
 
-const NOTICE_MESSAGES: Record<string, string> = {
-  'forgot-invalid-input': 'Please enter a valid email address.',
-  'forgot-error': 'An error occurred. Please try again.',
-  'forgot-rate-limited': 'Too many requests. Please wait a bit before trying again.',
-  'forgot-success': 'If an account exists, a password reset link has been sent. Check your inbox!',
-}
+export async function generateMetadata(): Promise<Metadata> {
+  const language = await getPreferredLanguage();
 
-export const metadata: Metadata = createNoIndexMetadata({
-  title: 'Reset Password',
-  description: 'Password reset page for the Wannes learning workspace.',
-})
+  return createNoIndexMetadata({
+    title: getTranslation(language, "forgot.metaTitle"),
+    description: getTranslation(language, "forgot.metaDescription"),
+  });
+}
 
 export default async function ForgotPasswordPage({
   searchParams,
@@ -28,8 +27,15 @@ export default async function ForgotPasswordPage({
     state?: string
   }>
 }) {
+  const language = await getPreferredLanguage();
+  const noticeMessages: Record<string, string> = {
+    'forgot-invalid-input': getTranslation(language, "forgot.notice.invalidInput"),
+    'forgot-error': getTranslation(language, "forgot.notice.error"),
+    'forgot-rate-limited': getTranslation(language, "forgot.notice.rateLimited"),
+    'forgot-success': getTranslation(language, "forgot.notice.success"),
+  };
   const { messageType = 'error', state } = await searchParams;
-  const noticeMessage = state && state in NOTICE_MESSAGES ? NOTICE_MESSAGES[state] : undefined;
+  const noticeMessage = state && state in noticeMessages ? noticeMessages[state] : undefined;
   const noticeVariant = state === 'forgot-success' ? 'success' : messageType;
 
   return (
@@ -42,8 +48,8 @@ export default async function ForgotPasswordPage({
       ]}
     >
       <PageHeader
-        title="Reset Password"
-        description="Enter the email associated with your account, and we'll send you a link to reset your password."
+        title={getTranslation(language, "forgot.title")}
+        description={getTranslation(language, "forgot.subtitle")}
         tone="brand"
         className="mb-12"
       />
@@ -51,13 +57,13 @@ export default async function ForgotPasswordPage({
       <div className="mx-auto max-w-xl">
         <SurfacePanel rounded="3xl" className="p-8 md:p-10">
           <form className="space-y-6 text-stone-800 dark:text-stone-200">
-            <FormField htmlFor="email" label="Email Address">
+            <FormField htmlFor="email" label={getTranslation(language, "forgot.email")}>
               <input
                 id="email"
                 className="input-base"
                 name="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder={getTranslation(language, "forgot.emailPlaceholder")}
                 required
               />
             </FormField>
@@ -67,13 +73,13 @@ export default async function ForgotPasswordPage({
                 formAction={resetPassword}
                 className="btn-primary w-full"
               >
-                Send Reset Link
+                {getTranslation(language, "forgot.sendLink")}
               </button>
               <Link
                 href="/login"
                 className="block text-center text-sm font-medium text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 transition-colors"
               >
-                Back to Sign In
+                {getTranslation(language, "forgot.backToSignIn")}
               </Link>
             </div>
 

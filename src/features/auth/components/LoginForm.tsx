@@ -102,7 +102,7 @@ export function LoginForm({
                 <div className="flex items-center justify-between w-full">
                   <span>{t("login.password")}</span>
                   <Link href="/forgot-password" className="text-xs text-brand-600 dark:text-brand-400 hover:underline">
-                    Forgot password?
+                    {t("login.forgotPassword")}
                   </Link>
                 </div>
               }>
@@ -137,7 +137,7 @@ export function LoginForm({
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-white dark:bg-stone-900 px-2 text-stone-500">
-                    Or continue with
+                    {t("login.orContinueWith")}
                   </span>
                 </div>
               </div>
@@ -148,7 +148,7 @@ export function LoginForm({
                 className="w-full flex items-center justify-center gap-3 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 px-4 py-2.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm"
               >
                 <FaGoogle className="h-4 w-4 text-red-500" />
-                Sign in with Google
+                {t("login.google")}
               </button>
 
               {noticeMessage && (

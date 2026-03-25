@@ -1,5 +1,6 @@
-import { permanentRedirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { getPublicationPath } from "@/features/publications/lib/publications";
+import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
 
 export default async function LegacyPublicationDetailRedirectPage({
   params,
@@ -7,5 +8,6 @@ export default async function LegacyPublicationDetailRedirectPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  permanentRedirect(getPublicationPath(id, "en"));
+  const preferredLanguage = await getPreferredLanguage();
+  redirect(getPublicationPath(id, preferredLanguage));
 }
