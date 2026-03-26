@@ -49,7 +49,9 @@ function RelationEntryLink({
 }) {
   const { language, t } = useLanguage();
   const relationLabel = getRelationLabel(relationType, t);
-  const firstMeaning = entry.english_meanings[0];
+  const firstMeaning = (language === "nl" && entry.dutch_meanings)
+    ? entry.dutch_meanings[0]
+    : entry.english_meanings[0];
 
   return (
     <Link

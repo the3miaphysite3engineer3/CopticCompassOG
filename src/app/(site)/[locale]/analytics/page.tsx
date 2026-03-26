@@ -36,6 +36,6 @@ export default async function AnalyticsPage({
   const resolvedLocale = isPublicLocale(locale) ? locale : "en";
 
   return (
-    <AnalyticsPageClient snapshots={createAnalyticsSnapshots(getDictionary(resolvedLocale))} />
+    <AnalyticsPageClient snapshots={createAnalyticsSnapshots(getDictionary())} />
   );
 }

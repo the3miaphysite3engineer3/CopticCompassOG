@@ -55,7 +55,6 @@ const localizedStaticRoutes: readonly LocalizedStaticRouteConfig[] = [
     sourcePaths: [
       "src/app/(site)/[locale]/dictionary/page.tsx",
       "public/data/dictionary.json",
-      "public/data/woordenboek.json",
     ],
   },
   {
@@ -105,7 +104,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const dictionary = getDictionary();
   const dictionaryLastModified = getLatestProjectFileMtime([
     "public/data/dictionary.json",
-    "public/data/woordenboek.json",
   ]);
   const publicationsLastModified = getLatestProjectFileMtime([
     "src/features/publications/lib/publications.ts",

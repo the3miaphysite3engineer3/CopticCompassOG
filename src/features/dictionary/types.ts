@@ -25,7 +25,9 @@ export interface LexicalEntry {
   parentEntryId?: string;
   relationType?: LexicalRelationType;
   english_meanings: string[];
+  dutch_meanings?: string[];
   greek_equivalents: string[];
+  bohairicParadigmData?: any;
   raw: {
     word: string;
     meaning: string;

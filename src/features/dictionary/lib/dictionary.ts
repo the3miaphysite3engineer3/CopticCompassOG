@@ -6,18 +6,16 @@ import { readProjectJsonFile } from "../../../lib/server/projectFiles.ts";
 
 assertServerOnly("src/features/dictionary/lib/dictionary.ts");
 
-function getDictionaryFilePath(language: Language) {
-  return language === "nl"
-    ? "public/data/woordenboek.json"
-    : "public/data/dictionary.json";
+function getDictionaryFilePath() {
+  return "public/data/dictionary.json";
 }
 
-const readDictionary = cache((language: Language): LexicalEntry[] => {
-  return readProjectJsonFile<LexicalEntry[]>(getDictionaryFilePath(language)) ?? [];
+const readDictionary = cache((): LexicalEntry[] => {
+  return readProjectJsonFile<LexicalEntry[]>(getDictionaryFilePath()) ?? [];
 });
 
-export function getDictionary(language: Language = "en"): LexicalEntry[] {
-  return readDictionary(language);
+export function getDictionary(): LexicalEntry[] {
+  return readDictionary();
 }
 
 export function getDictionaryEntryById(

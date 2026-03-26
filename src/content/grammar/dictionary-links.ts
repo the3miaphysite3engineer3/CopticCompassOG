@@ -61,7 +61,10 @@ function collectBohairicForms(entry: LexicalEntry): string[] {
     bohairicForms.nominal,
     bohairicForms.pronominal,
     bohairicForms.stative,
-  ].filter((form): form is string => form.length > 0);
+  ]
+    .flatMap((form) => form?.split(",") ?? [])
+    .map((form) => form.trim())
+    .filter((form) => form.length > 0);
 }
 
 function getBohairicDictionaryLookup() {

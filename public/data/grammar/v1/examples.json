@@ -86,6 +86,7 @@
         "grammar.concept.zero-determination"
       ],
       "dictionaryRefs": [
+        "cd_3368",
         "cd_1152"
       ],
       "tags": [
@@ -95,7 +96,8 @@
       ],
       "copticSegments": [
         {
-          "text": "Ø-ⲁⲅⲓⲟⲥ"
+          "text": "Ø-ⲁⲅⲓⲟⲥ",
+          "dictionaryEntryId": "cd_3368"
         },
         {
           "text": " "
@@ -119,6 +121,7 @@
         "grammar.concept.zero-determination"
       ],
       "dictionaryRefs": [
+        "cd_4042",
         "cd_1152"
       ],
       "tags": [
@@ -128,7 +131,8 @@
       ],
       "copticSegments": [
         {
-          "text": "Ø-ⲉⲕⲕ̀ⲗⲏⲥⲓⲁ̀"
+          "text": "Ø-ⲉⲕⲕ̀ⲗⲏⲥⲓⲁ̀",
+          "dictionaryEntryId": "cd_4042"
         },
         {
           "text": " "
@@ -411,7 +415,9 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [],
+      "dictionaryRefs": [
+        "cd_3368"
+      ],
       "tags": [
         "lesson-1",
         "nominal-sentence",
@@ -419,7 +425,8 @@
       ],
       "copticSegments": [
         {
-          "text": "Ⲛⲓⲁⲅⲓⲟⲥ"
+          "text": "Ⲛⲓⲁⲅⲓⲟⲥ",
+          "dictionaryEntryId": "cd_3368"
         },
         {
           "text": " "

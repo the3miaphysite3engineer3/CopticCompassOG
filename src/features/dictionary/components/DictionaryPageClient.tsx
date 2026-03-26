@@ -34,6 +34,8 @@ function DictionaryPageBody({ dictionaryPath }: DictionaryPageBodyProps) {
     setQuery,
     setSelectedDialect,
     setSelectedPartOfSpeech,
+    exactMatch,
+    setExactMatch,
     visibleQuery,
   } = useDictionarySearch({ dictionaryPath });
 
@@ -79,6 +81,8 @@ function DictionaryPageBody({ dictionaryPath }: DictionaryPageBodyProps) {
           selectedPartOfSpeech={selectedPartOfSpeech}
           setSelectedDialect={setSelectedDialect}
           setSelectedPartOfSpeech={setSelectedPartOfSpeech}
+          exactMatch={exactMatch}
+          setExactMatch={setExactMatch}
         />
       </div>
 
@@ -96,9 +100,7 @@ function DictionaryPageBody({ dictionaryPath }: DictionaryPageBodyProps) {
 }
 
 export default function DictionaryPageClient() {
-  const { language } = useLanguage();
-  const dictionaryPath =
-    language === "nl" ? "/data/woordenboek.json" : "/data/dictionary.json";
+  const dictionaryPath = "/data/dictionary.json";
 
   return <DictionaryPageBody key={dictionaryPath} dictionaryPath={dictionaryPath} />;
 }

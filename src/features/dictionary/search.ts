@@ -5,6 +5,7 @@ export interface PreparedLexicalEntry {
   normalizedHeadword: string;
   normalizedDialectForms: string;
   englishSearchText: string;
+  dutchSearchText: string;
   greekSearchText: string;
 }
 
@@ -40,28 +41,54 @@ export function prepareDictionaryForSearch(dictionary: LexicalEntry[]): Prepared
       normalizedHeadword: normalizeCoptic(entry.headword),
       normalizedDialectForms: normalizeCoptic(dialectForms),
       englishSearchText: entry.english_meanings.join(" ").toLowerCase(),
+      dutchSearchText: (entry.dutch_meanings || []).join(" ").toLowerCase(),
       greekSearchText: entry.greek_equivalents.join(" ").toLowerCase(),
     };
   });
 }
 
-export function searchPreparedDictionary(query: string, dictionary: PreparedLexicalEntry[]): LexicalEntry[] {
+export function escapeRegExp(string: string) {
+  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export function searchPreparedDictionary(
+  query: string,
+  dictionary: PreparedLexicalEntry[],
+  exactMatch: boolean = false
+): LexicalEntry[] {
   if (!query || query.trim().length === 0) return [];
 
   const plainQuery = query.toLowerCase().trim();
   const normalizedQuery = normalizeCoptic(query);
+
+  if (exactMatch) {
+    const plainRegex = new RegExp(`(^|[^\\p{L}\\p{M}\\p{N}_])${escapeRegExp(plainQuery)}([^\\p{L}\\p{M}\\p{N}_]|$)`, "ui");
+    const normalizedRegex = new RegExp(`(^|[^\\p{L}\\p{M}\\p{N}_])${escapeRegExp(normalizedQuery)}([^\\p{L}\\p{M}\\p{N}_]|$)`, "ui");
+
+    return dictionary
+      .filter((entry) => {
+        if (normalizedRegex.test(entry.normalizedHeadword)) return true;
+        if (normalizedRegex.test(entry.normalizedDialectForms)) return true;
+        if (plainRegex.test(entry.englishSearchText)) return true;
+        if (plainRegex.test(entry.dutchSearchText)) return true;
+        if (plainRegex.test(entry.greekSearchText)) return true;
+        return false;
+      })
+      .map((entry) => entry.entry);
+  }
 
   return dictionary
     .filter((entry) => {
       if (entry.normalizedHeadword.includes(normalizedQuery)) return true;
       if (entry.normalizedDialectForms.includes(normalizedQuery)) return true;
       if (entry.englishSearchText.includes(plainQuery)) return true;
+      if (entry.dutchSearchText.includes(plainQuery)) return true;
       if (entry.greekSearchText.includes(plainQuery)) return true;
       return false;
     })
     .map((entry) => entry.entry);
 }
 
-export function searchDictionary(query: string, dictionary: LexicalEntry[]): LexicalEntry[] {
-  return searchPreparedDictionary(query, prepareDictionaryForSearch(dictionary));
+export function searchDictionary(query: string, dictionary: LexicalEntry[], exactMatch: boolean = false): LexicalEntry[] {
+  return searchPreparedDictionary(query, prepareDictionaryForSearch(dictionary), exactMatch);
 }

@@ -21,6 +21,7 @@ export const dictionaryMessages = defineMessages({
     "dict.results": "result(s)",
     "dict.noMatch": "No distinct forms match your query.",
     "dict.tryFuzzy": "Try adjusting the fuzzy search or removing filters.",
+    "dict.exactMatch": "Exact Match",
 
     "dialect.ALL": "All dialects",
     "dialect.A": "Akhmimic",
@@ -79,6 +80,7 @@ export const dictionaryMessages = defineMessages({
     "dict.noMatch": "Geen unieke vormen komen overeen met uw zoekopdracht.",
     "dict.tryFuzzy":
       "Probeer de fuzzy search aan te passen of filters te verwijderen.",
+    "dict.exactMatch": "Exacte overeenkomst",
 
     "dialect.ALL": "Alle dialecten",
     "dialect.A": "Achmimisch",

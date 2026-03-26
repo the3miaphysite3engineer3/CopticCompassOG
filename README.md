@@ -102,24 +102,6 @@ npm run build
 
 ## Data Workflows
 
-### Dictionary
-
-Dictionary content is generated and maintained through local scripts.
-
-```bash
-npm run data:parse
-npm run data:dictionary:derive
-npm run data:dictionary:validate-config
-npm run data:dictionary:audit-related
-```
-
-Additional maintenance helpers:
-
-```bash
-npm run data:translate
-npm run data:rewrite
-```
-
 ### Grammar
 
 Grammar lesson data is exported into public JSON files used by the site and API.

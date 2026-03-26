@@ -30,6 +30,7 @@ export function useDictionarySearch({ dictionaryPath }: UseDictionarySearchOptio
     useState<DictionaryPartOfSpeechFilter>(DEFAULT_PART_OF_SPEECH_FILTER);
   const [selectedDialect, setSelectedDialect] =
     useState<DialectFilter>(DEFAULT_DICTIONARY_DIALECT_FILTER);
+  const [exactMatch, setExactMatch] = useState<boolean>(false);
   const deferredQuery = useDeferredValue(query);
 
   useEffect(() => {
@@ -60,29 +61,11 @@ export function useDictionarySearch({ dictionaryPath }: UseDictionarySearchOptio
           setLoading(false);
         }
       } catch {
-        console.warn("Target language dictionary missing, falling back to English...");
-
-        try {
-          // Localized dictionary files are optional; the English dataset is the
-          // safe fallback so search never hard-fails for missing translations.
-          const response = await fetch("/data/dictionary.json");
-          const data = (await response.json()) as LexicalEntry[];
-
-          if (!cancelled) {
-            if (initialQuery) {
-              setQuery(initialQuery);
-              setSelectedDialect("ALL");
-            }
-            setDictionary(data);
-            setPreparedDictionary(prepareDictionaryForSearch(data));
-            setLoading(false);
-          }
-        } catch {
-          if (!cancelled) {
-            setDictionary([]);
-            setPreparedDictionary([]);
-            setLoading(false);
-          }
+        console.warn("Target language dictionary missing...");
+        if (!cancelled) {
+          setDictionary([]);
+          setPreparedDictionary([]);
+          setLoading(false);
         }
       }
     }
@@ -117,7 +100,7 @@ export function useDictionarySearch({ dictionaryPath }: UseDictionarySearchOptio
   const filteredResults = useMemo(() => {
     let results =
       deferredQuery.trim().length > 0
-        ? searchPreparedDictionary(deferredQuery, preparedDictionary)
+        ? searchPreparedDictionary(deferredQuery, preparedDictionary, exactMatch)
         : dictionary;
 
     if (selectedPartOfSpeech !== "ALL") {
@@ -129,7 +112,7 @@ export function useDictionarySearch({ dictionaryPath }: UseDictionarySearchOptio
     }
 
     return results;
-  }, [deferredQuery, dictionary, preparedDictionary, selectedPartOfSpeech, selectedDialect]);
+  }, [deferredQuery, dictionary, preparedDictionary, selectedPartOfSpeech, selectedDialect, exactMatch]);
 
   const handleKeyboardAppend = useCallback((char: string) => {
     setQuery((prev) => {
@@ -172,7 +155,7 @@ export function useDictionarySearch({ dictionaryPath }: UseDictionarySearchOptio
 
   // Infinite-scroll rendering resets when query or filters change, so the list
   // gets a stable key derived from the effective search state.
-  const resultsKey = `${deferredQuery}\u0000${selectedPartOfSpeech}\u0000${selectedDialect}`;
+  const resultsKey = `${deferredQuery}\u0000${selectedPartOfSpeech}\u0000${selectedDialect}\u0000${exactMatch}`;
 
   return {
     dictionaryLength: dictionary.length,
@@ -191,6 +174,8 @@ export function useDictionarySearch({ dictionaryPath }: UseDictionarySearchOptio
     setQuery,
     setSelectedDialect,
     setSelectedPartOfSpeech,
+    exactMatch,
+    setExactMatch,
     visibleQuery: deferredQuery,
   };
 }

@@ -55,8 +55,7 @@ export default function EntryPageClient({
 
   useEffect(() => {
     let cancelled = false;
-    const dictionaryPath =
-      language === "nl" ? "/data/woordenboek.json" : "/data/dictionary.json";
+    const dictionaryPath = "/data/dictionary.json";
 
     async function loadLocalizedEntry() {
       try {

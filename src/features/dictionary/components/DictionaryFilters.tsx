@@ -16,6 +16,8 @@ type DictionaryFiltersProps = {
   selectedPartOfSpeech: DictionaryPartOfSpeechFilter;
   setSelectedDialect: (value: DialectFilter) => void;
   setSelectedPartOfSpeech: (value: DictionaryPartOfSpeechFilter) => void;
+  exactMatch: boolean;
+  setExactMatch: (value: boolean) => void;
 };
 
 export function DictionaryFilters({
@@ -23,6 +25,8 @@ export function DictionaryFilters({
   selectedPartOfSpeech,
   setSelectedDialect,
   setSelectedPartOfSpeech,
+  exactMatch,
+  setExactMatch,
 }: DictionaryFiltersProps) {
   const { t } = useLanguage();
 
@@ -68,6 +72,20 @@ export function DictionaryFilters({
           ))}
         </select>
       </div>
+
+      <div className="hidden h-6 w-px bg-stone-300 dark:bg-stone-700 sm:block" />
+
+      <label className="flex cursor-pointer items-center space-x-2 rounded-lg p-1 transition-colors hover:bg-stone-100 dark:hover:bg-stone-800">
+        <input
+          type="checkbox"
+          className="h-4 w-4 transform cursor-pointer rounded border-stone-300 text-sky-600 transition duration-150 ease-in-out focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:border-stone-600 dark:bg-stone-900 dark:checked:bg-sky-500"
+          checked={exactMatch}
+          onChange={(e) => setExactMatch(e.target.checked)}
+        />
+        <FormLabel tone="muted" className="cursor-pointer mb-0">
+          {t("dict.exactMatch") || "Exact Match"}
+        </FormLabel>
+      </label>
     </div>
   );
 }

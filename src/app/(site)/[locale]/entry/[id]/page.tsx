@@ -41,7 +41,7 @@ export async function generateMetadata({
   const locale = isPublicLocale(resolvedParams.locale)
     ? resolvedParams.locale
     : "en";
-  const dictionary = getDictionary(locale);
+  const dictionary = getDictionary();
   const entry = dictionary.find((item) => item.id === resolvedParams.id);
 
   if (!entry) {
@@ -92,7 +92,7 @@ export default async function EntryPage({
   const locale = isPublicLocale(resolvedParams.locale)
     ? resolvedParams.locale
     : "en";
-  const dictionary = getDictionary(locale);
+  const dictionary = getDictionary();
   const entry = dictionary.find(e => e.id === resolvedParams.id);
 
   if (!entry) {

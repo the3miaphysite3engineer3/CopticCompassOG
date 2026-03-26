@@ -96,8 +96,10 @@ function isPureGrammarLeadIn(value: string) {
   );
 }
 
-export function getEntrySummary(entry: LexicalEntry) {
-  for (const meaning of entry.english_meanings) {
+export function getEntrySummary(entry: LexicalEntry, locale: Language = "en") {
+  const meanings = locale === "nl" && entry.dutch_meanings ? entry.dutch_meanings : entry.english_meanings;
+  
+  for (const meaning of meanings) {
     const candidate = stripLeadIn(meaning);
     if (candidate && !isPureGrammarLeadIn(candidate)) {
       return candidate;
@@ -112,7 +114,7 @@ export function buildEntryDescription(
   locale: Language = "en",
 ) {
   const headword = toPlainText(entry.headword);
-  const firstMeaning = getEntrySummary(entry);
+  const firstMeaning = getEntrySummary(entry, locale);
 
   if (locale === "nl") {
     return firstMeaning

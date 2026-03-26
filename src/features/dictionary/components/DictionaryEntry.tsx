@@ -117,12 +117,12 @@ export default function DictionaryEntryCard({
           )}
         </div>
         
-        <div className="flex flex-wrap gap-2 text-xs font-semibold">
-          <span className="px-3 py-1 bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full text-stone-600 dark:text-stone-300">
+        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+          <span className="inline-flex h-8 items-center px-3 bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full text-stone-600 dark:text-stone-300">
             {entry.pos}
           </span>
           {entry.gender && (
-            <span className={`px-3 py-1 rounded-full border ${
+            <span className={`inline-flex h-8 items-center px-3 rounded-full border ${
               entry.gender === "F"
                 ? "bg-pink-50 dark:bg-pink-950/40 border-pink-200 dark:border-pink-900/50 text-pink-600 dark:text-pink-300"
                 : "bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-900/50 text-sky-600 dark:text-sky-300"
@@ -131,7 +131,7 @@ export default function DictionaryEntryCard({
             </span>
           )}
           {primaryDialectKey && (
-            <Badge tone="coptic" size="sm" className="min-h-8">
+            <Badge tone="coptic" size="sm" className="h-8 min-h-8">
               <DialectSiglum siglum={primaryDialectKey} />
             </Badge>
           )}
@@ -145,7 +145,7 @@ export default function DictionaryEntryCard({
         <ul className={`space-y-2 text-stone-800 dark:text-stone-200 list-disc ml-5 marker:text-sky-500 ${
           isDetailView ? "text-lg md:text-xl" : "text-lg"
         }`}>
-          {entry.english_meanings.map((meaning, idx) => (
+          {(language === "nl" && entry.dutch_meanings ? entry.dutch_meanings : entry.english_meanings).map((meaning, idx) => (
             <li key={idx} className="leading-relaxed pl-1">
               <HighlightText text={meaning} query={query} emphasizeLeadingLabel />
             </li>
