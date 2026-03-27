@@ -6,6 +6,8 @@ import {
   formatDashboardDate,
   getDashboardCopy,
 } from "@/features/dashboard/lib/dashboardCopy";
+import type { DialectFilter } from "@/features/dictionary/config";
+import { getPreferredEntryDisplaySpelling } from "@/features/dictionary/lib/entryDisplay";
 import type { EntryFavoriteWithEntry } from "@/features/dictionary/lib/entryActions";
 import { antinoou } from "@/lib/fonts";
 import { getEntryPath } from "@/lib/locale";
@@ -14,6 +16,7 @@ import type { Language } from "@/types/i18n";
 type DictionaryFavoritesOverviewProps = {
   favorites: readonly EntryFavoriteWithEntry[];
   language: Language;
+  preferredDialect: DialectFilter;
 };
 
 function getMeaningPreview(
@@ -35,6 +38,7 @@ function getMeaningPreview(
 export function DictionaryFavoritesOverview({
   favorites,
   language,
+  preferredDialect,
 }: DictionaryFavoritesOverviewProps) {
   const copy = getDashboardCopy(language);
   const availableFavorites = favorites.filter(({ entry }) => Boolean(entry));
@@ -103,7 +107,9 @@ export function DictionaryFavoritesOverview({
                     <h4
                       className={`${antinoou.className} text-3xl tracking-wide text-sky-700 dark:text-sky-300`}
                     >
-                      {entry?.headword ?? favorite.entry_id}
+                      {entry
+                        ? getPreferredEntryDisplaySpelling(entry, preferredDialect)
+                        : favorite.entry_id}
                     </h4>
 
                     {meaningPreview ? (

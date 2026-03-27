@@ -4,6 +4,7 @@ import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } f
 import {
   DEFAULT_DICTIONARY_DIALECT_FILTER,
   DEFAULT_PART_OF_SPEECH_FILTER,
+  isDialectFilter,
   type DialectFilter,
   type DictionaryPartOfSpeechFilter,
 } from "@/features/dictionary/config";
@@ -13,6 +14,7 @@ import {
   type PreparedLexicalEntry,
 } from "@/features/dictionary/search";
 import type { LexicalEntry } from "@/features/dictionary/types";
+import { createClient } from "@/lib/supabase/client";
 
 type UseDictionarySearchOptions = {
   dictionaryPath: string;
@@ -28,10 +30,12 @@ export function useDictionarySearch({ dictionaryPath }: UseDictionarySearchOptio
   const selectionRef = useRef({ start: 0, end: 0 });
   const [selectedPartOfSpeech, setSelectedPartOfSpeech] =
     useState<DictionaryPartOfSpeechFilter>(DEFAULT_PART_OF_SPEECH_FILTER);
-  const [selectedDialect, setSelectedDialect] =
+  const [selectedDialect, setSelectedDialectState] =
     useState<DialectFilter>(DEFAULT_DICTIONARY_DIALECT_FILTER);
   const [exactMatch, setExactMatch] = useState<boolean>(false);
+  const [preferenceUserId, setPreferenceUserId] = useState<string | null>(null);
   const deferredQuery = useDeferredValue(query);
+  const hasDeepLinkedQueryRef = useRef(false);
 
   useEffect(() => {
     // Deep-linked searches hydrate from ?q=... so shared dictionary URLs open
@@ -43,6 +47,7 @@ export function useDictionarySearch({ dictionaryPath }: UseDictionarySearchOptio
         typeof window === "undefined"
           ? ""
           : new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
+      hasDeepLinkedQueryRef.current = initialQuery.length > 0;
 
       try {
         const response = await fetch(dictionaryPath);
@@ -54,7 +59,7 @@ export function useDictionarySearch({ dictionaryPath }: UseDictionarySearchOptio
         if (!cancelled) {
           if (initialQuery) {
             setQuery(initialQuery);
-            setSelectedDialect("ALL");
+            setSelectedDialectState("ALL");
           }
           setDictionary(data);
           setPreparedDictionary(prepareDictionaryForSearch(data));
@@ -76,6 +81,58 @@ export function useDictionarySearch({ dictionaryPath }: UseDictionarySearchOptio
       cancelled = true;
     };
   }, [dictionaryPath]);
+
+  useEffect(() => {
+    const supabaseClient = createClient();
+    if (!supabaseClient) {
+      return;
+    }
+    const supabase = supabaseClient;
+
+    let isMounted = true;
+
+    async function applyUserPreference(nextUserId: string | null) {
+      if (!isMounted) {
+        return;
+      }
+
+      setPreferenceUserId(nextUserId);
+
+      if (!nextUserId || hasDeepLinkedQueryRef.current) {
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("preferred_dictionary_dialect")
+        .eq("id", nextUserId)
+        .maybeSingle();
+
+      if (!isMounted || error) {
+        return;
+      }
+
+      const preferredDialect = data?.preferred_dictionary_dialect;
+      if (preferredDialect && isDialectFilter(preferredDialect)) {
+        setSelectedDialectState(preferredDialect);
+      }
+    }
+
+    void supabase.auth.getUser().then(({ data }) => {
+      void applyUserPreference(data.user?.id ?? null);
+    });
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      void applyUserPreference(session?.user?.id ?? null);
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleSelectionChange = useCallback((start: number | null, end: number | null) => {
     const fallback = end ?? start ?? query.length;
@@ -156,6 +213,23 @@ export function useDictionarySearch({ dictionaryPath }: UseDictionarySearchOptio
   // Infinite-scroll rendering resets when query or filters change, so the list
   // gets a stable key derived from the effective search state.
   const resultsKey = `${deferredQuery}\u0000${selectedPartOfSpeech}\u0000${selectedDialect}\u0000${exactMatch}`;
+  const setSelectedDialect = useCallback((value: DialectFilter) => {
+    setSelectedDialectState(value);
+
+    if (!preferenceUserId) {
+      return;
+    }
+
+    const supabase = createClient();
+    if (!supabase) {
+      return;
+    }
+
+    void supabase
+      .from("profiles")
+      .update({ preferred_dictionary_dialect: value })
+      .eq("id", preferenceUserId);
+  }, [preferenceUserId]);
 
   return {
     dictionaryLength: dictionary.length,

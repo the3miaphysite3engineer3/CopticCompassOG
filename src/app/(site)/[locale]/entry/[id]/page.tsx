@@ -4,6 +4,7 @@ import EntryPageHeader from '@/features/dictionary/components/EntryPageHeader';
 import EntryPageClient from '@/features/dictionary/components/EntryPageClient';
 import { PageShell, pageShellAccents } from '@/components/PageShell';
 import StructuredData from '@/components/StructuredData';
+import { buildEntryOpenGraphImageUrl } from '@/features/dictionary/lib/entryOpenGraph';
 import {
   buildEntryDescription,
   toPlainText,
@@ -59,6 +60,7 @@ export async function generateMetadata({
       : `${headword} (${entry.pos}) - Coptic Dictionary`;
   const description = buildEntryDescription(entry, locale);
   const path = getEntryPath(entry.id, locale);
+  const imageUrl = buildEntryOpenGraphImageUrl(entry.id, locale);
 
   return {
     metadataBase: new URL(siteConfig.liveUrl),
@@ -73,10 +75,19 @@ export async function generateMetadata({
       description,
       url: `${siteConfig.liveUrl}${path}`,
       locale: getOpenGraphLocale(locale),
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
     },
     twitter: {
       title: buildPageTitle(title),
       description,
+      images: [imageUrl],
     },
   };
 }

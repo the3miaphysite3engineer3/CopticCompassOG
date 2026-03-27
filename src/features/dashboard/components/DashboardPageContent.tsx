@@ -20,6 +20,7 @@ import {
 import { AccountSettingsPanel } from "@/features/profile/components/AccountSettingsPanel";
 import { getAccountAuthSettings } from "@/features/profile/lib/accountSettings";
 import { getDashboardCopy } from "@/features/dashboard/lib/dashboardCopy";
+import { DEFAULT_DICTIONARY_DIALECT_FILTER } from "@/features/dictionary/config";
 import { antinoou } from "@/lib/fonts";
 import { getDashboardPath } from "@/lib/locale";
 import {
@@ -166,6 +167,10 @@ export async function DashboardPageContent({
         <DictionaryFavoritesOverview
           favorites={savedDictionaryEntries}
           language={locale}
+          preferredDialect={
+            profile.preferred_dictionary_dialect ??
+            DEFAULT_DICTIONARY_DIALECT_FILTER
+          }
         />
 
         <div className="space-y-8">

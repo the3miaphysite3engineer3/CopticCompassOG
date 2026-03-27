@@ -9,6 +9,10 @@ import type {
   DialectFilter,
   DictionaryDialectCode,
 } from "@/features/dictionary/config";
+import {
+  formatDialectForms,
+  getPreferredEntryDialectKey,
+} from "@/features/dictionary/lib/entryDisplay";
 import type { LexicalEntry } from "@/features/dictionary/types";
 import { antinoou } from "@/lib/fonts";
 import { getEntryPath } from "@/lib/locale";
@@ -29,24 +33,6 @@ type DialectEntryTuple = [
   NonNullable<LexicalEntry["dialects"][DictionaryDialectCode]>,
 ];
 
-function formatDialectForms(forms: DialectEntryTuple[1], headwordFallback: string) {
-  const parts: string[] = [];
-  const absoluteWithVariants = forms.absolute
-    ? [forms.absolute, ...(forms.absoluteVariants ?? [])].join(", ")
-    : headwordFallback;
-
-  parts.push(absoluteWithVariants);
-
-  const bound: string[] = [];
-  if (forms.nominal) bound.push(forms.nominal);
-  if (forms.pronominal) bound.push(forms.pronominal);
-
-  if (bound.length > 0) parts.push(bound.join("/"));
-  if (forms.stative) parts.push(forms.stative);
-
-  return parts.join(" ");
-}
-
 export default function DictionaryEntryCard({
   actions,
   entry,
@@ -57,16 +43,7 @@ export default function DictionaryEntryCard({
 }: DictionaryEntryCardProps) {
   const { language, t } = useLanguage();
   const isDetailView = headingLevel === "h1";
-  const dialectKeys = Object.keys(entry.dialects) as DictionaryDialectCode[];
-  let primaryDialectKey: DictionaryDialectCode | undefined = "S";
-
-  // Cards honor the active dialect filter when that form exists; otherwise they
-  // fall back to the first available spelling for the entry.
-  if (selectedDialect !== "ALL" && entry.dialects[selectedDialect]) {
-    primaryDialectKey = selectedDialect;
-  } else if (!entry.dialects.S) {
-    primaryDialectKey = dialectKeys[0];
-  }
+  const primaryDialectKey = getPreferredEntryDialectKey(entry, selectedDialect);
 
   let headerSpelling = entry.headword;
   const primaryForms = primaryDialectKey

@@ -30,7 +30,13 @@ export default function EntryPageClient({
   return (
     <>
       <DictionaryEntryCard
-        actions={<EntryActionBar entry={initialEntry} />}
+        actions={
+          <EntryActionBar
+            entry={initialEntry}
+            parentEntry={initialParentEntry}
+            relatedEntries={initialRelatedEntries}
+          />
+        }
         entry={initialEntry}
         headingLevel="h1"
         linkHeadword={false}

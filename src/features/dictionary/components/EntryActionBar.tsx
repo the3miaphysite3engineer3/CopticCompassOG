@@ -8,7 +8,18 @@ import {
   type Dispatch,
   type SetStateAction,
 } from "react";
-import { Flag, Heart, Loader2, MessageSquareText } from "lucide-react";
+import {
+  Copy,
+  Facebook,
+  Flag,
+  Heart,
+  Link2,
+  Linkedin,
+  Loader2,
+  MessageSquareText,
+  Share2,
+} from "lucide-react";
+import { FaXTwitter } from "react-icons/fa6";
 import {
   submitEntryReport,
   type EntryReportActionState,
@@ -29,10 +40,17 @@ import {
   type EntryFavoriteErrorCode,
   type EntryReportReason,
 } from "../lib/entryActions";
+import {
+  buildEntryShareLinks,
+  buildEntrySharePayload,
+  resolveEntryShareUrl,
+} from "../lib/entryShare";
 import { useEntryFavorite } from "../lib/useEntryFavorite";
 
 type EntryActionBarProps = {
   entry: LexicalEntry;
+  parentEntry?: LexicalEntry | null;
+  relatedEntries?: readonly LexicalEntry[];
 };
 
 type ActionNotice = {
@@ -182,9 +200,129 @@ function EntryReportPanel({
   );
 }
 
-export function EntryActionBar({ entry }: EntryActionBarProps) {
+function EntrySharePanel({
+  canUseNativeShare,
+  notice,
+  onCopyLink,
+  onCopyText,
+  onNativeShare,
+  shareLinks,
+  sharePayload,
+}: {
+  canUseNativeShare: boolean;
+  notice: ActionNotice;
+  onCopyLink: () => void;
+  onCopyText: () => void;
+  onNativeShare: () => void;
+  shareLinks: ReturnType<typeof buildEntryShareLinks>;
+  sharePayload: ReturnType<typeof buildEntrySharePayload>;
+}) {
+  const { t } = useLanguage();
+
+  return (
+    <div className="rounded-2xl border border-sky-200 bg-sky-50/75 p-5 shadow-sm backdrop-blur-md dark:border-sky-900/40 dark:bg-sky-950/20">
+      <div className="mb-4">
+        <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800 dark:text-stone-200">
+          <Share2 className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+          {t("entry.actions.shareTitle")}
+        </h3>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600 dark:text-stone-400">
+          {t("entry.actions.shareDescription")}
+        </p>
+      </div>
+
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
+        <div className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm dark:border-stone-800/70 dark:bg-stone-950/40">
+          <p className="text-xs font-semibold uppercase tracking-widest text-sky-700 dark:text-sky-300">
+            {t("entry.actions.sharePreviewLabel")}
+          </p>
+          <p className="mt-3 whitespace-pre-line text-sm leading-6 text-stone-700 dark:text-stone-300">
+            {sharePayload.text}
+          </p>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          {canUseNativeShare ? (
+            <button
+              type="button"
+              className="btn-secondary justify-center gap-2 px-4"
+              onClick={onNativeShare}
+            >
+              <Share2 className="h-4 w-4" />
+              {t("entry.actions.shareNative")}
+            </button>
+          ) : null}
+
+          <button
+            type="button"
+            className="btn-secondary justify-center gap-2 px-4"
+            onClick={onCopyText}
+          >
+            <Copy className="h-4 w-4" />
+            {t("entry.actions.shareCopyText")}
+          </button>
+
+          <button
+            type="button"
+            className="btn-secondary justify-center gap-2 px-4"
+            onClick={onCopyLink}
+          >
+            <Link2 className="h-4 w-4" />
+            {t("entry.actions.shareCopyLink")}
+          </button>
+
+          <a
+            href={shareLinks.x}
+            target="_blank"
+            rel="noreferrer"
+            className="btn-secondary justify-center gap-2 px-4"
+          >
+            <FaXTwitter className="h-4 w-4" />
+            {t("entry.actions.sharePlatformX")}
+          </a>
+
+          <a
+            href={shareLinks.facebook}
+            target="_blank"
+            rel="noreferrer"
+            className="btn-secondary justify-center gap-2 px-4"
+          >
+            <Facebook className="h-4 w-4" />
+            {t("entry.actions.sharePlatformFacebook")}
+          </a>
+
+          <a
+            href={shareLinks.linkedin}
+            target="_blank"
+            rel="noreferrer"
+            className="btn-secondary justify-center gap-2 px-4"
+          >
+            <Linkedin className="h-4 w-4" />
+            {t("entry.actions.sharePlatformLinkedIn")}
+          </a>
+        </div>
+      </div>
+
+      {notice ? (
+        <div className="mt-4">
+          <StatusNotice tone={notice.tone} align="left">
+            {notice.message}
+          </StatusNotice>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+export function EntryActionBar({
+  entry,
+  parentEntry = null,
+  relatedEntries = [],
+}: EntryActionBarProps) {
   const { language, t } = useLanguage();
   const authGate = useOptionalAuthGate();
+  const [isShareOpen, setIsShareOpen] = useState(false);
+  const [shareNotice, setShareNotice] = useState<ActionNotice>(null);
   const [isReportOpen, setIsReportOpen] = useState(false);
   const [reportNotice, setReportNotice] = useState<ActionNotice>(null);
   const {
@@ -202,7 +340,72 @@ export function EntryActionBar({ entry }: EntryActionBarProps) {
   const favoriteErrorMessage = errorCode
     ? t(ENTRY_FAVORITE_ERROR_LABEL_KEYS[errorCode])
     : null;
+  const canUseNativeShare =
+    typeof navigator !== "undefined" && typeof navigator.share === "function";
   const isReportPanelVisible = authGate.isAuthenticated && isReportOpen;
+  const sharePayload = buildEntrySharePayload({
+    entry,
+    language,
+    parentEntry,
+    relatedEntries,
+    url: resolveEntryShareUrl(
+      entry.id,
+      language,
+      typeof window !== "undefined" ? window.location.href : undefined,
+    ),
+  });
+  const shareLinks = buildEntryShareLinks(sharePayload);
+  const sharePanelId = `entry-share-panel-${entry.id}`;
+
+  async function writeToClipboard(value: string, successMessage: string) {
+    if (typeof navigator === "undefined" || !navigator.clipboard) {
+      setShareNotice({
+        message: t("entry.actions.shareCopyFailed"),
+        tone: "error",
+      });
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(value);
+      setShareNotice({
+        message: successMessage,
+        tone: "success",
+      });
+    } catch {
+      setShareNotice({
+        message: t("entry.actions.shareCopyFailed"),
+        tone: "error",
+      });
+    }
+  }
+
+  async function handleNativeShare() {
+    if (
+      typeof navigator === "undefined" ||
+      typeof navigator.share !== "function"
+    ) {
+      return;
+    }
+
+    try {
+      await navigator.share({
+        text: sharePayload.text,
+        title: sharePayload.title,
+        url: sharePayload.url,
+      });
+      setShareNotice(null);
+    } catch (error) {
+      if (error instanceof Error && error.name === "AbortError") {
+        return;
+      }
+
+      setShareNotice({
+        message: t("entry.actions.shareNativeFailed"),
+        tone: "error",
+      });
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -217,6 +420,28 @@ export function EntryActionBar({ entry }: EntryActionBarProps) {
         </div>
 
         <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            aria-controls={sharePanelId}
+            aria-expanded={isShareOpen}
+            className={cx(
+              "btn-secondary gap-2 px-4",
+              isShareOpen &&
+                "border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/25 dark:text-sky-300 dark:hover:bg-sky-950/40",
+            )}
+            onClick={() => {
+              setReportNotice(null);
+              setShareNotice(null);
+              setIsReportOpen(false);
+              setIsShareOpen((current) => !current);
+            }}
+          >
+            <Share2 className="h-4 w-4" />
+            {isShareOpen
+              ? t("entry.actions.shareClose")
+              : t("entry.actions.share")}
+          </button>
+
           <AuthGatedActionButton
             className={cx(
               "btn-secondary gap-2 px-4",
@@ -230,6 +455,7 @@ export function EntryActionBar({ entry }: EntryActionBarProps) {
             lockedMessage={lockedMessage}
             onClick={() => {
               setReportNotice(null);
+              setShareNotice(null);
               void toggleFavorite();
             }}
           >
@@ -259,7 +485,9 @@ export function EntryActionBar({ entry }: EntryActionBarProps) {
             isReady={authGate.isReady}
             lockedMessage={lockedMessage}
             onClick={() => {
+              setShareNotice(null);
               setReportNotice(null);
+              setIsShareOpen(false);
               setIsReportOpen((current) => !current);
             }}
           >
@@ -281,6 +509,30 @@ export function EntryActionBar({ entry }: EntryActionBarProps) {
         <StatusNotice tone={reportNotice.tone} align="left">
           {reportNotice.message}
         </StatusNotice>
+      ) : null}
+
+      {isShareOpen ? (
+        <div id={sharePanelId}>
+          <EntrySharePanel
+            canUseNativeShare={canUseNativeShare}
+            notice={shareNotice}
+            onCopyLink={() =>
+              void writeToClipboard(
+                sharePayload.url,
+                t("entry.actions.shareLinkCopied"),
+              )
+            }
+            onCopyText={() =>
+              void writeToClipboard(
+                sharePayload.copyText,
+                t("entry.actions.shareTextCopied"),
+              )
+            }
+            onNativeShare={() => void handleNativeShare()}
+            shareLinks={shareLinks}
+            sharePayload={sharePayload}
+          />
+        </div>
       ) : null}
 
       {isReportPanelVisible ? (

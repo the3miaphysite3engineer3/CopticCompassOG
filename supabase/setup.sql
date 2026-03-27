@@ -9,6 +9,12 @@ create table if not exists public.profiles (
   created_at timestamptz not null default timezone('utc', now())
 );
 
+alter table public.profiles
+add column if not exists preferred_dictionary_dialect text
+  not null
+  default 'B'
+  check (preferred_dictionary_dialect in ('ALL', 'S', 'B', 'A', 'L', 'F'));
+
 create table if not exists public.submissions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references public.profiles (id) on delete cascade,

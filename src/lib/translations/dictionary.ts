@@ -46,13 +46,31 @@ export const dictionaryMessages = defineMessages({
     "entry.relation.feminineCounterpart": "Feminine counterpart",
     "entry.relation.derivedSubentry": "Derived subentry",
     "entry.relation.paradigmMember": "Paradigm member",
-    "entry.actions.eyebrow": "Personal Tools",
+    "entry.actions.eyebrow": "Entry Tools",
     "entry.actions.description":
-      "Save this entry for later or send a quick note when something needs attention.",
+      "Share this entry, save it for later, or send a quick note when something needs attention.",
     "entry.actions.authUnavailable":
       "Entry actions are unavailable right now.",
     "entry.actions.loginPrompt":
       "Log in or sign up to save entries and report issues.",
+    "entry.actions.share": "Share",
+    "entry.actions.shareClose": "Hide share options",
+    "entry.actions.shareTitle": "Share this entry",
+    "entry.actions.shareDescription":
+      "Share a compact preview of this entry with its gloss and related forms, or copy the text to post it anywhere.",
+    "entry.actions.sharePreviewLabel": "Share preview",
+    "entry.actions.shareNative": "Use device share",
+    "entry.actions.shareCopyText": "Copy share text",
+    "entry.actions.shareCopyLink": "Copy link",
+    "entry.actions.shareTextCopied": "Share text copied.",
+    "entry.actions.shareLinkCopied": "Link copied.",
+    "entry.actions.shareCopyFailed":
+      "Could not copy the share content right now.",
+    "entry.actions.shareNativeFailed":
+      "Could not open the device share sheet right now.",
+    "entry.actions.sharePlatformX": "Share on X",
+    "entry.actions.sharePlatformFacebook": "Share on Facebook",
+    "entry.actions.sharePlatformLinkedIn": "Share on LinkedIn",
     "entry.actions.favorite": "Save entry",
     "entry.actions.favorited": "Saved entry",
     "entry.actions.favoriteLoading": "Loading...",
@@ -145,13 +163,31 @@ export const dictionaryMessages = defineMessages({
     "entry.relation.feminineCounterpart": "Vrouwelijke tegenhanger",
     "entry.relation.derivedSubentry": "Afgeleid sublemma",
     "entry.relation.paradigmMember": "Paradigmalid",
-    "entry.actions.eyebrow": "Persoonlijke acties",
+    "entry.actions.eyebrow": "Lemma-acties",
     "entry.actions.description":
-      "Sla dit lemma op voor later of stuur een korte melding als er iets nagekeken moet worden.",
+      "Deel dit lemma, sla het op voor later of stuur een korte melding als er iets nagekeken moet worden.",
     "entry.actions.authUnavailable":
       "Lemma-acties zijn momenteel niet beschikbaar.",
     "entry.actions.loginPrompt":
       "Log in of maak een account aan om lemma's op te slaan en te melden.",
+    "entry.actions.share": "Delen",
+    "entry.actions.shareClose": "Deelopties sluiten",
+    "entry.actions.shareTitle": "Deel dit lemma",
+    "entry.actions.shareDescription":
+      "Deel een compacte preview van dit lemma met vertaling en verwante vormen, of kopieer de tekst om die elders te posten.",
+    "entry.actions.sharePreviewLabel": "Voorbeeld",
+    "entry.actions.shareNative": "Delen via apparaat",
+    "entry.actions.shareCopyText": "Deeltekst kopieren",
+    "entry.actions.shareCopyLink": "Link kopieren",
+    "entry.actions.shareTextCopied": "Deeltekst gekopieerd.",
+    "entry.actions.shareLinkCopied": "Link gekopieerd.",
+    "entry.actions.shareCopyFailed":
+      "Deelinhoud kon nu niet worden gekopieerd.",
+    "entry.actions.shareNativeFailed":
+      "Het deelscherm van het apparaat kon nu niet worden geopend.",
+    "entry.actions.sharePlatformX": "Delen op X",
+    "entry.actions.sharePlatformFacebook": "Delen op Facebook",
+    "entry.actions.sharePlatformLinkedIn": "Delen op LinkedIn",
     "entry.actions.favorite": "Lemma opslaan",
     "entry.actions.favorited": "Lemma opgeslagen",
     "entry.actions.favoriteLoading": "Laden...",
