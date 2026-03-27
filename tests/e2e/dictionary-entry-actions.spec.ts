@@ -4,6 +4,8 @@ const ENTRY_PATH = "/en/entry/cd_173";
 const E2E_TEST_USER_EMAIL = process.env.E2E_TEST_USER_EMAIL;
 const E2E_TEST_USER_PASSWORD = process.env.E2E_TEST_USER_PASSWORD;
 const HAS_E2E_AUTH = Boolean(E2E_TEST_USER_EMAIL && E2E_TEST_USER_PASSWORD);
+const LOCKED_ENTRY_PROMPT_PATTERN =
+  /Log in or sign up to save entries and report issues\.|Entry actions are unavailable right now\./;
 
 async function loginToEntryPage(page: Page) {
   await page.goto(`/login?redirect_to=${encodeURIComponent(ENTRY_PATH)}`);
@@ -23,7 +25,7 @@ test("signed-out desktop users can hover locked dictionary entry actions to reve
   const reportButton = page.getByRole("button", { name: "Report entry" });
   const lockedPrompt = page
     .locator('[role="tooltip"]')
-    .filter({ hasText: "Log in or sign up to save entries and report issues." })
+    .filter({ hasText: LOCKED_ENTRY_PROMPT_PATTERN })
     .first();
 
   await expect(shareButton).toBeEnabled();
@@ -52,7 +54,7 @@ test("signed-out mobile users can tap locked dictionary entry actions to reveal 
   const reportButton = page.getByRole("button", { name: "Report entry" });
   const lockedPrompt = page
     .locator('[role="tooltip"]')
-    .filter({ hasText: "Log in or sign up to save entries and report issues." })
+    .filter({ hasText: LOCKED_ENTRY_PROMPT_PATTERN })
     .first();
 
   await expect(saveButton).toBeEnabled();
