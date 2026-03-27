@@ -13,16 +13,24 @@ async function loginToEntryPage(page: Page) {
   await expect(page).toHaveURL(new RegExp(`${ENTRY_PATH}$`));
 }
 
-test("signed-out users see disabled dictionary entry actions", async ({ page }) => {
+test("signed-out users can tap locked dictionary entry actions to reveal the login prompt", async ({
+  page,
+}) => {
   await page.goto(ENTRY_PATH);
 
   const shareButton = page.getByRole("button", { name: /^Share$/ });
   const saveButton = page.getByRole("button", { name: "Save entry" });
   const reportButton = page.getByRole("button", { name: "Report entry" });
+  const lockedPrompt = page
+    .locator('[role="tooltip"]')
+    .filter({ hasText: "Log in or sign up to save entries and report issues." })
+    .first();
 
   await expect(shareButton).toBeEnabled();
-  await expect(saveButton).toBeDisabled();
-  await expect(reportButton).toBeDisabled();
+  await expect(saveButton).toBeEnabled();
+  await expect(reportButton).toBeEnabled();
+  await expect(saveButton).toHaveAttribute("data-locked", "true");
+  await expect(reportButton).toHaveAttribute("data-locked", "true");
 
   await shareButton.click();
   await expect(page.getByRole("heading", { name: "Share this entry" })).toBeVisible();
@@ -30,10 +38,11 @@ test("signed-out users see disabled dictionary entry actions", async ({ page }) 
   await expect(page.getByRole("button", { name: "Copy share text" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Share on X" })).toBeVisible();
 
-  await saveButton.locator("xpath=..").hover();
-  await expect(
-    saveButton.locator("xpath=following-sibling::div[1]"),
-  ).toBeVisible();
+  await saveButton.click();
+  await expect(lockedPrompt).toBeVisible();
+
+  await reportButton.click();
+  await expect(lockedPrompt).toBeVisible();
 });
 
 test.describe("signed-in dictionary entry actions", () => {

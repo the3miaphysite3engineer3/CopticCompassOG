@@ -74,3 +74,19 @@ test("desktop keeps the abbreviations lookup table in table form", async ({ page
   await expect(abbreviationsTable).toBeVisible();
   await expect(abbreviationsCards).toBeHidden();
 });
+
+test("mobile locked lesson actions reveal the login prompt on tap", async ({
+  page,
+}) => {
+  await openMobileLesson(page);
+
+  const downloadButton = page.getByRole("button", { name: "Download PDF" });
+
+  await expect(downloadButton).toBeEnabled();
+  await expect(downloadButton).toHaveAttribute("data-locked", "true");
+
+  await downloadButton.click();
+  await expect(
+    page.getByText("Log in or sign up to download lessons as PDF"),
+  ).toBeVisible();
+});
