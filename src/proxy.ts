@@ -9,6 +9,7 @@ export async function proxy(request: NextRequest) {
   const requestHeaders = new Headers(request.headers)
 
   requestHeaders.set(CSP_NONCE_HEADER, nonce)
+  requestHeaders.set('x-pathname', request.nextUrl.pathname)
   requestHeaders.set('Content-Security-Policy', contentSecurityPolicy)
 
   const response = await updateSession(request, requestHeaders)

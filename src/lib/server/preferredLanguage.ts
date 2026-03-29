@@ -28,6 +28,15 @@ function getLanguageFromAcceptLanguage(acceptLanguage: string | null) {
   return null;
 }
 
+export function getLanguageFromPathname(pathname: string | null | undefined) {
+  if (!pathname) {
+    return null;
+  }
+
+  const [, maybeLocale] = pathname.split("/");
+  return maybeLocale && isLanguage(maybeLocale) ? maybeLocale : null;
+}
+
 export async function getPreferredLanguage(): Promise<Language> {
   const cookieStore = await cookies();
   const storedLanguage = cookieStore.get(LANGUAGE_STORAGE_KEY)?.value;
@@ -40,3 +49,13 @@ export async function getPreferredLanguage(): Promise<Language> {
   return getLanguageFromAcceptLanguage(headerStore.get("accept-language")) ?? DEFAULT_LANGUAGE;
 }
 
+export async function getDocumentLanguage(): Promise<Language> {
+  const headerStore = await headers();
+  const pathnameLanguage = getLanguageFromPathname(headerStore.get("x-pathname"));
+
+  if (pathnameLanguage) {
+    return pathnameLanguage;
+  }
+
+  return getPreferredLanguage();
+}
