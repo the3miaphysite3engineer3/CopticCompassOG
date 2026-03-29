@@ -42,6 +42,19 @@ describe("securityHeaders", () => {
     expect(policy).not.toContain("upgrade-insecure-requests");
   });
 
+  it("switches production script-src to a nonce when one is provided", () => {
+    const policy = buildContentSecurityPolicy({
+      nodeEnv: "production",
+      nonce: "test-nonce",
+      supabaseUrl: "https://project.supabase.co",
+    });
+
+    expect(getDirectiveValue(policy, "script-src")).toBe(
+      "'self' 'nonce-test-nonce' 'strict-dynamic'",
+    );
+    expect(getDirectiveValue(policy, "style-src")).toBe("'self' 'unsafe-inline'");
+  });
+
   it("drops invalid Supabase URLs instead of emitting malformed origins", () => {
     const policy = buildContentSecurityPolicy({
       nodeEnv: "production",
@@ -63,6 +76,15 @@ describe("securityHeaders", () => {
       buildSecurityHeaders({
         nodeEnv: "development",
       }).some((header) => header.key === "Strict-Transport-Security"),
+    ).toBe(false);
+  });
+
+  it("can emit the non-CSP headers on their own", () => {
+    expect(
+      buildSecurityHeaders({
+        includeContentSecurityPolicy: false,
+        nodeEnv: "production",
+      }).some((header) => header.key === "Content-Security-Policy"),
     ).toBe(false);
   });
 });

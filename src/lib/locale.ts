@@ -1,5 +1,4 @@
-import { isLanguage, DEFAULT_LANGUAGE } from "@/lib/i18n";
-import type { Language } from "@/types/i18n";
+import { isLanguage, DEFAULT_LANGUAGE, type Language } from "@/lib/i18n";
 
 export const PUBLIC_LOCALES = ["en", "nl"] as const satisfies readonly Language[];
 

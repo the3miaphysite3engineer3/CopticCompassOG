@@ -1,13 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type ExercisesModuleContext = {
-  submitExercise: typeof import("./exercises").submitExercise;
   consumeRateLimitMock: ReturnType<typeof vi.fn>;
-  createClientMock: ReturnType<typeof vi.fn>;
-  fromMock: ReturnType<typeof vi.fn>;
-  getUserMock: ReturnType<typeof vi.fn>;
+  dispatchLoggedOwnerAlertEmailMock: ReturnType<typeof vi.fn>;
+  getAuthenticatedServerContextMock: ReturnType<typeof vi.fn>;
   insertMock: ReturnType<typeof vi.fn>;
+  insertSingleMock: ReturnType<typeof vi.fn>;
   revalidatePathMock: ReturnType<typeof vi.fn>;
+  submitExercise: typeof import("./exercises").submitExercise;
 };
 
 function createExerciseFormData(overrides?: {
@@ -45,7 +45,10 @@ async function loadExercisesModule(options?: {
     message?: string;
   } | null;
   rateLimitOk?: boolean;
-  user?: { id: string } | null;
+  sendOwnerAlertResult?:
+    | { error: string; success: false }
+    | { id: string | null; success: true };
+  user?: { email?: string | null; id: string } | null;
 }) {
   vi.resetModules();
 
@@ -56,23 +59,35 @@ async function loadExercisesModule(options?: {
     resetAt: Date.now() + 60_000,
     retryAfterMs: 60_000,
   });
-  const getUserMock = vi.fn().mockResolvedValue({
-    data: {
-      user: options?.user === undefined ? { id: "user_123" } : options.user,
-    },
-  });
-  const insertMock = vi.fn().mockResolvedValue({
+  const insertSingleMock = vi.fn().mockResolvedValue({
+    data: { id: "submission_123" },
     error: options?.insertError ?? null,
   });
-  const fromMock = vi.fn(() => ({
-    insert: insertMock,
+  const insertMock = vi.fn(() => ({
+    select: vi.fn(() => ({
+      single: insertSingleMock,
+    })),
   }));
-  const createClientMock = vi.fn().mockResolvedValue({
-    auth: {
-      getUser: getUserMock,
-    },
-    from: fromMock,
-  });
+  const getAuthenticatedServerContextMock = vi.fn().mockResolvedValue(
+    options?.user === null
+      ? null
+      : {
+          supabase: {
+            from: vi.fn(() => ({
+              insert: insertMock,
+            })),
+          },
+          user: options?.user ?? {
+            email: "student@example.com",
+            id: "user_123",
+          },
+        },
+  );
+  const dispatchLoggedOwnerAlertEmailMock = vi
+    .fn()
+    .mockResolvedValue(
+      options?.sendOwnerAlertResult ?? { success: true, id: "email_123" },
+    );
 
   vi.doMock("next/cache", () => ({
     revalidatePath: revalidatePathMock,
@@ -81,11 +96,14 @@ async function loadExercisesModule(options?: {
     consumeRateLimit: consumeRateLimitMock,
     getUserRateLimitIdentifier: vi.fn(() => "user-rate-limit-id"),
   }));
+  vi.doMock("@/lib/supabase/auth", () => ({
+    getAuthenticatedServerContext: getAuthenticatedServerContextMock,
+  }));
   vi.doMock("@/lib/supabase/config", () => ({
     hasSupabaseRuntimeEnv: vi.fn(() => options?.hasEnv ?? true),
   }));
-  vi.doMock("@/lib/supabase/server", () => ({
-    createClient: createClientMock,
+  vi.doMock("@/lib/notifications/events", () => ({
+    dispatchLoggedOwnerAlertEmail: dispatchLoggedOwnerAlertEmailMock,
   }));
 
   const mod = await import("./exercises");
@@ -93,10 +111,10 @@ async function loadExercisesModule(options?: {
   return {
     ...mod,
     consumeRateLimitMock,
-    createClientMock,
-    fromMock,
-    getUserMock,
+    dispatchLoggedOwnerAlertEmailMock,
+    getAuthenticatedServerContextMock,
     insertMock,
+    insertSingleMock,
     revalidatePathMock,
   } satisfies ExercisesModuleContext;
 }
@@ -107,16 +125,19 @@ describe("exercise submission action", () => {
   });
 
   it("returns a friendly error when Supabase auth is unavailable", async () => {
-    const { createClientMock, submitExercise } = await loadExercisesModule({
-      hasEnv: false,
-    });
+    const { getAuthenticatedServerContextMock, submitExercise } =
+      await loadExercisesModule({
+        hasEnv: false,
+      });
 
-    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual({
-      success: false,
-      error: "Exercise submission is temporarily unavailable.",
-    });
+    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual(
+      {
+        success: false,
+        error: "Exercise submission is temporarily unavailable.",
+      },
+    );
 
-    expect(createClientMock).not.toHaveBeenCalled();
+    expect(getAuthenticatedServerContextMock).not.toHaveBeenCalled();
   });
 
   it("rejects unauthenticated exercise submissions", async () => {
@@ -124,10 +145,12 @@ describe("exercise submission action", () => {
       user: null,
     });
 
-    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual({
-      success: false,
-      error: "Unauthorized. Please log in first.",
-    });
+    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual(
+      {
+        success: false,
+        error: "Unauthorized. Please log in first.",
+      },
+    );
   });
 
   it("rejects malformed exercise payloads with unexpected answer keys", async () => {
@@ -138,8 +161,8 @@ describe("exercise submission action", () => {
         null,
         createExerciseFormData({
           extraAnswerKey: "answer_q999",
-        })
-      )
+        }),
+      ),
     ).resolves.toEqual({
       success: false,
       error: "Exercise answers were incomplete or malformed.",
@@ -154,8 +177,8 @@ describe("exercise submission action", () => {
         null,
         createExerciseFormData({
           exerciseId: "grammar.exercise.unknown",
-        })
-      )
+        }),
+      ),
     ).resolves.toEqual({
       success: false,
       error: "Invalid exercise submission.",
@@ -170,8 +193,8 @@ describe("exercise submission action", () => {
         null,
         createExerciseFormData({
           lessonSlug: "lesson-2",
-        })
-      )
+        }),
+      ),
     ).resolves.toEqual({
       success: false,
       error: "Invalid exercise submission.",
@@ -188,8 +211,8 @@ describe("exercise submission action", () => {
           answers: {
             q1: "x".repeat(501),
           },
-        })
-      )
+        }),
+      ),
     ).resolves.toEqual({
       success: false,
       error: "Each answer must be between 1 and 500 characters.",
@@ -201,17 +224,25 @@ describe("exercise submission action", () => {
       rateLimitOk: false,
     });
 
-    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual({
-      success: false,
-      error:
-        "Too many submissions were received for this lesson. Please wait a bit before trying again.",
-    });
+    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual(
+      {
+        success: false,
+        error:
+          "Too many submissions were received for this lesson. Please wait a bit before trying again.",
+      },
+    );
 
     expect(insertMock).not.toHaveBeenCalled();
   });
 
-  it("stores canonical prompts instead of trusting browser-supplied question text", async () => {
-    const { insertMock, revalidatePathMock, submitExercise } = await loadExercisesModule();
+  it("stores canonical prompts and submission metadata, then alerts the owner", async () => {
+    const {
+      dispatchLoggedOwnerAlertEmailMock,
+      insertMock,
+      revalidatePathMock,
+      submitExercise,
+    } =
+      await loadExercisesModule();
 
     await expect(
       submitExercise(
@@ -220,24 +251,61 @@ describe("exercise submission action", () => {
           answers: {
             q1: "  normalized answer  ",
           },
-        })
-      )
+        }),
+      ),
     ).resolves.toEqual({
       success: true,
     });
 
     expect(insertMock).toHaveBeenCalledWith([
       expect.objectContaining({
+        answers: expect.arrayContaining([
+          expect.objectContaining({
+            answer: "normalized answer",
+            prompt: "She is my daughter.",
+            question_id: "q1",
+          }),
+        ]),
+        exercise_id: "grammar.exercise.lesson01.001",
         lesson_slug: "lesson-1",
         status: "pending",
+        submitted_language: "en",
         submitted_text: expect.stringContaining(
-          "Question: She is my daughter.\nAnswer: normalized answer"
+          "Question: She is my daughter.\nAnswer: normalized answer",
         ),
         user_id: "user_123",
       }),
     ]);
+    expect(dispatchLoggedOwnerAlertEmailMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggregateId: "submission_123",
+        aggregateType: "submission",
+        eventType: "exercise_submission_received",
+        subject: "New exercise submission: lesson 1",
+        text: expect.stringContaining("Student: student@example.com"),
+      }),
+    );
     expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard");
     expect(revalidatePathMock).toHaveBeenCalledWith("/grammar/lesson-1");
+  });
+
+  it("returns success even if the owner alert email fails after the submission is stored", async () => {
+    const { dispatchLoggedOwnerAlertEmailMock, insertMock, submitExercise } =
+      await loadExercisesModule({
+        sendOwnerAlertResult: {
+          success: false,
+          error: "Owner inbox unavailable",
+        },
+      });
+
+    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual(
+      {
+        success: true,
+      },
+    );
+
+    expect(insertMock).toHaveBeenCalledOnce();
+    expect(dispatchLoggedOwnerAlertEmailMock).toHaveBeenCalledOnce();
   });
 
   it("returns a permission-specific message when the database denies submission", async () => {
@@ -248,9 +316,11 @@ describe("exercise submission action", () => {
       },
     });
 
-    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual({
-      success: false,
-      error: "Your account does not have permission to submit exercises yet.",
-    });
+    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual(
+      {
+        success: false,
+        error: "Your account does not have permission to submit exercises yet.",
+      },
+    );
   });
 });

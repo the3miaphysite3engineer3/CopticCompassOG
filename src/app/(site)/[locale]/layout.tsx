@@ -1,4 +1,3 @@
-import "../../globals.css";
 import { AppFrame } from "@/components/AppFrame";
 import { createRootLayoutMetadata } from "@/lib/metadata";
 import { PUBLIC_LOCALES } from "@/lib/locale";
@@ -27,10 +26,8 @@ export default async function SiteLayout({
   const locale = requirePublicLocale((await params).locale);
 
   return (
-    <html lang={locale} suppressHydrationWarning>
-      <AppFrame initialLanguage={locale} localeRouting>
-        {children}
-      </AppFrame>
-    </html>
+    <AppFrame initialLanguage={locale} localeRouting>
+      {children}
+    </AppFrame>
   );
 }

@@ -8,10 +8,17 @@ import {
 import { requiresAuthSessionProxy } from "@/lib/supabase/proxyRoutes";
 import type { Database } from '@/types/supabase'
 
-export async function updateSession(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({
-    request,
+function createForwardedResponse(requestHeaders: Headers) {
+  return NextResponse.next({
+    request: {
+      headers: requestHeaders,
+    },
   })
+}
+
+export async function updateSession(request: NextRequest, requestHeaders?: Headers) {
+  const forwardedRequestHeaders = requestHeaders ?? new Headers(request.headers)
+  let supabaseResponse = createForwardedResponse(forwardedRequestHeaders)
   const { pathname } = request.nextUrl
   const requiresAuthSession = requiresAuthSessionProxy(pathname)
 
@@ -37,9 +44,7 @@ export async function updateSession(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          supabaseResponse = NextResponse.next({
-            request,
-          })
+          supabaseResponse = createForwardedResponse(forwardedRequestHeaders)
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options)
           )

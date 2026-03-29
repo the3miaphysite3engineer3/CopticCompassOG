@@ -48,6 +48,11 @@ function getPassword(formData: FormData) {
   return getFormString(formData, "password");
 }
 
+function getTrustedAuthBaseUrl() {
+  const baseUrl = getSiteUrl()?.toString() ?? "https://kyrilloswannes.com";
+  return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
+}
+
 type PasswordUpdateResult =
   | { success: true }
   | {
@@ -183,7 +188,7 @@ export async function signup(formData: FormData) {
 
   const loginUrl = new URL(
     "/login",
-    getSiteUrl()?.toString() ?? "https://kyrilloswannes.com",
+    getTrustedAuthBaseUrl(),
   );
   loginUrl.searchParams.set("state", "signup-confirmed");
   loginUrl.searchParams.set("messageType", "success");
@@ -278,8 +283,7 @@ export async function resetPassword(formData: FormData) {
   }
 
   const supabase = await createClient();
-  let baseUrl = getSiteUrl()?.toString() || "https://kyrilloswannes.com";
-  if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
+  const baseUrl = getTrustedAuthBaseUrl();
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${baseUrl}/auth/callback?next=/update-password`,
@@ -350,14 +354,7 @@ export async function signInWithGoogle(formData: FormData) {
   }
 
   const supabase = await createClient();
-  
-  const headersList = await import("next/headers").then((m) => m.headers());
-  const origin = headersList.get("origin");
-  const host = headersList.get("host");
-  const protocol = headersList.get("x-forwarded-proto") || "https";
-  let baseUrl = origin || (host ? `${protocol}://${host}` : getSiteUrl()?.toString() || "http://localhost:3000");
-  
-  if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
+  const baseUrl = getTrustedAuthBaseUrl();
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",

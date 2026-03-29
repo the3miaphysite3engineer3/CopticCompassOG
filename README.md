@@ -1,4 +1,4 @@
-# Kyrillos Wannes | Coptic Dictionary, Grammar, and Publications
+# The Wannes Portfolio | Coptic Dictionary, Grammar, and Publications
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)
@@ -82,13 +82,20 @@ npx playwright install chromium
 
 ### Environment Setup
 
-Copy the example file only if you want to enable Supabase auth, profile avatars, contact email, or distributed rate limiting locally:
+Copy the example file only if you want to enable Supabase auth, profile avatars, contact email, owner notifications, or distributed rate limiting locally:
 
 ```bash
 cp .env.example .env.local
 ```
 
 Then replace the placeholder values in `.env.local` with your own local credentials.
+
+Additional notes:
+
+- `SUPABASE_SERVICE_ROLE_KEY` is only needed for trusted server-side workflows such as internal message persistence or notification dispatching.
+- `CONTACT_EMAIL` is the public contact inbox destination.
+- `OWNER_ALERT_EMAIL` is for operational alerts such as new signups or exercise submissions.
+- `NOTIFICATION_FROM_EMAIL` is the sender identity used by app-generated notification emails.
 
 Important:
 
@@ -105,6 +112,64 @@ npm run data:grammar:export
 npm run test:e2e:local
 npm run build
 ```
+
+### Signup Alert Webhook
+
+This repo includes a Supabase Edge Function at `supabase/functions/profile-signup-alert` that sends an owner alert whenever a new row is inserted into `public.profiles`.
+
+To enable signup alerts in a Supabase project:
+
+1. Set function secrets for `RESEND_API_KEY`, `OWNER_ALERT_EMAIL`, and `NOTIFICATION_FROM_EMAIL`.
+2. Deploy the function:
+
+```bash
+supabase functions deploy profile-signup-alert --project-ref <your-project-ref>
+```
+
+3. Create a database webhook on `public.profiles` for `INSERT` events.
+4. Choose `Supabase Edge Functions` as the webhook target, select `profile-signup-alert`, and add the auth header with service key.
+
+For local development with `supabase start`, you can still test the function itself locally with `supabase functions serve`, but the project-side signup alert activation happens in the hosted Supabase project dashboard.
+
+### Background Release Delivery
+
+This repo also includes a Supabase Edge Function at `supabase/functions/process-content-release` for background delivery of approved content releases. When Resend segment configuration is available, the worker hands release sends off to provider-native broadcasts. If that configuration is missing, it falls back to the app's direct per-recipient delivery flow.
+
+To enable background release sends in a Supabase project:
+
+1. Set function secrets for `NOTIFICATION_FROM_EMAIL` and at least one Resend key:
+   - `RESEND_API_KEY` for direct-send fallback
+   - `RESEND_API_KEY_FULL_ACCESS` for Contacts, Segments, and Broadcasts
+2. Deploy the function:
+
+```bash
+supabase functions deploy process-content-release --project-ref <your-project-ref>
+```
+
+3. Make sure the latest release delivery migrations have been pushed so `content_releases` includes the queue metadata columns.
+
+### Resend Audience Sync
+
+Audience opt-ins can be mirrored into Resend Contacts and Segments so provider-native broadcasts are possible.
+
+Set these app environment variables where your Next.js server runs:
+
+- `RESEND_API_KEY_FULL_ACCESS`
+- `RESEND_LESSONS_SEGMENT_ID`
+- `RESEND_BOOKS_SEGMENT_ID`
+- `RESEND_GENERAL_SEGMENT_ID`
+- `RESEND_LESSONS_EN_SEGMENT_ID`
+- `RESEND_LESSONS_NL_SEGMENT_ID`
+- `RESEND_BOOKS_EN_SEGMENT_ID`
+- `RESEND_BOOKS_NL_SEGMENT_ID`
+- `RESEND_GENERAL_EN_SEGMENT_ID`
+- `RESEND_GENERAL_NL_SEGMENT_ID`
+
+Keep `RESEND_API_KEY` for normal send-only email delivery if you want, and use `RESEND_API_KEY_FULL_ACCESS` for Contacts, Segments, and Broadcast operations.
+
+The three base segment IDs are used for topic-level audience sync. The six optional locale-specific segment IDs are used when sending localized EN/NL release broadcasts through Resend. If you do not set the locale-specific segment IDs, localized releases continue to fall back to direct per-recipient delivery.
+
+Once those are set and the latest audience-contact sync migration has been pushed, the admin dashboard includes a manual audience backfill action and future audience preference changes will sync automatically on a best-effort basis.
 
 ## Data Workflows
 

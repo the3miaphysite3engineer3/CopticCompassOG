@@ -1,7 +1,9 @@
 import type { NextConfig } from "next";
 import { buildSecurityHeaders } from "./src/lib/securityHeaders";
 
-const securityHeaders = buildSecurityHeaders();
+const securityHeaders = buildSecurityHeaders({
+  includeContentSecurityPolicy: false,
+});
 
 const nextConfig: NextConfig = {
   async headers() {

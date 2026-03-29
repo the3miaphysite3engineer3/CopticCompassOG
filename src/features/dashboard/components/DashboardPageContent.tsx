@@ -24,6 +24,7 @@ import { DEFAULT_DICTIONARY_DIALECT_FILTER } from "@/features/dictionary/config"
 import { antinoou } from "@/lib/fonts";
 import { getDashboardPath } from "@/lib/locale";
 import {
+  getAudienceContactForProfile,
   getProfile,
   getUserEntryFavorites,
   getUserLessonBookmarks,
@@ -53,6 +54,7 @@ export async function DashboardPageContent({
   }
 
   const [
+    audienceContact,
     submissions,
     lessonProgressRows,
     sectionProgressRows,
@@ -60,6 +62,7 @@ export async function DashboardPageContent({
     lessonBookmarks,
     lessonNotes,
   ] = await Promise.all([
+    getAudienceContactForProfile(supabase, user.id, profile.email),
     getUserSubmissions(supabase, user.id),
     getUserLessonProgressRows(supabase, user.id),
     getUserSectionProgressRows(supabase, user.id),
@@ -154,6 +157,7 @@ export async function DashboardPageContent({
         </SurfacePanel>
 
         <AccountSettingsPanel
+          audienceContact={audienceContact}
           canUpdatePassword={canUpdatePassword}
           profile={profile}
           providerLabel={providerLabel}

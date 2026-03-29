@@ -76,6 +76,406 @@ export type Database = {
           },
         ];
       };
+      contact_messages: {
+        Row: {
+          created_at: string;
+          email: string;
+          id: string;
+          inquiry_type: string;
+          locale: "en" | "nl";
+          message: string;
+          name: string;
+          responded_at: string | null;
+          status: "answered" | "archived" | "in_progress" | "new";
+          wants_updates: boolean;
+        };
+        Insert: {
+          created_at?: string;
+          email: string;
+          id?: string;
+          inquiry_type: string;
+          locale: "en" | "nl";
+          message: string;
+          name: string;
+          responded_at?: string | null;
+          status?: "answered" | "archived" | "in_progress" | "new";
+          wants_updates?: boolean;
+        };
+        Update: {
+          created_at?: string;
+          email?: string;
+          id?: string;
+          inquiry_type?: string;
+          locale?: "en" | "nl";
+          message?: string;
+          name?: string;
+          responded_at?: string | null;
+          status?: "answered" | "archived" | "in_progress" | "new";
+          wants_updates?: boolean;
+        };
+        Relationships: [];
+      };
+      notification_events: {
+        Row: {
+          aggregate_id: string;
+          aggregate_type: string;
+          channel: "email";
+          created_at: string;
+          dedupe_key: string | null;
+          event_type: string;
+          id: string;
+          last_error: string | null;
+          payload: Json;
+          processed_at: string | null;
+          recipient: string;
+          status: "failed" | "queued" | "sent";
+          subject: string;
+        };
+        Insert: {
+          aggregate_id: string;
+          aggregate_type: string;
+          channel?: "email";
+          created_at?: string;
+          dedupe_key?: string | null;
+          event_type: string;
+          id?: string;
+          last_error?: string | null;
+          payload?: Json;
+          processed_at?: string | null;
+          recipient: string;
+          status?: "failed" | "queued" | "sent";
+          subject: string;
+        };
+        Update: {
+          aggregate_id?: string;
+          aggregate_type?: string;
+          channel?: "email";
+          created_at?: string;
+          dedupe_key?: string | null;
+          event_type?: string;
+          id?: string;
+          last_error?: string | null;
+          payload?: Json;
+          processed_at?: string | null;
+          recipient?: string;
+          status?: "failed" | "queued" | "sent";
+          subject?: string;
+        };
+        Relationships: [];
+      };
+      notification_deliveries: {
+        Row: {
+          channel: "email";
+          created_at: string;
+          error: string | null;
+          event_id: string;
+          id: string;
+          provider_message_id: string | null;
+          recipient: string;
+          status: "failed" | "sent";
+        };
+        Insert: {
+          channel?: "email";
+          created_at?: string;
+          error?: string | null;
+          event_id: string;
+          id?: string;
+          provider_message_id?: string | null;
+          recipient: string;
+          status: "failed" | "sent";
+        };
+        Update: {
+          channel?: "email";
+          created_at?: string;
+          error?: string | null;
+          event_id?: string;
+          id?: string;
+          provider_message_id?: string | null;
+          recipient?: string;
+          status?: "failed" | "sent";
+        };
+        Relationships: [
+          {
+            columns: ["event_id"];
+            foreignKeyName: "notification_deliveries_event_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "notification_events";
+          },
+        ];
+      };
+      audience_contacts: {
+        Row: {
+          books_opt_in: boolean;
+          consented_at: string | null;
+          created_at: string;
+          email: string;
+          full_name: string | null;
+          general_updates_opt_in: boolean;
+          id: string;
+          lessons_opt_in: boolean;
+          locale: "en" | "nl";
+          profile_id: string | null;
+          source: "contact_form" | "dashboard" | "signup";
+          unsubscribed_at: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          books_opt_in?: boolean;
+          consented_at?: string | null;
+          created_at?: string;
+          email: string;
+          full_name?: string | null;
+          general_updates_opt_in?: boolean;
+          id?: string;
+          lessons_opt_in?: boolean;
+          locale?: "en" | "nl";
+          profile_id?: string | null;
+          source: "contact_form" | "dashboard" | "signup";
+          unsubscribed_at?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          books_opt_in?: boolean;
+          consented_at?: string | null;
+          created_at?: string;
+          email?: string;
+          full_name?: string | null;
+          general_updates_opt_in?: boolean;
+          id?: string;
+          lessons_opt_in?: boolean;
+          locale?: "en" | "nl";
+          profile_id?: string | null;
+          source?: "contact_form" | "dashboard" | "signup";
+          unsubscribed_at?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            columns: ["profile_id"];
+            foreignKeyName: "audience_contacts_profile_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+        ];
+      };
+      audience_contact_sync_state: {
+        Row: {
+          audience_contact_id: string;
+          created_at: string;
+          last_error: string | null;
+          last_synced_at: string | null;
+          provider: "resend";
+          provider_contact_id: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          audience_contact_id: string;
+          created_at?: string;
+          last_error?: string | null;
+          last_synced_at?: string | null;
+          provider?: "resend";
+          provider_contact_id?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          audience_contact_id?: string;
+          created_at?: string;
+          last_error?: string | null;
+          last_synced_at?: string | null;
+          provider?: "resend";
+          provider_contact_id?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            columns: ["audience_contact_id"];
+            foreignKeyName: "audience_contact_sync_state_audience_contact_id_fkey";
+            isOneToOne: true;
+            referencedColumns: ["id"];
+            referencedRelation: "audience_contacts";
+          },
+        ];
+      };
+      audience_opt_in_requests: {
+        Row: {
+          books_requested: boolean;
+          confirmed_at: string | null;
+          created_at: string;
+          email: string;
+          expires_at: string;
+          full_name: string | null;
+          general_updates_requested: boolean;
+          id: string;
+          lessons_requested: boolean;
+          locale: "en" | "nl";
+          source: "contact_form" | "signup";
+          token_hash: string;
+          updated_at: string;
+        };
+        Insert: {
+          books_requested?: boolean;
+          confirmed_at?: string | null;
+          created_at?: string;
+          email: string;
+          expires_at: string;
+          full_name?: string | null;
+          general_updates_requested?: boolean;
+          id?: string;
+          lessons_requested?: boolean;
+          locale?: "en" | "nl";
+          source: "contact_form" | "signup";
+          token_hash: string;
+          updated_at?: string;
+        };
+        Update: {
+          books_requested?: boolean;
+          confirmed_at?: string | null;
+          created_at?: string;
+          email?: string;
+          expires_at?: string;
+          full_name?: string | null;
+          general_updates_requested?: boolean;
+          id?: string;
+          lessons_requested?: boolean;
+          locale?: "en" | "nl";
+          source?: "contact_form" | "signup";
+          token_hash?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      content_releases: {
+        Row: {
+          audience_segment: "books" | "general" | "lessons";
+          body_en: string | null;
+          body_nl: string | null;
+          created_at: string;
+          delivery_cursor: string | null;
+          delivery_finished_at: string | null;
+          delivery_requested_at: string | null;
+          delivery_requested_by: string | null;
+          delivery_started_at: string | null;
+          delivery_summary: Json;
+          id: string;
+          last_delivery_error: string | null;
+          locale_mode: "en_only" | "localized" | "nl_only";
+          release_type: "lesson" | "mixed" | "publication";
+          sent_at: string | null;
+          status:
+            | "approved"
+            | "cancelled"
+            | "draft"
+            | "queued"
+            | "sending"
+            | "sent";
+          subject_en: string | null;
+          subject_nl: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          audience_segment: "books" | "general" | "lessons";
+          body_en?: string | null;
+          body_nl?: string | null;
+          created_at?: string;
+          delivery_cursor?: string | null;
+          delivery_finished_at?: string | null;
+          delivery_requested_at?: string | null;
+          delivery_requested_by?: string | null;
+          delivery_started_at?: string | null;
+          delivery_summary?: Json;
+          id?: string;
+          last_delivery_error?: string | null;
+          locale_mode: "en_only" | "localized" | "nl_only";
+          release_type: "lesson" | "mixed" | "publication";
+          sent_at?: string | null;
+          status?:
+            | "approved"
+            | "cancelled"
+            | "draft"
+            | "queued"
+            | "sending"
+            | "sent";
+          subject_en?: string | null;
+          subject_nl?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          audience_segment?: "books" | "general" | "lessons";
+          body_en?: string | null;
+          body_nl?: string | null;
+          created_at?: string;
+          delivery_cursor?: string | null;
+          delivery_finished_at?: string | null;
+          delivery_requested_at?: string | null;
+          delivery_requested_by?: string | null;
+          delivery_started_at?: string | null;
+          delivery_summary?: Json;
+          id?: string;
+          last_delivery_error?: string | null;
+          locale_mode?: "en_only" | "localized" | "nl_only";
+          release_type?: "lesson" | "mixed" | "publication";
+          sent_at?: string | null;
+          status?:
+            | "approved"
+            | "cancelled"
+            | "draft"
+            | "queued"
+            | "sending"
+            | "sent";
+          subject_en?: string | null;
+          subject_nl?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [
+          {
+            columns: ["delivery_requested_by"];
+            foreignKeyName: "content_releases_delivery_requested_by_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+        ];
+      };
+      content_release_items: {
+        Row: {
+          created_at: string;
+          id: string;
+          item_id: string;
+          item_type: "lesson" | "publication";
+          release_id: string;
+          title_snapshot: string;
+          url_snapshot: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          item_id: string;
+          item_type: "lesson" | "publication";
+          release_id: string;
+          title_snapshot: string;
+          url_snapshot: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          item_id?: string;
+          item_type?: "lesson" | "publication";
+          release_id?: string;
+          title_snapshot?: string;
+          url_snapshot?: string;
+        };
+        Relationships: [
+          {
+            columns: ["release_id"];
+            foreignKeyName: "content_release_items_release_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "content_releases";
+          },
+        ];
+      };
       profiles: {
         Row: {
           avatar_url: string | null;
@@ -242,36 +642,58 @@ export type Database = {
       };
       submissions: {
         Row: {
+          answers: Json | null;
           created_at: string;
+          exercise_id: string | null;
           feedback_text: string | null;
           id: string;
           lesson_slug: string;
           rating: number | null;
+          reviewed_at: string | null;
+          reviewed_by: string | null;
           status: "pending" | "reviewed";
+          submitted_language: "en" | "nl" | null;
           submitted_text: string;
           user_id: string;
         };
         Insert: {
+          answers?: Json | null;
           created_at?: string;
+          exercise_id?: string | null;
           feedback_text?: string | null;
           id?: string;
           lesson_slug: string;
           rating?: number | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
           status?: "pending" | "reviewed";
+          submitted_language?: "en" | "nl" | null;
           submitted_text: string;
           user_id: string;
         };
         Update: {
+          answers?: Json | null;
           created_at?: string;
+          exercise_id?: string | null;
           feedback_text?: string | null;
           id?: string;
           lesson_slug?: string;
           rating?: number | null;
+          reviewed_at?: string | null;
+          reviewed_by?: string | null;
           status?: "pending" | "reviewed";
+          submitted_language?: "en" | "nl" | null;
           submitted_text?: string;
           user_id?: string;
         };
         Relationships: [
+          {
+            columns: ["reviewed_by"];
+            foreignKeyName: "submissions_reviewed_by_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
           {
             columns: ["user_id"];
             foreignKeyName: "submissions_user_id_fkey";

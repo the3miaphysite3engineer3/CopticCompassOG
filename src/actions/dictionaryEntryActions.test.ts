@@ -2,18 +2,18 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type DictionaryEntryActionsModuleContext = {
   consumeRateLimitMock: ReturnType<typeof vi.fn>;
+  dispatchLoggedOwnerAlertEmailMock: ReturnType<typeof vi.fn>;
   fromMock: ReturnType<typeof vi.fn>;
   getAuthenticatedServerContextMock: ReturnType<typeof vi.fn>;
   getDictionaryEntryByIdMock: ReturnType<typeof vi.fn>;
   hasSupabaseRuntimeEnvMock: ReturnType<typeof vi.fn>;
   insertMock: ReturnType<typeof vi.fn>;
-  sendEmailMock: ReturnType<typeof vi.fn>;
+  insertSingleMock: ReturnType<typeof vi.fn>;
   submitEntryReport: typeof import("./dictionaryEntryActions").submitEntryReport;
 };
 
 const ORIGINAL_ENV = {
   CONTACT_EMAIL: process.env.CONTACT_EMAIL,
-  RESEND_API_KEY: process.env.RESEND_API_KEY,
 };
 
 function createReportFormData(
@@ -64,15 +64,19 @@ async function loadDictionaryEntryActionsModule(options?: {
 
   if (options?.hasEnv === false) {
     delete process.env.CONTACT_EMAIL;
-    delete process.env.RESEND_API_KEY;
   } else {
     process.env.CONTACT_EMAIL = "owner@example.com";
-    process.env.RESEND_API_KEY = "test-resend-key";
   }
 
-  const insertMock = vi.fn().mockResolvedValue({
+  const insertSingleMock = vi.fn().mockResolvedValue({
+    data: { id: "report_123" },
     error: options?.insertError ?? null,
   });
+  const insertMock = vi.fn(() => ({
+    select: vi.fn(() => ({
+      single: insertSingleMock,
+    })),
+  }));
   const fromMock = vi.fn(() => ({
     insert: insertMock,
   }));
@@ -111,16 +115,10 @@ async function loadDictionaryEntryActionsModule(options?: {
     retryAfterMs: 60_000,
   });
   const getUserRateLimitIdentifierMock = vi.fn().mockReturnValue("hashed-user-id");
-  const sendEmailMock = vi.fn().mockResolvedValue(
+  const dispatchLoggedOwnerAlertEmailMock = vi.fn().mockResolvedValue(
     options?.sendEmailError
-      ? {
-          data: null,
-          error: options.sendEmailError,
-        }
-      : {
-          data: { id: "email_123" },
-          error: null,
-        },
+      ? { success: false, error: options.sendEmailError.message }
+      : { success: true, id: "email_123" },
   );
 
   vi.doMock("@/features/dictionary/lib/dictionary", () => ({
@@ -136,12 +134,8 @@ async function loadDictionaryEntryActionsModule(options?: {
   vi.doMock("@/lib/supabase/config", () => ({
     hasSupabaseRuntimeEnv: hasSupabaseRuntimeEnvMock,
   }));
-  vi.doMock("resend", () => ({
-    Resend: class {
-      emails = {
-        send: sendEmailMock,
-      };
-    },
+  vi.doMock("@/lib/notifications/events", () => ({
+    dispatchLoggedOwnerAlertEmail: dispatchLoggedOwnerAlertEmailMock,
   }));
 
   const mod = await import("./dictionaryEntryActions");
@@ -149,12 +143,13 @@ async function loadDictionaryEntryActionsModule(options?: {
   return {
     ...mod,
     consumeRateLimitMock,
+    dispatchLoggedOwnerAlertEmailMock,
     fromMock,
     getAuthenticatedServerContextMock,
     getDictionaryEntryByIdMock,
     hasSupabaseRuntimeEnvMock,
     insertMock,
-    sendEmailMock,
+    insertSingleMock,
   } satisfies DictionaryEntryActionsModuleContext;
 }
 
@@ -162,7 +157,6 @@ describe("dictionary entry actions", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.CONTACT_EMAIL = ORIGINAL_ENV.CONTACT_EMAIL;
-    process.env.RESEND_API_KEY = ORIGINAL_ENV.RESEND_API_KEY;
   });
 
   it("returns a storage error when Supabase runtime env vars are missing", async () => {
@@ -215,7 +209,7 @@ describe("dictionary entry actions", () => {
   });
 
   it("returns a friendly error when report submissions are rate limited", async () => {
-    const { insertMock, sendEmailMock, submitEntryReport } =
+    const { dispatchLoggedOwnerAlertEmailMock, insertMock, submitEntryReport } =
       await loadDictionaryEntryActionsModule({
         rateLimitOk: false,
       });
@@ -227,12 +221,12 @@ describe("dictionary entry actions", () => {
     });
 
     expect(insertMock).not.toHaveBeenCalled();
-    expect(sendEmailMock).not.toHaveBeenCalled();
+    expect(dispatchLoggedOwnerAlertEmailMock).not.toHaveBeenCalled();
   });
 
   it("returns a configuration error when the entry_reports table is unavailable", async () => {
     const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    const { sendEmailMock, submitEntryReport } =
+    const { dispatchLoggedOwnerAlertEmailMock, submitEntryReport } =
       await loadDictionaryEntryActionsModule({
         insertError: {
           code: "42P01",
@@ -245,13 +239,13 @@ describe("dictionary entry actions", () => {
       error: "Entry reports are not configured yet.",
     });
 
-    expect(sendEmailMock).not.toHaveBeenCalled();
+    expect(dispatchLoggedOwnerAlertEmailMock).not.toHaveBeenCalled();
     consoleErrorSpy.mockRestore();
   });
 
   it("stores a normalized report and still succeeds when the email notification fails", async () => {
     const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    const { insertMock, sendEmailMock, submitEntryReport } =
+    const { dispatchLoggedOwnerAlertEmailMock, insertMock, submitEntryReport } =
       await loadDictionaryEntryActionsModule({
         sendEmailError: {
           message: "Domain not verified",
@@ -281,8 +275,11 @@ describe("dictionary entry actions", () => {
       status: "open",
       user_id: "user-123",
     });
-    expect(sendEmailMock).toHaveBeenCalledWith(
+    expect(dispatchLoggedOwnerAlertEmailMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        aggregateId: "report_123",
+        aggregateType: "entry_report",
+        eventType: "dictionary_entry_report_submitted",
         subject: "Dictionary entry report: ϭⲟⲗ (cd_173)",
         text: expect.stringContaining("Reason: translation"),
       }),

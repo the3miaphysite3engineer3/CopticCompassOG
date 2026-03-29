@@ -26,6 +26,145 @@ create table if not exists public.submissions (
   created_at timestamptz not null default timezone('utc', now())
 );
 
+alter table public.submissions
+add column if not exists exercise_id text,
+add column if not exists submitted_language text
+  check (submitted_language is null or submitted_language in ('en', 'nl')),
+add column if not exists answers jsonb,
+add column if not exists reviewed_at timestamptz,
+add column if not exists reviewed_by uuid
+  references public.profiles (id) on delete set null;
+
+create table if not exists public.contact_messages (
+  id uuid primary key default gen_random_uuid(),
+  name text not null check (char_length(name) between 1 and 100),
+  email text not null check (char_length(email) between 3 and 254),
+  inquiry_type text not null,
+  message text not null check (char_length(message) between 5 and 5000),
+  locale text not null check (locale in ('en', 'nl')),
+  wants_updates boolean not null default false,
+  status text not null default 'new' check (
+    status in ('new', 'in_progress', 'answered', 'archived')
+  ),
+  created_at timestamptz not null default timezone('utc', now()),
+  responded_at timestamptz
+);
+
+create table if not exists public.notification_events (
+  id uuid primary key default gen_random_uuid(),
+  event_type text not null,
+  aggregate_type text not null,
+  aggregate_id text not null,
+  channel text not null check (channel in ('email')),
+  recipient text not null,
+  subject text not null,
+  payload jsonb not null default '{}'::jsonb,
+  dedupe_key text unique,
+  status text not null default 'queued' check (
+    status in ('queued', 'sent', 'failed')
+  ),
+  last_error text,
+  processed_at timestamptz,
+  created_at timestamptz not null default timezone('utc', now())
+);
+
+create table if not exists public.notification_deliveries (
+  id uuid primary key default gen_random_uuid(),
+  event_id uuid not null references public.notification_events (id) on delete cascade,
+  channel text not null check (channel in ('email')),
+  recipient text not null,
+  provider_message_id text,
+  status text not null check (status in ('sent', 'failed')),
+  error text,
+  created_at timestamptz not null default timezone('utc', now())
+);
+
+create table if not exists public.audience_contacts (
+  id uuid primary key default gen_random_uuid(),
+  profile_id uuid references public.profiles (id) on delete set null,
+  email text not null unique check (char_length(email) between 3 and 254),
+  full_name text,
+  locale text not null default 'en' check (locale in ('en', 'nl')),
+  source text not null check (
+    source in ('contact_form', 'dashboard', 'signup')
+  ),
+  lessons_opt_in boolean not null default false,
+  books_opt_in boolean not null default false,
+  general_updates_opt_in boolean not null default false,
+  consented_at timestamptz,
+  unsubscribed_at timestamptz,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
+create table if not exists public.audience_contact_sync_state (
+  audience_contact_id uuid primary key references public.audience_contacts (id) on delete cascade,
+  provider text not null default 'resend' check (provider in ('resend')),
+  provider_contact_id text,
+  last_synced_at timestamptz,
+  last_error text,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
+create table if not exists public.audience_opt_in_requests (
+  id uuid primary key default gen_random_uuid(),
+  email text not null unique check (char_length(email) between 3 and 254),
+  full_name text,
+  locale text not null default 'en' check (locale in ('en', 'nl')),
+  source text not null check (
+    source in ('contact_form', 'signup')
+  ),
+  lessons_requested boolean not null default false,
+  books_requested boolean not null default false,
+  general_updates_requested boolean not null default false,
+  token_hash text not null unique,
+  expires_at timestamptz not null,
+  confirmed_at timestamptz,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
+create table if not exists public.content_releases (
+  id uuid primary key default gen_random_uuid(),
+  release_type text not null check (
+    release_type in ('lesson', 'publication', 'mixed')
+  ),
+  audience_segment text not null check (
+    audience_segment in ('lessons', 'books', 'general')
+  ),
+  locale_mode text not null check (
+    locale_mode in ('localized', 'en_only', 'nl_only')
+  ),
+  subject_en text,
+  subject_nl text,
+  body_en text,
+  body_nl text,
+  status text not null default 'draft' check (
+    status in ('draft', 'approved', 'queued', 'sending', 'sent', 'cancelled')
+  ),
+  delivery_requested_at timestamptz,
+  delivery_requested_by uuid references public.profiles (id),
+  delivery_started_at timestamptz,
+  delivery_finished_at timestamptz,
+  delivery_cursor text,
+  delivery_summary jsonb not null default '{}'::jsonb,
+  last_delivery_error text,
+  sent_at timestamptz,
+  created_at timestamptz not null default timezone('utc', now()),
+  updated_at timestamptz not null default timezone('utc', now())
+);
+
+create table if not exists public.content_release_items (
+  id uuid primary key default gen_random_uuid(),
+  release_id uuid not null references public.content_releases (id) on delete cascade,
+  item_type text not null check (item_type in ('lesson', 'publication')),
+  item_id text not null,
+  title_snapshot text not null,
+  url_snapshot text not null,
+  created_at timestamptz not null default timezone('utc', now())
+);
+
 create table if not exists public.lesson_progress (
   user_id uuid not null references public.profiles (id) on delete cascade,
   lesson_id text not null,
@@ -96,6 +235,98 @@ create index if not exists submissions_created_at_idx
 
 create index if not exists submissions_lesson_slug_idx
   on public.submissions (lesson_slug);
+
+create index if not exists submissions_status_created_at_idx
+  on public.submissions (status, created_at desc);
+
+create index if not exists submissions_exercise_id_idx
+  on public.submissions (exercise_id);
+
+create index if not exists submissions_reviewed_at_idx
+  on public.submissions (reviewed_at desc)
+  where reviewed_at is not null;
+
+create index if not exists submissions_reviewed_by_idx
+  on public.submissions (reviewed_by)
+  where reviewed_by is not null;
+
+create index if not exists contact_messages_created_at_idx
+  on public.contact_messages (created_at desc);
+
+create index if not exists contact_messages_status_created_at_idx
+  on public.contact_messages (status, created_at desc);
+
+create index if not exists contact_messages_email_created_at_idx
+  on public.contact_messages (email, created_at desc);
+
+create index if not exists notification_events_status_created_at_idx
+  on public.notification_events (status, created_at desc);
+
+create index if not exists notification_events_aggregate_created_at_idx
+  on public.notification_events (aggregate_type, aggregate_id, created_at desc);
+
+create index if not exists notification_events_event_type_created_at_idx
+  on public.notification_events (event_type, created_at desc);
+
+create index if not exists notification_deliveries_event_id_idx
+  on public.notification_deliveries (event_id);
+
+create index if not exists notification_deliveries_status_created_at_idx
+  on public.notification_deliveries (status, created_at desc);
+
+create index if not exists audience_contacts_profile_id_idx
+  on public.audience_contacts (profile_id);
+
+create index if not exists audience_contacts_locale_idx
+  on public.audience_contacts (locale);
+
+create index if not exists audience_contacts_source_idx
+  on public.audience_contacts (source);
+
+create index if not exists audience_contacts_active_idx
+  on public.audience_contacts (
+    lessons_opt_in,
+    books_opt_in,
+    general_updates_opt_in,
+    updated_at desc
+  );
+
+create index if not exists audience_contacts_consented_at_idx
+  on public.audience_contacts (consented_at desc)
+  where consented_at is not null;
+
+create index if not exists audience_contact_sync_state_last_synced_at_idx
+  on public.audience_contact_sync_state (last_synced_at desc)
+  where last_synced_at is not null;
+
+create index if not exists audience_contact_sync_state_last_error_idx
+  on public.audience_contact_sync_state (updated_at desc)
+  where last_error is not null;
+
+create index if not exists audience_opt_in_requests_expires_at_idx
+  on public.audience_opt_in_requests (expires_at);
+
+create index if not exists audience_opt_in_requests_confirmed_at_idx
+  on public.audience_opt_in_requests (confirmed_at)
+  where confirmed_at is not null;
+
+create index if not exists audience_opt_in_requests_updated_at_idx
+  on public.audience_opt_in_requests (updated_at desc);
+
+create index if not exists content_releases_status_created_at_idx
+  on public.content_releases (status, created_at desc);
+
+create index if not exists content_releases_segment_created_at_idx
+  on public.content_releases (audience_segment, created_at desc);
+
+create index if not exists content_releases_delivery_requested_at_idx
+  on public.content_releases (delivery_requested_at desc);
+
+create index if not exists content_release_items_release_id_idx
+  on public.content_release_items (release_id);
+
+create index if not exists content_release_items_item_type_item_id_idx
+  on public.content_release_items (item_type, item_id);
 
 create index if not exists lesson_progress_user_id_idx
   on public.lesson_progress (user_id);
@@ -233,6 +464,14 @@ on conflict (id) do update
 
 alter table public.profiles enable row level security;
 alter table public.submissions enable row level security;
+alter table public.contact_messages enable row level security;
+alter table public.notification_events enable row level security;
+alter table public.notification_deliveries enable row level security;
+alter table public.audience_contacts enable row level security;
+alter table public.audience_contact_sync_state enable row level security;
+alter table public.audience_opt_in_requests enable row level security;
+alter table public.content_releases enable row level security;
+alter table public.content_release_items enable row level security;
 alter table public.lesson_progress enable row level security;
 alter table public.section_progress enable row level security;
 alter table public.lesson_bookmarks enable row level security;
@@ -248,6 +487,22 @@ drop policy if exists "Users can read their own submissions" on public.submissio
 drop policy if exists "Admins can read all submissions" on public.submissions;
 drop policy if exists "Users can insert their own submissions" on public.submissions;
 drop policy if exists "Admins can update submissions" on public.submissions;
+drop policy if exists "Admins can read all contact messages" on public.contact_messages;
+drop policy if exists "Admins can update contact messages" on public.contact_messages;
+drop policy if exists "Admins can read all notification events" on public.notification_events;
+drop policy if exists "Admins can read all notification deliveries" on public.notification_deliveries;
+drop policy if exists "Users can read their own audience contact" on public.audience_contacts;
+drop policy if exists "Admins can read all audience contacts" on public.audience_contacts;
+drop policy if exists "Admins can read all audience contact sync states" on public.audience_contact_sync_state;
+drop policy if exists "Admins can insert audience contact sync states" on public.audience_contact_sync_state;
+drop policy if exists "Admins can update audience contact sync states" on public.audience_contact_sync_state;
+drop policy if exists "Admins can read all audience opt-in requests" on public.audience_opt_in_requests;
+drop policy if exists "Admins can update audience opt-in requests" on public.audience_opt_in_requests;
+drop policy if exists "Admins can read all content releases" on public.content_releases;
+drop policy if exists "Admins can insert content releases" on public.content_releases;
+drop policy if exists "Admins can update content releases" on public.content_releases;
+drop policy if exists "Admins can read all content release items" on public.content_release_items;
+drop policy if exists "Admins can insert content release items" on public.content_release_items;
 drop policy if exists "Users can read their own lesson progress" on public.lesson_progress;
 drop policy if exists "Users can insert their own lesson progress" on public.lesson_progress;
 drop policy if exists "Users can update their own lesson progress" on public.lesson_progress;
@@ -325,6 +580,109 @@ on public.submissions
 for update
 to authenticated
 using (public.is_admin())
+with check (public.is_admin());
+
+create policy "Admins can read all contact messages"
+on public.contact_messages
+for select
+to authenticated
+using (public.is_admin());
+
+create policy "Admins can update contact messages"
+on public.contact_messages
+for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+create policy "Admins can read all notification events"
+on public.notification_events
+for select
+to authenticated
+using (public.is_admin());
+
+create policy "Admins can read all notification deliveries"
+on public.notification_deliveries
+for select
+to authenticated
+using (public.is_admin());
+
+create policy "Users can read their own audience contact"
+on public.audience_contacts
+for select
+to authenticated
+using (
+  profile_id = auth.uid()
+  or lower(email) = lower(coalesce(auth.jwt() ->> 'email', ''))
+);
+
+create policy "Admins can read all audience contacts"
+on public.audience_contacts
+for select
+to authenticated
+using (public.is_admin());
+
+create policy "Admins can read all audience contact sync states"
+on public.audience_contact_sync_state
+for select
+to authenticated
+using (public.is_admin());
+
+create policy "Admins can insert audience contact sync states"
+on public.audience_contact_sync_state
+for insert
+to authenticated
+with check (public.is_admin());
+
+create policy "Admins can update audience contact sync states"
+on public.audience_contact_sync_state
+for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+create policy "Admins can read all audience opt-in requests"
+on public.audience_opt_in_requests
+for select
+to authenticated
+using (public.is_admin());
+
+create policy "Admins can update audience opt-in requests"
+on public.audience_opt_in_requests
+for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+create policy "Admins can read all content releases"
+on public.content_releases
+for select
+to authenticated
+using (public.is_admin());
+
+create policy "Admins can insert content releases"
+on public.content_releases
+for insert
+to authenticated
+with check (public.is_admin());
+
+create policy "Admins can update content releases"
+on public.content_releases
+for update
+to authenticated
+using (public.is_admin())
+with check (public.is_admin());
+
+create policy "Admins can read all content release items"
+on public.content_release_items
+for select
+to authenticated
+using (public.is_admin());
+
+create policy "Admins can insert content release items"
+on public.content_release_items
+for insert
+to authenticated
 with check (public.is_admin());
 
 create policy "Users can read their own lesson progress"

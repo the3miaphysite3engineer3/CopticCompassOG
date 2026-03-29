@@ -23,6 +23,24 @@ export function hasSupabaseRuntimeEnv() {
   return getSupabaseRuntimeEnv() !== null;
 }
 
+export function getSupabaseServiceRoleEnv() {
+  const runtimeEnv = getSupabaseRuntimeEnv();
+  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!runtimeEnv || !serviceRoleKey) {
+    return null;
+  }
+
+  return {
+    url: runtimeEnv.url,
+    serviceRoleKey,
+  };
+}
+
+export function hasSupabaseServiceRoleEnv() {
+  return getSupabaseServiceRoleEnv() !== null;
+}
+
 export function getLoginPath(redirectTo?: string) {
   const safeRedirectTarget = getSafeRedirectTarget(redirectTo);
 

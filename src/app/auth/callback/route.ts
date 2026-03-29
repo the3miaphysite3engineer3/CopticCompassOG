@@ -22,15 +22,17 @@ function getSafeRedirectUrl(next: string, baseUrl: string) {
 }
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
+  const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
 
   // if "next" is in param, use it as the redirect URL
   // this is used for password reset or dynamic redirects
   const next = searchParams.get("next") ?? "/";
 
-  let baseUrl = getSiteUrl()?.toString() || origin;
-  if (baseUrl.endsWith("/")) baseUrl = baseUrl.slice(0, -1);
+  const configuredSiteUrl = getSiteUrl() ?? new URL("https://kyrilloswannes.com");
+  const baseUrl = configuredSiteUrl.toString().endsWith("/")
+    ? configuredSiteUrl.toString().slice(0, -1)
+    : configuredSiteUrl.toString();
 
   if (code) {
     const supabase = await createClient();
@@ -42,7 +44,9 @@ export async function GET(request: Request) {
   }
 
   // Redirect to login if token exchange fails (e.g. invalid or expired link)
-  return NextResponse.redirect(
-    `${baseUrl}/login?state=login-error&messageType=error`,
-  );
+  const loginUrl = new URL("/login", baseUrl);
+  loginUrl.searchParams.set("state", "login-error");
+  loginUrl.searchParams.set("messageType", "error");
+
+  return NextResponse.redirect(loginUrl);
 }

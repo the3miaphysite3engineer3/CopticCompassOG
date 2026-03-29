@@ -71,6 +71,23 @@ const DASHBOARD_COPY = {
         "This account uses {provider} for sign-in, so password changes are not managed locally.",
       passwordAvailableBadge: "Available",
       passwordExternalBadge: "External sign-in",
+      communicationTitle: "Email Updates",
+      communicationDescription:
+        "Choose which lesson, publication, and project announcements should reach your inbox.",
+      communicationBadge: "Opt-in",
+      communicationLead:
+        "These preferences control release and announcement emails only. Account and grading emails continue to use their own operational paths.",
+      communicationEmailLabel: "Delivery Email",
+      communicationLocaleLabel: "Email language",
+      communicationLocaleHint:
+        "Release announcements can be localized, so choose the language you want to receive when both versions are available.",
+      communicationLessonsLabel: "New grammar lessons",
+      communicationBooksLabel: "Book and publication releases",
+      communicationGeneralLabel: "Major project updates",
+      communicationHint:
+        "You can pause every topic here without affecting required account emails like password resets or feedback notices.",
+      communicationSaveIdle: "Save Preferences",
+      communicationSavePending: "Saving...",
       deleteTitle: "Delete Profile",
       deleteDescription:
         "Review the permanent deletion path before removing your account and associated learning data.",
@@ -201,6 +218,23 @@ const DASHBOARD_COPY = {
         "Dit account gebruikt {provider} om in te loggen, dus wachtwoordwijzigingen worden niet lokaal beheerd.",
       passwordAvailableBadge: "Beschikbaar",
       passwordExternalBadge: "Externe aanmelding",
+      communicationTitle: "E-mailupdates",
+      communicationDescription:
+        "Kies welke les-, publicatie- en projectaankondigingen je in je inbox wilt ontvangen.",
+      communicationBadge: "Opt-in",
+      communicationLead:
+        "Deze voorkeuren gelden alleen voor release- en aankondigingsmails. Account- en beoordelingsmails blijven hun eigen operationele weg volgen.",
+      communicationEmailLabel: "Ontvangstadres",
+      communicationLocaleLabel: "Taal van e-mails",
+      communicationLocaleHint:
+        "Releaseaankondigingen kunnen gelokaliseerd zijn, dus kies de taal die je wilt ontvangen wanneer beide versies beschikbaar zijn.",
+      communicationLessonsLabel: "Nieuwe grammaticlessen",
+      communicationBooksLabel: "Boek- en publicatiereleases",
+      communicationGeneralLabel: "Belangrijke projectupdates",
+      communicationHint:
+        "Je kunt hier elk onderwerp pauzeren zonder verplichte accountmails zoals wachtwoordresets of feedbackmeldingen te beïnvloeden.",
+      communicationSaveIdle: "Voorkeuren opslaan",
+      communicationSavePending: "Bezig met opslaan...",
       deleteTitle: "Profiel verwijderen",
       deleteDescription:
         "Bekijk eerst het permanente verwijderingspad voordat je je account en bijbehorende leerdata verwijdert.",

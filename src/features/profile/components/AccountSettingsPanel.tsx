@@ -3,13 +3,18 @@
 import type { ReactNode } from 'react'
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
-import { ChevronDown, KeyRound, TriangleAlert, UserRound } from 'lucide-react'
+import { ChevronDown, KeyRound, Mail, TriangleAlert, UserRound } from 'lucide-react'
 import { updatePasswordFromDashboard } from '@/actions/auth'
 import { Badge } from '@/components/Badge'
 import { FormField } from '@/components/FormField'
 import { StatusNotice } from '@/components/StatusNotice'
 import { SurfacePanel } from '@/components/SurfacePanel'
 import { useLanguage } from "@/components/LanguageProvider";
+import { CommunicationPreferencesForm } from '@/features/communications/components/CommunicationPreferencesForm'
+import {
+  getAudiencePreferences,
+  type AudiencePreferencesRow,
+} from '@/features/communications/lib/communications'
 import {
   formatDashboardProviderDescription,
   getDashboardCopy,
@@ -20,12 +25,13 @@ import { getContactPath, getPrivacyPath } from "@/lib/locale";
 import type { Tables } from '@/types/supabase'
 
 type AccountSettingsPanelProps = {
+  audienceContact: AudiencePreferencesRow | null
   canUpdatePassword: boolean
   profile: Tables<'profiles'>
   providerLabel: string
 }
 
-type AccountSectionId = 'profile' | 'password' | 'delete'
+type AccountSectionId = 'profile' | 'password' | 'communication' | 'delete'
 
 function AccountSettingsSection({
   badge,
@@ -209,6 +215,7 @@ function DeleteProfileNotice() {
 }
 
 export function AccountSettingsPanel({
+  audienceContact,
   canUpdatePassword,
   profile,
   providerLabel,
@@ -219,6 +226,7 @@ export function AccountSettingsPanel({
   const providerBadgeLabel = canUpdatePassword
     ? copy.account.passwordAvailableBadge
     : copy.account.passwordExternalBadge
+  const audiencePreferences = getAudiencePreferences(audienceContact, language)
 
   return (
     <SurfacePanel rounded="3xl" className="overflow-hidden p-0">
@@ -271,6 +279,33 @@ export function AccountSettingsPanel({
         <PasswordSettingsForm
           canUpdatePassword={canUpdatePassword}
           providerLabel={providerLabel}
+        />
+      </AccountSettingsSection>
+
+      <AccountSettingsSection
+        icon={<Mail className="h-5 w-5" />}
+        title={copy.account.communicationTitle}
+        description={copy.account.communicationDescription}
+        badge={
+          <Badge
+            tone={
+              audiencePreferences.booksOptIn ||
+              audiencePreferences.generalUpdatesOptIn ||
+              audiencePreferences.lessonsOptIn
+                ? 'accent'
+                : 'neutral'
+            }
+            size="xs"
+          >
+            {copy.account.communicationBadge}
+          </Badge>
+        }
+        isOpen={openSection === 'communication'}
+        onToggle={() => setOpenSection((current) => current === 'communication' ? null : 'communication')}
+      >
+        <CommunicationPreferencesForm
+          deliveryEmail={profile.email}
+          preferences={audiencePreferences}
         />
       </AccountSettingsSection>
 

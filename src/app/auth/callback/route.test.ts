@@ -85,4 +85,20 @@ describe("auth callback route", () => {
       "https://www.kyrilloswannes.com/dashboard",
     );
   });
+
+  it("uses the configured site URL instead of the incoming request origin", async () => {
+    const { GET } = await loadCallbackRoute({
+      siteUrl: "https://www.kyrilloswannes.com",
+    });
+
+    const response = await GET(
+      new Request(
+        "https://preview-host.example/auth/callback?code=test-code&next=/dashboard",
+      ),
+    );
+
+    expect(response.headers.get("location")).toBe(
+      "https://www.kyrilloswannes.com/dashboard",
+    );
+  });
 });

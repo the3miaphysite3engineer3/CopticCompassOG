@@ -12,7 +12,7 @@ import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
 
 export default function ContactPageClient() {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const [state, formAction, isPending] = useActionState<ContactFormState | null, FormData>(
     sendContactEmail,
     null
@@ -37,6 +37,7 @@ export default function ContactPageClient() {
       <SurfacePanel rounded="3xl" className="p-8 md:p-10">
         <form action={formAction} className="space-y-8">
           <input type="text" name="website" className="hidden" tabIndex={-1} autoComplete="off" />
+          <input type="hidden" name="locale" value={language} />
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <FormField htmlFor="name" label={t("contact.name")}>
@@ -106,6 +107,26 @@ export default function ContactPageClient() {
             </div>
           </FormField>
 
+          <FormField
+            htmlFor="wants_updates"
+            label={t("contact.updatesLabel")}
+            className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-4 dark:border-stone-800 dark:bg-stone-950/30"
+          >
+            <label
+              htmlFor="wants_updates"
+              className="flex items-start gap-3 text-sm leading-6 text-stone-600 dark:text-stone-300"
+            >
+              <input
+                id="wants_updates"
+                type="checkbox"
+                name="wants_updates"
+                value="true"
+                className="mt-1 h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-sky-500/40 dark:border-stone-700 dark:bg-stone-950"
+              />
+              <span>{t("contact.updatesHint")}</span>
+            </label>
+          </FormField>
+
           <button
             type="submit"
             disabled={isPending}
@@ -117,7 +138,7 @@ export default function ContactPageClient() {
 
           {state?.success && (
             <StatusNotice tone="success">
-              {t("contact.success")}
+              {state.message ?? t("contact.success")}
             </StatusNotice>
           )}
 

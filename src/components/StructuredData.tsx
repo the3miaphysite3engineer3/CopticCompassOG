@@ -1,3 +1,5 @@
+import { getCspNonce } from "@/lib/server/csp";
+
 type StructuredDataProps = {
   data: Record<string, unknown> | Array<Record<string, unknown>>;
 };
@@ -27,9 +29,12 @@ function serializeStructuredData(data: StructuredDataProps["data"]) {
   return JSON.stringify(normalizeStructuredData(data)).replace(/</g, "\\u003c");
 }
 
-export default function StructuredData({ data }: StructuredDataProps) {
+export default async function StructuredData({ data }: StructuredDataProps) {
+  const nonce = await getCspNonce();
+
   return (
     <script
+      nonce={nonce}
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: serializeStructuredData(data) }}
     />

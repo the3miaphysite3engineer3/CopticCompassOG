@@ -3,7 +3,7 @@ import { Footer } from "@/components/Footer";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { Navbar } from "@/components/Navbar";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { antinoou } from "@/lib/fonts";
+import { getCspNonce } from "@/lib/server/csp";
 import type { Language } from "@/types/i18n";
 
 type AppFrameProps = {
@@ -12,22 +12,27 @@ type AppFrameProps = {
   localeRouting?: boolean;
 };
 
-export function AppFrame({
+export async function AppFrame({
   children,
   initialLanguage,
   localeRouting = false,
 }: AppFrameProps) {
+  const nonce = await getCspNonce();
+
   return (
-    <body className={antinoou.variable}>
-      <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-        <LanguageProvider initialLanguage={initialLanguage} localeRouting={localeRouting}>
-          <div className="flex min-h-screen flex-col">
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
-        </LanguageProvider>
-      </ThemeProvider>
-    </body>
+    <ThemeProvider
+      attribute="class"
+      defaultTheme="system"
+      enableSystem
+      nonce={nonce}
+    >
+      <LanguageProvider initialLanguage={initialLanguage} localeRouting={localeRouting}>
+        <div className="flex min-h-screen flex-col">
+          <Navbar />
+          <main className="flex-1">{children}</main>
+          <Footer />
+        </div>
+      </LanguageProvider>
+    </ThemeProvider>
   );
 }

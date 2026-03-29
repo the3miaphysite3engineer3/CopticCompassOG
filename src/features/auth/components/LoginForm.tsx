@@ -49,7 +49,7 @@ export function LoginForm({
   redirectTo?: string;
   state?: string;
 }) {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   const noticeKey =
     state && state in NOTICE_TRANSLATION_KEYS
       ? NOTICE_TRANSLATION_KEYS[state as NoticeState]
@@ -86,6 +86,7 @@ export function LoginForm({
                   value={redirectTo}
                 />
               )}
+              <input type="hidden" name="locale" value={language} />
 
               <FormField htmlFor="email" label={t("login.email")}>
                 <input

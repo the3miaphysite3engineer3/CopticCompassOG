@@ -1,4 +1,5 @@
 import type { Language } from "@/types/i18n";
+export type { Language };
 import { contactMessages } from "@/lib/translations/contact";
 import { dictionaryMessages } from "@/lib/translations/dictionary";
 import { grammarMessages } from "@/lib/translations/grammar";

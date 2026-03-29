@@ -10,6 +10,7 @@ import {
   consumeRateLimit,
   getUserRateLimitIdentifier,
 } from '@/lib/rateLimit'
+import { dispatchLoggedOwnerAlertEmail } from '@/lib/notifications/events'
 import { revalidatePath } from 'next/cache'
 import {
   getFormString,
@@ -17,8 +18,9 @@ import {
   normalizeMultiline,
   normalizeWhitespace,
 } from '@/lib/validation'
-import { PUBLIC_LOCALES, getDashboardPath } from "@/lib/locale";
+import { PUBLIC_LOCALES, getDashboardPath } from '@/lib/locale'
 import type { SubmissionInsert } from '@/features/submissions/types'
+import { formatLessonSlug } from '@/features/submissions/utils'
 import type { Language } from '@/types/i18n'
 
 export type ExerciseActionState =
@@ -76,9 +78,10 @@ export async function submitExercise(_prevState: ExerciseActionState, formData: 
   const answers = exerciseDefinition.items.map((question) => {
     const answer = normalizeMultiline(getFormString(formData, `answer_${question.id}`))
     return {
-      prompt: question.prompt[exerciseLanguage],
-      answer,
       answerSchema: question.answerSchema,
+      prompt: question.prompt[exerciseLanguage],
+      questionId: question.id,
+      answer,
     }
   })
 
@@ -114,17 +117,28 @@ export async function submitExercise(_prevState: ExerciseActionState, formData: 
   const submittedText = answers
     .map(({ prompt, answer }) => `Question: ${prompt}\nAnswer: ${answer}`)
     .join('\n\n')
+  const serializedAnswers = answers.map(({ answer, answerSchema, prompt, questionId }) => ({
+    answer,
+    answer_schema: answerSchema ?? null,
+    prompt,
+    question_id: questionId,
+  }))
 
   const submission: SubmissionInsert = {
+    answers: serializedAnswers,
+    exercise_id: exerciseDefinition.id,
     user_id: user.id,
     lesson_slug: lessonDefinition.slug,
+    submitted_language: exerciseLanguage,
     submitted_text: submittedText.trim(),
     status: 'pending',
   }
 
-  const { error } = await supabase
+  const { data: submissionRow, error } = await supabase
     .from('submissions')
     .insert([submission])
+    .select('id')
+    .single()
 
   if (error) {
     console.error('Error submitting exercise:', {
@@ -163,6 +177,42 @@ export async function submitExercise(_prevState: ExerciseActionState, formData: 
     revalidatePath(getDashboardPath(locale))
   }
   revalidatePath(`/grammar/${lessonDefinition.slug}`)
+
+  if (!submissionRow) {
+    return { success: true }
+  }
+
+  const ownerAlert = await dispatchLoggedOwnerAlertEmail({
+    aggregateId: submissionRow.id,
+    aggregateType: 'submission',
+    eventType: 'exercise_submission_received',
+    payload: {
+      exercise_id: exerciseDefinition.id,
+      lesson_slug: lessonDefinition.slug,
+      submitted_language: exerciseLanguage,
+      user_id: user.id,
+    },
+    subject: `New exercise submission: ${formatLessonSlug(lessonDefinition.slug)}`,
+    text: [
+      `Student: ${user.email ?? 'Unknown email'}`,
+      `Lesson: ${lessonDefinition.slug}`,
+      `Exercise: ${exerciseDefinition.id}`,
+      `Language: ${exerciseLanguage}`,
+      `Answer count: ${answers.length}`,
+      '',
+      'Submission:',
+      submittedText.trim(),
+    ].join('\n'),
+  })
+
+  if (!ownerAlert.success) {
+    console.error('Failed to send owner exercise submission alert', {
+      error: ownerAlert.error,
+      exerciseId,
+      lessonSlug,
+      userId: user.id,
+    })
+  }
 
   return { success: true }
 }

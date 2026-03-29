@@ -2,7 +2,9 @@ import { readProjectJsonFile } from "@/lib/server/projectFiles";
 
 function getDictionaryEntryCount() {
   try {
-    const dictionary = readProjectJsonFile<unknown[]>("public/data/dictionary.json");
+    const dictionary = readProjectJsonFile<unknown[]>(
+      "public/data/dictionary.json",
+    );
 
     return Array.isArray(dictionary) ? dictionary.length : 0;
   } catch {
@@ -13,8 +15,8 @@ function getDictionaryEntryCount() {
 const dictionaryEntryCount = getDictionaryEntryCount();
 
 export const siteConfig = {
-  name: "The Wannes Portfolio",
-  title: "Kyrillos Wannes | Coptic Dictionary, Grammar, and Publications",
+  name: "The Wannes Portfolio | Coptic Dictionary, Grammar, and Publications",
+  title: "The Wannes Portfolio | Coptic Dictionary, Grammar, and Publications",
   description: dictionaryEntryCount
     ? `Digital Coptic dictionary, grammar lessons, publications, and research tools by Kyrillos Wannes, featuring ${dictionaryEntryCount.toLocaleString()} searchable entries.`
     : "Digital Coptic dictionary, grammar lessons, publications, and research tools by Kyrillos Wannes.",
@@ -44,20 +46,27 @@ export function buildPageTitle(title: string) {
 }
 
 export function getSiteUrl() {
-  const rawUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.SITE_URL ??
-    (process.env.VERCEL_PROJECT_PRODUCTION_URL
+  const candidates = [
+    process.env.NEXT_PUBLIC_SITE_URL,
+    process.env.SITE_URL,
+    process.env.VERCEL_PROJECT_PRODUCTION_URL
       ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
-      : undefined) ??
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined) ??
-    siteConfig.liveUrl;
+      : undefined,
+    process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : undefined,
+    siteConfig.liveUrl,
+  ];
 
-  if (!rawUrl) return undefined;
+  for (const candidate of candidates) {
+    if (!candidate) {
+      continue;
+    }
 
-  try {
-    return new URL(rawUrl);
-  } catch {
-    return undefined;
+    try {
+      return new URL(candidate);
+    } catch {
+      continue;
+    }
   }
+
+  return undefined;
 }

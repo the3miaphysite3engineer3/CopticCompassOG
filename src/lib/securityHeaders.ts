@@ -4,6 +4,8 @@ type SecurityHeader = {
 };
 
 type SecurityHeadersOptions = {
+  includeContentSecurityPolicy?: boolean;
+  nonce?: string | null;
   nodeEnv?: string | null;
   supabaseUrl?: string | null;
 };
@@ -36,10 +38,12 @@ function buildSourceList(...sources: Array<string | null | undefined | false>) {
 
 export function buildContentSecurityPolicy(options: SecurityHeadersOptions = {}) {
   const nodeEnv = options.nodeEnv ?? process.env.NODE_ENV;
+  const nonce = options.nonce ?? null;
   const supabaseOrigin = getSupabaseOrigin(
     options.supabaseUrl ?? process.env.NEXT_PUBLIC_SUPABASE_URL,
   );
   const isProduction = isProductionEnvironment(nodeEnv);
+  const scriptNonceSource = nonce ? `'nonce-${nonce}'` : null;
   const connectSrc = buildSourceList(
     "'self'",
     supabaseOrigin,
@@ -58,7 +62,8 @@ export function buildContentSecurityPolicy(options: SecurityHeadersOptions = {})
     "object-src 'none'",
     `script-src ${buildSourceList(
       "'self'",
-      "'unsafe-inline'",
+      scriptNonceSource ?? "'unsafe-inline'",
+      scriptNonceSource ? "'strict-dynamic'" : null,
       isProduction ? null : "'unsafe-eval'",
     )}`,
     "script-src-attr 'none'",
@@ -77,11 +82,15 @@ export function buildContentSecurityPolicy(options: SecurityHeadersOptions = {})
 
 export function buildSecurityHeaders(options: SecurityHeadersOptions = {}): SecurityHeader[] {
   const nodeEnv = options.nodeEnv ?? process.env.NODE_ENV;
+  const includeContentSecurityPolicy =
+    options.includeContentSecurityPolicy ?? true;
   const headers = [
-    {
-      key: "Content-Security-Policy",
-      value: buildContentSecurityPolicy(options),
-    },
+    includeContentSecurityPolicy
+      ? {
+          key: "Content-Security-Policy",
+          value: buildContentSecurityPolicy(options),
+        }
+      : null,
     {
       key: "Referrer-Policy",
       value: "strict-origin-when-cross-origin",

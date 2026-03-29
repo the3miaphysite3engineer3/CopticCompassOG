@@ -1,6 +1,5 @@
 "use server";
 
-import { Resend } from "resend";
 import { getDictionaryEntryById } from "@/features/dictionary/lib/dictionary";
 import {
   ENTRY_REPORT_MAX_COMMENTARY_LENGTH,
@@ -8,14 +7,14 @@ import {
   isEntryReportReason,
   type EntryReportInsert,
 } from "@/features/dictionary/lib/entryActions";
+import { dispatchLoggedOwnerAlertEmail } from "@/lib/notifications/events";
 import { getSiteUrl, siteConfig } from "@/lib/site";
 import { getAuthenticatedServerContext } from "@/lib/supabase/auth";
 import { hasSupabaseRuntimeEnv } from "@/lib/supabase/config";
 import { consumeRateLimit, getUserRateLimitIdentifier } from "@/lib/rateLimit";
 import { getEntryPath } from "@/lib/locale";
 import { getFormString, hasLengthInRange, normalizeMultiline, normalizeWhitespace } from "@/lib/validation";
-import { isLanguage } from "@/lib/i18n";
-import type { Language } from "@/types/i18n";
+import { isLanguage, type Language } from "@/lib/i18n";
 
 export type EntryReportActionState =
   | {
@@ -75,6 +74,7 @@ function isMissingEntryReportTableError(
 }
 
 async function sendEntryReportNotificationEmail({
+  aggregateId,
   commentary,
   entryHeadword,
   entryId,
@@ -82,6 +82,7 @@ async function sendEntryReportNotificationEmail({
   reason,
   userEmail,
 }: {
+  aggregateId: string;
   commentary: string;
   entryHeadword: string;
   entryId: string;
@@ -89,17 +90,19 @@ async function sendEntryReportNotificationEmail({
   reason: string;
   userEmail: string | null | undefined;
 }) {
-  if (!process.env.RESEND_API_KEY || !process.env.CONTACT_EMAIL) {
-    return;
-  }
-
-  const resend = new Resend(process.env.RESEND_API_KEY);
   const siteUrl = getSiteUrl()?.toString() ?? siteConfig.liveUrl;
   const entryPath = getEntryPath(entryId, locale);
 
-  const { error } = await resend.emails.send({
-    from: "Kyrillos Wannes <contact@kyrilloswannes.com>",
-    to: [process.env.CONTACT_EMAIL],
+  return dispatchLoggedOwnerAlertEmail({
+    aggregateId,
+    aggregateType: "entry_report",
+    eventType: "dictionary_entry_report_submitted",
+    payload: {
+      entry_id: entryId,
+      locale,
+      reason,
+      reporter_email: userEmail ?? null,
+    },
     subject: `Dictionary entry report: ${entryHeadword} (${entryId})`,
     text: [
       `Entry: ${entryHeadword}`,
@@ -113,10 +116,6 @@ async function sendEntryReportNotificationEmail({
       commentary,
     ].join("\n"),
   });
-
-  if (error) {
-    throw error;
-  }
 }
 
 export async function submitEntryReport(
@@ -184,7 +183,11 @@ export async function submitEntryReport(
     user_id: user.id,
   };
 
-  const { error } = await supabase.from("entry_reports").insert(reportPayload);
+  const { data: report, error } = await supabase
+    .from("entry_reports")
+    .insert(reportPayload)
+    .select("id")
+    .single();
 
   if (error) {
     console.error("Failed to submit dictionary entry report", {
@@ -210,14 +213,26 @@ export async function submitEntryReport(
   }
 
   try {
-    await sendEntryReportNotificationEmail({
-      commentary,
-      entryHeadword: entry.headword,
-      entryId: entry.id,
-      locale: language,
-      reason,
-      userEmail: user.email,
-    });
+    if (report) {
+      const notificationResult = await sendEntryReportNotificationEmail({
+        aggregateId: report.id,
+        commentary,
+        entryHeadword: entry.headword,
+        entryId: entry.id,
+        locale: language,
+        reason,
+        userEmail: user.email,
+      });
+
+      if (!notificationResult.success) {
+        console.error("Failed to send dictionary entry report notification", {
+          entryId: entry.id,
+          error: notificationResult.error,
+          reportId: report.id,
+          userId: user.id,
+        });
+      }
+    }
   } catch (notificationError) {
     console.error("Failed to send dictionary entry report notification", notificationError);
   }

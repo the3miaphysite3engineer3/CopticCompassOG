@@ -10,6 +10,8 @@ type AuthModuleContext = {
   login: typeof import("./auth").login;
   signup: typeof import("./auth").signup;
   logout: typeof import("./auth").logout;
+  resetPassword: typeof import("./auth").resetPassword;
+  signInWithGoogle: typeof import("./auth").signInWithGoogle;
   updatePasswordFromDashboard: typeof import("./auth").updatePasswordFromDashboard;
   consumeRateLimitMock: ReturnType<typeof vi.fn>;
   createClientMock: ReturnType<typeof vi.fn>;
@@ -19,6 +21,8 @@ type AuthModuleContext = {
   hasSupabaseRuntimeEnvMock: ReturnType<typeof vi.fn>;
   revalidatePathMock: ReturnType<typeof vi.fn>;
   redirectMock: ReturnType<typeof vi.fn>;
+  resetPasswordForEmailMock: ReturnType<typeof vi.fn>;
+  signInWithOAuthMock: ReturnType<typeof vi.fn>;
   signInWithPasswordMock: ReturnType<typeof vi.fn>;
   signOutMock: ReturnType<typeof vi.fn>;
   signUpMock: ReturnType<typeof vi.fn>;
@@ -31,13 +35,24 @@ function createRedirectMock() {
   });
 }
 
-function createLoginFormData(overrides?: Partial<Record<"email" | "password" | "redirectTo", string>>) {
+function createLoginFormData(
+  overrides?: Partial<
+    Record<"email" | "locale" | "password" | "redirectTo", string> & {
+      subscribeToUpdates: boolean;
+    }
+  >,
+) {
   const formData = new FormData();
   formData.set("email", overrides?.email ?? "user@example.com");
+  formData.set("locale", overrides?.locale ?? "en");
   formData.set("password", overrides?.password ?? "password123");
 
   if (overrides?.redirectTo !== undefined) {
     formData.set("redirectTo", overrides.redirectTo);
+  }
+
+  if (overrides?.subscribeToUpdates) {
+    formData.set("subscribe_to_updates", "true");
   }
 
   return formData;
@@ -46,12 +61,16 @@ function createLoginFormData(overrides?: Partial<Record<"email" | "password" | "
 async function loadAuthModule(options?: {
   hasEnv?: boolean;
   rateLimitOk?: boolean;
+  resetPasswordError?: unknown;
+  signInWithOAuthError?: unknown;
+  signInWithOAuthUrl?: string | null;
   updateUserError?: unknown;
   user?: { id: string } | null;
   signInError?: unknown;
   signOutError?: unknown;
   signUpError?: unknown;
   signUpSession?: unknown;
+  signUpUser?: { id: string; user_metadata?: Record<string, unknown> } | null;
 }) {
   vi.resetModules();
 
@@ -80,11 +99,24 @@ async function loadAuthModule(options?: {
   const signInWithPasswordMock = vi
     .fn()
     .mockResolvedValue({ error: options?.signInError ?? null });
+  const signInWithOAuthMock = vi.fn().mockResolvedValue({
+    data: { url: options?.signInWithOAuthUrl ?? "https://accounts.google.com/mock" },
+    error: options?.signInWithOAuthError ?? null,
+  });
   const signUpMock = vi.fn().mockResolvedValue({
-    data: { session: options?.signUpSession ?? null },
+    data: {
+      session: options?.signUpSession ?? null,
+      user:
+        options?.signUpUser === undefined
+          ? { id: "user-1", user_metadata: {} }
+          : options.signUpUser,
+    },
     error: options?.signUpError ?? null,
   });
   const signOutMock = vi.fn().mockResolvedValue({ error: options?.signOutError ?? null });
+  const resetPasswordForEmailMock = vi
+    .fn()
+    .mockResolvedValue({ error: options?.resetPasswordError ?? null });
   const updateUserMock = vi
     .fn()
     .mockResolvedValue({ error: options?.updateUserError ?? null });
@@ -93,6 +125,8 @@ async function loadAuthModule(options?: {
       getUser: vi.fn().mockResolvedValue({
         data: { user: options?.user === undefined ? { id: "user-1" } : options.user },
       }),
+      resetPasswordForEmail: resetPasswordForEmailMock,
+      signInWithOAuth: signInWithOAuthMock,
       signInWithPassword: signInWithPasswordMock,
       signOut: signOutMock,
       signUp: signUpMock,
@@ -134,7 +168,9 @@ async function loadAuthModule(options?: {
     hasSupabaseRuntimeEnvMock,
     revalidatePathMock,
     redirectMock,
+    resetPasswordForEmailMock,
     signInWithPasswordMock,
+    signInWithOAuthMock,
     signOutMock,
     signUpMock,
     updateUserMock,
@@ -248,7 +284,8 @@ describe("auth actions", () => {
   });
 
   it("redirects to the email confirmation state when signup has no session", async () => {
-    const { revalidatePathMock, signup, signUpMock } = await loadAuthModule({
+    const { revalidatePathMock, signup, signUpMock } =
+      await loadAuthModule({
       signUpSession: null,
     });
 
@@ -266,6 +303,65 @@ describe("auth actions", () => {
       },
     });
     expect(revalidatePathMock).not.toHaveBeenCalled();
+  });
+
+  it("ignores legacy signup opt-in form fields and does not subscribe users during signup", async () => {
+    const { signup } = await loadAuthModule({
+      signUpSession: null,
+      signUpUser: {
+        id: "user-42",
+        user_metadata: {
+          full_name: "Kyrillos Wannes",
+        },
+      },
+    });
+
+    await expect(
+      signup(
+        createLoginFormData({
+          locale: "nl",
+          subscribeToUpdates: true,
+        }),
+      ),
+    ).rejects.toMatchObject({
+      destination:
+        "/login?state=signup-check-email&messageType=success&redirect_to=%2Fdashboard",
+    });
+  });
+
+  it("uses the configured site URL for reset-password callbacks", async () => {
+    const { resetPassword, resetPasswordForEmailMock } = await loadAuthModule();
+
+    await expect(
+      resetPassword(createLoginFormData({ password: "password123" })),
+    ).rejects.toMatchObject({
+      destination: "/forgot-password?state=forgot-success&messageType=success",
+    });
+
+    expect(resetPasswordForEmailMock).toHaveBeenCalledWith("user@example.com", {
+      redirectTo: "https://example.com/auth/callback?next=/update-password",
+    });
+  });
+
+  it("uses the configured site URL for Google OAuth callbacks", async () => {
+    const { signInWithGoogle, signInWithOAuthMock } = await loadAuthModule();
+
+    await expect(
+      signInWithGoogle(
+        createLoginFormData({
+          redirectTo: "https://evil.example/phish",
+        }),
+      ),
+    ).rejects.toMatchObject({
+      destination: "https://accounts.google.com/mock",
+    });
+
+    expect(signInWithOAuthMock).toHaveBeenCalledWith({
+      provider: "google",
+      options: {
+        redirectTo: "https://example.com/auth/callback?next=%2Fdashboard",
+      },
+    });
   });
 
   it("signs out and redirects back to login", async () => {
