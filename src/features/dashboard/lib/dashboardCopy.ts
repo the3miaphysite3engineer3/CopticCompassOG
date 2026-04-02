@@ -136,6 +136,10 @@ const DASHBOARD_COPY = {
     submissions: {
       scoreLabel: "Score",
       feedbackTitle: "Instructor Feedback",
+      awaitingReviewLabel: "Awaiting review",
+      showDetails: "Show response and feedback",
+      hideDetails: "Hide response and feedback",
+      responseLabel: "Your response",
       waitingForReview: "Waiting for instructor review. Check back later!",
     },
     loading: {
@@ -281,6 +285,10 @@ const DASHBOARD_COPY = {
     submissions: {
       scoreLabel: "Score",
       feedbackTitle: "Feedback van docent",
+      awaitingReviewLabel: "Wacht op beoordeling",
+      showDetails: "Antwoord en feedback tonen",
+      hideDetails: "Antwoord en feedback verbergen",
+      responseLabel: "Jouw antwoord",
       waitingForReview:
         "Wacht op beoordeling door de docent. Kom later nog eens terug.",
     },

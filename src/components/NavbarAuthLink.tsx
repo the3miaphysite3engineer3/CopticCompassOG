@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
+import { loadBrowserUser } from "@/lib/supabase/clientAuth";
 
 type NavbarAuthLinkProps = {
   dashboardHref: string;
@@ -63,11 +64,17 @@ export function NavbarAuthLink({
 
     let isMounted = true;
 
-    void supabase.auth.getSession().then(({ data }) => {
-      if (isMounted) {
-        setUser(data.session?.user ?? null);
-      }
-    });
+    void loadBrowserUser(supabase)
+      .then((nextUser) => {
+        if (isMounted) {
+          setUser(nextUser);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setUser(null);
+        }
+      });
 
     const {
       data: { subscription },

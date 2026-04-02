@@ -8,6 +8,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
+import { AuthFlashNoticeCleaner } from "@/features/auth/components/AuthFlashNoticeCleaner";
 import Link from "next/link";
 import { FaGoogle } from "react-icons/fa";
 
@@ -75,6 +76,8 @@ export function LoginForm({
         tone="brand"
         className="mb-12"
       />
+
+      <AuthFlashNoticeCleaner />
 
       <div className="max-w-xl mx-auto">
         <SurfacePanel rounded="3xl" className="p-8 md:p-10">

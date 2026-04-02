@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useActionState } from "react";
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
+import { loadBrowserUser } from "@/lib/supabase/clientAuth";
 import { submitExercise } from "@/actions/exercises";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
@@ -48,14 +49,23 @@ export function ExerciseForm({
 
     let isMounted = true;
 
-    void supabase.auth.getUser().then(({ data }) => {
-      if (!isMounted) {
-        return;
-      }
+    void loadBrowserUser(supabase)
+      .then((nextUser) => {
+        if (!isMounted) {
+          return;
+        }
 
-      setUser(data.user);
-      setLoading(false);
-    });
+        setUser(nextUser);
+        setLoading(false);
+      })
+      .catch(() => {
+        if (!isMounted) {
+          return;
+        }
+
+        setUser(null);
+        setLoading(false);
+      });
 
     return () => {
       isMounted = false;

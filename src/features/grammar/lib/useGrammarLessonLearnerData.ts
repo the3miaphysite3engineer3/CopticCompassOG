@@ -4,6 +4,7 @@ import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import type { User } from "@supabase/supabase-js";
 import type { GrammarLessonBundle } from "@/content/grammar/schema";
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
+import { loadBrowserUser } from "@/lib/supabase/clientAuth";
 import {
   createEmptyGrammarLessonLearnerRecords,
   loadGrammarLessonLearnerRecords,
@@ -143,9 +144,9 @@ export function useGrammarLessonLearnerData(
       }
     };
 
-    void supabase.auth.getUser().then(({ data }) => {
-      void loadLearnerState(data.user);
-    });
+    void loadBrowserUser(supabase)
+      .then((nextUser) => loadLearnerState(nextUser))
+      .catch(() => loadLearnerState(null));
 
     const {
       data: { subscription },

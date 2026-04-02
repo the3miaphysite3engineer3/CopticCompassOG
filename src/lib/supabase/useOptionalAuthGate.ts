@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
+import { loadBrowserUser } from "@/lib/supabase/clientAuth";
 
 export type OptionalAuthGateStatus =
   | "loading"
@@ -29,15 +30,23 @@ export function useOptionalAuthGate() {
 
     let isMounted = true;
 
-    void supabase.auth.getUser().then(({ data }) => {
-      if (!isMounted) {
-        return;
-      }
+    void loadBrowserUser(supabase)
+      .then((nextUser) => {
+        if (!isMounted) {
+          return;
+        }
 
-      const nextUser = data.user ?? null;
-      setUser(nextUser);
-      setStatus(nextUser ? "signed-in" : "signed-out");
-    });
+        setUser(nextUser);
+        setStatus(nextUser ? "signed-in" : "signed-out");
+      })
+      .catch(() => {
+        if (!isMounted) {
+          return;
+        }
+
+        setUser(null);
+        setStatus("signed-out");
+      });
 
     const {
       data: { subscription },

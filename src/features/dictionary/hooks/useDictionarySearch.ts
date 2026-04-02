@@ -22,6 +22,7 @@ import {
 } from "@/features/dictionary/search";
 import type { LexicalEntry } from "@/features/dictionary/types";
 import { createClient } from "@/lib/supabase/client";
+import { loadBrowserUser } from "@/lib/supabase/clientAuth";
 
 type UseDictionarySearchOptions = {
   dictionaryPath: string;
@@ -131,9 +132,9 @@ export function useDictionarySearch({
       }
     }
 
-    void supabase.auth.getUser().then(({ data }) => {
-      void applyUserPreference(data.user?.id ?? null);
-    });
+    void loadBrowserUser(supabase)
+      .then((nextUser) => applyUserPreference(nextUser?.id ?? null))
+      .catch(() => applyUserPreference(null));
 
     const {
       data: { subscription },

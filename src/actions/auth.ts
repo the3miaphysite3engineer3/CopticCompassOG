@@ -365,6 +365,10 @@ export async function signInWithGoogle(formData: FormData) {
     redirect(getAuthUnavailableLoginPath(redirectTo));
   }
 
+  if (!hasAvailableRateLimitProtection()) {
+    redirect(getAuthUnavailableLoginPath(redirectTo));
+  }
+
   const supabase = await createClient();
   const baseUrl = getTrustedAuthBaseUrl();
 

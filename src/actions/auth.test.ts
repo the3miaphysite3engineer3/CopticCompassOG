@@ -428,6 +428,28 @@ describe("auth actions", () => {
     });
   });
 
+  it("blocks Google OAuth when shared rate-limit protection is unavailable", async () => {
+    const {
+      createClientMock,
+      getAuthUnavailableLoginPathMock,
+      signInWithGoogle,
+      signInWithOAuthMock,
+    } = await loadAuthModule({
+      hasRateLimitProtection: false,
+    });
+
+    await expect(
+      signInWithGoogle(createLoginFormData({ redirectTo: "/dashboard" })),
+    ).rejects.toMatchObject({
+      destination:
+        "/login?state=auth-unavailable&messageType=error&redirect_to=%2Fdashboard",
+    });
+
+    expect(getAuthUnavailableLoginPathMock).toHaveBeenCalledWith("/dashboard");
+    expect(createClientMock).not.toHaveBeenCalled();
+    expect(signInWithOAuthMock).not.toHaveBeenCalled();
+  });
+
   it("signs out and redirects back to login", async () => {
     const { logout, revalidatePathMock, signOutMock } = await loadAuthModule();
 

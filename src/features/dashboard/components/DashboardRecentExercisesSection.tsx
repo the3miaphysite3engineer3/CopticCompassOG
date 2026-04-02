@@ -1,9 +1,7 @@
-import { SubmissionCard } from "@/features/submissions/components/SubmissionCard";
 import { SubmissionEmptyState } from "@/features/submissions/components/SubmissionEmptyState";
-import { SubmissionFeedbackPanel } from "@/features/submissions/components/SubmissionFeedbackPanel";
-import { SubmissionStatusBadge } from "@/features/submissions/components/SubmissionStatusBadge";
 import type { SubmissionRow } from "@/features/submissions/types";
 import type { Language } from "@/types/i18n";
+import { DashboardRecentExerciseDisclosure } from "./DashboardRecentExerciseDisclosure";
 import { getDashboardCopy } from "../lib/dashboardCopy";
 
 export function DashboardRecentExercisesSection({
@@ -21,23 +19,13 @@ export function DashboardRecentExercisesSection({
         {copy.recentExercisesTitle}
       </h3>
 
-      {submissions.map((submission) => (
-        <SubmissionCard
+      {submissions.map((submission, index) => (
+        <DashboardRecentExerciseDisclosure
           key={submission.id}
-          language={locale}
+          defaultOpen={index === 0}
+          locale={locale}
           submission={submission}
-          topRight={
-            submission.status === "reviewed" ? (
-              <SubmissionStatusBadge
-                label={copy.reviewedLabel}
-                tone="reviewed"
-                className="absolute right-0 top-0 rounded-none rounded-bl-xl px-4 py-1.5 text-white dark:text-emerald-200"
-              />
-            ) : undefined
-          }
-        >
-          <SubmissionFeedbackPanel language={locale} submission={submission} />
-        </SubmissionCard>
+        />
       ))}
 
       {submissions.length === 0 ? (

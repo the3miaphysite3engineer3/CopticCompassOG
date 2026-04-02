@@ -5,6 +5,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
+import { AuthFlashNoticeCleaner } from "@/features/auth/components/AuthFlashNoticeCleaner";
 import { getTranslation } from "@/lib/i18n";
 import { createNoIndexMetadata } from "@/lib/metadata";
 import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
@@ -60,6 +61,8 @@ export default async function ForgotPasswordPage({
         tone="brand"
         className="mb-12"
       />
+
+      <AuthFlashNoticeCleaner />
 
       <div className="mx-auto max-w-xl">
         <SurfacePanel rounded="3xl" className="p-8 md:p-10">
