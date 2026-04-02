@@ -1,6 +1,7 @@
 import { hasAudienceSubscriptions } from "@/features/communications/lib/communications";
 import { syncStoredAudienceContactToResend } from "@/lib/communications/resend";
 import { isLanguage, type Language } from "@/lib/i18n";
+import { redactEmailAddress } from "@/lib/privacy";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
 import { normalizeWhitespace } from "@/lib/validation";
 import type { TablesInsert, TablesUpdate } from "@/types/supabase";
@@ -101,7 +102,7 @@ export async function syncAudienceContact({
       if (!resendSyncResult.success) {
         console.error("Failed to sync audience contact to Resend", {
           audienceContactId: data.id,
-          email: data.email,
+          email: redactEmailAddress(data.email),
           error: resendSyncResult.error,
         });
       }
@@ -110,7 +111,7 @@ export async function syncAudienceContact({
     } catch (error) {
       console.error("Unexpected audience contact sync failure", {
         audienceContactId: data.id,
-        email: data.email,
+        email: redactEmailAddress(data.email),
         error,
       });
       return data;
@@ -138,7 +139,7 @@ export async function syncAudienceContact({
     if (!resendSyncResult.success) {
       console.error("Failed to sync audience contact to Resend", {
         audienceContactId: data.id,
-        email: data.email,
+        email: redactEmailAddress(data.email),
         error: resendSyncResult.error,
       });
     }
@@ -147,7 +148,7 @@ export async function syncAudienceContact({
   } catch (error) {
     console.error("Unexpected audience contact sync failure", {
       audienceContactId: data.id,
-      email: data.email,
+      email: redactEmailAddress(data.email),
       error,
     });
     return data;

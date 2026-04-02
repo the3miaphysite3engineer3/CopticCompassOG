@@ -9,11 +9,16 @@ import {
 } from "@/features/dictionary/lib/entryActions";
 import type { Language } from "@/lib/i18n";
 import { dispatchLoggedOwnerAlertEmail } from "@/lib/notifications/events";
+import { redactEmailAddress } from "@/lib/privacy";
 import { getSiteUrl, siteConfig } from "@/lib/site";
 import { getAuthenticatedServerContext } from "@/lib/supabase/auth";
 import { isMissingSupabaseTableError } from "@/lib/supabase/errors";
 import { hasSupabaseRuntimeEnv } from "@/lib/supabase/config";
-import { consumeRateLimit, getUserRateLimitIdentifier } from "@/lib/rateLimit";
+import {
+  consumeRateLimit,
+  getUserRateLimitIdentifier,
+  hasAvailableRateLimitProtection,
+} from "@/lib/rateLimit";
 import { getEntryPath } from "@/lib/locale";
 import {
   getFormLanguage,
@@ -35,6 +40,7 @@ const ENTRY_REPORT_COPY: Record<
     authRequired: string;
     invalid: string;
     rateLimited: string;
+    rateLimitUnavailable: string;
     storageUnavailable: string;
     submitFailed: string;
     success: string;
@@ -45,6 +51,8 @@ const ENTRY_REPORT_COPY: Record<
     invalid: "Please choose a reason and include a short explanation.",
     rateLimited:
       "Too many reports were sent recently. Please wait a bit before submitting another one.",
+    rateLimitUnavailable:
+      "Entry reporting is temporarily unavailable. Please try again later.",
     storageUnavailable: "Entry reports are not configured yet.",
     submitFailed: "Could not submit your report right now. Please try again.",
     success: "Thanks. Your report was submitted successfully.",
@@ -54,6 +62,8 @@ const ENTRY_REPORT_COPY: Record<
     invalid: "Kies een reden en voeg een korte toelichting toe.",
     rateLimited:
       "Er zijn onlangs te veel meldingen verzonden. Wacht even voordat je opnieuw iets indient.",
+    rateLimitUnavailable:
+      "Het melden van lemma's is tijdelijk niet beschikbaar. Probeer het later opnieuw.",
     storageUnavailable: "Het melden van lemma's is nog niet geconfigureerd.",
     submitFailed:
       "Je melding kon nu niet worden verzonden. Probeer het opnieuw.",
@@ -89,7 +99,7 @@ async function sendEntryReportNotificationEmail({
       entry_id: entryId,
       locale,
       reason,
-      reporter_email: userEmail ?? null,
+      reporter_email: redactEmailAddress(userEmail),
     },
     subject: `Dictionary entry report: ${entryHeadword} (${entryId})`,
     text: [
@@ -145,6 +155,13 @@ export async function submitEntryReport(
     return {
       success: false,
       error: copy.invalid,
+    };
+  }
+
+  if (!hasAvailableRateLimitProtection()) {
+    return {
+      success: false,
+      error: copy.rateLimitUnavailable,
     };
   }
 

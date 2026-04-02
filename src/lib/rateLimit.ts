@@ -22,6 +22,13 @@ type RateLimitResult = {
   resetAt: number;
 };
 
+export class RateLimitConfigurationError extends Error {
+  constructor(message = "Shared rate limiting is not configured.") {
+    super(message);
+    this.name = "RateLimitConfigurationError";
+  }
+}
+
 declare global {
   var __appRateLimitStore: Map<string, RateLimitBucket> | undefined;
   var __appRateLimitLastPruneAt: number | undefined;
@@ -64,6 +71,18 @@ const redis =
     ? new Redis({ url: redisUrl, token: redisToken })
     : null;
 
+function isProductionEnvironment() {
+  return process.env.NODE_ENV === "production";
+}
+
+export function hasSharedRateLimitBackend() {
+  return redis !== null;
+}
+
+export function hasAvailableRateLimitProtection() {
+  return hasSharedRateLimitBackend() || !isProductionEnvironment();
+}
+
 // Cache map for ratelimiters so we don't recreate them every request
 const upstashRateLimiters = new Map<string, Ratelimit>();
 const ratelimitCache = new Map<string, number>();
@@ -100,6 +119,10 @@ export async function consumeRateLimit({
       retryAfterMs: Math.max(reset - now, 0),
       resetAt: reset,
     };
+  }
+
+  if (isProductionEnvironment()) {
+    throw new RateLimitConfigurationError();
   }
 
   // Fallback to in-memory implementation for local dev

@@ -18,7 +18,9 @@ import { dispatchLoggedNotificationEmail } from "@/lib/notifications/events";
 import {
   consumeRateLimit,
   getClientRateLimitIdentifier,
+  hasAvailableRateLimitProtection,
 } from "@/lib/rateLimit";
+import { redactEmailAddress } from "@/lib/privacy";
 import { isMissingSupabaseTableError } from "@/lib/supabase/errors";
 import { hasSupabaseServiceRoleEnv } from "@/lib/supabase/config";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
@@ -43,6 +45,7 @@ const CONTACT_ACTION_COPY: Record<
   {
     invalid: string;
     rateLimited: string;
+    rateLimitUnavailable: string;
     storageUnavailable: string;
     success: string;
     successConfirmation: string;
@@ -54,6 +57,8 @@ const CONTACT_ACTION_COPY: Record<
     invalid: "Please complete all fields with valid values.",
     rateLimited:
       "Too many messages were sent from this connection. Please wait a few minutes and try again.",
+    rateLimitUnavailable:
+      "The contact form is temporarily unavailable. Please try again later.",
     storageUnavailable: "Contact form storage is not configured yet.",
     success: "Message sent successfully. I'll reply soon!",
     successConfirmation:
@@ -66,6 +71,8 @@ const CONTACT_ACTION_COPY: Record<
     invalid: "Vul alle velden correct in.",
     rateLimited:
       "Er zijn te veel berichten verzonden vanaf deze verbinding. Wacht even en probeer het opnieuw.",
+    rateLimitUnavailable:
+      "Het contactformulier is tijdelijk niet beschikbaar. Probeer het later opnieuw.",
     storageUnavailable: "De contactopslag is nog niet geconfigureerd.",
     success: "Bericht succesvol verzonden. Ik antwoord binnenkort!",
     successConfirmation:
@@ -111,6 +118,13 @@ export async function sendContactEmail(
     return {
       success: false,
       error: copy.invalid,
+    };
+  }
+
+  if (!hasAvailableRateLimitProtection()) {
+    return {
+      success: false,
+      error: copy.rateLimitUnavailable,
     };
   }
 
@@ -168,7 +182,7 @@ export async function sendContactEmail(
         payload: {
           inquiry_type: inquiryType,
           locale: language,
-          sender_email: email,
+          sender_email: redactEmailAddress(email),
           wants_updates: wantsUpdates,
         },
         to: process.env.CONTACT_EMAIL,
@@ -196,7 +210,7 @@ export async function sendContactEmail(
         console.error("Failed to send contact alert email", {
           contactMessageId: contactMessage.id,
           error: notificationResult.error,
-          email,
+          email: redactEmailAddress(email),
           inquiryType,
         });
       }
@@ -225,7 +239,7 @@ export async function sendContactEmail(
           aggregateType: "audience_opt_in_request",
           eventType: "audience_opt_in_requested",
           payload: {
-            email,
+            email: redactEmailAddress(email),
             locale: language,
             source: "contact_form",
             topics: {
@@ -260,7 +274,7 @@ export async function sendContactEmail(
         if (!confirmationResult.success) {
           console.error("Failed to send audience opt-in confirmation email", {
             audienceOptInRequestId: request.id,
-            email,
+            email: redactEmailAddress(email),
             error: confirmationResult.error,
             locale: language,
           });
@@ -269,7 +283,7 @@ export async function sendContactEmail(
         console.error(
           "Failed to create audience opt-in request from contact form",
           {
-            email,
+            email: redactEmailAddress(email),
             error,
             name,
           },

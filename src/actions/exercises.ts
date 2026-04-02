@@ -6,7 +6,11 @@ import {
 } from "@/content/grammar/registry";
 import { getAuthenticatedServerContext } from "@/lib/supabase/auth";
 import { hasSupabaseRuntimeEnv } from "@/lib/supabase/config";
-import { consumeRateLimit, getUserRateLimitIdentifier } from "@/lib/rateLimit";
+import {
+  consumeRateLimit,
+  getUserRateLimitIdentifier,
+  hasAvailableRateLimitProtection,
+} from "@/lib/rateLimit";
 import { dispatchLoggedOwnerAlertEmail } from "@/lib/notifications/events";
 import { revalidatePath } from "next/cache";
 import {
@@ -104,6 +108,13 @@ export async function submitExercise(
     return {
       success: false,
       error: "Each answer must be between 1 and 500 characters.",
+    };
+  }
+
+  if (!hasAvailableRateLimitProtection()) {
+    return {
+      success: false,
+      error: "Exercise submission is temporarily unavailable.",
     };
   }
 

@@ -175,7 +175,7 @@ describe("logged notification events", () => {
       expect.objectContaining({
         event_id: "event_123",
         provider_message_id: "email_123",
-        recipient: "owner@example.com",
+        recipient: "ow***@example.com",
         status: "sent",
       }),
     );
@@ -215,7 +215,7 @@ describe("logged notification events", () => {
     expect(notificationDeliveriesInsertMock).toHaveBeenCalledWith(
       expect.objectContaining({
         error: "Provider unavailable",
-        recipient: "student@example.com",
+        recipient: "st***@example.com",
         status: "failed",
       }),
     );

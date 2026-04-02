@@ -74,7 +74,7 @@ describe("notification formatting helpers", () => {
       ),
     ).toEqual([
       "Inquiry: publication inquiry",
-      "Sender: reader@example.com",
+      "Sender: re***@example.com",
       "Locale: EN",
     ]);
   });
@@ -91,7 +91,7 @@ describe("notification formatting helpers", () => {
           },
         }),
       ),
-    ).toEqual(["Email: student@example.com", "Name: Test Student"]);
+    ).toEqual(["Email: st***@example.com", "Name: Test Student"]);
   });
 
   it("handles content release preview payloads", () => {

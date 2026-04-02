@@ -1,4 +1,5 @@
 import type { Json, Tables } from "@/types/supabase";
+import { redactEmailAddress } from "@/lib/privacy";
 
 export type NotificationEventRow = Tables<"notification_events">;
 export type NotificationDeliveryRow = Tables<"notification_deliveries">;
@@ -110,7 +111,9 @@ export function getNotificationContextBadges(event: AdminNotificationEvent) {
         badges.push(`Inquiry: ${inquiryType.replace(/_/g, " ")}`);
       }
       if (senderEmail) {
-        badges.push(`Sender: ${senderEmail}`);
+        badges.push(
+          `Sender: ${redactEmailAddress(senderEmail) ?? senderEmail}`,
+        );
       }
       if (locale) {
         badges.push(`Locale: ${locale.toUpperCase()}`);
@@ -210,7 +213,9 @@ export function getNotificationContextBadges(event: AdminNotificationEvent) {
       );
 
       if (profileEmail) {
-        badges.push(`Email: ${profileEmail}`);
+        badges.push(
+          `Email: ${redactEmailAddress(profileEmail) ?? profileEmail}`,
+        );
       }
       if (profileFullName) {
         badges.push(`Name: ${profileFullName}`);

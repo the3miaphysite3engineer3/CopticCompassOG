@@ -4,6 +4,7 @@ import {
   hasResendAudienceEnv,
   syncStoredAudienceContactToResend,
 } from "@/lib/communications/resend";
+import { redactEmailAddress } from "@/lib/privacy";
 import { revalidateAdminPaths } from "@/lib/server/revalidation";
 import { getValidatedAdminContext } from "./shared";
 
@@ -71,7 +72,7 @@ export async function syncAudienceContactsWithResend(
       failedCount += 1;
       console.error("Failed to sync audience contact with Resend", {
         audienceContactId: contact.id,
-        email: contact.email,
+        email: redactEmailAddress(contact.email),
         error: syncResult.error,
       });
     }

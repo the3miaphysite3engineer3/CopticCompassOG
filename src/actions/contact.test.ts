@@ -45,6 +45,7 @@ function createContactFormData(
 
 async function loadContactModule(options?: {
   contactEmail?: string | null;
+  hasRateLimitProtection?: boolean;
   hasStorageEnv?: boolean;
   insertError?: {
     code?: string;
@@ -111,6 +112,9 @@ async function loadContactModule(options?: {
   vi.doMock("@/lib/rateLimit", () => ({
     consumeRateLimit: consumeRateLimitMock,
     getClientRateLimitIdentifier: getClientRateLimitIdentifierMock,
+    hasAvailableRateLimitProtection: vi.fn(
+      () => options?.hasRateLimitProtection ?? true,
+    ),
   }));
   vi.doMock("@/lib/supabase/config", () => ({
     hasSupabaseServiceRoleEnv: hasSupabaseServiceRoleEnvMock,
@@ -230,6 +234,24 @@ describe("contact action", () => {
     expect(dispatchLoggedNotificationEmailMock).not.toHaveBeenCalled();
   });
 
+  it("fails closed when shared rate limiting is unavailable", async () => {
+    const { consumeRateLimitMock, insertMock, sendContactEmail } =
+      await loadContactModule({
+        hasRateLimitProtection: false,
+      });
+
+    await expect(
+      sendContactEmail(null, createContactFormData()),
+    ).resolves.toEqual({
+      success: false,
+      error:
+        "The contact form is temporarily unavailable. Please try again later.",
+    });
+
+    expect(consumeRateLimitMock).not.toHaveBeenCalled();
+    expect(insertMock).not.toHaveBeenCalled();
+  });
+
   it("returns a configuration error when the contact_messages table is unavailable", async () => {
     const { dispatchLoggedNotificationEmailMock, sendContactEmail } =
       await loadContactModule({
@@ -289,6 +311,9 @@ describe("contact action", () => {
         aggregateId: "contact_123",
         aggregateType: "contact_message",
         eventType: "contact_message_received",
+        payload: expect.objectContaining({
+          sender_email: "se***@example.com",
+        }),
         replyTo: "sender@example.com",
         subject: "New Contact: Publication / Book Inquiry from Test User",
         text: expect.stringContaining("Wants updates: yes"),
@@ -313,6 +338,9 @@ describe("contact action", () => {
         aggregateId: "opt_in_123",
         aggregateType: "audience_opt_in_request",
         eventType: "audience_opt_in_requested",
+        payload: expect.objectContaining({
+          email: "se***@example.com",
+        }),
         subject: "Bevestig je e-mailupdates",
         to: "sender@example.com",
         text: expect.stringContaining(

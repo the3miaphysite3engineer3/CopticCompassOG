@@ -3,6 +3,7 @@ import {
   buildProfileSignupNotificationPayload,
   buildProfileSignupOwnerAlert,
   parseProfileSignupPayload,
+  redactEmailAddress,
 } from "../_shared/profileSignupAlert.ts";
 
 declare const Deno: {
@@ -237,7 +238,7 @@ Deno.serve(async (request) => {
     dedupeKey: buildProfileSignupNotificationDedupeKey(signupRecord),
     eventType: "profile_signup",
     payload: buildProfileSignupNotificationPayload(signupRecord),
-    recipient: ownerAlertEmail,
+    recipient: redactEmailAddress(ownerAlertEmail) ?? "[redacted email]",
     subject: ownerAlert.subject,
     supabaseServiceRoleKey,
     supabaseUrl,
@@ -265,7 +266,7 @@ Deno.serve(async (request) => {
         error: emailResult.error,
         eventId: notificationEvent.eventId,
         providerMessageId: null,
-        recipient: ownerAlertEmail,
+        recipient: redactEmailAddress(ownerAlertEmail) ?? "[redacted email]",
         status: "failed",
         supabaseServiceRoleKey,
         supabaseUrl,
@@ -291,7 +292,7 @@ Deno.serve(async (request) => {
       error: null,
       eventId: notificationEvent.eventId,
       providerMessageId: emailResult.id,
-      recipient: ownerAlertEmail,
+      recipient: redactEmailAddress(ownerAlertEmail) ?? "[redacted email]",
       status: "sent",
       supabaseServiceRoleKey,
       supabaseUrl,

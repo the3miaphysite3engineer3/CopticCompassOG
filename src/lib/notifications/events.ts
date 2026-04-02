@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 import { getNotificationEmailEnv } from "@/lib/notifications/config";
+import { redactEmailAddress } from "@/lib/privacy";
 import {
   sendNotificationEmail,
   type NotificationEmailResult,
@@ -32,8 +33,10 @@ function normalizeRecipients(value: EmailRecipients) {
   return Array.isArray(value) ? [...value] : [value];
 }
 
-function formatRecipients(value: EmailRecipients) {
-  return normalizeRecipients(value).join(", ");
+function redactRecipients(value: EmailRecipients) {
+  return normalizeRecipients(value)
+    .map((recipient) => redactEmailAddress(recipient) ?? "[redacted email]")
+    .join(", ");
 }
 
 async function insertNotificationEvent(options: {
@@ -151,7 +154,7 @@ export async function dispatchLoggedNotificationEmail(
 ): Promise<NotificationEmailResult> {
   assertServerOnly("dispatchLoggedNotificationEmail");
 
-  const recipient = formatRecipients(options.to);
+  const recipient = redactRecipients(options.to);
   const storedEvent = await insertNotificationEvent({
     aggregateId: options.aggregateId,
     aggregateType: options.aggregateType,

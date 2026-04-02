@@ -60,6 +60,7 @@ function createLoginFormData(
 
 async function loadAuthModule(options?: {
   hasEnv?: boolean;
+  hasRateLimitProtection?: boolean;
   rateLimitOk?: boolean;
   resetPasswordError?: unknown;
   signInWithOAuthError?: unknown;
@@ -149,6 +150,9 @@ async function loadAuthModule(options?: {
   vi.doMock("@/lib/rateLimit", () => ({
     consumeRateLimit: consumeRateLimitMock,
     getClientRateLimitIdentifier: getClientRateLimitIdentifierMock,
+    hasAvailableRateLimitProtection: vi.fn(
+      () => options?.hasRateLimitProtection ?? true,
+    ),
   }));
   vi.doMock("@/lib/site", () => ({
     getSiteUrl: () => new URL("https://example.com"),
@@ -246,6 +250,23 @@ describe("auth actions", () => {
     expect(createClientMock).not.toHaveBeenCalled();
   });
 
+  it("redirects login attempts when shared rate limiting is unavailable", async () => {
+    const { createClientMock, getAuthUnavailableLoginPathMock, login } =
+      await loadAuthModule({
+        hasRateLimitProtection: false,
+      });
+
+    await expect(
+      login(createLoginFormData({ redirectTo: "/dictionary" })),
+    ).rejects.toMatchObject({
+      destination:
+        "/login?state=auth-unavailable&messageType=error&redirect_to=%2Fdictionary",
+    });
+
+    expect(getAuthUnavailableLoginPathMock).toHaveBeenCalledWith("/dictionary");
+    expect(createClientMock).not.toHaveBeenCalled();
+  });
+
   it("normalizes login credentials and redirects to a safe local path", async () => {
     const { login, revalidatePathMock, signInWithPasswordMock } =
       await loadAuthModule();
@@ -293,6 +314,21 @@ describe("auth actions", () => {
         "/login?state=signup-invalid-input&messageType=error&redirect_to=%2Fdashboard",
     });
 
+    expect(createClientMock).not.toHaveBeenCalled();
+  });
+
+  it("redirects signup attempts when shared rate limiting is unavailable", async () => {
+    const { createClientMock, getAuthUnavailableLoginPathMock, signup } =
+      await loadAuthModule({
+        hasRateLimitProtection: false,
+      });
+
+    await expect(signup(createLoginFormData())).rejects.toMatchObject({
+      destination:
+        "/login?state=auth-unavailable&messageType=error&redirect_to=%2Fdashboard",
+    });
+
+    expect(getAuthUnavailableLoginPathMock).toHaveBeenCalledWith("/dashboard");
     expect(createClientMock).not.toHaveBeenCalled();
   });
 
@@ -353,6 +389,22 @@ describe("auth actions", () => {
     expect(resetPasswordForEmailMock).toHaveBeenCalledWith("user@example.com", {
       redirectTo: "https://example.com/auth/callback?next=/update-password",
     });
+  });
+
+  it("redirects reset-password attempts when shared rate limiting is unavailable", async () => {
+    const { createClientMock, getAuthUnavailableLoginPathMock, resetPassword } =
+      await loadAuthModule({
+        hasRateLimitProtection: false,
+      });
+
+    await expect(
+      resetPassword(createLoginFormData({ password: "password123" })),
+    ).rejects.toMatchObject({
+      destination: "/login?state=auth-unavailable&messageType=error",
+    });
+
+    expect(getAuthUnavailableLoginPathMock).toHaveBeenCalledWith();
+    expect(createClientMock).not.toHaveBeenCalled();
   });
 
   it("uses the configured site URL for Google OAuth callbacks", async () => {

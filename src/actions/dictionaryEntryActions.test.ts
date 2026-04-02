@@ -50,6 +50,7 @@ async function loadDictionaryEntryActionsModule(options?: {
     id: string;
   } | null;
   hasEnv?: boolean;
+  hasRateLimitProtection?: boolean;
   insertError?: {
     code?: string;
     details?: string | null;
@@ -130,6 +131,9 @@ async function loadDictionaryEntryActionsModule(options?: {
   vi.doMock("@/lib/rateLimit", () => ({
     consumeRateLimit: consumeRateLimitMock,
     getUserRateLimitIdentifier: getUserRateLimitIdentifierMock,
+    hasAvailableRateLimitProtection: vi.fn(
+      () => options?.hasRateLimitProtection ?? true,
+    ),
   }));
   vi.doMock("@/lib/supabase/auth", () => ({
     getAuthenticatedServerContext: getAuthenticatedServerContextMock,
@@ -231,6 +235,24 @@ describe("dictionary entry actions", () => {
     expect(dispatchLoggedOwnerAlertEmailMock).not.toHaveBeenCalled();
   });
 
+  it("fails closed when shared rate limiting is unavailable", async () => {
+    const { consumeRateLimitMock, insertMock, submitEntryReport } =
+      await loadDictionaryEntryActionsModule({
+        hasRateLimitProtection: false,
+      });
+
+    await expect(
+      submitEntryReport(null, createReportFormData()),
+    ).resolves.toEqual({
+      success: false,
+      error:
+        "Entry reporting is temporarily unavailable. Please try again later.",
+    });
+
+    expect(consumeRateLimitMock).not.toHaveBeenCalled();
+    expect(insertMock).not.toHaveBeenCalled();
+  });
+
   it("returns a configuration error when the entry_reports table is unavailable", async () => {
     const consoleErrorSpy = vi
       .spyOn(console, "error")
@@ -294,6 +316,9 @@ describe("dictionary entry actions", () => {
         aggregateId: "report_123",
         aggregateType: "entry_report",
         eventType: "dictionary_entry_report_submitted",
+        payload: expect.objectContaining({
+          reporter_email: "re***@example.com",
+        }),
         subject: "Dictionary entry report: ϭⲟⲗ (cd_173)",
         text: expect.stringContaining("Reason: translation"),
       }),

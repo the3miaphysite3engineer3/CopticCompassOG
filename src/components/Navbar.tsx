@@ -62,11 +62,11 @@ export function Navbar() {
           >
             <div className="relative h-10 w-10 shrink-0">
               <Image
-                src="/logo/logo-colored.svg"
+                src="/logo/logo-colored.png"
                 alt="Wannes Logo"
                 fill
+                sizes="40px"
                 className="object-contain drop-shadow"
-                priority
               />
             </div>
             <span className="whitespace-nowrap font-coptic text-xl font-bold text-transparent bg-gradient-to-r from-stone-800 to-stone-500 bg-clip-text transition-colors dark:from-stone-100 dark:to-stone-400">

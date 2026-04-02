@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import {
   consumeRateLimit,
   getClientRateLimitIdentifier,
+  hasAvailableRateLimitProtection,
 } from "@/lib/rateLimit";
 import {
   getAuthUnavailableLoginPath,
@@ -78,6 +79,14 @@ async function updatePasswordWithResult(
     };
   }
 
+  if (!hasAvailableRateLimitProtection()) {
+    return {
+      success: false,
+      code: "auth-unavailable",
+      message: "Authentication is currently unavailable.",
+    };
+  }
+
   const clientIdentifier = await getClientRateLimitIdentifier();
   const updateRateLimit = await consumeRateLimit({
     identifier: clientIdentifier,
@@ -141,6 +150,10 @@ export async function login(formData: FormData) {
     );
   }
 
+  if (!hasAvailableRateLimitProtection()) {
+    redirect(getAuthUnavailableLoginPath(redirectTo));
+  }
+
   const clientIdentifier = await getClientRateLimitIdentifier();
   const loginRateLimit = await consumeRateLimit({
     identifier: clientIdentifier,
@@ -194,6 +207,10 @@ export async function signup(formData: FormData) {
     redirect(
       `/login?state=signup-invalid-input&messageType=error&redirect_to=${encodeURIComponent(redirectTo)}`,
     );
+  }
+
+  if (!hasAvailableRateLimitProtection()) {
+    redirect(getAuthUnavailableLoginPath(redirectTo));
   }
 
   const clientIdentifier = await getClientRateLimitIdentifier();
@@ -259,6 +276,10 @@ export async function resetPassword(formData: FormData) {
   const email = getNormalizedEmail(formData);
   if (!isValidEmail(email)) {
     redirect("/forgot-password?state=forgot-invalid-input&messageType=error");
+  }
+
+  if (!hasAvailableRateLimitProtection()) {
+    redirect(getAuthUnavailableLoginPath());
   }
 
   const clientIdentifier = await getClientRateLimitIdentifier();

@@ -41,6 +41,7 @@ function createExerciseFormData(overrides?: {
 
 async function loadExercisesModule(options?: {
   hasEnv?: boolean;
+  hasRateLimitProtection?: boolean;
   insertError?: {
     code?: string;
     details?: string | null;
@@ -98,6 +99,9 @@ async function loadExercisesModule(options?: {
   vi.doMock("@/lib/rateLimit", () => ({
     consumeRateLimit: consumeRateLimitMock,
     getUserRateLimitIdentifier: vi.fn(() => "user-rate-limit-id"),
+    hasAvailableRateLimitProtection: vi.fn(
+      () => options?.hasRateLimitProtection ?? true,
+    ),
   }));
   vi.doMock("@/lib/supabase/auth", () => ({
     getAuthenticatedServerContext: getAuthenticatedServerContextMock,
@@ -235,6 +239,23 @@ describe("exercise submission action", () => {
         "Too many submissions were received for this lesson. Please wait a bit before trying again.",
     });
 
+    expect(insertMock).not.toHaveBeenCalled();
+  });
+
+  it("fails closed when shared rate limiting is unavailable", async () => {
+    const { consumeRateLimitMock, insertMock, submitExercise } =
+      await loadExercisesModule({
+        hasRateLimitProtection: false,
+      });
+
+    await expect(
+      submitExercise(null, createExerciseFormData()),
+    ).resolves.toEqual({
+      success: false,
+      error: "Exercise submission is temporarily unavailable.",
+    });
+
+    expect(consumeRateLimitMock).not.toHaveBeenCalled();
     expect(insertMock).not.toHaveBeenCalled();
   });
 

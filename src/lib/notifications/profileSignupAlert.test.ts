@@ -74,7 +74,7 @@ describe("profile signup alert helpers", () => {
       }),
     ).toEqual({
       created_at: "2026-03-28T12:00:00.000Z",
-      profile_email: "student@example.com",
+      profile_email: "st***@example.com",
       profile_full_name: "Test Student",
     });
 
