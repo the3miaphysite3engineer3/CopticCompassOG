@@ -58,9 +58,7 @@ declare const Deno: {
   env: {
     get(name: string): string | undefined;
   };
-  serve(
-    handler: (request: Request) => Response | Promise<Response>,
-  ): void;
+  serve(handler: (request: Request) => Response | Promise<Response>): void;
 };
 
 declare const EdgeRuntime:
@@ -94,7 +92,9 @@ function getResendBroadcastEnv() {
   const lessons = normalizeOptionalEnvValue(
     Deno.env.get("RESEND_LESSONS_SEGMENT_ID"),
   );
-  const books = normalizeOptionalEnvValue(Deno.env.get("RESEND_BOOKS_SEGMENT_ID"));
+  const books = normalizeOptionalEnvValue(
+    Deno.env.get("RESEND_BOOKS_SEGMENT_ID"),
+  );
   const general = normalizeOptionalEnvValue(
     Deno.env.get("RESEND_GENERAL_SEGMENT_ID"),
   );
@@ -106,16 +106,28 @@ function getResendBroadcastEnv() {
   return {
     localizedSegments: {
       books: {
-        en: normalizeOptionalEnvValue(Deno.env.get("RESEND_BOOKS_EN_SEGMENT_ID")),
-        nl: normalizeOptionalEnvValue(Deno.env.get("RESEND_BOOKS_NL_SEGMENT_ID")),
+        en: normalizeOptionalEnvValue(
+          Deno.env.get("RESEND_BOOKS_EN_SEGMENT_ID"),
+        ),
+        nl: normalizeOptionalEnvValue(
+          Deno.env.get("RESEND_BOOKS_NL_SEGMENT_ID"),
+        ),
       },
       general: {
-        en: normalizeOptionalEnvValue(Deno.env.get("RESEND_GENERAL_EN_SEGMENT_ID")),
-        nl: normalizeOptionalEnvValue(Deno.env.get("RESEND_GENERAL_NL_SEGMENT_ID")),
+        en: normalizeOptionalEnvValue(
+          Deno.env.get("RESEND_GENERAL_EN_SEGMENT_ID"),
+        ),
+        nl: normalizeOptionalEnvValue(
+          Deno.env.get("RESEND_GENERAL_NL_SEGMENT_ID"),
+        ),
       },
       lessons: {
-        en: normalizeOptionalEnvValue(Deno.env.get("RESEND_LESSONS_EN_SEGMENT_ID")),
-        nl: normalizeOptionalEnvValue(Deno.env.get("RESEND_LESSONS_NL_SEGMENT_ID")),
+        en: normalizeOptionalEnvValue(
+          Deno.env.get("RESEND_LESSONS_EN_SEGMENT_ID"),
+        ),
+        nl: normalizeOptionalEnvValue(
+          Deno.env.get("RESEND_LESSONS_NL_SEGMENT_ID"),
+        ),
       },
     },
     resendApiKey,
@@ -176,14 +188,19 @@ async function fetchSupabaseJson<T>(options: {
   supabaseUrl: string;
   body?: Record<string, unknown>;
 }) {
-  const response = await fetch(`${options.supabaseUrl}/rest/v1/${options.path}`, {
-    body: options.body ? JSON.stringify(options.body) : undefined,
-    headers: {
-      ...buildSupabaseRestHeaders(options.serviceRoleKey),
-      ...(options.preferRepresentation ? { Prefer: "return=representation" } : {}),
+  const response = await fetch(
+    `${options.supabaseUrl}/rest/v1/${options.path}`,
+    {
+      body: options.body ? JSON.stringify(options.body) : undefined,
+      headers: {
+        ...buildSupabaseRestHeaders(options.serviceRoleKey),
+        ...(options.preferRepresentation
+          ? { Prefer: "return=representation" }
+          : {}),
+      },
+      method: options.method ?? "GET",
     },
-    method: options.method ?? "GET",
-  });
+  );
 
   if (!response.ok) {
     return {
@@ -214,14 +231,17 @@ async function fetchSupabaseCount(options: {
   serviceRoleKey: string;
   supabaseUrl: string;
 }) {
-  const response = await fetch(`${options.supabaseUrl}/rest/v1/${options.path}`, {
-    headers: {
-      ...buildSupabaseRestHeaders(options.serviceRoleKey),
-      Prefer: "count=exact",
-      Range: "0-0",
+  const response = await fetch(
+    `${options.supabaseUrl}/rest/v1/${options.path}`,
+    {
+      headers: {
+        ...buildSupabaseRestHeaders(options.serviceRoleKey),
+        Prefer: "count=exact",
+        Range: "0-0",
+      },
+      method: "GET",
     },
-    method: "GET",
-  });
+  );
 
   if (!response.ok) {
     return {
@@ -357,7 +377,11 @@ async function loadAudienceContacts(options: {
   supabaseUrl: string;
 }) {
   const optInColumn = getAudienceSegmentOptInColumn(options.audienceSegment);
-  const filters = [`select=email,full_name,locale`, `${optInColumn}=eq.true`, `unsubscribed_at=is.null`];
+  const filters = [
+    `select=email,full_name,locale`,
+    `${optInColumn}=eq.true`,
+    `unsubscribed_at=is.null`,
+  ];
 
   if (options.cursor) {
     filters.push(`email=gt.${encodeURIComponent(options.cursor)}`);
@@ -383,7 +407,8 @@ async function loadAudienceContacts(options: {
   }
 
   return (result.data ?? []).filter(
-    (contact) => typeof contact.email === "string" && contact.email.trim().length > 0,
+    (contact) =>
+      typeof contact.email === "string" && contact.email.trim().length > 0,
   );
 }
 
@@ -424,9 +449,12 @@ async function insertNotificationEvent(options: {
     const eventId = data[0]?.id;
 
     if (!eventId) {
-      console.error("Content release notification event insert returned no id.", {
-        dedupeKey: options.dedupeKey,
-      });
+      console.error(
+        "Content release notification event insert returned no id.",
+        {
+          dedupeKey: options.dedupeKey,
+        },
+      );
       return null;
     }
 
@@ -440,7 +468,11 @@ async function insertNotificationEvent(options: {
       errorBody.includes("23505") ||
       errorBody.includes("dedupe_key"))
   ) {
-    return { eventId: null, inserted: false as const, duplicate: true as const };
+    return {
+      eventId: null,
+      inserted: false as const,
+      duplicate: true as const,
+    };
   }
 
   console.error("Failed to insert content release notification event.", {
@@ -459,18 +491,21 @@ async function insertNotificationDelivery(options: {
   status: "failed" | "sent";
   supabaseUrl: string;
 }) {
-  const response = await fetch(`${options.supabaseUrl}/rest/v1/notification_deliveries`, {
-    body: JSON.stringify({
-      channel: "email",
-      error: options.error,
-      event_id: options.eventId,
-      provider_message_id: options.providerMessageId,
-      recipient: options.recipient,
-      status: options.status,
-    }),
-    headers: buildSupabaseRestHeaders(options.serviceRoleKey),
-    method: "POST",
-  });
+  const response = await fetch(
+    `${options.supabaseUrl}/rest/v1/notification_deliveries`,
+    {
+      body: JSON.stringify({
+        channel: "email",
+        error: options.error,
+        event_id: options.eventId,
+        provider_message_id: options.providerMessageId,
+        recipient: options.recipient,
+        status: options.status,
+      }),
+      headers: buildSupabaseRestHeaders(options.serviceRoleKey),
+      method: "POST",
+    },
+  );
 
   if (!response.ok) {
     console.error("Failed to insert content release notification delivery.", {
@@ -502,11 +537,14 @@ async function updateNotificationEventStatus(options: {
   );
 
   if (!response.ok) {
-    console.error("Failed to update content release notification event status.", {
-      error: await response.text(),
-      eventId: options.eventId,
-      status: response.status,
-    });
+    console.error(
+      "Failed to update content release notification event status.",
+      {
+        error: await response.text(),
+        eventId: options.eventId,
+        status: response.status,
+      },
+    );
   }
 }
 
@@ -584,16 +622,19 @@ async function invokeNextBatch(options: {
   serviceRoleKey: string;
   supabaseUrl: string;
 }) {
-  const response = await fetch(`${options.supabaseUrl}/functions/v1/process-content-release`, {
-    body: JSON.stringify({
-      releaseId: options.releaseId,
-    }),
-    headers: {
-      Authorization: `Bearer ${options.serviceRoleKey}`,
-      "Content-Type": "application/json",
+  const response = await fetch(
+    `${options.supabaseUrl}/functions/v1/process-content-release`,
+    {
+      body: JSON.stringify({
+        releaseId: options.releaseId,
+      }),
+      headers: {
+        Authorization: `Bearer ${options.serviceRoleKey}`,
+        "Content-Type": "application/json",
+      },
+      method: "POST",
     },
-    method: "POST",
-  });
+  );
 
   if (!response.ok) {
     const error = await response.text();
@@ -740,7 +781,8 @@ async function buildReleaseBroadcastTargets(options: {
       const copy = getContentReleaseCopyForLocale(options.release, language);
       if (!copy.subject || !copy.body) {
         return {
-          error: "This release is missing localized copy for one or more broadcast audiences.",
+          error:
+            "This release is missing localized copy for one or more broadcast audiences.",
           targets: [],
           totalEligibleRecipients: englishCount + dutchCount,
           usedBroadcasts: true as const,
@@ -797,11 +839,13 @@ async function buildReleaseBroadcastTargets(options: {
     };
   }
 
-  const language: Language = options.release.locale_mode === "nl_only" ? "nl" : "en";
+  const language: Language =
+    options.release.locale_mode === "nl_only" ? "nl" : "en";
   const copy = getContentReleaseCopyForLocale(options.release, language);
   if (!copy.subject || !copy.body) {
     return {
-      error: "This release is missing complete copy for the selected broadcast language.",
+      error:
+        "This release is missing complete copy for the selected broadcast language.",
       targets: [],
       totalEligibleRecipients,
       usedBroadcasts: true as const,
@@ -836,10 +880,12 @@ function getPersistedBroadcastSummary(options: {
   release: ContentReleaseRecord;
   targets: ReleaseBroadcastTarget[];
 }) {
-  const previousBroadcasts = getContentReleaseBroadcastDeliveries(options.release) ?? {};
-  const broadcasts: Partial<Record<Language, ContentReleaseBroadcastDelivery>> = {
-    ...previousBroadcasts,
-  };
+  const previousBroadcasts =
+    getContentReleaseBroadcastDeliveries(options.release) ?? {};
+  const broadcasts: Partial<Record<Language, ContentReleaseBroadcastDelivery>> =
+    {
+      ...previousBroadcasts,
+    };
 
   for (const target of options.targets) {
     const existing = previousBroadcasts[target.language];
@@ -944,7 +990,8 @@ async function deliverReleaseByBroadcast(options: {
   if (totalEligibleRecipients === 0 || targets.length === 0) {
     await finalizeRelease({
       cursor: null,
-      lastDeliveryError: "No subscribed recipients match this release segment yet.",
+      lastDeliveryError:
+        "No subscribed recipients match this release segment yet.",
       releaseId: options.release.id,
       serviceRoleKey: options.serviceRoleKey,
       status: "approved",
@@ -1000,7 +1047,8 @@ async function deliverReleaseByBroadcast(options: {
 
     if (!notificationEvent?.eventId) {
       failedRecipientCount += target.recipientCount;
-      firstFailure ??= "A notification event could not be stored for one or more broadcasts.";
+      firstFailure ??=
+        "A notification event could not be stored for one or more broadcasts.";
       continue;
     }
 
@@ -1015,12 +1063,13 @@ async function deliverReleaseByBroadcast(options: {
 
     if (!broadcastResult.success || !broadcastResult.id) {
       failedRecipientCount += target.recipientCount;
-      firstFailure ??=
-        broadcastResult.success
-          ? "Resend did not return a broadcast id."
-          : broadcastResult.error;
+      firstFailure ??= broadcastResult.success
+        ? "Resend did not return a broadcast id."
+        : broadcastResult.error;
       await insertNotificationDelivery({
-        error: broadcastResult.success ? "Missing broadcast id." : broadcastResult.error,
+        error: broadcastResult.success
+          ? "Missing broadcast id."
+          : broadcastResult.error,
         eventId: notificationEvent.eventId,
         providerMessageId: null,
         recipient,
@@ -1030,7 +1079,9 @@ async function deliverReleaseByBroadcast(options: {
       });
       await updateNotificationEventStatus({
         eventId: notificationEvent.eventId,
-        lastError: broadcastResult.success ? "Missing broadcast id." : broadcastResult.error,
+        lastError: broadcastResult.success
+          ? "Missing broadcast id."
+          : broadcastResult.error,
         serviceRoleKey: options.serviceRoleKey,
         status: "failed",
         supabaseUrl: options.supabaseUrl,
@@ -1142,7 +1193,8 @@ async function deliverReleaseBatch(options: {
   if (totalEligibleRecipients === null) {
     await finalizeRelease({
       cursor: null,
-      lastDeliveryError: "Could not count subscribed recipients for this release.",
+      lastDeliveryError:
+        "Could not count subscribed recipients for this release.",
       releaseId: options.release.id,
       serviceRoleKey: options.serviceRoleKey,
       status: "approved",
@@ -1173,7 +1225,8 @@ async function deliverReleaseBatch(options: {
   if (!audienceContacts) {
     await finalizeRelease({
       cursor: null,
-      lastDeliveryError: "Could not load subscribed recipients for this release.",
+      lastDeliveryError:
+        "Could not load subscribed recipients for this release.",
       releaseId: options.release.id,
       serviceRoleKey: options.serviceRoleKey,
       status: "approved",
@@ -1186,7 +1239,8 @@ async function deliverReleaseBatch(options: {
   if (totalEligibleRecipients === 0) {
     await finalizeRelease({
       cursor: null,
-      lastDeliveryError: "No subscribed recipients match this release segment yet.",
+      lastDeliveryError:
+        "No subscribed recipients match this release segment yet.",
       releaseId: options.release.id,
       serviceRoleKey: options.serviceRoleKey,
       status: "approved",
@@ -1219,7 +1273,8 @@ async function deliverReleaseBatch(options: {
       cursor: null,
       lastDeliveryError:
         previousSummary.failed_count > 0
-          ? options.release.last_delivery_error ?? "Some release deliveries failed."
+          ? (options.release.last_delivery_error ??
+            "Some release deliveries failed.")
           : null,
       releaseId: options.release.id,
       serviceRoleKey: options.serviceRoleKey,
@@ -1238,12 +1293,16 @@ async function deliverReleaseBatch(options: {
   for (const contact of contactsToProcess) {
     const normalizedRecipient = normalizeEmail(contact.email);
     const preferredLocale: Language = contact.locale === "nl" ? "nl" : "en";
-    const copy = getContentReleaseCopyForLocale(options.release, preferredLocale);
+    const copy = getContentReleaseCopyForLocale(
+      options.release,
+      preferredLocale,
+    );
 
     if (!copy.subject || !copy.body) {
       failedCount += 1;
       if (!firstFailure) {
-        firstFailure = "This release is missing complete copy for one or more recipient locales.";
+        firstFailure =
+          "This release is missing complete copy for one or more recipient locales.";
       }
       continue;
     }
@@ -1277,7 +1336,8 @@ async function deliverReleaseBatch(options: {
     if (!notificationEvent?.eventId) {
       failedCount += 1;
       if (!firstFailure) {
-        firstFailure = "A notification event could not be stored for one or more recipients.";
+        firstFailure =
+          "A notification event could not be stored for one or more recipients.";
       }
       continue;
     }
@@ -1371,7 +1431,8 @@ async function deliverReleaseBatch(options: {
   }
 
   if (hasMoreRecipients) {
-    const nextCursor = contactsToProcess[contactsToProcess.length - 1]?.email ?? null;
+    const nextCursor =
+      contactsToProcess[contactsToProcess.length - 1]?.email ?? null;
 
     await updateQueuedReleaseProgress({
       cursor: nextCursor,
@@ -1391,7 +1452,8 @@ async function deliverReleaseBatch(options: {
     if (!nextBatchResult.success) {
       await updateQueuedReleaseProgress({
         cursor: nextCursor,
-        lastDeliveryError: "The next delivery batch could not be started automatically.",
+        lastDeliveryError:
+          "The next delivery batch could not be started automatically.",
         releaseId: options.release.id,
         serviceRoleKey: options.serviceRoleKey,
         summary: mergedSummary,
@@ -1420,7 +1482,8 @@ Deno.serve(async (request) => {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const resendApiKey =
-    Deno.env.get("RESEND_API_KEY") ?? Deno.env.get("RESEND_API_KEY_FULL_ACCESS");
+    Deno.env.get("RESEND_API_KEY") ??
+    Deno.env.get("RESEND_API_KEY_FULL_ACCESS");
   const notificationFromEmail = Deno.env.get("NOTIFICATION_FROM_EMAIL");
 
   if (
@@ -1465,7 +1528,10 @@ Deno.serve(async (request) => {
       return jsonResponse(404, { error: "Release draft not found." });
     }
 
-    if (currentRelease.status === "sending" || currentRelease.status === "sent") {
+    if (
+      currentRelease.status === "sending" ||
+      currentRelease.status === "sent"
+    ) {
       return jsonResponse(202, {
         releaseId: invocation.releaseId,
         success: true,
@@ -1500,7 +1566,10 @@ Deno.serve(async (request) => {
     });
   });
 
-  if (typeof EdgeRuntime !== "undefined" && typeof EdgeRuntime.waitUntil === "function") {
+  if (
+    typeof EdgeRuntime !== "undefined" &&
+    typeof EdgeRuntime.waitUntil === "function"
+  ) {
     EdgeRuntime.waitUntil(backgroundTask);
   } else {
     await backgroundTask;

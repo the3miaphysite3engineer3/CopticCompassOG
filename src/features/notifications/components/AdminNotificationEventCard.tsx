@@ -50,14 +50,18 @@ export function AdminNotificationEventCard({
             </p>
             <p>Created on {formatNotificationTimestamp(event.created_at)}</p>
             {event.processed_at ? (
-              <p>Processed on {formatNotificationTimestamp(event.processed_at)}</p>
+              <p>
+                Processed on {formatNotificationTimestamp(event.processed_at)}
+              </p>
             ) : null}
             <p>
               Aggregate: {formatNotificationAggregateType(event.aggregate_type)}{" "}
               #{event.aggregate_id}
             </p>
             {event.latestDelivery?.provider_message_id ? (
-              <p>Provider message ID: {event.latestDelivery.provider_message_id}</p>
+              <p>
+                Provider message ID: {event.latestDelivery.provider_message_id}
+              </p>
             ) : null}
           </div>
         </div>

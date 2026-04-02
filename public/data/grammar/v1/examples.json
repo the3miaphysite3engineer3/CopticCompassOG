@@ -8,34 +8,14 @@
       "lessonId": "grammar.lesson.01",
       "sectionId": "grammar.lesson.01.section.zero-determination",
       "coptic": "Ø-ⲣⲱⲙⲓ ⲛⲓⲃⲉⲛ",
-      "translation": {
-        "en": "“every man”",
-        "nl": "“iedere mens”"
-      },
-      "conceptRefs": [
-        "grammar.concept.zero-determination"
-      ],
-      "dictionaryRefs": [
-        "cd_21",
-        "cd_1152"
-      ],
-      "tags": [
-        "lesson-1",
-        "zero-determination",
-        "quantifier"
-      ],
+      "translation": { "en": "“every man”", "nl": "“iedere mens”" },
+      "conceptRefs": ["grammar.concept.zero-determination"],
+      "dictionaryRefs": ["cd_21", "cd_1152"],
+      "tags": ["lesson-1", "zero-determination", "quantifier"],
       "copticSegments": [
-        {
-          "text": "Ø-ⲣⲱⲙⲓ",
-          "dictionaryEntryId": "cd_21"
-        },
-        {
-          "text": " "
-        },
-        {
-          "text": "ⲛⲓⲃⲉⲛ",
-          "dictionaryEntryId": "cd_1152"
-        }
+        { "text": "Ø-ⲣⲱⲙⲓ", "dictionaryEntryId": "cd_21" },
+        { "text": " " },
+        { "text": "ⲛⲓⲃⲉⲛ", "dictionaryEntryId": "cd_1152" }
       ]
     },
     {
@@ -43,34 +23,14 @@
       "lessonId": "grammar.lesson.01",
       "sectionId": "grammar.lesson.01.section.zero-determination",
       "coptic": "Ø-ⲥ̀ϩⲓⲙⲓ ⲛⲓⲃⲉⲛ",
-      "translation": {
-        "en": "“every woman”",
-        "nl": "“elke vrouw”"
-      },
-      "conceptRefs": [
-        "grammar.concept.zero-determination"
-      ],
-      "dictionaryRefs": [
-        "cd_142",
-        "cd_1152"
-      ],
-      "tags": [
-        "lesson-1",
-        "zero-determination",
-        "quantifier"
-      ],
+      "translation": { "en": "“every woman”", "nl": "“elke vrouw”" },
+      "conceptRefs": ["grammar.concept.zero-determination"],
+      "dictionaryRefs": ["cd_142", "cd_1152"],
+      "tags": ["lesson-1", "zero-determination", "quantifier"],
       "copticSegments": [
-        {
-          "text": "Ø-ⲥ̀ϩⲓⲙⲓ",
-          "dictionaryEntryId": "cd_142"
-        },
-        {
-          "text": " "
-        },
-        {
-          "text": "ⲛⲓⲃⲉⲛ",
-          "dictionaryEntryId": "cd_1152"
-        }
+        { "text": "Ø-ⲥ̀ϩⲓⲙⲓ", "dictionaryEntryId": "cd_142" },
+        { "text": " " },
+        { "text": "ⲛⲓⲃⲉⲛ", "dictionaryEntryId": "cd_1152" }
       ]
     },
     {
@@ -78,34 +38,14 @@
       "lessonId": "grammar.lesson.01",
       "sectionId": "grammar.lesson.01.section.zero-determination",
       "coptic": "Ø-ⲁⲅⲓⲟⲥ ⲛⲓⲃⲉⲛ",
-      "translation": {
-        "en": "“every saint”",
-        "nl": "“iedere heilige”"
-      },
-      "conceptRefs": [
-        "grammar.concept.zero-determination"
-      ],
-      "dictionaryRefs": [
-        "cd_3368",
-        "cd_1152"
-      ],
-      "tags": [
-        "lesson-1",
-        "zero-determination",
-        "quantifier"
-      ],
+      "translation": { "en": "“every saint”", "nl": "“iedere heilige”" },
+      "conceptRefs": ["grammar.concept.zero-determination"],
+      "dictionaryRefs": ["cd_3368", "cd_1152"],
+      "tags": ["lesson-1", "zero-determination", "quantifier"],
       "copticSegments": [
-        {
-          "text": "Ø-ⲁⲅⲓⲟⲥ",
-          "dictionaryEntryId": "cd_3368"
-        },
-        {
-          "text": " "
-        },
-        {
-          "text": "ⲛⲓⲃⲉⲛ",
-          "dictionaryEntryId": "cd_1152"
-        }
+        { "text": "Ø-ⲁⲅⲓⲟⲥ", "dictionaryEntryId": "cd_3368" },
+        { "text": " " },
+        { "text": "ⲛⲓⲃⲉⲛ", "dictionaryEntryId": "cd_1152" }
       ]
     },
     {
@@ -113,34 +53,14 @@
       "lessonId": "grammar.lesson.01",
       "sectionId": "grammar.lesson.01.section.zero-determination",
       "coptic": "Ø-ⲉⲕⲕ̀ⲗⲏⲥⲓⲁ̀ ⲛⲓⲃⲉⲛ",
-      "translation": {
-        "en": "“every church”",
-        "nl": "“iedere kerk”"
-      },
-      "conceptRefs": [
-        "grammar.concept.zero-determination"
-      ],
-      "dictionaryRefs": [
-        "cd_4042",
-        "cd_1152"
-      ],
-      "tags": [
-        "lesson-1",
-        "zero-determination",
-        "quantifier"
-      ],
+      "translation": { "en": "“every church”", "nl": "“iedere kerk”" },
+      "conceptRefs": ["grammar.concept.zero-determination"],
+      "dictionaryRefs": ["cd_4042", "cd_1152"],
+      "tags": ["lesson-1", "zero-determination", "quantifier"],
       "copticSegments": [
-        {
-          "text": "Ø-ⲉⲕⲕ̀ⲗⲏⲥⲓⲁ̀",
-          "dictionaryEntryId": "cd_4042"
-        },
-        {
-          "text": " "
-        },
-        {
-          "text": "ⲛⲓⲃⲉⲛ",
-          "dictionaryEntryId": "cd_1152"
-        }
+        { "text": "Ø-ⲉⲕⲕ̀ⲗⲏⲥⲓⲁ̀", "dictionaryEntryId": "cd_4042" },
+        { "text": " " },
+        { "text": "ⲛⲓⲃⲉⲛ", "dictionaryEntryId": "cd_1152" }
       ]
     },
     {
@@ -148,36 +68,18 @@
       "lessonId": "grammar.lesson.01",
       "sectionId": "grammar.lesson.01.section.bipartite-nominal-sentence",
       "coptic": "Ⲟⲩⲓⲱⲧ ⲡⲉ.",
-      "translation": {
-        "en": "“He is a father.”",
-        "nl": "“Hij is een vader.”"
-      },
+      "translation": { "en": "“He is a father.”", "nl": "“Hij is een vader.”" },
       "conceptRefs": [
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [
-        "cd_57"
-      ],
-      "tags": [
-        "lesson-1",
-        "nominal-sentence",
-        "nexus-pronoun"
-      ],
+      "dictionaryRefs": ["cd_57"],
+      "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        {
-          "text": "Ⲟⲩⲓⲱⲧ",
-          "dictionaryEntryId": "cd_57"
-        },
-        {
-          "text": " "
-        },
-        {
-          "text": "ⲡⲉ"
-        },
-        {
-          "text": "."
-        }
+        { "text": "Ⲟⲩⲓⲱⲧ", "dictionaryEntryId": "cd_57" },
+        { "text": " " },
+        { "text": "ⲡⲉ" },
+        { "text": "." }
       ]
     },
     {
@@ -194,24 +96,12 @@
         "grammar.concept.nexus-pronouns"
       ],
       "dictionaryRefs": [],
-      "tags": [
-        "lesson-1",
-        "nominal-sentence",
-        "nexus-pronoun"
-      ],
+      "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        {
-          "text": "Ⲡⲁⲓⲱⲧ"
-        },
-        {
-          "text": " "
-        },
-        {
-          "text": "ⲡⲉ"
-        },
-        {
-          "text": "."
-        }
+        { "text": "Ⲡⲁⲓⲱⲧ" },
+        { "text": " " },
+        { "text": "ⲡⲉ" },
+        { "text": "." }
       ]
     },
     {
@@ -227,28 +117,13 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [
-        "cd_57"
-      ],
-      "tags": [
-        "lesson-1",
-        "nominal-sentence",
-        "nexus-pronoun"
-      ],
+      "dictionaryRefs": ["cd_57"],
+      "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        {
-          "text": "Ⲡⲁⲓⲓⲱⲧ",
-          "dictionaryEntryId": "cd_57"
-        },
-        {
-          "text": " "
-        },
-        {
-          "text": "ⲡⲉ"
-        },
-        {
-          "text": "."
-        }
+        { "text": "Ⲡⲁⲓⲓⲱⲧ", "dictionaryEntryId": "cd_57" },
+        { "text": " " },
+        { "text": "ⲡⲉ" },
+        { "text": "." }
       ]
     },
     {
@@ -256,9 +131,7 @@
       "lessonId": "grammar.lesson.01",
       "sectionId": "grammar.lesson.01.section.bipartite-nominal-sentence",
       "coptic": "Ⲧⲁⲙⲁⲩ ⲧⲉ.",
-      "dictionaryTokenOverrides": {
-        "Ⲧⲁⲙⲁⲩ": "cd_215"
-      },
+      "dictionaryTokenOverrides": { "Ⲧⲁⲙⲁⲩ": "cd_215" },
       "translation": {
         "en": "“She is my mother.”",
         "nl": "“Zij is mijn moeder.”"
@@ -267,28 +140,13 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [
-        "cd_215"
-      ],
-      "tags": [
-        "lesson-1",
-        "nominal-sentence",
-        "nexus-pronoun"
-      ],
+      "dictionaryRefs": ["cd_215"],
+      "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        {
-          "text": "Ⲧⲁⲙⲁⲩ",
-          "dictionaryEntryId": "cd_215"
-        },
-        {
-          "text": " "
-        },
-        {
-          "text": "ⲧⲉ"
-        },
-        {
-          "text": "."
-        }
+        { "text": "Ⲧⲁⲙⲁⲩ", "dictionaryEntryId": "cd_215" },
+        { "text": " " },
+        { "text": "ⲧⲉ" },
+        { "text": "." }
       ]
     },
     {
@@ -296,36 +154,18 @@
       "lessonId": "grammar.lesson.01",
       "sectionId": "grammar.lesson.01.section.bipartite-nominal-sentence",
       "coptic": "Ⲟⲩⲥ̀ϩⲓⲙⲓ ⲧⲉ.",
-      "translation": {
-        "en": "“She is a woman.”",
-        "nl": "“Zij is een vrouw.”"
-      },
+      "translation": { "en": "“She is a woman.”", "nl": "“Zij is een vrouw.”" },
       "conceptRefs": [
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [
-        "cd_142"
-      ],
-      "tags": [
-        "lesson-1",
-        "nominal-sentence",
-        "nexus-pronoun"
-      ],
+      "dictionaryRefs": ["cd_142"],
+      "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        {
-          "text": "Ⲟⲩⲥ̀ϩⲓⲙⲓ",
-          "dictionaryEntryId": "cd_142"
-        },
-        {
-          "text": " "
-        },
-        {
-          "text": "ⲧⲉ"
-        },
-        {
-          "text": "."
-        }
+        { "text": "Ⲟⲩⲥ̀ϩⲓⲙⲓ", "dictionaryEntryId": "cd_142" },
+        { "text": " " },
+        { "text": "ⲧⲉ" },
+        { "text": "." }
       ]
     },
     {
@@ -341,28 +181,13 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [
-        "cd_173a"
-      ],
-      "tags": [
-        "lesson-1",
-        "nominal-sentence",
-        "nexus-pronoun"
-      ],
+      "dictionaryRefs": ["cd_173a"],
+      "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        {
-          "text": "Ϩⲁⲛⲥⲱⲛⲓ",
-          "dictionaryEntryId": "cd_173a"
-        },
-        {
-          "text": " "
-        },
-        {
-          "text": "ⲛⲉ"
-        },
-        {
-          "text": "."
-        }
+        { "text": "Ϩⲁⲛⲥⲱⲛⲓ", "dictionaryEntryId": "cd_173a" },
+        { "text": " " },
+        { "text": "ⲛⲉ" },
+        { "text": "." }
       ]
     },
     {
@@ -370,36 +195,18 @@
       "lessonId": "grammar.lesson.01",
       "sectionId": "grammar.lesson.01.section.bipartite-nominal-sentence",
       "coptic": "Ϩⲁⲛⲣⲱⲙⲓ ⲛⲉ.",
-      "translation": {
-        "en": "“They are men.”",
-        "nl": "“Het zijn mannen.”"
-      },
+      "translation": { "en": "“They are men.”", "nl": "“Het zijn mannen.”" },
       "conceptRefs": [
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [
-        "cd_21"
-      ],
-      "tags": [
-        "lesson-1",
-        "nominal-sentence",
-        "nexus-pronoun"
-      ],
+      "dictionaryRefs": ["cd_21"],
+      "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        {
-          "text": "Ϩⲁⲛⲣⲱⲙⲓ",
-          "dictionaryEntryId": "cd_21"
-        },
-        {
-          "text": " "
-        },
-        {
-          "text": "ⲛⲉ"
-        },
-        {
-          "text": "."
-        }
+        { "text": "Ϩⲁⲛⲣⲱⲙⲓ", "dictionaryEntryId": "cd_21" },
+        { "text": " " },
+        { "text": "ⲛⲉ" },
+        { "text": "." }
       ]
     },
     {
@@ -415,28 +222,13 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": [
-        "cd_3368"
-      ],
-      "tags": [
-        "lesson-1",
-        "nominal-sentence",
-        "nexus-pronoun"
-      ],
+      "dictionaryRefs": ["cd_3368"],
+      "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        {
-          "text": "Ⲛⲓⲁⲅⲓⲟⲥ",
-          "dictionaryEntryId": "cd_3368"
-        },
-        {
-          "text": " "
-        },
-        {
-          "text": "ⲛⲉ"
-        },
-        {
-          "text": "."
-        }
+        { "text": "Ⲛⲓⲁⲅⲓⲟⲥ", "dictionaryEntryId": "cd_3368" },
+        { "text": " " },
+        { "text": "ⲛⲉ" },
+        { "text": "." }
       ]
     }
   ]

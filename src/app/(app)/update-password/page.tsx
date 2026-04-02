@@ -1,14 +1,14 @@
-import type { Metadata } from 'next'
-import { updatePassword } from '@/actions/auth'
-import { FormField } from '@/components/FormField'
-import { PageHeader } from '@/components/PageHeader'
-import { PageShell, pageShellAccents } from '@/components/PageShell'
-import { StatusNotice } from '@/components/StatusNotice'
-import { SurfacePanel } from '@/components/SurfacePanel'
+import type { Metadata } from "next";
+import { updatePassword } from "@/actions/auth";
+import { FormField } from "@/components/FormField";
+import { PageHeader } from "@/components/PageHeader";
+import { PageShell, pageShellAccents } from "@/components/PageShell";
+import { StatusNotice } from "@/components/StatusNotice";
+import { SurfacePanel } from "@/components/SurfacePanel";
 import { getTranslation } from "@/lib/i18n";
-import { createNoIndexMetadata } from '@/lib/metadata'
+import { createNoIndexMetadata } from "@/lib/metadata";
 import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
-import { requireAuthenticatedPageSession } from '@/lib/supabase/auth'
+import { requireAuthenticatedPageSession } from "@/lib/supabase/auth";
 
 export async function generateMetadata(): Promise<Metadata> {
   const language = await getPreferredLanguage();
@@ -23,20 +23,27 @@ export default async function UpdatePasswordPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    messageType?: 'error' | 'success' | 'info'
-    state?: string
-  }>
+    messageType?: "error" | "success" | "info";
+    state?: string;
+  }>;
 }) {
   const language = await getPreferredLanguage();
-  await requireAuthenticatedPageSession('/update-password')
+  await requireAuthenticatedPageSession("/update-password");
 
   const noticeMessages: Record<string, string> = {
-    'update-invalid-input': getTranslation(language, "update.notice.invalidInput"),
-    'update-error': getTranslation(language, "update.notice.error"),
-    'update-rate-limited': getTranslation(language, "update.notice.rateLimited"),
+    "update-invalid-input": getTranslation(
+      language,
+      "update.notice.invalidInput",
+    ),
+    "update-error": getTranslation(language, "update.notice.error"),
+    "update-rate-limited": getTranslation(
+      language,
+      "update.notice.rateLimited",
+    ),
   };
-  const { messageType = 'error', state } = await searchParams;
-  const noticeMessage = state && state in noticeMessages ? noticeMessages[state] : undefined;
+  const { messageType = "error", state } = await searchParams;
+  const noticeMessage =
+    state && state in noticeMessages ? noticeMessages[state] : undefined;
   const noticeVariant = messageType;
 
   return (
@@ -58,14 +65,20 @@ export default async function UpdatePasswordPage({
       <div className="mx-auto max-w-xl">
         <SurfacePanel rounded="3xl" className="p-8 md:p-10">
           <form className="space-y-6 text-stone-800 dark:text-stone-200">
-            <FormField htmlFor="password" label={getTranslation(language, "update.password")}>
+            <FormField
+              htmlFor="password"
+              label={getTranslation(language, "update.password")}
+            >
               <input
                 id="password"
                 className="input-base"
                 type="password"
                 name="password"
                 minLength={8}
-                placeholder={getTranslation(language, "update.passwordPlaceholder")}
+                placeholder={getTranslation(
+                  language,
+                  "update.passwordPlaceholder",
+                )}
                 required
               />
             </FormField>
@@ -80,13 +93,11 @@ export default async function UpdatePasswordPage({
             </div>
 
             {noticeMessage && (
-              <StatusNotice tone={noticeVariant}>
-                {noticeMessage}
-              </StatusNotice>
+              <StatusNotice tone={noticeVariant}>{noticeMessage}</StatusNotice>
             )}
           </form>
         </SurfacePanel>
       </div>
     </PageShell>
-  )
+  );
 }

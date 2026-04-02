@@ -1,58 +1,64 @@
-'use client'
+"use client";
 
-import { useState, useTransition } from 'react'
-import { updateCommunicationPreferences } from '@/actions/communications'
-import { FormField } from '@/components/FormField'
-import { StatusNotice } from '@/components/StatusNotice'
-import { useLanguage } from '@/components/LanguageProvider'
-import { getDashboardCopy } from '@/features/dashboard/lib/dashboardCopy'
-import type { AudiencePreferences } from '@/features/communications/lib/communications'
+import { useState, useTransition } from "react";
+import { updateCommunicationPreferences } from "@/actions/communications";
+import { FormField } from "@/components/FormField";
+import { StatusNotice } from "@/components/StatusNotice";
+import { useLanguage } from "@/components/LanguageProvider";
+import { getDashboardCopy } from "@/features/dashboard/lib/dashboardCopy";
+import type { AudiencePreferences } from "@/features/communications/lib/communications";
 
 type CommunicationPreferencesFormProps = {
-  deliveryEmail: string | null
-  preferences: AudiencePreferences
-}
+  deliveryEmail: string | null;
+  preferences: AudiencePreferences;
+};
 
 export function CommunicationPreferencesForm({
   deliveryEmail,
   preferences,
 }: CommunicationPreferencesFormProps) {
-  const { language } = useLanguage()
-  const copy = getDashboardCopy(language)
-  const [isPending, startTransition] = useTransition()
+  const { language } = useLanguage();
+  const copy = getDashboardCopy(language);
+  const [isPending, startTransition] = useTransition();
   const [status, setStatus] = useState<{
-    message: string
-    type: 'error' | 'success'
-  } | null>(null)
+    message: string;
+    type: "error" | "success";
+  } | null>(null);
 
   function handleSubmit(formData: FormData) {
-    setStatus(null)
+    setStatus(null);
 
     startTransition(async () => {
-      const result = await updateCommunicationPreferences(formData)
+      const result = await updateCommunicationPreferences(formData);
       setStatus({
         message:
           result.message ??
           (result.success
             ? copy.account.communicationSaveIdle
             : copy.account.communicationDescription),
-        type: result.success ? 'success' : 'error',
-      })
-    })
+        type: result.success ? "success" : "error",
+      });
+    });
   }
 
   return (
-    <form action={handleSubmit} className="space-y-6 text-stone-800 dark:text-stone-200">
+    <form
+      action={handleSubmit}
+      className="space-y-6 text-stone-800 dark:text-stone-200"
+    >
       <p className="text-sm leading-6 text-stone-600 dark:text-stone-300">
         {copy.account.communicationLead}
       </p>
 
-      <FormField htmlFor="communication_email" label={copy.account.communicationEmailLabel}>
+      <FormField
+        htmlFor="communication_email"
+        label={copy.account.communicationEmailLabel}
+      >
         <input
           id="communication_email"
           type="email"
           className="input-base bg-stone-50 text-stone-500 dark:bg-stone-900"
-          defaultValue={deliveryEmail ?? ''}
+          defaultValue={deliveryEmail ?? ""}
           disabled
         />
       </FormField>
@@ -123,5 +129,5 @@ export function CommunicationPreferencesForm({
         </StatusNotice>
       ) : null}
     </form>
-  )
+  );
 }

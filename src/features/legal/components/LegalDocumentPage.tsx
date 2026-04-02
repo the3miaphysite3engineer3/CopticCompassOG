@@ -10,11 +10,7 @@ export function LegalDocumentPage({
 }: LegalDocument) {
   return (
     <PageShell className="py-24" contentClassName="mx-auto max-w-4xl px-4">
-      <PageHeader
-        title={title}
-        description={description}
-        className="mb-12"
-      />
+      <PageHeader title={title} description={description} className="mb-12" />
 
       <SurfacePanel className="space-y-8 p-8 text-stone-800 dark:text-stone-200 md:p-12">
         {sections.map((section) => (

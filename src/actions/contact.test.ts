@@ -52,7 +52,9 @@ async function loadContactModule(options?: {
     hint?: string | null;
     message?: string;
   } | null;
-  notificationResult?: { error: string; success: false } | { id: string | null; success: true };
+  notificationResult?:
+    | { error: string; success: false }
+    | { id: string | null; success: true };
   rateLimitOk?: boolean;
 }) {
   vi.resetModules();
@@ -88,7 +90,9 @@ async function loadContactModule(options?: {
   });
   const buildAudienceOptInConfirmationUrlMock = vi
     .fn()
-    .mockReturnValue("https://example.com/en/communications/confirm?token=test-token");
+    .mockReturnValue(
+      "https://example.com/en/communications/confirm?token=test-token",
+    );
   const createAudienceOptInRequestMock = vi.fn().mockResolvedValue({
     request: {
       id: "opt_in_123",
@@ -100,7 +104,9 @@ async function loadContactModule(options?: {
     .mockReturnValue(options?.hasStorageEnv ?? true);
   const dispatchLoggedNotificationEmailMock = vi
     .fn()
-    .mockResolvedValue(options?.notificationResult ?? { success: true, id: "email_123" });
+    .mockResolvedValue(
+      options?.notificationResult ?? { success: true, id: "email_123" },
+    );
 
   vi.doMock("@/lib/rateLimit", () => ({
     consumeRateLimit: consumeRateLimitMock,
@@ -146,7 +152,9 @@ describe("contact action", () => {
     const { createServiceRoleClientMock, sendContactEmail } =
       await loadContactModule({ hasStorageEnv: false });
 
-    await expect(sendContactEmail(null, createContactFormData())).resolves.toEqual({
+    await expect(
+      sendContactEmail(null, createContactFormData()),
+    ).resolves.toEqual({
       success: false,
       error: "Contact form storage is not configured yet.",
     });
@@ -159,8 +167,7 @@ describe("contact action", () => {
       createServiceRoleClientMock,
       dispatchLoggedNotificationEmailMock,
       sendContactEmail,
-    } =
-      await loadContactModule();
+    } = await loadContactModule();
 
     await expect(
       sendContactEmail(
@@ -181,8 +188,7 @@ describe("contact action", () => {
       dispatchLoggedNotificationEmailMock,
       insertMock,
       sendContactEmail,
-    } =
-      await loadContactModule();
+    } = await loadContactModule();
 
     await expect(
       sendContactEmail(
@@ -208,12 +214,13 @@ describe("contact action", () => {
       dispatchLoggedNotificationEmailMock,
       insertMock,
       sendContactEmail,
-    } =
-      await loadContactModule({
-        rateLimitOk: false,
-      });
+    } = await loadContactModule({
+      rateLimitOk: false,
+    });
 
-    await expect(sendContactEmail(null, createContactFormData())).resolves.toEqual({
+    await expect(
+      sendContactEmail(null, createContactFormData()),
+    ).resolves.toEqual({
       success: false,
       error:
         "Too many messages were sent from this connection. Please wait a few minutes and try again.",
@@ -224,17 +231,17 @@ describe("contact action", () => {
   });
 
   it("returns a configuration error when the contact_messages table is unavailable", async () => {
-    const {
-      dispatchLoggedNotificationEmailMock,
-      sendContactEmail,
-    } = await loadContactModule({
-      insertError: {
-        code: "42P01",
-        message: 'relation "contact_messages" does not exist',
-      },
-    });
+    const { dispatchLoggedNotificationEmailMock, sendContactEmail } =
+      await loadContactModule({
+        insertError: {
+          code: "42P01",
+          message: 'relation "contact_messages" does not exist',
+        },
+      });
 
-    await expect(sendContactEmail(null, createContactFormData())).resolves.toEqual({
+    await expect(
+      sendContactEmail(null, createContactFormData()),
+    ).resolves.toEqual({
       success: false,
       error: "Contact form storage is not configured yet.",
     });
@@ -249,8 +256,7 @@ describe("contact action", () => {
       dispatchLoggedNotificationEmailMock,
       insertMock,
       sendContactEmail,
-    } =
-      await loadContactModule();
+    } = await loadContactModule();
 
     await expect(
       sendContactEmail(
@@ -309,7 +315,9 @@ describe("contact action", () => {
         eventType: "audience_opt_in_requested",
         subject: "Bevestig je e-mailupdates",
         to: "sender@example.com",
-        text: expect.stringContaining("https://example.com/en/communications/confirm?token=test-token"),
+        text: expect.stringContaining(
+          "https://example.com/en/communications/confirm?token=test-token",
+        ),
       }),
     );
   });
@@ -319,15 +327,16 @@ describe("contact action", () => {
       dispatchLoggedNotificationEmailMock,
       insertMock,
       sendContactEmail,
-    } =
-      await loadContactModule({
-        notificationResult: {
-          success: false,
-          error: "Domain not verified",
-        },
-      });
+    } = await loadContactModule({
+      notificationResult: {
+        success: false,
+        error: "Domain not verified",
+      },
+    });
 
-    await expect(sendContactEmail(null, createContactFormData())).resolves.toEqual({
+    await expect(
+      sendContactEmail(null, createContactFormData()),
+    ).resolves.toEqual({
       success: true,
       message: "Message sent successfully. I'll reply soon!",
     });
@@ -337,10 +346,8 @@ describe("contact action", () => {
   });
 
   it("keeps the inquiry successful even if the update confirmation email cannot be sent", async () => {
-    const {
-      dispatchLoggedNotificationEmailMock,
-      sendContactEmail,
-    } = await loadContactModule();
+    const { dispatchLoggedNotificationEmailMock, sendContactEmail } =
+      await loadContactModule();
 
     dispatchLoggedNotificationEmailMock
       .mockResolvedValueOnce({ success: true, id: "owner_email_1" })

@@ -25,7 +25,10 @@ export default function EntryPageHeader({ entryLabel }: EntryPageHeaderProps) {
       />
 
       <div className="flex items-center justify-between gap-4 flex-wrap">
-        <Link href={getDictionaryPath(language)} className="btn-secondary gap-2 px-4">
+        <Link
+          href={getDictionaryPath(language)}
+          className="btn-secondary gap-2 px-4"
+        >
           <ArrowLeft className="h-4 w-4" />
           {t("entry.back")}
         </Link>

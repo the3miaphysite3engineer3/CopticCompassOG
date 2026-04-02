@@ -14,21 +14,23 @@ import {
   buildAudienceOptInConfirmationUrl,
   createAudienceOptInRequest,
 } from "@/lib/communications/optInRequests";
-import { isLanguage, type Language } from "@/lib/i18n";
 import { dispatchLoggedNotificationEmail } from "@/lib/notifications/events";
 import {
   consumeRateLimit,
   getClientRateLimitIdentifier,
 } from "@/lib/rateLimit";
+import { isMissingSupabaseTableError } from "@/lib/supabase/errors";
 import { hasSupabaseServiceRoleEnv } from "@/lib/supabase/config";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
 import {
+  getFormLanguage,
   getFormString,
   hasLengthInRange,
   isValidEmail,
   normalizeMultiline,
   normalizeWhitespace,
 } from "@/lib/validation";
+import type { Language } from "@/types/i18n";
 
 export type ContactFormState = {
   error?: string;
@@ -39,14 +41,14 @@ export type ContactFormState = {
 const CONTACT_ACTION_COPY: Record<
   Language,
   {
-      invalid: string;
-      rateLimited: string;
-      storageUnavailable: string;
-      success: string;
-      successConfirmation: string;
-      successConfirmationIssue: string;
-      submitFailed: string;
-    }
+    invalid: string;
+    rateLimited: string;
+    storageUnavailable: string;
+    success: string;
+    successConfirmation: string;
+    successConfirmationIssue: string;
+    submitFailed: string;
+  }
 > = {
   en: {
     invalid: "Please complete all fields with valid values.",
@@ -70,39 +72,24 @@ const CONTACT_ACTION_COPY: Record<
       "Bericht succesvol verzonden. Controleer je inbox om e-mailupdates te bevestigen.",
     successConfirmationIssue:
       "Bericht succesvol verzonden, maar ik kon de bevestigingsmail voor updates nu niet versturen.",
-    submitFailed: "Je bericht kon nu niet worden verzonden. Probeer het opnieuw.",
+    submitFailed:
+      "Je bericht kon nu niet worden verzonden. Probeer het opnieuw.",
   },
 };
 
-function getActionLanguage(formData: FormData): Language {
-  const rawLocale = normalizeWhitespace(getFormString(formData, "locale"));
-  return isLanguage(rawLocale) ? rawLocale : "en";
-}
-
-function isMissingContactMessagesTableError(
-  error: { code?: string; message?: string } | null | undefined,
-) {
-  if (!error) {
-    return false;
-  }
-
-  return (
-    error.code === "PGRST205" ||
-    error.code === "42P01" ||
-    error.message?.includes("Could not find the table") === true ||
-    error.message?.includes("relation") === true
-  );
-}
-
 export async function sendContactEmail(
   _prevState: ContactFormState | null,
-  formData: FormData
+  formData: FormData,
 ): Promise<ContactFormState> {
-  const language = getActionLanguage(formData);
+  const language = getFormLanguage(formData);
   const copy = CONTACT_ACTION_COPY[language];
   const name = normalizeWhitespace(getFormString(formData, "name"));
-  const email = normalizeWhitespace(getFormString(formData, "email")).toLowerCase();
-  const inquiryType = normalizeWhitespace(getFormString(formData, "inquiryType"));
+  const email = normalizeWhitespace(
+    getFormString(formData, "email"),
+  ).toLowerCase();
+  const inquiryType = normalizeWhitespace(
+    getFormString(formData, "inquiryType"),
+  );
   const message = normalizeMultiline(getFormString(formData, "message"));
   const honeypot = normalizeWhitespace(getFormString(formData, "website"));
   const wantsUpdates = formData.has("wants_updates");
@@ -165,7 +152,7 @@ export async function sendContactEmail(
         message: error.message,
       });
 
-      if (isMissingContactMessagesTableError(error)) {
+      if (isMissingSupabaseTableError(error)) {
         return { success: false, error: copy.storageUnavailable };
       }
 
@@ -229,7 +216,10 @@ export async function sendContactEmail(
           source: "contact_form",
         });
 
-        const confirmationUrl = buildAudienceOptInConfirmationUrl(language, token);
+        const confirmationUrl = buildAudienceOptInConfirmationUrl(
+          language,
+          token,
+        );
         const confirmationResult = await dispatchLoggedNotificationEmail({
           aggregateId: request.id,
           aggregateType: "audience_opt_in_request",
@@ -276,11 +266,14 @@ export async function sendContactEmail(
           });
         }
       } catch (error) {
-        console.error("Failed to create audience opt-in request from contact form", {
-          email,
-          error,
-          name,
-        });
+        console.error(
+          "Failed to create audience opt-in request from contact form",
+          {
+            email,
+            error,
+            name,
+          },
+        );
         successMessage = copy.successConfirmationIssue;
       }
     }

@@ -2,26 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { isMissingSupabaseTableError } from "@/lib/supabase/errors";
 import type {
   EntryFavoriteErrorCode,
   EntryFavoriteInsert,
   EntryFavoriteRow,
 } from "./entryActions";
-
-function isMissingEntryFavoriteTableError(
-  error: { code?: string; message?: string } | null | undefined,
-) {
-  if (!error) {
-    return false;
-  }
-
-  return (
-    error.code === "PGRST205" ||
-    error.code === "42P01" ||
-    error.message?.includes("Could not find the table") === true ||
-    error.message?.includes("relation") === true
-  );
-}
 
 export function useEntryFavorite(entryId: string, userId: string | null) {
   const [favorite, setFavorite] = useState<EntryFavoriteRow | null>(null);
@@ -82,7 +68,7 @@ export function useEntryFavorite(entryId: string, userId: string | null) {
       }
 
       if (error) {
-        if (isMissingEntryFavoriteTableError(error)) {
+        if (isMissingSupabaseTableError(error)) {
           setErrorCode("not-configured");
           setFavorite(null);
           setIsLoading(false);
@@ -136,7 +122,7 @@ export function useEntryFavorite(entryId: string, userId: string | null) {
 
       if (error) {
         setFavorite(previousFavorite);
-        if (isMissingEntryFavoriteTableError(error)) {
+        if (isMissingSupabaseTableError(error)) {
           setErrorCode("not-configured");
         } else {
           setErrorCode("update-failed");
@@ -167,7 +153,7 @@ export function useEntryFavorite(entryId: string, userId: string | null) {
 
     if (error) {
       setFavorite(previousFavorite);
-      if (isMissingEntryFavoriteTableError(error)) {
+      if (isMissingSupabaseTableError(error)) {
         setErrorCode("not-configured");
       } else {
         setErrorCode("update-failed");

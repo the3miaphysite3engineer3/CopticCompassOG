@@ -1,34 +1,37 @@
-import { Badge } from '@/components/Badge'
-import { SurfacePanel } from '@/components/SurfacePanel'
+import { Badge } from "@/components/Badge";
+import { SurfacePanel } from "@/components/SurfacePanel";
 import {
   formatContentReleaseAudienceSegment,
   formatContentReleaseLocaleMode,
   formatContentReleaseType,
   getContentReleaseDeliverySummary,
   type AdminContentRelease,
-} from '@/features/communications/lib/releases'
-import { ContentReleaseReviewForm } from './ContentReleaseReviewForm'
-import { ContentReleaseStatusBadge } from './ContentReleaseStatusBadge'
-import { SendContentReleaseForm } from './SendContentReleaseForm'
-import { SendContentReleasePreviewForm } from './SendContentReleasePreviewForm'
+} from "@/features/communications/lib/releases";
+import { ContentReleaseReviewForm } from "./ContentReleaseReviewForm";
+import { ContentReleaseStatusBadge } from "./ContentReleaseStatusBadge";
+import { SendContentReleaseForm } from "./SendContentReleaseForm";
+import { SendContentReleasePreviewForm } from "./SendContentReleasePreviewForm";
 
-function formatContentReleaseTimestamp(timestamp: string | null, emptyLabel = 'Not sent yet') {
+function formatContentReleaseTimestamp(
+  timestamp: string | null,
+  emptyLabel = "Not sent yet",
+) {
   if (!timestamp) {
-    return emptyLabel
+    return emptyLabel;
   }
 
-  return new Date(timestamp).toLocaleString('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  })
+  return new Date(timestamp).toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
 
 export function AdminContentReleaseCard({
   release,
 }: {
-  release: AdminContentRelease
+  release: AdminContentRelease;
 }) {
-  const deliverySummary = getContentReleaseDeliverySummary(release)
+  const deliverySummary = getContentReleaseDeliverySummary(release);
 
   return (
     <SurfacePanel
@@ -53,26 +56,33 @@ export function AdminContentReleaseCard({
           </div>
 
           <h2 className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
-            {release.subject_en ?? release.subject_nl ?? 'Untitled release draft'}
+            {release.subject_en ??
+              release.subject_nl ??
+              "Untitled release draft"}
           </h2>
 
           <div className="mt-3 space-y-2 text-sm text-stone-600 dark:text-stone-400">
-            <p>Updated on {formatContentReleaseTimestamp(release.updated_at)}</p>
-            <p>Created on {formatContentReleaseTimestamp(release.created_at)}</p>
+            <p>
+              Updated on {formatContentReleaseTimestamp(release.updated_at)}
+            </p>
+            <p>
+              Created on {formatContentReleaseTimestamp(release.created_at)}
+            </p>
             {release.delivery_requested_at ? (
               <p>
-                Delivery requested on{' '}
+                Delivery requested on{" "}
                 {formatContentReleaseTimestamp(release.delivery_requested_at)}
               </p>
             ) : null}
             {release.delivery_started_at ? (
               <p>
-                Delivery started on {formatContentReleaseTimestamp(release.delivery_started_at)}
+                Delivery started on{" "}
+                {formatContentReleaseTimestamp(release.delivery_started_at)}
               </p>
             ) : null}
             {release.delivery_finished_at ? (
               <p>
-                Delivery finished on{' '}
+                Delivery finished on{" "}
                 {formatContentReleaseTimestamp(release.delivery_finished_at)}
               </p>
             ) : null}
@@ -80,31 +90,34 @@ export function AdminContentReleaseCard({
               <p>Sent on {formatContentReleaseTimestamp(release.sent_at)}</p>
             ) : null}
             <p>Snapshot items: {release.items.length}</p>
-            {typeof deliverySummary.eligibleRecipientCount === 'number' ? (
-              <p>Eligible recipients: {deliverySummary.eligibleRecipientCount}</p>
-            ) : null}
-            {typeof deliverySummary.processedRecipientCount === 'number' ? (
+            {typeof deliverySummary.eligibleRecipientCount === "number" ? (
               <p>
-                Processed recipients: {deliverySummary.processedRecipientCount}
-                {typeof deliverySummary.remainingRecipientCount === 'number'
-                  ? `, remaining ${deliverySummary.remainingRecipientCount}`
-                  : ''}
+                Eligible recipients: {deliverySummary.eligibleRecipientCount}
               </p>
             ) : null}
-            {typeof deliverySummary.sentCount === 'number' ||
-            typeof deliverySummary.skippedCount === 'number' ||
-            typeof deliverySummary.failedCount === 'number' ? (
+            {typeof deliverySummary.processedRecipientCount === "number" ? (
               <p>
-                Delivery counts: sent {deliverySummary.sentCount ?? 0}, skipped{' '}
-                {deliverySummary.skippedCount ?? 0}, failed {deliverySummary.failedCount ?? 0}
+                Processed recipients: {deliverySummary.processedRecipientCount}
+                {typeof deliverySummary.remainingRecipientCount === "number"
+                  ? `, remaining ${deliverySummary.remainingRecipientCount}`
+                  : ""}
+              </p>
+            ) : null}
+            {typeof deliverySummary.sentCount === "number" ||
+            typeof deliverySummary.skippedCount === "number" ||
+            typeof deliverySummary.failedCount === "number" ? (
+              <p>
+                Delivery counts: sent {deliverySummary.sentCount ?? 0}, skipped{" "}
+                {deliverySummary.skippedCount ?? 0}, failed{" "}
+                {deliverySummary.failedCount ?? 0}
               </p>
             ) : null}
             {deliverySummary.broadcasts?.length ? (
               <div className="space-y-1">
                 {deliverySummary.broadcasts.map((broadcast) => (
                   <p key={broadcast.id}>
-                    Broadcast {broadcast.language.toUpperCase()}: {broadcast.recipientCount}{' '}
-                    recipients, id {broadcast.id}
+                    Broadcast {broadcast.language.toUpperCase()}:{" "}
+                    {broadcast.recipientCount} recipients, id {broadcast.id}
                   </p>
                 ))}
               </div>
@@ -125,10 +138,10 @@ export function AdminContentReleaseCard({
             English copy
           </p>
           <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
-            {release.subject_en ?? 'Not set'}
+            {release.subject_en ?? "Not set"}
           </p>
           <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-stone-600 dark:text-stone-300">
-            {release.body_en ?? 'No English body saved yet.'}
+            {release.body_en ?? "No English body saved yet."}
           </p>
         </div>
 
@@ -137,10 +150,10 @@ export function AdminContentReleaseCard({
             Dutch copy
           </p>
           <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
-            {release.subject_nl ?? 'Niet ingesteld'}
+            {release.subject_nl ?? "Niet ingesteld"}
           </p>
           <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-stone-600 dark:text-stone-300">
-            {release.body_nl ?? 'Nog geen Nederlandse tekst opgeslagen.'}
+            {release.body_nl ?? "Nog geen Nederlandse tekst opgeslagen."}
           </p>
         </div>
       </div>
@@ -157,7 +170,7 @@ export function AdminContentReleaseCard({
             >
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone="surface" size="xs">
-                  {item.item_type === 'lesson' ? 'Lesson' : 'Publication'}
+                  {item.item_type === "lesson" ? "Lesson" : "Publication"}
                 </Badge>
                 <Badge tone="neutral" size="xs">
                   {item.item_id}
@@ -176,9 +189,15 @@ export function AdminContentReleaseCard({
 
       <div className="space-y-4">
         <SendContentReleasePreviewForm releaseId={release.id} />
-        <ContentReleaseReviewForm releaseId={release.id} status={release.status} />
-        <SendContentReleaseForm releaseId={release.id} status={release.status} />
+        <ContentReleaseReviewForm
+          releaseId={release.id}
+          status={release.status}
+        />
+        <SendContentReleaseForm
+          releaseId={release.id}
+          status={release.status}
+        />
       </div>
     </SurfacePanel>
-  )
+  );
 }

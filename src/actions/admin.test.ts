@@ -81,8 +81,14 @@ function createContentReleaseDraftFormData(
   formData.set("locale_mode", overrides?.locale_mode ?? "localized");
   formData.set("subject_en", overrides?.subject_en ?? "New lesson available");
   formData.set("subject_nl", overrides?.subject_nl ?? "Nieuwe les beschikbaar");
-  formData.set("body_en", overrides?.body_en ?? "A new lesson has been published.");
-  formData.set("body_nl", overrides?.body_nl ?? "Er is een nieuwe les gepubliceerd.");
+  formData.set(
+    "body_en",
+    overrides?.body_en ?? "A new lesson has been published.",
+  );
+  formData.set(
+    "body_nl",
+    overrides?.body_nl ?? "Er is een nieuwe les gepubliceerd.",
+  );
 
   for (const releaseItem of overrides?.releaseItems ?? ["lesson:lesson-1"]) {
     formData.append("release_item", releaseItem);
@@ -120,7 +126,11 @@ async function loadAdminModule(options?: {
     updated_at: string;
   }[];
   contactUpdateError?: { message?: string } | null;
-  existingReleaseEvents?: { payload?: object | null; recipient: string; status?: string }[];
+  existingReleaseEvents?: {
+    payload?: object | null;
+    recipient: string;
+    status?: string;
+  }[];
   contentReleaseInsertError?: { message?: string } | null;
   contentReleaseItems?: {
     created_at?: string;
@@ -252,8 +262,14 @@ async function loadAdminModule(options?: {
     .mockImplementation((payload: { aggregateType?: string }) =>
       Promise.resolve(
         payload.aggregateType === "content_release"
-          ? options?.releaseNotificationResult ?? { success: true, id: "email_789" }
-          : options?.feedbackNotificationResult ?? { success: true, id: "email_123" },
+          ? (options?.releaseNotificationResult ?? {
+              success: true,
+              id: "email_789",
+            })
+          : (options?.feedbackNotificationResult ?? {
+              success: true,
+              id: "email_123",
+            }),
       ),
     );
   const getNotificationEmailEnvMock = vi.fn().mockReturnValue({
@@ -261,15 +277,13 @@ async function loadAdminModule(options?: {
     ownerAlertEmail: "owner@example.com",
     resendApiKey: "re_123",
   });
-  const invokeSupabaseEdgeFunctionMock = vi
-    .fn()
-    .mockResolvedValue(
-      options?.invokeWorkerResult ?? {
-        data: { queued: true, releaseId: "44444444-4444-4444-8444-444444444444" },
-        status: 202,
-        success: true,
-      },
-    );
+  const invokeSupabaseEdgeFunctionMock = vi.fn().mockResolvedValue(
+    options?.invokeWorkerResult ?? {
+      data: { queued: true, releaseId: "44444444-4444-4444-8444-444444444444" },
+      status: 202,
+      success: true,
+    },
+  );
   const contentReleaseMaybeSingleMock = vi.fn().mockResolvedValue({
     data: options?.release ?? {
       audience_segment: "lessons",
@@ -295,67 +309,67 @@ async function loadAdminModule(options?: {
     error: null,
   });
   const contentReleaseItemsSelectEqOrderMock = vi.fn().mockResolvedValue({
-    data:
-      options?.contentReleaseItems ?? [
-        {
-          created_at: "2026-03-28T10:00:00.000Z",
-          id: "item_1",
-          item_id: "lesson-1",
-          item_type: "lesson",
-          release_id: "44444444-4444-4444-8444-444444444444",
-          title_snapshot: "Lesson 01",
-          url_snapshot: "/grammar/lesson-1",
-        },
-      ],
+    data: options?.contentReleaseItems ?? [
+      {
+        created_at: "2026-03-28T10:00:00.000Z",
+        id: "item_1",
+        item_id: "lesson-1",
+        item_type: "lesson",
+        release_id: "44444444-4444-4444-8444-444444444444",
+        title_snapshot: "Lesson 01",
+        url_snapshot: "/grammar/lesson-1",
+      },
+    ],
     error: null,
   });
   const audienceContactsIsMock = vi.fn().mockResolvedValue({
-    data:
-      options?.audienceContacts ?? [
-        {
-          books_opt_in: false,
-          consented_at: "2026-03-28T09:00:00.000Z",
-          created_at: "2026-03-28T09:00:00.000Z",
-          email: "reader@example.com",
-          full_name: "Reader One",
-          general_updates_opt_in: true,
-          id: "audience_123",
-          lessons_opt_in: true,
-          locale: "en",
-          profile_id: null,
-          source: "dashboard",
-          unsubscribed_at: null,
-          updated_at: "2026-03-28T09:00:00.000Z",
-        },
-      ],
+    data: options?.audienceContacts ?? [
+      {
+        books_opt_in: false,
+        consented_at: "2026-03-28T09:00:00.000Z",
+        created_at: "2026-03-28T09:00:00.000Z",
+        email: "reader@example.com",
+        full_name: "Reader One",
+        general_updates_opt_in: true,
+        id: "audience_123",
+        lessons_opt_in: true,
+        locale: "en",
+        profile_id: null,
+        source: "dashboard",
+        unsubscribed_at: null,
+        updated_at: "2026-03-28T09:00:00.000Z",
+      },
+    ],
     error: null,
   });
   const audienceContactsOrderMock = vi.fn().mockResolvedValue({
-    data:
-      options?.audienceContacts ?? [
-        {
-          books_opt_in: false,
-          consented_at: "2026-03-28T09:00:00.000Z",
-          created_at: "2026-03-28T09:00:00.000Z",
-          email: "reader@example.com",
-          full_name: "Reader One",
-          general_updates_opt_in: true,
-          id: "audience_123",
-          lessons_opt_in: true,
-          locale: "en",
-          profile_id: null,
-          source: "dashboard",
-          unsubscribed_at: null,
-          updated_at: "2026-03-28T09:00:00.000Z",
-        },
-      ],
+    data: options?.audienceContacts ?? [
+      {
+        books_opt_in: false,
+        consented_at: "2026-03-28T09:00:00.000Z",
+        created_at: "2026-03-28T09:00:00.000Z",
+        email: "reader@example.com",
+        full_name: "Reader One",
+        general_updates_opt_in: true,
+        id: "audience_123",
+        lessons_opt_in: true,
+        locale: "en",
+        profile_id: null,
+        source: "dashboard",
+        unsubscribed_at: null,
+        updated_at: "2026-03-28T09:00:00.000Z",
+      },
+    ],
     error: null,
   });
-  const syncStoredAudienceContactToResendMock = vi
-    .fn()
-    .mockImplementation(async (contact: Record<string, unknown>) =>
-      options?.resendAudienceSyncResult ?? { contact, success: true, syncState: null },
-    );
+  const syncStoredAudienceContactToResendMock = vi.fn().mockImplementation(
+    async (contact: Record<string, unknown>) =>
+      options?.resendAudienceSyncResult ?? {
+        contact,
+        success: true,
+        syncState: null,
+      },
+  );
   const notificationEventsEqStatusMock = vi.fn().mockResolvedValue({
     data:
       options?.existingReleaseEvents?.map((event) => ({
@@ -507,11 +521,15 @@ describe("admin feedback action", () => {
   });
 
   it("skips admin feedback when Supabase is unavailable", async () => {
-    const { getAdminServerContextMock, submitFeedback } = await loadAdminModule({
-      hasEnv: false,
-    });
+    const { getAdminServerContextMock, submitFeedback } = await loadAdminModule(
+      {
+        hasEnv: false,
+      },
+    );
 
-    await expect(submitFeedback(createAdminFormData())).resolves.toBeUndefined();
+    await expect(
+      submitFeedback(createAdminFormData()),
+    ).resolves.toBeUndefined();
     expect(getAdminServerContextMock).not.toHaveBeenCalled();
   });
 
@@ -520,7 +538,9 @@ describe("admin feedback action", () => {
       isAdmin: false,
     });
 
-    await expect(submitFeedback(createAdminFormData())).resolves.toBeUndefined();
+    await expect(
+      submitFeedback(createAdminFormData()),
+    ).resolves.toBeUndefined();
     expect(submissionUpdateMock).not.toHaveBeenCalled();
   });
 
@@ -549,7 +569,9 @@ describe("admin feedback action", () => {
       submitFeedback,
     } = await loadAdminModule();
 
-    await expect(submitFeedback(createAdminFormData())).resolves.toBeUndefined();
+    await expect(
+      submitFeedback(createAdminFormData()),
+    ).resolves.toBeUndefined();
 
     expect(submissionUpdateMock).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -581,20 +603,24 @@ describe("admin feedback action", () => {
   });
 
   it("still completes when the student review email cannot be sent", async () => {
-    const { dispatchLoggedNotificationEmailMock, submitFeedback } = await loadAdminModule({
-      feedbackNotificationResult: {
-        success: false,
-        error: "Provider unavailable",
-      },
-    });
+    const { dispatchLoggedNotificationEmailMock, submitFeedback } =
+      await loadAdminModule({
+        feedbackNotificationResult: {
+          success: false,
+          error: "Provider unavailable",
+        },
+      });
 
-    await expect(submitFeedback(createAdminFormData())).resolves.toBeUndefined();
+    await expect(
+      submitFeedback(createAdminFormData()),
+    ).resolves.toBeUndefined();
 
     expect(dispatchLoggedNotificationEmailMock).toHaveBeenCalledOnce();
   });
 
   it("rejects invalid entry report review payloads before updating reports", async () => {
-    const { reportUpdateEqMock, updateEntryReportStatus } = await loadAdminModule();
+    const { reportUpdateEqMock, updateEntryReportStatus } =
+      await loadAdminModule();
 
     await expect(
       updateEntryReportStatus(
@@ -640,8 +666,11 @@ describe("admin feedback action", () => {
   });
 
   it("updates contact messages and revalidates the admin page", async () => {
-    const { contactUpdateEqMock, revalidatePathMock, updateContactMessageStatus } =
-      await loadAdminModule();
+    const {
+      contactUpdateEqMock,
+      revalidatePathMock,
+      updateContactMessageStatus,
+    } = await loadAdminModule();
 
     await expect(
       updateContactMessageStatus(createContactMessageAdminFormData()),
@@ -701,8 +730,11 @@ describe("admin feedback action", () => {
   });
 
   it("updates content release status and revalidates admin pages", async () => {
-    const { contentReleaseUpdateEqMock, revalidatePathMock, updateContentReleaseStatus } =
-      await loadAdminModule();
+    const {
+      contentReleaseUpdateEqMock,
+      revalidatePathMock,
+      updateContentReleaseStatus,
+    } = await loadAdminModule();
 
     await expect(
       updateContentReleaseStatus(createContentReleaseStatusFormData()),
@@ -776,29 +808,30 @@ describe("admin feedback action", () => {
   });
 
   it("rejects release queueing when background delivery is already in progress", async () => {
-    const { invokeSupabaseEdgeFunctionMock, sendContentRelease } = await loadAdminModule({
-      release: {
-        audience_segment: "lessons",
-        body_en: "A new lesson has been published.",
-        body_nl: "Er is een nieuwe les gepubliceerd.",
-        created_at: "2026-03-28T10:00:00.000Z",
-        delivery_cursor: "reader-025@example.com",
-        delivery_finished_at: null,
-        delivery_requested_at: "2026-03-28T11:00:00.000Z",
-        delivery_requested_by: "admin_123",
-        delivery_started_at: "2026-03-28T11:00:02.000Z",
-        delivery_summary: {},
-        id: "44444444-4444-4444-8444-444444444444",
-        last_delivery_error: null,
-        locale_mode: "localized",
-        release_type: "lesson",
-        sent_at: null,
-        status: "sending",
-        subject_en: "New lesson available",
-        subject_nl: "Nieuwe les beschikbaar",
-        updated_at: "2026-03-28T11:00:02.000Z",
-      },
-    });
+    const { invokeSupabaseEdgeFunctionMock, sendContentRelease } =
+      await loadAdminModule({
+        release: {
+          audience_segment: "lessons",
+          body_en: "A new lesson has been published.",
+          body_nl: "Er is een nieuwe les gepubliceerd.",
+          created_at: "2026-03-28T10:00:00.000Z",
+          delivery_cursor: "reader-025@example.com",
+          delivery_finished_at: null,
+          delivery_requested_at: "2026-03-28T11:00:00.000Z",
+          delivery_requested_by: "admin_123",
+          delivery_started_at: "2026-03-28T11:00:02.000Z",
+          delivery_summary: {},
+          id: "44444444-4444-4444-8444-444444444444",
+          last_delivery_error: null,
+          locale_mode: "localized",
+          release_type: "lesson",
+          sent_at: null,
+          status: "sending",
+          subject_en: "New lesson available",
+          subject_nl: "Nieuwe les beschikbaar",
+          updated_at: "2026-03-28T11:00:02.000Z",
+        },
+      });
 
     await expect(
       sendContentRelease(null, createContentReleaseStatusFormData()),
@@ -811,39 +844,44 @@ describe("admin feedback action", () => {
   });
 
   it("resumes queued releases without resetting their progress cursor", async () => {
-    const { contentReleaseUpdateEqMock, invokeSupabaseEdgeFunctionMock, sendContentRelease } =
-      await loadAdminModule({
-        release: {
-          audience_segment: "lessons",
-          body_en: "A new lesson has been published.",
-          body_nl: "Er is een nieuwe les gepubliceerd.",
-          created_at: "2026-03-28T10:00:00.000Z",
-          delivery_cursor: "reader-025@example.com",
-          delivery_finished_at: null,
-          delivery_requested_at: "2026-03-28T11:00:00.000Z",
-          delivery_requested_by: "admin_123",
-          delivery_started_at: null,
-          delivery_summary: {
-            item_count: 1,
-            processed_recipient_count: 25,
-            remaining_recipient_count: 10,
-          },
-          id: "44444444-4444-4444-8444-444444444444",
-          last_delivery_error: "The next delivery batch could not be started automatically.",
-          locale_mode: "localized",
-          release_type: "lesson",
-          sent_at: null,
-          status: "queued",
-          subject_en: "New lesson available",
-          subject_nl: "Nieuwe les beschikbaar",
-          updated_at: "2026-03-28T11:05:00.000Z",
+    const {
+      contentReleaseUpdateEqMock,
+      invokeSupabaseEdgeFunctionMock,
+      sendContentRelease,
+    } = await loadAdminModule({
+      release: {
+        audience_segment: "lessons",
+        body_en: "A new lesson has been published.",
+        body_nl: "Er is een nieuwe les gepubliceerd.",
+        created_at: "2026-03-28T10:00:00.000Z",
+        delivery_cursor: "reader-025@example.com",
+        delivery_finished_at: null,
+        delivery_requested_at: "2026-03-28T11:00:00.000Z",
+        delivery_requested_by: "admin_123",
+        delivery_started_at: null,
+        delivery_summary: {
+          item_count: 1,
+          processed_recipient_count: 25,
+          remaining_recipient_count: 10,
         },
-      });
+        id: "44444444-4444-4444-8444-444444444444",
+        last_delivery_error:
+          "The next delivery batch could not be started automatically.",
+        locale_mode: "localized",
+        release_type: "lesson",
+        sent_at: null,
+        status: "queued",
+        subject_en: "New lesson available",
+        subject_nl: "Nieuwe les beschikbaar",
+        updated_at: "2026-03-28T11:05:00.000Z",
+      },
+    });
 
     await expect(
       sendContentRelease(null, createContentReleaseStatusFormData()),
     ).resolves.toEqual({
-      message: "Queued release resumed. Delivery will continue in the background.",
+      message:
+        "Queued release resumed. Delivery will continue in the background.",
       success: true,
     });
 
@@ -857,13 +895,14 @@ describe("admin feedback action", () => {
   });
 
   it("reverts queued releases when the background worker cannot be started", async () => {
-    const { contentReleaseUpdateEqMock, sendContentRelease } = await loadAdminModule({
-      invokeWorkerResult: {
-        error: "Worker unavailable",
-        status: 500,
-        success: false,
-      },
-    });
+    const { contentReleaseUpdateEqMock, sendContentRelease } =
+      await loadAdminModule({
+        invokeWorkerResult: {
+          error: "Worker unavailable",
+          status: 500,
+          success: false,
+        },
+      });
 
     await expect(
       sendContentRelease(null, createContentReleaseStatusFormData()),
@@ -891,7 +930,9 @@ describe("admin feedback action", () => {
       syncStoredAudienceContactToResendMock,
     } = await loadAdminModule();
 
-    await expect(syncAudienceContactsWithResend(null, new FormData())).resolves.toEqual({
+    await expect(
+      syncAudienceContactsWithResend(null, new FormData()),
+    ).resolves.toEqual({
       message: "Synced 1 audience contact.",
       success: true,
     });
@@ -903,12 +944,16 @@ describe("admin feedback action", () => {
   });
 
   it("reports missing Resend audience configuration for admin sync", async () => {
-    const { syncAudienceContactsWithResend, syncStoredAudienceContactToResendMock } =
-      await loadAdminModule({
-        hasResendAudienceEnv: false,
-      });
+    const {
+      syncAudienceContactsWithResend,
+      syncStoredAudienceContactToResendMock,
+    } = await loadAdminModule({
+      hasResendAudienceEnv: false,
+    });
 
-    await expect(syncAudienceContactsWithResend(null, new FormData())).resolves.toEqual({
+    await expect(
+      syncAudienceContactsWithResend(null, new FormData()),
+    ).resolves.toEqual({
       message: "Resend audience sync is not configured yet.",
       success: false,
     });

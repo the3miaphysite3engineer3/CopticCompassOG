@@ -1,5 +1,13 @@
 import * as React from "react";
-import { Html, Head, Body, Container, Text, Heading, Hr } from "@react-email/components";
+import {
+  Html,
+  Head,
+  Body,
+  Container,
+  Text,
+  Heading,
+  Hr,
+} from "@react-email/components";
 
 type ContactEmailTemplateProps = {
   name: string;
@@ -29,7 +37,9 @@ export function ContactEmailTemplate({
             <strong>Email:</strong> {email}
           </Text>
           <Hr style={hr} />
-          <Text style={{ ...paragraph, whiteSpace: "pre-wrap" }}>{message}</Text>
+          <Text style={{ ...paragraph, whiteSpace: "pre-wrap" }}>
+            {message}
+          </Text>
         </Container>
       </Body>
     </Html>

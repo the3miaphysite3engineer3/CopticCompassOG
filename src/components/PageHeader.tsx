@@ -25,7 +25,8 @@ const TITLE_TONE_CLASSES: Record<PageHeaderTone, string> = {
   default: "from-stone-800 to-stone-500 dark:from-stone-100 dark:to-stone-400",
   brand: "from-sky-600 to-emerald-500 dark:from-sky-400 dark:to-emerald-400",
   sky: "from-sky-600 to-stone-500 dark:from-sky-400 dark:to-stone-400",
-  analytics: "from-emerald-500 to-sky-600 dark:from-emerald-400 dark:to-sky-400",
+  analytics:
+    "from-emerald-500 to-sky-600 dark:from-emerald-400 dark:to-sky-400",
 };
 
 const TITLE_SIZE_CLASSES: Record<PageHeaderSize, string> = {
@@ -50,9 +51,15 @@ export function PageHeader({
   const centered = align === "center";
 
   return (
-    <div className={cx("space-y-4", centered ? "text-center" : "text-left", className)}>
-      {eyebrow && (
-        eyebrowVariant === "badge" ? (
+    <div
+      className={cx(
+        "space-y-4",
+        centered ? "text-center" : "text-left",
+        className,
+      )}
+    >
+      {eyebrow &&
+        (eyebrowVariant === "badge" ? (
           <Badge
             tone="accent"
             size="xs"
@@ -66,20 +73,19 @@ export function PageHeader({
             className={cx(
               "text-xs font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-400",
               centered && "mx-auto",
-              eyebrowClassName
+              eyebrowClassName,
             )}
           >
             {eyebrow}
           </span>
-        )
-      )}
+        ))}
 
       <h1
         className={cx(
           "bg-gradient-to-tr bg-clip-text pb-2 font-extrabold tracking-tight text-transparent drop-shadow-sm",
           TITLE_SIZE_CLASSES[size],
           TITLE_TONE_CLASSES[tone],
-          titleClassName
+          titleClassName,
         )}
       >
         {title}
@@ -90,7 +96,7 @@ export function PageHeader({
           className={cx(
             "text-lg font-medium text-stone-500 dark:text-stone-400 md:text-xl",
             centered ? "mx-auto max-w-3xl" : "max-w-3xl",
-            descriptionClassName
+            descriptionClassName,
           )}
         >
           {description}

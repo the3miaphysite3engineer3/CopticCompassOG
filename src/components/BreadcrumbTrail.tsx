@@ -15,10 +15,7 @@ type BreadcrumbTrailProps = {
   className?: string;
 };
 
-export function BreadcrumbTrail({
-  items,
-  className,
-}: BreadcrumbTrailProps) {
+export function BreadcrumbTrail({ items, className }: BreadcrumbTrailProps) {
   if (items.length === 0) {
     return null;
   }
@@ -33,7 +30,10 @@ export function BreadcrumbTrail({
           const isCurrentPage = index === items.length - 1;
 
           return (
-            <li key={`${item.label}-${index}`} className="flex items-center gap-2">
+            <li
+              key={`${item.label}-${index}`}
+              className="flex items-center gap-2"
+            >
               {index > 0 ? (
                 <ChevronRight
                   className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500"

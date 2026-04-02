@@ -1,13 +1,12 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import {
   MAX_PROFILE_FULL_NAME_LENGTH,
   getAvatarStorageObjectPath,
   isValidProfileFullName,
   normalizeProfileFullName,
 } from "@/features/profile/lib/profileValidation";
-import { PUBLIC_LOCALES, getDashboardPath } from "@/lib/locale";
+import { revalidateDashboardPaths } from "@/lib/server/revalidation";
 import { getAuthenticatedServerContext } from "@/lib/supabase/auth";
 import {
   getSupabaseRuntimeEnv,
@@ -93,9 +92,6 @@ export async function updateProfile(formData: FormData) {
     return { success: false, error: error.message };
   }
 
-  revalidatePath("/dashboard");
-  for (const locale of PUBLIC_LOCALES) {
-    revalidatePath(getDashboardPath(locale));
-  }
+  revalidateDashboardPaths();
   return { success: true };
 }

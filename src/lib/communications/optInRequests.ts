@@ -72,7 +72,10 @@ export function buildAudienceOptInConfirmationUrl(
   assertServerOnly("buildAudienceOptInConfirmationUrl");
 
   const siteUrl = getSiteUrl() ?? new URL(siteConfig.liveUrl);
-  const url = new URL(getLocalizedPath(locale, "/communications/confirm"), siteUrl);
+  const url = new URL(
+    getLocalizedPath(locale, "/communications/confirm"),
+    siteUrl,
+  );
   url.searchParams.set("token", token);
   return url.toString();
 }

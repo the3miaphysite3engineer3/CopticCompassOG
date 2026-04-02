@@ -46,19 +46,34 @@ export function DictionarySearchBar({
           value={query}
           onChange={(event) => {
             onQueryChange(event.target.value);
-            onSelectionChange(event.target.selectionStart, event.target.selectionEnd);
+            onSelectionChange(
+              event.target.selectionStart,
+              event.target.selectionEnd,
+            );
           }}
           onClick={(event) =>
-            onSelectionChange(event.currentTarget.selectionStart, event.currentTarget.selectionEnd)
+            onSelectionChange(
+              event.currentTarget.selectionStart,
+              event.currentTarget.selectionEnd,
+            )
           }
           onFocus={(event) =>
-            onSelectionChange(event.currentTarget.selectionStart, event.currentTarget.selectionEnd)
+            onSelectionChange(
+              event.currentTarget.selectionStart,
+              event.currentTarget.selectionEnd,
+            )
           }
           onKeyUp={(event) =>
-            onSelectionChange(event.currentTarget.selectionStart, event.currentTarget.selectionEnd)
+            onSelectionChange(
+              event.currentTarget.selectionStart,
+              event.currentTarget.selectionEnd,
+            )
           }
           onSelect={(event) =>
-            onSelectionChange(event.currentTarget.selectionStart, event.currentTarget.selectionEnd)
+            onSelectionChange(
+              event.currentTarget.selectionStart,
+              event.currentTarget.selectionEnd,
+            )
           }
           className={`${antinoou.className} w-full rounded-[1.75rem] bg-transparent p-6 pl-16 pr-28 text-lg text-stone-900 transition-all focus:outline-none focus:ring-2 focus:ring-sky-500/50 placeholder:font-sans placeholder:text-stone-400 dark:text-stone-100 dark:placeholder:text-stone-500 md:text-2xl`}
         />

@@ -1,30 +1,36 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import { fileURLToPath } from 'url';
-import { createGrammarStaticExportFiles } from '../src/content/grammar/build.ts';
+import * as fs from "fs";
+import * as path from "path";
+import { fileURLToPath } from "url";
+import { format } from "prettier";
+import { createGrammarStaticExportFiles } from "../src/content/grammar/build.ts";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-function writeJsonFile(filePath: string, payload: unknown) {
+async function writeJsonFile(filePath: string, payload: unknown) {
   fs.mkdirSync(path.dirname(filePath), { recursive: true });
-  fs.writeFileSync(filePath, `${JSON.stringify(payload, null, 2)}\n`);
+  const formattedJson = await format(JSON.stringify(payload), {
+    parser: "json",
+  });
+  fs.writeFileSync(filePath, formattedJson);
 }
 
-function main() {
-  const outputRoot = path.resolve(__dirname, '../public/data');
-  const grammarOutputRoot = path.join(outputRoot, 'grammar/v1');
+async function main() {
+  const outputRoot = path.resolve(__dirname, "../public/data");
+  const grammarOutputRoot = path.join(outputRoot, "grammar/v1");
   const files = createGrammarStaticExportFiles();
 
   fs.rmSync(grammarOutputRoot, { recursive: true, force: true });
 
-  files.forEach((file) => {
+  for (const file of files) {
     const absolutePath = path.join(outputRoot, file.outputPath);
-    writeJsonFile(absolutePath, file.payload);
+    await writeJsonFile(absolutePath, file.payload);
     console.log(`Wrote ${absolutePath}`);
-  });
+  }
 
-  console.log(`Successfully exported ${files.length} grammar data files to ${outputRoot}`);
+  console.log(
+    `Successfully exported ${files.length} grammar data files to ${outputRoot}`,
+  );
 }
 
-main();
+await main();

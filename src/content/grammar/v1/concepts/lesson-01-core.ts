@@ -10,7 +10,10 @@ import {
 } from "../lesson-01-ids.ts";
 
 const text = (value: string): GrammarInline => ({ type: "text", text: value });
-const coptic = (value: string): GrammarInline => ({ type: "coptic", text: value });
+const coptic = (value: string): GrammarInline => ({
+  type: "coptic",
+  text: value,
+});
 const paragraph = (...content: GrammarInline[]): GrammarBlock => ({
   type: "paragraph",
   content,
@@ -149,7 +152,9 @@ export const grammarLesson01CoreConcepts: readonly GrammarConceptDocument[] = [
     definition: {
       en: [
         paragraph(
-          text("A context in which a noun appears without an overt determiner prefix."),
+          text(
+            "A context in which a noun appears without an overt determiner prefix.",
+          ),
           text(" Lesson 1 highlights "),
           coptic("ⲛⲓⲃⲉⲛ"),
           text(" as a common trigger for this pattern."),
@@ -263,7 +268,9 @@ export const grammarLesson01CoreConcepts: readonly GrammarConceptDocument[] = [
           coptic("ⲛ̀ⲑⲟⲥ"),
           text(", and "),
           coptic("ⲛ̀ⲑⲱⲟⲩ"),
-          text(" that can be used for emphasis alongside the standard nexus-pronoun pattern."),
+          text(
+            " that can be used for emphasis alongside the standard nexus-pronoun pattern.",
+          ),
         ),
       ],
       nl: [

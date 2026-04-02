@@ -1,4 +1,7 @@
-import { ANALYTICS_DIALECTS, type AnalyticsDialect } from "@/features/dictionary/config";
+import {
+  ANALYTICS_DIALECTS,
+  type AnalyticsDialect,
+} from "@/features/dictionary/config";
 import type { LexicalEntry } from "@/features/dictionary/types";
 
 export type AnalyticsChartDatum = {
@@ -19,7 +22,9 @@ export type AnalyticsSnapshot = {
 
 export type AnalyticsSnapshotMap = Record<AnalyticsDialect, AnalyticsSnapshot>;
 
-function createAnalyticsSnapshot(dictionary: LexicalEntry[]): AnalyticsSnapshot {
+function createAnalyticsSnapshot(
+  dictionary: LexicalEntry[],
+): AnalyticsSnapshot {
   const posCounts: Record<string, number> = {
     V: 0,
     N: 0,
@@ -83,7 +88,10 @@ function createAnalyticsSnapshot(dictionary: LexicalEntry[]): AnalyticsSnapshot 
       { name: "Adverbs", value: posCounts.ADV || 0 },
       { name: "Conjunctions", value: posCounts.CONJ || 0 },
       { name: "Prepositions", value: posCounts.PREP || 0 },
-      { name: "Other", value: (posCounts.OTHER || 0) + (posCounts.INTERJ || 0) },
+      {
+        name: "Other",
+        value: (posCounts.OTHER || 0) + (posCounts.INTERJ || 0),
+      },
     ].filter((item) => item.value > 0),
     genderChartData: [
       { name: "Masculine (explicit)", value: genderCounts.M },
@@ -97,14 +105,19 @@ function createAnalyticsSnapshot(dictionary: LexicalEntry[]): AnalyticsSnapshot 
   };
 }
 
-export function createAnalyticsSnapshots(dictionary: LexicalEntry[]): AnalyticsSnapshotMap {
-  return ANALYTICS_DIALECTS.reduce<AnalyticsSnapshotMap>((snapshots, dialect) => {
-    const filteredDictionary =
-      dialect === "ALL"
-        ? dictionary
-        : dictionary.filter((entry) => entry.dialects[dialect] !== undefined);
+export function createAnalyticsSnapshots(
+  dictionary: LexicalEntry[],
+): AnalyticsSnapshotMap {
+  return ANALYTICS_DIALECTS.reduce<AnalyticsSnapshotMap>(
+    (snapshots, dialect) => {
+      const filteredDictionary =
+        dialect === "ALL"
+          ? dictionary
+          : dictionary.filter((entry) => entry.dialects[dialect] !== undefined);
 
-    snapshots[dialect] = createAnalyticsSnapshot(filteredDictionary);
-    return snapshots;
-  }, {} as AnalyticsSnapshotMap);
+      snapshots[dialect] = createAnalyticsSnapshot(filteredDictionary);
+      return snapshots;
+    },
+    {} as AnalyticsSnapshotMap,
+  );
 }

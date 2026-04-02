@@ -80,8 +80,14 @@ export function DictionaryFavoritesOverview({
       ) : (
         <div className="grid gap-4">
           {favorites.map(({ entry, favorite }) => {
-            const savedDate = formatDashboardDate(favorite.created_at, language);
-            const meaningPreview = getMeaningPreview(language, { entry, favorite });
+            const savedDate = formatDashboardDate(
+              favorite.created_at,
+              language,
+            );
+            const meaningPreview = getMeaningPreview(language, {
+              entry,
+              favorite,
+            });
 
             return (
               <SurfacePanel
@@ -108,7 +114,10 @@ export function DictionaryFavoritesOverview({
                       className={`${antinoou.className} text-3xl tracking-wide text-sky-700 dark:text-sky-300`}
                     >
                       {entry
-                        ? getPreferredEntryDisplaySpelling(entry, preferredDialect)
+                        ? getPreferredEntryDisplaySpelling(
+                            entry,
+                            preferredDialect,
+                          )
                         : favorite.entry_id}
                     </h4>
 

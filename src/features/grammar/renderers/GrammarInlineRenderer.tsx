@@ -132,7 +132,11 @@ function getCompoundAbbreviationMatch(
   const currentNode = nodes[index];
   const nextNode = nodes[index + 1];
 
-  if (currentNode?.type === "text" && currentNode.text.trim() === "N" && isNmSuperscriptNode(nextNode)) {
+  if (
+    currentNode?.type === "text" &&
+    currentNode.text.trim() === "N" &&
+    isNmSuperscriptNode(nextNode)
+  ) {
     return {
       href: `#${getGrammarLessonAbbreviationAnchorId(lessonId, "nm")}`,
       length: 2,
@@ -158,13 +162,13 @@ function renderInlineNode(
 
   switch (node.type) {
     case "text":
-      return abbreviationHref
-        ? (
-            <GrammarAbbreviation key={key} href={abbreviationHref}>
-              {node.text}
-            </GrammarAbbreviation>
-          )
-        : <span key={key}>{node.text}</span>;
+      return abbreviationHref ? (
+        <GrammarAbbreviation key={key} href={abbreviationHref}>
+          {node.text}
+        </GrammarAbbreviation>
+      ) : (
+        <span key={key}>{node.text}</span>
+      );
     case "coptic":
       return renderCopticNode(
         key,
@@ -214,39 +218,34 @@ function renderInlineNode(
         </em>
       );
     case "smallCaps":
-      return (
-        abbreviationHref ? (
-          <GrammarAbbreviation
-            key={key}
-            href={abbreviationHref}
-            className="small-caps"
-          >
-            <GrammarInlineRenderer
-              nodes={node.children}
-              language={language}
-              lessonId={lessonId}
-              renderFootnoteRef={renderFootnoteRef}
-              enableAbbreviationLinks={enableAbbreviationLinks}
-            />
-          </GrammarAbbreviation>
-        ) : (
-          <span key={key} className="small-caps">
-            <GrammarInlineRenderer
-              nodes={node.children}
-              language={language}
-              lessonId={lessonId}
-              renderFootnoteRef={renderFootnoteRef}
-              enableAbbreviationLinks={enableAbbreviationLinks}
-            />
-          </span>
-        )
+      return abbreviationHref ? (
+        <GrammarAbbreviation
+          key={key}
+          href={abbreviationHref}
+          className="small-caps"
+        >
+          <GrammarInlineRenderer
+            nodes={node.children}
+            language={language}
+            lessonId={lessonId}
+            renderFootnoteRef={renderFootnoteRef}
+            enableAbbreviationLinks={enableAbbreviationLinks}
+          />
+        </GrammarAbbreviation>
+      ) : (
+        <span key={key} className="small-caps">
+          <GrammarInlineRenderer
+            nodes={node.children}
+            language={language}
+            lessonId={lessonId}
+            renderFootnoteRef={renderFootnoteRef}
+            enableAbbreviationLinks={enableAbbreviationLinks}
+          />
+        </span>
       );
     case "underline":
       return (
-        <span
-          key={key}
-          className="underline decoration-2 underline-offset-4"
-        >
+        <span key={key} className="underline decoration-2 underline-offset-4">
           <GrammarInlineRenderer
             nodes={node.children}
             language={language}
@@ -289,7 +288,10 @@ function renderInlineNode(
       }
 
       return (
-        <sup key={key} className="text-xs font-semibold text-sky-700 dark:text-sky-300">
+        <sup
+          key={key}
+          className="text-xs font-semibold text-sky-700 dark:text-sky-300"
+        >
           [{node.ref}]
         </sup>
       );
@@ -366,7 +368,5 @@ export function GrammarInlineRenderer({
     );
   }
 
-  return (
-    <>{renderedNodes}</>
-  );
+  return <>{renderedNodes}</>;
 }

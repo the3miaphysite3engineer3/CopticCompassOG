@@ -27,7 +27,8 @@ declare global {
   var __appRateLimitLastPruneAt: number | undefined;
 }
 
-const rateLimitStore = globalThis.__appRateLimitStore ?? new Map<string, RateLimitBucket>();
+const rateLimitStore =
+  globalThis.__appRateLimitStore ?? new Map<string, RateLimitBucket>();
 globalThis.__appRateLimitStore = rateLimitStore;
 
 function getStoreKey(namespace: string, identifier: string) {
@@ -53,10 +54,15 @@ function pruneExpiredBuckets(now: number) {
   globalThis.__appRateLimitLastPruneAt = now;
 }
 
-const redisUrl = process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
-const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
+const redisUrl =
+  process.env.UPSTASH_REDIS_REST_URL ?? process.env.KV_REST_API_URL;
+const redisToken =
+  process.env.UPSTASH_REDIS_REST_TOKEN ?? process.env.KV_REST_API_TOKEN;
 
-const redis = redisUrl && redisToken ? new Redis({ url: redisUrl, token: redisToken }) : null;
+const redis =
+  redisUrl && redisToken
+    ? new Redis({ url: redisUrl, token: redisToken })
+    : null;
 
 // Cache map for ratelimiters so we don't recreate them every request
 const upstashRateLimiters = new Map<string, Ratelimit>();
@@ -80,13 +86,14 @@ export async function consumeRateLimit({
       upstashLimiter = new Ratelimit({
         redis,
         limiter: Ratelimit.fixedWindow(limit, `${windowMs} ms`),
-        ephemeralCache: ratelimitCache, 
+        ephemeralCache: ratelimitCache,
         prefix: `ratelimit:${namespace}`,
       });
       upstashRateLimiters.set(cacheKey, upstashLimiter);
     }
 
-    const { success, remaining, reset } = await upstashLimiter.limit(identifier);
+    const { success, remaining, reset } =
+      await upstashLimiter.limit(identifier);
     return {
       ok: success,
       remaining,

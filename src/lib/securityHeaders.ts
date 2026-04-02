@@ -36,7 +36,9 @@ function buildSourceList(...sources: Array<string | null | undefined | false>) {
   return [...new Set(sources.filter(Boolean))].join(" ");
 }
 
-export function buildContentSecurityPolicy(options: SecurityHeadersOptions = {}) {
+export function buildContentSecurityPolicy(
+  options: SecurityHeadersOptions = {},
+) {
   const nodeEnv = options.nodeEnv ?? process.env.NODE_ENV;
   const nonce = options.nonce ?? null;
   const supabaseOrigin = getSupabaseOrigin(
@@ -80,7 +82,9 @@ export function buildContentSecurityPolicy(options: SecurityHeadersOptions = {})
   return directives.join("; ");
 }
 
-export function buildSecurityHeaders(options: SecurityHeadersOptions = {}): SecurityHeader[] {
+export function buildSecurityHeaders(
+  options: SecurityHeadersOptions = {},
+): SecurityHeader[] {
   const nodeEnv = options.nodeEnv ?? process.env.NODE_ENV;
   const includeContentSecurityPolicy =
     options.includeContentSecurityPolicy ?? true;

@@ -28,7 +28,8 @@ export const ENTRY_FAVORITE_ERROR_CODES = [
   "update-failed",
 ] as const;
 
-export type EntryFavoriteErrorCode = (typeof ENTRY_FAVORITE_ERROR_CODES)[number];
+export type EntryFavoriteErrorCode =
+  (typeof ENTRY_FAVORITE_ERROR_CODES)[number];
 
 export function isEntryReportReason(value: string): value is EntryReportReason {
   return ENTRY_REPORT_REASONS.includes(value as EntryReportReason);

@@ -1,6 +1,9 @@
 import type { ReactElement } from "react";
 import { getNotificationEmailEnv } from "@/lib/notifications/config";
-import { sendNotificationEmail, type NotificationEmailResult } from "@/lib/notifications/email";
+import {
+  sendNotificationEmail,
+  type NotificationEmailResult,
+} from "@/lib/notifications/email";
 import { assertServerOnly } from "@/lib/server/assertServerOnly";
 import { hasSupabaseServiceRoleEnv } from "@/lib/supabase/config";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
@@ -98,7 +101,9 @@ async function recordNotificationOutcome(options: {
   supabase: ReturnType<typeof createServiceRoleClient>;
 }) {
   const processedAt = new Date().toISOString();
-  const deliveryStatus: "sent" | "failed" = options.result.success ? "sent" : "failed";
+  const deliveryStatus: "sent" | "failed" = options.result.success
+    ? "sent"
+    : "failed";
   const deliveryInsert = {
     channel: "email" as const,
     error: options.result.success ? null : options.result.error,

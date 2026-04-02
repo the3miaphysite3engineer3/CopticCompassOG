@@ -1,10 +1,6 @@
 import { cookies, headers } from "next/headers";
 import { assertServerOnly } from "@/lib/server/assertServerOnly";
-import {
-  DEFAULT_LANGUAGE,
-  LANGUAGE_STORAGE_KEY,
-  isLanguage,
-} from "@/lib/i18n";
+import { DEFAULT_LANGUAGE, LANGUAGE_STORAGE_KEY, isLanguage } from "@/lib/i18n";
 import type { Language } from "@/types/i18n";
 
 assertServerOnly("preferredLanguage");
@@ -46,12 +42,17 @@ export async function getPreferredLanguage(): Promise<Language> {
   }
 
   const headerStore = await headers();
-  return getLanguageFromAcceptLanguage(headerStore.get("accept-language")) ?? DEFAULT_LANGUAGE;
+  return (
+    getLanguageFromAcceptLanguage(headerStore.get("accept-language")) ??
+    DEFAULT_LANGUAGE
+  );
 }
 
 export async function getDocumentLanguage(): Promise<Language> {
   const headerStore = await headers();
-  const pathnameLanguage = getLanguageFromPathname(headerStore.get("x-pathname"));
+  const pathnameLanguage = getLanguageFromPathname(
+    headerStore.get("x-pathname"),
+  );
 
   if (pathnameLanguage) {
     return pathnameLanguage;

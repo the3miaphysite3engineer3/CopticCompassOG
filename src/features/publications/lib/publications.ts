@@ -2,7 +2,10 @@ import type { Language } from "@/types/i18n";
 import { getLocalizedPath } from "@/lib/locale";
 
 export type LanguageBadge = "COP" | "NL" | "EN";
-export type PublicationSchemaType = "Book" | "ScholarlyArticle" | "CreativeWork";
+export type PublicationSchemaType =
+  | "Book"
+  | "ScholarlyArticle"
+  | "CreativeWork";
 export type PublicationStatus = "published" | "forthcoming";
 
 export interface Publication {
@@ -45,7 +48,8 @@ export const publications: Publication[] = [
   },
   {
     id: "bohairisch-nederlands-woordenboek",
-    title: "Bohairisch–Nederlands Woordenboek: Een Beknopt Lexicon van het Koptisch",
+    title:
+      "Bohairisch–Nederlands Woordenboek: Een Beknopt Lexicon van het Koptisch",
     lang: "NL",
     schemaType: "Book",
     status: "forthcoming",
@@ -56,7 +60,8 @@ export const publications: Publication[] = [
   },
   {
     id: "complex-verb-constructions-coptic",
-    title: "Complex Verb Constructions in Coptic: Lexical and Morphological Perspectives from Bohairic and Sahidic",
+    title:
+      "Complex Verb Constructions in Coptic: Lexical and Morphological Perspectives from Bohairic and Sahidic",
     lang: "EN",
     schemaType: "ScholarlyArticle",
     status: "forthcoming",

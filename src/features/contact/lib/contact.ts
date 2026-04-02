@@ -35,7 +35,8 @@ export const contactInquiryOptions = [
   },
 ] as const satisfies readonly ContactInquiryOption[];
 
-export type ContactInquiryValue = (typeof contactInquiryOptions)[number]["value"];
+export type ContactInquiryValue =
+  (typeof contactInquiryOptions)[number]["value"];
 export const CONTACT_MESSAGE_STATUSES = [
   "new",
   "in_progress",
@@ -46,7 +47,7 @@ export type ContactMessageStatus = (typeof CONTACT_MESSAGE_STATUSES)[number];
 export type ContactMessageRow = Tables<"contact_messages">;
 
 const contactInquiryMap = new Map<string, string>(
-  contactInquiryOptions.map((option) => [option.value, option.emailLabel])
+  contactInquiryOptions.map((option) => [option.value, option.emailLabel]),
 );
 const contactMessageStatusLabelMap: Record<ContactMessageStatus, string> = {
   new: "New",
@@ -61,7 +62,9 @@ const contactMessageStatusPriority: Record<ContactMessageStatus, number> = {
   archived: 3,
 };
 
-export function isContactInquiryValue(value: string): value is ContactInquiryValue {
+export function isContactInquiryValue(
+  value: string,
+): value is ContactInquiryValue {
   return contactInquiryMap.has(value);
 }
 
@@ -73,7 +76,9 @@ export function formatContactInquiryLabel(value: string) {
   return contactInquiryMap.get(value) ?? "General Message";
 }
 
-export function isContactMessageStatus(value: string): value is ContactMessageStatus {
+export function isContactMessageStatus(
+  value: string,
+): value is ContactMessageStatus {
   return CONTACT_MESSAGE_STATUSES.includes(value as ContactMessageStatus);
 }
 

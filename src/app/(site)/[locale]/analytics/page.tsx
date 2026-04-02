@@ -20,7 +20,10 @@ export async function generateMetadata({
   const resolvedLocale = resolvePublicLocale(locale);
 
   return createLocalizedPageMetadata({
-    title: resolvedLocale === "nl" ? "Woordenboekstatistieken" : "Dictionary Analytics",
+    title:
+      resolvedLocale === "nl"
+        ? "Woordenboekstatistieken"
+        : "Dictionary Analytics",
     description: buildAnalyticsDescription(resolvedLocale),
     path: "/analytics",
     locale: resolvedLocale,
@@ -29,6 +32,8 @@ export async function generateMetadata({
 
 export default function AnalyticsPage() {
   return (
-    <AnalyticsPageClient snapshots={createAnalyticsSnapshots(getDictionary())} />
+    <AnalyticsPageClient
+      snapshots={createAnalyticsSnapshots(getDictionary())}
+    />
   );
 }

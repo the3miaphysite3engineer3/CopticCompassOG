@@ -1,19 +1,22 @@
-'use client'
+"use client";
 
-import { useActionState } from 'react'
-import { sendContentReleasePreview, type SendContentReleaseState } from '@/actions/admin'
-import { FormField } from '@/components/FormField'
-import { StatusNotice } from '@/components/StatusNotice'
+import { useActionState } from "react";
+import {
+  sendContentReleasePreview,
+  type SendContentReleaseState,
+} from "@/actions/admin";
+import { FormField } from "@/components/FormField";
+import { StatusNotice } from "@/components/StatusNotice";
 
 export function SendContentReleasePreviewForm({
   releaseId,
 }: {
-  releaseId: string
+  releaseId: string;
 }) {
-  const [state, formAction, isPending] = useActionState<SendContentReleaseState | null, FormData>(
-    sendContentReleasePreview,
-    null,
-  )
+  const [state, formAction, isPending] = useActionState<
+    SendContentReleaseState | null,
+    FormData
+  >(sendContentReleasePreview, null);
 
   return (
     <form
@@ -40,20 +43,25 @@ export function SendContentReleasePreviewForm({
           </select>
         </FormField>
 
-        <button type="submit" className="btn-secondary px-5" disabled={isPending}>
-          {isPending ? 'Sending preview...' : 'Send preview email'}
+        <button
+          type="submit"
+          className="btn-secondary px-5"
+          disabled={isPending}
+        >
+          {isPending ? "Sending preview..." : "Send preview email"}
         </button>
       </div>
 
       <p className="text-sm text-stone-500 dark:text-stone-400">
-        Sends a preview to the configured admin inbox without marking the release as sent.
+        Sends a preview to the configured admin inbox without marking the
+        release as sent.
       </p>
 
       {state?.message ? (
-        <StatusNotice tone={state.success ? 'success' : 'error'} align="left">
+        <StatusNotice tone={state.success ? "success" : "error"} align="left">
           {state.message}
         </StatusNotice>
       ) : null}
     </form>
-  )
+  );
 }

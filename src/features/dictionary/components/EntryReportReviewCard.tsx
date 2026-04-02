@@ -49,7 +49,9 @@ export function EntryReportReviewCard({
               <span className="font-semibold text-stone-800 dark:text-stone-200">
                 {report.reporterName ?? report.reporterEmail ?? "Unknown user"}
               </span>
-              {report.reporterEmail && report.reporterName ? ` (${report.reporterEmail})` : ""}
+              {report.reporterEmail && report.reporterName
+                ? ` (${report.reporterEmail})`
+                : ""}
             </p>
             <p>Submitted on {formatSubmissionDate(report.created_at, "en")}</p>
             <p>Entry ID: {report.entry_id}</p>
@@ -61,13 +63,17 @@ export function EntryReportReviewCard({
             </p>
           ) : (
             <p className="mt-4 max-w-3xl text-base leading-7 text-stone-600 dark:text-stone-400">
-              This entry is no longer present in the current published dictionary data.
+              This entry is no longer present in the current published
+              dictionary data.
             </p>
           )}
         </div>
 
         <div className="flex shrink-0 flex-col items-start gap-3 lg:items-end">
-          <Link href={getEntryPath(report.entry_id, "en")} className="btn-secondary px-5">
+          <Link
+            href={getEntryPath(report.entry_id, "en")}
+            className="btn-secondary px-5"
+          >
             Open entry
           </Link>
         </div>

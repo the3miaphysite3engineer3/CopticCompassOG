@@ -59,16 +59,20 @@ export default function ApiDocsPage() {
 
         <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {docsHighlights.map((highlight) => (
-            <div key={highlight} className="badge-accent justify-center px-4 py-3 text-center text-sm">
+            <div
+              key={highlight}
+              className="badge-accent justify-center px-4 py-3 text-center text-sm"
+            >
               {highlight}
             </div>
           ))}
         </div>
 
         <p className="text-sm leading-7 text-muted">
-          Public consumers should usually start with <code>/api/v1/grammar</code> for discovery or{" "}
-          <code>/api/openapi.json</code> for tooling. The public dataset only exposes published
-          lessons and their related records.
+          Public consumers should usually start with{" "}
+          <code>/api/v1/grammar</code> for discovery or{" "}
+          <code>/api/openapi.json</code> for tooling. The public dataset only
+          exposes published lessons and their related records.
         </p>
       </section>
 

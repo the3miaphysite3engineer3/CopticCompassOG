@@ -24,9 +24,9 @@ async function loadOptInModule(options?: {
     maybeSingle: vi.fn().mockResolvedValue({
       data:
         column === "email"
-          ? options?.existingRequestByEmail ?? null
+          ? (options?.existingRequestByEmail ?? null)
           : column === "token_hash"
-            ? options?.tokenLookupRequest ?? null
+            ? (options?.tokenLookupRequest ?? null)
             : null,
       error: null,
     }),
@@ -96,9 +96,9 @@ describe("opt-in request helpers", () => {
   it("builds a localized confirmation URL", async () => {
     const { buildAudienceOptInConfirmationUrl } = await loadOptInModule();
 
-    expect(
-      buildAudienceOptInConfirmationUrl("nl", "abc123"),
-    ).toBe("https://kyrilloswannes.com/nl/communications/confirm?token=abc123");
+    expect(buildAudienceOptInConfirmationUrl("nl", "abc123")).toBe(
+      "https://kyrilloswannes.com/nl/communications/confirm?token=abc123",
+    );
   });
 
   it("creates a pending opt-in request for a new email", async () => {

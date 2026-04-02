@@ -8,7 +8,10 @@ type RouteHandlerModule = {
 
 const publicApiRouteModules = Object.entries(
   import.meta.glob<RouteHandlerModule>("./**/route.ts*", { eager: true }),
-).filter(([path]) => path === "./openapi.json/route.ts" || path.startsWith("./v1/grammar/"));
+).filter(
+  ([path]) =>
+    path === "./openapi.json/route.ts" || path.startsWith("./v1/grammar/"),
+);
 
 function expectCorsHeaders(response: Response) {
   expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
@@ -35,27 +38,39 @@ function getRouteGetArgs(path: string): unknown[] {
   }
 
   if (path === "./v1/grammar/lessons/route.ts") {
-    return [new NextRequest(`${baseUrl}/api/v1/grammar/lessons?status=published`)];
+    return [
+      new NextRequest(`${baseUrl}/api/v1/grammar/lessons?status=published`),
+    ];
   }
 
   if (path === "./v1/grammar/examples/route.ts") {
-    return [new NextRequest(`${baseUrl}/api/v1/grammar/examples?lesson=lesson-1`)];
+    return [
+      new NextRequest(`${baseUrl}/api/v1/grammar/examples?lesson=lesson-1`),
+    ];
   }
 
   if (path === "./v1/grammar/exercises/route.ts") {
-    return [new NextRequest(`${baseUrl}/api/v1/grammar/exercises?lesson=lesson-1`)];
+    return [
+      new NextRequest(`${baseUrl}/api/v1/grammar/exercises?lesson=lesson-1`),
+    ];
   }
 
   if (path === "./v1/grammar/concepts/route.ts") {
-    return [new NextRequest(`${baseUrl}/api/v1/grammar/concepts?lesson=lesson-1`)];
+    return [
+      new NextRequest(`${baseUrl}/api/v1/grammar/concepts?lesson=lesson-1`),
+    ];
   }
 
   if (path === "./v1/grammar/footnotes/route.ts") {
-    return [new NextRequest(`${baseUrl}/api/v1/grammar/footnotes?lesson=lesson-1`)];
+    return [
+      new NextRequest(`${baseUrl}/api/v1/grammar/footnotes?lesson=lesson-1`),
+    ];
   }
 
   if (path === "./v1/grammar/sources/route.ts") {
-    return [new NextRequest(`${baseUrl}/api/v1/grammar/sources?lesson=lesson-1`)];
+    return [
+      new NextRequest(`${baseUrl}/api/v1/grammar/sources?lesson=lesson-1`),
+    ];
   }
 
   if (path === "./v1/grammar/lessons/[slug]/route.ts") {
@@ -70,7 +85,9 @@ function getRouteGetArgs(path: string): unknown[] {
       new Request(
         `${baseUrl}/api/v1/grammar/concepts/grammar.concept.significant-letters`,
       ),
-      { params: Promise.resolve({ id: "grammar.concept.significant-letters" }) },
+      {
+        params: Promise.resolve({ id: "grammar.concept.significant-letters" }),
+      },
     ];
   }
 

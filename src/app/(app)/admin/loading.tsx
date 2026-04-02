@@ -32,7 +32,12 @@ export default function Loading() {
           </div>
 
           {[0, 1].map((cardIndex) => (
-            <SurfacePanel key={cardIndex} as="section" rounded="3xl" className="space-y-5 p-6 md:p-8">
+            <SurfacePanel
+              key={cardIndex}
+              as="section"
+              rounded="3xl"
+              className="space-y-5 p-6 md:p-8"
+            >
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-3">
                   <LoadingBlock className="h-7 w-56 max-w-full" />

@@ -23,7 +23,9 @@ export type GrammarLessonLearnerSummary = {
   completedAt: string | null;
   noteUpdatedAt: string | null;
   nextSectionId: string | null;
-  nextSectionTitle: GrammarLessonBundle["lesson"]["sections"][number]["title"] | null;
+  nextSectionTitle:
+    | GrammarLessonBundle["lesson"]["sections"][number]["title"]
+    | null;
 };
 
 export type GrammarLearnerDashboardStats = {
@@ -62,10 +64,14 @@ export function buildGrammarLessonLearnerSummary({
       .map((row) => row.section_id),
   );
   const orderedSections = lesson.sectionOrder
-    .map((sectionId) =>
-      lesson.sections.find((section) => section.id === sectionId) ?? null,
+    .map(
+      (sectionId) =>
+        lesson.sections.find((section) => section.id === sectionId) ?? null,
     )
-    .filter((section): section is GrammarLessonBundle["lesson"]["sections"][number] => section !== null);
+    .filter(
+      (section): section is GrammarLessonBundle["lesson"]["sections"][number] =>
+        section !== null,
+    );
   const completedSections = orderedSections.filter((section) =>
     completedSectionIds.has(section.id),
   ).length;
@@ -75,7 +81,8 @@ export function buildGrammarLessonLearnerSummary({
       ? 0
       : Math.round((completedSections / totalSections) * 100);
   const nextSection =
-    orderedSections.find((section) => !completedSectionIds.has(section.id)) ?? null;
+    orderedSections.find((section) => !completedSectionIds.has(section.id)) ??
+    null;
 
   return {
     lessonId: lesson.id,
@@ -105,7 +112,8 @@ export function buildGrammarLearnerDashboardStats(
     totalLessons: summaries.length,
     startedLessons: summaries.filter((summary) => summary.isStarted).length,
     completedLessons: summaries.filter((summary) => summary.isCompleted).length,
-    bookmarkedLessons: summaries.filter((summary) => summary.isBookmarked).length,
+    bookmarkedLessons: summaries.filter((summary) => summary.isBookmarked)
+      .length,
     notedLessons: summaries.filter((summary) => summary.hasNotes).length,
   };
 }

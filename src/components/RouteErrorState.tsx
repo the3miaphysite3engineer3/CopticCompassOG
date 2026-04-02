@@ -58,7 +58,8 @@ export function RouteErrorState({
           align="left"
           title="Something interrupted this page"
         >
-          {details ?? "Please try loading the page again. If the issue continues, come back in a moment."}
+          {details ??
+            "Please try loading the page again. If the issue continues, come back in a moment."}
         </StatusNotice>
 
         <div className="flex flex-wrap gap-3">

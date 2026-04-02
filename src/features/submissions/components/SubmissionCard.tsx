@@ -40,7 +40,9 @@ export function SubmissionCard({
             {formatLessonSlug(submission.lesson_slug)}
           </h2>
           {subtitle && (
-            <div className="mt-1 text-stone-500 dark:text-stone-400">{subtitle}</div>
+            <div className="mt-1 text-stone-500 dark:text-stone-400">
+              {subtitle}
+            </div>
           )}
         </div>
         <span className="rounded-lg bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-400 dark:bg-stone-800">
@@ -51,7 +53,7 @@ export function SubmissionCard({
       <div
         className={cx(
           "mb-6 rounded-2xl border border-stone-100 bg-stone-50 p-5 whitespace-pre-wrap font-coptic text-lg text-stone-700 dark:border-stone-800/50 dark:bg-stone-950 dark:text-stone-300 md:text-xl",
-          contentClassName
+          contentClassName,
         )}
       >
         {submission.submitted_text}

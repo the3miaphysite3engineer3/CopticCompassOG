@@ -22,7 +22,8 @@ export function GET(request: NextRequest) {
     );
   }
 
-  const validatedStatus = status && isGrammarLessonStatus(status) ? status : undefined;
+  const validatedStatus =
+    status && isGrammarLessonStatus(status) ? status : undefined;
 
   return publicApiJsonResponse(listGrammarApiLessons(validatedStatus));
 }

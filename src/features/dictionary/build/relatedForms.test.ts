@@ -7,11 +7,9 @@ describe("extractRelatedFormCandidates", () => {
       id: "cd_20",
       headword: "ϣⲏⲣⲉ",
       raw: {
-        word: [
-          "(S, A, sA) ϣⲏⲣⲉ",
-          "(B, F, O) ϣⲏⲣⲓ",
-          "(B) female: ϣⲉⲣⲓ",
-        ].join("\n"),
+        word: ["(S, A, sA) ϣⲏⲣⲉ", "(B, F, O) ϣⲏⲣⲓ", "(B) female: ϣⲉⲣⲓ"].join(
+          "\n",
+        ),
         meaning: "m son [υιοσ]",
       },
     });

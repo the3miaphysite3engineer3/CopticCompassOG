@@ -59,12 +59,10 @@ export function hasAudienceSubscriptions(
 
   return Boolean(
     ("booksOptIn" in contact ? contact.booksOptIn : contact.books_opt_in) ||
-      ("generalUpdatesOptIn" in contact
-        ? contact.generalUpdatesOptIn
-        : contact.general_updates_opt_in) ||
-      ("lessonsOptIn" in contact
-        ? contact.lessonsOptIn
-        : contact.lessons_opt_in),
+    ("generalUpdatesOptIn" in contact
+      ? contact.generalUpdatesOptIn
+      : contact.general_updates_opt_in) ||
+    ("lessonsOptIn" in contact ? contact.lessonsOptIn : contact.lessons_opt_in),
   );
 }
 

@@ -40,7 +40,11 @@ function DefaultLoadingSkeleton() {
         </div>
       </SurfacePanel>
 
-      <SurfacePanel rounded="3xl" variant="subtle" className="space-y-4 p-6 md:p-8">
+      <SurfacePanel
+        rounded="3xl"
+        variant="subtle"
+        className="space-y-4 p-6 md:p-8"
+      >
         <LoadingBlock className="h-5 w-28" />
         <LoadingBlock className="h-20 w-full" />
         <LoadingBlock className="h-20 w-full" />

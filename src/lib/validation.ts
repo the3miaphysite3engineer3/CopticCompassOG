@@ -1,3 +1,5 @@
+import { DEFAULT_LANGUAGE, isLanguage, type Language } from "@/lib/i18n";
+
 type LengthRange = {
   min?: number;
   max: number;
@@ -10,6 +12,11 @@ const UUID_REGEX =
 export function getFormString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value : "";
+}
+
+export function getFormLanguage(formData: FormData, key = "locale"): Language {
+  const rawLanguage = normalizeWhitespace(getFormString(formData, key));
+  return isLanguage(rawLanguage) ? rawLanguage : DEFAULT_LANGUAGE;
 }
 
 export function normalizeWhitespace(value: string) {
@@ -31,7 +38,9 @@ export function hasLengthInRange(value: string, { min = 0, max }: LengthRange) {
 }
 
 export function isValidEmail(value: string) {
-  return hasLengthInRange(value, { min: 3, max: 254 }) && EMAIL_REGEX.test(value);
+  return (
+    hasLengthInRange(value, { min: 3, max: 254 }) && EMAIL_REGEX.test(value)
+  );
 }
 
 export function isUuid(value: string) {
@@ -40,7 +49,7 @@ export function isUuid(value: string) {
 
 export function parseBoundedInteger(
   value: string,
-  { min, max }: { min: number; max: number }
+  { min, max }: { min: number; max: number },
 ) {
   if (!/^-?\d+$/.test(value)) {
     return null;

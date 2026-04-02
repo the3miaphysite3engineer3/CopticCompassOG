@@ -1,38 +1,17 @@
-/* eslint-disable @next/next/no-img-element */
 import { redirect } from "next/navigation";
 import { logout } from "@/actions/auth";
 import { Badge } from "@/components/Badge";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
-import { SurfacePanel } from "@/components/SurfacePanel";
+import { DashboardRecentExercisesSection } from "@/features/dashboard/components/DashboardRecentExercisesSection";
+import { DashboardWelcomePanel } from "@/features/dashboard/components/DashboardWelcomePanel";
 import { DictionaryFavoritesOverview } from "@/features/dictionary/components/DictionaryFavoritesOverview";
-import { getDictionaryEntryById } from "@/features/dictionary/lib/dictionary";
-import { SubmissionCard } from "@/features/submissions/components/SubmissionCard";
-import { SubmissionEmptyState } from "@/features/submissions/components/SubmissionEmptyState";
-import { SubmissionFeedbackPanel } from "@/features/submissions/components/SubmissionFeedbackPanel";
-import { SubmissionStatusBadge } from "@/features/submissions/components/SubmissionStatusBadge";
 import { GrammarDashboardOverview } from "@/features/grammar/components/GrammarDashboardOverview";
-import { buildGrammarLessonLearnerSummary } from "@/features/grammar/lib/grammarLearnerState";
-import {
-  getPublishedGrammarLessonBundleBySlug,
-  listPublishedGrammarLessons,
-} from "@/features/grammar/lib/grammarDataset";
 import { AccountSettingsPanel } from "@/features/profile/components/AccountSettingsPanel";
-import { getAccountAuthSettings } from "@/features/profile/lib/accountSettings";
 import { getDashboardCopy } from "@/features/dashboard/lib/dashboardCopy";
 import { DEFAULT_DICTIONARY_DIALECT_FILTER } from "@/features/dictionary/config";
-import { antinoou } from "@/lib/fonts";
+import { loadDashboardPageData } from "@/features/dashboard/lib/server/pageData";
 import { getDashboardPath } from "@/lib/locale";
-import {
-  getAudienceContactForProfile,
-  getProfile,
-  getUserEntryFavorites,
-  getUserLessonBookmarks,
-  getUserLessonNotes,
-  getUserLessonProgressRows,
-  getUserSectionProgressRows,
-  getUserSubmissions,
-} from "@/lib/supabase/queries";
 import { requireAuthenticatedPageSession } from "@/lib/supabase/auth";
 import { getLoginPath } from "@/lib/supabase/config";
 import type { Language } from "@/types/i18n";
@@ -46,54 +25,16 @@ export async function DashboardPageContent({
 }: DashboardPageContentProps) {
   const dashboardPath = getDashboardPath(locale);
   const copy = getDashboardCopy(locale);
-  const { supabase, user } = await requireAuthenticatedPageSession(dashboardPath);
-
-  const profile = await getProfile(supabase, user.id);
-  if (!profile) {
+  const { supabase, user } =
+    await requireAuthenticatedPageSession(dashboardPath);
+  const dashboardData = await loadDashboardPageData({
+    locale,
+    supabase,
+    user,
+  });
+  if (!dashboardData) {
     return redirect(getLoginPath(dashboardPath));
   }
-
-  const [
-    audienceContact,
-    submissions,
-    lessonProgressRows,
-    sectionProgressRows,
-    entryFavorites,
-    lessonBookmarks,
-    lessonNotes,
-  ] = await Promise.all([
-    getAudienceContactForProfile(supabase, user.id, profile.email),
-    getUserSubmissions(supabase, user.id),
-    getUserLessonProgressRows(supabase, user.id),
-    getUserSectionProgressRows(supabase, user.id),
-    getUserEntryFavorites(supabase, user.id),
-    getUserLessonBookmarks(supabase, user.id),
-    getUserLessonNotes(supabase, user.id),
-  ]);
-  const savedDictionaryEntries = entryFavorites.map((favorite) => ({
-    entry: getDictionaryEntryById(favorite.entry_id),
-    favorite,
-  }));
-
-  const grammarLessonSummaries = listPublishedGrammarLessons()
-    .map((lesson) => getPublishedGrammarLessonBundleBySlug(lesson.slug))
-    .filter(
-      (lessonBundle): lessonBundle is NonNullable<typeof lessonBundle> =>
-        lessonBundle !== null,
-    )
-    .map((lessonBundle) =>
-      buildGrammarLessonLearnerSummary({
-        lessonBundle,
-        lessonProgressRows,
-        sectionProgressRows,
-        bookmarkRows: lessonBookmarks,
-        lessonNoteRows: lessonNotes,
-      }),
-    );
-  const { canUpdatePassword, providerLabel } = getAccountAuthSettings(
-    user.app_metadata,
-    locale,
-  );
 
   return (
     <PageShell
@@ -124,90 +65,36 @@ export async function DashboardPageContent({
       </div>
 
       <div className="flex flex-col gap-12">
-        <SurfacePanel
-          rounded="3xl"
-          className="flex items-center justify-between p-6 md:p-8"
-        >
-          <div>
-            <h2 className="mb-2 text-2xl font-semibold text-stone-800 dark:text-stone-200">
-              {copy.welcomeBack},{" "}
-              {profile.full_name ? (
-                <span className={`${antinoou.className} tracking-wide`}>
-                  {profile.full_name}
-                </span>
-              ) : (
-                copy.fallbackStudentName
-              )}
-              !
-            </h2>
-            <p className="font-medium text-stone-600 dark:text-stone-400">
-              {copy.loggedInAs}{" "}
-              <span className="font-bold text-sky-600 dark:text-sky-400">
-                {profile.email}
-              </span>
-            </p>
-          </div>
-          {profile.avatar_url ? (
-            <img
-              src={profile.avatar_url}
-              alt={copy.avatarAlt}
-              className="hidden h-16 w-16 rounded-full border-2 border-white object-cover shadow-sm md:block"
-            />
-          ) : null}
-        </SurfacePanel>
+        <DashboardWelcomePanel
+          locale={locale}
+          profile={dashboardData.profile}
+        />
 
         <AccountSettingsPanel
-          audienceContact={audienceContact}
-          canUpdatePassword={canUpdatePassword}
-          profile={profile}
-          providerLabel={providerLabel}
+          audienceContact={dashboardData.audienceContact}
+          canUpdatePassword={dashboardData.canUpdatePassword}
+          profile={dashboardData.profile}
+          providerLabel={dashboardData.providerLabel}
         />
 
         <GrammarDashboardOverview
           language={locale}
-          lessonSummaries={grammarLessonSummaries}
+          lessonSummaries={dashboardData.grammarLessonSummaries}
         />
 
         <DictionaryFavoritesOverview
-          favorites={savedDictionaryEntries}
+          favorites={dashboardData.savedDictionaryEntries}
           language={locale}
           preferredDialect={
-            profile.preferred_dictionary_dialect ??
+            dashboardData.profile.preferred_dictionary_dialect ??
             DEFAULT_DICTIONARY_DIALECT_FILTER
           }
         />
 
-        <div className="space-y-8">
-          <h3 className="text-2xl font-bold tracking-tight text-stone-800 dark:text-stone-200">
-            {copy.recentExercisesTitle}
-          </h3>
-
-          {submissions.map((submission) => (
-            <SubmissionCard
-              key={submission.id}
-              language={locale}
-              submission={submission}
-              topRight={
-                submission.status === "reviewed" ? (
-                  <SubmissionStatusBadge
-                    label={copy.reviewedLabel}
-                    tone="reviewed"
-                    className="absolute right-0 top-0 rounded-none rounded-bl-xl px-4 py-1.5 text-white dark:text-emerald-200"
-                  />
-                ) : undefined
-              }
-            >
-              <SubmissionFeedbackPanel language={locale} submission={submission} />
-            </SubmissionCard>
-          ))}
-
-          {submissions.length === 0 ? (
-            <SubmissionEmptyState
-              title={copy.noExercisesTitle}
-              description={copy.noExercisesDescription}
-            />
-          ) : null}
-        </div>
+        <DashboardRecentExercisesSection
+          locale={locale}
+          submissions={dashboardData.submissions}
+        />
       </div>
     </PageShell>
   );

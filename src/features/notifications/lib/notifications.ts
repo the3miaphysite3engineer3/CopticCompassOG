@@ -204,7 +204,10 @@ export function getNotificationContextBadges(event: AdminNotificationEvent) {
     }
     case "profile_signup": {
       const profileEmail = getStringValue(event.payload, "profile_email");
-      const profileFullName = getStringValue(event.payload, "profile_full_name");
+      const profileFullName = getStringValue(
+        event.payload,
+        "profile_full_name",
+      );
 
       if (profileEmail) {
         badges.push(`Email: ${profileEmail}`);

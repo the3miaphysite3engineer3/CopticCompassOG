@@ -7,6 +7,9 @@ import {
   publications,
 } from "@/features/publications/lib/publications";
 import {
+  getAnalyticsPath,
+  getContactPath,
+  getDevelopersPath,
   getDictionaryPath,
   getEntryPath,
   getGrammarPath,
@@ -24,14 +27,18 @@ export const runtime = "nodejs";
 
 type LocalizedStaticRouteConfig = {
   getRoute: (locale: Language) => string;
-  changeFrequency: NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
+  changeFrequency: NonNullable<
+    MetadataRoute.Sitemap[number]["changeFrequency"]
+  >;
   priority: number;
   sourcePaths: readonly string[];
 };
 
 type StaticRouteConfig = {
   route: string;
-  changeFrequency: NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
+  changeFrequency: NonNullable<
+    MetadataRoute.Sitemap[number]["changeFrequency"]
+  >;
   priority: number;
   sourcePaths: readonly string[];
 };
@@ -76,6 +83,35 @@ const localizedStaticRoutes: readonly LocalizedStaticRouteConfig[] = [
     ],
   },
   {
+    getRoute: getDevelopersPath,
+    changeFrequency: "monthly",
+    priority: 0.7,
+    sourcePaths: [
+      "src/app/(site)/[locale]/developers/page.tsx",
+      "src/app/(app)/api-docs/page.tsx",
+      "src/features/grammar/lib/grammarOpenApi.ts",
+    ],
+  },
+  {
+    getRoute: getAnalyticsPath,
+    changeFrequency: "monthly",
+    priority: 0.6,
+    sourcePaths: [
+      "src/app/(site)/[locale]/analytics/page.tsx",
+      "public/data/dictionary.json",
+      "src/features/analytics/lib/analytics.ts",
+    ],
+  },
+  {
+    getRoute: getContactPath,
+    changeFrequency: "yearly",
+    priority: 0.5,
+    sourcePaths: [
+      "src/app/(site)/[locale]/contact/page.tsx",
+      "src/features/contact/components/ContactPageClient.tsx",
+    ],
+  },
+  {
     getRoute: getPrivacyPath,
     changeFrequency: "yearly",
     priority: 0.3,
@@ -97,8 +133,18 @@ const localizedStaticRoutes: readonly LocalizedStaticRouteConfig[] = [
   },
 ];
 
-// Keep the sitemap focused on the strongest public landing pages.
-const staticRoutes: readonly StaticRouteConfig[] = [];
+const staticRoutes: readonly StaticRouteConfig[] = [
+  {
+    route: "/api-docs",
+    changeFrequency: "monthly",
+    priority: 0.65,
+    sourcePaths: [
+      "src/app/(app)/api-docs/page.tsx",
+      "src/features/grammar/components/SwaggerDocsClient.tsx",
+      "src/features/grammar/lib/grammarOpenApi.ts",
+    ],
+  },
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const dictionary = getDictionary();
@@ -141,9 +187,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ) satisfies MetadataRoute.Sitemap;
 
   const staticPages = staticRoutes.map((route) => {
-    const lastModified = getLatestProjectFileMtime([
-      ...route.sourcePaths,
-    ]);
+    const lastModified = getLatestProjectFileMtime([...route.sourcePaths]);
 
     return {
       url: `${siteConfig.liveUrl}${route.route}`,
@@ -156,7 +200,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const entryPages = PUBLIC_LOCALES.flatMap((locale) =>
     dictionary.map((entry) => ({
       url: `${siteConfig.liveUrl}${getEntryPath(entry.id, locale)}`,
-      ...(dictionaryLastModified ? { lastModified: dictionaryLastModified } : {}),
+      ...(dictionaryLastModified
+        ? { lastModified: dictionaryLastModified }
+        : {}),
       changeFrequency: "monthly" as const,
       priority: 0.8,
     })),
@@ -167,7 +213,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
       .filter((publication) => publication.status === "published")
       .map((publication) => ({
         url: `${siteConfig.liveUrl}${getPublicationPath(publication.id, locale)}`,
-        ...(publicationsLastModified ? { lastModified: publicationsLastModified } : {}),
+        ...(publicationsLastModified
+          ? { lastModified: publicationsLastModified }
+          : {}),
         changeFrequency: "monthly" as const,
         priority: 0.75,
       })),

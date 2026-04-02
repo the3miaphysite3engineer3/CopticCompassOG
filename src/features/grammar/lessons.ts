@@ -113,14 +113,14 @@ export function getGrammarLessonBySlug(slug: GrammarLessonSlug) {
 
 export function getGrammarLessonSectionById(
   lesson: GrammarLessonDefinition,
-  sectionId: string
+  sectionId: string,
 ) {
   return lesson.sections.find((section) => section.id === sectionId) ?? null;
 }
 
 export function getLocalizedGrammarLessonLabel(
   language: Language,
-  label: GrammarLessonLocalizedLabel
+  label: GrammarLessonLocalizedLabel,
 ) {
   return label[language];
 }

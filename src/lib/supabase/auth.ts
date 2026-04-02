@@ -1,15 +1,13 @@
 import type { User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
+import { getProfileRole } from "@/features/profile/lib/server/queries";
 import {
   getAuthUnavailableLoginPath,
   getLoginPath,
   hasSupabaseRuntimeEnv,
 } from "@/lib/supabase/config";
-import {
-  getAuthenticatedUser,
-  getProfileRole,
-  type AppSupabaseClient,
-} from "@/lib/supabase/queries";
+import { getAuthenticatedUser } from "@/lib/supabase/authQueries";
+import type { AppSupabaseClient } from "@/lib/supabase/queryTypes";
 import { createClient } from "@/lib/supabase/server";
 
 type AuthenticatedServerContext = {

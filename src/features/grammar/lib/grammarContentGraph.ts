@@ -22,7 +22,10 @@ type GrammarContentGraph = {
 
 let cachedGraph: GrammarContentGraph | null = null;
 
-function incrementEntryCount(entryCounts: Map<string, number>, entryId?: string) {
+function incrementEntryCount(
+  entryCounts: Map<string, number>,
+  entryId?: string,
+) {
   if (!entryId) {
     return;
   }
@@ -112,9 +115,7 @@ function createLessonReference(
   };
 }
 
-function collectRankedEntryIdsForLesson(
-  lessonBundle: GrammarLessonBundle,
-) {
+function collectRankedEntryIdsForLesson(lessonBundle: GrammarLessonBundle) {
   const entryCounts = new Map<string, number>();
 
   for (const section of lessonBundle.lesson.sections) {
@@ -182,9 +183,12 @@ function buildGraph(): GrammarContentGraph {
         continue;
       }
 
-      const linkedLessons = lessonsByPublicationId.get(source.publicationId) ?? [];
+      const linkedLessons =
+        lessonsByPublicationId.get(source.publicationId) ?? [];
 
-      if (!linkedLessons.some((linkedLesson) => linkedLesson.id === lessonRef.id)) {
+      if (
+        !linkedLessons.some((linkedLesson) => linkedLesson.id === lessonRef.id)
+      ) {
         linkedLessons.push(lessonRef);
         lessonsByPublicationId.set(source.publicationId, linkedLessons);
       }
@@ -210,7 +214,9 @@ export function listPublishedGrammarLessonsForEntry(entryId: string) {
   return getGraph().lessonsByEntryId.get(entryId) ?? [];
 }
 
-export function listPublishedGrammarLessonsForPublication(publicationId: string) {
+export function listPublishedGrammarLessonsForPublication(
+  publicationId: string,
+) {
   return getGraph().lessonsByPublicationId.get(publicationId) ?? [];
 }
 
@@ -218,5 +224,8 @@ export function listRankedDictionaryEntryIdsForPublishedLesson(
   slug: string,
   limit = 12,
 ) {
-  return (getGraph().rankedEntryIdsByLessonSlug.get(slug) ?? []).slice(0, limit);
+  return (getGraph().rankedEntryIdsByLessonSlug.get(slug) ?? []).slice(
+    0,
+    limit,
+  );
 }

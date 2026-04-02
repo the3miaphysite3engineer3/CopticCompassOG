@@ -1,37 +1,43 @@
-'use client'
+"use client";
 
-import type { ReactNode } from 'react'
-import { useState, useTransition } from 'react'
-import Link from 'next/link'
-import { ChevronDown, KeyRound, Mail, TriangleAlert, UserRound } from 'lucide-react'
-import { updatePasswordFromDashboard } from '@/actions/auth'
-import { Badge } from '@/components/Badge'
-import { FormField } from '@/components/FormField'
-import { StatusNotice } from '@/components/StatusNotice'
-import { SurfacePanel } from '@/components/SurfacePanel'
+import type { ReactNode } from "react";
+import { useState, useTransition } from "react";
+import Link from "next/link";
+import {
+  ChevronDown,
+  KeyRound,
+  Mail,
+  TriangleAlert,
+  UserRound,
+} from "lucide-react";
+import { updatePasswordFromDashboard } from "@/actions/auth";
+import { Badge } from "@/components/Badge";
+import { FormField } from "@/components/FormField";
+import { StatusNotice } from "@/components/StatusNotice";
+import { SurfacePanel } from "@/components/SurfacePanel";
 import { useLanguage } from "@/components/LanguageProvider";
-import { CommunicationPreferencesForm } from '@/features/communications/components/CommunicationPreferencesForm'
+import { CommunicationPreferencesForm } from "@/features/communications/components/CommunicationPreferencesForm";
 import {
   getAudiencePreferences,
   type AudiencePreferencesRow,
-} from '@/features/communications/lib/communications'
+} from "@/features/communications/lib/communications";
 import {
   formatDashboardProviderDescription,
   getDashboardCopy,
 } from "@/features/dashboard/lib/dashboardCopy";
-import { cx } from '@/lib/classes'
-import { ProfileForm } from '@/features/profile/components/ProfileForm'
+import { cx } from "@/lib/classes";
+import { ProfileForm } from "@/features/profile/components/ProfileForm";
 import { getContactPath, getPrivacyPath } from "@/lib/locale";
-import type { Tables } from '@/types/supabase'
+import type { Tables } from "@/types/supabase";
 
 type AccountSettingsPanelProps = {
-  audienceContact: AudiencePreferencesRow | null
-  canUpdatePassword: boolean
-  profile: Tables<'profiles'>
-  providerLabel: string
-}
+  audienceContact: AudiencePreferencesRow | null;
+  canUpdatePassword: boolean;
+  profile: Tables<"profiles">;
+  providerLabel: string;
+};
 
-type AccountSectionId = 'profile' | 'password' | 'communication' | 'delete'
+type AccountSectionId = "profile" | "password" | "communication" | "delete";
 
 function AccountSettingsSection({
   badge,
@@ -42,13 +48,13 @@ function AccountSettingsSection({
   onToggle,
   title,
 }: {
-  badge?: ReactNode
-  children: ReactNode
-  description: string
-  icon: ReactNode
-  isOpen: boolean
-  onToggle: () => void
-  title: string
+  badge?: ReactNode;
+  children: ReactNode;
+  description: string;
+  icon: ReactNode;
+  isOpen: boolean;
+  onToggle: () => void;
+  title: string;
 }) {
   return (
     <section className="border-t border-stone-200/80 first:border-t-0 dark:border-stone-800/80">
@@ -74,8 +80,8 @@ function AccountSettingsSection({
         </div>
         <ChevronDown
           className={cx(
-            'mt-1 h-5 w-5 shrink-0 text-stone-400 transition-transform dark:text-stone-500',
-            isOpen && 'rotate-180',
+            "mt-1 h-5 w-5 shrink-0 text-stone-400 transition-transform dark:text-stone-500",
+            isOpen && "rotate-180",
           )}
         />
       </button>
@@ -86,43 +92,49 @@ function AccountSettingsSection({
         </div>
       ) : null}
     </section>
-  )
+  );
 }
 
-function PasswordSettingsForm({ canUpdatePassword, providerLabel }: {
-  canUpdatePassword: boolean
-  providerLabel: string
+function PasswordSettingsForm({
+  canUpdatePassword,
+  providerLabel,
+}: {
+  canUpdatePassword: boolean;
+  providerLabel: string;
 }) {
-  const { language } = useLanguage()
-  const copy = getDashboardCopy(language)
-  const [isPending, startTransition] = useTransition()
-  const [status, setStatus] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
+  const { language } = useLanguage();
+  const copy = getDashboardCopy(language);
+  const [isPending, startTransition] = useTransition();
+  const [status, setStatus] = useState<{
+    message: string;
+    type: "success" | "error" | "info";
+  } | null>(null);
 
   function handleSubmit(formData: FormData) {
-    setStatus(null)
+    setStatus(null);
     const password = formData.get("password");
     const confirmPassword = formData.get("confirm_password");
 
     if (password !== confirmPassword) {
-      setStatus({ message: copy.account.passwordMismatch, type: "error" })
-      return
+      setStatus({ message: copy.account.passwordMismatch, type: "error" });
+      return;
     }
 
     startTransition(async () => {
-      const result = await updatePasswordFromDashboard(formData)
+      const result = await updatePasswordFromDashboard(formData);
       if (result.success) {
         setStatus({
           message: copy.account.passwordUpdateSuccess,
-          type: 'success',
-        })
-        return
+          type: "success",
+        });
+        return;
       }
 
       setStatus({
         message: result.error || copy.account.passwordUpdateFailed,
-        type: 'error',
-      })
-    })
+        type: "error",
+      });
+    });
   }
 
   if (!canUpdatePassword) {
@@ -133,11 +145,14 @@ function PasswordSettingsForm({ canUpdatePassword, providerLabel }: {
           providerLabel,
         )}
       </StatusNotice>
-    )
+    );
   }
 
   return (
-    <form action={handleSubmit} className="space-y-5 text-stone-800 dark:text-stone-200">
+    <form
+      action={handleSubmit}
+      className="space-y-5 text-stone-800 dark:text-stone-200"
+    >
       <FormField htmlFor="password" label={copy.account.newPasswordLabel}>
         <input
           id="password"
@@ -181,12 +196,12 @@ function PasswordSettingsForm({ canUpdatePassword, providerLabel }: {
         </StatusNotice>
       ) : null}
     </form>
-  )
+  );
 }
 
 function DeleteProfileNotice() {
-  const { language } = useLanguage()
-  const copy = getDashboardCopy(language)
+  const { language } = useLanguage();
+  const copy = getDashboardCopy(language);
 
   return (
     <div className="space-y-5">
@@ -211,7 +226,7 @@ function DeleteProfileNotice() {
         </Link>
       </div>
     </div>
-  )
+  );
 }
 
 export function AccountSettingsPanel({
@@ -220,13 +235,15 @@ export function AccountSettingsPanel({
   profile,
   providerLabel,
 }: AccountSettingsPanelProps) {
-  const { language } = useLanguage()
-  const copy = getDashboardCopy(language)
-  const [openSection, setOpenSection] = useState<AccountSectionId | null>('profile')
+  const { language } = useLanguage();
+  const copy = getDashboardCopy(language);
+  const [openSection, setOpenSection] = useState<AccountSectionId | null>(
+    "profile",
+  );
   const providerBadgeLabel = canUpdatePassword
     ? copy.account.passwordAvailableBadge
-    : copy.account.passwordExternalBadge
-  const audiencePreferences = getAudiencePreferences(audienceContact, language)
+    : copy.account.passwordExternalBadge;
+  const audiencePreferences = getAudiencePreferences(audienceContact, language);
 
   return (
     <SurfacePanel rounded="3xl" className="overflow-hidden p-0">
@@ -251,8 +268,12 @@ export function AccountSettingsPanel({
         icon={<UserRound className="h-5 w-5" />}
         title={copy.account.profileTitle}
         description={copy.account.profileDescription}
-        isOpen={openSection === 'profile'}
-        onToggle={() => setOpenSection((current) => current === 'profile' ? null : 'profile')}
+        isOpen={openSection === "profile"}
+        onToggle={() =>
+          setOpenSection((current) =>
+            current === "profile" ? null : "profile",
+          )
+        }
       >
         <ProfileForm profile={profile} embedded />
       </AccountSettingsSection>
@@ -269,12 +290,16 @@ export function AccountSettingsPanel({
               )
         }
         badge={
-          <Badge tone={canUpdatePassword ? 'accent' : 'neutral'} size="xs">
+          <Badge tone={canUpdatePassword ? "accent" : "neutral"} size="xs">
             {providerBadgeLabel}
           </Badge>
         }
-        isOpen={openSection === 'password'}
-        onToggle={() => setOpenSection((current) => current === 'password' ? null : 'password')}
+        isOpen={openSection === "password"}
+        onToggle={() =>
+          setOpenSection((current) =>
+            current === "password" ? null : "password",
+          )
+        }
       >
         <PasswordSettingsForm
           canUpdatePassword={canUpdatePassword}
@@ -292,16 +317,20 @@ export function AccountSettingsPanel({
               audiencePreferences.booksOptIn ||
               audiencePreferences.generalUpdatesOptIn ||
               audiencePreferences.lessonsOptIn
-                ? 'accent'
-                : 'neutral'
+                ? "accent"
+                : "neutral"
             }
             size="xs"
           >
             {copy.account.communicationBadge}
           </Badge>
         }
-        isOpen={openSection === 'communication'}
-        onToggle={() => setOpenSection((current) => current === 'communication' ? null : 'communication')}
+        isOpen={openSection === "communication"}
+        onToggle={() =>
+          setOpenSection((current) =>
+            current === "communication" ? null : "communication",
+          )
+        }
       >
         <CommunicationPreferencesForm
           deliveryEmail={profile.email}
@@ -318,11 +347,13 @@ export function AccountSettingsPanel({
             {copy.account.deleteBadge}
           </Badge>
         }
-        isOpen={openSection === 'delete'}
-        onToggle={() => setOpenSection((current) => current === 'delete' ? null : 'delete')}
+        isOpen={openSection === "delete"}
+        onToggle={() =>
+          setOpenSection((current) => (current === "delete" ? null : "delete"))
+        }
       >
         <DeleteProfileNotice />
       </AccountSettingsSection>
     </SurfacePanel>
-  )
+  );
 }

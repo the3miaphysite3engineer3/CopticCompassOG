@@ -20,23 +20,18 @@ type AudienceOptInConfirmationEmailProps = {
 
 const copy = {
   en: {
-    body:
-      "Please confirm that you want to receive updates about new lessons, book releases, and major project announcements.",
+    body: "Please confirm that you want to receive updates about new lessons, book releases, and major project announcements.",
     cta: "Confirm email updates",
-    fallback:
-      "If the button does not work, open this link in your browser:",
+    fallback: "If the button does not work, open this link in your browser:",
     greeting: "Hi",
     subject: "Confirm your email updates",
-    thanks:
-      "If you did not request this, you can safely ignore this email.",
+    thanks: "If you did not request this, you can safely ignore this email.",
     title: "Confirm your updates subscription",
   },
   nl: {
-    body:
-      "Bevestig dat je updates wilt ontvangen over nieuwe lessen, boekreleases en belangrijke projectaankondigingen.",
+    body: "Bevestig dat je updates wilt ontvangen over nieuwe lessen, boekreleases en belangrijke projectaankondigingen.",
     cta: "E-mailupdates bevestigen",
-    fallback:
-      "Werkt de knop niet, open dan deze link in je browser:",
+    fallback: "Werkt de knop niet, open dan deze link in je browser:",
     greeting: "Dag",
     subject: "Bevestig je e-mailupdates",
     thanks:
@@ -63,7 +58,7 @@ export function AudienceOptInConfirmationEmail({
           </Heading>
           <Text style={paragraph}>
             {localizedCopy.greeting}
-            {normalizedName ? ` ${normalizedName}` : ""}, 
+            {normalizedName ? ` ${normalizedName}` : ""},
           </Text>
           <Text style={paragraph}>{localizedCopy.body}</Text>
           <Button href={confirmationUrl} style={button}>

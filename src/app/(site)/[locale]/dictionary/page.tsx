@@ -47,7 +47,9 @@ export default async function DictionaryPage({
 
   return (
     <>
-      <StructuredData data={createDictionaryPageStructuredData(resolvedLocale)} />
+      <StructuredData
+        data={createDictionaryPageStructuredData(resolvedLocale)}
+      />
       <DictionaryPageClient />
     </>
   );

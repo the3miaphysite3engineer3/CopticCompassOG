@@ -1,38 +1,45 @@
-'use client'
+"use client";
 
-import { useActionState } from 'react'
-import { createContentReleaseDraft, type ContentReleaseDraftState } from '@/actions/admin'
-import { FormField } from '@/components/FormField'
-import { StatusNotice } from '@/components/StatusNotice'
+import { useActionState } from "react";
+import {
+  createContentReleaseDraft,
+  type ContentReleaseDraftState,
+} from "@/actions/admin";
+import { FormField } from "@/components/FormField";
+import { StatusNotice } from "@/components/StatusNotice";
 import {
   CONTENT_RELEASE_AUDIENCE_SEGMENTS,
   CONTENT_RELEASE_LOCALE_MODES,
   type ContentReleaseCandidate,
-} from '@/features/communications/lib/releases'
+} from "@/features/communications/lib/releases";
 
-function formatAudienceSegmentLabel(segment: (typeof CONTENT_RELEASE_AUDIENCE_SEGMENTS)[number]) {
+function formatAudienceSegmentLabel(
+  segment: (typeof CONTENT_RELEASE_AUDIENCE_SEGMENTS)[number],
+) {
   switch (segment) {
-    case 'lessons':
-      return 'Lesson subscribers'
-    case 'books':
-      return 'Book subscribers'
-    case 'general':
-      return 'General update subscribers'
+    case "lessons":
+      return "Lesson subscribers";
+    case "books":
+      return "Book subscribers";
+    case "general":
+      return "General update subscribers";
     default:
-      return segment
+      return segment;
   }
 }
 
-function formatLocaleModeLabel(localeMode: (typeof CONTENT_RELEASE_LOCALE_MODES)[number]) {
+function formatLocaleModeLabel(
+  localeMode: (typeof CONTENT_RELEASE_LOCALE_MODES)[number],
+) {
   switch (localeMode) {
-    case 'localized':
-      return 'Localized EN + NL'
-    case 'en_only':
-      return 'English only'
-    case 'nl_only':
-      return 'Dutch only'
+    case "localized":
+      return "Localized EN + NL";
+    case "en_only":
+      return "English only";
+    case "nl_only":
+      return "Dutch only";
     default:
-      return localeMode
+      return localeMode;
   }
 }
 
@@ -40,13 +47,13 @@ export function CreateContentReleaseForm({
   publicationCandidates,
   lessonCandidates,
 }: {
-  publicationCandidates: ContentReleaseCandidate[]
-  lessonCandidates: ContentReleaseCandidate[]
+  publicationCandidates: ContentReleaseCandidate[];
+  lessonCandidates: ContentReleaseCandidate[];
 }) {
-  const [state, formAction, isPending] = useActionState<ContentReleaseDraftState | null, FormData>(
-    createContentReleaseDraft,
-    null,
-  )
+  const [state, formAction, isPending] = useActionState<
+    ContentReleaseDraftState | null,
+    FormData
+  >(createContentReleaseDraft, null);
 
   return (
     <form
@@ -209,10 +216,11 @@ export function CreateContentReleaseForm({
 
       <div className="flex flex-wrap items-center gap-4">
         <button type="submit" className="btn-primary px-6" disabled={isPending}>
-          {isPending ? 'Saving draft...' : 'Create release draft'}
+          {isPending ? "Saving draft..." : "Create release draft"}
         </button>
         <p className="text-sm text-stone-500 dark:text-stone-400">
-          Drafts snapshot the selected titles and URLs so later content edits do not silently change the outgoing release.
+          Drafts snapshot the selected titles and URLs so later content edits do
+          not silently change the outgoing release.
         </p>
       </div>
 
@@ -228,5 +236,5 @@ export function CreateContentReleaseForm({
         </StatusNotice>
       ) : null}
     </form>
-  )
+  );
 }

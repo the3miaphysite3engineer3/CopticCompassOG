@@ -28,7 +28,10 @@ function getConceptRelations(
 
   return relatedConceptIds
     .map((conceptId) => conceptMap.get(conceptId))
-    .filter((concept): concept is GrammarLessonBundle["concepts"][number] => concept !== undefined);
+    .filter(
+      (concept): concept is GrammarLessonBundle["concepts"][number] =>
+        concept !== undefined,
+    );
 }
 
 function SemanticPanel({
@@ -159,7 +162,9 @@ export function GrammarLessonConceptGlossary({
               {relatedConcepts.length > 0 ? (
                 <div className="mt-4">
                   <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
-                    {language === "en" ? "Related concepts" : "Verwante begrippen"}
+                    {language === "en"
+                      ? "Related concepts"
+                      : "Verwante begrippen"}
                   </p>
                   <div className="flex flex-wrap gap-2">
                     {relatedConcepts.map((relatedConcept) => (
@@ -241,7 +246,9 @@ export function GrammarLessonBibliography({
                     ) : null}
                     {source.author || source.year ? (
                       <p className="mt-2 text-sm text-stone-600 dark:text-stone-300">
-                        {[source.author, source.year].filter(Boolean).join(", ")}
+                        {[source.author, source.year]
+                          .filter(Boolean)
+                          .join(", ")}
                       </p>
                     ) : null}
                   </div>

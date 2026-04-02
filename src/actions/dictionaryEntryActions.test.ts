@@ -17,7 +17,9 @@ const ORIGINAL_ENV = {
 };
 
 function createReportFormData(
-  overrides?: Partial<Record<"commentary" | "entryId" | "language" | "reason", string>>,
+  overrides?: Partial<
+    Record<"commentary" | "entryId" | "language" | "reason", string>
+  >,
 ) {
   const formData = new FormData();
   formData.set("language", overrides?.language ?? "en");
@@ -25,7 +27,8 @@ function createReportFormData(
   formData.set("reason", overrides?.reason ?? "translation");
   formData.set(
     "commentary",
-    overrides?.commentary ?? "The Dutch meaning could use a clearer gloss here.",
+    overrides?.commentary ??
+      "The Dutch meaning could use a clearer gloss here.",
   );
   return formData;
 }
@@ -80,31 +83,27 @@ async function loadDictionaryEntryActionsModule(options?: {
   const fromMock = vi.fn(() => ({
     insert: insertMock,
   }));
-  const getAuthenticatedServerContextMock = vi
-    .fn()
-    .mockResolvedValue(
-      options?.authContext === undefined
-        ? {
-            supabase: {
-              from: fromMock,
-            },
-            user: {
-              email: "reporter@example.com",
-              id: "user-123",
-            },
-          }
-        : options.authContext,
-    );
-  const getDictionaryEntryByIdMock = vi
-    .fn()
-    .mockReturnValue(
-      options?.dictionaryEntry === undefined
-        ? {
-            headword: "ϭⲟⲗ",
-            id: "cd_173",
-          }
-        : options.dictionaryEntry,
-    );
+  const getAuthenticatedServerContextMock = vi.fn().mockResolvedValue(
+    options?.authContext === undefined
+      ? {
+          supabase: {
+            from: fromMock,
+          },
+          user: {
+            email: "reporter@example.com",
+            id: "user-123",
+          },
+        }
+      : options.authContext,
+  );
+  const getDictionaryEntryByIdMock = vi.fn().mockReturnValue(
+    options?.dictionaryEntry === undefined
+      ? {
+          headword: "ϭⲟⲗ",
+          id: "cd_173",
+        }
+      : options.dictionaryEntry,
+  );
   const hasSupabaseRuntimeEnvMock = vi
     .fn()
     .mockReturnValue(options?.hasEnv ?? true);
@@ -114,12 +113,16 @@ async function loadDictionaryEntryActionsModule(options?: {
     resetAt: Date.now() + 60_000,
     retryAfterMs: 60_000,
   });
-  const getUserRateLimitIdentifierMock = vi.fn().mockReturnValue("hashed-user-id");
-  const dispatchLoggedOwnerAlertEmailMock = vi.fn().mockResolvedValue(
-    options?.sendEmailError
-      ? { success: false, error: options.sendEmailError.message }
-      : { success: true, id: "email_123" },
-  );
+  const getUserRateLimitIdentifierMock = vi
+    .fn()
+    .mockReturnValue("hashed-user-id");
+  const dispatchLoggedOwnerAlertEmailMock = vi
+    .fn()
+    .mockResolvedValue(
+      options?.sendEmailError
+        ? { success: false, error: options.sendEmailError.message }
+        : { success: true, id: "email_123" },
+    );
 
   vi.doMock("@/features/dictionary/lib/dictionary", () => ({
     getDictionaryEntryById: getDictionaryEntryByIdMock,
@@ -179,7 +182,9 @@ describe("dictionary entry actions", () => {
         authContext: null,
       });
 
-    await expect(submitEntryReport(null, createReportFormData())).resolves.toEqual({
+    await expect(
+      submitEntryReport(null, createReportFormData()),
+    ).resolves.toEqual({
       success: false,
       error: "Please sign in before reporting an entry.",
     });
@@ -214,7 +219,9 @@ describe("dictionary entry actions", () => {
         rateLimitOk: false,
       });
 
-    await expect(submitEntryReport(null, createReportFormData())).resolves.toEqual({
+    await expect(
+      submitEntryReport(null, createReportFormData()),
+    ).resolves.toEqual({
       success: false,
       error:
         "Too many reports were sent recently. Please wait a bit before submitting another one.",
@@ -225,7 +232,9 @@ describe("dictionary entry actions", () => {
   });
 
   it("returns a configuration error when the entry_reports table is unavailable", async () => {
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const { dispatchLoggedOwnerAlertEmailMock, submitEntryReport } =
       await loadDictionaryEntryActionsModule({
         insertError: {
@@ -234,7 +243,9 @@ describe("dictionary entry actions", () => {
         },
       });
 
-    await expect(submitEntryReport(null, createReportFormData())).resolves.toEqual({
+    await expect(
+      submitEntryReport(null, createReportFormData()),
+    ).resolves.toEqual({
       success: false,
       error: "Entry reports are not configured yet.",
     });
@@ -244,7 +255,9 @@ describe("dictionary entry actions", () => {
   });
 
   it("stores a normalized report and still succeeds when the email notification fails", async () => {
-    const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockImplementation(() => {});
     const { dispatchLoggedOwnerAlertEmailMock, insertMock, submitEntryReport } =
       await loadDictionaryEntryActionsModule({
         sendEmailError: {
@@ -258,7 +271,8 @@ describe("dictionary entry actions", () => {
       submitEntryReport(
         null,
         createReportFormData({
-          commentary: "  The Dutch translation looks too broad.\n\n  Maybe use a narrower gloss.  ",
+          commentary:
+            "  The Dutch translation looks too broad.\n\n  Maybe use a narrower gloss.  ",
         }),
       ),
     ).resolves.toEqual({

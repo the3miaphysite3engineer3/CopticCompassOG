@@ -5,7 +5,8 @@ import { redirectToPreferredLocale } from "@/lib/publicLocaleRouting";
 
 export const metadata: Metadata = createNoIndexMetadata({
   title: "Publications Redirect",
-  description: "Redirects visitors to the primary localized publications route.",
+  description:
+    "Redirects visitors to the primary localized publications route.",
 });
 
 export default async function LegacyPublicationsRedirectPage() {

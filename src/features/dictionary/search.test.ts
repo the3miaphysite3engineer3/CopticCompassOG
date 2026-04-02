@@ -28,11 +28,15 @@ describe("dictionary search", () => {
   it("indexes absolute Bohairic variants alongside the main spelling", () => {
     const preparedDictionary = prepareDictionaryForSearch([lordEntry]);
 
-    expect(searchPreparedDictionary("ϭⲱⲓⲥ", preparedDictionary).map((entry) => entry.id)).toEqual([
-      "cd_17",
-    ]);
-    expect(searchPreparedDictionary("⳪", preparedDictionary).map((entry) => entry.id)).toEqual([
-      "cd_17",
-    ]);
+    expect(
+      searchPreparedDictionary("ϭⲱⲓⲥ", preparedDictionary).map(
+        (entry) => entry.id,
+      ),
+    ).toEqual(["cd_17"]);
+    expect(
+      searchPreparedDictionary("⳪", preparedDictionary).map(
+        (entry) => entry.id,
+      ),
+    ).toEqual(["cd_17"]);
   });
 });

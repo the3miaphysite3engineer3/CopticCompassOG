@@ -49,7 +49,8 @@ export const loginMessages = defineMessages({
       "Too many attempts. Please wait a bit before trying again.",
     "login.notice.authUnavailable":
       "Authentication is temporarily unavailable. Please try again later.",
-    "login.notice.loginInvalidInput": "Enter a valid email address and password.",
+    "login.notice.loginInvalidInput":
+      "Enter a valid email address and password.",
     "login.notice.loginError":
       "Could not authenticate user. Check your email and password and try again.",
     "login.notice.loginRateLimited":
@@ -91,10 +92,8 @@ export const loginMessages = defineMessages({
     "forgot.emailPlaceholder": "jij@example.com",
     "forgot.sendLink": "Resetlink verzenden",
     "forgot.backToSignIn": "Terug naar inloggen",
-    "forgot.notice.invalidInput":
-      "Voer een geldig e-mailadres in.",
-    "forgot.notice.error":
-      "Er is iets misgegaan. Probeer het opnieuw.",
+    "forgot.notice.invalidInput": "Voer een geldig e-mailadres in.",
+    "forgot.notice.error": "Er is iets misgegaan. Probeer het opnieuw.",
     "forgot.notice.rateLimited":
       "Te veel verzoeken. Wacht even en probeer het opnieuw.",
     "forgot.notice.success":
@@ -103,8 +102,7 @@ export const loginMessages = defineMessages({
     "update.metaDescription":
       "Pagina om het wachtwoord van de leeromgeving van Wannes Portfolio bij te werken.",
     "update.title": "Nieuw wachtwoord instellen",
-    "update.subtitle":
-      "Kies een sterk nieuw wachtwoord voor je account.",
+    "update.subtitle": "Kies een sterk nieuw wachtwoord voor je account.",
     "update.password": "Nieuw wachtwoord",
     "update.passwordPlaceholder": "Moet minstens 8 tekens bevatten",
     "update.submit": "Wachtwoord bijwerken",

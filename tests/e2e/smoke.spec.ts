@@ -11,7 +11,9 @@ test("root route redirects to the English homepage", async ({ page }) => {
 
   await expect(page).toHaveURL(/\/en$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
-  await expect(page.getByRole("heading", { name: "Wannes Portfolio" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Wannes Portfolio" }),
+  ).toBeVisible();
 });
 
 test("root route honors the Dutch language preference", async ({ page }) => {
@@ -27,9 +29,13 @@ test("English locale renders English navigation", async ({ page }) => {
 
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(
-    page.locator("header").getByRole("link", { name: "Publications", exact: true }),
+    page
+      .locator("header")
+      .getByRole("link", { name: "Publications", exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Wannes Portfolio" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Wannes Portfolio" }),
+  ).toBeVisible();
 });
 
 test("Dutch locale renders Dutch navigation", async ({ page }) => {
@@ -37,9 +43,13 @@ test("Dutch locale renders Dutch navigation", async ({ page }) => {
 
   await expect(page.locator("html")).toHaveAttribute("lang", "nl");
   await expect(
-    page.locator("header").getByRole("link", { name: "Publicaties", exact: true }),
+    page
+      .locator("header")
+      .getByRole("link", { name: "Publicaties", exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Wannes Portfolio" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Wannes Portfolio" }),
+  ).toBeVisible();
 });
 
 test("legacy dictionary route redirects to the localized dictionary page", async ({
@@ -48,7 +58,9 @@ test("legacy dictionary route redirects to the localized dictionary page", async
   await page.goto("/dictionary");
 
   await expect(page).toHaveURL(/\/en\/dictionary$/);
-  await expect(page.getByRole("heading", { name: "Coptic Dictionary" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Coptic Dictionary" }),
+  ).toBeVisible();
   await expect(
     page.getByPlaceholder("Search in Coptic, English, or Greek..."),
   ).toBeVisible();
@@ -60,11 +72,15 @@ test("legacy grammar route redirects to the localized grammar page", async ({
   await page.goto("/grammar");
 
   await expect(page).toHaveURL(/\/en\/grammar$/);
-  await expect(page.getByRole("heading", { name: "Coptic Grammar" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Coptic Grammar" }),
+  ).toBeVisible();
   await expect(page.getByText("Lesson 01")).toBeVisible();
 });
 
-test("dashboard redirects unauthenticated visitors to login", async ({ page }) => {
+test("dashboard redirects unauthenticated visitors to login", async ({
+  page,
+}) => {
   await page.goto("/dashboard");
   await expect(page).toHaveURL(/\/login\?/);
 
@@ -121,7 +137,9 @@ test("privacy route honors the Dutch language preference", async ({ page }) => {
 
   await expect(page).toHaveURL(/\/nl\/privacy$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "nl");
-  await expect(page.getByRole("heading", { name: "Privacybeleid" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Privacybeleid" }),
+  ).toBeVisible();
 });
 
 test("terms route honors the Dutch language preference", async ({ page }) => {

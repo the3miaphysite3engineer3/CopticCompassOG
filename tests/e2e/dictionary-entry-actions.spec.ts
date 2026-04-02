@@ -35,9 +35,13 @@ test("signed-out desktop users can hover locked dictionary entry actions to reve
   await expect(reportButton).toHaveAttribute("data-locked", "true");
 
   await shareButton.click();
-  await expect(page.getByRole("heading", { name: "Share this entry" })).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Share this entry" }),
+  ).toBeVisible();
   await expect(page.getByText("Share preview")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Copy share text" })).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Copy share text" }),
+  ).toBeVisible();
   await expect(page.getByRole("link", { name: "Share on X" })).toBeVisible();
 
   await saveButton.hover();
@@ -46,7 +50,9 @@ test("signed-out desktop users can hover locked dictionary entry actions to reve
   await reportButton.hover();
   await expect(lockedPrompt).toBeVisible();
   await expect(
-    page.locator('[role="tooltip"]').filter({ hasText: LOCKED_ENTRY_PROMPT_PATTERN }),
+    page
+      .locator('[role="tooltip"]')
+      .filter({ hasText: LOCKED_ENTRY_PROMPT_PATTERN }),
   ).toHaveCount(1);
 });
 
@@ -83,7 +89,9 @@ test.describe("signed-out mobile dictionary entry actions", () => {
     await reportButton.tap();
     await expect(lockedPrompt).toBeVisible();
     await expect(
-      page.locator('[role="tooltip"]').filter({ hasText: LOCKED_ENTRY_PROMPT_PATTERN }),
+      page
+        .locator('[role="tooltip"]')
+        .filter({ hasText: LOCKED_ENTRY_PROMPT_PATTERN }),
     ).toHaveCount(1);
   });
 });
@@ -99,21 +107,29 @@ test.describe("signed-in dictionary entry actions", () => {
   }) => {
     await loginToEntryPage(page);
 
-    const saveButton = page.getByRole("button", { name: /Save entry|Saved entry/ });
+    const saveButton = page.getByRole("button", {
+      name: /Save entry|Saved entry/,
+    });
     await expect(saveButton).toBeEnabled();
     const initialLabel = (await saveButton.textContent())?.trim() ?? "";
 
     await page.getByRole("button", { name: "Report entry" }).click();
-    await expect(page.getByRole("heading", { name: "Report an issue" })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Report an issue" }),
+    ).toBeVisible();
     await expect(page.getByLabel("Reason")).toBeVisible();
     await expect(page.getByLabel("Commentary")).toBeVisible();
 
     await saveButton.click();
     const toggledLabel =
       initialLabel === "Saved entry" ? "Save entry" : "Saved entry";
-    await expect(page.getByRole("button", { name: toggledLabel })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: toggledLabel }),
+    ).toBeVisible();
 
     await page.getByRole("button", { name: toggledLabel }).click();
-    await expect(page.getByRole("button", { name: initialLabel })).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: initialLabel }),
+    ).toBeVisible();
   });
 });

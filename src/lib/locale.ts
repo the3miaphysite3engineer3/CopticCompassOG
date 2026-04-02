@@ -1,6 +1,9 @@
 import { isLanguage, DEFAULT_LANGUAGE, type Language } from "@/lib/i18n";
 
-export const PUBLIC_LOCALES = ["en", "nl"] as const satisfies readonly Language[];
+export const PUBLIC_LOCALES = [
+  "en",
+  "nl",
+] as const satisfies readonly Language[];
 
 function normalizePath(path: string) {
   if (!path) {

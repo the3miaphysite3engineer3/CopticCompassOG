@@ -1,7 +1,11 @@
 const AUTH_UNAVAILABLE_STATE = "auth-unavailable";
 
 function getSafeRedirectTarget(redirectTo?: string) {
-  if (!redirectTo || !redirectTo.startsWith("/") || redirectTo.startsWith("//")) {
+  if (
+    !redirectTo ||
+    !redirectTo.startsWith("/") ||
+    redirectTo.startsWith("//")
+  ) {
     return null;
   }
 

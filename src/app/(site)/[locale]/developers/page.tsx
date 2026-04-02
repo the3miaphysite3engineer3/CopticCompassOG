@@ -12,9 +12,7 @@ import {
   getGrammarPath,
   getLocalizedHomePath,
 } from "@/lib/locale";
-import {
-  createBreadcrumbStructuredData,
-} from "@/lib/structuredData";
+import { createBreadcrumbStructuredData } from "@/lib/structuredData";
 
 const developerCopy = {
   en: {
@@ -81,7 +79,8 @@ const developerCopy = {
       {
         href: "/api/openapi.json",
         label: "OpenAPI JSON",
-        description: "Import into Postman, SDK generators, or internal tooling.",
+        description:
+          "Import into Postman, SDK generators, or internal tooling.",
       },
       {
         href: "/api/v1/grammar",
@@ -140,7 +139,8 @@ const lessonTitles = payload.data.map((lesson) => lesson.title.en);`,
       {
         href: "/api/v1/grammar/lessons?status=published",
         label: "/api/v1/grammar/lessons?status=published",
-        description: "Index van gepubliceerde lessen voor publieke integraties.",
+        description:
+          "Index van gepubliceerde lessen voor publieke integraties.",
       },
       {
         href: "/api/v1/grammar/manifest",
@@ -230,7 +230,10 @@ export default async function DevelopersPage({
             name: getTranslation(resolvedLocale, "nav.home"),
             path: getLocalizedHomePath(resolvedLocale),
           },
-          { name: copy.breadcrumbLabel, path: getDevelopersPath(resolvedLocale) },
+          {
+            name: copy.breadcrumbLabel,
+            path: getDevelopersPath(resolvedLocale),
+          },
         ])}
       />
 
@@ -270,7 +273,10 @@ export default async function DevelopersPage({
           </p>
           <ul className="mt-4 space-y-3 text-sm leading-7 text-stone-600 dark:text-stone-300">
             {copy.workflowItems.map((item) => (
-              <li key={item} className="rounded-2xl border border-stone-200/80 bg-stone-50/80 px-4 py-3 dark:border-stone-800/80 dark:bg-stone-950/50">
+              <li
+                key={item}
+                className="rounded-2xl border border-stone-200/80 bg-stone-50/80 px-4 py-3 dark:border-stone-800/80 dark:bg-stone-950/50"
+              >
                 {item}
               </li>
             ))}
@@ -314,7 +320,10 @@ export default async function DevelopersPage({
           </p>
           <ul className="mt-4 space-y-3 text-sm leading-7 text-stone-600 dark:text-stone-300">
             {copy.integrationItems.map((item) => (
-              <li key={item} className="rounded-2xl border border-stone-200/80 bg-stone-50/80 px-4 py-3 dark:border-stone-800/80 dark:bg-stone-950/50">
+              <li
+                key={item}
+                className="rounded-2xl border border-stone-200/80 bg-stone-50/80 px-4 py-3 dark:border-stone-800/80 dark:bg-stone-950/50"
+              >
                 {item}
               </li>
             ))}

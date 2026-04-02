@@ -27,7 +27,7 @@ export function EmptyState({
       <h3
         className={cx(
           "mb-2 text-2xl font-semibold text-stone-800 dark:text-stone-200",
-          titleClassName
+          titleClassName,
         )}
       >
         {title}
@@ -37,7 +37,7 @@ export function EmptyState({
         <p
           className={cx(
             "font-medium text-stone-500 dark:text-stone-400",
-            descriptionClassName
+            descriptionClassName,
           )}
         >
           {description}

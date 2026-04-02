@@ -19,7 +19,7 @@ import {
   isValidEmail,
   normalizeWhitespace,
 } from "@/lib/validation";
-import { PUBLIC_LOCALES, getDashboardPath } from "@/lib/locale";
+import { revalidateDashboardPaths } from "@/lib/server/revalidation";
 
 function getSafeRedirectTarget(value: FormDataEntryValue | null) {
   if (
@@ -31,13 +31,6 @@ function getSafeRedirectTarget(value: FormDataEntryValue | null) {
   }
 
   return value;
-}
-
-function revalidateDashboardPaths() {
-  revalidatePath("/dashboard");
-  for (const locale of PUBLIC_LOCALES) {
-    revalidatePath(getDashboardPath(locale));
-  }
 }
 
 function getNormalizedEmail(formData: FormData) {
@@ -120,7 +113,8 @@ async function updatePasswordWithResult(
     return {
       success: false,
       code: "update-error",
-      message: "Could not update your password. The current session may have expired.",
+      message:
+        "Could not update your password. The current session may have expired.",
     };
   }
 
@@ -186,10 +180,7 @@ export async function signup(formData: FormData) {
     redirect(getAuthUnavailableLoginPath(redirectTo));
   }
 
-  const loginUrl = new URL(
-    "/login",
-    getTrustedAuthBaseUrl(),
-  );
+  const loginUrl = new URL("/login", getTrustedAuthBaseUrl());
   loginUrl.searchParams.set("state", "signup-confirmed");
   loginUrl.searchParams.set("messageType", "success");
   loginUrl.searchParams.set("redirect_to", redirectTo);

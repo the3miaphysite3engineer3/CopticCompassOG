@@ -54,11 +54,7 @@ export function FormField({
 }: FormFieldProps) {
   return (
     <div className={cx("space-y-2", className)}>
-      <FormLabel
-        htmlFor={htmlFor}
-        tone={labelTone}
-        className={labelClassName}
-      >
+      <FormLabel htmlFor={htmlFor} tone={labelTone} className={labelClassName}>
         {label}
       </FormLabel>
       {children}

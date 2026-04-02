@@ -51,7 +51,10 @@ const entryLeadIns = [
 ] as const;
 
 export function toPlainText(value: string) {
-  return value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  return value
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function stripLeadIn(value: string) {
@@ -97,8 +100,11 @@ function isPureGrammarLeadIn(value: string) {
 }
 
 export function getEntrySummary(entry: LexicalEntry, locale: Language = "en") {
-  const meanings = locale === "nl" && entry.dutch_meanings ? entry.dutch_meanings : entry.english_meanings;
-  
+  const meanings =
+    locale === "nl" && entry.dutch_meanings
+      ? entry.dutch_meanings
+      : entry.english_meanings;
+
   for (const meaning of meanings) {
     const candidate = stripLeadIn(meaning);
     if (candidate && !isPureGrammarLeadIn(candidate)) {

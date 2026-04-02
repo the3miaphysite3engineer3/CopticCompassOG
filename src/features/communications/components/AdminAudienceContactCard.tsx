@@ -1,30 +1,30 @@
-import { Badge } from '@/components/Badge'
-import { SurfacePanel } from '@/components/SurfacePanel'
+import { Badge } from "@/components/Badge";
+import { SurfacePanel } from "@/components/SurfacePanel";
 import {
   getAudienceLocaleLabel,
   getAudienceSourceLabel,
   hasAudienceSubscriptions,
   type AdminAudienceContactRow,
-} from '@/features/communications/lib/communications'
+} from "@/features/communications/lib/communications";
 
 function formatAdminAudienceDate(value: string | null) {
   if (!value) {
-    return 'Not recorded yet'
+    return "Not recorded yet";
   }
 
-  return new Date(value).toLocaleString('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  })
+  return new Date(value).toLocaleString("en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
 }
 
 export function AdminAudienceContactCard({
   contact,
 }: {
-  contact: AdminAudienceContactRow
+  contact: AdminAudienceContactRow;
 }) {
-  const isSubscribed = hasAudienceSubscriptions(contact)
-  const syncState = contact.syncState
+  const isSubscribed = hasAudienceSubscriptions(contact);
+  const syncState = contact.syncState;
 
   return (
     <SurfacePanel rounded="3xl" className="space-y-5 p-6">
@@ -39,18 +39,24 @@ export function AdminAudienceContactCard({
         </div>
 
         <div className="flex flex-wrap gap-2">
-          <Badge tone={isSubscribed ? 'accent' : 'neutral'} size="xs">
-            {isSubscribed ? 'Subscribed' : 'Paused'}
+          <Badge tone={isSubscribed ? "accent" : "neutral"} size="xs">
+            {isSubscribed ? "Subscribed" : "Paused"}
           </Badge>
           <Badge
-            tone={syncState?.last_error ? 'neutral' : syncState?.last_synced_at ? 'coptic' : 'surface'}
+            tone={
+              syncState?.last_error
+                ? "neutral"
+                : syncState?.last_synced_at
+                  ? "coptic"
+                  : "surface"
+            }
             size="xs"
           >
             {syncState?.last_error
-              ? 'Resend error'
+              ? "Resend error"
               : syncState?.last_synced_at
-                ? 'Resend synced'
-                : 'Resend pending'}
+                ? "Resend synced"
+                : "Resend pending"}
           </Badge>
           <Badge tone="surface" size="xs">
             {getAudienceSourceLabel(contact.source)}
@@ -109,9 +115,9 @@ export function AdminAudienceContactCard({
           <dt className="font-semibold text-stone-800 dark:text-stone-100">
             Resend status
           </dt>
-          <dd>{syncState?.last_error ?? 'Ready'}</dd>
+          <dd>{syncState?.last_error ?? "Ready"}</dd>
         </div>
       </dl>
     </SurfacePanel>
-  )
+  );
 }

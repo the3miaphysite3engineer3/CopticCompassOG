@@ -25,7 +25,9 @@ interface LanguageContextType {
   t: (key: TranslationKey) => string;
 }
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined,
+);
 
 function persistLanguagePreference(language: Language) {
   localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
@@ -83,8 +85,10 @@ export function LanguageProvider({
 
     if (localeRouting && pathname) {
       const nextPath = switchLocalePath(pathname, lang);
-      const nextSearch = typeof window === "undefined" ? "" : window.location.search;
-      const nextHash = typeof window === "undefined" ? "" : window.location.hash;
+      const nextSearch =
+        typeof window === "undefined" ? "" : window.location.search;
+      const nextHash =
+        typeof window === "undefined" ? "" : window.location.hash;
       router.push(appendSearchAndHash(nextPath, nextSearch, nextHash));
     }
   };

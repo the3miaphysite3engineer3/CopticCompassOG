@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  useEffect,
-  useId,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { cx } from "@/lib/classes";
 import { FloatingTooltip } from "@/components/FloatingTooltip";
 import { useGrammarLessonRenderContext } from "./GrammarLessonRenderContext";
@@ -19,11 +13,7 @@ type FootnoteProps = {
   align?: FootnoteAlign;
 };
 
-export function Footnote({
-  number,
-  content,
-  align = "center",
-}: FootnoteProps) {
+export function Footnote({ number, content, align = "center" }: FootnoteProps) {
   const { registerFootnote, renderMode } = useGrammarLessonRenderContext();
   const tooltipId = useId();
   const anchorRef = useRef<HTMLButtonElement | null>(null);

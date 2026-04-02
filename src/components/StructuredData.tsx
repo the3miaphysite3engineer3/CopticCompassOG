@@ -12,15 +12,15 @@ export function normalizeStructuredData(data: StructuredDataProps["data"]) {
   const entries = data.filter(Boolean);
   const sharedContext = entries.find(
     (entry): entry is Record<string, unknown> & { "@context": string } =>
-      typeof entry?.["@context"] === "string"
+      typeof entry?.["@context"] === "string",
   )?.["@context"];
 
   return {
     ...(sharedContext ? { "@context": sharedContext } : {}),
     "@graph": entries.map((entry) =>
       Object.fromEntries(
-        Object.entries(entry).filter(([key]) => key !== "@context")
-      )
+        Object.entries(entry).filter(([key]) => key !== "@context"),
+      ),
     ),
   };
 }

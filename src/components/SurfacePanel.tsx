@@ -46,7 +46,7 @@ export function SurfacePanel({
         VARIANT_CLASSES[variant],
         SHADOW_CLASSES[shadow],
         ROUNDED_CLASSES[rounded],
-        className
+        className,
       )}
       {...props}
     />

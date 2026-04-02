@@ -49,7 +49,10 @@ function DictionaryPageBody({ dictionaryPath }: DictionaryPageBodyProps) {
       ]}
     >
       <div className="mb-5 flex items-center justify-end">
-        <Link href={getAnalyticsPath(language)} className="btn-secondary gap-2 px-4">
+        <Link
+          href={getAnalyticsPath(language)}
+          className="btn-secondary gap-2 px-4"
+        >
           <BarChart3 className="h-4 w-4" />
           <span className="text-sm tracking-wide">{t("nav.analytics")}</span>
         </Link>
@@ -102,5 +105,7 @@ function DictionaryPageBody({ dictionaryPath }: DictionaryPageBodyProps) {
 export default function DictionaryPageClient() {
   const dictionaryPath = "/data/dictionary.json";
 
-  return <DictionaryPageBody key={dictionaryPath} dictionaryPath={dictionaryPath} />;
+  return (
+    <DictionaryPageBody key={dictionaryPath} dictionaryPath={dictionaryPath} />
+  );
 }

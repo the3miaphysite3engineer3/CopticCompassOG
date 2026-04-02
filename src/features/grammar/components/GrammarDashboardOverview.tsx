@@ -40,7 +40,10 @@ export function GrammarDashboardOverview({
           [copy.grammar.publishedLessons, stats.totalLessons],
           [copy.grammar.startedLessons, stats.startedLessons],
           [copy.grammar.completedLessons, stats.completedLessons],
-          [copy.grammar.savedLessons, stats.bookmarkedLessons + stats.notedLessons],
+          [
+            copy.grammar.savedLessons,
+            stats.bookmarkedLessons + stats.notedLessons,
+          ],
         ].map(([label, value]) => (
           <SurfacePanel key={label} rounded="2xl" className="p-5">
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">

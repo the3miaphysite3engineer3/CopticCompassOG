@@ -35,6 +35,8 @@ npx playwright install chromium
 
 ## Repository Workflows
 
+Before making structural changes, read [docs/architecture.md](./docs/architecture.md) for the current routing, feature, action, and shared-infrastructure layout.
+
 ### App, UI, and Routing Changes
 
 Run the app locally with:
@@ -93,6 +95,7 @@ Please keep PRs focused and explain:
 Before opening a PR, run:
 
 ```bash
+npm run format:check
 npm run lint
 npm run test
 npm run build
@@ -114,6 +117,7 @@ npm run test:e2e:local
 
 - Preserve Coptic spelling and dialect notation exactly unless the change is intentional
 - Prefer small, reviewable commits over broad unrelated changes
+- Prefer feature-owned modules over adding new cross-feature megafiles; query logic usually belongs under `src/features/*/lib/server`
 - Flag uncertain readings or reconstructions clearly in the PR description
 - Keep UI additions consistent with the academic and reference-focused character of the app
 - Keep English and Dutch user-facing copy aligned when editing localized content

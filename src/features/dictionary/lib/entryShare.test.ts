@@ -69,7 +69,9 @@ describe("entry share helpers", () => {
     expect(payload.text).toContain("son.");
     expect(payload.text).toContain("Related forms: ⲥⲁϫ • ⲥⲁϫⲉ");
     expect(payload.text).not.toContain("ⲥⲁϫⲟ");
-    expect(payload.copyText).toContain("https://kyrilloswannes.com/en/entry/cd_173");
+    expect(payload.copyText).toContain(
+      "https://kyrilloswannes.com/en/entry/cd_173",
+    );
   });
 
   it("builds a Dutch share payload with Dutch labels", () => {
@@ -104,6 +106,8 @@ describe("entry share helpers", () => {
     expect(payload.text).toContain("Koptisch woordenboeklemma: ⲣⲱⲙⲉ");
     expect(payload.text).toContain("mens.");
     expect(payload.text).toContain("Verwante vormen: ⲣⲱⲙⲓ");
-    expect(payload.copyText).toContain("https://kyrilloswannes.com/nl/entry/cd_200");
+    expect(payload.copyText).toContain(
+      "https://kyrilloswannes.com/nl/entry/cd_200",
+    );
   });
 });

@@ -26,9 +26,8 @@ type GrammarLessonRenderContextValue = {
   renderMode: GrammarLessonRenderMode;
 };
 
-const GrammarLessonRenderContext = createContext<GrammarLessonRenderContextValue | null>(
-  null,
-);
+const GrammarLessonRenderContext =
+  createContext<GrammarLessonRenderContextValue | null>(null);
 
 type GrammarLessonRenderProviderProps = {
   children: ReactNode;
@@ -62,7 +61,9 @@ export function GrammarLessonRenderProvider({
         }
 
         return {
-          items: [...currentItems, entry].sort((left, right) => left.number - right.number),
+          items: [...currentItems, entry].sort(
+            (left, right) => left.number - right.number,
+          ),
           sessionKey,
         };
       });

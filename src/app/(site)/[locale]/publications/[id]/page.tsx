@@ -113,7 +113,9 @@ export default async function PublicationDetailPage({
   }
 
   const publicationPath = getPublicationPath(publication.id, locale);
-  const grammarLessons = listPublishedGrammarLessonsForPublication(publication.id);
+  const grammarLessons = listPublishedGrammarLessonsForPublication(
+    publication.id,
+  );
   const relatedPublications = getRelatedPublications(publication.id);
 
   return (
@@ -121,8 +123,14 @@ export default async function PublicationDetailPage({
       <StructuredData
         data={[
           createBreadcrumbStructuredData([
-            { name: getTranslation(locale, "nav.home"), path: getLocalizedHomePath(locale) },
-            { name: getTranslation(locale, "nav.publications"), path: getPublicationsPath(locale) },
+            {
+              name: getTranslation(locale, "nav.home"),
+              path: getLocalizedHomePath(locale),
+            },
+            {
+              name: getTranslation(locale, "nav.publications"),
+              path: getPublicationsPath(locale),
+            },
             { name: publication.title, path: publicationPath },
           ]),
           createPublicationStructuredData(publication, locale),

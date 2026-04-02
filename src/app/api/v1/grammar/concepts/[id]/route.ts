@@ -12,10 +12,7 @@ type ConceptRouteContext = {
   }>;
 };
 
-export async function GET(
-  _request: Request,
-  context: ConceptRouteContext,
-) {
+export async function GET(_request: Request, context: ConceptRouteContext) {
   const { id } = await context.params;
   const concept = getGrammarApiConceptById(id);
 

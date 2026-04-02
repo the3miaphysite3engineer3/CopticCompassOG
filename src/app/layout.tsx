@@ -3,6 +3,8 @@ import { connection } from "next/server";
 import "@/app/globals.css";
 import { antinoou } from "@/lib/fonts";
 import { getDocumentLanguage } from "@/lib/server/preferredLanguage";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export default async function RootLayout({
   children,
@@ -16,7 +18,11 @@ export default async function RootLayout({
 
   return (
     <html lang={language} suppressHydrationWarning>
-      <body className={antinoou.variable}>{children}</body>
+      <body className={antinoou.variable}>
+        {children}
+        <Analytics />
+        <SpeedInsights />
+      </body>
     </html>
   );
 }

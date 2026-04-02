@@ -40,7 +40,9 @@ describe("grammar API helpers", () => {
 
   it("resolves lesson filters from either slug or canonical lesson id", () => {
     expect(resolveGrammarLessonFilter("lesson-1")).toBe("grammar.lesson.01");
-    expect(resolveGrammarLessonFilter("grammar.lesson.01")).toBe("grammar.lesson.01");
+    expect(resolveGrammarLessonFilter("grammar.lesson.01")).toBe(
+      "grammar.lesson.01",
+    );
     expect(resolveGrammarLessonFilter("lesson-2")).toBeNull();
     expect(resolveGrammarLessonFilter("missing-lesson")).toBeNull();
   });
@@ -75,16 +77,22 @@ describe("grammar API helpers", () => {
 
     expect(lessonId).toBe("grammar.lesson.01");
     expect(listGrammarApiExamples(lessonId ?? undefined).data).toHaveLength(12);
-    expect(listGrammarApiExercises(lessonId ?? undefined).data.map((exercise) => exercise.id)).toEqual([
-      "grammar.exercise.lesson01.001",
-    ]);
+    expect(
+      listGrammarApiExercises(lessonId ?? undefined).data.map(
+        (exercise) => exercise.id,
+      ),
+    ).toEqual(["grammar.exercise.lesson01.001"]);
     expect(listGrammarApiFootnotes(lessonId ?? undefined).data).toHaveLength(5);
   });
 
   it("returns concept and source collections for lesson-level consumers", () => {
     const lessonId = resolveGrammarLessonFilter("lesson-1");
 
-    expect(listGrammarApiConcepts(lessonId ?? undefined).data.map((concept) => concept.id)).toEqual([
+    expect(
+      listGrammarApiConcepts(lessonId ?? undefined).data.map(
+        (concept) => concept.id,
+      ),
+    ).toEqual([
       "grammar.concept.bare-noun",
       "grammar.concept.determined-noun",
       "grammar.concept.significant-letters",
@@ -95,9 +103,11 @@ describe("grammar API helpers", () => {
       "grammar.concept.independent-personal-pronouns",
       "grammar.concept.nomina-sacra",
     ]);
-    expect(listGrammarApiSources(lessonId ?? undefined).data.map((source) => source.id)).toEqual([
-      "grammar.source.basisgrammatica-bohairisch-koptisch",
-    ]);
+    expect(
+      listGrammarApiSources(lessonId ?? undefined).data.map(
+        (source) => source.id,
+      ),
+    ).toEqual(["grammar.source.basisgrammatica-bohairisch-koptisch"]);
   });
 
   it("returns detail records for canonical concept and source ids", () => {

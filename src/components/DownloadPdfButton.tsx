@@ -29,9 +29,9 @@ const PDF_BUTTON_COPY = {
   nl: {
     download: "PDF downloaden",
     generating: "PDF wordt gemaakt...",
-    loginPrompt: "Log in of maak een account aan om lessen als pdf te downloaden",
-    footerLeadIn:
-      "Gedownload van The Wannes Portfolio (kyrilloswannes.com) op",
+    loginPrompt:
+      "Log in of maak een account aan om lessen als pdf te downloaden",
+    footerLeadIn: "Gedownload van The Wannes Portfolio (kyrilloswannes.com) op",
     errorPrefix: "Er is een fout opgetreden bij het maken van de pdf:",
   },
 } as const;
@@ -62,7 +62,7 @@ export function DownloadPdfButton({
     if (!targetElement) return;
 
     setIsGenerating(true);
-    
+
     try {
       if (beforeCapture) {
         await beforeCapture();
@@ -72,10 +72,10 @@ export function DownloadPdfButton({
       // Dynamically import modern PDF compilers
       const { toPng } = await import("html-to-image");
       const { jsPDF } = await import("jspdf");
-      
+
       // Render native image via browser's SVG renderer instantly on the live node (no invisible clones)
-      const dataUrl = await toPng(targetElement, { 
-        cacheBust: true, 
+      const dataUrl = await toPng(targetElement, {
+        cacheBust: true,
         pixelRatio: 2,
         backgroundColor: "#ffffff",
       });
@@ -84,16 +84,16 @@ export function DownloadPdfButton({
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
-        format: "a4"
+        format: "a4",
       });
 
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();
       const margin = 15;
-      
-      const contentWidth = pdfWidth - (margin * 2);
-      const contentHeight = pageHeight - (margin * 2);
-      
+
+      const contentWidth = pdfWidth - margin * 2;
+      const contentHeight = pageHeight - margin * 2;
+
       const imgProps = pdf.getImageProperties(dataUrl);
       const imgHeight = (imgProps.height * contentWidth) / imgProps.width;
 
@@ -104,7 +104,7 @@ export function DownloadPdfButton({
         // Draw white rectangle to protect the top margin from image bleed
         doc.setFillColor(255, 255, 255);
         doc.rect(0, 0, pdfWidth, margin, "F");
-        
+
         // Draw white rectangle to protect the bottom margin
         doc.rect(0, pageHeight - margin, pdfWidth, margin, "F");
 
@@ -116,8 +116,8 @@ export function DownloadPdfButton({
         doc.text(
           `${copy.footerLeadIn} ${now}`,
           pdfWidth / 2,
-          pageHeight - (margin / 2) + 2,
-          { align: "center" }
+          pageHeight - margin / 2 + 2,
+          { align: "center" },
         );
       };
 

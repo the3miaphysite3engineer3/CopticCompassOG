@@ -31,7 +31,13 @@ export type DictionaryDialectCode = (typeof DICTIONARY_DIALECT_CODES)[number];
 export type AnalyticsDialect = (typeof ANALYTICS_DIALECTS)[number];
 export type DialectFilter = AnalyticsDialect;
 export type PartOfSpeech = (typeof PARTS_OF_SPEECH)[number];
-export type DictionaryPartOfSpeechFilter = "ALL" | "V" | "N" | "ADJ" | "ADV" | "PREP";
+export type DictionaryPartOfSpeechFilter =
+  | "ALL"
+  | "V"
+  | "N"
+  | "ADJ"
+  | "ADV"
+  | "PREP";
 
 type DialectOption = {
   value: DialectFilter;
@@ -43,7 +49,10 @@ type PartOfSpeechOption = {
   labelKey: TranslationKey;
 };
 
-const DIALECT_LABEL_KEYS: Record<"ALL" | DictionaryDialectCode, TranslationKey> = {
+const DIALECT_LABEL_KEYS: Record<
+  "ALL" | DictionaryDialectCode,
+  TranslationKey
+> = {
   ALL: "dialect.ALL",
   A: "dialect.A",
   B: "dialect.B",
@@ -57,10 +66,16 @@ const DIALECT_LABEL_KEYS: Record<"ALL" | DictionaryDialectCode, TranslationKey> 
   Sf: "dialect.Sf",
 };
 
-const DIALECT_KEYS_WITH_SUFFIX = new Set<DictionaryDialectCode>(["Fb", "Sl", "Sa", "Sf"]);
+const DIALECT_KEYS_WITH_SUFFIX = new Set<DictionaryDialectCode>([
+  "Fb",
+  "Sl",
+  "Sa",
+  "Sf",
+]);
 
 export const DEFAULT_DICTIONARY_DIALECT_FILTER: DialectFilter = "B";
-export const DEFAULT_PART_OF_SPEECH_FILTER: DictionaryPartOfSpeechFilter = "ALL";
+export const DEFAULT_PART_OF_SPEECH_FILTER: DictionaryPartOfSpeechFilter =
+  "ALL";
 
 export const dialectFilterOptions = [
   { value: "ALL", labelKey: "dialect.ALL" },
@@ -90,7 +105,7 @@ export function getDialectLabelKey(siglum: string): TranslationKey | undefined {
 
 export function getDialectFilterOptionLabel(
   dialect: DialectFilter,
-  translate: (key: TranslationKey) => string
+  translate: (key: TranslationKey) => string,
 ) {
   const label = translate(DIALECT_LABEL_KEYS[dialect]);
   return dialect === "ALL" ? label : `${label} (${dialect})`;
@@ -98,16 +113,18 @@ export function getDialectFilterOptionLabel(
 
 export function getPartOfSpeechFilterLabel(
   partOfSpeech: DictionaryPartOfSpeechFilter,
-  translate: (key: TranslationKey) => string
+  translate: (key: TranslationKey) => string,
 ) {
   const option = dictionaryPartOfSpeechFilterOptions.find(
-    (candidate) => candidate.value === partOfSpeech
+    (candidate) => candidate.value === partOfSpeech,
   );
 
   return option ? translate(option.labelKey) : partOfSpeech;
 }
 
-export function isDictionaryDialectCode(value: string): value is DictionaryDialectCode {
+export function isDictionaryDialectCode(
+  value: string,
+): value is DictionaryDialectCode {
   return DICTIONARY_DIALECT_CODES.includes(value as DictionaryDialectCode);
 }
 

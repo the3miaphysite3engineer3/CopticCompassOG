@@ -1,14 +1,14 @@
-import type { Metadata } from 'next'
-import { resetPassword } from '@/actions/auth'
-import { FormField } from '@/components/FormField'
-import { PageHeader } from '@/components/PageHeader'
-import { PageShell, pageShellAccents } from '@/components/PageShell'
-import { StatusNotice } from '@/components/StatusNotice'
-import { SurfacePanel } from '@/components/SurfacePanel'
+import type { Metadata } from "next";
+import { resetPassword } from "@/actions/auth";
+import { FormField } from "@/components/FormField";
+import { PageHeader } from "@/components/PageHeader";
+import { PageShell, pageShellAccents } from "@/components/PageShell";
+import { StatusNotice } from "@/components/StatusNotice";
+import { SurfacePanel } from "@/components/SurfacePanel";
 import { getTranslation } from "@/lib/i18n";
-import { createNoIndexMetadata } from '@/lib/metadata'
+import { createNoIndexMetadata } from "@/lib/metadata";
 import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
-import Link from 'next/link'
+import Link from "next/link";
 
 export async function generateMetadata(): Promise<Metadata> {
   const language = await getPreferredLanguage();
@@ -23,20 +23,27 @@ export default async function ForgotPasswordPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    messageType?: 'error' | 'success' | 'info'
-    state?: string
-  }>
+    messageType?: "error" | "success" | "info";
+    state?: string;
+  }>;
 }) {
   const language = await getPreferredLanguage();
   const noticeMessages: Record<string, string> = {
-    'forgot-invalid-input': getTranslation(language, "forgot.notice.invalidInput"),
-    'forgot-error': getTranslation(language, "forgot.notice.error"),
-    'forgot-rate-limited': getTranslation(language, "forgot.notice.rateLimited"),
-    'forgot-success': getTranslation(language, "forgot.notice.success"),
+    "forgot-invalid-input": getTranslation(
+      language,
+      "forgot.notice.invalidInput",
+    ),
+    "forgot-error": getTranslation(language, "forgot.notice.error"),
+    "forgot-rate-limited": getTranslation(
+      language,
+      "forgot.notice.rateLimited",
+    ),
+    "forgot-success": getTranslation(language, "forgot.notice.success"),
   };
-  const { messageType = 'error', state } = await searchParams;
-  const noticeMessage = state && state in noticeMessages ? noticeMessages[state] : undefined;
-  const noticeVariant = state === 'forgot-success' ? 'success' : messageType;
+  const { messageType = "error", state } = await searchParams;
+  const noticeMessage =
+    state && state in noticeMessages ? noticeMessages[state] : undefined;
+  const noticeVariant = state === "forgot-success" ? "success" : messageType;
 
   return (
     <PageShell
@@ -57,22 +64,25 @@ export default async function ForgotPasswordPage({
       <div className="mx-auto max-w-xl">
         <SurfacePanel rounded="3xl" className="p-8 md:p-10">
           <form className="space-y-6 text-stone-800 dark:text-stone-200">
-            <FormField htmlFor="email" label={getTranslation(language, "forgot.email")}>
+            <FormField
+              htmlFor="email"
+              label={getTranslation(language, "forgot.email")}
+            >
               <input
                 id="email"
                 className="input-base"
                 name="email"
                 type="email"
-                placeholder={getTranslation(language, "forgot.emailPlaceholder")}
+                placeholder={getTranslation(
+                  language,
+                  "forgot.emailPlaceholder",
+                )}
                 required
               />
             </FormField>
 
             <div className="space-y-3 pt-2">
-              <button
-                formAction={resetPassword}
-                className="btn-primary w-full"
-              >
+              <button formAction={resetPassword} className="btn-primary w-full">
                 {getTranslation(language, "forgot.sendLink")}
               </button>
               <Link
@@ -84,13 +94,11 @@ export default async function ForgotPasswordPage({
             </div>
 
             {noticeMessage && (
-              <StatusNotice tone={noticeVariant}>
-                {noticeMessage}
-              </StatusNotice>
+              <StatusNotice tone={noticeVariant}>{noticeMessage}</StatusNotice>
             )}
           </form>
         </SurfacePanel>
       </div>
     </PageShell>
-  )
+  );
 }

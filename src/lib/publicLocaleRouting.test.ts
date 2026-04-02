@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { requirePublicLocale, resolvePublicLocale } from "./publicLocaleRouting";
+import {
+  requirePublicLocale,
+  resolvePublicLocale,
+} from "./publicLocaleRouting";
 
 describe("publicLocaleRouting", () => {
   it("falls back to the default locale for unknown locale params", () => {

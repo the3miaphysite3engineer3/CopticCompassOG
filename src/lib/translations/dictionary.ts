@@ -49,8 +49,7 @@ export const dictionaryMessages = defineMessages({
     "entry.actions.eyebrow": "Entry Tools",
     "entry.actions.description":
       "Share this entry, save it for later, or send a quick note when something needs attention.",
-    "entry.actions.authUnavailable":
-      "Entry actions are unavailable right now.",
+    "entry.actions.authUnavailable": "Entry actions are unavailable right now.",
     "entry.actions.loginPrompt":
       "Log in or sign up to save entries and report issues.",
     "entry.actions.share": "Share",

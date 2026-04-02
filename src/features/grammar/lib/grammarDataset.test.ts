@@ -45,6 +45,8 @@ describe("grammar dataset adapter", () => {
 
     expect(exportSnapshot.manifest.datasetVersion).toBe("2026-03-22");
     expect(Object.keys(exportSnapshot.lessons)).toEqual(["lesson-1"]);
-    expect(exportSnapshot.lessons["lesson-1"]?.lesson.id).toBe("grammar.lesson.01");
+    expect(exportSnapshot.lessons["lesson-1"]?.lesson.id).toBe(
+      "grammar.lesson.01",
+    );
   });
 });

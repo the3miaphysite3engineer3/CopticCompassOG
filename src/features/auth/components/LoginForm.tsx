@@ -8,8 +8,8 @@ import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
-import Link from 'next/link';
-import { FaGoogle } from 'react-icons/fa';
+import Link from "next/link";
+import { FaGoogle } from "react-icons/fa";
 
 const NOTICE_TRANSLATION_KEYS = {
   "auth-unavailable": "login.notice.authUnavailable",
@@ -76,90 +76,84 @@ export function LoginForm({
         className="mb-12"
       />
 
-        <div className="max-w-xl mx-auto">
-          <SurfacePanel rounded="3xl" className="p-8 md:p-10">
-            <form className="space-y-6 text-stone-800 dark:text-stone-200">
-              {redirectTo && (
-                <input
-                  type="hidden"
-                  name="redirectTo"
-                  value={redirectTo}
-                />
-              )}
-              <input type="hidden" name="locale" value={language} />
+      <div className="max-w-xl mx-auto">
+        <SurfacePanel rounded="3xl" className="p-8 md:p-10">
+          <form className="space-y-6 text-stone-800 dark:text-stone-200">
+            {redirectTo && (
+              <input type="hidden" name="redirectTo" value={redirectTo} />
+            )}
+            <input type="hidden" name="locale" value={language} />
 
-              <FormField htmlFor="email" label={t("login.email")}>
-                <input
-                  id="email"
-                  className="input-base"
-                  name="email"
-                  type="email"
-                  placeholder={t("login.emailPlaceholder")}
-                  required
-                />
-              </FormField>
+            <FormField htmlFor="email" label={t("login.email")}>
+              <input
+                id="email"
+                className="input-base"
+                name="email"
+                type="email"
+                placeholder={t("login.emailPlaceholder")}
+                required
+              />
+            </FormField>
 
-              <FormField htmlFor="password" label={
+            <FormField
+              htmlFor="password"
+              label={
                 <div className="flex items-center justify-between w-full">
                   <span>{t("login.password")}</span>
-                  <Link href="/forgot-password" className="text-xs text-brand-600 dark:text-brand-400 hover:underline">
+                  <Link
+                    href="/forgot-password"
+                    className="text-xs text-brand-600 dark:text-brand-400 hover:underline"
+                  >
                     {t("login.forgotPassword")}
                   </Link>
                 </div>
-              }>
-                <input
-                  id="password"
-                  className="input-base"
-                  type="password"
-                  name="password"
-                  placeholder={t("login.passwordPlaceholder")}
-                  required
-                />
-              </FormField>
+              }
+            >
+              <input
+                id="password"
+                className="input-base"
+                type="password"
+                name="password"
+                placeholder={t("login.passwordPlaceholder")}
+                required
+              />
+            </FormField>
 
-              <div className="space-y-3 pt-2">
-                <button
-                  formAction={login}
-                  className="btn-primary w-full"
-                >
-                  {t("login.signIn")}
-                </button>
-                <button
-                  formAction={signup}
-                  className="btn-secondary w-full"
-                >
-                  {t("login.createAccount")}
-                </button>
-              </div>
-
-              <div className="relative py-2">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-stone-200 dark:border-stone-800" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-white dark:bg-stone-900 px-2 text-stone-500">
-                    {t("login.orContinueWith")}
-                  </span>
-                </div>
-              </div>
-
-              <button
-                formAction={signInWithGoogle}
-                formNoValidate
-                className="w-full flex items-center justify-center gap-3 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 px-4 py-2.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm"
-              >
-                <FaGoogle className="h-4 w-4 text-red-500" />
-                {t("login.google")}
+            <div className="space-y-3 pt-2">
+              <button formAction={login} className="btn-primary w-full">
+                {t("login.signIn")}
               </button>
+              <button formAction={signup} className="btn-secondary w-full">
+                {t("login.createAccount")}
+              </button>
+            </div>
 
-              {noticeMessage && (
-                <StatusNotice tone={noticeVariant}>
-                  {noticeMessage}
-                </StatusNotice>
-              )}
-            </form>
-          </SurfacePanel>
-        </div>
+            <div className="relative py-2">
+              <div className="absolute inset-0 flex items-center">
+                <span className="w-full border-t border-stone-200 dark:border-stone-800" />
+              </div>
+              <div className="relative flex justify-center text-xs uppercase">
+                <span className="bg-white dark:bg-stone-900 px-2 text-stone-500">
+                  {t("login.orContinueWith")}
+                </span>
+              </div>
+            </div>
+
+            <button
+              formAction={signInWithGoogle}
+              formNoValidate
+              className="w-full flex items-center justify-center gap-3 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 px-4 py-2.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm"
+            >
+              <FaGoogle className="h-4 w-4 text-red-500" />
+              {t("login.google")}
+            </button>
+
+            {noticeMessage && (
+              <StatusNotice tone={noticeVariant}>{noticeMessage}</StatusNotice>
+            )}
+          </form>
+        </SurfacePanel>
+      </div>
     </PageShell>
   );
 }

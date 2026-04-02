@@ -1,9 +1,14 @@
 import { describe, expect, it } from "vitest";
 import type { GrammarBlock, GrammarInline } from "./schema.ts";
-import { enrichGrammarDatasetSnapshotWithDictionaryLinks, getBohairicDictionaryEntryIdForWord } from "./dictionary-links.ts";
+import {
+  enrichGrammarDatasetSnapshotWithDictionaryLinks,
+  getBohairicDictionaryEntryIdForWord,
+} from "./dictionary-links.ts";
 import { getGrammarDatasetSnapshot } from "./registry.ts";
 
-function getParagraphCopticNode(block: GrammarBlock | undefined): GrammarInline | undefined {
+function getParagraphCopticNode(
+  block: GrammarBlock | undefined,
+): GrammarInline | undefined {
   if (!block || block.type !== "paragraph") {
     return undefined;
   }
@@ -88,10 +93,12 @@ describe("grammar dictionary link enrichment", () => {
     });
 
     const motherExample = snapshot.examples.find(
-      (example) => example.id === "grammar.example.lesson01.nominal-sentence.004",
+      (example) =>
+        example.id === "grammar.example.lesson01.nominal-sentence.004",
     );
     const everyManExample = snapshot.examples.find(
-      (example) => example.id === "grammar.example.lesson01.zero-determination.001",
+      (example) =>
+        example.id === "grammar.example.lesson01.zero-determination.001",
     );
 
     expect(motherExample?.copticSegments).toMatchObject([

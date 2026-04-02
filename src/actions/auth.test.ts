@@ -82,25 +82,27 @@ async function loadAuthModule(options?: {
     resetAt: Date.now() + 60_000,
     retryAfterMs: 60_000,
   });
-  const getClientRateLimitIdentifierMock = vi.fn().mockResolvedValue("client-fingerprint");
-  const getAuthUnavailableLoginPathMock = vi
-    .fn((redirectTo?: string) =>
-      redirectTo
-        ? `/login?state=auth-unavailable&messageType=error&redirect_to=${encodeURIComponent(redirectTo)}`
-        : "/login?state=auth-unavailable&messageType=error"
-    );
-  const getLoginPathMock = vi
-    .fn((redirectTo?: string) =>
-      redirectTo
-        ? `/login?redirect_to=${encodeURIComponent(redirectTo)}`
-        : "/login"
-    );
+  const getClientRateLimitIdentifierMock = vi
+    .fn()
+    .mockResolvedValue("client-fingerprint");
+  const getAuthUnavailableLoginPathMock = vi.fn((redirectTo?: string) =>
+    redirectTo
+      ? `/login?state=auth-unavailable&messageType=error&redirect_to=${encodeURIComponent(redirectTo)}`
+      : "/login?state=auth-unavailable&messageType=error",
+  );
+  const getLoginPathMock = vi.fn((redirectTo?: string) =>
+    redirectTo
+      ? `/login?redirect_to=${encodeURIComponent(redirectTo)}`
+      : "/login",
+  );
   const hasSupabaseRuntimeEnvMock = vi.fn(() => options?.hasEnv ?? true);
   const signInWithPasswordMock = vi
     .fn()
     .mockResolvedValue({ error: options?.signInError ?? null });
   const signInWithOAuthMock = vi.fn().mockResolvedValue({
-    data: { url: options?.signInWithOAuthUrl ?? "https://accounts.google.com/mock" },
+    data: {
+      url: options?.signInWithOAuthUrl ?? "https://accounts.google.com/mock",
+    },
     error: options?.signInWithOAuthError ?? null,
   });
   const signUpMock = vi.fn().mockResolvedValue({
@@ -113,7 +115,9 @@ async function loadAuthModule(options?: {
     },
     error: options?.signUpError ?? null,
   });
-  const signOutMock = vi.fn().mockResolvedValue({ error: options?.signOutError ?? null });
+  const signOutMock = vi
+    .fn()
+    .mockResolvedValue({ error: options?.signOutError ?? null });
   const resetPasswordForEmailMock = vi
     .fn()
     .mockResolvedValue({ error: options?.resetPasswordError ?? null });
@@ -123,7 +127,9 @@ async function loadAuthModule(options?: {
   const createClientMock = vi.fn().mockResolvedValue({
     auth: {
       getUser: vi.fn().mockResolvedValue({
-        data: { user: options?.user === undefined ? { id: "user-1" } : options.user },
+        data: {
+          user: options?.user === undefined ? { id: "user-1" } : options.user,
+        },
       }),
       resetPasswordForEmail: resetPasswordForEmailMock,
       signInWithOAuth: signInWithOAuthMock,
@@ -196,12 +202,16 @@ describe("auth actions", () => {
   });
 
   it("redirects login attempts when auth is unavailable", async () => {
-    const { createClientMock, getAuthUnavailableLoginPathMock, login } = await loadAuthModule({
-      hasEnv: false,
-    });
+    const { createClientMock, getAuthUnavailableLoginPathMock, login } =
+      await loadAuthModule({
+        hasEnv: false,
+      });
 
-    await expect(login(createLoginFormData({ redirectTo: "/dashboard" }))).rejects.toMatchObject({
-      destination: "/login?state=auth-unavailable&messageType=error&redirect_to=%2Fdashboard",
+    await expect(
+      login(createLoginFormData({ redirectTo: "/dashboard" })),
+    ).rejects.toMatchObject({
+      destination:
+        "/login?state=auth-unavailable&messageType=error&redirect_to=%2Fdashboard",
     });
 
     expect(getAuthUnavailableLoginPathMock).toHaveBeenCalledWith("/dashboard");
@@ -212,7 +222,7 @@ describe("auth actions", () => {
     const { createClientMock, login } = await loadAuthModule();
 
     await expect(
-      login(createLoginFormData({ email: "bad-email", password: "" }))
+      login(createLoginFormData({ email: "bad-email", password: "" })),
     ).rejects.toMatchObject({
       destination:
         "/login?state=login-invalid-input&messageType=error&redirect_to=%2Fdashboard",
@@ -226,7 +236,9 @@ describe("auth actions", () => {
       rateLimitOk: false,
     });
 
-    await expect(login(createLoginFormData({ redirectTo: "/dictionary" }))).rejects.toMatchObject({
+    await expect(
+      login(createLoginFormData({ redirectTo: "/dictionary" })),
+    ).rejects.toMatchObject({
       destination:
         "/login?state=login-rate-limited&messageType=error&redirect_to=%2Fdictionary",
     });
@@ -235,7 +247,8 @@ describe("auth actions", () => {
   });
 
   it("normalizes login credentials and redirects to a safe local path", async () => {
-    const { login, revalidatePathMock, signInWithPasswordMock } = await loadAuthModule();
+    const { login, revalidatePathMock, signInWithPasswordMock } =
+      await loadAuthModule();
 
     await expect(
       login(
@@ -243,8 +256,8 @@ describe("auth actions", () => {
           email: " USER@Example.com ",
           password: "password123",
           redirectTo: "https://evil.example",
-        })
-      )
+        }),
+      ),
     ).rejects.toMatchObject({
       destination: "/dashboard",
     });
@@ -274,7 +287,7 @@ describe("auth actions", () => {
     const { createClientMock, signup } = await loadAuthModule();
 
     await expect(
-      signup(createLoginFormData({ email: "invalid", password: "short" }))
+      signup(createLoginFormData({ email: "invalid", password: "short" })),
     ).rejects.toMatchObject({
       destination:
         "/login?state=signup-invalid-input&messageType=error&redirect_to=%2Fdashboard",
@@ -284,8 +297,7 @@ describe("auth actions", () => {
   });
 
   it("redirects to the email confirmation state when signup has no session", async () => {
-    const { revalidatePathMock, signup, signUpMock } =
-      await loadAuthModule({
+    const { revalidatePathMock, signup, signUpMock } = await loadAuthModule({
       signUpSession: null,
     });
 
@@ -376,7 +388,8 @@ describe("auth actions", () => {
   });
 
   it("returns an inline error when dashboard password confirmation does not match", async () => {
-    const { createClientMock, updatePasswordFromDashboard } = await loadAuthModule();
+    const { createClientMock, updatePasswordFromDashboard } =
+      await loadAuthModule();
 
     await expect(
       updatePasswordFromDashboard(
@@ -394,11 +407,8 @@ describe("auth actions", () => {
   });
 
   it("updates the password from the dashboard without redirecting", async () => {
-    const {
-      revalidatePathMock,
-      updatePasswordFromDashboard,
-      updateUserMock,
-    } = await loadAuthModule();
+    const { revalidatePathMock, updatePasswordFromDashboard, updateUserMock } =
+      await loadAuthModule();
 
     await expect(
       updatePasswordFromDashboard(createPasswordUpdateFormData()),

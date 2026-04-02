@@ -32,7 +32,9 @@ function TileInner({
 }) {
   return (
     <>
-      <span className={`absolute top-3 right-3 z-20 text-[10px] font-bold tracking-widest px-2 py-0.5 rounded-full border ${LANG_COLORS[pub.lang]}`}>
+      <span
+        className={`absolute top-3 right-3 z-20 text-[10px] font-bold tracking-widest px-2 py-0.5 rounded-full border ${LANG_COLORS[pub.lang]}`}
+      >
         {pub.lang}
       </span>
 

@@ -38,7 +38,9 @@ describe("grammar content registry", () => {
     const exportSnapshot = createGrammarExportSnapshot();
     const lessonBundle = exportSnapshot.lessons["lesson-1"];
 
-    expect(lessonBundle.lesson.exerciseRefs).toContain("grammar.exercise.lesson01.001");
+    expect(lessonBundle.lesson.exerciseRefs).toContain(
+      "grammar.exercise.lesson01.001",
+    );
     expect(lessonBundle.exercises.map((exercise) => exercise.id)).toContain(
       "grammar.exercise.lesson01.001",
     );
@@ -152,8 +154,12 @@ describe("grammar content registry", () => {
       "25%",
       "25%",
     ]);
-    expect(englishTable.headerRows?.[0]?.cells.map((cell) => cell.colSpan)).toEqual([2, 2]);
-    expect(dutchTable.headerRows?.[0]?.cells.map((cell) => cell.colSpan)).toEqual([2, 2]);
+    expect(
+      englishTable.headerRows?.[0]?.cells.map((cell) => cell.colSpan),
+    ).toEqual([2, 2]);
+    expect(
+      dutchTable.headerRows?.[0]?.cells.map((cell) => cell.colSpan),
+    ).toEqual([2, 2]);
   });
 
   it("marks lookup-style abbreviation tables for mobile card rendering", () => {
@@ -183,10 +189,12 @@ describe("grammar content registry", () => {
   it("wires concept and source references into examples and footnotes", () => {
     const snapshot = getGrammarDatasetSnapshot();
     const zeroDeterminationExample = snapshot.examples.find(
-      (example) => example.id === "grammar.example.lesson01.zero-determination.001",
+      (example) =>
+        example.id === "grammar.example.lesson01.zero-determination.001",
     );
     const nominalSentenceExample = snapshot.examples.find(
-      (example) => example.id === "grammar.example.lesson01.nominal-sentence.001",
+      (example) =>
+        example.id === "grammar.example.lesson01.nominal-sentence.001",
     );
     const orthographyFootnote = snapshot.footnotes.find(
       (footnote) => footnote.id === "grammar.footnote.lesson01.006",

@@ -27,5 +27,7 @@ export default async function LocalizedPrivacyPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  return <LegalDocumentPage {...getPrivacyDocument(resolvePublicLocale(locale))} />;
+  return (
+    <LegalDocumentPage {...getPrivacyDocument(resolvePublicLocale(locale))} />
+  );
 }

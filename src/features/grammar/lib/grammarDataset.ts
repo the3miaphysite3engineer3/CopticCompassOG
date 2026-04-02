@@ -1,4 +1,7 @@
-import { createGrammarExportSnapshot, createGrammarLessonBundle } from "@/content/grammar/build";
+import {
+  createGrammarExportSnapshot,
+  createGrammarLessonBundle,
+} from "@/content/grammar/build";
 import {
   getGrammarManifest,
   getGrammarLessonDocumentBySlug,
@@ -12,7 +15,10 @@ import type {
 } from "@/content/grammar/schema";
 import type { Language } from "@/types/i18n";
 
-export type GrammarLessonOutlineItem = Pick<GrammarSectionDocument, "id" | "slug" | "title">;
+export type GrammarLessonOutlineItem = Pick<
+  GrammarSectionDocument,
+  "id" | "slug" | "title"
+>;
 
 function pluralize(count: number, singular: string, plural: string) {
   return `${count} ${count === 1 ? singular : plural}`;
@@ -65,7 +71,9 @@ export function listPublishedGrammarLessons(): GrammarLessonIndexItem[] {
   return listGrammarLessons().filter((lesson) => lesson.status === "published");
 }
 
-export function getGrammarLessonBundleBySlug(slug: string): GrammarLessonBundle | null {
+export function getGrammarLessonBundleBySlug(
+  slug: string,
+): GrammarLessonBundle | null {
   const lesson = getGrammarLessonDocumentBySlug(slug);
 
   if (!lesson) {
@@ -102,7 +110,9 @@ export function getGrammarLessonOutlineBySlug(
 
   return bundle.lesson.sectionOrder
     .map((sectionId) => sectionsById.get(sectionId))
-    .filter((section): section is GrammarSectionDocument => section !== undefined)
+    .filter(
+      (section): section is GrammarSectionDocument => section !== undefined,
+    )
     .map((section) => ({
       id: section.id,
       slug: section.slug,

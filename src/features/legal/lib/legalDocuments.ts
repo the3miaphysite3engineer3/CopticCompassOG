@@ -95,7 +95,8 @@ const TERMS_DOCUMENTS = {
   },
   nl: {
     title: "Gebruiksvoorwaarden",
-    description: "De regels en voorwaarden voor het gebruik van onze digitale tools.",
+    description:
+      "De regels en voorwaarden voor het gebruik van onze digitale tools.",
     sections: [
       {
         title: "1. Voorwaarden",

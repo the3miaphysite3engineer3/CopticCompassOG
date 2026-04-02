@@ -18,9 +18,11 @@ export function SwaggerDocsClient({ specUrl }: SwaggerDocsClientProps) {
     async function loadSwaggerUi() {
       try {
         const swaggerUiModule = await import("swagger-ui-dist");
-        const swaggerUi = ("default" in swaggerUiModule
-          ? swaggerUiModule.default
-          : swaggerUiModule) as SwaggerUiModule;
+        const swaggerUi = (
+          "default" in swaggerUiModule
+            ? swaggerUiModule.default
+            : swaggerUiModule
+        ) as SwaggerUiModule;
 
         if (!isMounted || !containerRef.current) {
           return;
@@ -38,7 +40,10 @@ export function SwaggerDocsClient({ specUrl }: SwaggerDocsClientProps) {
           docExpansion: "list",
           filter: true,
           tryItOutEnabled: false,
-          presets: [swaggerUi.SwaggerUIBundle.presets.apis, swaggerUi.SwaggerUIStandalonePreset],
+          presets: [
+            swaggerUi.SwaggerUIBundle.presets.apis,
+            swaggerUi.SwaggerUIStandalonePreset,
+          ],
           layout: "BaseLayout",
         });
 
@@ -66,8 +71,12 @@ export function SwaggerDocsClient({ specUrl }: SwaggerDocsClientProps) {
     <div className="space-y-4">
       {hasLoadError ? (
         <p className="rounded-3xl border border-amber-300/70 bg-amber-50/90 px-4 py-3 text-sm text-amber-900">
-          The interactive docs could not load in this browser. You can still use the raw{" "}
-          <a className="underline decoration-amber-500 underline-offset-2" href={specUrl}>
+          The interactive docs could not load in this browser. You can still use
+          the raw{" "}
+          <a
+            className="underline decoration-amber-500 underline-offset-2"
+            href={specUrl}
+          >
             OpenAPI document
           </a>
           .

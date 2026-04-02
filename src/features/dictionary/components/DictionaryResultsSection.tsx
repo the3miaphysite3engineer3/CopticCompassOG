@@ -46,7 +46,7 @@ export function DictionaryResultsSection({
           setVisibleCount((previousCount) => previousCount + PAGE_SIZE);
         }
       },
-      { threshold: 0.1 }
+      { threshold: 0.1 },
     );
 
     observer.observe(target);
@@ -71,7 +71,8 @@ export function DictionaryResultsSection({
             <div className="flex flex-wrap gap-2 text-xs font-semibold">
               {selectedPartOfSpeech !== "ALL" && (
                 <Badge tone="neutral" size="xs">
-                  {t("dict.pos")} {getPartOfSpeechFilterLabel(selectedPartOfSpeech, t)}
+                  {t("dict.pos")}{" "}
+                  {getPartOfSpeechFilterLabel(selectedPartOfSpeech, t)}
                 </Badge>
               )}
               {selectedDialect !== "ALL" && (
@@ -115,7 +116,10 @@ export function DictionaryResultsSection({
       </div>
 
       {visibleCount < filteredResults.length && (
-        <div ref={observerTarget} className="mt-10 flex h-20 w-full items-center justify-center">
+        <div
+          ref={observerTarget}
+          className="mt-10 flex h-20 w-full items-center justify-center"
+        >
           <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-700 border-t-sky-500"></div>
         </div>
       )}

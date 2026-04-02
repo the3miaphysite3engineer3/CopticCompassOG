@@ -1,13 +1,15 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { getProfile } from "@/features/profile/lib/server/queries";
 import { syncAudienceContact } from "@/lib/communications/audience";
-import { isLanguage, type Language } from "@/lib/i18n";
-import { PUBLIC_LOCALES, getDashboardPath } from "@/lib/locale";
+import type { Language } from "@/lib/i18n";
+import {
+  revalidateAdminPaths,
+  revalidateDashboardPaths,
+} from "@/lib/server/revalidation";
 import { getAuthenticatedServerContext } from "@/lib/supabase/auth";
 import { hasSupabaseServiceRoleEnv } from "@/lib/supabase/config";
-import { getProfile } from "@/lib/supabase/queries";
-import { getFormString, normalizeWhitespace } from "@/lib/validation";
+import { getFormLanguage, normalizeWhitespace } from "@/lib/validation";
 
 export type CommunicationPreferencesState = {
   message?: string;
@@ -40,22 +42,10 @@ const COMMUNICATION_ACTION_COPY: Record<
   },
 };
 
-function getActionLanguage(formData: FormData): Language {
-  const rawLocale = normalizeWhitespace(getFormString(formData, "locale"));
-  return isLanguage(rawLocale) ? rawLocale : "en";
-}
-
-function revalidateDashboardPaths() {
-  revalidatePath("/dashboard");
-  for (const locale of PUBLIC_LOCALES) {
-    revalidatePath(getDashboardPath(locale));
-  }
-}
-
 export async function updateCommunicationPreferences(
   formData: FormData,
 ): Promise<CommunicationPreferencesState> {
-  const language = getActionLanguage(formData);
+  const language = getFormLanguage(formData);
   const copy = COMMUNICATION_ACTION_COPY[language];
 
   if (!hasSupabaseServiceRoleEnv()) {
@@ -68,7 +58,9 @@ export async function updateCommunicationPreferences(
   }
 
   const profile = await getProfile(authContext.supabase, authContext.user.id);
-  const email = normalizeWhitespace(profile?.email ?? authContext.user.email ?? "");
+  const email = normalizeWhitespace(
+    profile?.email ?? authContext.user.email ?? "",
+  );
 
   if (!email) {
     return { success: false, message: copy.saveFailed };
@@ -87,7 +79,7 @@ export async function updateCommunicationPreferences(
     });
 
     revalidateDashboardPaths();
-    revalidatePath("/admin");
+    revalidateAdminPaths();
     return { success: true, message: copy.success };
   } catch (error) {
     console.error("Failed to update communication preferences", error);

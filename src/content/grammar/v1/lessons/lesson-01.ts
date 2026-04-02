@@ -301,9 +301,17 @@ export const grammarLesson01Document: GrammarLessonDocument = {
             ],
             columns: [
               { id: "masculineWord", label: { en: "", nl: "" }, width: "25%" },
-              { id: "masculineMeaning", label: { en: "", nl: "" }, width: "25%" },
+              {
+                id: "masculineMeaning",
+                label: { en: "", nl: "" },
+                width: "25%",
+              },
               { id: "feminineWord", label: { en: "", nl: "" }, width: "25%" },
-              { id: "feminineMeaning", label: { en: "", nl: "" }, width: "25%" },
+              {
+                id: "feminineMeaning",
+                label: { en: "", nl: "" },
+                width: "25%",
+              },
             ],
             rows: [
               {
@@ -435,9 +443,17 @@ export const grammarLesson01Document: GrammarLessonDocument = {
             ],
             columns: [
               { id: "masculineWord", label: { en: "", nl: "" }, width: "25%" },
-              { id: "masculineMeaning", label: { en: "", nl: "" }, width: "25%" },
+              {
+                id: "masculineMeaning",
+                label: { en: "", nl: "" },
+                width: "25%",
+              },
               { id: "feminineWord", label: { en: "", nl: "" }, width: "25%" },
-              { id: "feminineMeaning", label: { en: "", nl: "" }, width: "25%" },
+              {
+                id: "feminineMeaning",
+                label: { en: "", nl: "" },
+                width: "25%",
+              },
             ],
             rows: [
               {

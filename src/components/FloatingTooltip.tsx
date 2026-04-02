@@ -60,7 +60,9 @@ export function FloatingTooltip({
 }: FloatingTooltipProps) {
   const internalTooltipRef = useRef<HTMLDivElement | null>(null);
   const resolvedTooltipRef = tooltipRef ?? internalTooltipRef;
-  const [position, setPosition] = useState<FloatingTooltipPosition | null>(null);
+  const [position, setPosition] = useState<FloatingTooltipPosition | null>(
+    null,
+  );
 
   useLayoutEffect(() => {
     if (!isOpen || !anchorRef.current || !resolvedTooltipRef.current) {

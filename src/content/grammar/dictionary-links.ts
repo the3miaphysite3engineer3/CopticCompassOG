@@ -82,7 +82,8 @@ function getBohairicDictionaryLookup() {
         continue;
       }
 
-      const existingEntryIds = formsToEntryIds.get(normalizedForm) ?? new Set<string>();
+      const existingEntryIds =
+        formsToEntryIds.get(normalizedForm) ?? new Set<string>();
       existingEntryIds.add(entry.id);
       formsToEntryIds.set(normalizedForm, existingEntryIds);
     }
@@ -97,7 +98,9 @@ function getBohairicDictionaryLookup() {
   return bohairicDictionaryLookupCache;
 }
 
-export function getBohairicDictionaryEntryIdForWord(word: string): string | null {
+export function getBohairicDictionaryEntryIdForWord(
+  word: string,
+): string | null {
   const normalizedWord = normalizeBohairicLookupCandidate(word);
 
   if (!normalizedWord) {
@@ -133,7 +136,7 @@ export function getBohairicDictionaryEntryIdForWord(word: string): string | null
     }
   }
 
-  return fallbackMatches.size === 1 ? [...fallbackMatches][0] ?? null : null;
+  return fallbackMatches.size === 1 ? ([...fallbackMatches][0] ?? null) : null;
 }
 
 function flattenInlineNodeText(node: GrammarInline): string {
@@ -294,14 +297,18 @@ function enrichBlocks(blocks: readonly GrammarBlock[]): GrammarBlock[] {
   });
 }
 
-function enrichLocalizedBlocks(blocks: Localized<GrammarBlock[]>): Localized<GrammarBlock[]> {
+function enrichLocalizedBlocks(
+  blocks: Localized<GrammarBlock[]>,
+): Localized<GrammarBlock[]> {
   return {
     en: enrichBlocks(blocks.en),
     nl: enrichBlocks(blocks.nl),
   };
 }
 
-function enrichLessonDocument(lesson: GrammarLessonDocument): GrammarLessonDocument {
+function enrichLessonDocument(
+  lesson: GrammarLessonDocument,
+): GrammarLessonDocument {
   return {
     ...lesson,
     sections: lesson.sections.map((section) => ({
@@ -311,24 +318,31 @@ function enrichLessonDocument(lesson: GrammarLessonDocument): GrammarLessonDocum
   };
 }
 
-function enrichConceptDocument(concept: GrammarConceptDocument): GrammarConceptDocument {
+function enrichConceptDocument(
+  concept: GrammarConceptDocument,
+): GrammarConceptDocument {
   return {
     ...concept,
     definition: enrichLocalizedBlocks(concept.definition),
   };
 }
 
-function enrichExerciseDocument(exercise: GrammarExerciseDocument): GrammarExerciseDocument {
+function enrichExerciseDocument(
+  exercise: GrammarExerciseDocument,
+): GrammarExerciseDocument {
   return {
     ...exercise,
     prompt: enrichLocalizedBlocks(exercise.prompt),
   };
 }
 
-function enrichExampleDocument(example: GrammarExampleDocument): GrammarExampleDocument {
+function enrichExampleDocument(
+  example: GrammarExampleDocument,
+): GrammarExampleDocument {
   const copticSegments = buildExampleCopticSegments(example);
-  const tokenDictionaryRefs = copticSegments
-    .flatMap((segment) => (segment.dictionaryEntryId ? [segment.dictionaryEntryId] : []));
+  const tokenDictionaryRefs = copticSegments.flatMap((segment) =>
+    segment.dictionaryEntryId ? [segment.dictionaryEntryId] : [],
+  );
   const dictionaryEntryId =
     example.dictionaryRefs.length === 0
       ? getBohairicDictionaryEntryIdForWord(example.coptic)
@@ -351,7 +365,9 @@ function enrichExampleDocument(example: GrammarExampleDocument): GrammarExampleD
 }
 
 function tokenizeExampleCoptic(coptic: string) {
-  return coptic.split(/(\s+|[.,;:!?])/g).filter((segment) => segment.length > 0);
+  return coptic
+    .split(/(\s+|[.,;:!?])/g)
+    .filter((segment) => segment.length > 0);
 }
 
 function buildExampleCopticSegments(
@@ -364,13 +380,16 @@ function buildExampleCopticSegments(
     ...(tokenOverrides[segment]
       ? { dictionaryEntryId: tokenOverrides[segment] }
       : (() => {
-          const dictionaryEntryId = getBohairicDictionaryEntryIdForWord(segment);
+          const dictionaryEntryId =
+            getBohairicDictionaryEntryIdForWord(segment);
           return dictionaryEntryId ? { dictionaryEntryId } : {};
         })()),
   }));
 }
 
-function enrichFootnoteDocument(footnote: GrammarFootnoteDocument): GrammarFootnoteDocument {
+function enrichFootnoteDocument(
+  footnote: GrammarFootnoteDocument,
+): GrammarFootnoteDocument {
   return {
     ...footnote,
     content: enrichLocalizedBlocks(footnote.content),

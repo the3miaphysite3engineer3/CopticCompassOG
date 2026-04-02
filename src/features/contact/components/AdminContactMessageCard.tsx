@@ -54,7 +54,10 @@ export function AdminContactMessageCard({
                 {message.email}
               </span>
             </p>
-            <p>Received on {formatSubmissionDate(message.created_at, message.locale)}</p>
+            <p>
+              Received on{" "}
+              {formatSubmissionDate(message.created_at, message.locale)}
+            </p>
             {message.responded_at ? (
               <p>
                 Marked answered on{" "}

@@ -1,33 +1,33 @@
-import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
-import EntryPageHeader from '@/features/dictionary/components/EntryPageHeader';
-import EntryPageClient from '@/features/dictionary/components/EntryPageClient';
-import { PageShell, pageShellAccents } from '@/components/PageShell';
-import StructuredData from '@/components/StructuredData';
-import { buildEntryOpenGraphImageUrl } from '@/features/dictionary/lib/entryOpenGraph';
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import EntryPageHeader from "@/features/dictionary/components/EntryPageHeader";
+import EntryPageClient from "@/features/dictionary/components/EntryPageClient";
+import { PageShell, pageShellAccents } from "@/components/PageShell";
+import StructuredData from "@/components/StructuredData";
+import { buildEntryOpenGraphImageUrl } from "@/features/dictionary/lib/entryOpenGraph";
 import {
   buildEntryDescription,
   toPlainText,
-} from '@/features/dictionary/lib/entryText';
+} from "@/features/dictionary/lib/entryText";
 import {
   getDictionary,
   getDictionaryEntryRelations,
-} from '@/features/dictionary/lib/dictionary';
-import { listPublishedGrammarLessonsForEntry } from '@/features/grammar/lib/grammarContentGraph';
+} from "@/features/dictionary/lib/dictionary";
+import { listPublishedGrammarLessonsForEntry } from "@/features/grammar/lib/grammarContentGraph";
 import {
   createLanguageAlternates,
   getDictionaryPath,
   getEntryPath,
   getLocalizedHomePath,
   getOpenGraphLocale,
-} from '@/lib/locale';
-import { getTranslation } from '@/lib/i18n';
-import { buildPageTitle, siteConfig } from '@/lib/site';
-import { resolvePublicLocale } from '@/lib/publicLocaleRouting';
+} from "@/lib/locale";
+import { getTranslation } from "@/lib/i18n";
+import { buildPageTitle, siteConfig } from "@/lib/site";
+import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
 import {
   createBreadcrumbStructuredData,
   createDefinedTermStructuredData,
-} from '@/lib/structuredData';
+} from "@/lib/structuredData";
 
 // Render dictionary entries on demand so the deployment stays within output
 // size limits while preserving stable, crawlable metadata per entry.
@@ -100,7 +100,7 @@ export default async function EntryPage({
   const resolvedParams = await params;
   const locale = resolvePublicLocale(resolvedParams.locale);
   const dictionary = getDictionary();
-  const entry = dictionary.find(e => e.id === resolvedParams.id);
+  const entry = dictionary.find((e) => e.id === resolvedParams.id);
 
   if (!entry) {
     notFound();
@@ -125,8 +125,14 @@ export default async function EntryPage({
       <StructuredData
         data={[
           createBreadcrumbStructuredData([
-            { name: getTranslation(locale, "nav.home"), path: getLocalizedHomePath(locale) },
-            { name: getTranslation(locale, "nav.dictionary"), path: getDictionaryPath(locale) },
+            {
+              name: getTranslation(locale, "nav.home"),
+              path: getLocalizedHomePath(locale),
+            },
+            {
+              name: getTranslation(locale, "nav.dictionary"),
+              path: getDictionaryPath(locale),
+            },
             { name: headword, path: getEntryPath(entry.id, locale) },
           ]),
           createDefinedTermStructuredData(entry, locale),

@@ -154,12 +154,10 @@ const DASHBOARD_COPY = {
   },
   nl: {
     metaTitle: "Leerdashboard",
-    metaDescription:
-      "Privéleeromgeving voor lessen, inzendingen en voortgang.",
+    metaDescription: "Privéleeromgeving voor lessen, inzendingen en voortgang.",
     shellBadge: "Leeromgeving",
     pageTitle: "Leerdashboard",
-    pageDescription:
-      "Beheer je grammaticaoefeningen en bekijk feedback.",
+    pageDescription: "Beheer je grammaticaoefeningen en bekijk feedback.",
     signOut: "Uitloggen",
     welcomeBack: "Welkom terug",
     fallbackStudentName: "Student",

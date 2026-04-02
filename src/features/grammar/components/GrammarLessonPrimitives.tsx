@@ -76,7 +76,10 @@ export function GrammarLessonSection({
         return;
       }
 
-      if (targetElement === detailsElement || detailsElement.contains(targetElement)) {
+      if (
+        targetElement === detailsElement ||
+        detailsElement.contains(targetElement)
+      ) {
         detailsElement.open = true;
 
         window.requestAnimationFrame(() => {
@@ -100,7 +103,7 @@ export function GrammarLessonSection({
       open={renderMode === "pdf" ? true : defaultOpen}
       className={cx(
         "group scroll-mt-28 overflow-hidden rounded-2xl border border-stone-200/90 bg-white/55 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/30",
-        className
+        className,
       )}
     >
       <summary className="flex cursor-pointer list-none items-start justify-between gap-4 px-4 py-3 [&::-webkit-details-marker]:hidden sm:px-5 sm:py-4">
@@ -140,7 +143,7 @@ export function GrammarLessonOutline({
     <nav
       className={cx(
         "overflow-hidden rounded-2xl border border-stone-200/90 bg-white/70 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/40",
-        className
+        className,
       )}
     >
       <div className="border-b border-stone-200/80 px-4 py-3 dark:border-stone-800/80 sm:px-5 sm:py-4">
@@ -192,7 +195,7 @@ export function GrammarLessonCard({
         tone === "sky"
           ? "border-sky-100 bg-sky-50 dark:border-sky-800 dark:bg-sky-900/30"
           : "border-stone-200 bg-stone-50 dark:border-stone-800 dark:bg-stone-900",
-        className
+        className,
       )}
     >
       {children}
@@ -267,14 +270,13 @@ export function GrammarLessonTable({
     };
   }, [language, mobileMinWidthRem, renderMode]);
 
-  const mobileScrollHint =
-    hasStickyLeadingColumn
-      ? language === "en"
-        ? "Swipe sideways. Labels stay pinned."
-        : "Veeg zijwaarts. Labels blijven staan."
-      : language === "en"
-        ? "Swipe sideways to compare"
-        : "Veeg zijwaarts om te vergelijken";
+  const mobileScrollHint = hasStickyLeadingColumn
+    ? language === "en"
+      ? "Swipe sideways. Labels stay pinned."
+      : "Veeg zijwaarts. Labels blijven staan."
+    : language === "en"
+      ? "Swipe sideways to compare"
+      : "Veeg zijwaarts om te vergelijken";
   const tableStyle =
     renderMode === "pdf" || !mobileMinWidthRem
       ? undefined

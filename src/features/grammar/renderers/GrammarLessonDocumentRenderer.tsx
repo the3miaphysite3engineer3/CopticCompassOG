@@ -1,5 +1,8 @@
 import type { ReactNode } from "react";
-import type { GrammarLessonBundle, GrammarSectionDocument } from "@/content/grammar/schema";
+import type {
+  GrammarLessonBundle,
+  GrammarSectionDocument,
+} from "@/content/grammar/schema";
 import type { Language } from "@/types/i18n";
 import {
   GrammarLessonEndnotes,
@@ -42,7 +45,9 @@ function GrammarLessonAbbreviationAppendix({
   const entries = [
     {
       key: "masculine",
-      label: <GrammarAbbreviation className="small-caps">m</GrammarAbbreviation>,
+      label: (
+        <GrammarAbbreviation className="small-caps">m</GrammarAbbreviation>
+      ),
       description: language === "en" ? "masculine" : "mannelijk",
     },
     {
@@ -56,33 +61,35 @@ function GrammarLessonAbbreviationAppendix({
     },
     {
       key: "singular",
-      label: <GrammarAbbreviation className="small-caps">s</GrammarAbbreviation>,
+      label: (
+        <GrammarAbbreviation className="small-caps">s</GrammarAbbreviation>
+      ),
       description: language === "en" ? "singular" : "enkelvoud",
     },
     {
       key: "plural",
-      label: <GrammarAbbreviation className="small-caps">p</GrammarAbbreviation>,
+      label: (
+        <GrammarAbbreviation className="small-caps">p</GrammarAbbreviation>
+      ),
       description: language === "en" ? "plural" : "meervoud",
     },
     {
       key: "ipa",
       label: <GrammarAbbreviation>/.../</GrammarAbbreviation>,
       description:
-        language === "en"
-          ? "pronunciation in the IPA"
-          : "uitspraak in het IPA",
+        language === "en" ? "pronunciation in the IPA" : "uitspraak in het IPA",
     },
     {
       key: "nm",
       label: (
         <GrammarAbbreviation>
-          N<sup><em className="small-caps">m</em></sup>
+          N
+          <sup>
+            <em className="small-caps">m</em>
+          </sup>
         </GrammarAbbreviation>
       ),
-      description:
-        language === "en"
-          ? "proper noun"
-          : "eigennaam",
+      description: language === "en" ? "proper noun" : "eigennaam",
     },
     {
       key: "enclitic-particle",
@@ -93,9 +100,7 @@ function GrammarLessonAbbreviationAppendix({
         </GrammarAbbreviation>
       ),
       description:
-        language === "en"
-          ? "enclitic particle"
-          : "enclitisch partikel",
+        language === "en" ? "enclitic particle" : "enclitisch partikel",
     },
   ] as const;
 
@@ -134,12 +139,16 @@ function getOrderedSections(
   lessonBundle: GrammarLessonBundle,
 ): GrammarSectionDocument[] {
   const sectionsById = new Map(
-    lessonBundle.lesson.sections.map((section) => [section.id, section] as const),
+    lessonBundle.lesson.sections.map(
+      (section) => [section.id, section] as const,
+    ),
   );
 
   return lessonBundle.lesson.sectionOrder
     .map((sectionId) => sectionsById.get(sectionId))
-    .filter((section): section is GrammarSectionDocument => section !== undefined);
+    .filter(
+      (section): section is GrammarSectionDocument => section !== undefined,
+    );
 }
 
 export function GrammarLessonDocumentRenderer({

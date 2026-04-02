@@ -46,7 +46,9 @@ export function RelatedGrammarLessonsPanel({
         <p className="text-stone-500 dark:text-stone-400">{description}</p>
       </div>
 
-      <div className={`grid gap-4 ${lessons.length > 1 ? "md:grid-cols-2" : ""}`}>
+      <div
+        className={`grid gap-4 ${lessons.length > 1 ? "md:grid-cols-2" : ""}`}
+      >
         {lessons.map((lesson) => (
           <Link
             key={lesson.id}
@@ -87,15 +89,16 @@ export function RelatedGrammarLessonsPanel({
 
   if (contained) {
     return (
-      <SurfacePanel as="section" rounded="3xl" variant="subtle" className="p-6 md:p-7">
+      <SurfacePanel
+        as="section"
+        rounded="3xl"
+        variant="subtle"
+        className="p-6 md:p-7"
+      >
         <div className="space-y-5">{sectionContent}</div>
       </SurfacePanel>
     );
   }
 
-  return (
-    <section className="space-y-5">
-      {sectionContent}
-    </section>
-  );
+  return <section className="space-y-5">{sectionContent}</section>;
 }

@@ -44,6 +44,8 @@ describe("grammar OpenAPI document", () => {
     );
     expect(document.components.parameters).toHaveProperty("LessonFilter");
     expect(document.components.schemas).toHaveProperty("GrammarApiIndex");
-    expect(document.components.schemas).toHaveProperty("GrammarLessonBundleEnvelope");
+    expect(document.components.schemas).toHaveProperty(
+      "GrammarLessonBundleEnvelope",
+    );
   });
 });

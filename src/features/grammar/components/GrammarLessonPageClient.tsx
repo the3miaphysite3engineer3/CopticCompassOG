@@ -5,7 +5,10 @@ import { flushSync } from "react-dom";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
-import type { GrammarLessonBundle, GrammarSectionDocument } from "@/content/grammar/schema";
+import type {
+  GrammarLessonBundle,
+  GrammarSectionDocument,
+} from "@/content/grammar/schema";
 import { useLanguage } from "@/components/LanguageProvider";
 import { DownloadPdfButton } from "@/components/DownloadPdfButton";
 import { PageHeader } from "@/components/PageHeader";
@@ -18,9 +21,7 @@ import {
 } from "@/features/grammar/components/GrammarLessonLearnerPanel";
 import { GrammarLessonOutline } from "@/features/grammar/components/GrammarLessonPrimitives";
 import { GrammarLessonRenderProvider } from "@/features/grammar/components/GrammarLessonRenderContext";
-import {
-  GrammarLessonConceptSummary,
-} from "@/features/grammar/components/GrammarLessonSemantics";
+import { GrammarLessonConceptSummary } from "@/features/grammar/components/GrammarLessonSemantics";
 import { getGrammarLessonAbbreviationSectionId } from "@/features/grammar/lib/grammarPresentation";
 import { getGrammarPath, getLocalizedHomePath } from "@/lib/locale";
 import { useGrammarLessonLearnerState } from "@/features/grammar/lib/useGrammarLessonLearnerState";
@@ -34,12 +35,16 @@ function getOrderedSections(
   lessonBundle: GrammarLessonBundle,
 ): GrammarSectionDocument[] {
   const sectionsById = new Map(
-    lessonBundle.lesson.sections.map((section) => [section.id, section] as const),
+    lessonBundle.lesson.sections.map(
+      (section) => [section.id, section] as const,
+    ),
   );
 
   return lessonBundle.lesson.sectionOrder
     .map((sectionId) => sectionsById.get(sectionId))
-    .filter((section): section is GrammarSectionDocument => section !== undefined);
+    .filter(
+      (section): section is GrammarSectionDocument => section !== undefined,
+    );
 }
 
 export function GrammarLessonPageClient({
@@ -50,14 +55,17 @@ export function GrammarLessonPageClient({
   const lesson = lessonBundle.lesson;
   const orderedSections = getOrderedSections(lessonBundle);
   const lessonContentId = `${lesson.id}-pdf-content`;
-  const lessonOutlineEyebrow = language === "en" ? "Lesson map" : "Lesoverzicht";
-  const lessonOutlineTitle = language === "en" ? "On this page" : "Op deze pagina";
+  const lessonOutlineEyebrow =
+    language === "en" ? "Lesson map" : "Lesoverzicht";
+  const lessonOutlineTitle =
+    language === "en" ? "On this page" : "Op deze pagina";
   const lessonAbbreviationAppendixTitle =
     language === "en"
       ? "Abbreviations and symbols used in this lesson"
       : "Afkortingen en symbolen in deze les";
   const lessonRenderSessionKey = `${lesson.id}:${language}:${renderMode}`;
-  const lessonDescription = lesson.description?.[language] ?? lesson.summary[language];
+  const lessonDescription =
+    lesson.description?.[language] ?? lesson.summary[language];
   const learnerState = useGrammarLessonLearnerState(lessonBundle);
   const hasSemanticSidebar =
     (renderMode === "web" && learnerState.status !== "unavailable") ||
@@ -92,7 +100,10 @@ export function GrammarLessonPageClient({
         />
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <Link href={getGrammarPath(language)} className="btn-secondary gap-2 px-4">
+          <Link
+            href={getGrammarPath(language)}
+            className="btn-secondary gap-2 px-4"
+          >
             <ArrowLeft className="h-4 w-4" />
             {t("grammar.back")}
           </Link>
@@ -177,7 +188,9 @@ export function GrammarLessonPageClient({
                             isCompleted={learnerState.completedSectionIds.includes(
                               section.id,
                             )}
-                            isPending={learnerState.pendingSectionId === section.id}
+                            isPending={
+                              learnerState.pendingSectionId === section.id
+                            }
                             language={language}
                             onToggle={() =>
                               learnerState.toggleSectionComplete(section)

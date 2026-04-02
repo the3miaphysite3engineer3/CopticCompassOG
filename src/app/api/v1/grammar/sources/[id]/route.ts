@@ -12,10 +12,7 @@ type SourceRouteContext = {
   }>;
 };
 
-export async function GET(
-  _request: Request,
-  context: SourceRouteContext,
-) {
+export async function GET(_request: Request, context: SourceRouteContext) {
   const { id } = await context.params;
   const source = getGrammarApiSourceById(id);
 

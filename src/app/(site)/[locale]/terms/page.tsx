@@ -27,5 +27,7 @@ export default async function LocalizedTermsPage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  return <LegalDocumentPage {...getTermsDocument(resolvePublicLocale(locale))} />;
+  return (
+    <LegalDocumentPage {...getTermsDocument(resolvePublicLocale(locale))} />
+  );
 }

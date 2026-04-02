@@ -179,7 +179,8 @@ export function getContentReleaseDeliverySummary(
 
   return {
     ...(broadcasts ? { broadcasts } : {}),
-    eligible_recipient_count: asOptionalNumber(summary?.eligible_recipient_count) ?? 0,
+    eligible_recipient_count:
+      asOptionalNumber(summary?.eligible_recipient_count) ?? 0,
     failed_count: asOptionalNumber(summary?.failed_count) ?? 0,
     item_count: asOptionalNumber(summary?.item_count) ?? 0,
     processed_recipient_count:
@@ -232,12 +233,8 @@ export function getContentReleaseBroadcastDeliveries(
       ] as const;
     })
     .filter(
-      (
-        entry,
-      ): entry is readonly [
-        Language,
-        ContentReleaseBroadcastDelivery,
-      ] => entry !== null,
+      (entry): entry is readonly [Language, ContentReleaseBroadcastDelivery] =>
+        entry !== null,
     );
 
   if (parsedEntries.length === 0) {

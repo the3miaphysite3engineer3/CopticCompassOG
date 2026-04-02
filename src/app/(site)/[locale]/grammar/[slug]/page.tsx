@@ -38,7 +38,9 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const resolvedParams = await params;
   const locale = resolvePublicLocale(resolvedParams.locale);
-  const lessonBundle = getPublishedGrammarLessonBundleBySlug(resolvedParams.slug);
+  const lessonBundle = getPublishedGrammarLessonBundleBySlug(
+    resolvedParams.slug,
+  );
 
   if (!lessonBundle) {
     return {
@@ -63,7 +65,9 @@ export async function generateMetadata({
     description,
     alternates: {
       canonical: path,
-      languages: createLanguageAlternates(`/grammar/${lessonBundle.lesson.slug}`),
+      languages: createLanguageAlternates(
+        `/grammar/${lessonBundle.lesson.slug}`,
+      ),
     },
     openGraph: {
       title: buildPageTitle(title),
@@ -85,7 +89,9 @@ export default async function GrammarLessonPage({
 }) {
   const resolvedParams = await params;
   const locale = resolvePublicLocale(resolvedParams.locale);
-  const lessonBundle = getPublishedGrammarLessonBundleBySlug(resolvedParams.slug);
+  const lessonBundle = getPublishedGrammarLessonBundleBySlug(
+    resolvedParams.slug,
+  );
 
   if (!lessonBundle) {
     notFound();
@@ -98,8 +104,14 @@ export default async function GrammarLessonPage({
       <StructuredData
         data={[
           createBreadcrumbStructuredData([
-            { name: getTranslation(locale, "nav.home"), path: getLocalizedHomePath(locale) },
-            { name: getTranslation(locale, "nav.grammar"), path: getGrammarPath(locale) },
+            {
+              name: getTranslation(locale, "nav.home"),
+              path: getLocalizedHomePath(locale),
+            },
+            {
+              name: getTranslation(locale, "nav.grammar"),
+              path: getGrammarPath(locale),
+            },
             { name: lessonBundle.lesson.title[locale], path: lessonPath },
           ]),
           createGrammarLessonStructuredData(lessonBundle, locale),

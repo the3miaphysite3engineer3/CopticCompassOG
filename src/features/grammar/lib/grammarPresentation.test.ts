@@ -13,7 +13,9 @@ describe("grammar presentation helpers", () => {
       "concept-bare-noun",
     );
     expect(
-      getGrammarSourceAnchorId("grammar.source.basisgrammatica-bohairisch-koptisch"),
+      getGrammarSourceAnchorId(
+        "grammar.source.basisgrammatica-bohairisch-koptisch",
+      ),
     ).toBe("source-basisgrammatica-bohairisch-koptisch");
   });
 
@@ -26,7 +28,9 @@ describe("grammar presentation helpers", () => {
     const sources = getOrderedLessonSources(bundle!);
 
     expect(concepts[0]?.id).toBe("grammar.concept.bare-noun");
-    expect(concepts[concepts.length - 1]?.id).toBe("grammar.concept.nomina-sacra");
+    expect(concepts[concepts.length - 1]?.id).toBe(
+      "grammar.concept.nomina-sacra",
+    );
     expect(sources.map((source) => source.id)).toEqual([
       "grammar.source.basisgrammatica-bohairisch-koptisch",
     ]);

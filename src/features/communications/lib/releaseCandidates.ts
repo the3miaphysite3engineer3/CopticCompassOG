@@ -40,6 +40,9 @@ export function getContentReleaseCandidateMap() {
   assertServerOnly("getContentReleaseCandidateMap");
 
   return new Map(
-    listContentReleaseCandidates().map((candidate) => [candidate.id, candidate]),
+    listContentReleaseCandidates().map((candidate) => [
+      candidate.id,
+      candidate,
+    ]),
   );
 }

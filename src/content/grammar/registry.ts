@@ -16,7 +16,10 @@ import { grammarLesson01Document } from "./v1/lessons/lesson-01.ts";
 import { grammarLesson02Document } from "./v1/lessons/lesson-02.ts";
 import { grammarLesson01CoreSources } from "./v1/sources/lesson-01-core.ts";
 
-const lessonDocuments = [grammarLesson01Document, grammarLesson02Document] as const;
+const lessonDocuments = [
+  grammarLesson01Document,
+  grammarLesson02Document,
+] as const;
 const conceptDocuments = [...grammarLesson01CoreConcepts] as const;
 const exerciseDocuments = [grammarLesson01Exercise01] as const;
 const exampleDocuments = [
@@ -26,11 +29,21 @@ const exampleDocuments = [
 const footnoteDocuments = [...grammarLesson01CoreFootnotes] as const;
 const sourceDocuments = [...grammarLesson01CoreSources] as const;
 
-const lessonById = new Map(lessonDocuments.map((lesson) => [lesson.id, lesson]));
-const lessonBySlug = new Map(lessonDocuments.map((lesson) => [lesson.slug, lesson]));
-const conceptById = new Map(conceptDocuments.map((concept) => [concept.id, concept]));
-const exerciseById = new Map(exerciseDocuments.map((exercise) => [exercise.id, exercise]));
-const sourceById = new Map(sourceDocuments.map((source) => [source.id, source]));
+const lessonById = new Map(
+  lessonDocuments.map((lesson) => [lesson.id, lesson]),
+);
+const lessonBySlug = new Map(
+  lessonDocuments.map((lesson) => [lesson.slug, lesson]),
+);
+const conceptById = new Map(
+  conceptDocuments.map((concept) => [concept.id, concept]),
+);
+const exerciseById = new Map(
+  exerciseDocuments.map((exercise) => [exercise.id, exercise]),
+);
+const sourceById = new Map(
+  sourceDocuments.map((source) => [source.id, source]),
+);
 
 export function getGrammarManifest() {
   return grammarManifestV1;

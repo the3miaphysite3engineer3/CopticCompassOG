@@ -1,16 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { buildContentSecurityPolicy, buildSecurityHeaders } from "./securityHeaders";
+import {
+  buildContentSecurityPolicy,
+  buildSecurityHeaders,
+} from "./securityHeaders";
 
 function getDirectiveValue(policy: string, directiveName: string) {
   const directive = policy
     .split("; ")
-    .find((entry) => entry.startsWith(`${directiveName} `) || entry === directiveName);
+    .find(
+      (entry) =>
+        entry.startsWith(`${directiveName} `) || entry === directiveName,
+    );
 
   if (!directive) {
     return null;
   }
 
-  return directive === directiveName ? "" : directive.slice(directiveName.length + 1);
+  return directive === directiveName
+    ? ""
+    : directive.slice(directiveName.length + 1);
 }
 
 describe("securityHeaders", () => {
@@ -24,8 +32,12 @@ describe("securityHeaders", () => {
     expect(getDirectiveValue(policy, "child-src")).toBe("'none'");
     expect(getDirectiveValue(policy, "script-src-attr")).toBe("'none'");
     expect(getDirectiveValue(policy, "media-src")).toBe("'self'");
-    expect(getDirectiveValue(policy, "connect-src")).toBe("'self' https://project.supabase.co");
-    expect(getDirectiveValue(policy, "img-src")).toContain("https://project.supabase.co");
+    expect(getDirectiveValue(policy, "connect-src")).toBe(
+      "'self' https://project.supabase.co",
+    );
+    expect(getDirectiveValue(policy, "img-src")).toContain(
+      "https://project.supabase.co",
+    );
     expect(policy).toContain("upgrade-insecure-requests");
   });
 
@@ -52,7 +64,9 @@ describe("securityHeaders", () => {
     expect(getDirectiveValue(policy, "script-src")).toBe(
       "'self' 'nonce-test-nonce' 'strict-dynamic'",
     );
-    expect(getDirectiveValue(policy, "style-src")).toBe("'self' 'unsafe-inline'");
+    expect(getDirectiveValue(policy, "style-src")).toBe(
+      "'self' 'unsafe-inline'",
+    );
   });
 
   it("drops invalid Supabase URLs instead of emitting malformed origins", () => {

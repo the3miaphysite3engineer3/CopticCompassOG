@@ -39,16 +39,16 @@ export default function GrammarHubPageClient({
         tone="sky"
       />
 
-        <div className="grid grid-cols-1 gap-6 mx-auto max-w-5xl w-full md:grid-cols-2 lg:grid-cols-3">
-          {lessons.map((lesson) => (
-            <GrammarLessonCard
-              key={lesson.slug}
-              lesson={lesson}
-              language={language}
-              t={t}
-            />
-          ))}
-        </div>
+      <div className="grid grid-cols-1 gap-6 mx-auto max-w-5xl w-full md:grid-cols-2 lg:grid-cols-3">
+        {lessons.map((lesson) => (
+          <GrammarLessonCard
+            key={lesson.slug}
+            lesson={lesson}
+            language={language}
+            t={t}
+          />
+        ))}
+      </div>
     </PageShell>
   );
 }

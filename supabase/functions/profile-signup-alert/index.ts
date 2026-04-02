@@ -9,9 +9,7 @@ declare const Deno: {
   env: {
     get(name: string): string | undefined;
   };
-  serve(
-    handler: (request: Request) => Response | Promise<Response>,
-  ): void;
+  serve(handler: (request: Request) => Response | Promise<Response>): void;
 };
 
 function jsonResponse(status: number, body: Record<string, unknown>) {
@@ -115,7 +113,11 @@ async function insertNotificationEvent(options: {
       errorBody.includes("23505") ||
       errorBody.includes("dedupe_key"))
   ) {
-    return { eventId: null, inserted: false as const, duplicate: true as const };
+    return {
+      eventId: null,
+      inserted: false as const,
+      duplicate: true as const,
+    };
   }
 
   console.error("Failed to insert signup notification event.", {
@@ -134,18 +136,21 @@ async function insertNotificationDelivery(options: {
   supabaseServiceRoleKey: string;
   supabaseUrl: string;
 }) {
-  const response = await fetch(`${options.supabaseUrl}/rest/v1/notification_deliveries`, {
-    body: JSON.stringify({
-      channel: "email",
-      error: options.error,
-      event_id: options.eventId,
-      provider_message_id: options.providerMessageId,
-      recipient: options.recipient,
-      status: options.status,
-    }),
-    headers: buildSupabaseRestHeaders(options.supabaseServiceRoleKey),
-    method: "POST",
-  });
+  const response = await fetch(
+    `${options.supabaseUrl}/rest/v1/notification_deliveries`,
+    {
+      body: JSON.stringify({
+        channel: "email",
+        error: options.error,
+        event_id: options.eventId,
+        provider_message_id: options.providerMessageId,
+        recipient: options.recipient,
+        status: options.status,
+      }),
+      headers: buildSupabaseRestHeaders(options.supabaseServiceRoleKey),
+      method: "POST",
+    },
+  );
 
   if (!response.ok) {
     console.error("Failed to insert signup notification delivery.", {

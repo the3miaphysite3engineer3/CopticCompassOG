@@ -15,7 +15,10 @@ type NavbarAuthLinkProps = {
   variant: "desktop" | "mobile";
 };
 
-function getLinkClasses(variant: NavbarAuthLinkProps["variant"], isActive: boolean) {
+function getLinkClasses(
+  variant: NavbarAuthLinkProps["variant"],
+  isActive: boolean,
+) {
   if (variant === "mobile") {
     return {
       linkClassName: `group grid rounded-xl px-4 py-3 text-sm tracking-[0.02em] transition-colors before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] ${

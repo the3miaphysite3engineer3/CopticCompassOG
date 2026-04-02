@@ -68,22 +68,25 @@ export default function PublicationDetailPageClient({
         <BreadcrumbTrail
           items={[
             { label: t("nav.home"), href: getLocalizedHomePath(language) },
-            { label: t("nav.publications"), href: getPublicationsPath(language) },
+            {
+              label: t("nav.publications"),
+              href: getPublicationsPath(language),
+            },
             { label: publication.title },
           ]}
         />
 
-        <Link href={getPublicationsPath(language)} className="btn-secondary inline-flex gap-2 px-4">
+        <Link
+          href={getPublicationsPath(language)}
+          className="btn-secondary inline-flex gap-2 px-4"
+        >
           <ArrowLeft className="h-4 w-4" />
           {t("publications.back")}
         </Link>
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(18rem,22rem)_minmax(0,1fr)]">
-        <SurfacePanel
-          rounded="3xl"
-          className="relative overflow-hidden p-5"
-        >
+        <SurfacePanel rounded="3xl" className="relative overflow-hidden p-5">
           <div className="relative aspect-[3/4.1] overflow-hidden rounded-[1.5rem] border border-stone-200 bg-stone-100 dark:border-stone-800 dark:bg-stone-900">
             {publication.image ? (
               <Image
@@ -121,7 +124,10 @@ export default function PublicationDetailPageClient({
             <Badge tone="surface" size="xs">
               {getFormatLabel(publication, language)}
             </Badge>
-            <Badge tone={publication.status === "published" ? "coptic" : "neutral"} size="xs">
+            <Badge
+              tone={publication.status === "published" ? "coptic" : "neutral"}
+              size="xs"
+            >
               {statusLabel}
             </Badge>
           </div>
@@ -238,7 +244,11 @@ export default function PublicationDetailPageClient({
                         {getFormatLabel(relatedPublication, language)}
                       </Badge>
                       <Badge
-                        tone={relatedPublication.status === "published" ? "coptic" : "neutral"}
+                        tone={
+                          relatedPublication.status === "published"
+                            ? "coptic"
+                            : "neutral"
+                        }
                         size="xs"
                       >
                         {relatedPublication.status === "published"

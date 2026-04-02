@@ -74,9 +74,13 @@ export function Navbar() {
             </span>
           </Link>
 
-          <nav aria-label="Primary" className="hidden items-center gap-1 md:flex">
+          <nav
+            aria-label="Primary"
+            className="hidden items-center gap-1 md:flex"
+          >
             {links.map((link) => {
-              const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+              const isActive =
+                pathname === link.href || pathname.startsWith(`${link.href}/`);
               return (
                 <Link
                   key={link.href}
@@ -88,7 +92,9 @@ export function Navbar() {
                       : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
                   }`}
                 >
-                  <span className={`col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`}>
+                  <span
+                    className={`col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`}
+                  >
                     {link.label}
                   </span>
                 </Link>
@@ -115,7 +121,11 @@ export function Navbar() {
               aria-expanded={isMobileMenuOpen}
               aria-label="Toggle Menu"
             >
-              {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+              {isMobileMenuOpen ? (
+                <X className="h-5 w-5" />
+              ) : (
+                <Menu className="h-5 w-5" />
+              )}
             </button>
           </div>
         </div>
@@ -127,7 +137,8 @@ export function Navbar() {
             className="mb-3 flex flex-col gap-1 rounded-2xl border border-stone-200 bg-white/80 p-2 shadow-md backdrop-blur-md md:hidden dark:border-stone-800 dark:bg-stone-900/70 dark:shadow-black/20"
           >
             {links.map((link) => {
-              const isActive = pathname === link.href || pathname.startsWith(`${link.href}/`);
+              const isActive =
+                pathname === link.href || pathname.startsWith(`${link.href}/`);
               return (
                 <Link
                   key={link.href}
@@ -140,7 +151,9 @@ export function Navbar() {
                       : "text-stone-600 hover:bg-stone-50 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-900/60 dark:hover:text-stone-200"
                   }`}
                 >
-                  <span className={`col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`}>
+                  <span
+                    className={`col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`}
+                  >
                     {link.label}
                   </span>
                 </Link>

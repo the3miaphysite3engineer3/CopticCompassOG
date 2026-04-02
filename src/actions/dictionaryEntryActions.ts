@@ -7,22 +7,27 @@ import {
   isEntryReportReason,
   type EntryReportInsert,
 } from "@/features/dictionary/lib/entryActions";
+import type { Language } from "@/lib/i18n";
 import { dispatchLoggedOwnerAlertEmail } from "@/lib/notifications/events";
 import { getSiteUrl, siteConfig } from "@/lib/site";
 import { getAuthenticatedServerContext } from "@/lib/supabase/auth";
+import { isMissingSupabaseTableError } from "@/lib/supabase/errors";
 import { hasSupabaseRuntimeEnv } from "@/lib/supabase/config";
 import { consumeRateLimit, getUserRateLimitIdentifier } from "@/lib/rateLimit";
 import { getEntryPath } from "@/lib/locale";
-import { getFormString, hasLengthInRange, normalizeMultiline, normalizeWhitespace } from "@/lib/validation";
-import { isLanguage, type Language } from "@/lib/i18n";
+import {
+  getFormLanguage,
+  getFormString,
+  hasLengthInRange,
+  normalizeMultiline,
+  normalizeWhitespace,
+} from "@/lib/validation";
 
-export type EntryReportActionState =
-  | {
-      message?: string;
-      success?: boolean;
-      error?: string;
-    }
-  | null;
+export type EntryReportActionState = {
+  message?: string;
+  success?: boolean;
+  error?: string;
+} | null;
 
 const ENTRY_REPORT_COPY: Record<
   Language,
@@ -38,7 +43,8 @@ const ENTRY_REPORT_COPY: Record<
   en: {
     authRequired: "Please sign in before reporting an entry.",
     invalid: "Please choose a reason and include a short explanation.",
-    rateLimited: "Too many reports were sent recently. Please wait a bit before submitting another one.",
+    rateLimited:
+      "Too many reports were sent recently. Please wait a bit before submitting another one.",
     storageUnavailable: "Entry reports are not configured yet.",
     submitFailed: "Could not submit your report right now. Please try again.",
     success: "Thanks. Your report was submitted successfully.",
@@ -46,32 +52,14 @@ const ENTRY_REPORT_COPY: Record<
   nl: {
     authRequired: "Meld je eerst aan voordat je een lemma meldt.",
     invalid: "Kies een reden en voeg een korte toelichting toe.",
-    rateLimited: "Er zijn onlangs te veel meldingen verzonden. Wacht even voordat je opnieuw iets indient.",
+    rateLimited:
+      "Er zijn onlangs te veel meldingen verzonden. Wacht even voordat je opnieuw iets indient.",
     storageUnavailable: "Het melden van lemma's is nog niet geconfigureerd.",
-    submitFailed: "Je melding kon nu niet worden verzonden. Probeer het opnieuw.",
+    submitFailed:
+      "Je melding kon nu niet worden verzonden. Probeer het opnieuw.",
     success: "Bedankt. Je melding is succesvol verzonden.",
   },
 };
-
-function getActionLanguage(formData: FormData) {
-  const rawLanguage = normalizeWhitespace(getFormString(formData, "language"));
-  return isLanguage(rawLanguage) ? rawLanguage : "en";
-}
-
-function isMissingEntryReportTableError(
-  error: { code?: string; message?: string } | null | undefined,
-) {
-  if (!error) {
-    return false;
-  }
-
-  return (
-    error.code === "PGRST205" ||
-    error.code === "42P01" ||
-    error.message?.includes("Could not find the table") === true ||
-    error.message?.includes("relation") === true
-  );
-}
 
 async function sendEntryReportNotificationEmail({
   aggregateId,
@@ -122,7 +110,7 @@ export async function submitEntryReport(
   _prevState: EntryReportActionState,
   formData: FormData,
 ): Promise<EntryReportActionState> {
-  const language = getActionLanguage(formData);
+  const language = getFormLanguage(formData, "language");
   const copy = ENTRY_REPORT_COPY[language];
 
   if (!hasSupabaseRuntimeEnv()) {
@@ -199,7 +187,7 @@ export async function submitEntryReport(
       userId: user.id,
     });
 
-    if (isMissingEntryReportTableError(error)) {
+    if (isMissingSupabaseTableError(error)) {
       return {
         success: false,
         error: copy.storageUnavailable,
@@ -234,7 +222,10 @@ export async function submitEntryReport(
       }
     }
   } catch (notificationError) {
-    console.error("Failed to send dictionary entry report notification", notificationError);
+    console.error(
+      "Failed to send dictionary entry report notification",
+      notificationError,
+    );
   }
 
   return {

@@ -8,7 +8,7 @@ import { FaXTwitter, FaInstagram, FaGithub } from "react-icons/fa6";
 export function Footer() {
   const { language, t } = useLanguage();
   const currentYear = new Date().getFullYear();
-  
+
   return (
     <footer className="relative z-40 mt-auto w-full border-t border-line/80 bg-paper">
       <div className="site-container flex flex-col items-center justify-between gap-4 py-8 md:flex-row">
@@ -17,10 +17,30 @@ export function Footer() {
             &copy; {currentYear} Kyrillos Wannes. {t("footer.rights")}
           </p>
           <div className="flex items-center gap-4 text-xs text-muted/70">
-            <Link href={getPrivacyPath(language)} className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors">{t("footer.privacy")}</Link>
-            <Link href={getTermsPath(language)} className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors">{t("footer.terms")}</Link>
-            <Link href={getDevelopersPath(language)} className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors">{t("footer.developers")}</Link>
-            <Link href="/api-docs" className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors">{t("footer.apiDocs")}</Link>
+            <Link
+              href={getPrivacyPath(language)}
+              className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+            >
+              {t("footer.privacy")}
+            </Link>
+            <Link
+              href={getTermsPath(language)}
+              className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+            >
+              {t("footer.terms")}
+            </Link>
+            <Link
+              href={getDevelopersPath(language)}
+              className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+            >
+              {t("footer.developers")}
+            </Link>
+            <Link
+              href="/api-docs"
+              className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+            >
+              {t("footer.apiDocs")}
+            </Link>
           </div>
         </div>
         <div className="flex items-center gap-2">

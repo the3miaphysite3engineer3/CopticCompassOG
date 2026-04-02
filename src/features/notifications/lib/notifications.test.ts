@@ -38,7 +38,9 @@ describe("notification formatting helpers", () => {
     expect(formatNotificationEventType("submission_reviewed")).toBe(
       "Feedback ready",
     );
-    expect(formatNotificationAggregateType("entry_report")).toBe("Entry report");
+    expect(formatNotificationAggregateType("entry_report")).toBe(
+      "Entry report",
+    );
     expect(formatNotificationEventType("profile_signup")).toBe("User signup");
     expect(formatNotificationEventType("content_release_test_sent")).toBe(
       "Release preview",
@@ -50,9 +52,7 @@ describe("notification formatting helpers", () => {
   });
 
   it("extracts useful context badges from payloads", () => {
-    expect(
-      getNotificationContextBadges(createNotificationEvent()),
-    ).toEqual([
+    expect(getNotificationContextBadges(createNotificationEvent())).toEqual([
       "Lesson: lesson-1",
       "Exercise: grammar.exercise.lesson01.001",
       "Language: NL",
@@ -91,10 +91,7 @@ describe("notification formatting helpers", () => {
           },
         }),
       ),
-    ).toEqual([
-      "Email: student@example.com",
-      "Name: Test Student",
-    ]);
+    ).toEqual(["Email: student@example.com", "Name: Test Student"]);
   });
 
   it("handles content release preview payloads", () => {

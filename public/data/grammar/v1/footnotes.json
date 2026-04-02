@@ -11,14 +11,8 @@
           {
             "type": "paragraph",
             "content": [
-              {
-                "type": "coptic",
-                "text": "Ⲟⲩ-"
-              },
-              {
-                "type": "text",
-                "text": " comes from "
-              },
+              { "type": "coptic", "text": "Ⲟⲩ-" },
+              { "type": "text", "text": " comes from " },
               {
                 "type": "coptic",
                 "text": "ⲟⲩⲁⲓ",
@@ -35,14 +29,8 @@
           {
             "type": "paragraph",
             "content": [
-              {
-                "type": "coptic",
-                "text": "Ⲟⲩ-"
-              },
-              {
-                "type": "text",
-                "text": " < "
-              },
+              { "type": "coptic", "text": "Ⲟⲩ-" },
+              { "type": "text", "text": " < " },
               {
                 "type": "coptic",
                 "text": "ⲟⲩⲁⲓ",
@@ -56,9 +44,7 @@
           }
         ]
       },
-      "sourceRefs": [
-        "grammar.source.basisgrammatica-bohairisch-koptisch"
-      ]
+      "sourceRefs": ["grammar.source.basisgrammatica-bohairisch-koptisch"]
     },
     {
       "id": "grammar.footnote.lesson01.003",
@@ -73,14 +59,8 @@
                 "text": "Ϩⲁⲛ-",
                 "dictionaryEntryId": "cd_100"
               },
-              {
-                "type": "text",
-                "text": " comes from "
-              },
-              {
-                "type": "coptic",
-                "text": "ϩⲟⲓ̈ⲛⲉ"
-              },
+              { "type": "text", "text": " comes from " },
+              { "type": "coptic", "text": "ϩⲟⲓ̈ⲛⲉ" },
               {
                 "type": "text",
                 "text": " “some”. There is no direct English equivalent for the indefinite plural article "
@@ -90,10 +70,7 @@
                 "text": "ϩⲁⲛ-",
                 "dictionaryEntryId": "cd_100"
               },
-              {
-                "type": "text",
-                "text": "."
-              }
+              { "type": "text", "text": "." }
             ]
           }
         ],
@@ -106,14 +83,8 @@
                 "text": "Ϩⲁⲛ-",
                 "dictionaryEntryId": "cd_100"
               },
-              {
-                "type": "text",
-                "text": " < "
-              },
-              {
-                "type": "coptic",
-                "text": "ϩⲟⲓ̈ⲛⲉ"
-              },
+              { "type": "text", "text": " < " },
+              { "type": "coptic", "text": "ϩⲟⲓ̈ⲛⲉ" },
               {
                 "type": "text",
                 "text": " “sommige”. Er is geen Nederlands equivalent voor het onbepaald meervoud lidwoord "
@@ -123,17 +94,12 @@
                 "text": "ϩⲁⲛ-",
                 "dictionaryEntryId": "cd_100"
               },
-              {
-                "type": "text",
-                "text": "."
-              }
+              { "type": "text", "text": "." }
             ]
           }
         ]
       },
-      "sourceRefs": [
-        "grammar.source.basisgrammatica-bohairisch-koptisch"
-      ]
+      "sourceRefs": ["grammar.source.basisgrammatica-bohairisch-koptisch"]
     },
     {
       "id": "grammar.footnote.lesson01.004",
@@ -143,23 +109,14 @@
           {
             "type": "paragraph",
             "content": [
-              {
-                "type": "coptic",
-                "text": "Ⲧ + ⲓ = ϯ"
-              },
-              {
-                "type": "text",
-                "text": ". Therefore: "
-              },
+              { "type": "coptic", "text": "Ⲧ + ⲓ = ϯ" },
+              { "type": "text", "text": ". Therefore: " },
               {
                 "type": "coptic",
                 "text": "ϯⲥⲱⲛⲓ",
                 "dictionaryEntryId": "cd_173a"
               },
-              {
-                "type": "text",
-                "text": "."
-              }
+              { "type": "text", "text": "." }
             ]
           }
         ],
@@ -167,30 +124,19 @@
           {
             "type": "paragraph",
             "content": [
-              {
-                "type": "coptic",
-                "text": "Ⲧ + ⲓ = ϯ"
-              },
-              {
-                "type": "text",
-                "text": ". Dus: "
-              },
+              { "type": "coptic", "text": "Ⲧ + ⲓ = ϯ" },
+              { "type": "text", "text": ". Dus: " },
               {
                 "type": "coptic",
                 "text": "ϯⲥⲱⲛⲓ",
                 "dictionaryEntryId": "cd_173a"
               },
-              {
-                "type": "text",
-                "text": "."
-              }
+              { "type": "text", "text": "." }
             ]
           }
         ]
       },
-      "sourceRefs": [
-        "grammar.source.basisgrammatica-bohairisch-koptisch"
-      ]
+      "sourceRefs": ["grammar.source.basisgrammatica-bohairisch-koptisch"]
     },
     {
       "id": "grammar.footnote.lesson01.005",
@@ -219,9 +165,7 @@
           }
         ]
       },
-      "sourceRefs": [
-        "grammar.source.basisgrammatica-bohairisch-koptisch"
-      ]
+      "sourceRefs": ["grammar.source.basisgrammatica-bohairisch-koptisch"]
     },
     {
       "id": "grammar.footnote.lesson01.006",
@@ -235,10 +179,7 @@
                 "type": "text",
                 "text": "In older church books and presentations, this is often archaically written as "
               },
-              {
-                "type": "coptic",
-                "text": "ϭⲟⲓⲥ"
-              },
+              { "type": "coptic", "text": "ϭⲟⲓⲥ" },
               {
                 "type": "text",
                 "text": ". The standard modern Bohairic spelling is "
@@ -248,10 +189,7 @@
                 "text": "ϭⲱⲓⲥ",
                 "dictionaryEntryId": "cd_17"
               },
-              {
-                "type": "text",
-                "text": "."
-              }
+              { "type": "text", "text": "." }
             ]
           }
         ],
@@ -263,10 +201,7 @@
                 "type": "text",
                 "text": "In kerkelijke boeken en presentaties wordt dit vaak verouderd geschreven als "
               },
-              {
-                "type": "coptic",
-                "text": "ϭⲟⲓⲥ"
-              },
+              { "type": "coptic", "text": "ϭⲟⲓⲥ" },
               {
                 "type": "text",
                 "text": ". De standaard Bohairische spelling is "
@@ -276,17 +211,12 @@
                 "text": "ϭⲱⲓⲥ",
                 "dictionaryEntryId": "cd_17"
               },
-              {
-                "type": "text",
-                "text": "."
-              }
+              { "type": "text", "text": "." }
             ]
           }
         ]
       },
-      "sourceRefs": [
-        "grammar.source.basisgrammatica-bohairisch-koptisch"
-      ]
+      "sourceRefs": ["grammar.source.basisgrammatica-bohairisch-koptisch"]
     }
   ]
 }

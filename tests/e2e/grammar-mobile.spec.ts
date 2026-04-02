@@ -29,7 +29,9 @@ test("mobile grammar lessons switch lookup tables to cards while keeping compari
 
   await expect(abbreviationsCards).toBeVisible();
   await expect(abbreviationsCards.getByText("Full Word").first()).toBeVisible();
-  await expect(abbreviationsCards.getByText("Abbreviation").first()).toBeVisible();
+  await expect(
+    abbreviationsCards.getByText("Abbreviation").first(),
+  ).toBeVisible();
   await expect(abbreviationsCards.getByText("Meaning").first()).toBeVisible();
   await expect(abbreviationsCards.getByText("Ⲁⲗⲗⲏⲗⲟⲩⲓⲁ̀")).toBeVisible();
   await expect(abbreviationsTable).toBeHidden();
@@ -52,7 +54,9 @@ test("mobile row-header comparison tables keep their leading labels sticky", asy
   const significantLettersTable = page.locator(
     `[data-grammar-table-id="${SIGNIFICANT_LETTERS_TABLE_ID}"][data-grammar-table-rendering="table"]`,
   );
-  const firstRowHeader = significantLettersTable.locator("tbody th[scope='row']").first();
+  const firstRowHeader = significantLettersTable
+    .locator("tbody th[scope='row']")
+    .first();
 
   await significantLettersTable.scrollIntoViewIfNeeded();
 
@@ -60,7 +64,9 @@ test("mobile row-header comparison tables keep their leading labels sticky", asy
   await expect(firstRowHeader).toHaveCSS("left", "0px");
 });
 
-test("desktop keeps the abbreviations lookup table in table form", async ({ page }) => {
+test("desktop keeps the abbreviations lookup table in table form", async ({
+  page,
+}) => {
   const abbreviationsCards = page.locator(
     `[data-grammar-table-id="${ABBREVIATIONS_TABLE_ID}"][data-grammar-table-rendering="cards"]`,
   );

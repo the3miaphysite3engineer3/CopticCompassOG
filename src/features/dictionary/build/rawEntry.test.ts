@@ -18,11 +18,9 @@ describe("dictionary raw entry parsing", () => {
   it("keeps the main Bohairic absolute form when related female lines are present", () => {
     const entry = buildLexicalEntryFromSourceRow(
       {
-        word: [
-          "(S, A, sA) ϣⲏⲣⲉ",
-          "(B, F, O) ϣⲏⲣⲓ",
-          "(B) female: ϣⲉⲣⲓ",
-        ].join("\n"),
+        word: ["(S, A, sA) ϣⲏⲣⲉ", "(B, F, O) ϣⲏⲣⲓ", "(B) female: ϣⲉⲣⲓ"].join(
+          "\n",
+        ),
         meaning: "m son [υιοσ]",
       },
       "cd_test",

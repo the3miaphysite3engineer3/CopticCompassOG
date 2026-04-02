@@ -44,6 +44,8 @@ describe("audience communication helpers", () => {
       updated_at: "2026-03-28T13:00:00.000Z",
     } as AudienceContactArgument;
 
-    expect(compareAudienceContactPriority(activeContact, pausedContact)).toBeLessThan(0);
+    expect(
+      compareAudienceContactPriority(activeContact, pausedContact),
+    ).toBeLessThan(0);
   });
 });

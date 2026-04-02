@@ -1,47 +1,48 @@
-import { updateContentReleaseStatus } from '@/actions/admin'
-import { FormField } from '@/components/FormField'
-import { StatusNotice } from '@/components/StatusNotice'
+import { updateContentReleaseStatus } from "@/actions/admin";
+import { FormField } from "@/components/FormField";
+import { StatusNotice } from "@/components/StatusNotice";
 import {
   CONTENT_RELEASE_EDITABLE_STATUSES,
   formatContentReleaseStatus,
   type ContentReleaseRow,
-} from '@/features/communications/lib/releases'
+} from "@/features/communications/lib/releases";
 
 export function ContentReleaseReviewForm({
   releaseId,
   status,
 }: {
-  releaseId: string
-  status: ContentReleaseRow['status']
+  releaseId: string;
+  status: ContentReleaseRow["status"];
 }) {
-  if (status === 'queued') {
+  if (status === "queued") {
     return (
       <StatusNotice tone="info" align="left">
-        This release is queued for background delivery. Status changes are locked until the worker starts.
+        This release is queued for background delivery. Status changes are
+        locked until the worker starts.
       </StatusNotice>
-    )
+    );
   }
 
-  if (status === 'sending') {
+  if (status === "sending") {
     return (
       <StatusNotice tone="info" align="left">
         This release is currently being delivered in the background.
       </StatusNotice>
-    )
+    );
   }
 
-  if (status === 'sent') {
+  if (status === "sent") {
     return (
       <StatusNotice tone="success" align="left">
         This release has already finished delivering.
       </StatusNotice>
-    )
+    );
   }
 
   const editableStatus =
-    status === 'draft' || status === 'approved' || status === 'cancelled'
+    status === "draft" || status === "approved" || status === "cancelled"
       ? status
-      : 'draft'
+      : "draft";
 
   return (
     <form
@@ -75,5 +76,5 @@ export function ContentReleaseReviewForm({
         </button>
       </div>
     </form>
-  )
+  );
 }

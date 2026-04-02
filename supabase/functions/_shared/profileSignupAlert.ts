@@ -30,7 +30,9 @@ function asOptionalString(value: unknown) {
   return normalized.length > 0 ? normalized : null;
 }
 
-export function parseProfileSignupPayload(payload: unknown): ProfileSignupRecord | null {
+export function parseProfileSignupPayload(
+  payload: unknown,
+): ProfileSignupRecord | null {
   const webhookPayload = asObject(payload) as DatabaseWebhookPayload | null;
   if (!webhookPayload) {
     return null;

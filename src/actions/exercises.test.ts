@@ -26,7 +26,10 @@ function createExerciseFormData(overrides?: {
   formData.set("exerciseLanguage", overrides?.exerciseLanguage ?? "en");
 
   for (let i = 1; i <= 10; i += 1) {
-    formData.set(`answer_q${i}`, overrides?.answers?.[`q${i}`] ?? `Answer ${i}`);
+    formData.set(
+      `answer_q${i}`,
+      overrides?.answers?.[`q${i}`] ?? `Answer ${i}`,
+    );
   }
 
   if (overrides?.extraAnswerKey) {
@@ -130,12 +133,12 @@ describe("exercise submission action", () => {
         hasEnv: false,
       });
 
-    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual(
-      {
-        success: false,
-        error: "Exercise submission is temporarily unavailable.",
-      },
-    );
+    await expect(
+      submitExercise(null, createExerciseFormData()),
+    ).resolves.toEqual({
+      success: false,
+      error: "Exercise submission is temporarily unavailable.",
+    });
 
     expect(getAuthenticatedServerContextMock).not.toHaveBeenCalled();
   });
@@ -145,12 +148,12 @@ describe("exercise submission action", () => {
       user: null,
     });
 
-    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual(
-      {
-        success: false,
-        error: "Unauthorized. Please log in first.",
-      },
-    );
+    await expect(
+      submitExercise(null, createExerciseFormData()),
+    ).resolves.toEqual({
+      success: false,
+      error: "Unauthorized. Please log in first.",
+    });
   });
 
   it("rejects malformed exercise payloads with unexpected answer keys", async () => {
@@ -224,13 +227,13 @@ describe("exercise submission action", () => {
       rateLimitOk: false,
     });
 
-    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual(
-      {
-        success: false,
-        error:
-          "Too many submissions were received for this lesson. Please wait a bit before trying again.",
-      },
-    );
+    await expect(
+      submitExercise(null, createExerciseFormData()),
+    ).resolves.toEqual({
+      success: false,
+      error:
+        "Too many submissions were received for this lesson. Please wait a bit before trying again.",
+    });
 
     expect(insertMock).not.toHaveBeenCalled();
   });
@@ -241,8 +244,7 @@ describe("exercise submission action", () => {
       insertMock,
       revalidatePathMock,
       submitExercise,
-    } =
-      await loadExercisesModule();
+    } = await loadExercisesModule();
 
     await expect(
       submitExercise(
@@ -298,11 +300,11 @@ describe("exercise submission action", () => {
         },
       });
 
-    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual(
-      {
-        success: true,
-      },
-    );
+    await expect(
+      submitExercise(null, createExerciseFormData()),
+    ).resolves.toEqual({
+      success: true,
+    });
 
     expect(insertMock).toHaveBeenCalledOnce();
     expect(dispatchLoggedOwnerAlertEmailMock).toHaveBeenCalledOnce();
@@ -316,11 +318,11 @@ describe("exercise submission action", () => {
       },
     });
 
-    await expect(submitExercise(null, createExerciseFormData())).resolves.toEqual(
-      {
-        success: false,
-        error: "Your account does not have permission to submit exercises yet.",
-      },
-    );
+    await expect(
+      submitExercise(null, createExerciseFormData()),
+    ).resolves.toEqual({
+      success: false,
+      error: "Your account does not have permission to submit exercises yet.",
+    });
   });
 });

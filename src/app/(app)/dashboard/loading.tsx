@@ -34,7 +34,10 @@ export default function Loading() {
             <LoadingBlock className="h-11 w-32" />
           </div>
 
-          <SurfacePanel rounded="3xl" className="flex flex-col gap-6 p-6 md:flex-row md:items-center md:justify-between md:p-8">
+          <SurfacePanel
+            rounded="3xl"
+            className="flex flex-col gap-6 p-6 md:flex-row md:items-center md:justify-between md:p-8"
+          >
             <div className="flex-1 space-y-3">
               <LoadingBlock className="h-8 w-56 max-w-full" />
               <LoadingBlock className="h-4 w-64 max-w-full" />
@@ -49,7 +52,11 @@ export default function Loading() {
               <LoadingBlock className="h-24 w-full" />
             </SurfacePanel>
 
-            <SurfacePanel rounded="3xl" variant="subtle" className="space-y-4 p-6 md:p-8">
+            <SurfacePanel
+              rounded="3xl"
+              variant="subtle"
+              className="space-y-4 p-6 md:p-8"
+            >
               <LoadingBlock className="h-6 w-36" />
               <LoadingBlock className="h-16 w-full" />
               <LoadingBlock className="h-16 w-full" />

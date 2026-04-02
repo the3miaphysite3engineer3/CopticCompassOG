@@ -95,7 +95,11 @@ export function buildEntrySharePayload({
 }: BuildEntrySharePayloadOptions): EntrySharePayload {
   const displayForm = getShareDisplayForm(entry);
   const summary = ensureSentence(getEntrySummary(entry, language));
-  const relatedForms = collectRelatedShareForms(entry, parentEntry, relatedEntries);
+  const relatedForms = collectRelatedShareForms(
+    entry,
+    parentEntry,
+    relatedEntries,
+  );
   const relatedLine =
     relatedForms.length > 0
       ? language === "nl"

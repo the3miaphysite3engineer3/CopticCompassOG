@@ -29,7 +29,8 @@ export async function GET(request: Request) {
   // this is used for password reset or dynamic redirects
   const next = searchParams.get("next") ?? "/";
 
-  const configuredSiteUrl = getSiteUrl() ?? new URL("https://kyrilloswannes.com");
+  const configuredSiteUrl =
+    getSiteUrl() ?? new URL("https://kyrilloswannes.com");
   const baseUrl = configuredSiteUrl.toString().endsWith("/")
     ? configuredSiteUrl.toString().slice(0, -1)
     : configuredSiteUrl.toString();

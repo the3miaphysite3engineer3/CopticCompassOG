@@ -30,14 +30,19 @@ function createProfileFormData(
 }
 
 async function loadProfileModule(options?: {
-  authContext?: { supabase: { from: ReturnType<typeof vi.fn> }; user: { id: string } } | null;
+  authContext?: {
+    supabase: { from: ReturnType<typeof vi.fn> };
+    user: { id: string };
+  } | null;
   hasEnv?: boolean;
   updateError?: { message: string } | null;
 }) {
   vi.resetModules();
 
   const revalidatePathMock = vi.fn();
-  const eqMock = vi.fn().mockResolvedValue({ error: options?.updateError ?? null });
+  const eqMock = vi
+    .fn()
+    .mockResolvedValue({ error: options?.updateError ?? null });
   const updateMock = vi.fn().mockReturnValue({
     eq: eqMock,
   });

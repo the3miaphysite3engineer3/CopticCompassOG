@@ -67,15 +67,13 @@ async function loadNotificationsEventsModule(options?: {
     .mockResolvedValue(
       options?.sendNotificationResult ?? { success: true, id: "email_123" },
     );
-  const getNotificationEmailEnvMock = vi
-    .fn()
-    .mockReturnValue(
-      options?.notificationEmailEnv ?? {
-        notificationFromEmail: "notifications@example.com",
-        ownerAlertEmail: "owner@example.com",
-        resendApiKey: "re_123",
-      },
-    );
+  const getNotificationEmailEnvMock = vi.fn().mockReturnValue(
+    options?.notificationEmailEnv ?? {
+      notificationFromEmail: "notifications@example.com",
+      ownerAlertEmail: "owner@example.com",
+      resendApiKey: "re_123",
+    },
+  );
 
   vi.doMock("@/lib/notifications/config", () => ({
     getNotificationEmailEnv: getNotificationEmailEnvMock,
@@ -181,7 +179,10 @@ describe("logged notification events", () => {
         status: "sent",
       }),
     );
-    expect(notificationEventsUpdateEqMock).toHaveBeenCalledWith("id", "event_123");
+    expect(notificationEventsUpdateEqMock).toHaveBeenCalledWith(
+      "id",
+      "event_123",
+    );
   });
 
   it("stores a failed delivery when the email send fails", async () => {

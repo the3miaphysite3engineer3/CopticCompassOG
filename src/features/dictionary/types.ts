@@ -1,4 +1,7 @@
-import type { DictionaryDialectCode, PartOfSpeech } from "@/features/dictionary/config";
+import type {
+  DictionaryDialectCode,
+  PartOfSpeech,
+} from "@/features/dictionary/config";
 
 export type LexicalGender = "" | "BOTH" | "F" | "M";
 export type LexicalRelationType =
@@ -14,7 +17,9 @@ export interface DialectForms {
   stative: string;
 }
 
-export type DictionaryDialectFormsMap = Partial<Record<DictionaryDialectCode, DialectForms>>;
+export type DictionaryDialectFormsMap = Partial<
+  Record<DictionaryDialectCode, DialectForms>
+>;
 
 export interface LexicalEntry {
   id: string;

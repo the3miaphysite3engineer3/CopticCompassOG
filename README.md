@@ -107,11 +107,23 @@ Useful commands:
 
 ```bash
 npm run lint
+npm run format
+npm run format:check
 npm run test
 npm run data:grammar:export
 npm run test:e2e:local
 npm run build
 ```
+
+## Code Organization
+
+- Localized public pages live under `src/app/(site)/[locale]`.
+- Legacy non-localized routes live under `src/app/(app)` and mostly redirect into the localized public routes.
+- Feature-owned server helpers and query modules generally live close to their feature under `src/features/*/lib/server`.
+- Shared server actions live under `src/actions`, with admin workflows split by domain under `src/actions/admin`.
+- Shared SEO helpers live in `src/lib/metadata.ts`, `src/lib/structuredData.ts`, `src/app/sitemap.ts`, and `src/app/robots.ts`.
+
+For a fuller walkthrough of the current structure, see [docs/architecture.md](./docs/architecture.md).
 
 ### Signup Alert Webhook
 

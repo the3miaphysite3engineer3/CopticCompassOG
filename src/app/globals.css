@@ -3,8 +3,12 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --font-sans: "Aptos", "Segoe UI", "SF Pro Text", "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Constantia, Georgia, serif;
+  --font-sans:
+    "Aptos", "Segoe UI", "SF Pro Text", "Helvetica Neue", ui-sans-serif,
+    system-ui, sans-serif;
+  --font-serif:
+    "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Constantia, Georgia,
+    serif;
   --font-coptic: var(--font-coptic), "Antinoou", serif;
 
   --color-paper: rgb(var(--paper));
@@ -22,7 +26,8 @@
   --color-warning: rgb(var(--warning));
   --color-danger: rgb(var(--danger));
 
-  --shadow-soft: 0 1px 2px rgba(24, 30, 27, 0.04), 0 12px 28px rgba(24, 30, 27, 0.06);
+  --shadow-soft:
+    0 1px 2px rgba(24, 30, 27, 0.04), 0 12px 28px rgba(24, 30, 27, 0.06);
   --shadow-panel: 0 8px 32px rgba(24, 30, 27, 0.08);
 }
 

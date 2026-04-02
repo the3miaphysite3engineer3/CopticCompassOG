@@ -21,8 +21,7 @@ const TONE_CLASSES: Record<StatusNoticeTone, string> = {
     "border-stone-200 bg-white/60 text-stone-600 shadow-sm backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/50 dark:text-stone-400",
   error:
     "border-red-200 bg-red-50 text-red-600 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400",
-  info:
-    "border-sky-200 bg-sky-50/80 text-sky-700 dark:border-sky-900/50 dark:bg-sky-950/20 dark:text-sky-400",
+  info: "border-sky-200 bg-sky-50/80 text-sky-700 dark:border-sky-900/50 dark:bg-sky-950/20 dark:text-sky-400",
   success:
     "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-400",
 };
@@ -52,7 +51,7 @@ export function StatusNotice({
         SIZE_CLASSES[size],
         dashed && "border-dashed",
         align === "center" ? "text-center" : "text-left",
-        className
+        className,
       )}
     >
       {title && (
@@ -63,7 +62,11 @@ export function StatusNotice({
 
       {hasBody && <div className="leading-relaxed">{children}</div>}
 
-      {actions && <div className={cx(hasBody || title ? "mt-4" : undefined)}>{actions}</div>}
+      {actions && (
+        <div className={cx(hasBody || title ? "mt-4" : undefined)}>
+          {actions}
+        </div>
+      )}
     </div>
   );
 }

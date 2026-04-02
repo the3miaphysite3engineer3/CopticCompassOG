@@ -140,7 +140,11 @@ export type GrammarSourceDocument = {
 export type GrammarInline =
   | { type: "text"; text: string }
   | { type: "coptic"; text: string; dictionaryEntryId?: string }
-  | { type: "copticSpan"; children: GrammarInline[]; dictionaryEntryId?: string }
+  | {
+      type: "copticSpan";
+      children: GrammarInline[];
+      dictionaryEntryId?: string;
+    }
   | { type: "strong"; children: GrammarInline[] }
   | { type: "em"; children: GrammarInline[] }
   | { type: "smallCaps"; children: GrammarInline[] }

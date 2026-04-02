@@ -19,7 +19,8 @@ export default function DialectSiglum({ siglum }: DialectSiglumProps) {
   const tooltip = fullName === siglum ? siglum : `${fullName} (${siglum})`;
   const sharedProps = {
     "aria-label": tooltip,
-    className: "group/tooltip relative inline-flex items-center leading-none cursor-help whitespace-nowrap focus:outline-none",
+    className:
+      "group/tooltip relative inline-flex items-center leading-none cursor-help whitespace-nowrap focus:outline-none",
     tabIndex: 0,
   };
 

@@ -17,8 +17,7 @@ const TONE_CLASSES: Record<BadgeTone, string> = {
     "border border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-400",
   coptic:
     "border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-400",
-  flat:
-    "bg-stone-200 text-stone-600 dark:bg-stone-800 dark:text-stone-300",
+  flat: "bg-stone-200 text-stone-600 dark:bg-stone-800 dark:text-stone-300",
   neutral:
     "border border-stone-200 bg-stone-100 text-stone-600 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300",
   surface:
@@ -45,7 +44,7 @@ export function Badge({
         TONE_CLASSES[tone],
         SIZE_CLASSES[size],
         caps ? "uppercase tracking-widest" : "tracking-[0.02em]",
-        className
+        className,
       )}
     >
       {children}

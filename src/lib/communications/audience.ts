@@ -68,8 +68,8 @@ export async function syncAudienceContact({
   const payload = {
     books_opt_in: booksOptIn,
     consented_at: nextIsSubscribed
-      ? existingContact?.consented_at ?? now
-      : existingContact?.consented_at ?? null,
+      ? (existingContact?.consented_at ?? now)
+      : (existingContact?.consented_at ?? null),
     email: normalizedEmail,
     full_name: normalizedFullName ?? existingContact?.full_name ?? null,
     general_updates_opt_in: generalUpdatesOptIn,
@@ -94,7 +94,10 @@ export async function syncAudienceContact({
     }
 
     try {
-      const resendSyncResult = await syncStoredAudienceContactToResend(data, supabase);
+      const resendSyncResult = await syncStoredAudienceContactToResend(
+        data,
+        supabase,
+      );
       if (!resendSyncResult.success) {
         console.error("Failed to sync audience contact to Resend", {
           audienceContactId: data.id,
@@ -128,7 +131,10 @@ export async function syncAudienceContact({
   }
 
   try {
-    const resendSyncResult = await syncStoredAudienceContactToResend(data, supabase);
+    const resendSyncResult = await syncStoredAudienceContactToResend(
+      data,
+      supabase,
+    );
     if (!resendSyncResult.success) {
       console.error("Failed to sync audience contact to Resend", {
         audienceContactId: data.id,

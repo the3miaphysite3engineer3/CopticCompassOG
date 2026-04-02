@@ -52,7 +52,9 @@ export function getOrderedLessonConcepts(
 
   return lessonBundle.lesson.conceptRefs
     .map((conceptId) => conceptsById.get(conceptId))
-    .filter((concept): concept is GrammarConceptDocument => concept !== undefined);
+    .filter(
+      (concept): concept is GrammarConceptDocument => concept !== undefined,
+    );
 }
 
 export function getOrderedLessonSources(

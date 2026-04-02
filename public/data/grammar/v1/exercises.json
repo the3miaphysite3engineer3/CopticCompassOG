@@ -8,10 +8,7 @@
       "lessonId": "grammar.lesson.01",
       "sectionId": "grammar.lesson.01.section.exercise-01",
       "kind": "reviewed",
-      "title": {
-        "en": "Exercise 01",
-        "nl": "Oefening 01"
-      },
+      "title": { "en": "Exercise 01", "nl": "Oefening 01" },
       "prompt": {
         "en": [
           {
@@ -63,10 +60,7 @@
         },
         {
           "id": "q3",
-          "prompt": {
-            "en": "It is heaven.",
-            "nl": "Het is de hemel."
-          },
+          "prompt": { "en": "It is heaven.", "nl": "Het is de hemel." },
           "answerSchema": {
             "kind": "free-text",
             "minLength": 1,
@@ -75,10 +69,7 @@
         },
         {
           "id": "q4",
-          "prompt": {
-            "en": "She is a lady.",
-            "nl": "Zij is een dame."
-          },
+          "prompt": { "en": "She is a lady.", "nl": "Zij is een dame." },
           "answerSchema": {
             "kind": "free-text",
             "minLength": 1,
@@ -99,10 +90,7 @@
         },
         {
           "id": "q6",
-          "prompt": {
-            "en": "He is a spirit.",
-            "nl": "Hij is een geest."
-          },
+          "prompt": { "en": "He is a spirit.", "nl": "Hij is een geest." },
           "answerSchema": {
             "kind": "free-text",
             "minLength": 1,
@@ -111,10 +99,7 @@
         },
         {
           "id": "q7",
-          "prompt": {
-            "en": "It is the spirit.",
-            "nl": "Het is de geest."
-          },
+          "prompt": { "en": "It is the spirit.", "nl": "Het is de geest." },
           "answerSchema": {
             "kind": "free-text",
             "minLength": 1,
@@ -123,10 +108,7 @@
         },
         {
           "id": "q8",
-          "prompt": {
-            "en": "Every city.",
-            "nl": "Iedere stad."
-          },
+          "prompt": { "en": "Every city.", "nl": "Iedere stad." },
           "answerSchema": {
             "kind": "free-text",
             "minLength": 1,
@@ -135,10 +117,7 @@
         },
         {
           "id": "q9",
-          "prompt": {
-            "en": "Every man.",
-            "nl": "Iedere man."
-          },
+          "prompt": { "en": "Every man.", "nl": "Iedere man." },
           "answerSchema": {
             "kind": "free-text",
             "minLength": 1,
@@ -158,12 +137,7 @@
           }
         }
       ],
-      "tags": [
-        "lesson-1",
-        "exercise",
-        "translation",
-        "reviewed"
-      ]
+      "tags": ["lesson-1", "exercise", "translation", "reviewed"]
     }
   ]
 }

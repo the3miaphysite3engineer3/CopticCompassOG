@@ -194,8 +194,12 @@ export function getContentReleaseDeliverySummary(
     ...(broadcasts ? { broadcasts } : {}),
     eligibleRecipientCount: asOptionalNumber(summary.eligible_recipient_count),
     failedCount: asOptionalNumber(summary.failed_count),
-    processedRecipientCount: asOptionalNumber(summary.processed_recipient_count),
-    remainingRecipientCount: asOptionalNumber(summary.remaining_recipient_count),
+    processedRecipientCount: asOptionalNumber(
+      summary.processed_recipient_count,
+    ),
+    remainingRecipientCount: asOptionalNumber(
+      summary.remaining_recipient_count,
+    ),
     sentCount: asOptionalNumber(summary.sent_count),
     skippedCount: asOptionalNumber(summary.skipped_count),
   };
@@ -251,7 +255,9 @@ export function buildContentReleaseEmailText(options: {
   return [intro, "", itemsHeading, itemsList].join("\n");
 }
 
-function asObject(value: Json | undefined): Record<string, Json | undefined> | null {
+function asObject(
+  value: Json | undefined,
+): Record<string, Json | undefined> | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return null;
   }
@@ -260,11 +266,15 @@ function asObject(value: Json | undefined): Record<string, Json | undefined> | n
 }
 
 function asOptionalNumber(value: Json | undefined) {
-  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
 }
 
 function asOptionalString(value: Json | undefined) {
-  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
+  return typeof value === "string" && value.trim().length > 0
+    ? value
+    : undefined;
 }
 
 function getBroadcastSummaryEntries(summary: Record<string, Json | undefined>) {

@@ -82,7 +82,6 @@ export function buildEntryOpenGraphPreview({
         : "Coptic dictionary entry"),
     heading: getDisplayForm(entry),
     relatedForms: collectRelatedForms(entry, parentEntry, relatedEntries),
-    strapline:
-      language === "nl" ? "Koptisch woordenboek" : "Coptic Dictionary",
+    strapline: language === "nl" ? "Koptisch woordenboek" : "Coptic Dictionary",
   };
 }

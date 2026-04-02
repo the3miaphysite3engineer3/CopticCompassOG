@@ -87,7 +87,10 @@ export function resolveGrammarLessonFilter(
     return lessonBySlug.id;
   }
 
-  return snapshot.lessons.find((lesson) => lesson.id === normalizedLessonFilter)?.id ?? null;
+  return (
+    snapshot.lessons.find((lesson) => lesson.id === normalizedLessonFilter)
+      ?.id ?? null
+  );
 }
 
 export function listGrammarApiLessons(
@@ -144,7 +147,9 @@ export function listGrammarApiConcepts(
 ): GrammarApiEnvelope<GrammarConceptDocument[]> {
   const snapshot = getPublishedGrammarApiSnapshot();
   const concepts = lessonId
-    ? snapshot.concepts.filter((concept) => concept.lessonRefs.includes(lessonId))
+    ? snapshot.concepts.filter((concept) =>
+        concept.lessonRefs.includes(lessonId),
+      )
     : snapshot.concepts;
 
   return createGrammarVersionedExport(snapshot.manifest, concepts);
@@ -183,9 +188,13 @@ export function listGrammarApiSources(
     return createGrammarVersionedExport(snapshot.manifest, snapshot.sources);
   }
 
-  const lesson = snapshot.lessons.find((candidate) => candidate.id === lessonId);
+  const lesson = snapshot.lessons.find(
+    (candidate) => candidate.id === lessonId,
+  );
   const lessonSourceIds = new Set(lesson?.sourceRefs ?? []);
-  const sources = snapshot.sources.filter((source) => lessonSourceIds.has(source.id));
+  const sources = snapshot.sources.filter((source) =>
+    lessonSourceIds.has(source.id),
+  );
 
   return createGrammarVersionedExport(snapshot.manifest, sources);
 }
@@ -235,7 +244,8 @@ export function getGrammarApiIndex(): GrammarApiIndex {
     endpoints: [
       {
         path: "/api/v1/grammar/manifest",
-        description: "Returns the canonical manifest for the published grammar dataset.",
+        description:
+          "Returns the canonical manifest for the published grammar dataset.",
       },
       {
         path: "/api/v1/grammar/lessons",
@@ -244,21 +254,25 @@ export function getGrammarApiIndex(): GrammarApiIndex {
       },
       {
         path: "/api/v1/grammar/lessons/[slug]",
-        description: "Returns a full published lesson bundle, including sections, examples, exercises, and footnotes.",
+        description:
+          "Returns a full published lesson bundle, including sections, examples, exercises, and footnotes.",
       },
       {
         path: "/api/v1/grammar/examples",
-        description: "Returns example records across the dataset or for a specific lesson.",
+        description:
+          "Returns example records across the dataset or for a specific lesson.",
         queryParameters: ["lesson=<lesson-slug-or-id>"],
       },
       {
         path: "/api/v1/grammar/exercises",
-        description: "Returns exercise records across the dataset or for a specific lesson.",
+        description:
+          "Returns exercise records across the dataset or for a specific lesson.",
         queryParameters: ["lesson=<lesson-slug-or-id>"],
       },
       {
         path: "/api/v1/grammar/concepts",
-        description: "Returns concept records across the dataset or for a specific lesson.",
+        description:
+          "Returns concept records across the dataset or for a specific lesson.",
         queryParameters: ["lesson=<lesson-slug-or-id>"],
       },
       {
@@ -267,12 +281,14 @@ export function getGrammarApiIndex(): GrammarApiIndex {
       },
       {
         path: "/api/v1/grammar/footnotes",
-        description: "Returns footnote records across the dataset or for a specific lesson.",
+        description:
+          "Returns footnote records across the dataset or for a specific lesson.",
         queryParameters: ["lesson=<lesson-slug-or-id>"],
       },
       {
         path: "/api/v1/grammar/sources",
-        description: "Returns source records across the dataset or for a specific lesson.",
+        description:
+          "Returns source records across the dataset or for a specific lesson.",
         queryParameters: ["lesson=<lesson-slug-or-id>"],
       },
       {
@@ -283,7 +299,8 @@ export function getGrammarApiIndex(): GrammarApiIndex {
     examples: [
       {
         path: "/api/v1/grammar/lessons?status=published",
-        description: "List public lesson cards for the website or a mobile app.",
+        description:
+          "List public lesson cards for the website or a mobile app.",
       },
       {
         path: "/api/v1/grammar/lessons/lesson-1",
@@ -295,11 +312,13 @@ export function getGrammarApiIndex(): GrammarApiIndex {
       },
       {
         path: "/api/v1/grammar/concepts/grammar.concept.significant-letters",
-        description: "Fetch one canonical concept record for glossary or flashcard tooling.",
+        description:
+          "Fetch one canonical concept record for glossary or flashcard tooling.",
       },
       {
         path: "/api/v1/grammar/footnotes?lesson=grammar.lesson.01",
-        description: "Fetch footnotes for a lesson using the canonical lesson id.",
+        description:
+          "Fetch footnotes for a lesson using the canonical lesson id.",
       },
       {
         path: "/api/v1/grammar/sources/grammar.source.basisgrammatica-bohairisch-koptisch",
@@ -307,7 +326,8 @@ export function getGrammarApiIndex(): GrammarApiIndex {
       },
       {
         path: "/data/grammar/v1/manifest.json",
-        description: "Read the static grammar manifest without hitting the API layer.",
+        description:
+          "Read the static grammar manifest without hitting the API layer.",
       },
       {
         path: "/data/grammar/v1/lessons/lesson-1.json",

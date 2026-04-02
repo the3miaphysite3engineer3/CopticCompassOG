@@ -1,259 +1,96 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
-import type { GrammarLessonBundle, GrammarSectionDocument } from "@/content/grammar/schema";
-import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
-import { normalizeMultiline } from "@/lib/validation";
+import { useState } from "react";
 import type {
-  LessonBookmarkRow,
-  LessonNoteRow,
-  LessonProgressRow,
-  SectionProgressRow,
-} from "@/features/grammar/types";
+  GrammarLessonBundle,
+  GrammarSectionDocument,
+} from "@/content/grammar/schema";
+import { createClient } from "@/lib/supabase/client";
+import { normalizeMultiline } from "@/lib/validation";
 import {
   buildGrammarLessonLearnerSummary,
   type GrammarLessonLearnerSummary,
 } from "./grammarLearnerState";
-
-type GrammarLessonLearnerStatus = "loading" | "ready" | "signed-out" | "unavailable";
+import {
+  deleteGrammarLessonBookmark,
+  deleteGrammarLessonNote,
+  deleteGrammarSectionProgress,
+  removeSectionProgressRow,
+  saveGrammarLessonBookmark,
+  saveGrammarLessonNote,
+  saveGrammarSectionProgress,
+  syncGrammarLessonProgress,
+  upsertSectionProgressRow,
+} from "./grammarLessonLearnerClient";
+import {
+  type GrammarLessonLearnerStatus,
+  useGrammarLessonLearnerData,
+} from "./useGrammarLessonLearnerData";
 
 type UseGrammarLessonLearnerStateResult = {
   completedSectionIds: string[];
   errorMessage: string | null;
+  hasUnsavedNoteChanges: boolean;
   isBookmarkPending: boolean;
   isNotePending: boolean;
   noteText: string;
   noteUpdatedAt: string | null;
   pendingSectionId: string | null;
+  saveNote: () => Promise<void>;
   sectionCompletionEnabled: boolean;
+  setNoteText: (value: string) => void;
   status: GrammarLessonLearnerStatus;
   summary: GrammarLessonLearnerSummary;
   toggleBookmark: () => Promise<void>;
   toggleSectionComplete: (section: GrammarSectionDocument) => Promise<void>;
-  saveNote: () => Promise<void>;
-  setNoteText: (value: string) => void;
-  hasUnsavedNoteChanges: boolean;
 };
-
-function isMissingLearnerStateTableError(
-  error: { code?: string; message?: string } | null | undefined,
-) {
-  if (!error) {
-    return false;
-  }
-
-  return (
-    error.code === "PGRST205" ||
-    error.code === "42P01" ||
-    error.message?.includes("Could not find the table") === true ||
-    error.message?.includes("relation") === true
-  );
-}
 
 function createEmptySummary(lessonBundle: GrammarLessonBundle) {
   return buildGrammarLessonLearnerSummary({
+    bookmarkRows: [],
     lessonBundle,
+    lessonNoteRows: [],
     lessonProgressRows: [],
     sectionProgressRows: [],
-    bookmarkRows: [],
-    lessonNoteRows: [],
   });
 }
 
 export function useGrammarLessonLearnerState(
   lessonBundle: GrammarLessonBundle,
 ): UseGrammarLessonLearnerStateResult {
-  const supabaseAvailable = hasSupabaseEnv();
-  const lessonSectionOrderKey = lessonBundle.lesson.sectionOrder.join("|");
-  const lessonSectionCount = lessonBundle.lesson.sectionOrder.length;
-  const [status, setStatus] = useState<GrammarLessonLearnerStatus>(
-    supabaseAvailable ? "loading" : "unavailable",
-  );
-  const [user, setUser] = useState<User | null>(null);
-  const [lessonProgress, setLessonProgress] = useState<LessonProgressRow | null>(null);
-  const [sectionProgressRows, setSectionProgressRows] = useState<SectionProgressRow[]>([]);
-  const [bookmark, setBookmark] = useState<LessonBookmarkRow | null>(null);
-  const [lessonNote, setLessonNote] = useState<LessonNoteRow | null>(null);
-  const [noteText, setNoteText] = useState("");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const lesson = lessonBundle.lesson;
   const [isBookmarkPending, setIsBookmarkPending] = useState(false);
   const [isNotePending, setIsNotePending] = useState(false);
   const [pendingSectionId, setPendingSectionId] = useState<string | null>(null);
+  const {
+    errorMessage,
+    noteText,
+    records,
+    setErrorMessage,
+    setNoteText,
+    setRecords,
+    setStatus,
+    status,
+    user,
+  } = useGrammarLessonLearnerData(lessonBundle);
+  const { bookmark, lessonNote, lessonProgress, sectionProgressRows } = records;
 
   const summary = buildGrammarLessonLearnerSummary({
+    bookmarkRows: bookmark ? [bookmark] : [],
     lessonBundle,
+    lessonNoteRows: lessonNote ? [lessonNote] : [],
     lessonProgressRows: lessonProgress ? [lessonProgress] : [],
     sectionProgressRows,
-    bookmarkRows: bookmark ? [bookmark] : [],
-    lessonNoteRows: lessonNote ? [lessonNote] : [],
   });
   const normalizedNoteText = normalizeMultiline(noteText);
   const savedNoteText = lessonNote?.note_text ?? "";
   const hasUnsavedNoteChanges = normalizedNoteText !== savedNoteText;
   const completedSectionIds = sectionProgressRows.map((row) => row.section_id);
 
-  useEffect(() => {
-    if (!supabaseAvailable) {
-      return;
-    }
-
-    const supabase = createClient();
-    if (!supabase) {
-      return;
-    }
-
-    let isMounted = true;
-
-    const syncLessonProgress = async (
-      currentUserId: string,
-      nextCompletedSectionRows: readonly SectionProgressRow[],
-      currentCompletedAt: string | null,
-    ) => {
-      const completedSections = nextCompletedSectionRows.length;
-      const nextCompletedAt =
-        lessonSectionCount > 0 && completedSections === lessonSectionCount
-          ? currentCompletedAt ?? new Date().toISOString()
-          : null;
-
-      const { data, error } = await supabase
-        .from("lesson_progress")
-        .upsert(
-          {
-            user_id: currentUserId,
-            lesson_id: lessonBundle.lesson.id,
-            lesson_slug: lessonBundle.lesson.slug,
-            last_viewed_at: new Date().toISOString(),
-            completed_at: nextCompletedAt,
-          },
-          { onConflict: "user_id,lesson_id" },
-        )
-        .select("*")
-        .maybeSingle();
-
-      if (!isMounted) {
-        return;
-      }
-
-      if (error) {
-        if (isMissingLearnerStateTableError(error)) {
-          setStatus("unavailable");
-          setErrorMessage(null);
-          return;
-        }
-
-        setErrorMessage("Could not sync lesson progress right now.");
-        return;
-      }
-
-      if (data) {
-        setLessonProgress(data);
-      }
-    };
-
-    const loadLearnerState = async (currentUser: User | null) => {
-      if (!isMounted) {
-        return;
-      }
-
-      if (!currentUser) {
-        setUser(null);
-        setLessonProgress(null);
-        setSectionProgressRows([]);
-        setBookmark(null);
-        setLessonNote(null);
-        setNoteText("");
-        setErrorMessage(null);
-        setStatus("signed-out");
-        return;
-      }
-
-      setStatus("loading");
-      setUser(currentUser);
-
-      const [lessonProgressResult, sectionProgressResult, bookmarkResult, noteResult] =
-        await Promise.all([
-          supabase
-            .from("lesson_progress")
-            .select("*")
-            .eq("user_id", currentUser.id)
-            .eq("lesson_id", lessonBundle.lesson.id)
-            .maybeSingle(),
-          supabase
-            .from("section_progress")
-            .select("*")
-            .eq("user_id", currentUser.id)
-            .eq("lesson_id", lessonBundle.lesson.id)
-            .order("completed_at", { ascending: false }),
-          supabase
-            .from("lesson_bookmarks")
-            .select("*")
-            .eq("user_id", currentUser.id)
-            .eq("lesson_id", lessonBundle.lesson.id)
-            .maybeSingle(),
-          supabase
-            .from("lesson_notes")
-            .select("*")
-            .eq("user_id", currentUser.id)
-            .eq("lesson_id", lessonBundle.lesson.id)
-            .maybeSingle(),
-        ]);
-
-      if (!isMounted) {
-        return;
-      }
-
-      const errors = [
-        lessonProgressResult.error,
-        sectionProgressResult.error,
-        bookmarkResult.error,
-        noteResult.error,
-      ].filter((error) => error !== null);
-
-      if (errors.some((error) => isMissingLearnerStateTableError(error))) {
-        setStatus("unavailable");
-        setErrorMessage(null);
-        return;
-      }
-
-      setLessonProgress(lessonProgressResult.data ?? null);
-      setSectionProgressRows(sectionProgressResult.data ?? []);
-      setBookmark(bookmarkResult.data ?? null);
-      setLessonNote(noteResult.data ?? null);
-      setNoteText(noteResult.data?.note_text ?? "");
-      setErrorMessage(
-        errors.length > 0 ? "Could not load your saved lesson state." : null,
-      );
-      setStatus("ready");
-
-      await syncLessonProgress(
-        currentUser.id,
-        sectionProgressResult.data ?? [],
-        lessonProgressResult.data?.completed_at ?? null,
-      );
-    };
-
-    void supabase.auth.getUser().then(({ data }) => {
-      void loadLearnerState(data.user);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      void loadLearnerState(session?.user ?? null);
-    });
-
-    return () => {
-      isMounted = false;
-      subscription.unsubscribe();
-    };
-  }, [
-    supabaseAvailable,
-    lessonBundle.lesson.id,
-    lessonBundle.lesson.slug,
-    lessonSectionCount,
-    lessonSectionOrderKey,
-  ]);
+  function applyUnavailableState() {
+    setStatus("unavailable");
+    setErrorMessage(null);
+  }
 
   async function toggleBookmark() {
     if (!user) {
@@ -271,53 +108,38 @@ export function useGrammarLessonLearnerState(
     setErrorMessage(null);
 
     if (bookmark) {
-      const { error } = await supabase
-        .from("lesson_bookmarks")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("lesson_id", lessonBundle.lesson.id);
+      const result = await deleteGrammarLessonBookmark(
+        supabase,
+        user.id,
+        lesson.id,
+      );
 
-      if (error) {
-        if (isMissingLearnerStateTableError(error)) {
-          setStatus("unavailable");
-          setErrorMessage(null);
-          setIsBookmarkPending(false);
-          return;
-        }
-
-        setErrorMessage("Could not update your bookmark right now.");
+      if (result.isUnavailable) {
+        applyUnavailableState();
+      } else if (result.errorMessage) {
+        setErrorMessage(result.errorMessage);
       } else {
-        setBookmark(null);
+        setRecords((currentRecords) => ({
+          ...currentRecords,
+          bookmark: null,
+        }));
       }
 
       setIsBookmarkPending(false);
       return;
     }
 
-    const { data, error } = await supabase
-      .from("lesson_bookmarks")
-      .upsert(
-        {
-          user_id: user.id,
-          lesson_id: lessonBundle.lesson.id,
-          lesson_slug: lessonBundle.lesson.slug,
-        },
-        { onConflict: "user_id,lesson_id" },
-      )
-      .select("*")
-      .maybeSingle();
+    const result = await saveGrammarLessonBookmark(supabase, user.id, lesson);
 
-    if (error) {
-      if (isMissingLearnerStateTableError(error)) {
-        setStatus("unavailable");
-        setErrorMessage(null);
-        setIsBookmarkPending(false);
-        return;
-      }
-
-      setErrorMessage("Could not update your bookmark right now.");
-    } else if (data) {
-      setBookmark(data);
+    if (result.isUnavailable) {
+      applyUnavailableState();
+    } else if (result.errorMessage) {
+      setErrorMessage(result.errorMessage);
+    } else if (result.data) {
+      setRecords((currentRecords) => ({
+        ...currentRecords,
+        bookmark: result.data,
+      }));
     }
 
     setIsBookmarkPending(false);
@@ -343,128 +165,114 @@ export function useGrammarLessonLearnerState(
     );
 
     if (isCompleted) {
-      const { error } = await supabase
-        .from("section_progress")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("section_id", section.id);
-
-      if (error) {
-        if (isMissingLearnerStateTableError(error)) {
-          setStatus("unavailable");
-          setErrorMessage(null);
-          setPendingSectionId(null);
-          return;
-        }
-
-        setErrorMessage("Could not update your section progress right now.");
-        setPendingSectionId(null);
-        return;
-      }
-
-      const nextRows = sectionProgressRows.filter(
-        (row) => row.section_id !== section.id,
+      const deleteResult = await deleteGrammarSectionProgress(
+        supabase,
+        user.id,
+        section.id,
       );
-      setSectionProgressRows(nextRows);
 
-      await supabase
-        .from("lesson_progress")
-        .upsert(
-          {
-            user_id: user.id,
-            lesson_id: lessonBundle.lesson.id,
-            lesson_slug: lessonBundle.lesson.slug,
-            last_viewed_at: new Date().toISOString(),
-            completed_at: null,
-          },
-          { onConflict: "user_id,lesson_id" },
-        )
-        .select("*")
-        .maybeSingle()
-        .then(({ data, error }) => {
-          if (error) {
-            if (isMissingLearnerStateTableError(error)) {
-              setStatus("unavailable");
-              setErrorMessage(null);
-              return;
-            }
+      if (deleteResult.isUnavailable) {
+        applyUnavailableState();
+        setPendingSectionId(null);
+        return;
+      }
 
-            setErrorMessage("Could not sync lesson progress right now.");
-            return;
-          }
+      if (deleteResult.errorMessage) {
+        setErrorMessage(deleteResult.errorMessage);
+        setPendingSectionId(null);
+        return;
+      }
 
-          if (data) {
-            setLessonProgress(data);
-          }
-        });
+      const nextRows = removeSectionProgressRow(
+        sectionProgressRows,
+        section.id,
+      );
+      setRecords((currentRecords) => ({
+        ...currentRecords,
+        sectionProgressRows: nextRows,
+      }));
+
+      const progressResult = await syncGrammarLessonProgress(supabase, {
+        completedSections: nextRows.length,
+        currentCompletedAt: null,
+        lesson,
+        userId: user.id,
+      });
+
+      if (progressResult.isUnavailable) {
+        applyUnavailableState();
+        setPendingSectionId(null);
+        return;
+      }
+
+      if (progressResult.errorMessage) {
+        setErrorMessage(progressResult.errorMessage);
+        setPendingSectionId(null);
+        return;
+      }
+
+      if (progressResult.data) {
+        setRecords((currentRecords) => ({
+          ...currentRecords,
+          lessonProgress: progressResult.data,
+        }));
+      }
 
       setPendingSectionId(null);
       return;
     }
 
-    const { data, error } = await supabase
-      .from("section_progress")
-      .upsert(
-        {
-          user_id: user.id,
-          lesson_id: lessonBundle.lesson.id,
-          lesson_slug: lessonBundle.lesson.slug,
-          section_id: section.id,
-          section_slug: section.slug,
-          completed_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id,section_id" },
-      )
-      .select("*")
-      .maybeSingle();
+    const saveResult = await saveGrammarSectionProgress(
+      supabase,
+      user.id,
+      lesson,
+      section,
+    );
 
-    if (error || !data) {
-      if (isMissingLearnerStateTableError(error)) {
-        setStatus("unavailable");
-        setErrorMessage(null);
-        setPendingSectionId(null);
-        return;
-      }
-
-      setErrorMessage("Could not update your section progress right now.");
+    if (saveResult.isUnavailable) {
+      applyUnavailableState();
       setPendingSectionId(null);
       return;
     }
 
-    const nextRows = [...sectionProgressRows.filter((row) => row.section_id !== section.id), data];
-    setSectionProgressRows(nextRows);
+    if (saveResult.errorMessage || !saveResult.data) {
+      setErrorMessage(
+        saveResult.errorMessage ??
+          "Could not update your section progress right now.",
+      );
+      setPendingSectionId(null);
+      return;
+    }
 
-    const nextCompletedAt =
-      lessonSectionCount > 0 && nextRows.length === lessonSectionCount
-        ? lessonProgress?.completed_at ?? new Date().toISOString()
-        : null;
+    const nextRows = upsertSectionProgressRow(
+      sectionProgressRows,
+      saveResult.data,
+    );
+    setRecords((currentRecords) => ({
+      ...currentRecords,
+      sectionProgressRows: nextRows,
+    }));
 
-    const lessonProgressResult = await supabase
-      .from("lesson_progress")
-      .upsert(
-        {
-          user_id: user.id,
-          lesson_id: lessonBundle.lesson.id,
-          lesson_slug: lessonBundle.lesson.slug,
-          last_viewed_at: new Date().toISOString(),
-          completed_at: nextCompletedAt,
-        },
-        { onConflict: "user_id,lesson_id" },
-      )
-      .select("*")
-      .maybeSingle();
+    const progressResult = await syncGrammarLessonProgress(supabase, {
+      completedSections: nextRows.length,
+      currentCompletedAt: lessonProgress?.completed_at ?? null,
+      lesson,
+      userId: user.id,
+    });
 
-    if (lessonProgressResult.error) {
-      if (isMissingLearnerStateTableError(lessonProgressResult.error)) {
-        setStatus("unavailable");
-        setErrorMessage(null);
-        setPendingSectionId(null);
-        return;
-      }
+    if (progressResult.isUnavailable) {
+      applyUnavailableState();
+      setPendingSectionId(null);
+      return;
+    }
 
-      setErrorMessage("Could not sync lesson progress right now.");
-    } else if (lessonProgressResult.data) {
-      setLessonProgress(lessonProgressResult.data);
+    if (progressResult.errorMessage) {
+      setErrorMessage(progressResult.errorMessage);
+    } else if (progressResult.data) {
+      setRecords((currentRecords) => ({
+        ...currentRecords,
+        lessonProgress: progressResult.data,
+      }));
     }
 
     setPendingSectionId(null);
@@ -487,23 +295,21 @@ export function useGrammarLessonLearnerState(
     setErrorMessage(null);
 
     if (!nextNote) {
-      const { error } = await supabase
-        .from("lesson_notes")
-        .delete()
-        .eq("user_id", user.id)
-        .eq("lesson_id", lessonBundle.lesson.id);
+      const result = await deleteGrammarLessonNote(
+        supabase,
+        user.id,
+        lesson.id,
+      );
 
-      if (error) {
-        if (isMissingLearnerStateTableError(error)) {
-          setStatus("unavailable");
-          setErrorMessage(null);
-          setIsNotePending(false);
-          return;
-        }
-
-        setErrorMessage("Could not save your lesson note right now.");
+      if (result.isUnavailable) {
+        applyUnavailableState();
+      } else if (result.errorMessage) {
+        setErrorMessage(result.errorMessage);
       } else {
-        setLessonNote(null);
+        setRecords((currentRecords) => ({
+          ...currentRecords,
+          lessonNote: null,
+        }));
         setNoteText("");
       }
 
@@ -511,33 +317,23 @@ export function useGrammarLessonLearnerState(
       return;
     }
 
-    const { data, error } = await supabase
-      .from("lesson_notes")
-      .upsert(
-        {
-          user_id: user.id,
-          lesson_id: lessonBundle.lesson.id,
-          lesson_slug: lessonBundle.lesson.slug,
-          note_text: nextNote,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id,lesson_id" },
-      )
-      .select("*")
-      .maybeSingle();
+    const result = await saveGrammarLessonNote(
+      supabase,
+      user.id,
+      lesson,
+      nextNote,
+    );
 
-    if (error || !data) {
-      if (isMissingLearnerStateTableError(error)) {
-        setStatus("unavailable");
-        setErrorMessage(null);
-        setIsNotePending(false);
-        return;
-      }
-
-      setErrorMessage("Could not save your lesson note right now.");
-    } else {
-      setLessonNote(data);
-      setNoteText(data.note_text);
+    if (result.isUnavailable) {
+      applyUnavailableState();
+    } else if (result.errorMessage) {
+      setErrorMessage(result.errorMessage);
+    } else if (result.data) {
+      setRecords((currentRecords) => ({
+        ...currentRecords,
+        lessonNote: result.data,
+      }));
+      setNoteText(result.data.note_text);
     }
 
     setIsNotePending(false);
@@ -546,18 +342,19 @@ export function useGrammarLessonLearnerState(
   return {
     completedSectionIds,
     errorMessage,
+    hasUnsavedNoteChanges,
     isBookmarkPending,
     isNotePending,
     noteText,
     noteUpdatedAt: lessonNote?.updated_at ?? null,
     pendingSectionId,
+    saveNote,
     sectionCompletionEnabled: status === "ready",
+    setNoteText,
     status,
-    summary: status === "unavailable" ? createEmptySummary(lessonBundle) : summary,
+    summary:
+      status === "unavailable" ? createEmptySummary(lessonBundle) : summary,
     toggleBookmark,
     toggleSectionComplete,
-    saveNote,
-    setNoteText,
-    hasUnsavedNoteChanges,
   };
 }

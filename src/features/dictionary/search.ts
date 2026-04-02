@@ -21,7 +21,9 @@ export function normalizeCoptic(text: string): string {
     .trim();
 }
 
-export function prepareDictionaryForSearch(dictionary: LexicalEntry[]): PreparedLexicalEntry[] {
+export function prepareDictionaryForSearch(
+  dictionary: LexicalEntry[],
+): PreparedLexicalEntry[] {
   return dictionary.map((entry) => {
     // Dialect forms are flattened once up front so interactive search does not
     // rebuild the same normalized strings on every keystroke.
@@ -54,7 +56,7 @@ export function escapeRegExp(string: string) {
 export function searchPreparedDictionary(
   query: string,
   dictionary: PreparedLexicalEntry[],
-  exactMatch: boolean = false
+  exactMatch: boolean = false,
 ): LexicalEntry[] {
   if (!query || query.trim().length === 0) return [];
 
@@ -62,8 +64,14 @@ export function searchPreparedDictionary(
   const normalizedQuery = normalizeCoptic(query);
 
   if (exactMatch) {
-    const plainRegex = new RegExp(`(^|[^\\p{L}\\p{M}\\p{N}_])${escapeRegExp(plainQuery)}([^\\p{L}\\p{M}\\p{N}_]|$)`, "ui");
-    const normalizedRegex = new RegExp(`(^|[^\\p{L}\\p{M}\\p{N}_])${escapeRegExp(normalizedQuery)}([^\\p{L}\\p{M}\\p{N}_]|$)`, "ui");
+    const plainRegex = new RegExp(
+      `(^|[^\\p{L}\\p{M}\\p{N}_])${escapeRegExp(plainQuery)}([^\\p{L}\\p{M}\\p{N}_]|$)`,
+      "ui",
+    );
+    const normalizedRegex = new RegExp(
+      `(^|[^\\p{L}\\p{M}\\p{N}_])${escapeRegExp(normalizedQuery)}([^\\p{L}\\p{M}\\p{N}_]|$)`,
+      "ui",
+    );
 
     return dictionary
       .filter((entry) => {
@@ -89,6 +97,14 @@ export function searchPreparedDictionary(
     .map((entry) => entry.entry);
 }
 
-export function searchDictionary(query: string, dictionary: LexicalEntry[], exactMatch: boolean = false): LexicalEntry[] {
-  return searchPreparedDictionary(query, prepareDictionaryForSearch(dictionary), exactMatch);
+export function searchDictionary(
+  query: string,
+  dictionary: LexicalEntry[],
+  exactMatch: boolean = false,
+): LexicalEntry[] {
+  return searchPreparedDictionary(
+    query,
+    prepareDictionaryForSearch(dictionary),
+    exactMatch,
+  );
 }

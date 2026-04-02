@@ -1,5 +1,5 @@
-import React, { ReactNode } from 'react';
-import { antinoou } from '@/lib/fonts';
+import React, { ReactNode } from "react";
+import { antinoou } from "@/lib/fonts";
 
 const COPTIC_LEGACY_CHAR_CLASS = "\\u03E2-\\u03EF";
 const COPTIC_CHAR_CLASS = `${COPTIC_LEGACY_CHAR_CLASS}\\u2C80-\\u2CFF`;
@@ -90,38 +90,45 @@ const INLINE_ABBREVIATION_FRAGMENTS = [
 ];
 const LEADING_LABEL_PATTERN = new RegExp(
   `^(${LEADING_LABEL_FRAGMENTS.join("|")})(?: ?\\([^)]*\\))?(?=$|[:., ]|-)`,
-  "i"
+  "i",
 );
 const INLINE_ABBREVIATION_PATTERN = new RegExp(
   `(${INLINE_ABBREVIATION_FRAGMENTS.join("|")})`,
-  "i"
+  "i",
 );
 const COPTIC_RUN_REGEX = new RegExp(
   `([${COPTIC_CHAR_CLASS}](?:[${COPTIC_CHAR_CLASS}${COPTIC_COMBINING_CLASS}]*)?)`,
-  'g'
+  "g",
 );
 
 // Search needs to match Coptic text even when the query and stored string use
 // different Unicode normalization forms for combining marks.
 function buildRegexFromQuery(query: string) {
-  if (!query || query.trim() === '') return null;
+  if (!query || query.trim() === "") return null;
 
-  const nQuery = query.normalize('NFD').replace(/[\u0300-\u036f\uFE20-\uFE2F\u0483-\u0489]/g, "");
+  const nQuery = query
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f\uFE20-\uFE2F\u0483-\u0489]/g, "");
   if (nQuery.length === 0) return null;
 
   const combiningChars = "[\\u0300-\\u036f\\uFE20-\\uFE2F\\u0483-\\u0489]*";
-  const escapeRegex = (s: string) => s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+  const escapeRegex = (s: string) =>
+    s.replace(/[-\/\\^$*+?.()|[\]{}]/g, "\\$&");
 
   const pattern = nQuery
-    .split('')
-    .map(char => escapeRegex(char) + combiningChars)
-    .join('');
+    .split("")
+    .map((char) => escapeRegex(char) + combiningChars)
+    .join("");
 
-  return new RegExp(`(${pattern})`, 'gi');
+  return new RegExp(`(${pattern})`, "gi");
 }
 
-function renderWithSuperscript(text: string, keyPrefix: string, className?: string): ReactNode[] {
-  const parts = text.split('†');
+function renderWithSuperscript(
+  text: string,
+  keyPrefix: string,
+  className?: string,
+): ReactNode[] {
+  const parts = text.split("†");
   const result: ReactNode[] = [];
 
   parts.forEach((part, i) => {
@@ -133,7 +140,7 @@ function renderWithSuperscript(text: string, keyPrefix: string, className?: stri
           </span>
         ) : (
           <React.Fragment key={`${keyPrefix}-text-${i}`}>{part}</React.Fragment>
-        )
+        ),
       );
     }
 
@@ -141,7 +148,7 @@ function renderWithSuperscript(text: string, keyPrefix: string, className?: stri
       result.push(
         <sup key={`${keyPrefix}-dagger-${i}`} className="opacity-75">
           †
-        </sup>
+        </sup>,
       );
     }
   });
@@ -149,7 +156,11 @@ function renderWithSuperscript(text: string, keyPrefix: string, className?: stri
   return result;
 }
 
-function renderPlainTypography(text: string, keyPrefix: string, emphasizeAbbreviations: boolean): ReactNode[] {
+function renderPlainTypography(
+  text: string,
+  keyPrefix: string,
+  emphasizeAbbreviations: boolean,
+): ReactNode[] {
   if (!emphasizeAbbreviations) {
     return renderWithSuperscript(text, keyPrefix);
   }
@@ -167,7 +178,11 @@ function renderPlainTypography(text: string, keyPrefix: string, emphasizeAbbrevi
   return result;
 }
 
-function renderWithCopticTypography(text: string, keyPrefix: string, emphasizeAbbreviations: boolean): ReactNode[] {
+function renderWithCopticTypography(
+  text: string,
+  keyPrefix: string,
+  emphasizeAbbreviations: boolean,
+): ReactNode[] {
   const parts = text.split(COPTIC_RUN_REGEX);
   const result: ReactNode[] = [];
 
@@ -175,9 +190,17 @@ function renderWithCopticTypography(text: string, keyPrefix: string, emphasizeAb
     if (!part) return;
 
     if (i % 2 === 1) {
-      result.push(...renderWithSuperscript(part, `${keyPrefix}-${i}`, antinoou.className));
+      result.push(
+        ...renderWithSuperscript(part, `${keyPrefix}-${i}`, antinoou.className),
+      );
     } else {
-      result.push(...renderPlainTypography(part, `${keyPrefix}-${i}`, emphasizeAbbreviations));
+      result.push(
+        ...renderPlainTypography(
+          part,
+          `${keyPrefix}-${i}`,
+          emphasizeAbbreviations,
+        ),
+      );
     }
   });
 
@@ -189,15 +212,23 @@ function renderSearchableText(
   query: string,
   keyPrefix: string,
   className = "",
-  emphasizeAbbreviations = false
+  emphasizeAbbreviations = false,
 ): ReactNode {
   if (!query) {
-    return <span className={className}>{renderWithCopticTypography(text, keyPrefix, emphasizeAbbreviations)}</span>;
+    return (
+      <span className={className}>
+        {renderWithCopticTypography(text, keyPrefix, emphasizeAbbreviations)}
+      </span>
+    );
   }
 
   const regex = buildRegexFromQuery(query);
   if (!regex) {
-    return <span className={className}>{renderWithCopticTypography(text, keyPrefix, emphasizeAbbreviations)}</span>;
+    return (
+      <span className={className}>
+        {renderWithCopticTypography(text, keyPrefix, emphasizeAbbreviations)}
+      </span>
+    );
   }
 
   const parts = text.split(regex);
@@ -206,12 +237,25 @@ function renderSearchableText(
     <span className={className}>
       {parts.map((part, i) =>
         i % 2 === 1 ? (
-          <mark key={i} className="bg-sky-200 dark:bg-sky-500/40 text-sky-900 dark:text-sky-100 rounded-[2px] px-[1px] font-bold">
-            {renderWithCopticTypography(part, `highlight-${i}`, emphasizeAbbreviations)}
+          <mark
+            key={i}
+            className="bg-sky-200 dark:bg-sky-500/40 text-sky-900 dark:text-sky-100 rounded-[2px] px-[1px] font-bold"
+          >
+            {renderWithCopticTypography(
+              part,
+              `highlight-${i}`,
+              emphasizeAbbreviations,
+            )}
           </mark>
         ) : (
-          <span key={i}>{renderWithCopticTypography(part, `plain-${i}`, emphasizeAbbreviations)}</span>
-        )
+          <span key={i}>
+            {renderWithCopticTypography(
+              part,
+              `plain-${i}`,
+              emphasizeAbbreviations,
+            )}
+          </span>
+        ),
       )}
     </span>
   );
@@ -224,7 +268,7 @@ function splitLeadingLabel(text: string) {
   let label = match[0];
   let rest = text.slice(label.length);
 
-  if (rest.startsWith(':') || rest.startsWith(',')) {
+  if (rest.startsWith(":") || rest.startsWith(",")) {
     label += rest[0];
     rest = rest.slice(1);
   }
@@ -238,16 +282,22 @@ export default function HighlightText({
   className = "",
   emphasizeLeadingLabel = false,
 }: {
-  text: string,
-  query: string,
-  className?: string,
-  emphasizeLeadingLabel?: boolean,
+  text: string;
+  query: string;
+  className?: string;
+  emphasizeLeadingLabel?: boolean;
 }) {
-  const safeText = text.replace(/<[^>]+>/g, '');
+  const safeText = text.replace(/<[^>]+>/g, "");
   const labelSplit = emphasizeLeadingLabel ? splitLeadingLabel(safeText) : null;
 
   if (!labelSplit) {
-    return renderSearchableText(safeText, query, "plain", className, emphasizeLeadingLabel);
+    return renderSearchableText(
+      safeText,
+      query,
+      "plain",
+      className,
+      emphasizeLeadingLabel,
+    );
   }
 
   return (

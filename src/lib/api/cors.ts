@@ -17,10 +17,7 @@ function withPublicApiCors(response: NextResponse) {
   return response;
 }
 
-export function publicApiJsonResponse(
-  body: unknown,
-  init?: ResponseInit,
-) {
+export function publicApiJsonResponse(body: unknown, init?: ResponseInit) {
   return withPublicApiCors(NextResponse.json(body, init));
 }
 

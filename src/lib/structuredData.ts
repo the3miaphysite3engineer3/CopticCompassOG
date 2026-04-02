@@ -301,7 +301,9 @@ export function createGrammarHubStructuredData(
   lessons: readonly GrammarLessonIndexItem[],
   locale: Language = DEFAULT_LANGUAGE,
 ): JsonLd[] {
-  const publishedLessons = lessons.filter((lesson) => lesson.status === "published");
+  const publishedLessons = lessons.filter(
+    (lesson) => lesson.status === "published",
+  );
   const grammarHubUrl = getGrammarHubUrl(locale);
   const grammarHubPageId = getGrammarHubPageId(locale);
   const grammarHubListId = getGrammarHubListId(locale);
@@ -410,8 +412,8 @@ export function createDefinedTermStructuredData(
           forms.stative,
         ])
         .map((form) => toPlainText(form))
-        .filter(Boolean)
-    )
+        .filter(Boolean),
+    ),
   );
   const additionalProperty = [
     {

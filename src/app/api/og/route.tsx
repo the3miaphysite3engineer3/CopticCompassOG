@@ -1,10 +1,11 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
+import { buildEntryOpenGraphPreview } from "@/features/dictionary/lib/entryOpenGraph";
 import {
-  buildEntryOpenGraphPreview,
-} from "@/features/dictionary/lib/entryOpenGraph";
-import { getDictionary, getDictionaryEntryRelations } from "@/features/dictionary/lib/dictionary";
+  getDictionary,
+  getDictionaryEntryRelations,
+} from "@/features/dictionary/lib/dictionary";
 import { isPublicLocale } from "@/lib/locale";
 import { siteConfig } from "@/lib/site";
 
@@ -97,8 +98,8 @@ function renderGenericCard() {
                 color: "#334155",
               }}
             >
-              Scholarly portfolio, lexical search, analytics, and learning
-              tools by {siteConfig.author.name}.
+              Scholarly portfolio, lexical search, analytics, and learning tools
+              by {siteConfig.author.name}.
             </div>
           </div>
         </div>

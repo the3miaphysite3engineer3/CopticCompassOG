@@ -80,9 +80,13 @@ describe("grammar static export files", () => {
 
   it("omits draft lessons from the public static export", () => {
     const files = createGrammarStaticExportFiles();
-    const manifest = files.find((file) => file.outputPath === "grammar/v1/manifest.json");
+    const manifest = files.find(
+      (file) => file.outputPath === "grammar/v1/manifest.json",
+    );
 
-    expect(outputPathsContain(files, "grammar/v1/lessons/lesson-2.json")).toBe(false);
+    expect(outputPathsContain(files, "grammar/v1/lessons/lesson-2.json")).toBe(
+      false,
+    );
     expect(manifest?.payload).toMatchObject({
       lessons: [
         {

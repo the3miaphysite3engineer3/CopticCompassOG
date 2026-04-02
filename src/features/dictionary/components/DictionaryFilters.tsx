@@ -45,7 +45,9 @@ export function DictionaryFilters({
           className="select-base h-auto cursor-pointer rounded-lg px-3 py-2 text-sm font-medium"
           value={selectedPartOfSpeech}
           onChange={(event) =>
-            setSelectedPartOfSpeech(event.target.value as DictionaryPartOfSpeechFilter)
+            setSelectedPartOfSpeech(
+              event.target.value as DictionaryPartOfSpeechFilter,
+            )
           }
         >
           {dictionaryPartOfSpeechFilterOptions.map((option) => (
@@ -63,7 +65,9 @@ export function DictionaryFilters({
         <select
           className="select-base h-auto cursor-pointer rounded-lg px-3 py-2 text-sm font-medium"
           value={selectedDialect}
-          onChange={(event) => setSelectedDialect(event.target.value as DialectFilter)}
+          onChange={(event) =>
+            setSelectedDialect(event.target.value as DialectFilter)
+          }
         >
           {dialectFilterOptions.map((option) => (
             <option key={option.value} value={option.value}>

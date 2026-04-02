@@ -12,10 +12,7 @@ type LessonRouteContext = {
   }>;
 };
 
-export async function GET(
-  _request: Request,
-  context: LessonRouteContext,
-) {
+export async function GET(_request: Request, context: LessonRouteContext) {
   const { slug } = await context.params;
   const lesson = getGrammarApiLessonBySlug(slug);
 

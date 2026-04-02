@@ -1,9 +1,12 @@
 import type { Language } from "@/types/i18n";
 
-type UserAppMetadata = {
-  provider?: unknown;
-  providers?: unknown;
-} | null | undefined;
+type UserAppMetadata =
+  | {
+      provider?: unknown;
+      providers?: unknown;
+    }
+  | null
+  | undefined;
 
 export type AccountAuthSettings = {
   authProviders: string[];

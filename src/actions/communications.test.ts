@@ -37,16 +37,14 @@ function createCommunicationFormData(
 }
 
 async function loadCommunicationsModule(options?: {
-  authContext?:
-    | {
-        supabase: object;
-        user: {
-          email?: string | null;
-          id: string;
-          user_metadata?: Record<string, unknown>;
-        };
-      }
-    | null;
+  authContext?: {
+    supabase: object;
+    user: {
+      email?: string | null;
+      id: string;
+      user_metadata?: Record<string, unknown>;
+    };
+  } | null;
   hasStorageEnv?: boolean;
   profile?: { email: string | null; full_name: string | null } | null;
 }) {
@@ -94,7 +92,7 @@ async function loadCommunicationsModule(options?: {
   vi.doMock("@/lib/supabase/config", () => ({
     hasSupabaseServiceRoleEnv: hasSupabaseServiceRoleEnvMock,
   }));
-  vi.doMock("@/lib/supabase/queries", () => ({
+  vi.doMock("@/features/profile/lib/server/queries", () => ({
     getProfile: getProfileMock,
   }));
 

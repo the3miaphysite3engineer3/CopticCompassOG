@@ -26,7 +26,10 @@ export async function AppFrame({
       enableSystem
       nonce={nonce}
     >
-      <LanguageProvider initialLanguage={initialLanguage} localeRouting={localeRouting}>
+      <LanguageProvider
+        initialLanguage={initialLanguage}
+        localeRouting={localeRouting}
+      >
         <div className="flex min-h-screen flex-col">
           <Navbar />
           <main className="flex-1">{children}</main>

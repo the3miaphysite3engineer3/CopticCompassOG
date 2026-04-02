@@ -119,7 +119,10 @@ export function classifyNounGender(
     gender = "F";
   } else if (/\bnn\s+m\b/.test(loweredMeaning)) {
     gender = "M";
-  } else if (/\bnn\b/.test(loweredMeaning) && !/\bnn\s+[mf]\b/.test(loweredMeaning)) {
+  } else if (
+    /\bnn\b/.test(loweredMeaning) &&
+    !/\bnn\s+[mf]\b/.test(loweredMeaning)
+  ) {
     gender = "BOTH";
   }
 
@@ -215,7 +218,9 @@ export function extractDialectsAndHeadword(wordRaw: string): {
       }
 
       if (state === "absolute" && absoluteVariants.length > 0) {
-        const existingVariants = new Set(dialectsObj[dialectKey].absoluteVariants ?? []);
+        const existingVariants = new Set(
+          dialectsObj[dialectKey].absoluteVariants ?? [],
+        );
 
         for (const variant of absoluteVariants) {
           existingVariants.add(variant);
@@ -227,12 +232,13 @@ export function extractDialectsAndHeadword(wordRaw: string): {
   }
 
   if (!primaryHeadword) {
-    primaryHeadword = wordRaw
-      .split("\n")[0]
-      ?.replace(/\{.*?\}/g, "")
-      .replace(/^\(.*?\)\s*/, "")
-      .split(",")[0]
-      ?.trim() ?? "";
+    primaryHeadword =
+      wordRaw
+        .split("\n")[0]
+        ?.replace(/\{.*?\}/g, "")
+        .replace(/^\(.*?\)\s*/, "")
+        .split(",")[0]
+        ?.trim() ?? "";
   }
 
   return { headword: primaryHeadword, dialects: dialectsObj };

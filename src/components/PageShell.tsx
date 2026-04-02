@@ -51,9 +51,7 @@ export function PageShell({
       {accents.map((accentClassName, index) => (
         <div key={index} className={cx(ACCENT_BASE_CLASS, accentClassName)} />
       ))}
-      <div className={cx("relative z-10", contentClassName)}>
-        {children}
-      </div>
+      <div className={cx("relative z-10", contentClassName)}>{children}</div>
     </section>
   );
 }

@@ -62,14 +62,15 @@ export function ExerciseForm({
     };
   }, [authAvailable]);
 
-  if (loading) return <div className="animate-pulse h-20 bg-sky-50 dark:bg-sky-900/20 rounded-xl mt-6"></div>;
+  if (loading)
+    return (
+      <div className="animate-pulse h-20 bg-sky-50 dark:bg-sky-900/20 rounded-xl mt-6"></div>
+    );
 
   if (!authAvailable) {
     return (
       <StatusNotice tone="default" size="comfortable" className="mt-6">
-        <p className="mb-4">
-          {t("exercise.authUnavailable")}
-        </p>
+        <p className="mb-4">{t("exercise.authUnavailable")}</p>
       </StatusNotice>
     );
   }
@@ -118,9 +119,14 @@ export function ExerciseForm({
       <input type="hidden" name="exerciseId" value={exerciseId} />
       <input type="hidden" name="exerciseLanguage" value={language} />
       {questions.map((question, idx) => (
-        <div key={question.id} className="space-y-3 rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/70 dark:bg-stone-950/30 p-5">
+        <div
+          key={question.id}
+          className="space-y-3 rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/70 dark:bg-stone-950/30 p-5"
+        >
           <label className="block text-stone-700 dark:text-stone-300 font-medium text-lg leading-8">
-            <span className="mr-2 inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400 text-sm font-semibold tabular-nums px-2">{idx + 1}</span>
+            <span className="mr-2 inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400 text-sm font-semibold tabular-nums px-2">
+              {idx + 1}
+            </span>
             {question.prompt}
           </label>
           <input
@@ -152,5 +158,5 @@ export function ExerciseForm({
         </StatusNotice>
       )}
     </form>
-  )
+  );
 }

@@ -13,10 +13,10 @@ import { SurfacePanel } from "@/components/SurfacePanel";
 
 export default function ContactPageClient() {
   const { language, t } = useLanguage();
-  const [state, formAction, isPending] = useActionState<ContactFormState | null, FormData>(
-    sendContactEmail,
-    null
-  );
+  const [state, formAction, isPending] = useActionState<
+    ContactFormState | null,
+    FormData
+  >(sendContactEmail, null);
 
   return (
     <PageShell
@@ -26,23 +26,32 @@ export default function ContactPageClient() {
         pageShellAccents.topLeftSkyOrb,
         pageShellAccents.bottomRightEmeraldOrb,
       ]}
-      >
-        <PageHeader
-          title={t("contact.title")}
-          description={t("contact.subtitle")}
-          tone="brand"
+    >
+      <PageHeader
+        title={t("contact.title")}
+        description={t("contact.subtitle")}
+        tone="brand"
         className="mb-12"
       />
 
       <SurfacePanel rounded="3xl" className="p-8 md:p-10">
         <form action={formAction} className="space-y-8">
-          <input type="text" name="website" className="hidden" tabIndex={-1} autoComplete="off" />
+          <input
+            type="text"
+            name="website"
+            className="hidden"
+            tabIndex={-1}
+            autoComplete="off"
+          />
           <input type="hidden" name="locale" value={language} />
 
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <FormField htmlFor="name" label={t("contact.name")}>
               <div className="relative">
-                <User className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500" size={20} />
+                <User
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500"
+                  size={20}
+                />
                 <input
                   id="name"
                   type="text"
@@ -57,7 +66,10 @@ export default function ContactPageClient() {
 
             <FormField htmlFor="email" label={t("contact.email")}>
               <div className="relative">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500" size={20} />
+                <Mail
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500"
+                  size={20}
+                />
                 <input
                   id="email"
                   type="email"
@@ -95,7 +107,10 @@ export default function ContactPageClient() {
 
           <FormField htmlFor="message" label={t("contact.message")}>
             <div className="relative">
-              <MessageSquare className="absolute left-4 top-4 text-stone-400 dark:text-stone-500" size={20} />
+              <MessageSquare
+                className="absolute left-4 top-4 text-stone-400 dark:text-stone-500"
+                size={20}
+              />
               <textarea
                 id="message"
                 name="message"
@@ -143,9 +158,7 @@ export default function ContactPageClient() {
           )}
 
           {state?.error && (
-            <StatusNotice tone="error">
-              {state.error}
-            </StatusNotice>
+            <StatusNotice tone="error">{state.error}</StatusNotice>
           )}
         </form>
       </SurfacePanel>
