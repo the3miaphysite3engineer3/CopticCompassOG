@@ -7,11 +7,7 @@ import {
 import { redactEmailAddress } from "@/lib/privacy";
 import { revalidateAdminPaths } from "@/lib/server/revalidation";
 import { getValidatedAdminContext } from "./shared";
-
-export type SyncAudienceContactsState = {
-  message?: string;
-  success: boolean;
-};
+import type { SyncAudienceContactsState } from "./states";
 
 export async function syncAudienceContactsWithResend(
   _prevState: SyncAudienceContactsState | null,

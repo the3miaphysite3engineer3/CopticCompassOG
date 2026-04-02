@@ -1,10 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import {
-  sendContentRelease,
-  type SendContentReleaseState,
-} from "@/actions/admin";
+import { sendContentRelease } from "@/actions/admin";
+import type { SendContentReleaseState } from "@/actions/admin/states";
 import { StatusNotice } from "@/components/StatusNotice";
 import type { ContentReleaseRow } from "@/features/communications/lib/releases";
 

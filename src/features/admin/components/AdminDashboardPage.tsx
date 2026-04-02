@@ -5,8 +5,12 @@ import {
   AdminNotificationsSection,
   AdminReleasesSection,
   AdminSubmissionsSection,
+  AdminWorkspaceQuickJump,
 } from "@/features/admin/components/AdminDashboardSections";
-import { loadAdminDashboardData } from "@/features/admin/lib/dashboardData";
+import {
+  buildAdminWorkspaceOverview,
+  loadAdminDashboardData,
+} from "@/features/admin/lib/dashboardData";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { requireAdminPageSession } from "@/lib/supabase/auth";
@@ -18,6 +22,7 @@ export async function AdminDashboardPage({
 }) {
   const { supabase } = await requireAdminPageSession(redirectTo);
   const dashboardData = await loadAdminDashboardData(supabase);
+  const workspaceOverview = buildAdminWorkspaceOverview(dashboardData);
 
   return (
     <PageShell
@@ -39,7 +44,9 @@ export async function AdminDashboardPage({
         className="mb-12"
       />
 
-      <div className="space-y-10">
+      <AdminWorkspaceQuickJump overview={workspaceOverview} />
+
+      <div className="space-y-8">
         <AdminSubmissionsSection submissions={dashboardData.submissions} />
         <AdminAudienceSection audience={dashboardData.audience} />
         <AdminReleasesSection contentReleases={dashboardData.contentReleases} />

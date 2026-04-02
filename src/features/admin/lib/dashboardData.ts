@@ -36,6 +36,15 @@ export type AdminNotificationMetrics = {
   sentNotificationCount: number;
 };
 
+export type AdminWorkspaceOverview = {
+  actionableReleaseCount: number;
+  audienceSyncErrorCount: number;
+  failedNotificationCount: number;
+  openContactMessageCount: number;
+  openEntryReportCount: number;
+  pendingSubmissionCount: number;
+};
+
 type LoadedDashboardSection<T> = {
   error: QueryResult<T>["error"];
   items: T;
@@ -100,6 +109,65 @@ export function buildAdminNotificationMetrics(
     recentNotificationCount: events.length,
     sentNotificationCount: events.filter((event) => event.status === "sent")
       .length,
+  };
+}
+
+export function countPendingSubmissions(
+  submissions: readonly Pick<AdminSubmission, "status">[],
+) {
+  return submissions.filter((submission) => submission.status === "pending")
+    .length;
+}
+
+export function countOpenContactMessages(
+  messages: readonly Pick<ContactMessageRow, "status">[],
+) {
+  return messages.filter(
+    (message) => message.status === "new" || message.status === "in_progress",
+  ).length;
+}
+
+export function countOpenEntryReports(
+  reports: readonly Pick<EntryReportWithEntry["report"], "status">[],
+) {
+  return reports.filter((report) => report.status === "open").length;
+}
+
+export function countActionableContentReleases(
+  releases: readonly Pick<AdminContentRelease, "status">[],
+) {
+  return releases.filter(
+    (release) =>
+      release.status === "approved" ||
+      release.status === "queued" ||
+      release.status === "sending",
+  ).length;
+}
+
+export function buildAdminWorkspaceOverview(
+  data: Pick<
+    AdminDashboardData,
+    | "audience"
+    | "contactMessages"
+    | "contentReleases"
+    | "entryReports"
+    | "notifications"
+    | "submissions"
+  >,
+): AdminWorkspaceOverview {
+  return {
+    actionableReleaseCount: countActionableContentReleases(
+      data.contentReleases.items,
+    ),
+    audienceSyncErrorCount: data.audience.metrics.resendSyncErrorCount,
+    failedNotificationCount: data.notifications.metrics.failedNotificationCount,
+    openContactMessageCount: countOpenContactMessages(
+      data.contactMessages.items,
+    ),
+    openEntryReportCount: countOpenEntryReports(
+      data.entryReports.items.map((item) => item.report),
+    ),
+    pendingSubmissionCount: countPendingSubmissions(data.submissions.items),
   };
 }
 

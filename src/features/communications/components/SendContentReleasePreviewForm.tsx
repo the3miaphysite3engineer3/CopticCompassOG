@@ -1,10 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import {
-  sendContentReleasePreview,
-  type SendContentReleaseState,
-} from "@/actions/admin";
+import { sendContentReleasePreview } from "@/actions/admin";
+import type { SendContentReleaseState } from "@/actions/admin/states";
 import { FormField } from "@/components/FormField";
 import { StatusNotice } from "@/components/StatusNotice";
 

@@ -22,16 +22,10 @@ import {
   normalizeWhitespace,
 } from "@/lib/validation";
 import type { Language } from "@/types/i18n";
-
-export type ContentReleaseDraftState = {
-  error?: string;
-  success: boolean;
-};
-
-export type SendContentReleaseState = {
-  message?: string;
-  success: boolean;
-};
+import type {
+  ContentReleaseDraftState,
+  SendContentReleaseState,
+} from "./states";
 
 async function loadContentReleaseForDelivery(
   releaseId: string,

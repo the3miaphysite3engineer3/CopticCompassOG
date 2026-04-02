@@ -1,10 +1,10 @@
 "use client";
 
-import { useActionState } from "react";
-import {
-  createContentReleaseDraft,
-  type ContentReleaseDraftState,
-} from "@/actions/admin";
+import { useActionState, useEffect, useRef } from "react";
+import { ChevronDown } from "lucide-react";
+import { createContentReleaseDraft } from "@/actions/admin";
+import type { ContentReleaseDraftState } from "@/actions/admin/states";
+import { Badge } from "@/components/Badge";
 import { FormField } from "@/components/FormField";
 import { StatusNotice } from "@/components/StatusNotice";
 import {
@@ -50,191 +50,244 @@ export function CreateContentReleaseForm({
   publicationCandidates: ContentReleaseCandidate[];
   lessonCandidates: ContentReleaseCandidate[];
 }) {
+  const totalCandidates =
+    lessonCandidates.length + publicationCandidates.length;
   const [state, formAction, isPending] = useActionState<
     ContentReleaseDraftState | null,
     FormData
   >(createContentReleaseDraft, null);
+  const detailsRef = useRef<HTMLDetailsElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (state?.error) {
+      detailsRef.current?.setAttribute("open", "");
+    }
+
+    if (state?.success) {
+      formRef.current?.reset();
+      detailsRef.current?.removeAttribute("open");
+    }
+  }, [state]);
 
   return (
-    <form
-      action={formAction}
-      className="space-y-6 rounded-3xl border border-stone-200/80 bg-white/70 p-6 shadow-sm dark:border-stone-800 dark:bg-stone-900/40"
+    <details
+      ref={detailsRef}
+      className="group overflow-hidden rounded-3xl border border-stone-200/80 bg-white/70 shadow-sm dark:border-stone-800 dark:bg-stone-900/40"
+      open={totalCandidates === 0}
     >
-      <div className="grid gap-5 md:grid-cols-2">
-        <FormField htmlFor="audience_segment" label="Audience segment">
-          <select
-            id="audience_segment"
-            name="audience_segment"
-            defaultValue="lessons"
-            className="select-base"
-          >
-            {CONTENT_RELEASE_AUDIENCE_SEGMENTS.map((segment) => (
-              <option key={segment} value={segment}>
-                {formatAudienceSegmentLabel(segment)}
-              </option>
-            ))}
-          </select>
-        </FormField>
-
-        <FormField htmlFor="locale_mode" label="Locale mode">
-          <select
-            id="locale_mode"
-            name="locale_mode"
-            defaultValue="localized"
-            className="select-base"
-          >
-            {CONTENT_RELEASE_LOCALE_MODES.map((localeMode) => (
-              <option key={localeMode} value={localeMode}>
-                {formatLocaleModeLabel(localeMode)}
-              </option>
-            ))}
-          </select>
-        </FormField>
-      </div>
-
-      <div className="grid gap-5 md:grid-cols-2">
-        <FormField htmlFor="subject_en" label="English subject">
-          <input
-            id="subject_en"
-            name="subject_en"
-            type="text"
-            className="input-base"
-            maxLength={160}
-            placeholder="New Coptic lesson available"
-          />
-        </FormField>
-
-        <FormField htmlFor="subject_nl" label="Dutch subject">
-          <input
-            id="subject_nl"
-            name="subject_nl"
-            type="text"
-            className="input-base"
-            maxLength={160}
-            placeholder="Nieuwe Koptische les beschikbaar"
-          />
-        </FormField>
-      </div>
-
-      <div className="grid gap-5 md:grid-cols-2">
-        <FormField htmlFor="body_en" label="English message">
-          <textarea
-            id="body_en"
-            name="body_en"
-            rows={6}
-            className="textarea-base resize-y"
-            placeholder="Share what is new, why it matters, and where the reader should go next."
-          />
-        </FormField>
-
-        <FormField htmlFor="body_nl" label="Dutch message">
-          <textarea
-            id="body_nl"
-            name="body_nl"
-            rows={6}
-            className="textarea-base resize-y"
-            placeholder="Vat samen wat er nieuw is, waarom het relevant is en waar de lezer verder kan gaan."
-          />
-        </FormField>
-      </div>
-
-      <div className="grid gap-5 lg:grid-cols-2">
-        <FormField
-          label={`Published lessons (${lessonCandidates.length})`}
-          className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/30"
-        >
-          <div className="space-y-3">
-            {lessonCandidates.length === 0 ? (
-              <p className="text-sm text-stone-500 dark:text-stone-400">
-                No published grammar lessons are available yet.
-              </p>
-            ) : (
-              lessonCandidates.map((candidate) => (
-                <label
-                  key={candidate.id}
-                  className="flex items-start gap-3 text-sm leading-6 text-stone-600 dark:text-stone-300"
-                >
-                  <input
-                    type="checkbox"
-                    name="release_item"
-                    value={candidate.id}
-                    className="mt-1 h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-sky-500/40 dark:border-stone-700 dark:bg-stone-950"
-                  />
-                  <span>
-                    <span className="block font-semibold text-stone-800 dark:text-stone-100">
-                      {candidate.title}
-                    </span>
-                    {candidate.summaryEn ? (
-                      <span className="block text-xs text-stone-500 dark:text-stone-400">
-                        {candidate.summaryEn}
-                      </span>
-                    ) : null}
-                  </span>
-                </label>
-              ))
-            )}
+      <summary className="flex cursor-pointer list-none items-start justify-between gap-4 p-6 [&::-webkit-details-marker]:hidden md:p-7">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge tone="coptic" size="xs">
+              Draft composer
+            </Badge>
+            <Badge tone="surface" size="xs">
+              Lessons: {lessonCandidates.length}
+            </Badge>
+            <Badge tone="surface" size="xs">
+              Publications: {publicationCandidates.length}
+            </Badge>
+            {state?.success ? (
+              <Badge tone="coptic" size="xs">
+                Draft saved
+              </Badge>
+            ) : null}
           </div>
-        </FormField>
 
-        <FormField
-          label={`Published publications (${publicationCandidates.length})`}
-          className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/30"
-        >
-          <div className="space-y-3">
-            {publicationCandidates.length === 0 ? (
-              <p className="text-sm text-stone-500 dark:text-stone-400">
-                No published publications are available yet.
-              </p>
-            ) : (
-              publicationCandidates.map((candidate) => (
-                <label
-                  key={candidate.id}
-                  className="flex items-start gap-3 text-sm leading-6 text-stone-600 dark:text-stone-300"
-                >
-                  <input
-                    type="checkbox"
-                    name="release_item"
-                    value={candidate.id}
-                    className="mt-1 h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-sky-500/40 dark:border-stone-700 dark:bg-stone-950"
-                  />
-                  <span>
-                    <span className="block font-semibold text-stone-800 dark:text-stone-100">
-                      {candidate.title}
-                    </span>
-                    {candidate.summaryEn ? (
-                      <span className="block text-xs text-stone-500 dark:text-stone-400">
-                        {candidate.summaryEn}
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
+            Pick published lessons and publications, write the EN/NL copy, and
+            save a release snapshot without keeping the full composer open all
+            the time.
+          </p>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-stone-500 dark:text-stone-400">
+          <span className="group-open:hidden">Compose</span>
+          <span className="hidden group-open:inline">Collapse</span>
+          <ChevronDown className="mt-1 h-5 w-5 transition-transform duration-200 group-open:rotate-180" />
+        </div>
+      </summary>
+
+      <form
+        ref={formRef}
+        action={formAction}
+        className="space-y-6 border-t border-stone-200/80 p-6 dark:border-stone-800 md:p-7"
+      >
+        <div className="grid gap-5 md:grid-cols-2">
+          <FormField htmlFor="audience_segment" label="Audience segment">
+            <select
+              id="audience_segment"
+              name="audience_segment"
+              defaultValue="lessons"
+              className="select-base"
+            >
+              {CONTENT_RELEASE_AUDIENCE_SEGMENTS.map((segment) => (
+                <option key={segment} value={segment}>
+                  {formatAudienceSegmentLabel(segment)}
+                </option>
+              ))}
+            </select>
+          </FormField>
+
+          <FormField htmlFor="locale_mode" label="Locale mode">
+            <select
+              id="locale_mode"
+              name="locale_mode"
+              defaultValue="localized"
+              className="select-base"
+            >
+              {CONTENT_RELEASE_LOCALE_MODES.map((localeMode) => (
+                <option key={localeMode} value={localeMode}>
+                  {formatLocaleModeLabel(localeMode)}
+                </option>
+              ))}
+            </select>
+          </FormField>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2">
+          <FormField htmlFor="subject_en" label="English subject">
+            <input
+              id="subject_en"
+              name="subject_en"
+              type="text"
+              className="input-base"
+              maxLength={160}
+              placeholder="New Coptic lesson available"
+            />
+          </FormField>
+
+          <FormField htmlFor="subject_nl" label="Dutch subject">
+            <input
+              id="subject_nl"
+              name="subject_nl"
+              type="text"
+              className="input-base"
+              maxLength={160}
+              placeholder="Nieuwe Koptische les beschikbaar"
+            />
+          </FormField>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2">
+          <FormField htmlFor="body_en" label="English message">
+            <textarea
+              id="body_en"
+              name="body_en"
+              rows={6}
+              className="textarea-base resize-y"
+              placeholder="Share what is new, why it matters, and where the reader should go next."
+            />
+          </FormField>
+
+          <FormField htmlFor="body_nl" label="Dutch message">
+            <textarea
+              id="body_nl"
+              name="body_nl"
+              rows={6}
+              className="textarea-base resize-y"
+              placeholder="Vat samen wat er nieuw is, waarom het relevant is en waar de lezer verder kan gaan."
+            />
+          </FormField>
+        </div>
+
+        <div className="grid gap-5 lg:grid-cols-2">
+          <FormField
+            label={`Published lessons (${lessonCandidates.length})`}
+            className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/30"
+          >
+            <div className="space-y-3">
+              {lessonCandidates.length === 0 ? (
+                <p className="text-sm text-stone-500 dark:text-stone-400">
+                  No published grammar lessons are available yet.
+                </p>
+              ) : (
+                lessonCandidates.map((candidate) => (
+                  <label
+                    key={candidate.id}
+                    className="flex items-start gap-3 text-sm leading-6 text-stone-600 dark:text-stone-300"
+                  >
+                    <input
+                      type="checkbox"
+                      name="release_item"
+                      value={candidate.id}
+                      className="mt-1 h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-sky-500/40 dark:border-stone-700 dark:bg-stone-950"
+                    />
+                    <span>
+                      <span className="block font-semibold text-stone-800 dark:text-stone-100">
+                        {candidate.title}
                       </span>
-                    ) : null}
-                  </span>
-                </label>
-              ))
-            )}
-          </div>
-        </FormField>
-      </div>
+                      {candidate.summaryEn ? (
+                        <span className="block text-xs text-stone-500 dark:text-stone-400">
+                          {candidate.summaryEn}
+                        </span>
+                      ) : null}
+                    </span>
+                  </label>
+                ))
+              )}
+            </div>
+          </FormField>
 
-      <div className="flex flex-wrap items-center gap-4">
-        <button type="submit" className="btn-primary px-6" disabled={isPending}>
-          {isPending ? "Saving draft..." : "Create release draft"}
-        </button>
-        <p className="text-sm text-stone-500 dark:text-stone-400">
-          Drafts snapshot the selected titles and URLs so later content edits do
-          not silently change the outgoing release.
-        </p>
-      </div>
+          <FormField
+            label={`Published publications (${publicationCandidates.length})`}
+            className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/30"
+          >
+            <div className="space-y-3">
+              {publicationCandidates.length === 0 ? (
+                <p className="text-sm text-stone-500 dark:text-stone-400">
+                  No published publications are available yet.
+                </p>
+              ) : (
+                publicationCandidates.map((candidate) => (
+                  <label
+                    key={candidate.id}
+                    className="flex items-start gap-3 text-sm leading-6 text-stone-600 dark:text-stone-300"
+                  >
+                    <input
+                      type="checkbox"
+                      name="release_item"
+                      value={candidate.id}
+                      className="mt-1 h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-sky-500/40 dark:border-stone-700 dark:bg-stone-950"
+                    />
+                    <span>
+                      <span className="block font-semibold text-stone-800 dark:text-stone-100">
+                        {candidate.title}
+                      </span>
+                      {candidate.summaryEn ? (
+                        <span className="block text-xs text-stone-500 dark:text-stone-400">
+                          {candidate.summaryEn}
+                        </span>
+                      ) : null}
+                    </span>
+                  </label>
+                ))
+              )}
+            </div>
+          </FormField>
+        </div>
 
-      {state?.success ? (
-        <StatusNotice tone="success" align="left">
-          Release draft created.
-        </StatusNotice>
-      ) : null}
+        <div className="flex flex-wrap items-center gap-4">
+          <button
+            type="submit"
+            className="btn-primary px-6"
+            disabled={isPending}
+          >
+            {isPending ? "Saving draft..." : "Create release draft"}
+          </button>
+          <p className="text-sm text-stone-500 dark:text-stone-400">
+            Drafts snapshot the selected titles and URLs so later content edits
+            do not silently change the outgoing release.
+          </p>
+        </div>
 
-      {state?.error ? (
-        <StatusNotice tone="error" align="left">
-          {state.error}
-        </StatusNotice>
-      ) : null}
-    </form>
+        {state?.error ? (
+          <StatusNotice tone="error" align="left">
+            {state.error}
+          </StatusNotice>
+        ) : null}
+      </form>
+    </details>
   );
 }

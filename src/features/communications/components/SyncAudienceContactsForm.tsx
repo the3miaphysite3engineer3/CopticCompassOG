@@ -1,10 +1,8 @@
 "use client";
 
 import { useActionState } from "react";
-import {
-  syncAudienceContactsWithResend,
-  type SyncAudienceContactsState,
-} from "@/actions/admin";
+import { syncAudienceContactsWithResend } from "@/actions/admin";
+import type { SyncAudienceContactsState } from "@/actions/admin/states";
 import { StatusNotice } from "@/components/StatusNotice";
 
 export function SyncAudienceContactsForm() {

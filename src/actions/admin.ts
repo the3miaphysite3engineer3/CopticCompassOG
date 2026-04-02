@@ -15,14 +15,8 @@ import { submitFeedback as submitFeedbackAction } from "./admin/submissions";
 import type {
   ContentReleaseDraftState,
   SendContentReleaseState,
-} from "./admin/releases";
-import type { SyncAudienceContactsState } from "./admin/audience";
-
-export type {
-  ContentReleaseDraftState,
-  SendContentReleaseState,
   SyncAudienceContactsState,
-};
+} from "./admin/states";
 
 export async function submitFeedback(formData: FormData) {
   return submitFeedbackAction(formData);
