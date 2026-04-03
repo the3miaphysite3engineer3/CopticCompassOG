@@ -15,8 +15,8 @@ function getDictionaryEntryCount() {
 const dictionaryEntryCount = getDictionaryEntryCount();
 
 export const siteConfig = {
-  name: "The Wannes Portfolio | Coptic Dictionary, Grammar, and Publications",
-  title: "The Wannes Portfolio | Coptic Dictionary, Grammar, and Publications",
+  name: "Coptic Compass | Coptic Dictionary, Grammar, and Publications",
+  title: "Coptic Compass | Coptic Dictionary, Grammar, and Publications",
   description: dictionaryEntryCount
     ? `Digital Coptic dictionary, grammar lessons, publications, and research tools by Kyrillos Wannes, featuring ${dictionaryEntryCount.toLocaleString()} searchable entries.`
     : "Digital Coptic dictionary, grammar lessons, publications, and research tools by Kyrillos Wannes.",

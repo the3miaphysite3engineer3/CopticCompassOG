@@ -60,6 +60,7 @@ Examples:
 
 - dictionary search and entry rendering live under `src/features/dictionary`
 - grammar dataset, lesson rendering, API shaping, and learner state live under `src/features/grammar`
+- analytics dashboards and linguistic drill-downs live under `src/features/analytics`
 - admin dashboard presentation lives under `src/features/admin`
 
 This is the default home for new product logic.

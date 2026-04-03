@@ -12,7 +12,7 @@ test("root route redirects to the English homepage", async ({ page }) => {
   await expect(page).toHaveURL(/\/en$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(
-    page.getByRole("heading", { name: "Wannes Portfolio" }),
+    page.getByRole("heading", { name: "Coptic Compass" }),
   ).toBeVisible();
 });
 
@@ -34,7 +34,7 @@ test("English locale renders English navigation", async ({ page }) => {
       .getByRole("link", { name: "Publications", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Wannes Portfolio" }),
+    page.getByRole("heading", { name: "Coptic Compass" }),
   ).toBeVisible();
 });
 
@@ -48,7 +48,7 @@ test("Dutch locale renders Dutch navigation", async ({ page }) => {
       .getByRole("link", { name: "Publicaties", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Wannes Portfolio" }),
+    page.getByRole("heading", { name: "Koptisch Kompas" }),
   ).toBeVisible();
 });
 
@@ -106,7 +106,7 @@ test("login page honors the Dutch language preference", async ({ page }) => {
 
   await expect(page.locator("html")).toHaveAttribute("lang", "nl");
   await expect(
-    page.getByRole("heading", { name: "Welkom bij Wannes Portfolio" }),
+    page.getByRole("heading", { name: "Welkom bij Koptisch Kompas" }),
   ).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Wachtwoord vergeten?" }),

@@ -157,7 +157,7 @@ export default function HomePageClient() {
         <div className="relative w-48 h-48 md:w-64 md:h-64 mb-2 transition-transform duration-500 hover:scale-[1.03]">
           <Image
             src="/logo/logo-colored.png"
-            alt="Wannes Portfolio Logo"
+            alt="Coptic Compass Logo"
             fill
             sizes="(max-width: 768px) 192px, 256px"
             className="object-contain drop-shadow-2xl dark:drop-shadow-[0_20px_20px_rgba(255,255,255,0.05)]"

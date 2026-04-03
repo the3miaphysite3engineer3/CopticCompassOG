@@ -23,7 +23,7 @@ const PDF_BUTTON_COPY = {
     generating: "Generating...",
     loginPrompt: "Log in or sign up to download lessons as PDF",
     footerLeadIn:
-      "Downloaded from The Wannes Portfolio (kyrilloswannes.com) on",
+      "Downloaded from Coptic Compass (kyrilloswannes.com) on",
     errorPrefix: "PDF generation encountered an error:",
   },
   nl: {
@@ -31,7 +31,7 @@ const PDF_BUTTON_COPY = {
     generating: "PDF wordt gemaakt...",
     loginPrompt:
       "Log in of maak een account aan om lessen als pdf te downloaden",
-    footerLeadIn: "Gedownload van The Wannes Portfolio (kyrilloswannes.com) op",
+    footerLeadIn: "Gedownload van Koptisch Kompas (kyrilloswannes.com) op",
     errorPrefix: "Er is een fout opgetreden bij het maken van de pdf:",
   },
 } as const;

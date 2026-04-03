@@ -29,7 +29,7 @@ describe("metadata helpers", () => {
     });
     expect(metadata.twitter).toMatchObject({
       title:
-        "Dictionary | The Wannes Portfolio | Coptic Dictionary, Grammar, and Publications",
+        "Dictionary | Coptic Compass | Coptic Dictionary, Grammar, and Publications",
     });
   });
 

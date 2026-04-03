@@ -1,4 +1,4 @@
-# The Wannes Portfolio | Coptic Dictionary, Grammar, and Publications
+# Coptic Compass | Coptic Dictionary, Grammar, and Publications
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=next.js&logoColor=white)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)

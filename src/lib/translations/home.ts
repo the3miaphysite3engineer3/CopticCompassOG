@@ -3,7 +3,7 @@ import { defineMessages } from "@/lib/translations/defineMessages";
 export const homeMessages = defineMessages({
   en: {
     "home.eyebrow": "Academic Portfolio and Coptic Research Tools",
-    "home.title": "Wannes Portfolio",
+    "home.title": "Coptic Compass",
     "home.subtitle":
       "Explore my publications and interactive scholarly applications.",
     "home.publications": "My Publications",
@@ -26,7 +26,7 @@ export const homeMessages = defineMessages({
   },
   nl: {
     "home.eyebrow": "Academisch portfolio en Koptische onderzoekstools",
-    "home.title": "Wannes Portfolio",
+    "home.title": "Koptisch Kompas",
     "home.subtitle":
       "Verken mijn publicaties en interactieve academische toepassingen.",
     "home.publications": "Mijn Publicaties",

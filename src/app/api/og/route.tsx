@@ -88,7 +88,7 @@ function renderGenericCard() {
                 letterSpacing: -2,
               }}
             >
-              The Wannes Portfolio
+              Coptic Compass
             </div>
             <div
               style={{

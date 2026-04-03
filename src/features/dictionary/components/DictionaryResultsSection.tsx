@@ -22,6 +22,7 @@ type DictionaryResultsSectionProps = {
   query: string;
   selectedDialect: DialectFilter;
   selectedPartOfSpeech: DictionaryPartOfSpeechFilter;
+  scrollContainerId?: string;
 };
 
 export function DictionaryResultsSection({
@@ -31,6 +32,7 @@ export function DictionaryResultsSection({
   query,
   selectedDialect,
   selectedPartOfSpeech,
+  scrollContainerId,
 }: DictionaryResultsSectionProps) {
   const { t } = useLanguage();
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
@@ -40,13 +42,15 @@ export function DictionaryResultsSection({
     const target = observerTarget.current;
     if (!target) return;
 
+    const rootTarget = scrollContainerId ? document.getElementById(scrollContainerId) : null;
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting) {
           setVisibleCount((previousCount) => previousCount + PAGE_SIZE);
         }
       },
-      { threshold: 0.1 },
+      { threshold: 0.1, root: rootTarget },
     );
 
     observer.observe(target);

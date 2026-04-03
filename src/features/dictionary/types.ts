@@ -33,6 +33,7 @@ export interface LexicalEntry {
   dutch_meanings?: string[];
   greek_equivalents: string[];
   bohairicParadigmData?: unknown;
+  etymology?: "Egy" | "Gr";
   raw: {
     word: string;
     meaning: string;

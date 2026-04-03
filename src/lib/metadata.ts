@@ -13,7 +13,7 @@ function getSocialImages() {
       url: `${siteConfig.liveUrl}/api/og`,
       width: 1200,
       height: 630,
-      alt: "Wannes Portfolio social preview",
+      alt: "Coptic Compass social preview",
     },
   ];
 }

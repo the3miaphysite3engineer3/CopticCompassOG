@@ -31,9 +31,11 @@ export async function generateMetadata({
 }
 
 export default function AnalyticsPage() {
+  const dictionary = getDictionary();
   return (
     <AnalyticsPageClient
-      snapshots={createAnalyticsSnapshots(getDictionary())}
+      snapshots={createAnalyticsSnapshots(dictionary)}
+      dictionary={dictionary}
     />
   );
 }

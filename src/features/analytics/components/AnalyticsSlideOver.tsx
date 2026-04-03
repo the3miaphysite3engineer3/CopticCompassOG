@@ -1,0 +1,84 @@
+import { ReactNode, useEffect } from "react";
+import { X } from "lucide-react";
+import { cx } from "@/lib/classes";
+import { createPortal } from "react-dom";
+
+export type AnalyticsSlideOverProps = {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: ReactNode;
+};
+
+export function AnalyticsSlideOver({
+  isOpen,
+  onClose,
+  title,
+  children,
+}: AnalyticsSlideOverProps) {
+  // Prevent body scrolling when open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  // Handle escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex justify-end overflow-hidden">
+      {/* Backdrop */}
+      <div
+        className={cx(
+          "fixed inset-0 bg-stone-900/40 backdrop-blur-sm transition-opacity duration-300 dark:bg-black/60",
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}
+        onClick={onClose}
+      />
+
+      {/* Slide-over Panel */}
+      <div
+        className={cx(
+          "relative flex h-full w-full max-w-2xl flex-col bg-stone-50 shadow-2xl transition-transform duration-300 ease-in-out dark:bg-stone-950",
+          isOpen ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        {/* Header */}
+        <header className="flex items-center justify-between border-b border-stone-200 px-6 py-4 dark:border-stone-800">
+          <h2 className="text-xl font-bold text-stone-800 dark:text-stone-200">
+            {title}
+          </h2>
+          <button
+            onClick={onClose}
+            className="rounded-full p-2 text-stone-500 hover:bg-stone-200 transition-colors dark:text-stone-400 dark:hover:bg-stone-800"
+            aria-label="Close panel"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </header>
+
+        {/* Content (scrollable) */}
+        <div id="analytics-slideover-scroll" className="flex-1 min-h-0 overflow-y-auto px-6 py-6">
+          {children}
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}

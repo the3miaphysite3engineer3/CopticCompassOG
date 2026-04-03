@@ -2,7 +2,7 @@ import { defineMessages } from "@/lib/translations/defineMessages";
 
 export const loginMessages = defineMessages({
   en: {
-    "login.title": "Welcome to Wannes Portfolio",
+    "login.title": "Welcome to Coptic Compass",
     "login.subtitle":
       "Sign in to save exercises, receive feedback, and continue your Coptic studies.",
     "login.email": "Email Address",
@@ -67,7 +67,7 @@ export const loginMessages = defineMessages({
       "Too many account creation attempts. Please try again later.",
   },
   nl: {
-    "login.title": "Welkom bij Wannes Portfolio",
+    "login.title": "Welkom bij Koptisch Kompas",
     "login.subtitle":
       "Log in om oefeningen op te slaan, feedback te ontvangen en je Koptische studie voort te zetten.",
     "login.email": "E-mailadres",
@@ -81,10 +81,10 @@ export const loginMessages = defineMessages({
     "login.google": "Inloggen met Google",
     "login.metaTitle": "Inloggen",
     "login.metaDescription":
-      "Inlogpagina voor de leeromgeving van Wannes Portfolio.",
+      "Inlogpagina voor de leeromgeving van Koptisch Kompas.",
     "forgot.metaTitle": "Wachtwoord opnieuw instellen",
     "forgot.metaDescription":
-      "Pagina om het wachtwoord van de leeromgeving van Wannes Portfolio opnieuw in te stellen.",
+      "Pagina om het wachtwoord van de leeromgeving van Koptisch Kompas opnieuw in te stellen.",
     "forgot.title": "Wachtwoord opnieuw instellen",
     "forgot.subtitle":
       "Voer het e-mailadres van je account in en we sturen je een link om je wachtwoord opnieuw in te stellen.",
@@ -100,7 +100,7 @@ export const loginMessages = defineMessages({
       "Als er een account bestaat, is er een resetlink verzonden. Controleer je inbox.",
     "update.metaTitle": "Wachtwoord bijwerken",
     "update.metaDescription":
-      "Pagina om het wachtwoord van de leeromgeving van Wannes Portfolio bij te werken.",
+      "Pagina om het wachtwoord van de leeromgeving van Koptisch Kompas bij te werken.",
     "update.title": "Nieuw wachtwoord instellen",
     "update.subtitle": "Kies een sterk nieuw wachtwoord voor je account.",
     "update.password": "Nieuw wachtwoord",
