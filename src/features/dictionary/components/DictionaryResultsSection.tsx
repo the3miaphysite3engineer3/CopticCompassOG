@@ -57,7 +57,7 @@ export function DictionaryResultsSection({
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [filteredResults.length]);
+  }, [filteredResults.length, scrollContainerId]);
 
   const visibleResults = filteredResults.slice(0, visibleCount);
 

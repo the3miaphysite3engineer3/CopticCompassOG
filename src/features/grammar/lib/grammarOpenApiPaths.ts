@@ -4,7 +4,6 @@ export function buildGrammarOpenApiPaths(context: GrammarOpenApiContext) {
   const {
     apiIndex,
     exampleConceptId,
-    exampleLessonId,
     exampleLessonSlug,
     exampleSourceId,
     manifest,

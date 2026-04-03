@@ -158,7 +158,14 @@ export function useGrammarLessonLearnerData(
       isMounted = false;
       subscription.unsubscribe();
     };
-  }, [lesson.id, lesson.slug, lessonSectionOrderKey, supabaseAvailable]);
+  }, [
+    lesson,
+    lesson.id,
+    lesson.slug,
+    lessonSectionOrderKey,
+    supabase,
+    supabaseAvailable,
+  ]);
 
   return {
     errorMessage,

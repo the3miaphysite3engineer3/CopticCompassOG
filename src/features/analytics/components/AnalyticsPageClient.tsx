@@ -15,7 +15,6 @@ import { useTheme } from "next-themes";
 import {
   type AnalyticsSnapshotMap,
   type EtymologyFilter,
-  ETYMOLOGY_FILTERS,
 } from "@/features/analytics/lib/analytics";
 import { FormLabel } from "@/components/FormField";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -200,6 +199,7 @@ export default function AnalyticsPageClient({
     setSlideOverFilter({ title, predicate });
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChartClick = (data: any, type: string) => {
     if (!data?.payload?.originalName) return;
     const title = data.name;
