@@ -47,7 +47,7 @@ export function AnalyticsSlideOver({
       <div
         className={cx(
           "fixed inset-0 bg-stone-900/40 backdrop-blur-sm transition-opacity duration-300 dark:bg-black/60",
-          isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+          isOpen ? "opacity-100" : "opacity-0 pointer-events-none",
         )}
         onClick={onClose}
       />
@@ -56,7 +56,7 @@ export function AnalyticsSlideOver({
       <div
         className={cx(
           "relative flex h-full w-full max-w-2xl flex-col bg-stone-50 shadow-2xl transition-transform duration-300 ease-in-out dark:bg-stone-950",
-          isOpen ? "translate-x-0" : "translate-x-full"
+          isOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
         {/* Header */}
@@ -74,11 +74,14 @@ export function AnalyticsSlideOver({
         </header>
 
         {/* Content (scrollable) */}
-        <div id="analytics-slideover-scroll" className="flex-1 min-h-0 overflow-y-auto px-6 py-6">
+        <div
+          id="analytics-slideover-scroll"
+          className="flex-1 min-h-0 overflow-y-auto px-6 py-6"
+        >
           {children}
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

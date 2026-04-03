@@ -22,8 +22,7 @@ const PDF_BUTTON_COPY = {
     download: "Download PDF",
     generating: "Generating...",
     loginPrompt: "Log in or sign up to download lessons as PDF",
-    footerLeadIn:
-      "Downloaded from Coptic Compass (kyrilloswannes.com) on",
+    footerLeadIn: "Downloaded from Coptic Compass (kyrilloswannes.com) on",
     errorPrefix: "PDF generation encountered an error:",
   },
   nl: {

@@ -42,7 +42,9 @@ export function DictionaryResultsSection({
     const target = observerTarget.current;
     if (!target) return;
 
-    const rootTarget = scrollContainerId ? document.getElementById(scrollContainerId) : null;
+    const rootTarget = scrollContainerId
+      ? document.getElementById(scrollContainerId)
+      : null;
 
     const observer = new IntersectionObserver(
       (entries) => {

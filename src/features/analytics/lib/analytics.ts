@@ -49,16 +49,16 @@ function createAnalyticsSnapshot(
 
   let unknownMeaning = 0;
   let uncertainMeaning = 0;
-  
+
   let egyEtymology = 0;
   let grEtymology = 0;
-  
+
   let hasStative = 0;
   let missingStative = 0;
-  
+
   let baseRoots = 0;
   let derivedForms = 0;
-  
+
   const derivationCounts = {
     abstract: 0,
     agent: 0,
@@ -97,7 +97,9 @@ function createAnalyticsSnapshot(
     }
 
     if (entry.pos === "V") {
-      const hasAnyStative = Object.values(entry.dialects).some((d) => d?.stative);
+      const hasAnyStative = Object.values(entry.dialects).some(
+        (d) => d?.stative,
+      );
       if (hasAnyStative) {
         hasStative++;
       } else {
@@ -119,7 +121,11 @@ function createAnalyticsSnapshot(
       const hw = entry.headword.toLowerCase();
       if (hw.startsWith("ⲙⲉⲧ") || hw.startsWith("ⲙⲛⲧ")) {
         derivationCounts.abstract++;
-      } else if (hw.startsWith("ⲣⲉϥ") || hw.startsWith("ⲣⲉⲙ") || hw.startsWith("ⲣⲙ")) {
+      } else if (
+        hw.startsWith("ⲣⲉϥ") ||
+        hw.startsWith("ⲣⲉⲙ") ||
+        hw.startsWith("ⲣⲙ")
+      ) {
         derivationCounts.agent++;
       } else if (hw.startsWith("ϫⲓⲛ") || hw.startsWith("ϭⲓⲛ")) {
         derivationCounts.action++;
@@ -188,7 +194,7 @@ export function createAnalyticsSnapshots(
   return ANALYTICS_DIALECTS.reduce<AnalyticsSnapshotMap>(
     (snapshots, dialect) => {
       snapshots[dialect] = {} as Record<EtymologyFilter, AnalyticsSnapshot>;
-      
+
       const dialectDictionary =
         dialect === "ALL"
           ? dictionary
@@ -198,13 +204,14 @@ export function createAnalyticsSnapshots(
         const filteredDictionary =
           etymology === "ALL"
             ? dialectDictionary
-            : dialectDictionary.filter((entry) => 
-                etymology === "Gr" 
+            : dialectDictionary.filter((entry) =>
+                etymology === "Gr"
                   ? entry.etymology === "Gr"
-                  : entry.etymology !== "Gr"
+                  : entry.etymology !== "Gr",
               );
 
-        snapshots[dialect][etymology] = createAnalyticsSnapshot(filteredDictionary);
+        snapshots[dialect][etymology] =
+          createAnalyticsSnapshot(filteredDictionary);
       }
       return snapshots;
     },

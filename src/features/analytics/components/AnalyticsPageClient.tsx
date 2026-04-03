@@ -12,7 +12,11 @@ import {
   Legend,
 } from "recharts";
 import { useTheme } from "next-themes";
-import { type AnalyticsSnapshotMap, type EtymologyFilter, ETYMOLOGY_FILTERS } from "@/features/analytics/lib/analytics";
+import {
+  type AnalyticsSnapshotMap,
+  type EtymologyFilter,
+  ETYMOLOGY_FILTERS,
+} from "@/features/analytics/lib/analytics";
 import { FormLabel } from "@/components/FormField";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
@@ -42,7 +46,13 @@ const POS_COLORS = [
 const GENDER_COLORS = ["#38bdf8", "#f472b6", "#34d399", "#94a3b8"];
 const ETYMOLOGY_COLORS = ["#fbbf24", "#38bdf8"]; // Amber for Egyptian, Sky for Greek
 const VERB_COLORS = ["#34d399", "#f472b6"]; // Emerald for complete, Pink for missing
-const DERIVATION_COLORS = ["#a78bfa", "#38bdf8", "#fbbf24", "#f472b6", "#94a3b8"];
+const DERIVATION_COLORS = [
+  "#a78bfa",
+  "#38bdf8",
+  "#fbbf24",
+  "#f472b6",
+  "#94a3b8",
+];
 const RELATION_COLORS = ["#38bdf8", "#a78bfa"];
 
 const FILTER_SELECT_CLASS_NAME =
@@ -92,7 +102,8 @@ function AnalyticsStatCard({
       shadow="soft"
       className={cx(
         "relative overflow-hidden p-6",
-        onClick && "cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]"
+        onClick &&
+          "cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]",
       )}
       onClick={onClick}
     >
@@ -145,15 +156,18 @@ export default function AnalyticsPageClient({
   dictionary,
 }: AnalyticsPageClientProps) {
   const [selectedDialect, setSelectedDialect] = useState<AnalyticsDialect>("B");
-  const [selectedEtymology, setSelectedEtymology] = useState<EtymologyFilter>("ALL");
-  const [slideOverFilter, setSlideOverFilter] = useState<SlideOverPredicate | null>(null);
+  const [selectedEtymology, setSelectedEtymology] =
+    useState<EtymologyFilter>("ALL");
+  const [slideOverFilter, setSlideOverFilter] =
+    useState<SlideOverPredicate | null>(null);
 
   const { resolvedTheme } = useTheme();
   const { language, t } = useLanguage();
-  const stats = snapshots[selectedDialect]?.[selectedEtymology] ?? snapshots.ALL.ALL;
+  const stats =
+    snapshots[selectedDialect]?.[selectedEtymology] ?? snapshots.ALL.ALL;
   const isThemeReady = resolvedTheme !== undefined;
   const isDark = resolvedTheme === "dark";
-  
+
   const tooltipContentStyle = isDark ? DARK_TOOLTIP_STYLE : LIGHT_TOOLTIP_STYLE;
   const tooltipItemStyle = {
     color: isDark ? "#e7e5e4" : "#1c1917",
@@ -172,10 +186,15 @@ export default function AnalyticsPageClient({
       predicate = () => true;
     } else if (type === "unknown") {
       title = t("analytics.meaningUnknown");
-      predicate = (e) => e.english_meanings.join(" ").toLowerCase().includes("meaning unknown");
+      predicate = (e) =>
+        e.english_meanings.join(" ").toLowerCase().includes("meaning unknown");
     } else if (type === "uncertain") {
       title = t("analytics.meaningUncertain");
-      predicate = (e) => e.english_meanings.join(" ").toLowerCase().includes("meaning uncertain");
+      predicate = (e) =>
+        e.english_meanings
+          .join(" ")
+          .toLowerCase()
+          .includes("meaning uncertain");
     }
 
     setSlideOverFilter({ title, predicate });
@@ -190,47 +209,67 @@ export default function AnalyticsPageClient({
 
     if (type === "pos") {
       predicate = (e) => {
-         if (originalName === "Verbs") return e.pos === "V";
-         if (originalName === "Nouns") return e.pos === "N";
-         if (originalName === "Adjectives") return e.pos === "ADJ";
-         if (originalName === "Adverbs") return e.pos === "ADV";
-         if (originalName === "Conjunctions") return e.pos === "CONJ";
-         if (originalName === "Prepositions") return e.pos === "PREP";
-         return e.pos === "OTHER" || e.pos === "INTERJ" || e.pos === "UNKNOWN";
+        if (originalName === "Verbs") return e.pos === "V";
+        if (originalName === "Nouns") return e.pos === "N";
+        if (originalName === "Adjectives") return e.pos === "ADJ";
+        if (originalName === "Adverbs") return e.pos === "ADV";
+        if (originalName === "Conjunctions") return e.pos === "CONJ";
+        if (originalName === "Prepositions") return e.pos === "PREP";
+        return e.pos === "OTHER" || e.pos === "INTERJ" || e.pos === "UNKNOWN";
       };
     } else if (type === "gender") {
       predicate = (e) => {
-         if (e.pos !== "N") return false;
-         if (originalName.startsWith("Masculine")) return e.gender === "M";
-         if (originalName.startsWith("Feminine")) return e.gender === "F";
-         if (originalName.startsWith("Epicene")) return e.gender === "BOTH";
-         return e.gender === "";
+        if (e.pos !== "N") return false;
+        if (originalName.startsWith("Masculine")) return e.gender === "M";
+        if (originalName.startsWith("Feminine")) return e.gender === "F";
+        if (originalName.startsWith("Epicene")) return e.gender === "BOTH";
+        return e.gender === "";
       };
     } else if (type === "etymology") {
       predicate = (e) => {
-        return originalName === "analytics.grEtymology" 
+        return originalName === "analytics.grEtymology"
           ? e.etymology === "Gr"
           : e.etymology !== "Gr";
       };
     } else if (type === "derivation") {
       predicate = (e) => {
-         if (e.pos !== "N") return false;
-         const hw = e.headword.toLowerCase();
-         if (originalName === "analytics.prefixAbstract") return hw.startsWith("ⲙⲉⲧ") || hw.startsWith("ⲙⲛⲧ");
-         if (originalName === "analytics.prefixAgent") return hw.startsWith("ⲣⲉϥ") || hw.startsWith("ⲣⲉⲙ") || hw.startsWith("ⲣⲙ");
-         if (originalName === "analytics.prefixAction") return hw.startsWith("ϫⲓⲛ") || hw.startsWith("ϭⲓⲛ");
-         if (originalName === "analytics.prefixPrivative") return hw.startsWith("ⲁⲧ") || hw.startsWith("ⲁⲑ");
-         return !(hw.startsWith("ⲙⲉⲧ") || hw.startsWith("ⲙⲛⲧ") || hw.startsWith("ⲣⲉϥ") || hw.startsWith("ⲣⲉⲙ") || hw.startsWith("ⲣⲙ") || hw.startsWith("ϫⲓⲛ") || hw.startsWith("ϭⲓⲛ") || hw.startsWith("ⲁⲧ") || hw.startsWith("ⲁⲑ"));
+        if (e.pos !== "N") return false;
+        const hw = e.headword.toLowerCase();
+        if (originalName === "analytics.prefixAbstract")
+          return hw.startsWith("ⲙⲉⲧ") || hw.startsWith("ⲙⲛⲧ");
+        if (originalName === "analytics.prefixAgent")
+          return (
+            hw.startsWith("ⲣⲉϥ") || hw.startsWith("ⲣⲉⲙ") || hw.startsWith("ⲣⲙ")
+          );
+        if (originalName === "analytics.prefixAction")
+          return hw.startsWith("ϫⲓⲛ") || hw.startsWith("ϭⲓⲛ");
+        if (originalName === "analytics.prefixPrivative")
+          return hw.startsWith("ⲁⲧ") || hw.startsWith("ⲁⲑ");
+        return !(
+          hw.startsWith("ⲙⲉⲧ") ||
+          hw.startsWith("ⲙⲛⲧ") ||
+          hw.startsWith("ⲣⲉϥ") ||
+          hw.startsWith("ⲣⲉⲙ") ||
+          hw.startsWith("ⲣⲙ") ||
+          hw.startsWith("ϫⲓⲛ") ||
+          hw.startsWith("ϭⲓⲛ") ||
+          hw.startsWith("ⲁⲧ") ||
+          hw.startsWith("ⲁⲑ")
+        );
       };
     } else if (type === "verb") {
       predicate = (e) => {
-         if (e.pos !== "V") return false;
-         const hasAnyStative = Object.values(e.dialects).some((d) => d?.stative);
-         return originalName === "analytics.hasStative" ? hasAnyStative : !hasAnyStative;
+        if (e.pos !== "V") return false;
+        const hasAnyStative = Object.values(e.dialects).some((d) => d?.stative);
+        return originalName === "analytics.hasStative"
+          ? hasAnyStative
+          : !hasAnyStative;
       };
     } else if (type === "relations") {
       predicate = (e) => {
-         return originalName === "analytics.baseRoots" ? !e.relationType : !!e.relationType;
+        return originalName === "analytics.baseRoots"
+          ? !e.relationType
+          : !!e.relationType;
       };
     }
 
@@ -239,16 +278,20 @@ export default function AnalyticsPageClient({
 
   const slideOverResults = useMemo(() => {
     if (!slideOverFilter) return [];
-    
+
     // First apply dialect and etymology dashboard filters
     let base = dictionary;
     if (selectedDialect !== "ALL") {
-      base = base.filter(e => e.dialects[selectedDialect] !== undefined);
+      base = base.filter((e) => e.dialects[selectedDialect] !== undefined);
     }
     if (selectedEtymology !== "ALL") {
-      base = base.filter(e => selectedEtymology === "Gr" ? e.etymology === "Gr" : e.etymology !== "Gr");
+      base = base.filter((e) =>
+        selectedEtymology === "Gr"
+          ? e.etymology === "Gr"
+          : e.etymology !== "Gr",
+      );
     }
-    
+
     // Apply the specific pie slice predicate
     return base.filter(slideOverFilter.predicate);
   }, [dictionary, selectedDialect, selectedEtymology, slideOverFilter]);
@@ -304,7 +347,9 @@ export default function AnalyticsPageClient({
             className="flex items-center space-x-3 rounded-2xl p-3 px-4 dark:border-stone-700"
           >
             <span className="inline-flex items-center gap-2 whitespace-nowrap text-stone-500 dark:text-stone-400">
-              <FormLabel tone="muted">{t("analytics.filterEtymology" as TranslationKey)}</FormLabel>
+              <FormLabel tone="muted">
+                {t("analytics.filterEtymology" as TranslationKey)}
+              </FormLabel>
             </span>
             <select
               className={FILTER_SELECT_CLASS_NAME}
@@ -313,9 +358,15 @@ export default function AnalyticsPageClient({
                 setSelectedEtymology(e.target.value as EtymologyFilter)
               }
             >
-              <option value="ALL">{t("analytics.filterEtymologyAll" as TranslationKey)}</option>
-              <option value="Egy">{t("analytics.filterEtymologyEgy" as TranslationKey)}</option>
-              <option value="Gr">{t("analytics.filterEtymologyGr" as TranslationKey)}</option>
+              <option value="ALL">
+                {t("analytics.filterEtymologyAll" as TranslationKey)}
+              </option>
+              <option value="Egy">
+                {t("analytics.filterEtymologyEgy" as TranslationKey)}
+              </option>
+              <option value="Gr">
+                {t("analytics.filterEtymologyGr" as TranslationKey)}
+              </option>
             </select>
           </SurfacePanel>
         </div>
@@ -364,7 +415,13 @@ export default function AnalyticsPageClient({
                   />
                   <Legend wrapperStyle={CHART_LEGEND_STYLE} />
                   <Pie
-                    data={stats.posChartData.map(d => ({...d, originalName: d.name, name: t(("dict." + d.name.toLowerCase()) as TranslationKey) ?? d.name}))}
+                    data={stats.posChartData.map((d) => ({
+                      ...d,
+                      originalName: d.name,
+                      name:
+                        t(("dict." + d.name.toLowerCase()) as TranslationKey) ??
+                        d.name,
+                    }))}
                     cx="50%"
                     cy="50%"
                     innerRadius={70}
@@ -406,9 +463,7 @@ export default function AnalyticsPageClient({
             <div className="mt-auto rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 shadow-sm dark:border-stone-800/50 dark:bg-stone-950/40">
               <li className="mb-2 flex list-none items-center justify-between text-sm text-sky-600 dark:text-sky-400">
                 <span>{t("analytics.verbalNouns")}</span>
-                <span className="font-bold">
-                  {stats.verbalNouns}
-                </span>
+                <span className="font-bold">{stats.verbalNouns}</span>
               </li>
               <div className="my-2 h-px w-full bg-stone-300 dark:bg-stone-800"></div>
               <div className="flex justify-between font-bold text-stone-700 dark:text-stone-300">
@@ -428,7 +483,11 @@ export default function AnalyticsPageClient({
                   />
                   <Legend wrapperStyle={CHART_LEGEND_STYLE} />
                   <Pie
-                    data={stats.genderChartData.map(d => ({...d, originalName: d.name, name: d.name}))}
+                    data={stats.genderChartData.map((d) => ({
+                      ...d,
+                      originalName: d.name,
+                      name: d.name,
+                    }))}
                     cx="50%"
                     cy="50%"
                     innerRadius={70}
@@ -457,7 +516,7 @@ export default function AnalyticsPageClient({
           </div>
         </AnalyticsChartCard>
       </div>
-      
+
       <div className="grid lg:grid-cols-2 gap-8 items-start mb-8">
         <AnalyticsChartCard title={t("analytics.etymology" as TranslationKey)}>
           <div className="h-[300px] w-full mb-6">
@@ -470,7 +529,11 @@ export default function AnalyticsPageClient({
                   />
                   <Legend wrapperStyle={CHART_LEGEND_STYLE} />
                   <Pie
-                    data={stats.etymologyChartData.map(d => ({...d, originalName: d.name, name: t(d.name as TranslationKey)}))}
+                    data={stats.etymologyChartData.map((d) => ({
+                      ...d,
+                      originalName: d.name,
+                      name: t(d.name as TranslationKey),
+                    }))}
                     cx="50%"
                     cy="50%"
                     innerRadius={70}
@@ -509,7 +572,11 @@ export default function AnalyticsPageClient({
                   />
                   <Legend wrapperStyle={CHART_LEGEND_STYLE} />
                   <Pie
-                    data={stats.derivationalMorphologyData.map(d => ({...d, originalName: d.name, name: t(d.name as TranslationKey)}))}
+                    data={stats.derivationalMorphologyData.map((d) => ({
+                      ...d,
+                      originalName: d.name,
+                      name: t(d.name as TranslationKey),
+                    }))}
                     cx="50%"
                     cy="50%"
                     innerRadius={70}
@@ -523,7 +590,9 @@ export default function AnalyticsPageClient({
                     {stats.derivationalMorphologyData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={DERIVATION_COLORS[index % DERIVATION_COLORS.length]}
+                        fill={
+                          DERIVATION_COLORS[index % DERIVATION_COLORS.length]
+                        }
                         stroke={chartCellStroke}
                         className="hover:opacity-80 transition-opacity"
                       />
@@ -539,7 +608,9 @@ export default function AnalyticsPageClient({
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8 items-start">
-        <AnalyticsChartCard title={t("analytics.verbCompleteness" as TranslationKey)}>
+        <AnalyticsChartCard
+          title={t("analytics.verbCompleteness" as TranslationKey)}
+        >
           <div className="h-[300px] w-full mb-6">
             {isThemeReady ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -550,7 +621,11 @@ export default function AnalyticsPageClient({
                   />
                   <Legend wrapperStyle={CHART_LEGEND_STYLE} />
                   <Pie
-                    data={stats.verbCompletenessData.map(d => ({...d, originalName: d.name, name: t(d.name as TranslationKey)}))}
+                    data={stats.verbCompletenessData.map((d) => ({
+                      ...d,
+                      originalName: d.name,
+                      name: t(d.name as TranslationKey),
+                    }))}
                     cx="50%"
                     cy="50%"
                     innerRadius={70}
@@ -589,7 +664,11 @@ export default function AnalyticsPageClient({
                   />
                   <Legend wrapperStyle={CHART_LEGEND_STYLE} />
                   <Pie
-                    data={stats.relationTypeData.map(d => ({...d, originalName: d.name, name: t(d.name as TranslationKey)}))}
+                    data={stats.relationTypeData.map((d) => ({
+                      ...d,
+                      originalName: d.name,
+                      name: t(d.name as TranslationKey),
+                    }))}
                     cx="50%"
                     cy="50%"
                     innerRadius={70}
@@ -633,7 +712,6 @@ export default function AnalyticsPageClient({
           scrollContainerId="analytics-slideover-scroll"
         />
       </AnalyticsSlideOver>
-
     </PageShell>
   );
 }
