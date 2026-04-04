@@ -98,6 +98,16 @@ export default async function GrammarLessonPage({
   }
 
   const lessonPath = getGrammarLessonPath(lessonBundle.lesson.slug, locale);
+  const publishedLessons = listPublishedGrammarLessons();
+  const currentLessonIndex = publishedLessons.findIndex(
+    (lesson) => lesson.slug === lessonBundle.lesson.slug,
+  );
+  const previousLessonIndexItem =
+    currentLessonIndex > 0 ? publishedLessons[currentLessonIndex - 1] : null;
+  const nextLessonIndexItem =
+    currentLessonIndex >= 0 && currentLessonIndex < publishedLessons.length - 1
+      ? publishedLessons[currentLessonIndex + 1]
+      : null;
 
   return (
     <>
@@ -117,7 +127,30 @@ export default async function GrammarLessonPage({
           createGrammarLessonStructuredData(lessonBundle, locale),
         ]}
       />
-      <GrammarLessonPageClient lessonBundle={lessonBundle} />
+      <GrammarLessonPageClient
+        lessonBundle={lessonBundle}
+        previousLesson={
+          previousLessonIndexItem
+            ? {
+                href: getGrammarLessonPath(
+                  previousLessonIndexItem.slug,
+                  locale,
+                ),
+                number: previousLessonIndexItem.number,
+                title: previousLessonIndexItem.title[locale],
+              }
+            : null
+        }
+        nextLesson={
+          nextLessonIndexItem
+            ? {
+                href: getGrammarLessonPath(nextLessonIndexItem.slug, locale),
+                number: nextLessonIndexItem.number,
+                title: nextLessonIndexItem.title[locale],
+              }
+            : null
+        }
+      />
     </>
   );
 }

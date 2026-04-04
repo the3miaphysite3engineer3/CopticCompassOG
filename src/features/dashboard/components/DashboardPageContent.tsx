@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { logout } from "@/actions/auth";
 import { Badge } from "@/components/Badge";
+import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { DashboardRecentExercisesSection } from "@/features/dashboard/components/DashboardRecentExercisesSection";
@@ -11,7 +12,8 @@ import { AccountSettingsPanel } from "@/features/profile/components/AccountSetti
 import { getDashboardCopy } from "@/features/dashboard/lib/dashboardCopy";
 import { DEFAULT_DICTIONARY_DIALECT_FILTER } from "@/features/dictionary/config";
 import { loadDashboardPageData } from "@/features/dashboard/lib/server/pageData";
-import { getDashboardPath } from "@/lib/locale";
+import { getTranslation } from "@/lib/i18n";
+import { getDashboardPath, getLocalizedHomePath } from "@/lib/locale";
 import { requireAuthenticatedPageSession } from "@/lib/supabase/auth";
 import { getLoginPath } from "@/lib/supabase/config";
 import type { Language } from "@/types/i18n";
@@ -38,30 +40,43 @@ export async function DashboardPageContent({
 
   return (
     <PageShell
-      className="min-h-screen px-6 py-16"
-      contentClassName="mx-auto min-h-[80vh] max-w-5xl"
+      className="min-h-screen flex flex-col items-center p-6 md:p-10"
+      contentClassName="min-h-[80vh] w-full pt-10"
+      width="standard"
       accents={[
         pageShellAccents.topLeftSkyOrb,
         pageShellAccents.bottomRightEmeraldOrb,
       ]}
     >
-      <div className="mb-12 flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-        <div>
-          <Badge tone="accent" size="xs" caps className="mb-4">
-            {copy.shellBadge}
-          </Badge>
-          <PageHeader
-            title={copy.pageTitle}
-            description={copy.pageDescription}
-            align="left"
-            tone="brand"
-            size="compact"
-          />
+      <div className="mb-12 space-y-8">
+        <BreadcrumbTrail
+          items={[
+            {
+              label: getTranslation(locale, "nav.home"),
+              href: getLocalizedHomePath(locale),
+            },
+            { label: getTranslation(locale, "nav.dashboard") },
+          ]}
+        />
+
+        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+          <div>
+            <Badge tone="accent" size="xs" caps className="mb-4">
+              {copy.shellBadge}
+            </Badge>
+            <PageHeader
+              title={copy.pageTitle}
+              description={copy.pageDescription}
+              align="left"
+              tone="brand"
+              size="compact"
+            />
+          </div>
+          <form action={logout}>
+            <input type="hidden" name="redirectTo" value={dashboardPath} />
+            <button className="btn-secondary px-6">{copy.signOut}</button>
+          </form>
         </div>
-        <form action={logout}>
-          <input type="hidden" name="redirectTo" value={dashboardPath} />
-          <button className="btn-secondary px-6">{copy.signOut}</button>
-        </form>
       </div>
 
       <div className="flex flex-col gap-12">

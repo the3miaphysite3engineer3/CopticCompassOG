@@ -39,12 +39,14 @@ function SemanticPanel({
   eyebrow,
   count,
   className,
+  density = "default",
   children,
 }: {
   title: string;
   eyebrow: string;
   count?: number;
   className?: string;
+  density?: "default" | "compact";
   children: ReactNode;
 }) {
   return (
@@ -54,22 +56,34 @@ function SemanticPanel({
         className,
       )}
     >
-      <div className="border-b border-stone-200/80 px-5 py-4 dark:border-stone-800/80">
+      <div
+        className={cx(
+          "border-b border-stone-200/80 dark:border-stone-800/80",
+          density === "compact" ? "px-4 py-3" : "px-5 py-4",
+        )}
+      >
         <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
           {eyebrow}
         </p>
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+          <h2
+            className={cx(
+              "font-semibold text-stone-900 dark:text-stone-100",
+              density === "compact" ? "text-base" : "text-lg",
+            )}
+          >
             {title}
           </h2>
           {typeof count === "number" ? (
-            <span className="text-xs font-medium text-stone-400 dark:text-stone-500">
+            <span className="text-[11px] font-semibold tracking-[0.12em] text-stone-400 dark:text-stone-500">
               {String(count).padStart(2, "0")}
             </span>
           ) : null}
         </div>
       </div>
-      <div className="px-5 py-4">{children}</div>
+      <div className={density === "compact" ? "px-4 py-3.5" : "px-5 py-4"}>
+        {children}
+      </div>
     </section>
   );
 }
@@ -88,16 +102,17 @@ export function GrammarLessonConceptSummary({
   return (
     <SemanticPanel
       className={className}
+      density="compact"
       eyebrow={language === "en" ? "Glossary" : "Begrippen"}
       title={language === "en" ? "Key concepts" : "Kernbegrippen"}
       count={concepts.length}
     >
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-1.5">
         {concepts.map((concept) => (
           <a
             key={concept.id}
             href={`#${getGrammarConceptAnchorId(concept.id)}`}
-            className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-3 py-1.5 text-sm font-medium text-sky-700 transition-colors hover:border-sky-300 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:border-sky-800 dark:hover:bg-sky-950/60 dark:hover:text-sky-200"
+            className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700 transition-colors hover:border-sky-300 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:border-sky-800 dark:hover:bg-sky-950/60 dark:hover:text-sky-200"
           >
             {concept.title[language]}
           </a>
@@ -139,7 +154,7 @@ export function GrammarLessonConceptGlossary({
             <article
               key={concept.id}
               id={getGrammarConceptAnchorId(concept.id)}
-              className="scroll-mt-28 rounded-xl border border-stone-200/80 bg-stone-50/60 px-4 py-4 dark:border-stone-800/80 dark:bg-stone-950/40"
+              className="app-anchor-inline rounded-xl border border-stone-200/80 bg-stone-50/60 px-4 py-4 dark:border-stone-800/80 dark:bg-stone-950/40"
             >
               <div className="flex flex-wrap items-center gap-2">
                 <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
@@ -223,7 +238,7 @@ export function GrammarLessonBibliography({
               <li
                 key={source.id}
                 id={getGrammarSourceAnchorId(source.id)}
-                className="scroll-mt-28 rounded-xl border border-stone-200/80 bg-stone-50/70 px-4 py-4 dark:border-stone-800/80 dark:bg-stone-950/40"
+                className="app-anchor-inline rounded-xl border border-stone-200/80 bg-stone-50/70 px-4 py-4 dark:border-stone-800/80 dark:bg-stone-950/40"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">

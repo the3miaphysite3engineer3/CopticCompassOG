@@ -14,7 +14,7 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return (
-      <button className="icon-button pointer-events-none">
+      <button className="topbar-control pointer-events-none">
         <div className="h-5 w-5 rounded-full bg-line animate-pulse" />
       </button>
     );
@@ -25,7 +25,7 @@ export function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="icon-button group relative"
+      className="topbar-control group relative"
       aria-label="Toggle theme"
     >
       <Sun className="h-[1.1rem] w-[1.1rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0 group-hover:text-warning" />

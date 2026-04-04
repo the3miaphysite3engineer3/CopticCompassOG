@@ -2,7 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { updateCommunicationPreferences } from "@/actions/communications";
-import { FormField } from "@/components/FormField";
+import { Button } from "@/components/Button";
+import { CheckboxField } from "@/components/CheckboxField";
+import { FormField, FormHint } from "@/components/FormField";
 import { StatusNotice } from "@/components/StatusNotice";
 import { useLanguage } from "@/components/LanguageProvider";
 import { getDashboardCopy } from "@/features/dashboard/lib/dashboardCopy";
@@ -73,55 +75,44 @@ export function CommunicationPreferencesForm({
           <option value="en">English</option>
           <option value="nl">Nederlands</option>
         </select>
-        <p className="mt-2 text-xs leading-5 text-stone-500 dark:text-stone-400">
-          {copy.account.communicationLocaleHint}
-        </p>
+        <FormHint>{copy.account.communicationLocaleHint}</FormHint>
       </FormField>
 
       <div className="space-y-4 rounded-2xl border border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/30">
-        <label className="flex items-start gap-3 text-sm leading-6 text-stone-600 dark:text-stone-300">
-          <input
-            type="checkbox"
-            name="lessons_opt_in"
-            value="true"
-            defaultChecked={preferences.lessonsOptIn}
-            className="mt-1 h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-sky-500/40 dark:border-stone-700 dark:bg-stone-950"
-          />
-          <span>{copy.account.communicationLessonsLabel}</span>
-        </label>
+        <CheckboxField
+          name="lessons_opt_in"
+          value="true"
+          defaultChecked={preferences.lessonsOptIn}
+          label={copy.account.communicationLessonsLabel}
+          wrapperClassName="-m-2"
+        />
 
-        <label className="flex items-start gap-3 text-sm leading-6 text-stone-600 dark:text-stone-300">
-          <input
-            type="checkbox"
-            name="books_opt_in"
-            value="true"
-            defaultChecked={preferences.booksOptIn}
-            className="mt-1 h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-sky-500/40 dark:border-stone-700 dark:bg-stone-950"
-          />
-          <span>{copy.account.communicationBooksLabel}</span>
-        </label>
+        <CheckboxField
+          name="books_opt_in"
+          value="true"
+          defaultChecked={preferences.booksOptIn}
+          label={copy.account.communicationBooksLabel}
+          wrapperClassName="-m-2"
+        />
 
-        <label className="flex items-start gap-3 text-sm leading-6 text-stone-600 dark:text-stone-300">
-          <input
-            type="checkbox"
-            name="general_updates_opt_in"
-            value="true"
-            defaultChecked={preferences.generalUpdatesOptIn}
-            className="mt-1 h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-sky-500/40 dark:border-stone-700 dark:bg-stone-950"
-          />
-          <span>{copy.account.communicationGeneralLabel}</span>
-        </label>
+        <CheckboxField
+          name="general_updates_opt_in"
+          value="true"
+          defaultChecked={preferences.generalUpdatesOptIn}
+          label={copy.account.communicationGeneralLabel}
+          wrapperClassName="-m-2"
+        />
       </div>
 
       <p className="text-sm leading-6 text-stone-500 dark:text-stone-400">
         {copy.account.communicationHint}
       </p>
 
-      <button type="submit" className="btn-primary px-6" disabled={isPending}>
+      <Button type="submit" disabled={isPending}>
         {isPending
           ? copy.account.communicationSavePending
           : copy.account.communicationSaveIdle}
-      </button>
+      </Button>
 
       {status ? (
         <StatusNotice tone={status.type} align="left">

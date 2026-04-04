@@ -115,8 +115,9 @@ export default async function EntryPage({
 
   return (
     <PageShell
-      className="min-h-screen px-6 pb-20 pt-16"
-      contentClassName="max-w-4xl mx-auto"
+      className="min-h-screen flex flex-col items-center p-6 pb-20 md:p-10"
+      contentClassName="w-full pt-10"
+      width="standard"
       accents={[
         pageShellAccents.heroSkyArc,
         pageShellAccents.topRightEmeraldOrbOffset,

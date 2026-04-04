@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import "swagger-ui-dist/swagger-ui.css";
 import "./swagger-overrides.css";
+import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SwaggerDocsClient } from "@/features/grammar/components/SwaggerDocsClient";
@@ -25,13 +26,22 @@ const docsHighlights = [
 export default function ApiDocsPage() {
   return (
     <PageShell
-      className="min-h-screen px-6 py-14 md:px-10"
-      contentClassName="mx-auto max-w-6xl space-y-10"
+      className="min-h-screen flex flex-col items-center p-6 md:p-10"
+      contentClassName="w-full space-y-10 pt-10"
+      width="standard"
       accents={[
         pageShellAccents.topRightSkyOrb,
         pageShellAccents.bottomLeftEmeraldOrbSoft,
       ]}
     >
+      <BreadcrumbTrail
+        items={[
+          { label: "Home", href: "/en" },
+          { label: "Developers", href: getDevelopersPath("en") },
+          { label: "API Docs" },
+        ]}
+      />
+
       <PageHeader
         eyebrow="Developer Docs"
         eyebrowVariant="badge"

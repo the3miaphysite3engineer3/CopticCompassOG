@@ -130,7 +130,7 @@ export function AdminWorkspaceQuickJump({
   ] as const;
 
   return (
-    <nav className="sticky top-20 z-20 mb-8 rounded-[2rem] border border-stone-200/80 bg-white/85 p-4 shadow-lg backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/75 dark:shadow-black/20">
+    <nav className="app-sticky-panel mb-8 rounded-[2rem] border border-stone-200/80 bg-white/85 p-4 shadow-lg backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/75 dark:shadow-black/20">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <Badge tone="flat" size="xs" caps>
           Quick Jump

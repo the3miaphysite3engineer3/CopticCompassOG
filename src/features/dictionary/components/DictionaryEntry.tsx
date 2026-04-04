@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { Badge } from "@/components/Badge";
 import { useLanguage } from "@/components/LanguageProvider";
+import { surfacePanelClassName } from "@/components/SurfacePanel";
 import { DEFAULT_DICTIONARY_DIALECT_FILTER } from "@/features/dictionary/config";
 import type {
   DialectFilter,
@@ -14,6 +15,7 @@ import {
   getPreferredEntryDialectKey,
 } from "@/features/dictionary/lib/entryDisplay";
 import type { LexicalEntry } from "@/features/dictionary/types";
+import { cx } from "@/lib/classes";
 import { antinoou } from "@/lib/fonts";
 import { getEntryPath } from "@/lib/locale";
 import DialectSiglum from "./DialectSiglum";
@@ -76,11 +78,16 @@ export default function DictionaryEntryCard({
 
   return (
     <article
-      className={`group relative overflow-hidden rounded-3xl bg-white/70 dark:bg-stone-900/50 backdrop-blur-md border border-stone-200 dark:border-stone-800 shadow-md dark:shadow-lg dark:shadow-black/20 transition-all duration-300 ${
-        linkHeadword
-          ? "hover:border-stone-300 dark:hover:border-stone-700 hover:bg-white dark:hover:bg-stone-800/50"
-          : ""
-      } ${isDetailView ? "p-8 md:p-10" : "p-6 md:p-7"}`}
+      className={surfacePanelClassName({
+        rounded: "3xl",
+        interactive: linkHeadword,
+        className: cx(
+          "group relative overflow-hidden",
+          linkHeadword &&
+            "hover:border-stone-300 dark:hover:border-stone-700 dark:hover:bg-stone-800/50",
+          isDetailView ? "p-8 md:p-10" : "p-6 md:p-7",
+        ),
+      })}
     >
       <div className="pointer-events-none absolute top-0 right-0 h-32 w-32 bg-sky-500/10 dark:bg-sky-500/10 rounded-full blur-3xl opacity-70" />
 

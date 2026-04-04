@@ -2,12 +2,14 @@ import type { ReactNode } from "react";
 import { cx } from "@/lib/classes";
 
 type PageAccent = string;
+type PageShellWidth = "narrow" | "standard" | "workspace";
 
 type PageShellProps = {
   children: ReactNode;
   className?: string;
   contentClassName?: string;
   accents?: readonly PageAccent[];
+  width?: PageShellWidth;
 };
 
 const ACCENT_BASE_CLASS =
@@ -40,18 +42,33 @@ export const pageShellAccents = {
     "bottom-0 right-0 h-[420px] w-[420px] rounded-full bg-emerald-500/10 blur-[120px] dark:bg-emerald-900/10",
 } as const;
 
+const WIDTH_CLASSES: Record<PageShellWidth, string> = {
+  narrow: "page-content-narrow",
+  standard: "page-content-standard",
+  workspace: "page-content-workspace",
+};
+
 export function PageShell({
   children,
   className,
   contentClassName,
   accents = [],
+  width,
 }: PageShellProps) {
   return (
     <section className={cx("relative overflow-hidden", className)}>
       {accents.map((accentClassName, index) => (
         <div key={index} className={cx(ACCENT_BASE_CLASS, accentClassName)} />
       ))}
-      <div className={cx("relative z-10", contentClassName)}>{children}</div>
+      <div
+        className={cx(
+          "relative z-10",
+          width ? WIDTH_CLASSES[width] : undefined,
+          contentClassName,
+        )}
+      >
+        {children}
+      </div>
     </section>
   );
 }

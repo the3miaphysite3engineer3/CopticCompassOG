@@ -12,6 +12,9 @@ import {
   Legend,
 } from "recharts";
 import { useTheme } from "next-themes";
+import { buttonClassName } from "@/components/Button";
+import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { CompactSelect } from "@/components/CompactSelect";
 import {
   type AnalyticsSnapshotMap,
   type EtymologyFilter,
@@ -22,7 +25,7 @@ import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { cx } from "@/lib/classes";
-import { getDictionaryPath } from "@/lib/locale";
+import { getDictionaryPath, getLocalizedHomePath } from "@/lib/locale";
 import {
   type AnalyticsDialect,
   dialectFilterOptions,
@@ -33,46 +36,39 @@ import type { LexicalEntry } from "@/features/dictionary/types";
 import { AnalyticsSlideOver } from "./AnalyticsSlideOver";
 import { DictionaryResultsSection } from "@/features/dictionary/components/DictionaryResultsSection";
 
-const POS_COLORS = [
-  "#38bdf8",
-  "#34d399",
-  "#f472b6",
-  "#fbbf24",
-  "#a78bfa",
-  "#f87171",
-  "#94a3b8",
-];
-const GENDER_COLORS = ["#38bdf8", "#f472b6", "#34d399", "#94a3b8"];
-const ETYMOLOGY_COLORS = ["#fbbf24", "#38bdf8"]; // Amber for Egyptian, Sky for Greek
-const VERB_COLORS = ["#34d399", "#f472b6"]; // Emerald for complete, Pink for missing
-const DERIVATION_COLORS = [
-  "#a78bfa",
-  "#38bdf8",
-  "#fbbf24",
-  "#f472b6",
-  "#94a3b8",
-];
-const RELATION_COLORS = ["#38bdf8", "#a78bfa"];
+const COLOR_FALLBACKS = {
+  surface: "#ffffff",
+  line: "#e5e5e5",
+  ink: "#1c1917",
+  accent: "#38bdf8",
+  accentStrong: "#0284c7",
+  warning: "#d97706",
+  danger: "#dc2626",
+  chart1: "#38bdf8",
+  chart2: "#34d399",
+  chart3: "#f472b6",
+  chart4: "#fbbf24",
+  chart5: "#a78bfa",
+  chart6: "#f87171",
+  chart7: "#a8a29e",
+} as const;
 
-const FILTER_SELECT_CLASS_NAME =
-  "select-base h-auto cursor-pointer rounded-lg px-3 py-2 text-sm font-medium text-sky-600 dark:text-sky-400";
+function readThemeColor(token: string, fallback: string) {
+  if (typeof window === "undefined") {
+    return fallback;
+  }
+
+  const value = getComputedStyle(document.documentElement)
+    .getPropertyValue(`--${token}`)
+    .trim();
+
+  return value ? `rgb(${value})` : fallback;
+}
+
 const CHART_LEGEND_STYLE = {
   fontSize: "12px",
   paddingTop: "20px",
 } satisfies CSSProperties;
-const LIGHT_TOOLTIP_STYLE = {
-  backgroundColor: "#ffffff",
-  borderColor: "#e5e5e5",
-  borderRadius: "12px",
-  color: "#1c1917",
-} satisfies CSSProperties;
-const DARK_TOOLTIP_STYLE = {
-  backgroundColor: "#1c1917",
-  borderColor: "#292524",
-  borderRadius: "12px",
-  color: "#e7e5e4",
-} satisfies CSSProperties;
-
 type AnalyticsStatCardProps = {
   accentClassName: string;
   title: string;
@@ -167,11 +163,70 @@ export default function AnalyticsPageClient({
   const isThemeReady = resolvedTheme !== undefined;
   const isDark = resolvedTheme === "dark";
 
-  const tooltipContentStyle = isDark ? DARK_TOOLTIP_STYLE : LIGHT_TOOLTIP_STYLE;
-  const tooltipItemStyle = {
-    color: isDark ? "#e7e5e4" : "#1c1917",
-  } satisfies CSSProperties;
-  const chartCellStroke = isDark ? "rgba(0,0,0,0)" : "#ffffff";
+  const colors = useMemo(() => {
+    const surface = readThemeColor("surface", COLOR_FALLBACKS.surface);
+    const line = readThemeColor("line", COLOR_FALLBACKS.line);
+    const ink = readThemeColor("ink", COLOR_FALLBACKS.ink);
+    const accentStrong = readThemeColor(
+      "accent-strong",
+      COLOR_FALLBACKS.accentStrong,
+    );
+    const warning = readThemeColor("warning", COLOR_FALLBACKS.warning);
+    const danger = readThemeColor("danger", COLOR_FALLBACKS.danger);
+
+    return {
+      accentStrong,
+      chartCellStroke: surface,
+      danger,
+      palettes: {
+        derivation: [
+          readThemeColor("chart-5", COLOR_FALLBACKS.chart5),
+          readThemeColor("chart-1", COLOR_FALLBACKS.chart1),
+          readThemeColor("chart-4", COLOR_FALLBACKS.chart4),
+          readThemeColor("chart-3", COLOR_FALLBACKS.chart3),
+          readThemeColor("chart-7", COLOR_FALLBACKS.chart7),
+        ],
+        etymology: [
+          readThemeColor("chart-4", COLOR_FALLBACKS.chart4),
+          readThemeColor("chart-1", COLOR_FALLBACKS.chart1),
+        ],
+        gender: [
+          readThemeColor("chart-1", COLOR_FALLBACKS.chart1),
+          readThemeColor("chart-3", COLOR_FALLBACKS.chart3),
+          readThemeColor("chart-2", COLOR_FALLBACKS.chart2),
+          readThemeColor("chart-7", COLOR_FALLBACKS.chart7),
+        ],
+        pos: [
+          readThemeColor("chart-1", COLOR_FALLBACKS.chart1),
+          readThemeColor("chart-2", COLOR_FALLBACKS.chart2),
+          readThemeColor("chart-3", COLOR_FALLBACKS.chart3),
+          readThemeColor("chart-4", COLOR_FALLBACKS.chart4),
+          readThemeColor("chart-5", COLOR_FALLBACKS.chart5),
+          readThemeColor("chart-6", COLOR_FALLBACKS.chart6),
+          readThemeColor("chart-7", COLOR_FALLBACKS.chart7),
+        ],
+        relations: [
+          readThemeColor("chart-1", COLOR_FALLBACKS.chart1),
+          readThemeColor("chart-5", COLOR_FALLBACKS.chart5),
+        ],
+        verb: [
+          readThemeColor("chart-2", COLOR_FALLBACKS.chart2),
+          readThemeColor("chart-3", COLOR_FALLBACKS.chart3),
+        ],
+      },
+      tooltipContentStyle: {
+        backgroundColor: surface,
+        borderColor: line,
+        borderRadius: "12px",
+        color: ink,
+      } satisfies CSSProperties,
+      tooltipItemStyle: {
+        color: ink,
+      } satisfies CSSProperties,
+      warning,
+    };
+  }, [resolvedTheme]);
+
   const chartPlaceholder = (
     <div className="h-full w-full rounded-2xl bg-stone-100/70 dark:bg-stone-900/40" />
   );
@@ -298,107 +353,113 @@ export default function AnalyticsPageClient({
 
   return (
     <PageShell
-      className="min-h-screen px-6 pb-32 pt-16"
-      contentClassName="max-w-6xl mx-auto"
+      className="min-h-screen flex flex-col items-center p-6 pb-20 md:p-10"
+      contentClassName="w-full pt-10"
+      width="standard"
       accents={[
         pageShellAccents.heroEmeraldArc,
         pageShellAccents.topRightSkyOrbInset,
       ]}
     >
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
-        <div className="flex items-center gap-3">
-          <Link
-            href={getDictionaryPath(language)}
-            className="btn-secondary gap-2 px-4"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            {t("analytics.back")}
-          </Link>
-        </div>
+      <div className="mb-10 space-y-8">
+        <BreadcrumbTrail
+          items={[
+            { label: t("nav.home"), href: getLocalizedHomePath(language) },
+            { label: t("nav.dictionary"), href: getDictionaryPath(language) },
+            { label: t("nav.analytics") },
+          ]}
+        />
 
-        <div className="flex flex-col sm:flex-row items-center gap-3">
-          <SurfacePanel
-            variant="subtle"
-            shadow="soft"
-            className="flex items-center space-x-3 rounded-2xl p-3 px-4 dark:border-stone-700"
-          >
-            <span className="inline-flex items-center gap-2 whitespace-nowrap text-stone-500 dark:text-stone-400">
-              <Filter className="h-4 w-4" />
-              <FormLabel tone="muted">{t("analytics.filter")}</FormLabel>
-            </span>
-            <select
-              className={FILTER_SELECT_CLASS_NAME}
-              value={selectedDialect}
-              onChange={(e) =>
-                setSelectedDialect(e.target.value as AnalyticsDialect)
-              }
+        <PageHeader
+          title={t("analytics.title")}
+          align="left"
+          size="compact"
+          tone="analytics"
+        />
+
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-3">
+            <Link
+              href={getDictionaryPath(language)}
+              className={buttonClassName({ variant: "secondary" })}
             >
-              {dialectFilterOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {getDialectFilterOptionLabel(option.value, t)}
+              <ArrowLeft className="h-4 w-4" />
+              {t("analytics.back")}
+            </Link>
+          </div>
+
+          <div className="flex flex-col items-center gap-3 sm:flex-row">
+            <SurfacePanel
+              variant="subtle"
+              shadow="soft"
+              className="flex items-center space-x-3 rounded-2xl p-3 px-4 dark:border-stone-700"
+            >
+              <span className="inline-flex items-center whitespace-nowrap text-stone-500 dark:text-stone-400">
+                <Filter className="h-4 w-4" />
+              </span>
+              <CompactSelect
+                label={t("analytics.filter")}
+                value={selectedDialect}
+                onChange={(e) =>
+                  setSelectedDialect(e.target.value as AnalyticsDialect)
+                }
+                className="text-stone-700 dark:text-stone-200"
+              >
+                {dialectFilterOptions.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {getDialectFilterOptionLabel(option.value, t)}
+                  </option>
+                ))}
+              </CompactSelect>
+            </SurfacePanel>
+
+            <SurfacePanel
+              variant="subtle"
+              shadow="soft"
+              className="flex items-center space-x-3 rounded-2xl p-3 px-4 dark:border-stone-700"
+            >
+              <CompactSelect
+                label={t("analytics.filterEtymology" as TranslationKey)}
+                value={selectedEtymology}
+                onChange={(e) =>
+                  setSelectedEtymology(e.target.value as EtymologyFilter)
+                }
+                className="text-stone-700 dark:text-stone-200"
+              >
+                <option value="ALL">
+                  {t("analytics.filterEtymologyAll" as TranslationKey)}
                 </option>
-              ))}
-            </select>
-          </SurfacePanel>
-
-          <SurfacePanel
-            variant="subtle"
-            shadow="soft"
-            className="flex items-center space-x-3 rounded-2xl p-3 px-4 dark:border-stone-700"
-          >
-            <span className="inline-flex items-center gap-2 whitespace-nowrap text-stone-500 dark:text-stone-400">
-              <FormLabel tone="muted">
-                {t("analytics.filterEtymology" as TranslationKey)}
-              </FormLabel>
-            </span>
-            <select
-              className={FILTER_SELECT_CLASS_NAME}
-              value={selectedEtymology}
-              onChange={(e) =>
-                setSelectedEtymology(e.target.value as EtymologyFilter)
-              }
-            >
-              <option value="ALL">
-                {t("analytics.filterEtymologyAll" as TranslationKey)}
-              </option>
-              <option value="Egy">
-                {t("analytics.filterEtymologyEgy" as TranslationKey)}
-              </option>
-              <option value="Gr">
-                {t("analytics.filterEtymologyGr" as TranslationKey)}
-              </option>
-            </select>
-          </SurfacePanel>
+                <option value="Egy">
+                  {t("analytics.filterEtymologyEgy" as TranslationKey)}
+                </option>
+                <option value="Gr">
+                  {t("analytics.filterEtymologyGr" as TranslationKey)}
+                </option>
+              </CompactSelect>
+            </SurfacePanel>
+          </div>
         </div>
       </div>
 
-      <PageHeader
-        title={t("analytics.title")}
-        align="left"
-        size="compact"
-        tone="analytics"
-        className="mb-10"
-      />
-
       <div className="grid md:grid-cols-3 gap-6 mb-12">
         <AnalyticsStatCard
-          accentClassName="bg-sky-500/10"
+          accentClassName="bg-[rgb(var(--accent)/0.12)]"
           title={t("analytics.totalRoots")}
           value={stats.totalRoots.toLocaleString()}
           onClick={() => handleStatClick("total")}
         />
         <AnalyticsStatCard
-          accentClassName="bg-yellow-500/10"
+          accentClassName="bg-[rgb(var(--warning)/0.12)]"
           title={t("analytics.meaningUnknown")}
           value={stats.unknownMeaning.toLocaleString()}
-          valueClassName="text-4xl font-bold text-sky-600 dark:text-sky-400"
+          valueClassName="text-4xl font-bold"
           onClick={() => handleStatClick("unknown")}
         />
         <AnalyticsStatCard
-          accentClassName="bg-rose-500/10"
+          accentClassName="bg-[rgb(var(--danger)/0.12)]"
           title={t("analytics.meaningUncertain")}
           value={stats.uncertainMeaning.toLocaleString()}
-          valueClassName="text-4xl font-bold text-sky-600/70 dark:text-sky-400/70"
+          valueClassName="text-4xl font-bold"
           onClick={() => handleStatClick("uncertain")}
         />
       </div>
@@ -410,8 +471,8 @@ export default function AnalyticsPageClient({
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip
-                    contentStyle={tooltipContentStyle}
-                    itemStyle={tooltipItemStyle}
+                    contentStyle={colors.tooltipContentStyle}
+                    itemStyle={colors.tooltipItemStyle}
                   />
                   <Legend wrapperStyle={CHART_LEGEND_STYLE} />
                   <Pie
@@ -436,8 +497,12 @@ export default function AnalyticsPageClient({
                     {stats.posChartData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={POS_COLORS[index % POS_COLORS.length]}
-                        stroke={chartCellStroke}
+                        fill={
+                          colors.palettes.pos[
+                            index % colors.palettes.pos.length
+                          ]
+                        }
+                        stroke={colors.chartCellStroke}
                         className="hover:opacity-80 transition-opacity"
                       />
                     ))}
@@ -461,7 +526,7 @@ export default function AnalyticsPageClient({
           }
           footer={
             <div className="mt-auto rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 shadow-sm dark:border-stone-800/50 dark:bg-stone-950/40">
-              <li className="mb-2 flex list-none items-center justify-between text-sm text-sky-600 dark:text-sky-400">
+              <li className="mb-2 flex list-none items-center justify-between text-sm text-[rgb(var(--accent-strong))]">
                 <span>{t("analytics.verbalNouns")}</span>
                 <span className="font-bold">{stats.verbalNouns}</span>
               </li>
@@ -478,8 +543,8 @@ export default function AnalyticsPageClient({
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip
-                    contentStyle={tooltipContentStyle}
-                    itemStyle={tooltipItemStyle}
+                    contentStyle={colors.tooltipContentStyle}
+                    itemStyle={colors.tooltipItemStyle}
                   />
                   <Legend wrapperStyle={CHART_LEGEND_STYLE} />
                   <Pie
@@ -502,8 +567,12 @@ export default function AnalyticsPageClient({
                     {stats.genderChartData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={GENDER_COLORS[index % GENDER_COLORS.length]}
-                        stroke={chartCellStroke}
+                        fill={
+                          colors.palettes.gender[
+                            index % colors.palettes.gender.length
+                          ]
+                        }
+                        stroke={colors.chartCellStroke}
                         className="hover:opacity-80 transition-opacity"
                       />
                     ))}
@@ -524,8 +593,8 @@ export default function AnalyticsPageClient({
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip
-                    contentStyle={tooltipContentStyle}
-                    itemStyle={tooltipItemStyle}
+                    contentStyle={colors.tooltipContentStyle}
+                    itemStyle={colors.tooltipItemStyle}
                   />
                   <Legend wrapperStyle={CHART_LEGEND_STYLE} />
                   <Pie
@@ -547,8 +616,12 @@ export default function AnalyticsPageClient({
                     {stats.etymologyChartData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={ETYMOLOGY_COLORS[index % ETYMOLOGY_COLORS.length]}
-                        stroke={chartCellStroke}
+                        fill={
+                          colors.palettes.etymology[
+                            index % colors.palettes.etymology.length
+                          ]
+                        }
+                        stroke={colors.chartCellStroke}
                         className="hover:opacity-80 transition-opacity"
                       />
                     ))}
@@ -567,8 +640,8 @@ export default function AnalyticsPageClient({
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip
-                    contentStyle={tooltipContentStyle}
-                    itemStyle={tooltipItemStyle}
+                    contentStyle={colors.tooltipContentStyle}
+                    itemStyle={colors.tooltipItemStyle}
                   />
                   <Legend wrapperStyle={CHART_LEGEND_STYLE} />
                   <Pie
@@ -591,9 +664,11 @@ export default function AnalyticsPageClient({
                       <Cell
                         key={`cell-${index}`}
                         fill={
-                          DERIVATION_COLORS[index % DERIVATION_COLORS.length]
+                          colors.palettes.derivation[
+                            index % colors.palettes.derivation.length
+                          ]
                         }
-                        stroke={chartCellStroke}
+                        stroke={colors.chartCellStroke}
                         className="hover:opacity-80 transition-opacity"
                       />
                     ))}
@@ -616,8 +691,8 @@ export default function AnalyticsPageClient({
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip
-                    contentStyle={tooltipContentStyle}
-                    itemStyle={tooltipItemStyle}
+                    contentStyle={colors.tooltipContentStyle}
+                    itemStyle={colors.tooltipItemStyle}
                   />
                   <Legend wrapperStyle={CHART_LEGEND_STYLE} />
                   <Pie
@@ -639,8 +714,12 @@ export default function AnalyticsPageClient({
                     {stats.verbCompletenessData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={VERB_COLORS[index % VERB_COLORS.length]}
-                        stroke={chartCellStroke}
+                        fill={
+                          colors.palettes.verb[
+                            index % colors.palettes.verb.length
+                          ]
+                        }
+                        stroke={colors.chartCellStroke}
                         className="hover:opacity-80 transition-opacity"
                       />
                     ))}
@@ -659,8 +738,8 @@ export default function AnalyticsPageClient({
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                   <Tooltip
-                    contentStyle={tooltipContentStyle}
-                    itemStyle={tooltipItemStyle}
+                    contentStyle={colors.tooltipContentStyle}
+                    itemStyle={colors.tooltipItemStyle}
                   />
                   <Legend wrapperStyle={CHART_LEGEND_STYLE} />
                   <Pie
@@ -682,8 +761,12 @@ export default function AnalyticsPageClient({
                     {stats.relationTypeData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
-                        fill={RELATION_COLORS[index % RELATION_COLORS.length]}
-                        stroke={chartCellStroke}
+                        fill={
+                          colors.palettes.relations[
+                            index % colors.palettes.relations.length
+                          ]
+                        }
+                        stroke={colors.chartCellStroke}
                         className="hover:opacity-80 transition-opacity"
                       />
                     ))}

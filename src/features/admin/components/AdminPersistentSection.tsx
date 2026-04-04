@@ -2,7 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { Badge } from "@/components/Badge";
-import { cx } from "@/lib/classes";
+import { surfacePanelClassName } from "@/components/SurfacePanel";
 import { usePersistentDisclosureState } from "@/features/admin/lib/uiState";
 
 export function AdminPersistentSection({
@@ -30,9 +30,11 @@ export function AdminPersistentSection({
   return (
     <details
       id={id}
-      className={cx(
-        "group scroll-mt-32 overflow-hidden rounded-[2rem] border border-stone-200/80 bg-white/75 shadow-md backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/50 dark:shadow-xl dark:shadow-black/20",
-      )}
+      className={surfacePanelClassName({
+        rounded: "4xl",
+        variant: "elevated",
+        className: "group app-anchor-section overflow-hidden",
+      })}
       open={isOpen}
       onToggle={(event) => setIsOpen(event.currentTarget.open)}
     >

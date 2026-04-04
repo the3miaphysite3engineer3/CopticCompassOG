@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
@@ -46,42 +47,59 @@ export default async function CommunicationConfirmPage({
 
   return (
     <PageShell
-      className="min-h-screen px-6 py-16 md:px-10"
-      contentClassName="max-w-3xl mx-auto pt-8"
+      className="min-h-screen flex flex-col items-center p-6 md:p-10"
+      contentClassName="w-full pt-10"
+      width="standard"
       accents={[
         pageShellAccents.topLeftSkyOrb,
         pageShellAccents.bottomRightEmeraldOrb,
       ]}
     >
-      <PageHeader
-        title={getTranslation(resolvedLocale, "contact.confirm.title")}
-        description={getTranslation(resolvedLocale, messageKey)}
-        tone="brand"
-        className="mb-12"
-      />
+      <div className="mb-12 space-y-8">
+        <BreadcrumbTrail
+          items={[
+            {
+              label: getTranslation(resolvedLocale, "nav.home"),
+              href: getLocalizedHomePath(resolvedLocale),
+            },
+            {
+              label: getTranslation(resolvedLocale, "nav.contact"),
+              href: getContactPath(resolvedLocale),
+            },
+            { label: getTranslation(resolvedLocale, "contact.confirm.title") },
+          ]}
+        />
+        <PageHeader
+          title={getTranslation(resolvedLocale, "contact.confirm.title")}
+          description={getTranslation(resolvedLocale, messageKey)}
+          tone="brand"
+        />
+      </div>
 
-      <SurfacePanel rounded="3xl" className="p-8 md:p-10">
-        <div className="space-y-6 text-center">
-          <p className="text-base leading-7 text-stone-600 dark:text-stone-300">
-            {getTranslation(resolvedLocale, messageKey)}
-          </p>
+      <div className="mx-auto w-full max-w-3xl">
+        <SurfacePanel rounded="3xl" className="p-8 md:p-10">
+          <div className="space-y-6 text-center">
+            <p className="text-base leading-7 text-stone-600 dark:text-stone-300">
+              {getTranslation(resolvedLocale, messageKey)}
+            </p>
 
-          <div className="flex flex-col justify-center gap-3 sm:flex-row">
-            <Link
-              href={getLocalizedHomePath(resolvedLocale)}
-              className="btn-primary px-6"
-            >
-              {getTranslation(resolvedLocale, "contact.confirm.homeCta")}
-            </Link>
-            <Link
-              href={getContactPath(resolvedLocale)}
-              className="btn-secondary px-6"
-            >
-              {getTranslation(resolvedLocale, "contact.confirm.contactCta")}
-            </Link>
+            <div className="flex flex-col justify-center gap-3 sm:flex-row">
+              <Link
+                href={getLocalizedHomePath(resolvedLocale)}
+                className="btn-primary px-6"
+              >
+                {getTranslation(resolvedLocale, "contact.confirm.homeCta")}
+              </Link>
+              <Link
+                href={getContactPath(resolvedLocale)}
+                className="btn-secondary px-6"
+              >
+                {getTranslation(resolvedLocale, "contact.confirm.contactCta")}
+              </Link>
+            </div>
           </div>
-        </div>
-      </SurfacePanel>
+        </SurfacePanel>
+      </div>
     </PageShell>
   );
 }

@@ -41,6 +41,7 @@ export const loginMessages = defineMessages({
     "update.password": "New Password",
     "update.passwordPlaceholder": "Must be at least 8 characters",
     "update.submit": "Update Password",
+    "update.backToDashboard": "Back to Dashboard",
     "update.notice.invalidInput":
       "Password must be at least 8 characters long.",
     "update.notice.error":
@@ -106,6 +107,7 @@ export const loginMessages = defineMessages({
     "update.password": "Nieuw wachtwoord",
     "update.passwordPlaceholder": "Moet minstens 8 tekens bevatten",
     "update.submit": "Wachtwoord bijwerken",
+    "update.backToDashboard": "Terug naar dashboard",
     "update.notice.invalidInput":
       "Het wachtwoord moet minstens 8 tekens bevatten.",
     "update.notice.error":

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import StructuredData from "@/components/StructuredData";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
@@ -217,8 +218,9 @@ export default async function DevelopersPage({
 
   return (
     <PageShell
-      className="min-h-screen px-6 py-14 md:px-10"
-      contentClassName="mx-auto max-w-6xl space-y-10"
+      className="min-h-screen flex flex-col items-center p-6 md:p-10"
+      contentClassName="w-full space-y-10 pt-10"
+      width="standard"
       accents={[
         pageShellAccents.topRightSkyOrb,
         pageShellAccents.bottomLeftEmeraldOrbSoft,
@@ -235,6 +237,16 @@ export default async function DevelopersPage({
             path: getDevelopersPath(resolvedLocale),
           },
         ])}
+      />
+
+      <BreadcrumbTrail
+        items={[
+          {
+            label: getTranslation(resolvedLocale, "nav.home"),
+            href: getLocalizedHomePath(resolvedLocale),
+          },
+          { label: copy.breadcrumbLabel },
+        ]}
       />
 
       <PageHeader

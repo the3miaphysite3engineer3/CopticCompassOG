@@ -47,6 +47,16 @@
   --success: 5 150 105;
   --warning: 217 119 6;
   --danger: 220 38 38;
+  --chart-1: 2 132 199;
+  --chart-2: 5 150 105;
+  --chart-3: 244 114 182;
+  --chart-4: 217 119 6;
+  --chart-5: 139 92 246;
+  --chart-6: 220 38 38;
+  --chart-7: 120 113 108;
+  --app-sticky-offset: 5rem;
+  --app-anchor-offset: 8rem;
+  --app-anchor-inline-offset: 7rem;
 }
 
 .dark {
@@ -65,11 +75,19 @@
   --success: 52 211 153;
   --warning: 251 191 36;
   --danger: 248 113 113;
+  --chart-1: 56 189 248;
+  --chart-2: 52 211 153;
+  --chart-3: 251 113 133;
+  --chart-4: 251 191 36;
+  --chart-5: 167 139 250;
+  --chart-6: 248 113 113;
+  --chart-7: 168 162 158;
 }
 
 @layer base {
   html {
     background-color: rgb(var(--paper));
+    scroll-padding-top: var(--app-anchor-offset);
   }
 
   body {
@@ -115,12 +133,16 @@
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
-  .page-shell {
-    @apply relative overflow-hidden pb-16 pt-10 md:pb-20 md:pt-14;
+  .page-content-narrow {
+    @apply mx-auto w-full max-w-3xl;
   }
 
-  .page-content {
-    @apply mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8;
+  .page-content-standard {
+    @apply mx-auto w-full max-w-5xl;
+  }
+
+  .page-content-workspace {
+    @apply mx-auto w-full max-w-[90rem];
   }
 
   .page-header {
@@ -155,6 +177,10 @@
     @apply inline-flex h-10 w-10 items-center justify-center rounded-lg border border-stone-200 bg-white/50 text-stone-600 shadow-sm transition-all duration-200 hover:-translate-y-px hover:bg-stone-100 hover:text-stone-900 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25 dark:border-stone-800 dark:bg-stone-900/50 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-200;
   }
 
+  .topbar-control {
+    @apply inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-line bg-surface px-0 text-muted shadow-soft transition-colors hover:bg-elevated hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25;
+  }
+
   .btn-primary {
     @apply inline-flex h-11 items-center justify-center rounded-xl bg-sky-600 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-px hover:bg-sky-500 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/35 disabled:pointer-events-none disabled:opacity-55 dark:bg-sky-500 dark:hover:bg-sky-400;
   }
@@ -175,8 +201,24 @@
     @apply h-12 w-full rounded-2xl border border-stone-200 bg-white/80 px-4 text-base text-stone-900 shadow-sm outline-none transition-[border-color,box-shadow,background-color,color] focus:border-sky-400/60 focus:ring-2 focus:ring-sky-500/30 dark:border-stone-800 dark:bg-stone-950/70 dark:text-stone-100;
   }
 
+  .compact-select-base {
+    @apply h-auto min-h-10 w-full cursor-pointer rounded-xl border border-stone-200 bg-white/80 px-3 py-2 text-sm font-medium text-stone-900 shadow-sm outline-none transition-[border-color,box-shadow,background-color,color] focus:border-sky-400/60 focus:ring-2 focus:ring-sky-500/30 dark:border-stone-800 dark:bg-stone-950/70 dark:text-stone-100;
+  }
+
   .textarea-base {
     @apply min-h-[10rem] w-full rounded-2xl border border-stone-200 bg-white/80 px-4 py-3 text-base leading-7 text-stone-900 shadow-sm outline-none transition-[border-color,box-shadow,background-color,color] placeholder:text-stone-400 focus:border-sky-400/60 focus:ring-2 focus:ring-sky-500/30 dark:border-stone-800 dark:bg-stone-950/70 dark:text-stone-100 dark:placeholder:text-stone-500;
+  }
+
+  .checkbox-base {
+    @apply mt-1 h-4 w-4 shrink-0 rounded border-stone-300 text-sky-600 transition-[border-color,background-color,box-shadow] focus:ring-2 focus:ring-sky-500/40 focus:ring-offset-2 focus:ring-offset-white dark:border-stone-700 dark:bg-stone-950 dark:checked:bg-sky-500 dark:focus:ring-offset-stone-950;
+  }
+
+  .checkbox-row {
+    @apply flex cursor-pointer items-start gap-3 rounded-xl p-2 transition-colors hover:bg-stone-100/70 dark:hover:bg-stone-800/60;
+  }
+
+  .field-hint {
+    @apply mt-2 text-xs leading-5 text-stone-500 dark:text-stone-400;
   }
 
   .badge-base {
@@ -193,6 +235,20 @@
 }
 
 @layer utilities {
+  .app-sticky-panel {
+    position: sticky;
+    top: var(--app-sticky-offset);
+    z-index: 20;
+  }
+
+  .app-anchor-section {
+    scroll-margin-top: var(--app-anchor-offset);
+  }
+
+  .app-anchor-inline {
+    scroll-margin-top: var(--app-anchor-inline-offset);
+  }
+
   .font-coptic {
     font-family: var(--font-coptic, "Antinoou"), serif;
     text-rendering: optimizeLegibility;

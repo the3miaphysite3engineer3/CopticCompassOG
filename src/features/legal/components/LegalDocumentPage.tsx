@@ -1,16 +1,27 @@
+import {
+  BreadcrumbTrail,
+  type BreadcrumbTrailItem,
+} from "@/components/BreadcrumbTrail";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import type { LegalDocument } from "@/features/legal/lib/legalDocuments";
 
 export function LegalDocumentPage({
+  breadcrumbItems,
   title,
   description,
   sections,
-}: LegalDocument) {
+}: LegalDocument & { breadcrumbItems?: readonly BreadcrumbTrailItem[] }) {
   return (
-    <PageShell className="py-24" contentClassName="mx-auto max-w-4xl px-4">
-      <PageHeader title={title} description={description} className="mb-12" />
+    <PageShell
+      className="min-h-screen flex flex-col items-center p-6 md:p-10"
+      contentClassName="w-full max-w-4xl pt-10"
+    >
+      <div className="mb-12 space-y-8">
+        {breadcrumbItems ? <BreadcrumbTrail items={breadcrumbItems} /> : null}
+        <PageHeader title={title} description={description} />
+      </div>
 
       <SurfacePanel className="space-y-8 p-8 text-stone-800 dark:text-stone-200 md:p-12">
         {sections.map((section) => (

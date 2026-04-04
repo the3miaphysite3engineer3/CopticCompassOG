@@ -18,12 +18,12 @@ type StatusNoticeProps = {
 
 const TONE_CLASSES: Record<StatusNoticeTone, string> = {
   default:
-    "border-stone-200 bg-white/60 text-stone-600 shadow-sm backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/50 dark:text-stone-400",
+    "border-[rgb(var(--line))] bg-[rgb(var(--surface)/0.6)] text-[rgb(var(--muted))] shadow-sm backdrop-blur-md",
   error:
-    "border-red-200 bg-red-50 text-red-600 dark:border-red-900/50 dark:bg-red-950/20 dark:text-red-400",
-  info: "border-sky-200 bg-sky-50/80 text-sky-700 dark:border-sky-900/50 dark:bg-sky-950/20 dark:text-sky-400",
+    "border-[rgb(var(--danger)/0.18)] bg-[rgb(var(--danger)/0.08)] text-[rgb(var(--danger))]",
+  info: "border-[rgb(var(--accent)/0.18)] bg-[rgb(var(--accent-soft)/0.72)] text-[rgb(var(--accent-strong))]",
   success:
-    "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/20 dark:text-emerald-400",
+    "border-[rgb(var(--success)/0.18)] bg-[rgb(var(--success)/0.08)] text-[rgb(var(--success))]",
 };
 
 const SIZE_CLASSES: Record<StatusNoticeSize, string> = {

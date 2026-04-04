@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { Button, buttonClassName } from "@/components/Button";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell } from "@/components/PageShell";
 import { StatusNotice } from "@/components/StatusNotice";
@@ -64,12 +65,15 @@ export function RouteErrorState({
 
         <div className="flex flex-wrap gap-3">
           {reset ? (
-            <button type="button" onClick={reset} className="btn-primary">
+            <Button type="button" onClick={reset}>
               {retryLabel}
-            </button>
+            </Button>
           ) : null}
           {primaryHref && primaryLabel ? (
-            <Link href={primaryHref} className="btn-secondary">
+            <Link
+              href={primaryHref}
+              className={buttonClassName({ variant: "secondary" })}
+            >
               {primaryLabel}
             </Link>
           ) : null}

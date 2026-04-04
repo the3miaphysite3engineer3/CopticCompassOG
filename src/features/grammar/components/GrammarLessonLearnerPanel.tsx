@@ -1,13 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { Bookmark, CheckCircle2, NotebookPen } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Bookmark,
+  CheckCircle2,
+  NotebookPen,
+} from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { StatusNotice } from "@/components/StatusNotice";
 import { cx } from "@/lib/classes";
 import { getDashboardPath } from "@/lib/locale";
 import type { Language } from "@/types/i18n";
 import type { GrammarLessonLearnerSummary } from "@/features/grammar/lib/grammarLearnerState";
+
+export type GrammarAdjacentLessonLink = {
+  href: string;
+  number: number;
+  title: string;
+};
 
 type GrammarLessonLearnerPanelProps = {
   errorMessage: string | null;
@@ -28,6 +40,12 @@ type GrammarLessonNotesPanelProps = {
   onSaveNote: () => Promise<void>;
   onNoteChange: (value: string) => void;
   status: "loading" | "ready" | "signed-out" | "unavailable";
+};
+
+type GrammarLessonNavigationPanelProps = {
+  language: Language;
+  nextLesson: GrammarAdjacentLessonLink | null;
+  previousLesson: GrammarAdjacentLessonLink | null;
 };
 
 function formatProgressLabel(
@@ -66,7 +84,7 @@ export function GrammarLessonLearnerPanel({
 
   if (status === "loading") {
     return (
-      <div className="h-44 animate-pulse rounded-2xl border border-stone-200/90 bg-white/70 shadow-sm dark:border-stone-800/90 dark:bg-stone-950/40" />
+      <div className="h-40 animate-pulse rounded-2xl border border-stone-200/90 bg-white/70 shadow-sm dark:border-stone-800/90 dark:bg-stone-950/40" />
     );
   }
 
@@ -90,12 +108,12 @@ export function GrammarLessonLearnerPanel({
 
   return (
     <section className="overflow-hidden rounded-2xl border border-stone-200/90 bg-white/70 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/40">
-      <div className="border-b border-stone-200/80 px-5 py-4 dark:border-stone-800/80">
+      <div className="border-b border-stone-200/80 px-4 py-3 dark:border-stone-800/80">
         <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
           {language === "nl" ? "Studietracking" : "Study tracking"}
         </p>
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+          <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">
             {language === "nl" ? "Jouw voortgang" : "Your progress"}
           </h2>
           {summary.isCompleted ? (
@@ -106,7 +124,7 @@ export function GrammarLessonLearnerPanel({
         </div>
       </div>
 
-      <div className="space-y-4 px-5 py-4">
+      <div className="space-y-3.5 px-4 py-3.5">
         <div>
           <div className="mb-2 flex items-center justify-between gap-4 text-sm">
             <span className="font-medium text-stone-700 dark:text-stone-300">
@@ -158,7 +176,7 @@ export function GrammarLessonLearnerPanel({
             }}
             disabled={isBookmarkPending}
             className={cx(
-              "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors",
+              "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition-colors",
               summary.isBookmarked
                 ? "bg-stone-900 text-white hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200"
                 : "border border-stone-200 bg-white/80 text-stone-700 hover:border-sky-200 hover:text-sky-700 dark:border-stone-700 dark:bg-stone-900/60 dark:text-stone-300 dark:hover:border-sky-900/70 dark:hover:text-sky-300",
@@ -175,7 +193,7 @@ export function GrammarLessonLearnerPanel({
           </button>
           <Link
             href={getDashboardPath(language)}
-            className="btn-secondary px-4 py-2 text-sm"
+            className="btn-secondary px-3.5 text-sm"
           >
             {language === "nl" ? "Dashboard" : "Dashboard"}
           </Link>
@@ -186,6 +204,156 @@ export function GrammarLessonLearnerPanel({
             {errorMessage}
           </p>
         ) : null}
+      </div>
+    </section>
+  );
+}
+
+function LessonNavigationCard({
+  className,
+  direction,
+  language,
+  lesson,
+}: {
+  className?: string;
+  direction: "previous" | "next";
+  language: Language;
+  lesson: GrammarAdjacentLessonLink | null;
+}) {
+  const isPrevious = direction === "previous";
+  const Icon = isPrevious ? ArrowLeft : ArrowRight;
+  const eyebrow =
+    language === "nl"
+      ? isPrevious
+        ? "Vorige les"
+        : "Volgende les"
+      : isPrevious
+        ? "Previous lesson"
+        : "Next lesson";
+  const unavailableLabel =
+    language === "nl" ? "Niet beschikbaar" : "Unavailable";
+
+  const content = (
+    <>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+            {eyebrow}
+          </p>
+          <p
+            className={cx(
+              "line-clamp-2 text-sm font-semibold",
+              lesson
+                ? "text-stone-900 dark:text-stone-100"
+                : "text-stone-400 dark:text-stone-500",
+            )}
+          >
+            {lesson
+              ? `${language === "nl" ? "Les" : "Lesson"} ${lesson.number}: ${lesson.title}`
+              : unavailableLabel}
+          </p>
+        </div>
+        <Icon
+          className={cx(
+            "mt-0.5 h-4 w-4 shrink-0",
+            lesson
+              ? "text-sky-600 dark:text-sky-300"
+              : "text-stone-300 dark:text-stone-600",
+          )}
+        />
+      </div>
+    </>
+  );
+
+  if (!lesson) {
+    return (
+      <div
+        className={cx(
+          "rounded-xl border border-stone-200/90 bg-stone-50/80 px-3.5 py-3 opacity-70 dark:border-stone-800/90 dark:bg-stone-900/40",
+          className,
+        )}
+      >
+        {content}
+      </div>
+    );
+  }
+
+  return (
+    <Link
+      href={lesson.href}
+      className={cx(
+        "rounded-xl border border-stone-200/90 bg-white/80 px-3.5 py-3 transition-colors hover:border-sky-200 hover:bg-sky-50/70 dark:border-stone-800/90 dark:bg-stone-900/60 dark:hover:border-sky-900/70 dark:hover:bg-sky-950/30",
+        className,
+      )}
+    >
+      {content}
+    </Link>
+  );
+}
+
+export function GrammarLessonNavigationPanel({
+  language,
+  nextLesson,
+  previousLesson,
+}: GrammarLessonNavigationPanelProps) {
+  return (
+    <section className="overflow-hidden rounded-2xl border border-stone-200/90 bg-white/70 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/40">
+      <div className="border-b border-stone-200/80 px-4 py-3 dark:border-stone-800/80">
+        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          {language === "nl" ? "Navigatie" : "Navigation"}
+        </p>
+        <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">
+          {language === "nl" ? "Andere lessen" : "Other lessons"}
+        </h2>
+      </div>
+
+      <div className="grid gap-3 px-4 py-3.5">
+        <LessonNavigationCard
+          direction="previous"
+          language={language}
+          lesson={previousLesson}
+        />
+        <LessonNavigationCard
+          direction="next"
+          language={language}
+          lesson={nextLesson}
+        />
+      </div>
+    </section>
+  );
+}
+
+export function GrammarLessonBottomNavigation({
+  language,
+  nextLesson,
+  previousLesson,
+}: GrammarLessonNavigationPanelProps) {
+  return (
+    <section className="mt-10 border-t border-stone-200/80 pt-8 dark:border-stone-800/80">
+      <div className="mb-4 space-y-1">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          {language === "nl" ? "Vervolg" : "Continue"}
+        </p>
+        <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
+          {language === "nl"
+            ? "Navigeer tussen lessen"
+            : "Move between lessons"}
+        </h2>
+      </div>
+
+      <div className="grid gap-3 md:grid-cols-2">
+        <LessonNavigationCard
+          className="h-full"
+          direction="previous"
+          language={language}
+          lesson={previousLesson}
+        />
+        <LessonNavigationCard
+          className="h-full"
+          direction="next"
+          language={language}
+          lesson={nextLesson}
+        />
       </div>
     </section>
   );

@@ -1,4 +1,5 @@
 import { ChevronDown } from "lucide-react";
+import { surfacePanelClassName } from "@/components/SurfacePanel";
 import { SubmissionFeedbackPanel } from "@/features/submissions/components/SubmissionFeedbackPanel";
 import type { SubmissionRow } from "@/features/submissions/types";
 import {
@@ -22,9 +23,11 @@ export function DashboardRecentExerciseDisclosure({
 
   return (
     <details
-      className={cx(
-        "group overflow-hidden rounded-3xl border border-stone-200 bg-white/75 shadow-md backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/55 dark:shadow-xl dark:shadow-black/20",
-      )}
+      className={surfacePanelClassName({
+        rounded: "3xl",
+        variant: "elevated",
+        className: "group overflow-hidden",
+      })}
       open={defaultOpen}
     >
       <summary className="flex cursor-pointer list-none items-start justify-between gap-4 p-6 [&::-webkit-details-marker]:hidden md:p-8">

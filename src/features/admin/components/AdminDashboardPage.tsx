@@ -27,7 +27,8 @@ export async function AdminDashboardPage({
   return (
     <PageShell
       className="min-h-screen px-6 py-16"
-      contentClassName="mx-auto min-h-[80vh] max-w-5xl animate-in fade-in slide-in-from-bottom-8 duration-700"
+      contentClassName="min-h-[80vh] animate-in fade-in slide-in-from-bottom-8 duration-700"
+      width="workspace"
       accents={[
         pageShellAccents.heroEmeraldArc,
         pageShellAccents.topRightSkyOrbInset,

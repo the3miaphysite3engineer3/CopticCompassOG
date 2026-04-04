@@ -30,7 +30,7 @@ const NavbarAuthLink = dynamic(
       <Link
         href="/login"
         data-label="Log In"
-        className="group inline-grid h-10 items-center rounded-full px-4 text-sm tracking-[0.02em] text-stone-600 transition-all duration-200 dark:text-stone-400"
+        className="group inline-grid h-10 items-center justify-items-center rounded-full px-4 text-sm tracking-[0.02em] text-stone-600 transition-all duration-200 dark:text-stone-400"
       >
         <span className="col-start-1 row-start-1 font-medium">Log In</span>
       </Link>
@@ -77,7 +77,7 @@ export function Navbar() {
 
           <nav
             aria-label="Primary"
-            className="hidden items-center gap-1 md:flex"
+            className="hidden items-center gap-1 lg:flex"
           >
             {links.map((link) => {
               const isActive =
@@ -87,7 +87,7 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   data-label={link.label}
-                  className={`group inline-grid h-10 items-center rounded-full px-4 text-sm tracking-[0.02em] transition-all duration-200 before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25 ${
+                  className={`group inline-grid h-10 items-center justify-items-center rounded-full px-4 text-sm tracking-[0.02em] text-center transition-all duration-200 before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25 ${
                     isActive
                       ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
                       : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
@@ -116,7 +116,7 @@ export function Navbar() {
             <LanguageToggle />
             <button
               type="button"
-              className="icon-button md:hidden"
+              className="topbar-control lg:hidden"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-controls="mobile-navigation"
               aria-expanded={isMobileMenuOpen}
@@ -135,7 +135,7 @@ export function Navbar() {
           <nav
             id="mobile-navigation"
             aria-label="Mobile"
-            className="mb-3 flex flex-col gap-1 rounded-2xl border border-stone-200 bg-white/80 p-2 shadow-md backdrop-blur-md md:hidden dark:border-stone-800 dark:bg-stone-900/70 dark:shadow-black/20"
+            className="mb-3 flex flex-col gap-1 rounded-2xl border border-stone-200 bg-white/80 p-2 shadow-md backdrop-blur-md lg:hidden dark:border-stone-800 dark:bg-stone-900/70 dark:shadow-black/20"
           >
             {links.map((link) => {
               const isActive =
@@ -146,7 +146,7 @@ export function Navbar() {
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   data-label={link.label}
-                  className={`group grid rounded-xl px-4 py-3 text-sm tracking-[0.02em] transition-colors before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] ${
+                  className={`group grid justify-items-center rounded-xl px-4 py-3 text-center text-sm tracking-[0.02em] transition-colors before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] ${
                     isActive
                       ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
                       : "text-stone-600 hover:bg-stone-50 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-900/60 dark:hover:text-stone-200"

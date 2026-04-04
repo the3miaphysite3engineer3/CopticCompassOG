@@ -1,6 +1,7 @@
 "use client";
 
 import { login, signup, signInWithGoogle } from "@/actions/auth";
+import { Button, buttonClassName } from "@/components/Button";
 import type { TranslationKey } from "@/lib/i18n";
 import { FormField } from "@/components/FormField";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -64,7 +65,8 @@ export function LoginForm({
   return (
     <PageShell
       className="min-h-screen px-6 py-16 md:px-10"
-      contentClassName="max-w-3xl mx-auto pt-8"
+      contentClassName="pt-8"
+      width="narrow"
       accents={[
         pageShellAccents.topLeftSkyOrb,
         pageShellAccents.bottomRightEmeraldOrb,
@@ -105,7 +107,7 @@ export function LoginForm({
                   <span>{t("login.password")}</span>
                   <Link
                     href="/forgot-password"
-                    className="text-xs text-brand-600 dark:text-brand-400 hover:underline"
+                    className={buttonClassName({ size: "sm", variant: "link" })}
                   >
                     {t("login.forgotPassword")}
                   </Link>
@@ -123,12 +125,12 @@ export function LoginForm({
             </FormField>
 
             <div className="space-y-3 pt-2">
-              <button formAction={login} className="btn-primary w-full">
+              <Button formAction={login} fullWidth>
                 {t("login.signIn")}
-              </button>
-              <button formAction={signup} className="btn-secondary w-full">
+              </Button>
+              <Button formAction={signup} fullWidth variant="secondary">
                 {t("login.createAccount")}
-              </button>
+              </Button>
             </div>
 
             <div className="relative py-2">
@@ -142,14 +144,15 @@ export function LoginForm({
               </div>
             </div>
 
-            <button
+            <Button
               formAction={signInWithGoogle}
               formNoValidate
-              className="w-full flex items-center justify-center gap-3 rounded-xl border border-stone-200 dark:border-stone-800 bg-white dark:bg-stone-900 px-4 py-2.5 text-sm font-medium text-stone-700 dark:text-stone-300 hover:bg-stone-50 dark:hover:bg-stone-800 transition-colors shadow-sm"
+              fullWidth
+              variant="social"
             >
               <FaGoogle className="h-4 w-4 text-red-500" />
               {t("login.google")}
-            </button>
+            </Button>
 
             {noticeMessage && (
               <StatusNotice tone={noticeVariant}>{noticeMessage}</StatusNotice>

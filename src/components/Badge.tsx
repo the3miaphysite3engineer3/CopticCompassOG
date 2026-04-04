@@ -14,14 +14,14 @@ type BadgeProps = {
 
 const TONE_CLASSES: Record<BadgeTone, string> = {
   accent:
-    "border border-sky-200 bg-sky-50 text-sky-700 dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-400",
+    "border border-[rgb(var(--accent)/0.18)] bg-[rgb(var(--accent-soft)/0.78)] text-[rgb(var(--accent-strong))]",
   coptic:
-    "border border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-400",
-  flat: "bg-stone-200 text-stone-600 dark:bg-stone-800 dark:text-stone-300",
+    "border border-[rgb(var(--coptic)/0.18)] bg-[rgb(var(--coptic-soft)/0.78)] text-[rgb(var(--coptic))]",
+  flat: "bg-[rgb(var(--line))] text-[rgb(var(--muted))]",
   neutral:
-    "border border-stone-200 bg-stone-100 text-stone-600 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-300",
+    "border border-[rgb(var(--line))] bg-[rgb(var(--elevated))] text-[rgb(var(--muted))]",
   surface:
-    "border border-stone-200 bg-white/70 text-stone-600 shadow-sm backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/50 dark:text-stone-400",
+    "border border-[rgb(var(--line))] bg-[rgb(var(--surface)/0.72)] text-[rgb(var(--muted))] shadow-sm backdrop-blur-md",
 };
 
 const SIZE_CLASSES: Record<BadgeSize, string> = {

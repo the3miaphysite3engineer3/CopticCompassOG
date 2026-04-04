@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { resetPassword } from "@/actions/auth";
+import { Button, buttonClassName } from "@/components/Button";
 import { FormField } from "@/components/FormField";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
@@ -49,7 +50,8 @@ export default async function ForgotPasswordPage({
   return (
     <PageShell
       className="min-h-screen px-6 py-16 md:px-10"
-      contentClassName="mx-auto max-w-3xl pt-8"
+      contentClassName="pt-8"
+      width="narrow"
       accents={[
         pageShellAccents.topLeftSkyOrb,
         pageShellAccents.bottomRightEmeraldOrb,
@@ -85,12 +87,15 @@ export default async function ForgotPasswordPage({
             </FormField>
 
             <div className="space-y-3 pt-2">
-              <button formAction={resetPassword} className="btn-primary w-full">
+              <Button formAction={resetPassword} fullWidth>
                 {getTranslation(language, "forgot.sendLink")}
-              </button>
+              </Button>
               <Link
                 href="/login"
-                className="block text-center text-sm font-medium text-stone-500 hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200 transition-colors"
+                className={buttonClassName({
+                  className: "w-full justify-center",
+                  variant: "link",
+                })}
               >
                 {getTranslation(language, "forgot.backToSignIn")}
               </Link>

@@ -37,6 +37,7 @@ type GrammarLessonOutlineProps = {
   title: ReactNode;
   eyebrow?: ReactNode;
   className?: string;
+  activeSectionId?: string | null;
   sections: readonly {
     id: string;
     title: ReactNode;
@@ -102,7 +103,7 @@ export function GrammarLessonSection({
       id={id}
       open={renderMode === "pdf" ? true : defaultOpen}
       className={cx(
-        "group scroll-mt-28 overflow-hidden rounded-2xl border border-stone-200/90 bg-white/55 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/30",
+        "group app-anchor-section overflow-hidden rounded-2xl border border-stone-200/90 bg-white/55 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/30",
         className,
       )}
     >
@@ -133,6 +134,7 @@ export function GrammarLessonOutline({
   title,
   eyebrow,
   className,
+  activeSectionId,
   sections,
 }: GrammarLessonOutlineProps) {
   if (sections.length === 0) {
@@ -146,38 +148,56 @@ export function GrammarLessonOutline({
         className,
       )}
     >
-      <div className="border-b border-stone-200/80 px-4 py-3 dark:border-stone-800/80 sm:px-5 sm:py-4">
+      <div className="border-b border-stone-200/80 px-4 py-3 dark:border-stone-800/80">
         {eyebrow && (
           <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
             {eyebrow}
           </p>
         )}
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+          <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">
             {title}
           </h2>
-          <span className="text-xs font-medium text-stone-400 dark:text-stone-500">
+          <span className="text-[11px] font-semibold tracking-[0.12em] text-stone-400 dark:text-stone-500">
             {String(sections.length).padStart(2, "0")}
           </span>
         </div>
       </div>
 
       <ol className="divide-y divide-stone-200/80 dark:divide-stone-800/80">
-        {sections.map((section, index) => (
-          <li key={section.id}>
-            <a
-              href={`#${section.id}`}
-              className="group flex items-start gap-4 px-4 py-3 transition-colors hover:bg-stone-50/80 dark:hover:bg-stone-900/60 sm:px-5"
-            >
-              <span className="w-6 shrink-0 pt-0.5 text-xs font-semibold text-stone-400 transition-colors group-hover:text-sky-600 dark:text-stone-500 dark:group-hover:text-sky-400">
-                {String(index + 1).padStart(2, "0")}
-              </span>
-              <span className="text-sm font-medium text-stone-700 transition-colors group-hover:text-sky-700 dark:text-stone-300 dark:group-hover:text-sky-300">
-                {section.title}
-              </span>
-            </a>
-          </li>
-        ))}
+        {sections.map((section, index) => {
+          const isActive = activeSectionId === section.id;
+
+          return (
+            <li key={section.id}>
+              <a
+                href={`#${section.id}`}
+                aria-current={isActive ? "location" : undefined}
+                className={cx(
+                  "group flex items-start gap-3 px-4 py-2.5 transition-colors hover:bg-stone-50/80 dark:hover:bg-stone-900/60",
+                  isActive && "bg-sky-50/90 dark:bg-sky-950/30",
+                )}
+              >
+                <span
+                  className={cx(
+                    "w-5 shrink-0 pt-0.5 text-[11px] font-semibold tracking-[0.08em] text-stone-400 transition-colors group-hover:text-sky-600 dark:text-stone-500 dark:group-hover:text-sky-400",
+                    isActive && "text-sky-700 dark:text-sky-300",
+                  )}
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <span
+                  className={cx(
+                    "min-w-0 text-sm leading-5 font-medium text-stone-700 transition-colors group-hover:text-sky-700 dark:text-stone-300 dark:group-hover:text-sky-300",
+                    isActive && "text-sky-700 dark:text-sky-300",
+                  )}
+                >
+                  {section.title}
+                </span>
+              </a>
+            </li>
+          );
+        })}
       </ol>
     </nav>
   );

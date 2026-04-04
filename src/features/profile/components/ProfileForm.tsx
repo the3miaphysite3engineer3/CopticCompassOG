@@ -4,6 +4,7 @@
 import { useState } from "react";
 import imageCompression from "browser-image-compression";
 import { updateProfile } from "@/actions/profile";
+import { Button, buttonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
 import { createClient } from "@/lib/supabase/client";
 import { FormField } from "@/components/FormField";
@@ -157,7 +158,11 @@ export function ProfileForm({
         </div>
         <div>
           <label
-            className="btn-secondary relative cursor-pointer px-4 py-2 text-xs"
+            className={buttonClassName({
+              className: "relative cursor-pointer",
+              size: "sm",
+              variant: "secondary",
+            })}
             htmlFor="single"
           >
             {isUploading ? copy.profile.uploadPending : copy.profile.uploadIdle}
@@ -204,13 +209,14 @@ export function ProfileForm({
           </p>
         </FormField>
 
-        <button
+        <Button
           type="submit"
-          className="btn-primary w-full px-8 md:w-auto"
           disabled={isUploading}
+          fullWidth
+          className="md:w-auto"
         >
           {copy.profile.saveChanges}
-        </button>
+        </Button>
 
         {status && (
           <StatusNotice tone={status.type} className="mt-4">

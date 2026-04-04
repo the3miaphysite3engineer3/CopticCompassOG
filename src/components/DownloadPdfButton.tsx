@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Download, Lock } from "lucide-react";
 import { AuthGatedActionButton } from "@/components/AuthGatedActionButton";
+import { buttonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
 import { cx } from "@/lib/classes";
 import { useOptionalAuthGate } from "@/lib/supabase/useOptionalAuthGate";
@@ -150,7 +151,10 @@ export function DownloadPdfButton({
 
   return (
     <AuthGatedActionButton
-      className={cx("btn-secondary gap-2 px-4", isGenerating && "opacity-70")}
+      className={cx(
+        buttonClassName({ variant: "secondary" }),
+        isGenerating && "opacity-70",
+      )}
       disabled={isGenerating}
       isAuthenticated={authGate.isAuthenticated}
       isReady={authGate.isReady}

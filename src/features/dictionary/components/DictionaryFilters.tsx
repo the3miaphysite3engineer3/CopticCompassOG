@@ -1,6 +1,8 @@
 "use client";
 
 import { SlidersHorizontal } from "lucide-react";
+import { CheckboxField } from "@/components/CheckboxField";
+import { CompactSelect } from "@/components/CompactSelect";
 import { useLanguage } from "@/components/LanguageProvider";
 import { FormLabel } from "@/components/FormField";
 import {
@@ -39,57 +41,47 @@ export function DictionaryFilters({
 
       <div className="hidden h-6 w-px bg-stone-300 dark:bg-stone-700 md:block" />
 
-      <div className="flex items-center space-x-2">
-        <FormLabel tone="muted">{t("dict.pos")}</FormLabel>
-        <select
-          className="select-base h-auto cursor-pointer rounded-lg px-3 py-2 text-sm font-medium"
-          value={selectedPartOfSpeech}
-          onChange={(event) =>
-            setSelectedPartOfSpeech(
-              event.target.value as DictionaryPartOfSpeechFilter,
-            )
-          }
-        >
-          {dictionaryPartOfSpeechFilterOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {t(option.labelKey)}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CompactSelect
+        label={t("dict.pos")}
+        value={selectedPartOfSpeech}
+        onChange={(event) =>
+          setSelectedPartOfSpeech(
+            event.target.value as DictionaryPartOfSpeechFilter,
+          )
+        }
+      >
+        {dictionaryPartOfSpeechFilterOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {t(option.labelKey)}
+          </option>
+        ))}
+      </CompactSelect>
 
       <div className="hidden h-6 w-px bg-stone-300 dark:bg-stone-700 sm:block" />
 
-      <div className="flex items-center space-x-2">
-        <FormLabel tone="muted">{t("dict.dialect")}</FormLabel>
-        <select
-          className="select-base h-auto cursor-pointer rounded-lg px-3 py-2 text-sm font-medium"
-          value={selectedDialect}
-          onChange={(event) =>
-            setSelectedDialect(event.target.value as DialectFilter)
-          }
-        >
-          {dialectFilterOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {getDialectFilterOptionLabel(option.value, t)}
-            </option>
-          ))}
-        </select>
-      </div>
+      <CompactSelect
+        label={t("dict.dialect")}
+        value={selectedDialect}
+        onChange={(event) =>
+          setSelectedDialect(event.target.value as DialectFilter)
+        }
+      >
+        {dialectFilterOptions.map((option) => (
+          <option key={option.value} value={option.value}>
+            {getDialectFilterOptionLabel(option.value, t)}
+          </option>
+        ))}
+      </CompactSelect>
 
       <div className="hidden h-6 w-px bg-stone-300 dark:bg-stone-700 sm:block" />
 
-      <label className="flex cursor-pointer items-center space-x-2 rounded-lg p-1 transition-colors hover:bg-stone-100 dark:hover:bg-stone-800">
-        <input
-          type="checkbox"
-          className="h-4 w-4 transform cursor-pointer rounded border-stone-300 text-sky-600 transition duration-150 ease-in-out focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 dark:border-stone-600 dark:bg-stone-900 dark:checked:bg-sky-500"
-          checked={exactMatch}
-          onChange={(e) => setExactMatch(e.target.checked)}
-        />
-        <FormLabel tone="muted" className="cursor-pointer mb-0">
-          {t("dict.exactMatch") || "Exact Match"}
-        </FormLabel>
-      </label>
+      <CheckboxField
+        checked={exactMatch}
+        label={t("dict.exactMatch") || "Exact Match"}
+        labelClassName="text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400"
+        onChange={(event) => setExactMatch(event.target.checked)}
+        wrapperClassName="-m-2 rounded-lg p-2 hover:bg-stone-100 dark:hover:bg-stone-800"
+      />
     </div>
   );
 }

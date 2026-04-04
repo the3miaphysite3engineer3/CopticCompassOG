@@ -2,10 +2,12 @@
 
 import Link from "next/link";
 import { BarChart3 } from "lucide-react";
+import { buttonClassName } from "@/components/Button";
+import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
-import { getAnalyticsPath } from "@/lib/locale";
+import { getAnalyticsPath, getLocalizedHomePath } from "@/lib/locale";
 import { DictionaryFilters } from "./DictionaryFilters";
 import { DictionaryResultsSection } from "./DictionaryResultsSection";
 import { DictionarySearchBar } from "./DictionarySearchBar";
@@ -41,21 +43,31 @@ function DictionaryPageBody({ dictionaryPath }: DictionaryPageBodyProps) {
 
   return (
     <PageShell
-      className="min-h-screen pb-20"
-      contentClassName="mx-auto max-w-5xl px-6 pt-16 md:pt-20"
+      className="min-h-screen flex flex-col items-center p-6 pb-20 md:p-10"
+      contentClassName="w-full pt-10"
+      width="standard"
       accents={[
         pageShellAccents.heroSkyArc,
         pageShellAccents.topRightEmeraldOrbInset,
       ]}
     >
-      <div className="mb-5 flex items-center justify-end">
-        <Link
-          href={getAnalyticsPath(language)}
-          className="btn-secondary gap-2 px-4"
-        >
-          <BarChart3 className="h-4 w-4" />
-          <span className="text-sm tracking-wide">{t("nav.analytics")}</span>
-        </Link>
+      <div className="mb-5 space-y-4">
+        <BreadcrumbTrail
+          items={[
+            { label: t("nav.home"), href: getLocalizedHomePath(language) },
+            { label: t("nav.dictionary") },
+          ]}
+        />
+
+        <div className="flex items-center justify-end">
+          <Link
+            href={getAnalyticsPath(language)}
+            className={buttonClassName({ variant: "secondary" })}
+          >
+            <BarChart3 className="h-4 w-4" />
+            {t("nav.analytics")}
+          </Link>
+        </div>
       </div>
 
       <PageHeader
@@ -66,7 +78,7 @@ function DictionaryPageBody({ dictionaryPath }: DictionaryPageBodyProps) {
         className="mb-16"
       />
 
-      <div className="relative sticky top-5 z-20 isolate mb-12 flex flex-col gap-4">
+      <div className="relative app-sticky-panel isolate mb-12 flex flex-col gap-4">
         <DictionarySearchBar
           isKeyboardOpen={isKeyboardOpen}
           onAppend={handleKeyboardAppend}

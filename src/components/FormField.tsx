@@ -19,6 +19,11 @@ type FormFieldProps = {
   labelTone?: FormLabelTone;
 };
 
+type FormHintProps = {
+  children: ReactNode;
+  className?: string;
+};
+
 const LABEL_TONE_CLASSES: Record<FormLabelTone, string> = {
   default: "block text-sm font-semibold text-stone-700 dark:text-stone-300",
   muted:
@@ -60,4 +65,8 @@ export function FormField({
       {children}
     </div>
   );
+}
+
+export function FormHint({ children, className }: FormHintProps) {
+  return <p className={cx("field-hint", className)}>{children}</p>;
 }

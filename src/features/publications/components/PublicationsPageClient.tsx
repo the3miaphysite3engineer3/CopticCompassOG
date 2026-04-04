@@ -7,6 +7,7 @@ import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
+import { surfacePanelClassName } from "@/components/SurfacePanel";
 import {
   getPublicationPath,
   LanguageBadge,
@@ -104,14 +105,18 @@ function PublicationTile({
   viewDetailsLabel: string;
 }) {
   const { language } = useLanguage();
-  const baseClass =
-    "group relative rounded-3xl bg-white/70 dark:bg-stone-900/50 backdrop-blur-md border border-stone-200 dark:border-stone-800 p-5 md:p-6 shadow-md dark:shadow-xl dark:shadow-black/20 transition-all duration-300 flex flex-col justify-between overflow-hidden";
+  const baseClass = surfacePanelClassName({
+    rounded: "3xl",
+    interactive: true,
+    className:
+      "group relative flex flex-col justify-between overflow-hidden p-5 md:p-6",
+  });
 
   return (
     <Link
       href={getPublicationPath(pub.id, language)}
       id={pub.id}
-      className={`${baseClass} scroll-mt-32 hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-emerald-500/10 cursor-pointer transform hover:-translate-y-1`}
+      className={`${baseClass} app-anchor-section hover:border-emerald-300 dark:hover:border-emerald-700 hover:shadow-emerald-500/10 cursor-pointer transform hover:-translate-y-1`}
     >
       <TileInner
         pub={pub}
@@ -128,7 +133,8 @@ export default function PublicationsPageClient() {
   return (
     <PageShell
       className="min-h-screen flex flex-col items-center p-6 md:p-10"
-      contentClassName="max-w-5xl w-full space-y-12 pt-10"
+      contentClassName="w-full space-y-12 pt-10"
+      width="standard"
       accents={[
         pageShellAccents.topRightEmeraldOrb,
         pageShellAccents.topLeftSkyOrbInset,

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ChevronDown } from "lucide-react";
 import { Badge } from "@/components/Badge";
+import { surfacePanelClassName } from "@/components/SurfacePanel";
 import { ContactMessageReviewForm } from "@/features/contact/components/ContactMessageReviewForm";
 import { ContactMessageStatusBadge } from "@/features/contact/components/ContactMessageStatusBadge";
 import {
@@ -53,7 +54,11 @@ function AdminItemDisclosure({
 }) {
   return (
     <details
-      className="group overflow-hidden rounded-3xl border border-stone-200/80 bg-white/75 shadow-md backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/55 dark:shadow-xl dark:shadow-black/20"
+      className={surfacePanelClassName({
+        rounded: "3xl",
+        variant: "elevated",
+        className: "group overflow-hidden",
+      })}
       open={defaultOpen}
     >
       <summary className="flex cursor-pointer list-none items-start justify-between gap-4 p-6 [&::-webkit-details-marker]:hidden md:p-7">

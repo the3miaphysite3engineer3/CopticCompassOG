@@ -57,8 +57,9 @@ export default function PublicationDetailPageClient({
 
   return (
     <PageShell
-      className="min-h-screen px-6 py-16 md:px-10"
-      contentClassName="mx-auto max-w-6xl space-y-10"
+      className="min-h-screen flex flex-col items-center p-6 md:p-10"
+      contentClassName="w-full space-y-10 pt-10"
+      width="standard"
       accents={[
         pageShellAccents.topRightEmeraldOrb,
         pageShellAccents.topLeftSkyOrbInset,

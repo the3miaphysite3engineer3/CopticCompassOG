@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { updatePassword } from "@/actions/auth";
+import { Button, buttonClassName } from "@/components/Button";
 import { FormField } from "@/components/FormField";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
@@ -7,6 +9,7 @@ import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { AuthFlashNoticeCleaner } from "@/features/auth/components/AuthFlashNoticeCleaner";
 import { getTranslation } from "@/lib/i18n";
+import { getDashboardPath } from "@/lib/locale";
 import { createNoIndexMetadata } from "@/lib/metadata";
 import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
 import { requireAuthenticatedPageSession } from "@/lib/supabase/auth";
@@ -50,7 +53,8 @@ export default async function UpdatePasswordPage({
   return (
     <PageShell
       className="min-h-screen px-6 py-16 md:px-10"
-      contentClassName="mx-auto max-w-3xl pt-8"
+      contentClassName="pt-8"
+      width="narrow"
       accents={[
         pageShellAccents.topLeftSkyOrb,
         pageShellAccents.bottomRightEmeraldOrb,
@@ -87,12 +91,18 @@ export default async function UpdatePasswordPage({
             </FormField>
 
             <div className="space-y-3 pt-2">
-              <button
-                formAction={updatePassword}
-                className="btn-primary w-full"
-              >
+              <Button formAction={updatePassword} fullWidth>
                 {getTranslation(language, "update.submit")}
-              </button>
+              </Button>
+              <Link
+                href={getDashboardPath(language)}
+                className={buttonClassName({
+                  className: "w-full justify-center",
+                  variant: "link",
+                })}
+              >
+                {getTranslation(language, "update.backToDashboard")}
+              </Link>
             </div>
 
             {noticeMessage && (

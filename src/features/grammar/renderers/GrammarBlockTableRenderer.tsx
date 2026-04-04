@@ -189,7 +189,10 @@ export function GrammarTableBlockRenderer({
         {block.rows.map((row) => (
           <tr
             key={row.id}
-            className={useRowHeaderLayout ? "align-middle" : "align-top"}
+            className={cx(
+              "group/row transition-colors",
+              useRowHeaderLayout ? "align-middle" : "align-top",
+            )}
           >
             {block.columns.map((column) => {
               const isRowHeader = column.id === block.rowHeaderColumnId;
@@ -199,7 +202,7 @@ export function GrammarTableBlockRenderer({
                   <th
                     key={column.id}
                     scope="row"
-                    className="sticky left-0 z-10 w-28 border-r border-stone-200 bg-stone-100 px-3 py-2 text-left text-sm font-semibold text-stone-900 shadow-[10px_0_16px_-14px_rgba(28,25,23,0.45)] dark:border-stone-700 dark:bg-stone-800/95 dark:text-stone-100 dark:shadow-[10px_0_18px_-14px_rgba(0,0,0,0.7)] sm:static sm:w-32 sm:px-4 sm:py-3 sm:text-base sm:shadow-none [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7"
+                    className="sticky left-0 z-10 w-28 border-r border-stone-200 bg-stone-100 px-3 py-2 text-left text-sm font-semibold text-stone-900 shadow-[10px_0_16px_-14px_rgba(28,25,23,0.45)] transition-colors group-hover/row:border-sky-200 group-hover/row:bg-sky-100/90 dark:border-stone-700 dark:bg-stone-800/95 dark:text-stone-100 dark:shadow-[10px_0_18px_-14px_rgba(0,0,0,0.7)] dark:group-hover/row:border-sky-800/70 dark:group-hover/row:bg-sky-950/40 sm:static sm:w-32 sm:px-4 sm:py-3 sm:text-base sm:shadow-none [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7"
                   >
                     {renderBlocks(row.cells[column.id] ?? [], {
                       inheritTextColor: true,
@@ -211,11 +214,12 @@ export function GrammarTableBlockRenderer({
               return (
                 <td
                   key={column.id}
-                  className={
+                  className={cx(
+                    "transition-colors group-hover/row:bg-sky-50/85 dark:group-hover/row:bg-sky-950/24",
                     useRowHeaderLayout
-                      ? "w-[22.66%] px-2.5 py-2 text-center align-middle text-sm sm:px-4 sm:py-3 sm:text-base [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7"
-                      : "px-3 py-2 text-sm sm:p-3 sm:text-base [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7"
-                  }
+                      ? "w-[22.66%] px-2.5 py-2 text-center align-middle text-sm group-hover/row:text-sky-950 sm:px-4 sm:py-3 sm:text-base dark:group-hover/row:text-stone-100 [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7"
+                      : "px-3 py-2 text-sm group-hover/row:text-sky-950 sm:p-3 sm:text-base dark:group-hover/row:text-stone-100 [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7",
+                  )}
                 >
                   {renderBlocks(row.cells[column.id] ?? [], {
                     inheritTextColor,

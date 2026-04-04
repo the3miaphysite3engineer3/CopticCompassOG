@@ -12,6 +12,7 @@ import {
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
+import { surfacePanelClassName } from "@/components/SurfacePanel";
 import { cx } from "@/lib/classes";
 import {
   getDictionaryPath,
@@ -30,8 +31,12 @@ type FeatureCardProps = {
   tone: FeatureCardTone;
 };
 
-const FEATURE_CARD_BASE_CLASS =
-  "group relative flex h-full min-h-[280px] cursor-pointer flex-col items-center overflow-hidden rounded-3xl border border-stone-200 bg-white/70 p-8 shadow-md backdrop-blur-md transition-all duration-300 hover:-translate-y-1 dark:border-stone-800 dark:bg-stone-900/50 dark:shadow-xl dark:shadow-black/20 md:p-10";
+const FEATURE_CARD_BASE_CLASS = surfacePanelClassName({
+  rounded: "3xl",
+  interactive: true,
+  className:
+    "group relative flex h-full min-h-[280px] cursor-pointer flex-col items-center overflow-hidden p-8 md:p-10",
+});
 
 const FEATURE_CARD_TONES: Record<
   FeatureCardTone,
