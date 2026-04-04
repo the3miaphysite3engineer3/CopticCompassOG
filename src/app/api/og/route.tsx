@@ -67,7 +67,7 @@ function renderGenericCard() {
                 color: "#0f766e",
               }}
             >
-              Digital Humanities
+              Coptic Study Platform
             </div>
           </div>
 
@@ -98,8 +98,8 @@ function renderGenericCard() {
                 color: "#334155",
               }}
             >
-              Scholarly portfolio, lexical search, analytics, and learning tools
-              by {siteConfig.author.name}.
+              Dictionary, grammar lessons, publications, and learning tools for
+              Coptic study.
             </div>
           </div>
         </div>
@@ -113,11 +113,12 @@ function renderGenericCard() {
           }}
         >
           {[
-            `${siteConfig.dictionaryEntryCount.toLocaleString()} entries`,
+            `${siteConfig.dictionaryEntryCount.toLocaleString()} searchable entries`,
             "Coptic / English / Greek search",
-            "Virtual keyboard",
-            "Dictionary analytics",
             "Grammar lessons",
+            "Publications",
+            siteConfig.founderCreditLine,
+            "Virtual keyboard",
           ].map((label) => (
             <div
               key={label}

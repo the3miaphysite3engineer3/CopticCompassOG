@@ -44,6 +44,7 @@ export function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const dashboardHref = getDashboardPath(language);
   const loginHref = getLoginPath(dashboardHref);
+  const brandLabel = t("home.title");
 
   const links = [
     { href: getPublicationsPath(language), label: t("nav.publications") },
@@ -63,14 +64,14 @@ export function Navbar() {
             <div className="relative h-10 w-10 shrink-0">
               <Image
                 src="/logo/logo-colored.png"
-                alt="Wannes Logo"
+                alt={`${brandLabel} logo`}
                 fill
                 sizes="40px"
                 className="object-contain drop-shadow"
               />
             </div>
             <span className="whitespace-nowrap font-coptic text-xl font-bold text-transparent bg-gradient-to-r from-stone-800 to-stone-500 bg-clip-text transition-colors dark:from-stone-100 dark:to-stone-400">
-              {t("nav.home")}
+              {brandLabel}
             </span>
           </Link>
 

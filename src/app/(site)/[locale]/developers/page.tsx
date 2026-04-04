@@ -17,9 +17,9 @@ import { createBreadcrumbStructuredData } from "@/lib/structuredData";
 const developerCopy = {
   en: {
     title: "Developers",
-    seoTitle: "Coptic Grammar API for Developers",
+    seoTitle: "Coptic Compass Grammar API for Developers",
     description:
-      "Explore the public Coptic grammar API, OpenAPI schema, static JSON exports, and integration notes for developers building on the grammar dataset.",
+      "Explore the public Coptic Compass grammar API, OpenAPI schema, static JSON exports, and integration notes for developers building on the grammar dataset.",
     eyebrow: "Developer Platform",
     heroTitle: "Build on the Coptic grammar dataset",
     heroDescription:
@@ -103,9 +103,9 @@ const lessonTitles = payload.data.map((lesson) => lesson.title.en);`,
   },
   nl: {
     title: "Ontwikkelaars",
-    seoTitle: "Koptische grammatica-API voor ontwikkelaars",
+    seoTitle: "Koptisch Kompas grammatica-API voor ontwikkelaars",
     description:
-      "Verken de publieke Koptische grammatica-API, het OpenAPI-schema, statische JSON-exports en integratienotities voor ontwikkelaars.",
+      "Verken de publieke grammatica-API van Koptisch Kompas, het OpenAPI-schema, statische JSON-exports en integratienotities voor ontwikkelaars.",
     eyebrow: "Developerplatform",
     heroTitle: "Bouw voort op de grammatica-dataset",
     heroDescription:

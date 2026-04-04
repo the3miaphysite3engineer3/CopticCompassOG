@@ -39,28 +39,28 @@ const STRUCTURED_DATA_COPY = {
     copticLanguageName: "Coptic",
     publicationCreativeWorkStatus: "In preparation",
     websiteDescription: siteConfig.dictionaryEntryCount
-      ? `Digital Coptic dictionary, grammar lessons, publications, and research tools by Kyrillos Wannes, featuring ${siteConfig.dictionaryEntryCount.toLocaleString()} searchable entries.`
-      : "Digital Coptic dictionary, grammar lessons, publications, and research tools by Kyrillos Wannes.",
+      ? `Coptic Compass is a digital home for Coptic study, with ${siteConfig.dictionaryEntryCount.toLocaleString()} searchable dictionary entries, grammar lessons, publications, and research tools.`
+      : "Coptic Compass is a digital home for Coptic study, with a searchable dictionary, grammar lessons, publications, and research tools.",
     dictionary: {
       pageName: "Coptic Dictionary",
       pageDescription:
         "Search the Coptic-English dictionary by Coptic, English, or Greek, with dialect filters, grammatical detail, and a built-in virtual keyboard.",
       setName: "Coptic-English Dictionary",
       setDescription:
-        "A digital Coptic dictionary with English and Greek glosses, dialect forms, and grammatical annotations.",
+        "A digital Coptic dictionary from Coptic Compass with English and Greek glosses, dialect forms, and grammatical annotations.",
     },
     grammar: {
       hubPageName: "Coptic Grammar Lessons",
       hubPageDescription:
-        "Published Coptic grammar lessons with exercises, concept glossaries, and source notes by Kyrillos Wannes.",
+        "Structured Coptic grammar lessons from Coptic Compass, with exercises, concept glossaries, and source notes.",
       hubListName: "Published Coptic Grammar Lessons",
       learningResourceType: "Grammar lesson",
     },
     publications: {
       pageName: "Publications",
       pageDescription:
-        "Books, reference works, and research projects by Kyrillos Wannes, including published and forthcoming Coptic language materials.",
-      listName: "Publications by Kyrillos Wannes",
+        "Books, reference works, and research materials available through Coptic Compass, including works by Kyrillos Wannes.",
+      listName: "Coptic Compass Publications",
     },
     definedTerm: {
       partOfSpeech: "Part of speech",
@@ -72,28 +72,28 @@ const STRUCTURED_DATA_COPY = {
     copticLanguageName: "Koptisch",
     publicationCreativeWorkStatus: "In voorbereiding",
     websiteDescription: siteConfig.dictionaryEntryCount
-      ? `Digitale Koptische woordenboeklemma's, grammaticalessen, publicaties en onderzoekstools van Kyrillos Wannes, met ${siteConfig.dictionaryEntryCount.toLocaleString()} doorzoekbare lemma's.`
-      : "Digitale Koptische woordenboeklemma's, grammaticalessen, publicaties en onderzoekstools van Kyrillos Wannes.",
+      ? `Coptic Compass is een digitaal thuis voor de studie van het Koptisch, met ${siteConfig.dictionaryEntryCount.toLocaleString()} doorzoekbare woordenboeklemma's, grammaticalessen, publicaties en onderzoekstools.`
+      : "Coptic Compass is een digitaal thuis voor de studie van het Koptisch, met een doorzoekbaar woordenboek, grammaticalessen, publicaties en onderzoekstools.",
     dictionary: {
       pageName: "Koptisch Woordenboek",
       pageDescription:
         "Doorzoek het Koptisch-Nederlandse woordenboek op Koptisch, Nederlands of Grieks, met dialectfilters, grammaticale details en een ingebouwd virtueel toetsenbord.",
       setName: "Koptisch-Nederlands Woordenboek",
       setDescription:
-        "Een digitaal Koptisch woordenboek met Nederlandse en Griekse glossen, dialectvormen en grammaticale annotaties.",
+        "Een digitaal Koptisch woordenboek van Coptic Compass met Nederlandse en Griekse glossen, dialectvormen en grammaticale annotaties.",
     },
     grammar: {
       hubPageName: "Lessen Koptische Grammatica",
       hubPageDescription:
-        "Gepubliceerde lessen Koptische grammatica met oefeningen, begrippenlijsten en bronnotities van Kyrillos Wannes.",
+        "Gestructureerde lessen Koptische grammatica van Coptic Compass, met oefeningen, begrippenlijsten en bronnotities.",
       hubListName: "Gepubliceerde lessen Koptische grammatica",
       learningResourceType: "Grammaticales",
     },
     publications: {
       pageName: "Publicaties",
       pageDescription:
-        "Boeken, naslagwerken en onderzoeksprojecten van Kyrillos Wannes, waaronder gepubliceerde en aankomende materialen voor de Koptische taal.",
-      listName: "Publicaties van Kyrillos Wannes",
+        "Boeken, naslagwerken en onderzoeksmaterialen binnen Coptic Compass, waaronder werken van Kyrillos Wannes.",
+      listName: "Publicaties van Coptic Compass",
     },
     definedTerm: {
       partOfSpeech: "Woordsoort",
@@ -232,8 +232,8 @@ export function createWebSiteStructuredData(
     "@type": "WebSite",
     "@id": getWebsiteId(locale),
     url: absoluteUrl(getLocalizedHomePath(locale)),
-    name: siteConfig.name,
-    alternateName: "Kyrillos Wannes",
+    name: siteConfig.brandName,
+    alternateName: siteConfig.descriptor,
     description: copy.websiteDescription,
     inLanguage: ["en", "nl", "cop"],
     publisher: {

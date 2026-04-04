@@ -34,6 +34,8 @@ describe("structured dictionary data", () => {
 
     expect(data).toMatchObject({
       "@type": "WebSite",
+      name: "Coptic Compass",
+      alternateName: "Coptic Dictionary, Grammar, and Publications",
       url: "https://kyrilloswannes.com/nl",
       inLanguage: ["en", "nl", "cop"],
       potentialAction: {
@@ -61,6 +63,8 @@ describe("structured dictionary data", () => {
     expect(data[1]).toMatchObject({
       "@type": "DefinedTermSet",
       url: "https://kyrilloswannes.com/en/dictionary",
+      description:
+        "A digital Coptic dictionary from Coptic Compass with English and Greek glosses, dialect forms, and grammatical annotations.",
       inLanguage: ["cop", "en", "nl", "el"],
     });
   });

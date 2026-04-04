@@ -30,8 +30,8 @@ export const publications: Publication[] = [
     schemaType: "Book",
     status: "published",
     summary: {
-      en: "A published Coptic edition of the Holy Bible presented as part of Kyrillos Wannes's growing body of Coptic language resources.",
-      nl: "Een gepubliceerde Koptische editie van de Heilige Bijbel als onderdeel van Kyrillos Wannes' groeiende collectie Koptische taalbronnen.",
+      en: "A published Coptic edition of the Holy Bible, available as part of the growing publication catalog on Coptic Compass.",
+      nl: "Een gepubliceerde Koptische editie van de Heilige Bijbel, beschikbaar als onderdeel van de groeiende publicatiecatalogus van Coptic Compass.",
     },
   },
   {
@@ -169,6 +169,8 @@ export function buildPublicationDescription(
         ? "Available now."
         : "Forthcoming.";
   const authorLabel = locale === "nl" ? "door" : "by";
+  const platformLabel =
+    locale === "nl" ? "via Coptic Compass" : "available through Coptic Compass";
 
-  return `${buildPublicationTitle(publication)}. ${publication.summary[locale]} ${availabilityLabel} ${formatLabel} ${authorLabel} Kyrillos Wannes.`;
+  return `${buildPublicationTitle(publication)}. ${publication.summary[locale]} ${availabilityLabel} ${formatLabel} ${platformLabel}. ${authorLabel} Kyrillos Wannes.`;
 }

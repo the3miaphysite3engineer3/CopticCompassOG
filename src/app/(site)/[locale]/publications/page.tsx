@@ -13,8 +13,8 @@ import {
 
 function buildPublicationsDescription(locale: "en" | "nl") {
   return locale === "nl"
-    ? "Blader door boeken, naslagwerken en onderzoeksprojecten over de Koptische taal en taalkunde van Kyrillos Wannes."
-    : "Browse books, reference works, and research projects on Coptic language and linguistics by Kyrillos Wannes.";
+    ? "Blader door boeken, naslagwerken en onderzoeksmaterialen binnen Coptic Compass, waaronder publicaties van Kyrillos Wannes over de Koptische taal en taalkunde."
+    : "Browse books, reference works, and research materials on Coptic Compass, including publications by Kyrillos Wannes on Coptic language and linguistics.";
 }
 
 export async function generateMetadata({

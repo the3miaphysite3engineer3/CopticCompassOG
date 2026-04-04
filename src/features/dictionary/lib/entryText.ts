@@ -125,10 +125,10 @@ export function buildEntryDescription(
   if (locale === "nl") {
     return firstMeaning
       ? `${headword} (${entry.pos}) in het Koptische woordenboek. ${firstMeaning}.`
-      : `${headword} (${entry.pos}) in het Koptische woordenboek van Kyrillos Wannes.`;
+      : `${headword} (${entry.pos}) in het Koptische woordenboek van Coptic Compass.`;
   }
 
   return firstMeaning
     ? `${headword} (${entry.pos}) in the Coptic dictionary. ${firstMeaning}.`
-    : `${headword} (${entry.pos}) in the Coptic dictionary by Kyrillos Wannes.`;
+    : `${headword} (${entry.pos}) in the Coptic dictionary on Coptic Compass.`;
 }

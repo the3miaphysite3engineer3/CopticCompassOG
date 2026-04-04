@@ -9,9 +9,9 @@ import { getDevelopersPath, getGrammarPath } from "@/lib/locale";
 import { createPageMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createPageMetadata({
-  title: "Grammar API Docs",
+  title: "Coptic Compass Grammar API Docs",
   description:
-    "Swagger-powered API documentation for the public Coptic grammar dataset, including versioned lesson, concept, example, source, and footnote endpoints.",
+    "Swagger-powered API documentation for the public Coptic Compass grammar dataset, including versioned lesson, concept, example, source, and footnote endpoints.",
   path: "/api-docs",
 });
 
@@ -35,8 +35,8 @@ export default function ApiDocsPage() {
       <PageHeader
         eyebrow="Developer Docs"
         eyebrowVariant="badge"
-        title="Grammar API Docs"
-        description="Explore the public grammar dataset through a Swagger UI backed by an OpenAPI document generated from the current API surface."
+        title="Coptic Compass Grammar API Docs"
+        description="Explore the public grammar dataset through a Swagger UI backed by an OpenAPI document generated from the current Coptic Compass API surface."
         tone="sky"
         size="compact"
       />

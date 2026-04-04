@@ -22,11 +22,11 @@ export function createRootLayoutMetadata(locale: Language): Metadata {
   return {
     metadataBase: new URL(siteConfig.liveUrl),
     title: {
-      default: siteConfig.name,
-      template: `%s | ${siteConfig.name}`,
+      default: siteConfig.title,
+      template: `%s | ${siteConfig.brandName}`,
     },
     description: siteConfig.description,
-    applicationName: siteConfig.name,
+    applicationName: siteConfig.brandName,
     keywords: siteConfig.keywords,
     authors: [
       {
@@ -35,13 +35,13 @@ export function createRootLayoutMetadata(locale: Language): Metadata {
       },
     ],
     creator: siteConfig.author.name,
-    publisher: siteConfig.author.name,
+    publisher: siteConfig.brandName,
     category: "education",
     openGraph: {
       type: "website",
       title: siteConfig.title,
       description: siteConfig.description,
-      siteName: siteConfig.name,
+      siteName: siteConfig.brandName,
       locale: getOpenGraphLocale(locale),
       url: `${siteConfig.liveUrl}${getLocalizedPath(locale)}`,
       images: getSocialImages(),

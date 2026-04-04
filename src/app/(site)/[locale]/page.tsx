@@ -9,13 +9,13 @@ import { createWebSiteStructuredData } from "@/lib/structuredData";
 function buildHomeDescription(locale: "en" | "nl") {
   if (locale === "nl") {
     return siteConfig.dictionaryEntryCount
-      ? `Verken ${siteConfig.dictionaryEntryCount.toLocaleString()} Koptische woordenboeklemma's, grammaticahandleidingen, publicaties en digitale onderzoekstools van Kyrillos Wannes.`
-      : "Verken Koptische woordenboeklemma's, grammaticahandleidingen, publicaties en digitale onderzoekstools van Kyrillos Wannes.";
+      ? `Verken Coptic Compass: een digitaal thuis voor de studie van het Koptisch met ${siteConfig.dictionaryEntryCount.toLocaleString()} doorzoekbare woordenboeklemma's, grammaticalessen, publicaties en leertools.`
+      : "Verken Coptic Compass: een digitaal thuis voor de studie van het Koptisch met een doorzoekbaar woordenboek, grammaticalessen, publicaties en leertools.";
   }
 
   return siteConfig.dictionaryEntryCount
-    ? `Explore ${siteConfig.dictionaryEntryCount.toLocaleString()} Coptic dictionary entries, grammar lessons, publications, and digital humanities tools by Kyrillos Wannes.`
-    : "Explore Coptic dictionary entries, grammar lessons, publications, and digital humanities tools by Kyrillos Wannes.";
+    ? `Explore Coptic Compass, a digital home for Coptic study with ${siteConfig.dictionaryEntryCount.toLocaleString()} searchable dictionary entries, grammar lessons, publications, and learning tools.`
+    : "Explore Coptic Compass, a digital home for Coptic study with a searchable dictionary, grammar lessons, publications, and learning tools.";
 }
 
 export async function generateMetadata({

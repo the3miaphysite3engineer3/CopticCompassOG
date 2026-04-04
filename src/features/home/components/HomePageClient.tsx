@@ -165,11 +165,17 @@ export default function HomePageClient() {
           />
         </div>
         <PageHeader
+          eyebrow={t("home.eyebrow")}
+          eyebrowVariant="badge"
           title={t("home.title")}
           description={t("home.subtitle")}
           size="hero"
+          tone="brand"
           titleClassName="font-coptic"
         />
+        <p className="text-sm font-medium uppercase tracking-[0.22em] text-stone-500 dark:text-stone-400">
+          {t("home.credit")}
+        </p>
       </section>
 
       <section className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto w-full">

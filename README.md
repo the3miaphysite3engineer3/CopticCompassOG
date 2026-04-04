@@ -5,11 +5,11 @@
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![API](https://img.shields.io/badge/Public_Grammar_API-Live-0ea5e9)
 
-Digital Coptic language platform by Kyrillos Wannes, bringing together a searchable dictionary, published grammar lessons, academic publications, a public grammar API, and private learning workspaces for students and instructors.
+Coptic Compass is a digital home for Coptic study, bringing together a searchable dictionary, published grammar lessons, academic publications, a public grammar API, and private learning workspaces for students and instructors. The platform is built by Kyrillos Wannes.
 
 > Live site: [kyrilloswannes.com](https://kyrilloswannes.com)
 >
-> Repository: [github.com/KyroHub/portfolio](https://github.com/KyroHub/portfolio)
+> Repository: [github.com/KyroHub/CopticCompass](https://github.com/KyroHub/CopticCompass)
 
 ## What the App Includes
 
@@ -63,8 +63,8 @@ Digital Coptic language platform by Kyrillos Wannes, bringing together a searcha
 ## Local Development
 
 ```bash
-git clone https://github.com/KyroHub/portfolio.git
-cd portfolio
+git clone https://github.com/KyroHub/CopticCompass.git
+cd CopticCompass
 nvm use
 npm install
 npm run dev

@@ -13,21 +13,33 @@ function getDictionaryEntryCount() {
 }
 
 const dictionaryEntryCount = getDictionaryEntryCount();
+const siteAuthor = {
+  name: "Kyrillos Wannes",
+  twitter: "@kyrilloswannes",
+  github: "https://github.com/KyroHub",
+};
+
+function buildSiteDescription(entryCount: number) {
+  const searchableEntries = entryCount
+    ? ` It currently includes ${entryCount.toLocaleString()} searchable entries.`
+    : "";
+
+  return `Coptic Compass is a digital home for Coptic study, bringing together a searchable dictionary, grammar lessons, publications, and research tools.${searchableEntries}`;
+}
 
 export const siteConfig = {
-  name: "Coptic Compass | Coptic Dictionary, Grammar, and Publications",
+  brandName: "Coptic Compass",
+  descriptor: "Coptic Dictionary, Grammar, and Publications",
+  founderLine: `by ${siteAuthor.name}`,
+  founderCreditLine: `Built by ${siteAuthor.name}`,
+  name: "Coptic Compass",
   title: "Coptic Compass | Coptic Dictionary, Grammar, and Publications",
-  description: dictionaryEntryCount
-    ? `Digital Coptic dictionary, grammar lessons, publications, and research tools by Kyrillos Wannes, featuring ${dictionaryEntryCount.toLocaleString()} searchable entries.`
-    : "Digital Coptic dictionary, grammar lessons, publications, and research tools by Kyrillos Wannes.",
+  shortDescription: "A digital home for Coptic study.",
+  description: buildSiteDescription(dictionaryEntryCount),
   liveUrl: "https://kyrilloswannes.com",
-  repoUrl: "https://github.com/KyroHub/portfolio",
-  cloneUrl: "https://github.com/KyroHub/portfolio.git",
-  author: {
-    name: "Kyrillos Wannes",
-    twitter: "@kyrilloswannes",
-    github: "https://github.com/KyroHub",
-  },
+  repoUrl: "https://github.com/KyroHub/CopticCompass",
+  cloneUrl: "https://github.com/KyroHub/CopticCompass.git",
+  author: siteAuthor,
   keywords: [
     "coptic",
     "linguistics",
@@ -42,7 +54,7 @@ export const siteConfig = {
 };
 
 export function buildPageTitle(title: string) {
-  return `${title} | ${siteConfig.name}`;
+  return `${title} | ${siteConfig.brandName}`;
 }
 
 export function getSiteUrl() {

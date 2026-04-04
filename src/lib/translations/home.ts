@@ -2,14 +2,15 @@ import { defineMessages } from "@/lib/translations/defineMessages";
 
 export const homeMessages = defineMessages({
   en: {
-    "home.eyebrow": "Academic Portfolio and Coptic Research Tools",
+    "home.eyebrow": "Coptic Dictionary, Grammar, and Publications",
     "home.title": "Coptic Compass",
     "home.subtitle":
-      "Explore my publications and interactive scholarly applications.",
-    "home.publications": "My Publications",
+      "A digital home for Coptic study, with a searchable dictionary, structured grammar lessons, and publications for learners and researchers.",
+    "home.credit": "Built by Kyrillos Wannes",
+    "home.publications": "Publications",
     "home.publications.desc":
-      "A curated collection of my academic works and ongoing research.",
-    "home.publications.cta": "Explore publications",
+      "Books, reference works, and research materials for students and scholars of Coptic.",
+    "home.publications.cta": "Browse publications",
     "home.comingSoon": "Coming Soon",
     "home.app.title": "Coptic Learner",
     "home.app.desc":
@@ -25,13 +26,14 @@ export const homeMessages = defineMessages({
     "home.grammar.cta": "Begin studying",
   },
   nl: {
-    "home.eyebrow": "Academisch portfolio en Koptische onderzoekstools",
+    "home.eyebrow": "Koptisch woordenboek, grammatica en publicaties",
     "home.title": "Koptisch Kompas",
     "home.subtitle":
-      "Verken mijn publicaties en interactieve academische toepassingen.",
-    "home.publications": "Mijn Publicaties",
+      "Een digitaal thuis voor de studie van het Koptisch, met een doorzoekbaar woordenboek, gestructureerde grammaticalessen en publicaties voor studenten en onderzoekers.",
+    "home.credit": "Ontwikkeld door Kyrillos Wannes",
+    "home.publications": "Publicaties",
     "home.publications.desc":
-      "Een zorgvuldig samengestelde verzameling van mijn academische werken en lopend onderzoek.",
+      "Boeken, naslagwerken en onderzoeksmaterialen voor studenten en onderzoekers van het Koptisch.",
     "home.publications.cta": "Bekijk publicaties",
     "home.comingSoon": "Binnenkort Beschikbaar",
     "home.app.title": "Coptic Learner",

@@ -16,10 +16,10 @@ export const loginMessages = defineMessages({
     "login.google": "Sign in with Google",
     "login.metaTitle": "Sign In",
     "login.metaDescription":
-      "Account sign-in for the Wannes learning workspace.",
+      "Account sign-in for the Coptic Compass learning workspace.",
     "forgot.metaTitle": "Reset Password",
     "forgot.metaDescription":
-      "Password reset page for the Wannes learning workspace.",
+      "Password reset page for the Coptic Compass learning workspace.",
     "forgot.title": "Reset Password",
     "forgot.subtitle":
       "Enter the email associated with your account, and we'll send you a link to reset your password.",
@@ -35,7 +35,7 @@ export const loginMessages = defineMessages({
       "If an account exists, a password reset link has been sent. Check your inbox!",
     "update.metaTitle": "Update Password",
     "update.metaDescription":
-      "Password update page for the Wannes learning workspace.",
+      "Password update page for the Coptic Compass learning workspace.",
     "update.title": "Create New Password",
     "update.subtitle": "Please choose a strong, new password for your account.",
     "update.password": "New Password",

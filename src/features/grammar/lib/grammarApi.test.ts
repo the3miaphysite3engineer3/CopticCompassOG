@@ -141,6 +141,7 @@ describe("grammar API helpers", () => {
     const apiIndex = getGrammarApiIndex();
 
     expect(apiIndex).toMatchObject({
+      name: "Coptic Compass Grammar API",
       apiBasePath: "/api/v1/grammar",
       staticDataBasePath: "/data/grammar/v1",
       schemaVersion: "1.0.0",

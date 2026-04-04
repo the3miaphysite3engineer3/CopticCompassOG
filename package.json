@@ -1,6 +1,6 @@
 {
   "name": "coptic-compass",
-  "description": "Scholarly portfolio and digital Coptic-English dictionary with bilingual UI, analytics, and learning tools.",
+  "description": "Coptic Compass: a digital home for Coptic study with dictionary, grammar, publications, and learning tools.",
   "version": "0.1.0",
   "private": true,
   "author": "Kyrillos Wannes",
@@ -10,11 +10,11 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/KyroHub/portfolio.git"
+    "url": "https://github.com/KyroHub/CopticCompass.git"
   },
   "homepage": "https://kyrilloswannes.com",
   "bugs": {
-    "url": "https://github.com/KyroHub/portfolio/issues"
+    "url": "https://github.com/KyroHub/CopticCompass/issues"
   },
   "keywords": [
     "coptic",

@@ -227,7 +227,7 @@ export function getGrammarApiIndex(): GrammarApiIndex {
   );
 
   return {
-    name: "Kyrillos Wannes Grammar API",
+    name: "Coptic Compass Grammar API",
     description:
       "Versioned grammar lesson data for web clients, flashcard tools, mobile apps, and research scripts.",
     schemaVersion: manifest.schemaVersion,

@@ -17,6 +17,7 @@ export const sharedMessages = defineMessages({
     "nav.dashboard": "Dashboard",
 
     "footer.rights": "All rights reserved.",
+    "footer.credit": "is built and maintained by Kyrillos Wannes.",
     "footer.privacy": "Privacy Policy",
     "footer.terms": "Terms of Service",
     "footer.apiDocs": "API Docs",
@@ -38,6 +39,7 @@ export const sharedMessages = defineMessages({
     "nav.dashboard": "Dashboard",
 
     "footer.rights": "Alle rechten voorbehouden.",
+    "footer.credit": "wordt ontwikkeld en beheerd door Kyrillos Wannes.",
     "footer.privacy": "Privacybeleid",
     "footer.terms": "Gebruiksvoorwaarden",
     "footer.apiDocs": "API-docs",

@@ -161,7 +161,7 @@ test("grammar API index responds with the published dataset metadata", async ({
   expect(response.ok()).toBeTruthy();
 
   const payload = await response.json();
-  expect(payload.name).toBe("Kyrillos Wannes Grammar API");
+  expect(payload.name).toBe("Coptic Compass Grammar API");
   expect(payload.apiBasePath).toBe("/api/v1/grammar");
   expect(payload.lessonCounts.published).toBeGreaterThan(0);
 });

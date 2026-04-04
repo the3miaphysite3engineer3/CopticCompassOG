@@ -15,7 +15,7 @@ describe("grammar OpenAPI document", () => {
     };
 
     expect(document.openapi).toBe("3.0.3");
-    expect(document.info.title).toBe("Kyrillos Wannes Grammar API");
+    expect(document.info.title).toBe("Coptic Compass Grammar API");
     expect(Object.keys(document.paths)).toEqual(
       expect.arrayContaining([
         "/api/v1/grammar",

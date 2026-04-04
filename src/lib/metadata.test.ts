@@ -28,8 +28,7 @@ describe("metadata helpers", () => {
       locale: "nl_BE",
     });
     expect(metadata.twitter).toMatchObject({
-      title:
-        "Dictionary | Coptic Compass | Coptic Dictionary, Grammar, and Publications",
+      title: "Dictionary | Coptic Compass",
     });
   });
 
@@ -49,12 +48,13 @@ describe("metadata helpers", () => {
     const metadata = createRootLayoutMetadata("en");
 
     expect(metadata.title).toMatchObject({
-      default: siteConfig.name,
-      template: `%s | ${siteConfig.name}`,
+      default: siteConfig.title,
+      template: `%s | ${siteConfig.brandName}`,
     });
     expect(metadata.openGraph).toMatchObject({
       type: "website",
       locale: "en_US",
+      siteName: siteConfig.brandName,
       url: `${siteConfig.liveUrl}/en`,
     });
     expect(metadata.twitter).toMatchObject({

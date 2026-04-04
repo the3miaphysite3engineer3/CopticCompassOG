@@ -8,6 +8,7 @@ import { FaXTwitter, FaInstagram, FaGithub } from "react-icons/fa6";
 export function Footer() {
   const { language, t } = useLanguage();
   const currentYear = new Date().getFullYear();
+  const brandLabel = t("home.title");
 
   return (
     <footer className="relative z-40 mt-auto w-full border-t border-line/80 bg-paper">
@@ -15,6 +16,9 @@ export function Footer() {
         <div className="flex flex-col items-center gap-2 md:items-start">
           <p className="text-center text-sm leading-6 text-muted md:text-left">
             &copy; {currentYear} Kyrillos Wannes. {t("footer.rights")}
+          </p>
+          <p className="text-center text-sm leading-6 text-muted/80 md:text-left">
+            {brandLabel} {t("footer.credit")}
           </p>
           <div className="flex items-center gap-4 text-xs text-muted/70">
             <Link
