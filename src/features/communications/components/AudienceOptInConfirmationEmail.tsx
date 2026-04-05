@@ -10,6 +10,7 @@ import {
   Link,
   Text,
 } from "@react-email/components";
+import { mailBrand } from "@/lib/communications/mailBrand";
 import type { Language } from "@/types/i18n";
 
 type AudienceOptInConfirmationEmailProps = {
@@ -20,23 +21,25 @@ type AudienceOptInConfirmationEmailProps = {
 
 const copy = {
   en: {
-    body: "Please confirm that you want to receive updates about new lessons, book releases, and major project announcements.",
+    body: "Please confirm that you want to receive updates from Coptic Compass about new lessons, book releases, and major project announcements.",
     cta: "Confirm email updates",
     fallback: "If the button does not work, open this link in your browser:",
     greeting: "Hi",
-    subject: "Confirm your email updates",
+    signature: "Coptic Compass",
+    subject: "Confirm your Coptic Compass email updates",
     thanks: "If you did not request this, you can safely ignore this email.",
-    title: "Confirm your updates subscription",
+    title: "Confirm your Coptic Compass updates",
   },
   nl: {
-    body: "Bevestig dat je updates wilt ontvangen over nieuwe lessen, boekreleases en belangrijke projectaankondigingen.",
+    body: "Bevestig dat je updates van Coptic Compass wilt ontvangen over nieuwe lessen, boekreleases en belangrijke projectaankondigingen.",
     cta: "E-mailupdates bevestigen",
     fallback: "Werkt de knop niet, open dan deze link in je browser:",
     greeting: "Dag",
-    subject: "Bevestig je e-mailupdates",
+    signature: "Coptic Compass",
+    subject: "Bevestig je Coptic Compass e-mailupdates",
     thanks:
       "Heb je dit niet aangevraagd, dan kun je deze e-mail gerust negeren.",
-    title: "Bevestig je updatesabonnement",
+    title: "Bevestig je updates van Coptic Compass",
   },
 } as const;
 
@@ -69,6 +72,11 @@ export function AudienceOptInConfirmationEmail({
           <Link href={confirmationUrl} style={link}>
             {confirmationUrl}
           </Link>
+          <Text style={footer}>
+            {localizedCopy.signature}
+            <br />
+            {mailBrand.descriptor}
+          </Text>
           <Text style={footer}>{localizedCopy.thanks}</Text>
         </Container>
       </Body>

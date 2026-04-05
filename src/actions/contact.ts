@@ -187,7 +187,7 @@ export async function sendContactEmail(
         },
         to: process.env.CONTACT_EMAIL,
         replyTo: email,
-        subject: `New Contact: ${inquiryLabel} from ${name}`,
+        subject: `Coptic Compass contact: ${inquiryLabel} from ${name}`,
         react: React.createElement(ContactEmailTemplate, {
           name,
           email,
@@ -257,8 +257,8 @@ export async function sendContactEmail(
           }),
           text: [
             language === "nl"
-              ? "Bevestig je e-mailupdates via deze link:"
-              : "Confirm your email updates with this link:",
+              ? "Bevestig je Coptic Compass e-mailupdates via deze link:"
+              : "Confirm your Coptic Compass email updates with this link:",
             confirmationUrl,
             "",
             language === "nl"

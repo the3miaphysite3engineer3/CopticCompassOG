@@ -52,9 +52,10 @@ describe("profile signup alert helpers", () => {
         id: "11111111-1111-4111-8111-111111111111",
       }),
     ).toEqual({
-      subject: "New user signup: 11111111-1111-4111-8111-111111111111",
+      subject:
+        "New Coptic Compass signup: 11111111-1111-4111-8111-111111111111",
       text: [
-        "A new user account has been created.",
+        "A new Coptic Compass user account has been created.",
         "",
         "Profile ID: 11111111-1111-4111-8111-111111111111",
         "Email: Not provided",

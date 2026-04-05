@@ -315,7 +315,8 @@ describe("contact action", () => {
           sender_email: "se***@example.com",
         }),
         replyTo: "sender@example.com",
-        subject: "New Contact: Publication / Book Inquiry from Test User",
+        subject:
+          "Coptic Compass contact: Publication / Book Inquiry from Test User",
         text: expect.stringContaining("Wants updates: yes"),
         to: "owner@example.com",
       }),
@@ -341,7 +342,7 @@ describe("contact action", () => {
         payload: expect.objectContaining({
           email: "se***@example.com",
         }),
-        subject: "Bevestig je e-mailupdates",
+        subject: "Bevestig je Coptic Compass e-mailupdates",
         to: "sender@example.com",
         text: expect.stringContaining(
           "https://example.com/en/communications/confirm?token=test-token",

@@ -88,9 +88,9 @@ export function buildProfileSignupOwnerAlert(record: ProfileSignupRecord) {
   const subjectTarget = record.email ?? record.fullName ?? record.id;
 
   return {
-    subject: `New user signup: ${subjectTarget}`,
+    subject: `New Coptic Compass signup: ${subjectTarget}`,
     text: [
-      "A new user account has been created.",
+      "A new Coptic Compass user account has been created.",
       "",
       `Profile ID: ${record.id}`,
       `Email: ${record.email ?? "Not provided"}`,

@@ -319,7 +319,7 @@ describe("dictionary entry actions", () => {
         payload: expect.objectContaining({
           reporter_email: "re***@example.com",
         }),
-        subject: "Dictionary entry report: ϭⲟⲗ (cd_173)",
+        subject: "Coptic Compass entry report: ϭⲟⲗ (cd_173)",
         text: expect.stringContaining("Reason: translation"),
       }),
     );

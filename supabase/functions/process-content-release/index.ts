@@ -1,4 +1,5 @@
 import {
+  buildContentReleaseEmailHtml,
   buildContentReleaseEmailText,
   buildContentReleaseNotificationDedupeKey,
   buildContentReleaseNotificationPayload,
@@ -47,6 +48,7 @@ type ResendBroadcastEnv = {
 };
 
 type ReleaseBroadcastTarget = {
+  html: string;
   language: Language;
   recipientCount: number;
   segmentId: string;
@@ -149,6 +151,7 @@ function buildSupabaseRestHeaders(serviceRoleKey: string) {
 
 async function sendResendEmail(options: {
   from: string;
+  html?: string;
   resendApiKey: string;
   subject: string;
   text: string;
@@ -157,6 +160,7 @@ async function sendResendEmail(options: {
   const response = await fetch("https://api.resend.com/emails", {
     body: JSON.stringify({
       from: options.from,
+      ...(options.html ? { html: options.html } : {}),
       subject: options.subject,
       text: options.text,
       to: [options.to],
@@ -657,6 +661,7 @@ async function invokeNextBatch(options: {
 
 async function createResendBroadcast(options: {
   from: string;
+  html?: string;
   resendApiKey: string;
   segmentId: string;
   subject: string;
@@ -666,6 +671,7 @@ async function createResendBroadcast(options: {
   const response = await fetch("https://api.resend.com/broadcasts", {
     body: JSON.stringify({
       from: options.from,
+      ...(options.html ? { html: options.html } : {}),
       name: options.name,
       segment_id: options.segmentId,
       send: true,
@@ -790,6 +796,12 @@ async function buildReleaseBroadcastTargets(options: {
       }
 
       targets.push({
+        html: buildContentReleaseEmailHtml({
+          body: copy.body,
+          items: options.releaseItems,
+          language,
+          subject: copy.subject,
+        }),
         language,
         recipientCount,
         segmentId,
@@ -856,6 +868,12 @@ async function buildReleaseBroadcastTargets(options: {
     error: null,
     targets: [
       {
+        html: buildContentReleaseEmailHtml({
+          body: copy.body,
+          items: options.releaseItems,
+          language,
+          subject: copy.subject,
+        }),
         language,
         recipientCount: totalEligibleRecipients,
         segmentId,
@@ -1054,6 +1072,7 @@ async function deliverReleaseByBroadcast(options: {
 
     const broadcastResult = await createResendBroadcast({
       from: options.notificationFromEmail,
+      html: target.html,
       name: `content-release-${options.release.id}-${target.language}`,
       resendApiKey: options.broadcastEnv.resendApiKey,
       segmentId: target.segmentId,
@@ -1344,6 +1363,12 @@ async function deliverReleaseBatch(options: {
 
     const emailResult = await sendResendEmail({
       from: options.notificationFromEmail,
+      html: buildContentReleaseEmailHtml({
+        body: copy.body,
+        items: releaseItems,
+        language: copy.language,
+        subject: copy.subject,
+      }),
       resendApiKey: options.resendApiKey,
       subject: copy.subject,
       text: buildContentReleaseEmailText({

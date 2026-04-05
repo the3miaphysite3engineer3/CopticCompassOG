@@ -101,7 +101,7 @@ async function sendEntryReportNotificationEmail({
       reason,
       reporter_email: redactEmailAddress(userEmail),
     },
-    subject: `Dictionary entry report: ${entryHeadword} (${entryId})`,
+    subject: `Coptic Compass entry report: ${entryHeadword} (${entryId})`,
     text: [
       `Entry: ${entryHeadword}`,
       `Entry ID: ${entryId}`,

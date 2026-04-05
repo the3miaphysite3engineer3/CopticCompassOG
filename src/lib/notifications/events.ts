@@ -19,6 +19,7 @@ type LoggedNotificationEmailOptions = {
   cc?: EmailRecipients;
   dedupeKey?: string | null;
   eventType: string;
+  html?: string;
   payload?: Json;
   react?: ReactElement;
   replyTo?: EmailRecipients;
@@ -169,6 +170,7 @@ export async function dispatchLoggedNotificationEmail(
   const result = await sendNotificationEmail({
     ...(options.bcc ? { bcc: options.bcc } : {}),
     ...(options.cc ? { cc: options.cc } : {}),
+    ...(options.html ? { html: options.html } : {}),
     ...(options.react ? { react: options.react } : {}),
     ...(options.replyTo ? { replyTo: options.replyTo } : {}),
     subject: options.subject,

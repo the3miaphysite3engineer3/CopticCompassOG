@@ -9,6 +9,7 @@ type BaseEmailOptions = {
   bcc?: EmailRecipients;
   cc?: EmailRecipients;
   from?: string;
+  html?: string;
   react?: ReactElement;
   replyTo?: EmailRecipients;
   subject: string;
@@ -55,6 +56,7 @@ export async function sendNotificationEmail(
     to: normalizeRecipients(options.to) ?? [],
     subject: options.subject,
     text: options.text,
+    ...(options.html ? { html: options.html } : {}),
     ...(options.react ? { react: options.react } : {}),
     ...(options.replyTo
       ? { replyTo: normalizeRecipients(options.replyTo) }

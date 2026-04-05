@@ -47,6 +47,13 @@ export type ContentReleaseBroadcastDelivery = {
   subject: string;
 };
 
+const MAIL_BRAND = {
+  brandName: "Coptic Compass",
+  descriptorEn: "Coptic dictionary, grammar, and publications.",
+  descriptorNl: "Koptisch woordenboek, grammatica en publicaties.",
+  liveUrl: "https://kyrilloswannes.com",
+} as const;
+
 function asObject(value: unknown): Record<string, unknown> | null {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return null;
@@ -140,8 +147,82 @@ export function buildContentReleaseEmailText(options: {
   const itemsList = options.items
     .map((item) => `- ${item.title_snapshot}: ${item.url_snapshot}`)
     .join("\n");
+  const footerLines =
+    options.language === "nl"
+      ? [
+          "Met vriendelijke groet,",
+          MAIL_BRAND.brandName,
+          MAIL_BRAND.descriptorNl,
+          `Verder lezen op Coptic Compass: ${MAIL_BRAND.liveUrl}`,
+        ]
+      : [
+          "Kind regards,",
+          MAIL_BRAND.brandName,
+          MAIL_BRAND.descriptorEn,
+          `Continue reading on Coptic Compass: ${MAIL_BRAND.liveUrl}`,
+        ];
 
-  return [intro, "", itemsHeading, itemsList].join("\n");
+  return [intro, "", itemsHeading, itemsList, "", ...footerLines].join("\n");
+}
+
+export function buildContentReleaseEmailHtml(options: {
+  body: string;
+  items: Pick<ContentReleaseItemRecord, "title_snapshot" | "url_snapshot">[];
+  language: Language;
+  subject: string;
+}) {
+  const intro = escapeHtml(options.body.trim()).replace(/\n/g, "<br />");
+  const itemsHeading =
+    options.language === "nl" ? "In deze release" : "In this release";
+  const footerLines =
+    options.language === "nl"
+      ? [
+          "Met vriendelijke groet,",
+          MAIL_BRAND.brandName,
+          MAIL_BRAND.descriptorNl,
+          `Verder lezen op Coptic Compass: ${MAIL_BRAND.liveUrl}`,
+        ]
+      : [
+          "Kind regards,",
+          MAIL_BRAND.brandName,
+          MAIL_BRAND.descriptorEn,
+          `Continue reading on Coptic Compass: ${MAIL_BRAND.liveUrl}`,
+        ];
+
+  const itemsHtml = options.items
+    .map(
+      (item) => `
+        <li style="margin:0 0 14px;">
+          <a href="${escapeHtml(item.url_snapshot)}" style="color:#0284c7;text-decoration:none;font-weight:600;">
+            ${escapeHtml(item.title_snapshot)}
+          </a>
+          <div style="margin-top:4px;font-size:13px;color:#57534e;">${escapeHtml(item.url_snapshot)}</div>
+        </li>`,
+    )
+    .join("");
+
+  return `<!doctype html>
+<html>
+  <body style="margin:0;background:#f5f5f4;padding:24px 12px;font-family:Aptos,Segoe UI,Helvetica Neue,Arial,sans-serif;color:#1c1917;">
+    <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e7e5e4;border-radius:24px;overflow:hidden;box-shadow:0 8px 32px rgba(24,30,27,0.08);">
+      <div style="padding:28px 32px;background:linear-gradient(135deg,#ecfdf5 0%,#f0f9ff 100%);border-bottom:1px solid #e7e5e4;">
+        <div style="font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:#059669;font-weight:700;">${options.language === "nl" ? "Nieuwe updates van Coptic Compass" : "New updates from Coptic Compass"}</div>
+        <h1 style="margin:10px 0 0;font-size:28px;line-height:1.2;color:#1c1917;">${escapeHtml(options.subject)}</h1>
+      </div>
+      <div style="padding:32px;">
+        <p style="margin:0 0 20px;font-size:16px;line-height:1.7;color:#292524;">${intro}</p>
+        <h2 style="margin:0 0 14px;font-size:18px;line-height:1.4;color:#1c1917;">${escapeHtml(itemsHeading)}</h2>
+        <ul style="margin:0;padding-left:20px;">${itemsHtml}</ul>
+      </div>
+      <div style="padding:24px 32px;border-top:1px solid #e7e5e4;background:#fafaf9;font-size:13px;line-height:1.7;color:#57534e;">
+        <div>${escapeHtml(footerLines[0])}</div>
+        <div style="font-weight:700;color:#1c1917;">${escapeHtml(footerLines[1])}</div>
+        <div>${escapeHtml(footerLines[2])}</div>
+        <div style="margin-top:8px;"><a href="${MAIL_BRAND.liveUrl}" style="color:#059669;text-decoration:none;">${escapeHtml(footerLines[3])}</a></div>
+      </div>
+    </div>
+  </body>
+</html>`;
 }
 
 export function buildContentReleaseNotificationPayload(options: {
@@ -272,4 +353,13 @@ export function mergeContentReleaseDeliverySummary(options: {
 
 function asOptionalNumber(value: unknown) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }

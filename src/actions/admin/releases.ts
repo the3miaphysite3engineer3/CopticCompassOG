@@ -1,6 +1,7 @@
 "use server";
 
 import {
+  buildContentReleaseEmailHtml,
   buildContentReleaseEmailText,
   deriveContentReleaseType,
   getContentReleaseCopyForLocale,
@@ -437,7 +438,13 @@ export async function sendContentReleasePreview(
       preview: "true",
       release_type: release.release_type,
     },
-    subject: `[Preview] ${copy.subject}`,
+    subject: `[Coptic Compass Preview] ${copy.subject}`,
+    html: buildContentReleaseEmailHtml({
+      body: copy.body,
+      items: releaseItems,
+      language: copy.language,
+      subject: `[Coptic Compass Preview] ${copy.subject}`,
+    }),
     text: buildContentReleaseEmailText({
       body: copy.body,
       items: releaseItems,

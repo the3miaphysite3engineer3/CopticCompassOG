@@ -28,7 +28,7 @@ function createNotificationEvent(
     processed_at: "2026-03-28T10:00:01.000Z",
     recipient: "owner@example.com",
     status: "sent",
-    subject: "New exercise submission: lesson 1",
+    subject: "Coptic Compass exercise submission: lesson 1",
     ...overrides,
   };
 }

@@ -161,8 +161,8 @@ export async function submitFeedback(formData: FormData) {
     to: studentProfile.email,
     subject:
       submissionLanguage === "nl"
-        ? `Feedback beschikbaar voor ${lessonLabel}`
-        : `Your feedback is ready for ${lessonLabel}`,
+        ? `Je Coptic Compass-feedback is beschikbaar voor ${lessonLabel}`
+        : `Your Coptic Compass feedback is ready for ${lessonLabel}`,
     text: reviewSummary,
   });
 

@@ -210,7 +210,7 @@ export async function submitExercise(
       submitted_language: exerciseLanguage,
       user_id: user.id,
     },
-    subject: `New exercise submission: ${formatLessonSlug(lessonDefinition.slug)}`,
+    subject: `Coptic Compass exercise submission: ${formatLessonSlug(lessonDefinition.slug)}`,
     text: [
       `Student: ${user.email ?? "Unknown email"}`,
       `Lesson: ${lessonDefinition.slug}`,

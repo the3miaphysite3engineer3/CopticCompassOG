@@ -304,7 +304,7 @@ describe("exercise submission action", () => {
         aggregateId: "submission_123",
         aggregateType: "submission",
         eventType: "exercise_submission_received",
-        subject: "New exercise submission: lesson 1",
+        subject: "Coptic Compass exercise submission: lesson 1",
         text: expect.stringContaining("Student: student@example.com"),
       }),
     );

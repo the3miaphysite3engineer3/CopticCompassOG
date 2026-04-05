@@ -8,6 +8,7 @@ import {
   Heading,
   Hr,
 } from "@react-email/components";
+import { mailBrand } from "@/lib/communications/mailBrand";
 
 type ContactEmailTemplateProps = {
   name: string;
@@ -28,13 +29,16 @@ export function ContactEmailTemplate({
       <Body style={main}>
         <Container style={container}>
           <Heading as="h2" style={heading}>
-            New Contact: {inquiryLabel}
+            {mailBrand.brandName} contact message: {inquiryLabel}
           </Heading>
           <Text style={paragraph}>
             <strong>From:</strong> {name}
           </Text>
           <Text style={paragraph}>
             <strong>Email:</strong> {email}
+          </Text>
+          <Text style={paragraph}>
+            <strong>Platform:</strong> {mailBrand.brandName}
           </Text>
           <Hr style={hr} />
           <Text style={{ ...paragraph, whiteSpace: "pre-wrap" }}>
