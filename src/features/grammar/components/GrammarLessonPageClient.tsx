@@ -3,13 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
 import Link from "next/link";
-import {
-  ArrowLeft,
-  PanelLeftClose,
-  PanelLeftOpen,
-  PanelRightClose,
-  PanelRightOpen,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { Button } from "@/components/Button";
 import type {
@@ -20,7 +14,6 @@ import { useLanguage } from "@/components/LanguageProvider";
 import { DownloadPdfButton } from "@/components/DownloadPdfButton";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
-import { SurfacePanel } from "@/components/SurfacePanel";
 import { cx } from "@/lib/classes";
 import {
   type GrammarAdjacentLessonLink,
@@ -30,7 +23,10 @@ import {
   GrammarLessonNotesPanel,
   GrammarLessonSectionProgressButton,
 } from "@/features/grammar/components/GrammarLessonLearnerPanel";
-import { GrammarLessonOutline } from "@/features/grammar/components/GrammarLessonPrimitives";
+import {
+  GrammarLessonReadingWorkspace,
+  GrammarLessonStudyWorkspace,
+} from "@/features/grammar/components/GrammarLessonWorkspace";
 import { GrammarLessonRenderProvider } from "@/features/grammar/components/GrammarLessonRenderContext";
 import { GrammarLessonConceptSummary } from "@/features/grammar/components/GrammarLessonSemantics";
 import { getGrammarLessonAbbreviationSectionId } from "@/features/grammar/lib/grammarPresentation";
@@ -49,8 +45,6 @@ type GrammarLessonPageClientProps = {
   previousLesson: GrammarAdjacentLessonLink | null;
 };
 
-type LessonRailSide = "left" | "right";
-
 function getOrderedSections(
   lessonBundle: GrammarLessonBundle,
 ): GrammarSectionDocument[] {
@@ -65,107 +59,6 @@ function getOrderedSections(
     .filter(
       (section): section is GrammarSectionDocument => section !== undefined,
     );
-}
-
-function getStudyWorkspaceGridClass({
-  hasSemanticSidebar,
-  isLeftRailCollapsed,
-  isRightRailCollapsed,
-}: {
-  hasSemanticSidebar: boolean;
-  isLeftRailCollapsed: boolean;
-  isRightRailCollapsed: boolean;
-}) {
-  if (!hasSemanticSidebar) {
-    return isLeftRailCollapsed
-      ? "2xl:grid-cols-[3.75rem_minmax(0,1fr)]"
-      : "2xl:grid-cols-[minmax(15rem,17rem)_minmax(0,1fr)]";
-  }
-
-  if (isLeftRailCollapsed && isRightRailCollapsed) {
-    return "2xl:grid-cols-[3.75rem_minmax(0,1fr)_3.75rem]";
-  }
-
-  if (isLeftRailCollapsed) {
-    return "2xl:grid-cols-[3.75rem_minmax(0,1fr)_minmax(18rem,20rem)]";
-  }
-
-  if (isRightRailCollapsed) {
-    return "2xl:grid-cols-[minmax(15rem,17rem)_minmax(0,1fr)_3.75rem]";
-  }
-
-  return "2xl:grid-cols-[minmax(15rem,17rem)_minmax(0,1fr)_minmax(18rem,20rem)]";
-}
-
-function DesktopRailToggle({
-  collapsed,
-  expandLabel,
-  collapseLabel,
-  onToggle,
-  side,
-}: {
-  collapsed: boolean;
-  expandLabel: string;
-  collapseLabel: string;
-  onToggle: () => void;
-  side: LessonRailSide;
-}) {
-  const Icon = collapsed
-    ? side === "left"
-      ? PanelLeftOpen
-      : PanelRightOpen
-    : side === "left"
-      ? PanelLeftClose
-      : PanelRightClose;
-
-  return (
-    <Button
-      type="button"
-      variant="secondary"
-      size="sm"
-      onClick={onToggle}
-      aria-label={collapsed ? expandLabel : collapseLabel}
-      className="h-9 w-9 rounded-xl px-0"
-    >
-      <Icon className="h-4 w-4" />
-      <span className="sr-only">{collapsed ? expandLabel : collapseLabel}</span>
-    </Button>
-  );
-}
-
-function CollapsedRailCard({
-  collapsedLabel,
-  expandLabel,
-  onToggle,
-  side,
-}: {
-  collapsedLabel: string;
-  expandLabel: string;
-  onToggle: () => void;
-  side: LessonRailSide;
-}) {
-  const Icon = side === "left" ? PanelLeftOpen : PanelRightOpen;
-
-  return (
-    <SurfacePanel
-      rounded="2xl"
-      shadow="soft"
-      variant="subtle"
-      className="w-[3.75rem] p-2"
-    >
-      <button
-        type="button"
-        onClick={onToggle}
-        aria-label={expandLabel}
-        className="flex w-full flex-col items-center gap-2 rounded-xl px-2 py-3 text-center text-stone-500 transition-colors hover:bg-stone-100/80 hover:text-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25 dark:text-stone-400 dark:hover:bg-stone-800/70 dark:hover:text-sky-300"
-      >
-        <Icon className="h-4 w-4" />
-        <span className="text-[10px] font-semibold uppercase tracking-[0.14em]">
-          {collapsedLabel}
-        </span>
-      </button>
-    </SurfacePanel>
-  );
 }
 
 export function GrammarLessonPageClient({
@@ -244,11 +137,6 @@ export function GrammarLessonPageClient({
     usePersistentLessonRailState(lesson.id, "right", false);
   const leftRailCollapsed = isStudyLayoutActive && isLeftRailCollapsed;
   const rightRailCollapsed = isStudyLayoutActive && isRightRailCollapsed;
-  const studyGridClassName = getStudyWorkspaceGridClass({
-    hasSemanticSidebar,
-    isLeftRailCollapsed: leftRailCollapsed,
-    isRightRailCollapsed: rightRailCollapsed,
-  });
   const leftRailLabels =
     language === "en"
       ? {
@@ -327,6 +215,31 @@ export function GrammarLessonPageClient({
         previousLesson={previousLesson}
       />
     ) : null;
+  const learnerPanel =
+    renderMode === "web" ? (
+      <GrammarLessonLearnerPanel
+        errorMessage={learnerState.errorMessage}
+        isBookmarkPending={learnerState.isBookmarkPending}
+        language={language}
+        onToggleBookmark={learnerState.toggleBookmark}
+        status={learnerState.status}
+        summary={learnerState.summary}
+      />
+    ) : null;
+  const navigationPanel =
+    renderMode === "web" ? (
+      <GrammarLessonNavigationPanel
+        language={language}
+        nextLesson={nextLesson}
+        previousLesson={previousLesson}
+      />
+    ) : null;
+  const conceptSummary = (
+    <GrammarLessonConceptSummary
+      lessonBundle={lessonBundle}
+      language={language}
+    />
+  );
 
   return (
     <PageShell
@@ -405,160 +318,44 @@ export function GrammarLessonPageClient({
             />
 
             {isStudyLayoutActive ? (
-              <div className="relative hidden 2xl:block">
-                <div className="relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw] w-screen px-6 3xl:px-8">
-                  <div
-                    className={cx("grid items-start gap-6", studyGridClassName)}
-                  >
-                    <div className="app-sticky-panel self-start">
-                      <div className="flex flex-col gap-2">
-                        {leftRailCollapsed ? (
-                          <CollapsedRailCard
-                            collapsedLabel={leftRailLabels.compact}
-                            expandLabel={leftRailLabels.expand}
-                            onToggle={() => setIsLeftRailCollapsed(false)}
-                            side="left"
-                          />
-                        ) : (
-                          <>
-                            <div className="flex justify-end">
-                              <DesktopRailToggle
-                                collapsed={false}
-                                expandLabel={leftRailLabels.expand}
-                                collapseLabel={leftRailLabels.collapse}
-                                onToggle={() => setIsLeftRailCollapsed(true)}
-                                side="left"
-                              />
-                            </div>
-                            <div className="max-h-[calc(100vh-var(--app-sticky-offset)-4rem)] overflow-y-auto pr-1">
-                              <GrammarLessonOutline
-                                activeSectionId={activeSectionId}
-                                eyebrow={lessonOutlineEyebrow}
-                                title={lessonOutlineTitle}
-                                sections={lessonOutlineSections}
-                              />
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    <SurfacePanel
-                      rounded="3xl"
-                      variant="elevated"
-                      className="px-6 py-6 sm:px-8 md:px-10"
-                    >
-                      <div className="mx-auto w-full max-w-4xl space-y-6">
-                        {lessonDocument}
-                        {lessonBottomNavigation}
-                        {lessonNotes}
-                      </div>
-                    </SurfacePanel>
-
-                    {hasSemanticSidebar ? (
-                      <div className="app-sticky-panel self-start">
-                        <div className="flex flex-col gap-2">
-                          {rightRailCollapsed ? (
-                            <CollapsedRailCard
-                              collapsedLabel={rightRailLabels.compact}
-                              expandLabel={rightRailLabels.expand}
-                              onToggle={() => setIsRightRailCollapsed(false)}
-                              side="right"
-                            />
-                          ) : (
-                            <>
-                              <div className="flex justify-end">
-                                <DesktopRailToggle
-                                  collapsed={false}
-                                  expandLabel={rightRailLabels.expand}
-                                  collapseLabel={rightRailLabels.collapse}
-                                  onToggle={() => setIsRightRailCollapsed(true)}
-                                  side="right"
-                                />
-                              </div>
-                              <div className="max-h-[calc(100vh-var(--app-sticky-offset)-4rem)] space-y-4 overflow-y-auto pr-1">
-                                {renderMode === "web" ? (
-                                  <GrammarLessonLearnerPanel
-                                    errorMessage={learnerState.errorMessage}
-                                    isBookmarkPending={
-                                      learnerState.isBookmarkPending
-                                    }
-                                    language={language}
-                                    onToggleBookmark={
-                                      learnerState.toggleBookmark
-                                    }
-                                    status={learnerState.status}
-                                    summary={learnerState.summary}
-                                  />
-                                ) : null}
-                                {renderMode === "web" ? (
-                                  <GrammarLessonNavigationPanel
-                                    language={language}
-                                    nextLesson={nextLesson}
-                                    previousLesson={previousLesson}
-                                  />
-                                ) : null}
-                                <GrammarLessonConceptSummary
-                                  lessonBundle={lessonBundle}
-                                  language={language}
-                                />
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              </div>
+              <GrammarLessonStudyWorkspace
+                activeSectionId={activeSectionId}
+                conceptSummary={conceptSummary}
+                hasSemanticSidebar={hasSemanticSidebar}
+                isLeftRailCollapsed={leftRailCollapsed}
+                isRightRailCollapsed={rightRailCollapsed}
+                learnerPanel={learnerPanel}
+                leftRailLabels={leftRailLabels}
+                lessonBottomNavigation={lessonBottomNavigation}
+                lessonDocument={lessonDocument}
+                lessonNotes={lessonNotes}
+                lessonOutlineEyebrow={lessonOutlineEyebrow}
+                lessonOutlineSections={lessonOutlineSections}
+                lessonOutlineTitle={lessonOutlineTitle}
+                navigationPanel={navigationPanel}
+                onLeftRailToggle={() =>
+                  setIsLeftRailCollapsed(!leftRailCollapsed)
+                }
+                onRightRailToggle={() =>
+                  setIsRightRailCollapsed(!rightRailCollapsed)
+                }
+                rightRailLabels={rightRailLabels}
+              />
             ) : null}
 
             <div className={cx(isStudyLayoutActive && "2xl:hidden")}>
-              <SurfacePanel
-                rounded="3xl"
-                variant="elevated"
-                className="p-4 transition-colors duration-300 sm:p-5 md:p-10"
-              >
-                {hasSemanticSidebar ? (
-                  <div className="mb-8 grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(19rem,1fr)]">
-                    <GrammarLessonOutline
-                      activeSectionId={activeSectionId}
-                      eyebrow={lessonOutlineEyebrow}
-                      title={lessonOutlineTitle}
-                      sections={lessonOutlineSections}
-                    />
-                    <div className="space-y-4">
-                      {renderMode === "web" ? (
-                        <GrammarLessonLearnerPanel
-                          errorMessage={learnerState.errorMessage}
-                          isBookmarkPending={learnerState.isBookmarkPending}
-                          language={language}
-                          onToggleBookmark={learnerState.toggleBookmark}
-                          status={learnerState.status}
-                          summary={learnerState.summary}
-                        />
-                      ) : null}
-                      <GrammarLessonConceptSummary
-                        lessonBundle={lessonBundle}
-                        language={language}
-                      />
-                    </div>
-                  </div>
-                ) : (
-                  <GrammarLessonOutline
-                    activeSectionId={activeSectionId}
-                    className="mb-8"
-                    eyebrow={lessonOutlineEyebrow}
-                    title={lessonOutlineTitle}
-                    sections={lessonOutlineSections}
-                  />
-                )}
-
-                {lessonDocument}
-                {lessonBottomNavigation}
-              </SurfacePanel>
-
-              {lessonNotes ? <div className="mt-6">{lessonNotes}</div> : null}
+              <GrammarLessonReadingWorkspace
+                activeSectionId={activeSectionId}
+                conceptSummary={conceptSummary}
+                hasSemanticSidebar={hasSemanticSidebar}
+                learnerPanel={learnerPanel}
+                lessonBottomNavigation={lessonBottomNavigation}
+                lessonDocument={lessonDocument}
+                lessonNotes={lessonNotes}
+                lessonOutlineEyebrow={lessonOutlineEyebrow}
+                lessonOutlineSections={lessonOutlineSections}
+                lessonOutlineTitle={lessonOutlineTitle}
+              />
             </div>
           </div>
         </GrammarLessonRenderProvider>

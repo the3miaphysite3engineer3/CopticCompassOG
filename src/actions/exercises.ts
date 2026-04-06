@@ -30,6 +30,8 @@ export type ExerciseActionState = {
   error?: string;
 } | null;
 
+const SUBMISSION_DUPLICATE_WINDOW_MS = 10 * 60 * 1000;
+
 function isExerciseLanguage(value: string): value is Language {
   return value === "en" || value === "nl";
 }
@@ -55,6 +57,9 @@ export async function submitExercise(
   const exerciseLanguage = normalizeWhitespace(
     getFormString(formData, "exerciseLanguage"),
   );
+  const submissionIntentId = normalizeWhitespace(
+    getFormString(formData, "submissionIntentId"),
+  );
   const lessonDefinition = getGrammarLessonDocumentBySlug(lessonSlug);
   const exerciseDefinition = getGrammarExerciseDocumentById(exerciseId);
 
@@ -62,7 +67,8 @@ export async function submitExercise(
     !lessonDefinition ||
     !exerciseDefinition ||
     exerciseDefinition.lessonId !== lessonDefinition.id ||
-    !isExerciseLanguage(exerciseLanguage)
+    !isExerciseLanguage(exerciseLanguage) ||
+    !hasLengthInRange(submissionIntentId, { min: 16, max: 200 })
   ) {
     return { success: false, error: "Invalid exercise submission." };
   }
@@ -111,6 +117,50 @@ export async function submitExercise(
     };
   }
 
+  const submittedText = answers
+    .map(({ prompt, answer }) => `Question: ${prompt}\nAnswer: ${answer}`)
+    .join("\n\n");
+  const normalizedSubmittedText = submittedText.trim();
+  const serializedAnswers = answers.map(
+    ({ answer, answerSchema, prompt, questionId }) => ({
+      answer,
+      answer_schema: answerSchema ?? null,
+      prompt,
+      question_id: questionId,
+    }),
+  );
+  const duplicateThreshold = new Date(
+    Date.now() - SUBMISSION_DUPLICATE_WINDOW_MS,
+  ).toISOString();
+  const { data: recentDuplicate, error: duplicateLookupError } = await supabase
+    .from("submissions")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("lesson_slug", lessonDefinition.slug)
+    .eq("exercise_id", exerciseDefinition.id)
+    .eq("submitted_text", normalizedSubmittedText)
+    .gte("created_at", duplicateThreshold)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (duplicateLookupError) {
+    console.error("Error checking for duplicate exercise submission:", {
+      code: duplicateLookupError.code,
+      message: duplicateLookupError.message,
+      details: duplicateLookupError.details,
+      hint: duplicateLookupError.hint,
+      exerciseId,
+      lessonSlug,
+      userId: user.id,
+    });
+  } else if (recentDuplicate) {
+    revalidateDashboardPaths();
+    revalidatePath(`/grammar/${lessonDefinition.slug}`);
+
+    return { success: true };
+  }
+
   if (!hasAvailableRateLimitProtection()) {
     return {
       success: false,
@@ -133,25 +183,14 @@ export async function submitExercise(
     };
   }
 
-  const submittedText = answers
-    .map(({ prompt, answer }) => `Question: ${prompt}\nAnswer: ${answer}`)
-    .join("\n\n");
-  const serializedAnswers = answers.map(
-    ({ answer, answerSchema, prompt, questionId }) => ({
-      answer,
-      answer_schema: answerSchema ?? null,
-      prompt,
-      question_id: questionId,
-    }),
-  );
-
   const submission: SubmissionInsert = {
     answers: serializedAnswers,
     exercise_id: exerciseDefinition.id,
     user_id: user.id,
     lesson_slug: lessonDefinition.slug,
+    submission_intent_id: submissionIntentId,
     submitted_language: exerciseLanguage,
-    submitted_text: submittedText.trim(),
+    submitted_text: normalizedSubmittedText,
     status: "pending",
   };
 
@@ -187,6 +226,13 @@ export async function submitExercise(
       };
     }
 
+    if (error.code === "23505") {
+      revalidateDashboardPaths();
+      revalidatePath(`/grammar/${lessonDefinition.slug}`);
+
+      return { success: true };
+    }
+
     return {
       success: false,
       error: "Failed to submit exercise. Please try again.",
@@ -219,7 +265,7 @@ export async function submitExercise(
       `Answer count: ${answers.length}`,
       "",
       "Submission:",
-      submittedText.trim(),
+      normalizedSubmittedText,
     ].join("\n"),
   });
 

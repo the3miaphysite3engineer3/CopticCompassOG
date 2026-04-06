@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type ExercisesModuleContext = {
+  duplicateLookupMaybeSingleMock: ReturnType<typeof vi.fn>;
   consumeRateLimitMock: ReturnType<typeof vi.fn>;
   dispatchLoggedOwnerAlertEmailMock: ReturnType<typeof vi.fn>;
   getAuthenticatedServerContextMock: ReturnType<typeof vi.fn>;
@@ -16,6 +17,7 @@ function createExerciseFormData(overrides?: {
   exerciseId?: string;
   extraAnswerKey?: string;
   lessonSlug?: string;
+  submissionIntentId?: string;
 }) {
   const formData = new FormData();
   formData.set("lessonSlug", overrides?.lessonSlug ?? "lesson-1");
@@ -24,6 +26,10 @@ function createExerciseFormData(overrides?: {
     overrides?.exerciseId ?? "grammar.exercise.lesson01.001",
   );
   formData.set("exerciseLanguage", overrides?.exerciseLanguage ?? "en");
+  formData.set(
+    "submissionIntentId",
+    overrides?.submissionIntentId ?? "intent_grammar_exercise_submission_123",
+  );
 
   for (let i = 1; i <= 10; i += 1) {
     formData.set(
@@ -40,6 +46,12 @@ function createExerciseFormData(overrides?: {
 }
 
 async function loadExercisesModule(options?: {
+  duplicateLookupError?: {
+    code?: string;
+    details?: string | null;
+    hint?: string | null;
+    message?: string;
+  } | null;
   hasEnv?: boolean;
   hasRateLimitProtection?: boolean;
   insertError?: {
@@ -49,6 +61,7 @@ async function loadExercisesModule(options?: {
     message?: string;
   } | null;
   rateLimitOk?: boolean;
+  recentDuplicate?: boolean;
   sendOwnerAlertResult?:
     | { error: string; success: false }
     | { id: string | null; success: true };
@@ -72,12 +85,24 @@ async function loadExercisesModule(options?: {
       single: insertSingleMock,
     })),
   }));
+  const duplicateLookupMaybeSingleMock = vi.fn().mockResolvedValue({
+    data: options?.recentDuplicate ? { id: "submission_existing" } : null,
+    error: options?.duplicateLookupError ?? null,
+  });
+  const duplicateLookupQuery = {
+    eq: vi.fn(() => duplicateLookupQuery),
+    gte: vi.fn(() => duplicateLookupQuery),
+    limit: vi.fn(() => duplicateLookupQuery),
+    maybeSingle: duplicateLookupMaybeSingleMock,
+    order: vi.fn(() => duplicateLookupQuery),
+  };
   const getAuthenticatedServerContextMock = vi.fn().mockResolvedValue(
     options?.user === null
       ? null
       : {
           supabase: {
             from: vi.fn(() => ({
+              select: vi.fn(() => duplicateLookupQuery),
               insert: insertMock,
             })),
           },
@@ -117,6 +142,7 @@ async function loadExercisesModule(options?: {
 
   return {
     ...mod,
+    duplicateLookupMaybeSingleMock,
     consumeRateLimitMock,
     dispatchLoggedOwnerAlertEmailMock,
     getAuthenticatedServerContextMock,
@@ -208,6 +234,22 @@ describe("exercise submission action", () => {
     });
   });
 
+  it("rejects submissions without a valid submission intent token", async () => {
+    const { submitExercise } = await loadExercisesModule();
+
+    await expect(
+      submitExercise(
+        null,
+        createExerciseFormData({
+          submissionIntentId: "short",
+        }),
+      ),
+    ).resolves.toEqual({
+      success: false,
+      error: "Invalid exercise submission.",
+    });
+  });
+
   it("rejects answers that exceed the allowed length", async () => {
     const { submitExercise } = await loadExercisesModule();
 
@@ -240,6 +282,30 @@ describe("exercise submission action", () => {
     });
 
     expect(insertMock).not.toHaveBeenCalled();
+  });
+
+  it("returns success without inserting when a matching recent submission already exists", async () => {
+    const {
+      consumeRateLimitMock,
+      dispatchLoggedOwnerAlertEmailMock,
+      insertMock,
+      revalidatePathMock,
+      submitExercise,
+    } = await loadExercisesModule({
+      recentDuplicate: true,
+    });
+
+    await expect(
+      submitExercise(null, createExerciseFormData()),
+    ).resolves.toEqual({
+      success: true,
+    });
+
+    expect(consumeRateLimitMock).not.toHaveBeenCalled();
+    expect(insertMock).not.toHaveBeenCalled();
+    expect(dispatchLoggedOwnerAlertEmailMock).not.toHaveBeenCalled();
+    expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/grammar/lesson-1");
   });
 
   it("fails closed when shared rate limiting is unavailable", async () => {
@@ -292,6 +358,7 @@ describe("exercise submission action", () => {
         exercise_id: "grammar.exercise.lesson01.001",
         lesson_slug: "lesson-1",
         status: "pending",
+        submission_intent_id: "intent_grammar_exercise_submission_123",
         submitted_language: "en",
         submitted_text: expect.stringContaining(
           "Question: She is my daughter.\nAnswer: normalized answer",
@@ -329,6 +396,31 @@ describe("exercise submission action", () => {
 
     expect(insertMock).toHaveBeenCalledOnce();
     expect(dispatchLoggedOwnerAlertEmailMock).toHaveBeenCalledOnce();
+  });
+
+  it("treats a duplicate submission intent as an already-stored success", async () => {
+    const {
+      dispatchLoggedOwnerAlertEmailMock,
+      insertMock,
+      revalidatePathMock,
+      submitExercise,
+    } = await loadExercisesModule({
+      insertError: {
+        code: "23505",
+        message: "duplicate key value violates unique constraint",
+      },
+    });
+
+    await expect(
+      submitExercise(null, createExerciseFormData()),
+    ).resolves.toEqual({
+      success: true,
+    });
+
+    expect(insertMock).toHaveBeenCalledOnce();
+    expect(dispatchLoggedOwnerAlertEmailMock).not.toHaveBeenCalled();
+    expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard");
+    expect(revalidatePathMock).toHaveBeenCalledWith("/grammar/lesson-1");
   });
 
   it("returns a permission-specific message when the database denies submission", async () => {

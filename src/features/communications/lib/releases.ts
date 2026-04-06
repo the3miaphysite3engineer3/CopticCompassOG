@@ -53,6 +53,11 @@ export const CONTENT_RELEASE_EDITABLE_STATUSES = [
   "cancelled",
 ] as const satisfies readonly ContentReleaseRow["status"][];
 
+export const CONTENT_RELEASE_DELETABLE_STATUSES = [
+  "draft",
+  "cancelled",
+] as const satisfies readonly ContentReleaseRow["status"][];
+
 export function deriveContentReleaseType(
   itemTypes: ContentReleaseItemRow["item_type"][],
 ): ContentReleaseRow["release_type"] | null {
@@ -90,6 +95,14 @@ export function isContentReleaseEditableStatus(
 ): value is (typeof CONTENT_RELEASE_EDITABLE_STATUSES)[number] {
   return CONTENT_RELEASE_EDITABLE_STATUSES.includes(
     value as (typeof CONTENT_RELEASE_EDITABLE_STATUSES)[number],
+  );
+}
+
+export function isContentReleaseDeletableStatus(
+  value: string,
+): value is (typeof CONTENT_RELEASE_DELETABLE_STATUSES)[number] {
+  return CONTENT_RELEASE_DELETABLE_STATUSES.includes(
+    value as (typeof CONTENT_RELEASE_DELETABLE_STATUSES)[number],
   );
 }
 

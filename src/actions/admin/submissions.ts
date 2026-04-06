@@ -177,3 +177,59 @@ export async function submitFeedback(formData: FormData) {
     );
   }
 }
+
+export async function deleteSubmission(formData: FormData) {
+  const adminContext = await getValidatedAdminContext();
+  if (!adminContext) {
+    console.warn(
+      "Admin submission deletion skipped because Supabase is not configured.",
+    );
+    return;
+  }
+
+  const { supabase, user } = adminContext;
+
+  const submissionId = normalizeWhitespace(
+    getFormString(formData, "submission_id"),
+  );
+  const lessonSlug = normalizeWhitespace(
+    getFormString(formData, "lesson_slug"),
+  );
+  const deletionReason = normalizeWhitespace(
+    getFormString(formData, "deletion_reason"),
+  );
+
+  if (
+    !isUuid(submissionId) ||
+    !hasLengthInRange(deletionReason, { min: 3, max: 120 })
+  ) {
+    console.warn("Rejected invalid admin submission deletion payload", {
+      userId: user.id,
+      submissionId,
+      deletionReason,
+    });
+    return;
+  }
+
+  const updates: SubmissionUpdate = {
+    deleted_at: new Date().toISOString(),
+    deleted_by: user.id,
+    deletion_reason: deletionReason,
+  };
+
+  const { error } = await supabase
+    .from("submissions")
+    .update(updates)
+    .eq("id", submissionId);
+
+  if (error) {
+    console.error("Error soft deleting submission:", error);
+    return;
+  }
+
+  revalidatePath("/admin");
+  if (lessonSlug.length > 0) {
+    revalidatePath(`/grammar/${lessonSlug}`);
+  }
+  revalidateDashboardPaths();
+}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AdminDashboardPage } from "@/features/admin/components/AdminDashboardPage";
+import { resolveAdminWorkspaceMode } from "@/features/admin/lib/workspaceMode";
 import { createNoIndexMetadata } from "@/lib/metadata";
 
 export const metadata: Metadata = createNoIndexMetadata({
@@ -8,6 +9,16 @@ export const metadata: Metadata = createNoIndexMetadata({
     "Private instructor workspace for reviewing grammar submissions.",
 });
 
-export default async function AdminPage() {
-  return <AdminDashboardPage redirectTo="/admin" />;
+export default async function AdminPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ mode?: string | string[] }>;
+}) {
+  const resolvedSearchParams = await searchParams;
+  const modeValue = resolvedSearchParams?.mode;
+  const initialMode = resolveAdminWorkspaceMode(
+    Array.isArray(modeValue) ? modeValue[0] : modeValue,
+  );
+
+  return <AdminDashboardPage initialMode={initialMode} redirectTo="/admin" />;
 }

@@ -19,6 +19,7 @@ import type { AdminSubmission } from "@/features/submissions/types";
 import type { QueryResult, AppSupabaseClient } from "@/lib/supabase/queryTypes";
 import type { ContactMessageRow } from "@/features/contact/lib/contact";
 import type { AdminContentRelease } from "@/features/communications/lib/releases";
+import type { AdminWorkspaceMode } from "@/features/admin/lib/workspaceMode";
 
 export type AdminAudienceMetrics = {
   bookAudienceCount: number;
@@ -66,11 +67,43 @@ export type AdminDashboardData = {
   submissions: LoadedDashboardSection<AdminSubmission[]>;
 };
 
+export type AdminReviewDashboardData = Pick<
+  AdminDashboardData,
+  "contactMessages" | "entryReports" | "submissions"
+>;
+
+export type AdminCommunicationsDashboardData = Pick<
+  AdminDashboardData,
+  "audience" | "contentReleases"
+>;
+
+export type AdminSystemDashboardData = Pick<
+  AdminDashboardData,
+  "notifications"
+>;
+
 function withItems<T>(result: QueryResult<T[]>): LoadedDashboardSection<T[]> {
   return {
     error: result.error,
     items: result.data ?? [],
   };
+}
+
+async function getExactCount(
+  label: string,
+  query: PromiseLike<{
+    count: number | null;
+    error: { message: string } | null;
+  }>,
+) {
+  const result = await query;
+
+  if (result.error) {
+    console.error(`Error loading admin ${label} count:`, result.error);
+    return 0;
+  }
+
+  return result.count ?? 0;
 }
 
 export function buildAdminAudienceMetrics(
@@ -171,6 +204,72 @@ export function buildAdminWorkspaceOverview(
   };
 }
 
+export async function loadAdminWorkspaceOverview(
+  supabase: AppSupabaseClient,
+): Promise<AdminWorkspaceOverview> {
+  const [
+    pendingSubmissionCount,
+    openContactMessageCount,
+    openEntryReportCount,
+    actionableReleaseCount,
+    audienceSyncErrorCount,
+    failedNotificationCount,
+  ] = await Promise.all([
+    getExactCount(
+      "pending submissions",
+      supabase
+        .from("submissions")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "pending")
+        .is("deleted_at", null),
+    ),
+    getExactCount(
+      "open contact messages",
+      supabase
+        .from("contact_messages")
+        .select("id", { count: "exact", head: true })
+        .in("status", ["new", "in_progress"]),
+    ),
+    getExactCount(
+      "open entry reports",
+      supabase
+        .from("entry_reports")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "open"),
+    ),
+    getExactCount(
+      "actionable content releases",
+      supabase
+        .from("content_releases")
+        .select("id", { count: "exact", head: true })
+        .in("status", ["approved", "queued", "sending"]),
+    ),
+    getExactCount(
+      "audience sync errors",
+      supabase
+        .from("audience_contact_sync_state")
+        .select("audience_contact_id", { count: "exact", head: true })
+        .not("last_error", "is", null),
+    ),
+    getExactCount(
+      "failed notifications",
+      supabase
+        .from("notification_events")
+        .select("id", { count: "exact", head: true })
+        .eq("status", "failed"),
+    ),
+  ]);
+
+  return {
+    actionableReleaseCount,
+    audienceSyncErrorCount,
+    failedNotificationCount,
+    openContactMessageCount,
+    openEntryReportCount,
+    pendingSubmissionCount,
+  };
+}
+
 function buildReleaseCandidates() {
   const releaseCandidates = listContentReleaseCandidates();
 
@@ -241,4 +340,87 @@ export async function loadAdminDashboardData(
     },
     submissions,
   };
+}
+
+export async function loadAdminReviewDashboardData(
+  supabase: AppSupabaseClient,
+): Promise<AdminReviewDashboardData> {
+  const [submissionsResult, contactMessagesResult, entryReportsResult] =
+    await Promise.all([
+      getAdminSubmissions(supabase),
+      getAdminContactMessages(supabase),
+      getAdminEntryReports(supabase),
+    ]);
+
+  return {
+    contactMessages: withItems(contactMessagesResult),
+    entryReports: {
+      error: entryReportsResult.error,
+      items: buildEntryReportItems(
+        (entryReportsResult.data ?? []).map((report) => ({
+          entry: getDictionaryEntryById(report.entry_id),
+          report,
+        })),
+      ),
+    },
+    submissions: withItems(submissionsResult),
+  };
+}
+
+export async function loadAdminCommunicationsDashboardData(
+  supabase: AppSupabaseClient,
+): Promise<AdminCommunicationsDashboardData> {
+  const [audienceContactsResult, contentReleasesResult] = await Promise.all([
+    getAdminAudienceContacts(supabase),
+    getAdminContentReleases(supabase),
+  ]);
+
+  const audience = withItems(audienceContactsResult);
+  const contentReleases = withItems(contentReleasesResult);
+
+  return {
+    audience: {
+      ...audience,
+      metrics: buildAdminAudienceMetrics(audience.items),
+    },
+    contentReleases: {
+      ...contentReleases,
+      ...buildReleaseCandidates(),
+    },
+  };
+}
+
+export async function loadAdminSystemDashboardData(
+  supabase: AppSupabaseClient,
+): Promise<AdminSystemDashboardData> {
+  const notificationEventsResult = await getAdminNotificationEvents(supabase);
+  const notifications = withItems(notificationEventsResult);
+
+  return {
+    notifications: {
+      ...notifications,
+      metrics: buildAdminNotificationMetrics(notifications.items),
+    },
+  };
+}
+
+export async function loadAdminDashboardDataForMode(
+  supabase: AppSupabaseClient,
+  mode: AdminWorkspaceMode,
+) {
+  switch (mode) {
+    case "communications":
+      return {
+        communications: await loadAdminCommunicationsDashboardData(supabase),
+      } as const;
+    case "system":
+      return {
+        system: await loadAdminSystemDashboardData(supabase),
+      } as const;
+    case "review":
+    default:
+      return {
+        review: await loadAdminReviewDashboardData(supabase),
+      } as const;
+  }
 }

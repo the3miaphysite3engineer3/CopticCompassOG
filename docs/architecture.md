@@ -59,9 +59,9 @@ Typical subfolders:
 Examples:
 
 - dictionary search and entry rendering live under `src/features/dictionary`
-- grammar dataset, lesson rendering, API shaping, and learner state live under `src/features/grammar`
+- grammar dataset, lesson rendering, reading/study workspace UI, API shaping, and learner state live under `src/features/grammar`
 - analytics dashboards and linguistic drill-downs live under `src/features/analytics`
-- admin dashboard presentation lives under `src/features/admin`
+- admin dashboard presentation, workspace modes, and queue UI live under `src/features/admin`
 
 This is the default home for new product logic.
 
@@ -149,6 +149,8 @@ The app uses Supabase in three layers:
 
 Shared Edge Function logic lives under `supabase/functions/_shared`.
 
+More involved workers should stay decomposed by responsibility instead of growing into single long files. The content release worker is a good example: its env/config, REST helpers, notification persistence, and broadcast delivery logic now live in separate modules under `supabase/functions/process-content-release`.
+
 ## Testing Strategy
 
 Current testing layers:
@@ -156,6 +158,8 @@ Current testing layers:
 - unit and integration-style coverage with Vitest in `src/**/*.test.ts`
 - end-to-end smoke coverage with Playwright in `tests/e2e`
 - CI enforcement in `.github/workflows/ci.yml`
+
+Where a domain has enough behavior to justify it, prefer smaller domain-specific test files over one giant catch-all harness. The admin action tests now follow that pattern with shared helpers plus separate release, moderation, and audience test files.
 
 CI currently runs:
 
@@ -185,6 +189,7 @@ When adding new code, use these defaults:
 
 - Prefer feature-owned modules over new cross-feature megafiles.
 - Keep page files and route handlers thin when extraction improves clarity.
+- Split large client containers into orchestration plus smaller layout or interaction helpers once multiple modes, panels, or drill-down behaviors accumulate.
 - Keep SEO logic centralized in shared helpers.
 - Treat `public/data` as generated or checked-in data, not the place for new business logic.
 - Use compatibility shims only as temporary migration tools, then remove them once imports are updated.

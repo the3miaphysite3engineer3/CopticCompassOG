@@ -1,4 +1,5 @@
 import { submitFeedback } from "@/actions/admin";
+import { Button } from "@/components/Button";
 import { FormField, FormLabel } from "@/components/FormField";
 import type { SubmissionRow } from "@/features/submissions/types";
 
@@ -43,14 +44,11 @@ export function SubmissionReviewForm({
         />
       </FormField>
 
-      <button
-        type="submit"
-        className="w-full rounded-xl bg-sky-600 px-8 py-3.5 font-bold text-white shadow-sm transition-all hover:bg-sky-500 focus:ring-4 focus:ring-sky-600/30 sm:w-auto"
-      >
+      <Button type="submit" fullWidth className="sm:w-auto" size="lg">
         {submission.status === "reviewed"
           ? "Save Updated Feedback"
           : "Mark Reviewed & Send Feedback"}
-      </button>
+      </Button>
     </form>
   );
 }

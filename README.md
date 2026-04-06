@@ -18,16 +18,16 @@ Coptic Compass is a digital home for Coptic study, bringing together a searchabl
 - A publications section for published and forthcoming books connected to the broader Coptic project.
 - A public grammar API with JSON endpoints and OpenAPI documentation for reuse in other tools and teaching workflows.
 - A private student dashboard for profile settings, grammar progress, bookmarks, notes, and exercise submissions.
-- A private instructor workspace for reviewing and grading student submissions.
+- A private instructor workspace with review inboxes, focused submission grading, release drafting, audience sync, and notification health.
 - English and Dutch interfaces, with legacy non-localized routes redirecting to localized pages.
 
 ## Highlights
 
 - Fast lexical browsing with support for Coptic script and a built-in virtual keyboard.
 - Rich entry pages with grammatical detail, dialect forms, and related content.
-- Grammar lessons that connect terminology, examples, sources, learner progress, and dictionary entries in one reading flow.
+- Grammar lessons that connect terminology, examples, sources, learner progress, and dictionary entries in both a calmer reading layout and an optional desktop study mode.
 - A versioned grammar dataset exported to `public/data/grammar/v1` and shared by the site, API, and developer docs.
-- Private learner and instructor flows built around submissions, feedback, bookmarks, notes, and profile management.
+- Private learner and instructor flows built around submissions, feedback, bookmarks, notes, profile management, release communications, and delivery monitoring.
 - Developer-facing grammar endpoints and docs for lessons, concepts, examples, exercises, footnotes, sources, and the OpenAPI spec.
 
 ## Interface Preview
@@ -141,11 +141,13 @@ supabase functions deploy profile-signup-alert --project-ref <your-project-ref>
 3. Create a database webhook on `public.profiles` for `INSERT` events.
 4. Choose `Supabase Edge Functions` as the webhook target, select `profile-signup-alert`, and add the auth header with service key.
 
+The function now rejects unauthenticated requests in code as well, so the webhook must send `Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>` (or an equivalent service-role bearer token you control).
+
 For local development with `supabase start`, you can still test the function itself locally with `supabase functions serve`, but the project-side signup alert activation happens in the hosted Supabase project dashboard.
 
 ### Background Release Delivery
 
-This repo also includes a Supabase Edge Function at `supabase/functions/process-content-release` for background delivery of approved content releases. When Resend segment configuration is available, the worker hands release sends off to provider-native broadcasts. If that configuration is missing, it falls back to the app's direct per-recipient delivery flow.
+This repo also includes a Supabase Edge Function at `supabase/functions/process-content-release` for background delivery of approved content releases. When Resend segment configuration is available, the worker hands release sends off to provider-native broadcasts. If that configuration is missing, it falls back to direct per-recipient delivery from the worker.
 
 To enable background release sends in a Supabase project:
 
@@ -159,6 +161,8 @@ supabase functions deploy process-content-release --project-ref <your-project-re
 ```
 
 3. Make sure the latest release delivery migrations have been pushed so `content_releases` includes the queue metadata columns.
+
+The worker also validates its bearer token in code, so any caller must send `Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>`.
 
 ### Resend Audience Sync
 
@@ -179,7 +183,7 @@ Set these app environment variables where your Next.js server runs:
 
 Keep `RESEND_API_KEY` for normal send-only email delivery if you want, and use `RESEND_API_KEY_FULL_ACCESS` for Contacts, Segments, and Broadcast operations.
 
-The three base segment IDs are used for topic-level audience sync. The six optional locale-specific segment IDs are used when sending localized EN/NL release broadcasts through Resend. If you do not set the locale-specific segment IDs, localized releases continue to fall back to direct per-recipient delivery.
+The three base segment IDs are used for segment-level audience sync. The six optional locale-specific segment IDs are used when sending localized EN/NL release broadcasts through Resend. If you do not set the locale-specific segment IDs, localized releases continue to fall back to direct per-recipient delivery.
 
 Once those are set and the latest audience-contact sync migration has been pushed, the admin dashboard includes a manual audience backfill action and future audience preference changes will sync automatically on a best-effort basis.
 
@@ -227,18 +231,20 @@ Currently implemented in the app:
 
 - Searchable Coptic dictionary
 - Published grammar lesson system
+- Grammar lesson reading and study-mode workspace
 - Publications section
 - Public grammar API and API docs
 - English and Dutch localized UI
 - Student dashboard with profile and learning progress
-- Instructor submission review workspace
+- Instructor workspace with `Review`, `Communications`, and `System` modes
+- Background release delivery, Resend audience sync, and branded notification emails
 
 Current areas of active maintenance:
 
 - More published grammar lessons
 - Expanded publication metadata and coverage
 - Editorial and lexical data cleanup
-- Submission and review workflow polish
+- Submission, review, and admin workflow polish
 - Further polish for contributor and developer documentation
 
 ## Contributing

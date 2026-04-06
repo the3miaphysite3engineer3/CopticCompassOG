@@ -5,6 +5,7 @@ import {
   parseProfileSignupPayload,
   redactEmailAddress,
 } from "../_shared/profileSignupAlert.ts";
+import { hasExpectedBearerToken } from "../_shared/requestAuth.ts";
 
 declare const Deno: {
   env: {
@@ -213,6 +214,10 @@ Deno.serve(async (request) => {
     return jsonResponse(500, {
       error: "Signup alert email service is not configured.",
     });
+  }
+
+  if (!hasExpectedBearerToken(request, supabaseServiceRoleKey)) {
+    return jsonResponse(401, { error: "Unauthorized." });
   }
 
   let payload: unknown;

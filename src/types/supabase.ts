@@ -644,6 +644,9 @@ export type Database = {
         Row: {
           answers: Json | null;
           created_at: string;
+          deleted_at: string | null;
+          deleted_by: string | null;
+          deletion_reason: string | null;
           exercise_id: string | null;
           feedback_text: string | null;
           id: string;
@@ -652,6 +655,7 @@ export type Database = {
           reviewed_at: string | null;
           reviewed_by: string | null;
           status: "pending" | "reviewed";
+          submission_intent_id: string | null;
           submitted_language: "en" | "nl" | null;
           submitted_text: string;
           user_id: string;
@@ -659,6 +663,9 @@ export type Database = {
         Insert: {
           answers?: Json | null;
           created_at?: string;
+          deleted_at?: string | null;
+          deleted_by?: string | null;
+          deletion_reason?: string | null;
           exercise_id?: string | null;
           feedback_text?: string | null;
           id?: string;
@@ -667,6 +674,7 @@ export type Database = {
           reviewed_at?: string | null;
           reviewed_by?: string | null;
           status?: "pending" | "reviewed";
+          submission_intent_id?: string | null;
           submitted_language?: "en" | "nl" | null;
           submitted_text: string;
           user_id: string;
@@ -674,6 +682,9 @@ export type Database = {
         Update: {
           answers?: Json | null;
           created_at?: string;
+          deleted_at?: string | null;
+          deleted_by?: string | null;
+          deletion_reason?: string | null;
           exercise_id?: string | null;
           feedback_text?: string | null;
           id?: string;
@@ -682,6 +693,7 @@ export type Database = {
           reviewed_at?: string | null;
           reviewed_by?: string | null;
           status?: "pending" | "reviewed";
+          submission_intent_id?: string | null;
           submitted_language?: "en" | "nl" | null;
           submitted_text?: string;
           user_id?: string;

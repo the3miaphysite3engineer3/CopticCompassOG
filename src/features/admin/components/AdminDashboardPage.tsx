@@ -1,28 +1,103 @@
+import type { ReactNode } from "react";
 import {
   AdminAudienceSection,
+  AdminCommunicationsDesk,
   AdminContactInboxSection,
   AdminEntryReportsSection,
   AdminNotificationsSection,
+  AdminReviewInboxSummary,
   AdminReleasesSection,
   AdminSubmissionsSection,
+  AdminSystemHealthSummary,
   AdminWorkspaceQuickJump,
 } from "@/features/admin/components/AdminDashboardSections";
+import { AdminWorkspaceModeShell } from "@/features/admin/components/AdminWorkspaceModeShell";
 import {
-  buildAdminWorkspaceOverview,
-  loadAdminDashboardData,
+  loadAdminCommunicationsDashboardData,
+  loadAdminReviewDashboardData,
+  loadAdminSystemDashboardData,
+  loadAdminWorkspaceOverview,
 } from "@/features/admin/lib/dashboardData";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { requireAdminPageSession } from "@/lib/supabase/auth";
+import type { AdminWorkspaceMode } from "@/features/admin/lib/workspaceMode";
 
 export async function AdminDashboardPage({
+  initialMode = "review",
   redirectTo = "/admin",
 }: {
+  initialMode?: AdminWorkspaceMode;
   redirectTo?: string;
 }) {
   const { supabase } = await requireAdminPageSession(redirectTo);
-  const dashboardData = await loadAdminDashboardData(supabase);
-  const workspaceOverview = buildAdminWorkspaceOverview(dashboardData);
+  const workspaceOverview = await loadAdminWorkspaceOverview(supabase);
+  const mode = initialMode;
+  let modeContent: ReactNode;
+
+  if (mode === "communications") {
+    const dashboardData = await loadAdminCommunicationsDashboardData(supabase);
+
+    modeContent = (
+      <>
+        <AdminCommunicationsDesk
+          audience={dashboardData.audience}
+          contentReleases={dashboardData.contentReleases}
+          overview={workspaceOverview}
+        />
+        <AdminWorkspaceQuickJump
+          overview={workspaceOverview}
+          mode="communications"
+        />
+
+        <div className="space-y-8">
+          <AdminReleasesSection
+            contentReleases={dashboardData.contentReleases}
+            showComposer={false}
+          />
+          <AdminAudienceSection
+            audience={dashboardData.audience}
+            showSyncForm={false}
+          />
+        </div>
+      </>
+    );
+  } else if (mode === "system") {
+    const dashboardData = await loadAdminSystemDashboardData(supabase);
+
+    modeContent = (
+      <>
+        <AdminSystemHealthSummary
+          overview={workspaceOverview}
+          notifications={dashboardData.notifications}
+        />
+        <AdminWorkspaceQuickJump overview={workspaceOverview} mode="system" />
+
+        <div className="space-y-8">
+          <AdminNotificationsSection
+            notifications={dashboardData.notifications}
+          />
+        </div>
+      </>
+    );
+  } else {
+    const dashboardData = await loadAdminReviewDashboardData(supabase);
+
+    modeContent = (
+      <>
+        <AdminReviewInboxSummary overview={workspaceOverview} />
+        <AdminWorkspaceQuickJump overview={workspaceOverview} mode="review" />
+
+        <div className="space-y-8">
+          <AdminSubmissionsSection submissions={dashboardData.submissions} />
+          <AdminContactInboxSection
+            contactMessages={dashboardData.contactMessages}
+          />
+          <AdminEntryReportsSection entryReports={dashboardData.entryReports} />
+        </div>
+      </>
+    );
+  }
 
   return (
     <PageShell
@@ -45,20 +120,9 @@ export async function AdminDashboardPage({
         className="mb-12"
       />
 
-      <AdminWorkspaceQuickJump overview={workspaceOverview} />
-
-      <div className="space-y-8">
-        <AdminSubmissionsSection submissions={dashboardData.submissions} />
-        <AdminAudienceSection audience={dashboardData.audience} />
-        <AdminReleasesSection contentReleases={dashboardData.contentReleases} />
-        <AdminContactInboxSection
-          contactMessages={dashboardData.contactMessages}
-        />
-        <AdminNotificationsSection
-          notifications={dashboardData.notifications}
-        />
-        <AdminEntryReportsSection entryReports={dashboardData.entryReports} />
-      </div>
+      <AdminWorkspaceModeShell mode={mode} overview={workspaceOverview}>
+        {modeContent}
+      </AdminWorkspaceModeShell>
     </PageShell>
   );
 }

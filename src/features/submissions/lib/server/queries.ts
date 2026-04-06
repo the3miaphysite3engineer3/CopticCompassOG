@@ -12,6 +12,7 @@ export async function getUserSubmissions(
     .from("submissions")
     .select("*")
     .eq("user_id", userId)
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   return data ?? [];
@@ -23,6 +24,7 @@ export async function getAdminSubmissions(
   const submissionsResult = await supabase
     .from("submissions")
     .select("*")
+    .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
   if (submissionsResult.error || !submissionsResult.data) {

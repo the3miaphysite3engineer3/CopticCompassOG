@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { syncAudienceContactsWithResend } from "@/actions/admin";
 import type { SyncAudienceContactsState } from "@/actions/admin/states";
+import { Button } from "@/components/Button";
 import { StatusNotice } from "@/components/StatusNotice";
 
 export function SyncAudienceContactsForm() {
@@ -13,9 +14,9 @@ export function SyncAudienceContactsForm() {
 
   return (
     <form action={formAction} className="space-y-4">
-      <button type="submit" className="btn-secondary px-6" disabled={isPending}>
+      <Button type="submit" variant="secondary" disabled={isPending}>
         {isPending ? "Syncing audience..." : "Sync audience to Resend"}
-      </button>
+      </Button>
 
       {state?.message ? (
         <StatusNotice tone={state.success ? "success" : "error"} align="left">

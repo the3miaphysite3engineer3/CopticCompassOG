@@ -73,6 +73,12 @@ For lexical corrections, include the scholarly or source rationale in your PR. F
 
 If you change auth, profiles, learner progress, submissions, or avatar storage, include the necessary SQL in `supabase/migrations` and describe any setup or rollout steps in your PR.
 
+If you change release delivery, audience sync, notification emails, or Supabase Edge Functions, also document:
+
+- required Resend or sender environment variables
+- whether a Supabase function deploy is needed
+- whether any follow-up dashboard setup is required
+
 ## Security Policy
 
 Report security issues privately to `kyrilloswannes@gmail.com`, via the contact page, or by opening an issue if the report is not sensitive.
@@ -88,6 +94,7 @@ Please keep PRs focused and explain:
 - whether the update is editorial, lexical, technical, visual, or schema-related
 - any source or scholarly rationale behind dictionary or grammar edits
 - any required environment variables, migrations, or follow-up steps
+- whether any Resend or Supabase function configuration changed
 - screenshots for visible UI changes when they help reviewers
 
 ## Suggested Validation

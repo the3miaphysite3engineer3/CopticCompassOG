@@ -6,6 +6,7 @@ import {
   deriveContentReleaseType,
   getContentReleaseCopyForLocale,
   isContentReleaseAudienceSegment,
+  isContentReleaseDeletableStatus,
   isContentReleaseEditableStatus,
   isContentReleaseLocaleMode,
 } from "@/features/communications/lib/releases";
@@ -14,7 +15,17 @@ import { dispatchLoggedNotificationEmail } from "@/lib/notifications/events";
 import { getNotificationEmailEnv } from "@/lib/notifications/config";
 import { revalidateAdminPaths } from "@/lib/server/revalidation";
 import { invokeSupabaseEdgeFunction } from "@/lib/supabase/functions";
-import { getValidatedAdminContext, type AdminSupabase } from "./shared";
+import { getValidatedAdminContext } from "./shared";
+import {
+  createContentReleaseItemSnapshots,
+  createContentReleaseRecord,
+  deleteContentReleaseRecord,
+  loadContentReleaseForDelivery,
+  loadContentReleaseStatusRecord,
+  queueContentReleaseDeliveryRecord,
+  revertQueuedContentReleaseRecord,
+  updateContentReleaseStatusRecord,
+} from "./releasePersistence";
 import {
   getFormString,
   hasLengthInRange,
@@ -25,46 +36,9 @@ import {
 import type { Language } from "@/types/i18n";
 import type {
   ContentReleaseDraftState,
+  DeleteContentReleaseState,
   SendContentReleaseState,
 } from "./states";
-
-async function loadContentReleaseForDelivery(
-  releaseId: string,
-  supabase: AdminSupabase,
-) {
-  const { data: release, error: releaseError } = await supabase
-    .from("content_releases")
-    .select("*")
-    .eq("id", releaseId)
-    .maybeSingle();
-
-  if (releaseError || !release) {
-    console.error(
-      "Error loading content release draft for delivery:",
-      releaseError,
-    );
-    return null;
-  }
-
-  const { data: releaseItems, error: releaseItemsError } = await supabase
-    .from("content_release_items")
-    .select("*")
-    .eq("release_id", releaseId)
-    .order("created_at", { ascending: true });
-
-  if (releaseItemsError || !releaseItems || releaseItems.length === 0) {
-    console.error(
-      "Error loading content release items for delivery:",
-      releaseItemsError,
-    );
-    return null;
-  }
-
-  return {
-    items: releaseItems,
-    release,
-  };
-}
 
 export async function createContentReleaseDraft(
   _prevState: ContentReleaseDraftState | null,
@@ -154,21 +128,17 @@ export async function createContentReleaseDraft(
     };
   }
 
-  const timestamp = new Date().toISOString();
-  const { data: release, error: releaseError } = await supabase
-    .from("content_releases")
-    .insert({
-      audience_segment: audienceSegment,
-      body_en: bodyEn || null,
-      body_nl: bodyNl || null,
-      locale_mode: localeMode,
-      release_type: releaseType,
-      subject_en: subjectEn || null,
-      subject_nl: subjectNl || null,
-      updated_at: timestamp,
-    })
-    .select("id")
-    .single();
+  const { data: release, error: releaseError } =
+    await createContentReleaseRecord({
+      audienceSegment,
+      bodyEn: bodyEn || null,
+      bodyNl: bodyNl || null,
+      localeMode,
+      releaseType,
+      subjectEn: subjectEn || null,
+      subjectNl: subjectNl || null,
+      supabase,
+    });
 
   if (releaseError || !release) {
     console.error("Error creating content release draft:", releaseError);
@@ -178,17 +148,11 @@ export async function createContentReleaseDraft(
     };
   }
 
-  const { error: itemsError } = await supabase
-    .from("content_release_items")
-    .insert(
-      resolvedItems.map((item) => ({
-        item_id: item.itemId,
-        item_type: item.itemType,
-        release_id: release.id,
-        title_snapshot: item.title,
-        url_snapshot: item.url,
-      })),
-    );
+  const { error: itemsError } = await createContentReleaseItemSnapshots({
+    releaseId: release.id,
+    resolvedItems,
+    supabase,
+  });
 
   if (itemsError) {
     console.error("Error storing content release draft items:", itemsError);
@@ -225,20 +189,106 @@ export async function updateContentReleaseStatus(formData: FormData) {
     return;
   }
 
-  const { error } = await supabase
-    .from("content_releases")
-    .update({
-      sent_at: null,
-      status,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", releaseId);
+  const { error } = await updateContentReleaseStatusRecord({
+    releaseId,
+    status,
+    supabase,
+  });
 
   if (error) {
     console.error("Error updating content release status:", error);
   }
 
   revalidateAdminPaths();
+}
+
+export async function deleteContentReleaseDraft(
+  _prevState: DeleteContentReleaseState | null,
+  formData: FormData,
+): Promise<DeleteContentReleaseState> {
+  const adminContext = await getValidatedAdminContext();
+  if (!adminContext) {
+    return {
+      success: false,
+      message: "Draft cleanup is unavailable right now.",
+    };
+  }
+
+  const { supabase, user } = adminContext;
+  const releaseId = normalizeWhitespace(getFormString(formData, "release_id"));
+
+  if (!isUuid(releaseId)) {
+    console.warn("Rejected invalid content release deletion payload", {
+      releaseId,
+      userId: user.id,
+    });
+    return {
+      success: false,
+      message: "Choose a valid draft before deleting it.",
+    };
+  }
+
+  const { data: release, error: releaseError } =
+    await loadContentReleaseStatusRecord({
+      releaseId,
+      supabase,
+    });
+
+  if (releaseError || !release) {
+    console.error("Error loading content release draft for deletion:", {
+      releaseError,
+      releaseId,
+      userId: user.id,
+    });
+    return {
+      success: false,
+      message: "Could not load that release draft.",
+    };
+  }
+
+  if (!isContentReleaseDeletableStatus(release.status)) {
+    return {
+      success: false,
+      message:
+        "Only draft or cancelled releases can be deleted. Sent and in-flight releases stay in history.",
+    };
+  }
+
+  const { data: deletedRelease, error: deleteError } =
+    await deleteContentReleaseRecord({
+      releaseId,
+      supabase,
+    });
+
+  if (deleteError) {
+    console.error("Error deleting content release draft:", {
+      deleteError,
+      releaseId,
+      userId: user.id,
+    });
+    return {
+      success: false,
+      message: "Could not delete this release draft.",
+    };
+  }
+
+  if (!deletedRelease) {
+    console.error("No content release draft was deleted.", {
+      releaseId,
+      userId: user.id,
+    });
+    return {
+      success: false,
+      message:
+        "This draft could not be deleted yet. Make sure the latest content release permissions migration has been applied.",
+    };
+  }
+
+  revalidateAdminPaths();
+  return {
+    success: true,
+    message: "Release draft deleted.",
+  };
 }
 
 export async function sendContentRelease(
@@ -300,24 +350,13 @@ export async function sendContentRelease(
       };
     }
 
-    const now = new Date().toISOString();
-    const { error: queueError } = await supabase
-      .from("content_releases")
-      .update({
-        delivery_cursor: null,
-        delivery_finished_at: null,
-        delivery_requested_at: now,
-        delivery_requested_by: user.id,
-        delivery_started_at: null,
-        delivery_summary: release.delivery_summary ?? {
-          item_count: releaseItems.length,
-        },
-        last_delivery_error: null,
-        sent_at: null,
-        status: "queued",
-        updated_at: now,
-      })
-      .eq("id", releaseId);
+    const { error: queueError } = await queueContentReleaseDeliveryRecord({
+      itemCount: releaseItems.length,
+      release,
+      releaseId,
+      requestedBy: user.id,
+      supabase,
+    });
 
     if (queueError) {
       console.error("Error queueing content release delivery:", queueError);
@@ -336,16 +375,11 @@ export async function sendContentRelease(
   );
 
   if (!invokeResult.success) {
-    const revertTimestamp = new Date().toISOString();
-    const { error: revertError } = await supabase
-      .from("content_releases")
-      .update({
-        last_delivery_error:
-          "The background delivery worker could not be started.",
-        status: isResumingQueuedRelease ? "queued" : "approved",
-        updated_at: revertTimestamp,
-      })
-      .eq("id", releaseId);
+    const { error: revertError } = await revertQueuedContentReleaseRecord({
+      isResumingQueuedRelease,
+      releaseId,
+      supabase,
+    });
 
     if (revertError) {
       console.error(

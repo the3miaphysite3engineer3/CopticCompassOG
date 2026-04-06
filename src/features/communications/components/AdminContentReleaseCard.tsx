@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import { Badge } from "@/components/Badge";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import {
@@ -9,6 +10,7 @@ import {
 } from "@/features/communications/lib/releases";
 import { ContentReleaseReviewForm } from "./ContentReleaseReviewForm";
 import { ContentReleaseStatusBadge } from "./ContentReleaseStatusBadge";
+import { DeleteContentReleaseForm } from "./DeleteContentReleaseForm";
 import { SendContentReleaseForm } from "./SendContentReleaseForm";
 import { SendContentReleasePreviewForm } from "./SendContentReleasePreviewForm";
 
@@ -32,6 +34,10 @@ export function AdminContentReleaseCard({
   release: AdminContentRelease;
 }) {
   const deliverySummary = getContentReleaseDeliverySummary(release);
+  const shouldOpenDeliveryLog =
+    release.status === "queued" ||
+    release.status === "sending" ||
+    Boolean(release.last_delivery_error);
 
   return (
     <SurfacePanel
@@ -61,67 +67,126 @@ export function AdminContentReleaseCard({
               "Untitled release draft"}
           </h2>
 
-          <div className="mt-3 space-y-2 text-sm text-stone-600 dark:text-stone-400">
-            <p>
-              Updated on {formatContentReleaseTimestamp(release.updated_at)}
-            </p>
-            <p>
-              Created on {formatContentReleaseTimestamp(release.created_at)}
-            </p>
-            {release.delivery_requested_at ? (
-              <p>
-                Delivery requested on{" "}
-                {formatContentReleaseTimestamp(release.delivery_requested_at)}
-              </p>
-            ) : null}
-            {release.delivery_started_at ? (
-              <p>
-                Delivery started on{" "}
-                {formatContentReleaseTimestamp(release.delivery_started_at)}
-              </p>
-            ) : null}
-            {release.delivery_finished_at ? (
-              <p>
-                Delivery finished on{" "}
-                {formatContentReleaseTimestamp(release.delivery_finished_at)}
-              </p>
-            ) : null}
-            {release.sent_at ? (
-              <p>Sent on {formatContentReleaseTimestamp(release.sent_at)}</p>
-            ) : null}
-            <p>Snapshot items: {release.items.length}</p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Badge tone="surface" size="xs">
+              Updated {formatContentReleaseTimestamp(release.updated_at)}
+            </Badge>
+            <Badge tone="surface" size="xs">
+              Snapshot items: {release.items.length}
+            </Badge>
             {typeof deliverySummary.eligibleRecipientCount === "number" ? (
-              <p>
+              <Badge tone="surface" size="xs">
                 Eligible recipients: {deliverySummary.eligibleRecipientCount}
-              </p>
+              </Badge>
             ) : null}
-            {typeof deliverySummary.processedRecipientCount === "number" ? (
-              <p>
-                Processed recipients: {deliverySummary.processedRecipientCount}
-                {typeof deliverySummary.remainingRecipientCount === "number"
-                  ? `, remaining ${deliverySummary.remainingRecipientCount}`
-                  : ""}
-              </p>
+            {typeof deliverySummary.sentCount === "number" ? (
+              <Badge
+                tone={deliverySummary.failedCount ? "accent" : "coptic"}
+                size="xs"
+              >
+                Sent: {deliverySummary.sentCount}
+              </Badge>
             ) : null}
-            {typeof deliverySummary.sentCount === "number" ||
-            typeof deliverySummary.skippedCount === "number" ||
-            typeof deliverySummary.failedCount === "number" ? (
-              <p>
-                Delivery counts: sent {deliverySummary.sentCount ?? 0}, skipped{" "}
-                {deliverySummary.skippedCount ?? 0}, failed{" "}
-                {deliverySummary.failedCount ?? 0}
-              </p>
-            ) : null}
-            {deliverySummary.broadcasts?.length ? (
-              <div className="space-y-1">
-                {deliverySummary.broadcasts.map((broadcast) => (
-                  <p key={broadcast.id}>
-                    Broadcast {broadcast.language.toUpperCase()}:{" "}
-                    {broadcast.recipientCount} recipients, id {broadcast.id}
+          </div>
+
+          <div className="mt-4">
+            <details
+              className="group rounded-2xl border border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/40"
+              open={shouldOpenDeliveryLog}
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium text-stone-700 [&::-webkit-details-marker]:hidden dark:text-stone-200">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span>Delivery log</span>
+                  {release.sent_at ? (
+                    <span className="text-stone-500 dark:text-stone-400">
+                      Sent on {formatContentReleaseTimestamp(release.sent_at)}
+                    </span>
+                  ) : release.delivery_started_at ? (
+                    <span className="text-stone-500 dark:text-stone-400">
+                      Started{" "}
+                      {formatContentReleaseTimestamp(
+                        release.delivery_started_at,
+                      )}
+                    </span>
+                  ) : (
+                    <span className="text-stone-500 dark:text-stone-400">
+                      Created on{" "}
+                      {formatContentReleaseTimestamp(release.created_at)}
+                    </span>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2 text-stone-500 dark:text-stone-400">
+                  <span className="group-open:hidden">Show details</span>
+                  <span className="hidden group-open:inline">Hide details</span>
+                  <ChevronDown className="h-5 w-5 transition-transform duration-200 group-open:rotate-180" />
+                </div>
+              </summary>
+
+              <div className="mt-4 space-y-2 text-sm text-stone-600 dark:text-stone-400">
+                <p>
+                  Created on {formatContentReleaseTimestamp(release.created_at)}
+                </p>
+                <p>
+                  Updated on {formatContentReleaseTimestamp(release.updated_at)}
+                </p>
+                {release.delivery_requested_at ? (
+                  <p>
+                    Delivery requested on{" "}
+                    {formatContentReleaseTimestamp(
+                      release.delivery_requested_at,
+                    )}
                   </p>
-                ))}
+                ) : null}
+                {release.delivery_started_at ? (
+                  <p>
+                    Delivery started on{" "}
+                    {formatContentReleaseTimestamp(release.delivery_started_at)}
+                  </p>
+                ) : null}
+                {release.delivery_finished_at ? (
+                  <p>
+                    Delivery finished on{" "}
+                    {formatContentReleaseTimestamp(
+                      release.delivery_finished_at,
+                    )}
+                  </p>
+                ) : null}
+                {release.sent_at ? (
+                  <p>
+                    Sent on {formatContentReleaseTimestamp(release.sent_at)}
+                  </p>
+                ) : null}
+                {typeof deliverySummary.processedRecipientCount === "number" ? (
+                  <p>
+                    Processed recipients:{" "}
+                    {deliverySummary.processedRecipientCount}
+                    {typeof deliverySummary.remainingRecipientCount === "number"
+                      ? `, remaining ${deliverySummary.remainingRecipientCount}`
+                      : ""}
+                  </p>
+                ) : null}
+                {typeof deliverySummary.sentCount === "number" ||
+                typeof deliverySummary.skippedCount === "number" ||
+                typeof deliverySummary.failedCount === "number" ? (
+                  <p>
+                    Delivery counts: sent {deliverySummary.sentCount ?? 0},
+                    skipped {deliverySummary.skippedCount ?? 0}, failed{" "}
+                    {deliverySummary.failedCount ?? 0}
+                  </p>
+                ) : null}
+                {deliverySummary.broadcasts?.length ? (
+                  <div className="space-y-1">
+                    {deliverySummary.broadcasts.map((broadcast) => (
+                      <p key={broadcast.id}>
+                        Broadcast {broadcast.language.toUpperCase()}:{" "}
+                        {broadcast.recipientCount} recipients, id {broadcast.id}
+                      </p>
+                    ))}
+                  </div>
+                ) : null}
               </div>
-            ) : null}
+            </details>
           </div>
         </div>
       </div>
@@ -190,6 +255,10 @@ export function AdminContentReleaseCard({
       <div className="space-y-4">
         <SendContentReleasePreviewForm releaseId={release.id} />
         <ContentReleaseReviewForm
+          releaseId={release.id}
+          status={release.status}
+        />
+        <DeleteContentReleaseForm
           releaseId={release.id}
           status={release.status}
         />

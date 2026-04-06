@@ -14,29 +14,12 @@ export function ContentReleaseReviewForm({
   releaseId: string;
   status: ContentReleaseRow["status"];
 }) {
-  if (status === "queued") {
-    return (
-      <StatusNotice tone="info" align="left">
-        This release is queued for background delivery. Status changes are
-        locked until the worker starts.
-      </StatusNotice>
-    );
-  }
-
-  if (status === "sending") {
-    return (
-      <StatusNotice tone="info" align="left">
-        This release is currently being delivered in the background.
-      </StatusNotice>
-    );
-  }
-
-  if (status === "sent") {
-    return (
-      <StatusNotice tone="success" align="left">
-        This release has already finished delivering.
-      </StatusNotice>
-    );
+  if (
+    status !== "draft" &&
+    status !== "approved" &&
+    status !== "cancelled"
+  ) {
+    return null;
   }
 
   const editableStatus =

@@ -1,17 +1,8 @@
 "use client";
 
-import { useState, type CSSProperties, type ReactNode, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { ArrowLeft, Filter } from "lucide-react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  Legend,
-} from "recharts";
-import { useTheme } from "next-themes";
 import { buttonClassName } from "@/components/Button";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { CompactSelect } from "@/components/CompactSelect";
@@ -19,7 +10,6 @@ import {
   type AnalyticsSnapshotMap,
   type EtymologyFilter,
 } from "@/features/analytics/lib/analytics";
-import { FormLabel } from "@/components/FormField";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
@@ -34,53 +24,21 @@ import {
 import type { TranslationKey } from "@/lib/i18n";
 import type { LexicalEntry } from "@/features/dictionary/types";
 import { AnalyticsSlideOver } from "./AnalyticsSlideOver";
+import { AnalyticsPieChartCard } from "./AnalyticsPieChartCard";
+import {
+  buildAnalyticsChartDrilldown,
+  buildAnalyticsStatDrilldown,
+  filterAnalyticsEntries,
+  type AnalyticsDrilldown,
+} from "@/features/analytics/lib/analyticsDrilldown";
+import { useAnalyticsThemeColors } from "@/features/analytics/lib/useAnalyticsThemeColors";
 import { DictionaryResultsSection } from "@/features/dictionary/components/DictionaryResultsSection";
-
-const COLOR_FALLBACKS = {
-  surface: "#ffffff",
-  line: "#e5e5e5",
-  ink: "#1c1917",
-  accent: "#38bdf8",
-  accentStrong: "#0284c7",
-  warning: "#d97706",
-  danger: "#dc2626",
-  chart1: "#38bdf8",
-  chart2: "#34d399",
-  chart3: "#f472b6",
-  chart4: "#fbbf24",
-  chart5: "#a78bfa",
-  chart6: "#f87171",
-  chart7: "#a8a29e",
-} as const;
-
-function readThemeColor(token: string, fallback: string) {
-  if (typeof window === "undefined") {
-    return fallback;
-  }
-
-  const value = getComputedStyle(document.documentElement)
-    .getPropertyValue(`--${token}`)
-    .trim();
-
-  return value ? `rgb(${value})` : fallback;
-}
-
-const CHART_LEGEND_STYLE = {
-  fontSize: "12px",
-  paddingTop: "20px",
-} satisfies CSSProperties;
 type AnalyticsStatCardProps = {
   accentClassName: string;
   title: string;
   value: string;
   valueClassName?: string;
   onClick?: () => void;
-};
-
-type AnalyticsChartCardProps = {
-  children: ReactNode;
-  footer?: ReactNode;
-  title: ReactNode;
 };
 
 function AnalyticsStatCard({
@@ -116,31 +74,6 @@ function AnalyticsStatCard({
   );
 }
 
-function AnalyticsChartCard({
-  children,
-  footer,
-  title,
-}: AnalyticsChartCardProps) {
-  return (
-    <SurfacePanel
-      rounded="3xl"
-      shadow="soft"
-      className="flex h-full flex-col p-6"
-    >
-      <h2 className="mb-6 border-b border-stone-200 pb-3 text-2xl font-bold text-stone-800 dark:border-stone-800 dark:text-stone-300">
-        {title}
-      </h2>
-      {children}
-      {footer}
-    </SurfacePanel>
-  );
-}
-
-type SlideOverPredicate = {
-  title: string;
-  predicate: (entry: LexicalEntry) => boolean;
-};
-
 type AnalyticsPageClientProps = {
   snapshots: AnalyticsSnapshotMap;
   dictionary: LexicalEntry[];
@@ -154,202 +87,107 @@ export default function AnalyticsPageClient({
   const [selectedEtymology, setSelectedEtymology] =
     useState<EtymologyFilter>("ALL");
   const [slideOverFilter, setSlideOverFilter] =
-    useState<SlideOverPredicate | null>(null);
+    useState<AnalyticsDrilldown | null>(null);
 
-  const { resolvedTheme } = useTheme();
   const { language, t } = useLanguage();
   const stats =
     snapshots[selectedDialect]?.[selectedEtymology] ?? snapshots.ALL.ALL;
-  const isThemeReady = resolvedTheme !== undefined;
-  const isDark = resolvedTheme === "dark";
-
-  const colors = useMemo(() => {
-    const surface = readThemeColor("surface", COLOR_FALLBACKS.surface);
-    const line = readThemeColor("line", COLOR_FALLBACKS.line);
-    const ink = readThemeColor("ink", COLOR_FALLBACKS.ink);
-    const accentStrong = readThemeColor(
-      "accent-strong",
-      COLOR_FALLBACKS.accentStrong,
-    );
-    const warning = readThemeColor("warning", COLOR_FALLBACKS.warning);
-    const danger = readThemeColor("danger", COLOR_FALLBACKS.danger);
-
-    return {
-      accentStrong,
-      chartCellStroke: surface,
-      danger,
-      palettes: {
-        derivation: [
-          readThemeColor("chart-5", COLOR_FALLBACKS.chart5),
-          readThemeColor("chart-1", COLOR_FALLBACKS.chart1),
-          readThemeColor("chart-4", COLOR_FALLBACKS.chart4),
-          readThemeColor("chart-3", COLOR_FALLBACKS.chart3),
-          readThemeColor("chart-7", COLOR_FALLBACKS.chart7),
-        ],
-        etymology: [
-          readThemeColor("chart-4", COLOR_FALLBACKS.chart4),
-          readThemeColor("chart-1", COLOR_FALLBACKS.chart1),
-        ],
-        gender: [
-          readThemeColor("chart-1", COLOR_FALLBACKS.chart1),
-          readThemeColor("chart-3", COLOR_FALLBACKS.chart3),
-          readThemeColor("chart-2", COLOR_FALLBACKS.chart2),
-          readThemeColor("chart-7", COLOR_FALLBACKS.chart7),
-        ],
-        pos: [
-          readThemeColor("chart-1", COLOR_FALLBACKS.chart1),
-          readThemeColor("chart-2", COLOR_FALLBACKS.chart2),
-          readThemeColor("chart-3", COLOR_FALLBACKS.chart3),
-          readThemeColor("chart-4", COLOR_FALLBACKS.chart4),
-          readThemeColor("chart-5", COLOR_FALLBACKS.chart5),
-          readThemeColor("chart-6", COLOR_FALLBACKS.chart6),
-          readThemeColor("chart-7", COLOR_FALLBACKS.chart7),
-        ],
-        relations: [
-          readThemeColor("chart-1", COLOR_FALLBACKS.chart1),
-          readThemeColor("chart-5", COLOR_FALLBACKS.chart5),
-        ],
-        verb: [
-          readThemeColor("chart-2", COLOR_FALLBACKS.chart2),
-          readThemeColor("chart-3", COLOR_FALLBACKS.chart3),
-        ],
-      },
-      tooltipContentStyle: {
-        backgroundColor: surface,
-        borderColor: line,
-        borderRadius: "12px",
-        color: ink,
-      } satisfies CSSProperties,
-      tooltipItemStyle: {
-        color: ink,
-      } satisfies CSSProperties,
-      warning,
-    };
-  }, [resolvedTheme]);
-
-  const chartPlaceholder = (
-    <div className="h-full w-full rounded-2xl bg-stone-100/70 dark:bg-stone-900/40" />
-  );
+  const { colors, isThemeReady } = useAnalyticsThemeColors();
 
   const handleStatClick = (type: "total" | "unknown" | "uncertain") => {
-    let title = "";
-    let predicate: (e: LexicalEntry) => boolean = () => true;
-
-    if (type === "total") {
-      title = t("analytics.totalRoots");
-      predicate = () => true;
-    } else if (type === "unknown") {
-      title = t("analytics.meaningUnknown");
-      predicate = (e) =>
-        e.english_meanings.join(" ").toLowerCase().includes("meaning unknown");
-    } else if (type === "uncertain") {
-      title = t("analytics.meaningUncertain");
-      predicate = (e) =>
-        e.english_meanings
-          .join(" ")
-          .toLowerCase()
-          .includes("meaning uncertain");
-    }
-
-    setSlideOverFilter({ title, predicate });
+    setSlideOverFilter(
+      buildAnalyticsStatDrilldown({
+        totalTitle: t("analytics.totalRoots"),
+        type,
+        uncertainTitle: t("analytics.meaningUncertain"),
+        unknownTitle: t("analytics.meaningUnknown"),
+      }),
+    );
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleChartClick = (data: any, type: string) => {
     if (!data?.payload?.originalName) return;
-    const title = data.name;
-    const originalName = data.payload.originalName;
-
-    let predicate: (e: LexicalEntry) => boolean = () => true;
-
-    if (type === "pos") {
-      predicate = (e) => {
-        if (originalName === "Verbs") return e.pos === "V";
-        if (originalName === "Nouns") return e.pos === "N";
-        if (originalName === "Adjectives") return e.pos === "ADJ";
-        if (originalName === "Adverbs") return e.pos === "ADV";
-        if (originalName === "Conjunctions") return e.pos === "CONJ";
-        if (originalName === "Prepositions") return e.pos === "PREP";
-        return e.pos === "OTHER" || e.pos === "INTERJ" || e.pos === "UNKNOWN";
-      };
-    } else if (type === "gender") {
-      predicate = (e) => {
-        if (e.pos !== "N") return false;
-        if (originalName.startsWith("Masculine")) return e.gender === "M";
-        if (originalName.startsWith("Feminine")) return e.gender === "F";
-        if (originalName.startsWith("Epicene")) return e.gender === "BOTH";
-        return e.gender === "";
-      };
-    } else if (type === "etymology") {
-      predicate = (e) => {
-        return originalName === "analytics.grEtymology"
-          ? e.etymology === "Gr"
-          : e.etymology !== "Gr";
-      };
-    } else if (type === "derivation") {
-      predicate = (e) => {
-        if (e.pos !== "N") return false;
-        const hw = e.headword.toLowerCase();
-        if (originalName === "analytics.prefixAbstract")
-          return hw.startsWith("ⲙⲉⲧ") || hw.startsWith("ⲙⲛⲧ");
-        if (originalName === "analytics.prefixAgent")
-          return (
-            hw.startsWith("ⲣⲉϥ") || hw.startsWith("ⲣⲉⲙ") || hw.startsWith("ⲣⲙ")
-          );
-        if (originalName === "analytics.prefixAction")
-          return hw.startsWith("ϫⲓⲛ") || hw.startsWith("ϭⲓⲛ");
-        if (originalName === "analytics.prefixPrivative")
-          return hw.startsWith("ⲁⲧ") || hw.startsWith("ⲁⲑ");
-        return !(
-          hw.startsWith("ⲙⲉⲧ") ||
-          hw.startsWith("ⲙⲛⲧ") ||
-          hw.startsWith("ⲣⲉϥ") ||
-          hw.startsWith("ⲣⲉⲙ") ||
-          hw.startsWith("ⲣⲙ") ||
-          hw.startsWith("ϫⲓⲛ") ||
-          hw.startsWith("ϭⲓⲛ") ||
-          hw.startsWith("ⲁⲧ") ||
-          hw.startsWith("ⲁⲑ")
-        );
-      };
-    } else if (type === "verb") {
-      predicate = (e) => {
-        if (e.pos !== "V") return false;
-        const hasAnyStative = Object.values(e.dialects).some((d) => d?.stative);
-        return originalName === "analytics.hasStative"
-          ? hasAnyStative
-          : !hasAnyStative;
-      };
-    } else if (type === "relations") {
-      predicate = (e) => {
-        return originalName === "analytics.baseRoots"
-          ? !e.relationType
-          : !!e.relationType;
-      };
-    }
-
-    setSlideOverFilter({ title, predicate });
+    setSlideOverFilter(
+      buildAnalyticsChartDrilldown({
+        originalName: data.payload.originalName,
+        title: data.name,
+        type: type as
+          | "derivation"
+          | "etymology"
+          | "gender"
+          | "pos"
+          | "relations"
+          | "verb",
+      }),
+    );
   };
 
   const slideOverResults = useMemo(() => {
-    if (!slideOverFilter) return [];
-
-    // First apply dialect and etymology dashboard filters
-    let base = dictionary;
-    if (selectedDialect !== "ALL") {
-      base = base.filter((e) => e.dialects[selectedDialect] !== undefined);
-    }
-    if (selectedEtymology !== "ALL") {
-      base = base.filter((e) =>
-        selectedEtymology === "Gr"
-          ? e.etymology === "Gr"
-          : e.etymology !== "Gr",
-      );
-    }
-
-    // Apply the specific pie slice predicate
-    return base.filter(slideOverFilter.predicate);
+    return filterAnalyticsEntries({
+      dictionary,
+      drilldown: slideOverFilter,
+      selectedDialect,
+      selectedEtymology,
+    });
   }, [dictionary, selectedDialect, selectedEtymology, slideOverFilter]);
+
+  const posChartData = useMemo(
+    () =>
+      stats.posChartData.map((datum) => ({
+        ...datum,
+        originalName: datum.name,
+        name:
+          t(("dict." + datum.name.toLowerCase()) as TranslationKey) ??
+          datum.name,
+      })),
+    [stats.posChartData, t],
+  );
+  const genderChartData = useMemo(
+    () =>
+      stats.genderChartData.map((datum) => ({
+        ...datum,
+        originalName: datum.name,
+        name: datum.name,
+      })),
+    [stats.genderChartData],
+  );
+  const etymologyChartData = useMemo(
+    () =>
+      stats.etymologyChartData.map((datum) => ({
+        ...datum,
+        originalName: datum.name,
+        name: t(datum.name as TranslationKey),
+      })),
+    [stats.etymologyChartData, t],
+  );
+  const derivationChartData = useMemo(
+    () =>
+      stats.derivationalMorphologyData.map((datum) => ({
+        ...datum,
+        originalName: datum.name,
+        name: t(datum.name as TranslationKey),
+      })),
+    [stats.derivationalMorphologyData, t],
+  );
+  const verbChartData = useMemo(
+    () =>
+      stats.verbCompletenessData.map((datum) => ({
+        ...datum,
+        originalName: datum.name,
+        name: t(datum.name as TranslationKey),
+      })),
+    [stats.verbCompletenessData, t],
+  );
+  const relationChartData = useMemo(
+    () =>
+      stats.relationTypeData.map((datum) => ({
+        ...datum,
+        originalName: datum.name,
+        name: t(datum.name as TranslationKey),
+      })),
+    [stats.relationTypeData, t],
+  );
 
   return (
     <PageShell
@@ -465,57 +303,18 @@ export default function AnalyticsPageClient({
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8 items-start mb-8">
-        <AnalyticsChartCard title={t("analytics.posBreakdown")}>
-          <div className="h-[300px] w-full mb-6">
-            {isThemeReady ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Tooltip
-                    contentStyle={colors.tooltipContentStyle}
-                    itemStyle={colors.tooltipItemStyle}
-                  />
-                  <Legend wrapperStyle={CHART_LEGEND_STYLE} />
-                  <Pie
-                    data={stats.posChartData.map((d) => ({
-                      ...d,
-                      originalName: d.name,
-                      name:
-                        t(("dict." + d.name.toLowerCase()) as TranslationKey) ??
-                        d.name,
-                    }))}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={100}
-                    paddingAngle={3}
-                    dataKey="value"
-                    animationBegin={0}
-                    animationDuration={1200}
-                    onClick={(data) => handleChartClick(data, "pos")}
-                    className="cursor-pointer"
-                  >
-                    {stats.posChartData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={
-                          colors.palettes.pos[
-                            index % colors.palettes.pos.length
-                          ]
-                        }
-                        stroke={colors.chartCellStroke}
-                        className="hover:opacity-80 transition-opacity"
-                      />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              chartPlaceholder
-            )}
-          </div>
-        </AnalyticsChartCard>
+        <AnalyticsPieChartCard
+          title={t("analytics.posBreakdown")}
+          data={posChartData}
+          palette={colors.palettes.pos}
+          chartCellStroke={colors.chartCellStroke}
+          isThemeReady={isThemeReady}
+          tooltipContentStyle={colors.tooltipContentStyle}
+          tooltipItemStyle={colors.tooltipItemStyle}
+          onSliceClick={(data) => handleChartClick(data, "pos")}
+        />
 
-        <AnalyticsChartCard
+        <AnalyticsPieChartCard
           title={
             <>
               {t("analytics.nounGenders")}{" "}
@@ -537,247 +336,67 @@ export default function AnalyticsPageClient({
               </div>
             </div>
           }
-        >
-          <div className="h-[300px] w-full mb-6">
-            {isThemeReady ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Tooltip
-                    contentStyle={colors.tooltipContentStyle}
-                    itemStyle={colors.tooltipItemStyle}
-                  />
-                  <Legend wrapperStyle={CHART_LEGEND_STYLE} />
-                  <Pie
-                    data={stats.genderChartData.map((d) => ({
-                      ...d,
-                      originalName: d.name,
-                      name: d.name,
-                    }))}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={100}
-                    paddingAngle={3}
-                    dataKey="value"
-                    animationBegin={200}
-                    animationDuration={1200}
-                    onClick={(data) => handleChartClick(data, "gender")}
-                    className="cursor-pointer"
-                  >
-                    {stats.genderChartData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={
-                          colors.palettes.gender[
-                            index % colors.palettes.gender.length
-                          ]
-                        }
-                        stroke={colors.chartCellStroke}
-                        className="hover:opacity-80 transition-opacity"
-                      />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              chartPlaceholder
-            )}
-          </div>
-        </AnalyticsChartCard>
+          data={genderChartData}
+          palette={colors.palettes.gender}
+          chartCellStroke={colors.chartCellStroke}
+          isThemeReady={isThemeReady}
+          tooltipContentStyle={colors.tooltipContentStyle}
+          tooltipItemStyle={colors.tooltipItemStyle}
+          animationBegin={200}
+          onSliceClick={(data) => handleChartClick(data, "gender")}
+        />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8 items-start mb-8">
-        <AnalyticsChartCard title={t("analytics.etymology" as TranslationKey)}>
-          <div className="h-[300px] w-full mb-6">
-            {isThemeReady ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Tooltip
-                    contentStyle={colors.tooltipContentStyle}
-                    itemStyle={colors.tooltipItemStyle}
-                  />
-                  <Legend wrapperStyle={CHART_LEGEND_STYLE} />
-                  <Pie
-                    data={stats.etymologyChartData.map((d) => ({
-                      ...d,
-                      originalName: d.name,
-                      name: t(d.name as TranslationKey),
-                    }))}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={100}
-                    paddingAngle={3}
-                    dataKey="value"
-                    animationBegin={300}
-                    onClick={(data) => handleChartClick(data, "etymology")}
-                    className="cursor-pointer"
-                  >
-                    {stats.etymologyChartData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={
-                          colors.palettes.etymology[
-                            index % colors.palettes.etymology.length
-                          ]
-                        }
-                        stroke={colors.chartCellStroke}
-                        className="hover:opacity-80 transition-opacity"
-                      />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              chartPlaceholder
-            )}
-          </div>
-        </AnalyticsChartCard>
+        <AnalyticsPieChartCard
+          title={t("analytics.etymology" as TranslationKey)}
+          data={etymologyChartData}
+          palette={colors.palettes.etymology}
+          chartCellStroke={colors.chartCellStroke}
+          isThemeReady={isThemeReady}
+          tooltipContentStyle={colors.tooltipContentStyle}
+          tooltipItemStyle={colors.tooltipItemStyle}
+          animationBegin={300}
+          onSliceClick={(data) => handleChartClick(data, "etymology")}
+        />
 
-        <AnalyticsChartCard title={t("analytics.derivation" as TranslationKey)}>
-          <div className="h-[300px] w-full mb-6">
-            {isThemeReady ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Tooltip
-                    contentStyle={colors.tooltipContentStyle}
-                    itemStyle={colors.tooltipItemStyle}
-                  />
-                  <Legend wrapperStyle={CHART_LEGEND_STYLE} />
-                  <Pie
-                    data={stats.derivationalMorphologyData.map((d) => ({
-                      ...d,
-                      originalName: d.name,
-                      name: t(d.name as TranslationKey),
-                    }))}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={100}
-                    paddingAngle={3}
-                    dataKey="value"
-                    animationBegin={400}
-                    onClick={(data) => handleChartClick(data, "derivation")}
-                    className="cursor-pointer"
-                  >
-                    {stats.derivationalMorphologyData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={
-                          colors.palettes.derivation[
-                            index % colors.palettes.derivation.length
-                          ]
-                        }
-                        stroke={colors.chartCellStroke}
-                        className="hover:opacity-80 transition-opacity"
-                      />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              chartPlaceholder
-            )}
-          </div>
-        </AnalyticsChartCard>
+        <AnalyticsPieChartCard
+          title={t("analytics.derivation" as TranslationKey)}
+          data={derivationChartData}
+          palette={colors.palettes.derivation}
+          chartCellStroke={colors.chartCellStroke}
+          isThemeReady={isThemeReady}
+          tooltipContentStyle={colors.tooltipContentStyle}
+          tooltipItemStyle={colors.tooltipItemStyle}
+          animationBegin={400}
+          onSliceClick={(data) => handleChartClick(data, "derivation")}
+        />
       </div>
 
       <div className="grid lg:grid-cols-2 gap-8 items-start">
-        <AnalyticsChartCard
+        <AnalyticsPieChartCard
           title={t("analytics.verbCompleteness" as TranslationKey)}
-        >
-          <div className="h-[300px] w-full mb-6">
-            {isThemeReady ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Tooltip
-                    contentStyle={colors.tooltipContentStyle}
-                    itemStyle={colors.tooltipItemStyle}
-                  />
-                  <Legend wrapperStyle={CHART_LEGEND_STYLE} />
-                  <Pie
-                    data={stats.verbCompletenessData.map((d) => ({
-                      ...d,
-                      originalName: d.name,
-                      name: t(d.name as TranslationKey),
-                    }))}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={100}
-                    paddingAngle={3}
-                    dataKey="value"
-                    animationBegin={500}
-                    onClick={(data) => handleChartClick(data, "verb")}
-                    className="cursor-pointer"
-                  >
-                    {stats.verbCompletenessData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={
-                          colors.palettes.verb[
-                            index % colors.palettes.verb.length
-                          ]
-                        }
-                        stroke={colors.chartCellStroke}
-                        className="hover:opacity-80 transition-opacity"
-                      />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              chartPlaceholder
-            )}
-          </div>
-        </AnalyticsChartCard>
+          data={verbChartData}
+          palette={colors.palettes.verb}
+          chartCellStroke={colors.chartCellStroke}
+          isThemeReady={isThemeReady}
+          tooltipContentStyle={colors.tooltipContentStyle}
+          tooltipItemStyle={colors.tooltipItemStyle}
+          animationBegin={500}
+          onSliceClick={(data) => handleChartClick(data, "verb")}
+        />
 
-        <AnalyticsChartCard title={t("analytics.relations" as TranslationKey)}>
-          <div className="h-[300px] w-full mb-6">
-            {isThemeReady ? (
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Tooltip
-                    contentStyle={colors.tooltipContentStyle}
-                    itemStyle={colors.tooltipItemStyle}
-                  />
-                  <Legend wrapperStyle={CHART_LEGEND_STYLE} />
-                  <Pie
-                    data={stats.relationTypeData.map((d) => ({
-                      ...d,
-                      originalName: d.name,
-                      name: t(d.name as TranslationKey),
-                    }))}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={70}
-                    outerRadius={100}
-                    paddingAngle={3}
-                    dataKey="value"
-                    animationBegin={600}
-                    onClick={(data) => handleChartClick(data, "relations")}
-                    className="cursor-pointer"
-                  >
-                    {stats.relationTypeData.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={
-                          colors.palettes.relations[
-                            index % colors.palettes.relations.length
-                          ]
-                        }
-                        stroke={colors.chartCellStroke}
-                        className="hover:opacity-80 transition-opacity"
-                      />
-                    ))}
-                  </Pie>
-                </PieChart>
-              </ResponsiveContainer>
-            ) : (
-              chartPlaceholder
-            )}
-          </div>
-        </AnalyticsChartCard>
+        <AnalyticsPieChartCard
+          title={t("analytics.relations" as TranslationKey)}
+          data={relationChartData}
+          palette={colors.palettes.relations}
+          chartCellStroke={colors.chartCellStroke}
+          isThemeReady={isThemeReady}
+          tooltipContentStyle={colors.tooltipContentStyle}
+          tooltipItemStyle={colors.tooltipItemStyle}
+          animationBegin={600}
+          onSliceClick={(data) => handleChartClick(data, "relations")}
+        />
       </div>
 
       <AnalyticsSlideOver

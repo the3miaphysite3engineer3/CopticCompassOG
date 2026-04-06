@@ -117,3 +117,31 @@ export function usePersistentFilterState<T extends string>(
     },
   ] as const;
 }
+
+export function usePersistentEnumState<T extends string>(
+  key: string,
+  defaultValue: T,
+  allowedValues: readonly T[],
+) {
+  const value = useSyncExternalStore(
+    (callback) => subscribeToStoredValue(key, callback),
+    () => {
+      const storedValue = getStoredValue(key);
+      return storedValue && allowedValues.includes(storedValue as T)
+        ? (storedValue as T)
+        : defaultValue;
+    },
+    () => defaultValue,
+  );
+
+  return [
+    value,
+    (nextValue: T) => {
+      if (!allowedValues.includes(nextValue)) {
+        return;
+      }
+
+      setStoredValue(key, nextValue);
+    },
+  ] as const;
+}
