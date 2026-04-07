@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildOpenGraphImageUrl } from "@/features/seo/lib/openGraph";
 import {
   createLanguageAlternates,
   getLocalizedPath,
@@ -7,15 +8,64 @@ import {
 import { buildPageTitle, siteConfig } from "@/lib/site";
 import type { Language } from "@/types/i18n";
 
+type SocialImage = {
+  alt: string;
+  height: number;
+  url: string;
+  width: number;
+};
+
+export function createSocialImage(url: string, alt: string): SocialImage {
+  return {
+    url,
+    width: 1200,
+    height: 630,
+    alt,
+  };
+}
+
 function getSocialImages() {
   return [
-    {
-      url: `${siteConfig.liveUrl}/api/og`,
-      width: 1200,
-      height: 630,
-      alt: "Coptic Compass social preview",
-    },
+    createSocialImage(
+      buildOpenGraphImageUrl({
+        type: "site",
+      }),
+      "Coptic Compass social preview",
+    ),
   ];
+}
+
+function getTwitterImages(images: SocialImage[]) {
+  return images.map((image) => image.url);
+}
+
+export function createPageSocialMetadata({
+  title,
+  description,
+  path,
+  locale,
+  images = getSocialImages(),
+}: {
+  title: string;
+  description: string;
+  path: string;
+  locale?: Language;
+  images?: SocialImage[];
+}) {
+  return {
+    openGraph: {
+      title: buildPageTitle(title),
+      description,
+      url: `${siteConfig.liveUrl}${path}`,
+      ...(locale ? { locale: getOpenGraphLocale(locale) } : {}),
+      images,
+    },
+    twitter: {
+      title: buildPageTitle(title),
+      description,
+      images: getTwitterImages(images),
+    },
+  };
 }
 
 export function createRootLayoutMetadata(locale: Language): Metadata {
@@ -72,17 +122,11 @@ export function createPageMetadata({
     alternates: {
       canonical: path,
     },
-    openGraph: {
-      title: buildPageTitle(title),
+    ...createPageSocialMetadata({
+      title,
       description,
-      url: `${siteConfig.liveUrl}${path}`,
-      images: getSocialImages(),
-    },
-    twitter: {
-      title: buildPageTitle(title),
-      description,
-      images: getSocialImages().map((image) => image.url),
-    },
+      path,
+    }),
   };
 }
 
@@ -107,18 +151,12 @@ export function createLocalizedPageMetadata({
       canonical: localizedPath,
       languages: createLanguageAlternates(path),
     },
-    openGraph: {
-      title: buildPageTitle(title),
+    ...createPageSocialMetadata({
+      title,
       description,
-      url: `${siteConfig.liveUrl}${localizedPath}`,
-      locale: getOpenGraphLocale(locale),
-      images: getSocialImages(),
-    },
-    twitter: {
-      title: buildPageTitle(title),
-      description,
-      images: getSocialImages().map((image) => image.url),
-    },
+      path: localizedPath,
+      locale,
+    }),
   };
 }
 

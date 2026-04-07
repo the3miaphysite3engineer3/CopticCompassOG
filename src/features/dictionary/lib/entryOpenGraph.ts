@@ -3,6 +3,7 @@ import type { Language } from "@/types/i18n";
 import type { LexicalEntry } from "../types";
 import { getPreferredEntryDisplaySpelling } from "./entryDisplay";
 import { getEntrySummary, toPlainText } from "./entryText";
+import { buildOpenGraphImageUrl } from "@/features/seo/lib/openGraph";
 
 type BuildEntryOpenGraphPreviewOptions = {
   entry: LexicalEntry;
@@ -59,13 +60,12 @@ export function buildEntryOpenGraphImageUrl(
   language: Language,
   baseUrl = siteConfig.liveUrl,
 ) {
-  const params = new URLSearchParams({
+  return buildOpenGraphImageUrl({
+    baseUrl,
     id: entryId,
     locale: language,
     type: "entry",
   });
-
-  return `${baseUrl}/api/og?${params.toString()}`;
 }
 
 export function buildEntryOpenGraphPreview({

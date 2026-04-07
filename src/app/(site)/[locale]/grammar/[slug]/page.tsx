@@ -8,16 +8,17 @@ import {
   getPublishedGrammarLessonBundleBySlug,
   listPublishedGrammarLessons,
 } from "@/features/grammar/lib/grammarDataset";
+import { buildLessonOpenGraphImageUrl } from "@/features/grammar/lib/lessonOpenGraph";
 import { getGrammarLessonPath } from "@/features/grammar/lib/grammarPaths";
 import {
   createLanguageAlternates,
   getGrammarPath,
   getLocalizedHomePath,
-  getOpenGraphLocale,
 } from "@/lib/locale";
 import { getTranslation } from "@/lib/i18n";
+import { createPageSocialMetadata, createSocialImage } from "@/lib/metadata";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
-import { buildPageTitle, siteConfig } from "@/lib/site";
+import { siteConfig } from "@/lib/site";
 import {
   createBreadcrumbStructuredData,
   createGrammarLessonStructuredData,
@@ -58,6 +59,14 @@ export async function generateMetadata({
   const title = buildGrammarLessonSeoTitle(lessonBundle.lesson, locale);
   const description = buildGrammarLessonSeoDescription(lessonBundle, locale);
   const path = getGrammarLessonPath(lessonBundle.lesson.slug, locale);
+  const imageUrl = buildLessonOpenGraphImageUrl(
+    lessonBundle.lesson.slug,
+    locale,
+  );
+  const image = createSocialImage(
+    imageUrl,
+    `${lessonBundle.lesson.title[locale]} | ${siteConfig.brandName} Grammar`,
+  );
 
   return {
     metadataBase: new URL(siteConfig.liveUrl),
@@ -69,16 +78,13 @@ export async function generateMetadata({
         `/grammar/${lessonBundle.lesson.slug}`,
       ),
     },
-    openGraph: {
-      title: buildPageTitle(title),
+    ...createPageSocialMetadata({
+      title,
       description,
-      url: `${siteConfig.liveUrl}${path}`,
-      locale: getOpenGraphLocale(locale),
-    },
-    twitter: {
-      title: buildPageTitle(title),
-      description,
-    },
+      path,
+      locale,
+      images: [image],
+    }),
   };
 }
 

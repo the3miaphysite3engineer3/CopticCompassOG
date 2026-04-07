@@ -19,10 +19,10 @@ import {
   getDictionaryPath,
   getEntryPath,
   getLocalizedHomePath,
-  getOpenGraphLocale,
 } from "@/lib/locale";
 import { getTranslation } from "@/lib/i18n";
-import { buildPageTitle, siteConfig } from "@/lib/site";
+import { createPageSocialMetadata, createSocialImage } from "@/lib/metadata";
+import { siteConfig } from "@/lib/site";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
 import {
   createBreadcrumbStructuredData,
@@ -61,6 +61,12 @@ export async function generateMetadata({
   const description = buildEntryDescription(entry, locale);
   const path = getEntryPath(entry.id, locale);
   const imageUrl = buildEntryOpenGraphImageUrl(entry.id, locale);
+  const image = createSocialImage(
+    imageUrl,
+    locale === "nl"
+      ? `${headword} | ${siteConfig.brandName} woordenboeklemma`
+      : `${headword} | ${siteConfig.brandName} dictionary entry`,
+  );
 
   return {
     metadataBase: new URL(siteConfig.liveUrl),
@@ -70,25 +76,13 @@ export async function generateMetadata({
       canonical: path,
       languages: createLanguageAlternates(`/entry/${entry.id}`),
     },
-    openGraph: {
-      title: buildPageTitle(title),
+    ...createPageSocialMetadata({
+      title,
       description,
-      url: `${siteConfig.liveUrl}${path}`,
-      locale: getOpenGraphLocale(locale),
-      images: [
-        {
-          url: imageUrl,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
-    },
-    twitter: {
-      title: buildPageTitle(title),
-      description,
-      images: [imageUrl],
-    },
+      path,
+      locale,
+      images: [image],
+    }),
   };
 }
 
