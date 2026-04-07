@@ -14,11 +14,7 @@ export function ContentReleaseReviewForm({
   releaseId: string;
   status: ContentReleaseRow["status"];
 }) {
-  if (
-    status !== "draft" &&
-    status !== "approved" &&
-    status !== "cancelled"
-  ) {
+  if (status !== "draft" && status !== "approved" && status !== "cancelled") {
     return null;
   }
 
