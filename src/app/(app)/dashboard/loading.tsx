@@ -21,7 +21,7 @@ export default function Loading() {
       title="Preparing your dashboard"
       description="Loading your profile, lesson progress, and recent exercise feedback."
       tone="brand"
-      panelClassName="max-w-5xl"
+      width="standard"
       accents={[
         pageShellAccents.topLeftSkyOrb,
         pageShellAccents.bottomRightEmeraldOrb,

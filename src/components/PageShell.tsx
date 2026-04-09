@@ -3,7 +3,7 @@ import { cx } from "@/lib/classes";
 import type { ReactNode } from "react";
 
 type PageAccent = string;
-type PageShellWidth = "narrow" | "standard" | "workspace";
+export type PageShellWidth = "narrow" | "standard" | "workspace";
 
 type PageShellProps = {
   children: ReactNode;
