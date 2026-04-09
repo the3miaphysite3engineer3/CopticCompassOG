@@ -702,7 +702,7 @@ export async function sendContentReleasePreview(
 
   return dispatchReleasePreviewEmail({
     copy: copy as typeof copy & { subject: string; body: string },
-    env,
+    env: env as typeof env & { ownerAlertEmail: string },
     release,
     releaseId,
     releaseItems,
