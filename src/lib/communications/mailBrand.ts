@@ -1,5 +1,9 @@
 import type { Language } from "@/types/i18n";
 
+/**
+ * Centralizes the shared mail-brand copy used across transactional and update
+ * emails.
+ */
 export const mailBrand = {
   brandName: "Coptic Compass",
   descriptor: "Coptic Dictionary, Grammar, and Publications",
@@ -8,7 +12,10 @@ export const mailBrand = {
   liveUrl: "https://kyrilloswannes.com",
 } as const;
 
-export function getMailFooterCopy(language: Language) {
+/**
+ * Returns the localized footer copy fragments used in branded emails.
+ */
+function getMailFooterCopy(language: Language) {
   if (language === "nl") {
     return {
       browseLabel: "Verder lezen op Coptic Compass",
@@ -24,6 +31,10 @@ export function getMailFooterCopy(language: Language) {
   };
 }
 
+/**
+ * Builds the localized footer lines rendered in plain-text and HTML mail
+ * templates.
+ */
 export function getMailFooterLines(language: Language) {
   const footer = getMailFooterCopy(language);
 

@@ -1,11 +1,16 @@
-import React, { ReactNode } from "react";
+import React from "react";
+
 import { antinoou } from "@/lib/fonts";
+
+import type { ReactNode } from "react";
 
 const COPTIC_LEGACY_CHAR_CLASS = "\\u03E2-\\u03EF";
 const COPTIC_CHAR_CLASS = `${COPTIC_LEGACY_CHAR_CLASS}\\u2C80-\\u2CFF`;
 const COPTIC_COMBINING_CLASS = "\\u0300-\\u036f\\uFE20-\\uFE2F\\u0483-\\u0489";
-// These fragments capture the shorthand that appears in imported glosses so we
-// can emphasize it without forcing the source data into a stricter schema.
+/**
+ * These fragments capture the shorthand that appears in imported glosses so we
+ * can emphasize it without forcing the source data into a stricter schema.
+ */
 const LEADING_LABEL_FRAGMENTS = [
   "p\\.c\\.",
   "impers vb",
@@ -101,15 +106,21 @@ const COPTIC_RUN_REGEX = new RegExp(
   "g",
 );
 
-// Search needs to match Coptic text even when the query and stored string use
-// different Unicode normalization forms for combining marks.
+/**
+ * Builds a query regex that tolerates combining-mark differences so highlighted
+ * matches line up with the accent-insensitive dictionary search behavior.
+ */
 function buildRegexFromQuery(query: string) {
-  if (!query || query.trim() === "") return null;
+  if (!query || query.trim() === "") {
+    return null;
+  }
 
   const nQuery = query
     .normalize("NFD")
     .replace(/[\u0300-\u036f\uFE20-\uFE2F\u0483-\u0489]/g, "");
-  if (nQuery.length === 0) return null;
+  if (nQuery.length === 0) {
+    return null;
+  }
 
   const combiningChars = "[\\u0300-\\u036f\\uFE20-\\uFE2F\\u0483-\\u0489]*";
   const escapeRegex = (s: string) =>
@@ -169,7 +180,9 @@ function renderPlainTypography(
   const result: ReactNode[] = [];
 
   parts.forEach((part, i) => {
-    if (!part) return;
+    if (!part) {
+      return;
+    }
 
     const className = i % 2 === 1 ? "font-bold" : undefined;
     result.push(...renderWithSuperscript(part, `${keyPrefix}-${i}`, className));
@@ -187,7 +200,9 @@ function renderWithCopticTypography(
   const result: ReactNode[] = [];
 
   parts.forEach((part, i) => {
-    if (!part) return;
+    if (!part) {
+      return;
+    }
 
     if (i % 2 === 1) {
       result.push(
@@ -263,7 +278,9 @@ function renderSearchableText(
 
 function splitLeadingLabel(text: string) {
   const match = text.match(LEADING_LABEL_PATTERN);
-  if (!match || match.index !== 0) return null;
+  if (!match || match.index !== 0) {
+    return null;
+  }
 
   let label = match[0];
   let rest = text.slice(label.length);
@@ -276,6 +293,10 @@ function splitLeadingLabel(text: string) {
   return { label, rest };
 }
 
+/**
+ * Renders dictionary text with Coptic typography, optional grammar-label
+ * emphasis, and query highlighting that respects combining-mark variants.
+ */
 export default function HighlightText({
   text,
   query,

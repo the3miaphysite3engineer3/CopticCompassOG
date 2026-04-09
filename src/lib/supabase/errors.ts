@@ -6,6 +6,10 @@ export type SupabaseLikeError =
   | null
   | undefined;
 
+/**
+ * Detects the missing-table error shapes surfaced by PostgREST and Postgres so
+ * optional integrations can degrade without crashing.
+ */
 export function isMissingSupabaseTableError(error: SupabaseLikeError) {
   if (!error) {
     return false;

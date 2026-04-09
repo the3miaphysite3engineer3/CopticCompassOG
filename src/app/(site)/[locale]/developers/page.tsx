@@ -1,19 +1,21 @@
-import type { Metadata } from "next";
 import Link from "next/link";
+
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
-import StructuredData from "@/components/StructuredData";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
+import StructuredData from "@/components/StructuredData";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { getTranslation } from "@/lib/i18n";
-import { createLocalizedPageMetadata } from "@/lib/metadata";
-import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
 import {
   getDevelopersPath,
   getGrammarPath,
   getLocalizedHomePath,
 } from "@/lib/locale";
+import { createLocalizedPageMetadata } from "@/lib/metadata";
+import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
 import { createBreadcrumbStructuredData } from "@/lib/structuredData";
+
+import type { Metadata } from "next";
 
 const developerCopy = {
   en: {
@@ -207,6 +209,9 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Renders the localized developer guide for the public grammar API surface.
+ */
 export default async function DevelopersPage({
   params,
 }: {

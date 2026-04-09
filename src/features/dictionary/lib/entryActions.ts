@@ -31,17 +31,25 @@ export const ENTRY_FAVORITE_ERROR_CODES = [
 export type EntryFavoriteErrorCode =
   (typeof ENTRY_FAVORITE_ERROR_CODES)[number];
 
+/**
+ * Narrows a raw report reason value to one of the supported dictionary report
+ * categories.
+ */
 export function isEntryReportReason(value: string): value is EntryReportReason {
   return ENTRY_REPORT_REASONS.includes(value as EntryReportReason);
 }
 
+/**
+ * Narrows a raw report status value to one of the supported admin workflow
+ * states.
+ */
 export function isEntryReportStatus(value: string): value is EntryReportStatus {
   return ENTRY_REPORT_STATUSES.includes(value as EntryReportStatus);
 }
 
 export type EntryFavoriteRow = Tables<"entry_favorites">;
 export type EntryFavoriteInsert = TablesInsert<"entry_favorites">;
-export type EntryFavoriteUpdate = TablesUpdate<"entry_favorites">;
+type _EntryFavoriteUpdate = TablesUpdate<"entry_favorites">;
 export type EntryFavoriteWithEntry = {
   entry: LexicalEntry | null;
   favorite: EntryFavoriteRow;
@@ -49,7 +57,7 @@ export type EntryFavoriteWithEntry = {
 
 export type EntryReportRow = Tables<"entry_reports">;
 export type EntryReportInsert = TablesInsert<"entry_reports">;
-export type EntryReportUpdate = TablesUpdate<"entry_reports">;
+type _EntryReportUpdate = TablesUpdate<"entry_reports">;
 export type AdminEntryReport = EntryReportRow & {
   reporterEmail: string | null;
   reporterName: string | null;
@@ -74,10 +82,16 @@ const ENTRY_REPORT_STATUS_LABELS: Record<EntryReportStatus, string> = {
   dismissed: "Dismissed",
 };
 
+/**
+ * Returns the user-facing label for a validated entry report reason.
+ */
 export function formatEntryReportReason(reason: EntryReportReason) {
   return ENTRY_REPORT_REASON_LABELS[reason];
 }
 
+/**
+ * Returns the admin-facing label for a validated entry report status.
+ */
 export function formatEntryReportStatus(status: EntryReportStatus) {
   return ENTRY_REPORT_STATUS_LABELS[status];
 }
@@ -89,6 +103,9 @@ const ENTRY_REPORT_STATUS_PRIORITY: Record<EntryReportStatus, number> = {
   dismissed: 3,
 };
 
+/**
+ * Sorts entry reports by workflow priority first and then by newest first.
+ */
 export function compareEntryReportPriority(
   left: { created_at: string; status: EntryReportStatus },
   right: { created_at: string; status: EntryReportStatus },

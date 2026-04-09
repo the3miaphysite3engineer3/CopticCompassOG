@@ -2,20 +2,20 @@
 
 import { EmptyState } from "@/components/EmptyState";
 import {
+  AdminContactMessageDisclosure,
+  AdminEntryReportDisclosure,
+} from "@/features/admin/components/AdminItemDisclosures";
+import {
   AdminFilterBar,
   AdminFilterToggle,
   AdminOverflowDisclosure,
 } from "@/features/admin/components/AdminListPrimitives";
-import { splitAdminVisibleItems } from "@/features/admin/lib/listPrimitives";
-import {
-  AdminContactMessageDisclosure,
-  AdminEntryReportDisclosure,
-} from "@/features/admin/components/AdminItemDisclosures";
 import { AdminSubmissionReviewWorkspace } from "@/features/admin/components/AdminSubmissionReviewWorkspace";
+import { splitAdminVisibleItems } from "@/features/admin/lib/listPrimitives";
 import { usePersistentFilterState } from "@/features/admin/lib/uiState";
 import { AdminContentReleaseCard } from "@/features/communications/components/AdminContentReleaseCard";
-import type { ContactMessageRow } from "@/features/contact/lib/contact";
 import type { AdminContentRelease } from "@/features/communications/lib/releases";
+import type { ContactMessageRow } from "@/features/contact/lib/contact";
 import type { EntryReportWithEntry } from "@/features/dictionary/lib/entryActions";
 import type { AdminSubmission } from "@/features/submissions/types";
 
@@ -39,6 +39,20 @@ export function AdminContentReleasesList({
   const filteredReleases =
     filter === "active" ? activeReleases : historyReleases;
   const { overflow, visible } = splitAdminVisibleItems(filteredReleases);
+  let emptyTitle = "No recent release log yet.";
+  let emptyDescription =
+    "Recent sent and cancelled releases will appear here after you have published and delivered some announcements.";
+
+  if (filter === "active") {
+    emptyTitle = "No active release drafts right now.";
+    emptyDescription =
+      historyReleases.length > 0
+        ? "Switch to Recent if you want to revisit the latest sent or cancelled releases."
+        : "Your communications desk is clear for now.";
+  } else if (activeReleases.length > 0) {
+    emptyDescription =
+      "The latest finished and cancelled releases will collect here once the active desk starts moving.";
+  }
 
   return (
     <div className="space-y-6">
@@ -58,22 +72,7 @@ export function AdminContentReleasesList({
       </AdminFilterBar>
 
       {filteredReleases.length === 0 ? (
-        <EmptyState
-          title={
-            filter === "active"
-              ? "No active release drafts right now."
-              : "No recent release log yet."
-          }
-          description={
-            filter === "active"
-              ? historyReleases.length > 0
-                ? "Switch to Recent if you want to revisit the latest sent or cancelled releases."
-                : "Your communications desk is clear for now."
-              : activeReleases.length > 0
-                ? "The latest finished and cancelled releases will collect here once the active desk starts moving."
-                : "Recent sent and cancelled releases will appear here after you have published and delivered some announcements."
-          }
-        />
+        <EmptyState title={emptyTitle} description={emptyDescription} />
       ) : (
         <>
           {visible.map((release) => (
@@ -114,6 +113,20 @@ export function AdminSubmissionsList({
   );
   const filteredSubmissions =
     filter === "pending" ? pendingSubmissions : historySubmissions;
+  let emptyTitle = "No reviewed submissions yet.";
+  let emptyDescription =
+    "Recent reviewed work will appear here once students have submitted and you have graded a lesson.";
+
+  if (filter === "pending") {
+    emptyTitle = "No submissions need review right now.";
+    emptyDescription =
+      historySubmissions.length > 0
+        ? "Switch to Recent if you want to revisit the latest graded work."
+        : "Your review queue is clear for now.";
+  } else if (pendingSubmissions.length > 0) {
+    emptyDescription =
+      "Recent graded submissions will appear here once you start clearing the queue.";
+  }
 
   return (
     <div className="space-y-6">
@@ -127,28 +140,13 @@ export function AdminSubmissionsList({
         <AdminFilterToggle
           active={filter === "history"}
           count={historySubmissions.length}
-          label="History"
+          label="Recent"
           onClick={() => setFilter("history")}
         />
       </AdminFilterBar>
 
       {filteredSubmissions.length === 0 ? (
-        <EmptyState
-          title={
-            filter === "pending"
-              ? "No submissions need review right now."
-              : "No reviewed submissions yet."
-          }
-          description={
-            filter === "pending"
-              ? historySubmissions.length > 0
-                ? "Switch to History if you want to revisit graded work."
-                : "Your review queue is clear for now."
-              : pendingSubmissions.length > 0
-                ? "Graded submissions will appear here once you start clearing the queue."
-                : "Reviewed work will appear here once students have submitted and you have graded a lesson."
-          }
-        />
+        <EmptyState title={emptyTitle} description={emptyDescription} />
       ) : (
         <AdminSubmissionReviewWorkspace submissions={filteredSubmissions} />
       )}
@@ -174,6 +172,20 @@ export function AdminContactMessagesList({
   );
   const filteredMessages =
     filter === "active" ? activeMessages : archivedMessages;
+  let emptyTitle = "No archived conversations yet.";
+  let emptyDescription =
+    "Recent answered and archived conversations will appear here once messages have been resolved.";
+
+  if (filter === "active") {
+    emptyTitle = "No active conversations right now.";
+    emptyDescription =
+      archivedMessages.length > 0
+        ? "Switch to Recent if you want to look back through the latest answered or archived messages."
+        : "Your contact inbox is quiet for the moment.";
+  } else if (activeMessages.length > 0) {
+    emptyDescription =
+      "Recent answered or archived conversations will collect here after you clear the live inbox.";
+  }
 
   return (
     <div className="space-y-6">
@@ -187,28 +199,13 @@ export function AdminContactMessagesList({
         <AdminFilterToggle
           active={filter === "history"}
           count={archivedMessages.length}
-          label="History"
+          label="Recent"
           onClick={() => setFilter("history")}
         />
       </AdminFilterBar>
 
       {filteredMessages.length === 0 ? (
-        <EmptyState
-          title={
-            filter === "active"
-              ? "No active conversations right now."
-              : "No archived conversations yet."
-          }
-          description={
-            filter === "active"
-              ? archivedMessages.length > 0
-                ? "Switch to History if you want to look back through answered or archived messages."
-                : "Your contact inbox is quiet for the moment."
-              : activeMessages.length > 0
-                ? "Answered or archived conversations will collect here after you clear the live inbox."
-                : "Past conversations will appear here once messages have been answered or archived."
-          }
-        />
+        <EmptyState title={emptyTitle} description={emptyDescription} />
       ) : (
         filteredMessages.map((message, index) => (
           <AdminContactMessageDisclosure
@@ -237,6 +234,20 @@ export function AdminEntryReportsList({
     ["history", "open"],
   );
   const filteredReports = filter === "open" ? openReports : historyReports;
+  let emptyTitle = "No report history yet.";
+  let emptyDescription =
+    "Recent reviewed and resolved reports will appear here after you have handled some dictionary feedback.";
+
+  if (filter === "open") {
+    emptyTitle = "No open dictionary reports right now.";
+    emptyDescription =
+      historyReports.length > 0
+        ? "Switch to Recent if you want to revisit the latest reviewed or resolved reports."
+        : "Nothing in the dictionary queue needs attention right now.";
+  } else if (openReports.length > 0) {
+    emptyDescription =
+      "Recent resolved reports will collect here once you work through the open queue.";
+  }
 
   return (
     <div className="space-y-6">
@@ -250,28 +261,13 @@ export function AdminEntryReportsList({
         <AdminFilterToggle
           active={filter === "history"}
           count={historyReports.length}
-          label="History"
+          label="Recent"
           onClick={() => setFilter("history")}
         />
       </AdminFilterBar>
 
       {filteredReports.length === 0 ? (
-        <EmptyState
-          title={
-            filter === "open"
-              ? "No open dictionary reports right now."
-              : "No report history yet."
-          }
-          description={
-            filter === "open"
-              ? historyReports.length > 0
-                ? "Switch to History if you want to revisit reviewed or resolved reports."
-                : "Nothing in the dictionary queue needs attention right now."
-              : openReports.length > 0
-                ? "Resolved reports will collect here once you work through the open queue."
-                : "Reviewed and resolved reports will appear here after you have handled some dictionary feedback."
-          }
-        />
+        <EmptyState title={emptyTitle} description={emptyDescription} />
       ) : (
         filteredReports.map((reportWithEntry, index) => (
           <AdminEntryReportDisclosure

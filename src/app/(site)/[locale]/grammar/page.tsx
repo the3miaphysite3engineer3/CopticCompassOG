@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
 import StructuredData from "@/components/StructuredData";
 import GrammarHubPageClient from "@/features/grammar/components/GrammarHubPageClient";
 import { listGrammarLessons } from "@/features/grammar/lib/grammarDataset";
 import { getTranslation } from "@/lib/i18n";
-import { createLocalizedPageMetadata } from "@/lib/metadata";
 import { getGrammarPath, getLocalizedHomePath } from "@/lib/locale";
+import { createLocalizedPageMetadata } from "@/lib/metadata";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
 import {
   createBreadcrumbStructuredData,
   createGrammarHubStructuredData,
 } from "@/lib/structuredData";
+
+import type { Metadata } from "next";
 
 function buildGrammarDescription(locale: "en" | "nl") {
   return locale === "nl"
@@ -36,6 +37,10 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Renders the localized grammar hub with its lesson listing and structured
+ * data.
+ */
 export default async function GrammarPage({
   params,
 }: {

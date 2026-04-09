@@ -1,16 +1,17 @@
-import type { ReactNode } from "react";
 import { Badge } from "@/components/Badge";
 import type { GrammarLessonBundle } from "@/content/grammar/schema";
-import { cx } from "@/lib/classes";
-import type { Language } from "@/types/i18n";
 import {
   getGrammarConceptAnchorId,
   getGrammarSourceAnchorId,
   getOrderedLessonConcepts,
   getOrderedLessonSources,
 } from "@/features/grammar/lib/grammarPresentation";
-import { getPublicationPath } from "@/features/publications/lib/publications";
 import { GrammarBlockRenderer } from "@/features/grammar/renderers/GrammarBlockRenderer";
+import { getPublicationPath } from "@/features/publications/lib/publications";
+import { cx } from "@/lib/classes";
+import type { Language } from "@/types/i18n";
+
+import type { ReactNode } from "react";
 
 type GrammarLessonSemanticsProps = {
   lessonBundle: GrammarLessonBundle;

@@ -8,12 +8,16 @@ type UserAppMetadata =
   | null
   | undefined;
 
-export type AccountAuthSettings = {
+interface AccountAuthSettings {
   authProviders: string[];
   canUpdatePassword: boolean;
   providerLabel: string;
-};
+}
 
+/**
+ * Normalizes the auth providers reported by Supabase into a unique list that
+ * the account settings UI can reason about.
+ */
 function normalizeAuthProviders(appMetadata: UserAppMetadata) {
   const providers = Array.isArray(appMetadata?.providers)
     ? appMetadata.providers
@@ -29,6 +33,9 @@ function normalizeAuthProviders(appMetadata: UserAppMetadata) {
   );
 }
 
+/**
+ * Formats the primary sign-in method for the account settings panel.
+ */
 function formatProviderLabel(provider: string, language: Language) {
   if (provider === "google") {
     return "Google";
@@ -41,6 +48,10 @@ function formatProviderLabel(provider: string, language: Language) {
   return provider;
 }
 
+/**
+ * Derives the account-auth settings shown in the profile UI, including whether
+ * password updates are supported for the current provider mix.
+ */
 export function getAccountAuthSettings(
   appMetadata: UserAppMetadata,
   language: Language = "en",

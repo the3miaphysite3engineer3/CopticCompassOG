@@ -3,17 +3,30 @@ import type {
   ContentReleaseItemRow,
   ContentReleaseRow,
 } from "@/features/communications/lib/releases";
+import type { QueryResult } from "@/lib/supabase/queryTypes";
+
 import type { AdminSupabase } from "./shared";
 
 type ResolvedReleaseItem = Pick<
   ContentReleaseCandidate,
   "itemId" | "itemType" | "title" | "url"
 >;
+type ContentReleaseDeliveryContext = {
+  items: ContentReleaseItemRow[];
+  release: ContentReleaseRow;
+};
+type ContentReleaseIdRecord = Pick<ContentReleaseRow, "id">;
+type ContentReleaseStatusRecord = Pick<ContentReleaseRow, "id" | "status">;
+type ContentReleaseMutationResult = QueryResult<null>;
 
+/**
+ * Loads the release row plus its snapshotted items so delivery, preview, and
+ * deletion actions all operate on the same persisted draft payload.
+ */
 export async function loadContentReleaseForDelivery(
   releaseId: string,
   supabase: AdminSupabase,
-) {
+): Promise<ContentReleaseDeliveryContext | null> {
   const { data: release, error: releaseError } = await supabase
     .from("content_releases")
     .select("*")
@@ -45,12 +58,13 @@ export async function loadContentReleaseForDelivery(
   return {
     items: releaseItems,
     release,
-  } satisfies {
-    items: ContentReleaseItemRow[];
-    release: ContentReleaseRow;
   };
 }
 
+/**
+ * Creates the parent release row that stores the reviewed copy and delivery
+ * metadata used by later preview and background-send actions.
+ */
 export async function createContentReleaseRecord(options: {
   audienceSegment: ContentReleaseRow["audience_segment"];
   bodyEn: string | null;
@@ -60,7 +74,7 @@ export async function createContentReleaseRecord(options: {
   subjectEn: string | null;
   subjectNl: string | null;
   supabase: AdminSupabase;
-}) {
+}): Promise<QueryResult<ContentReleaseIdRecord>> {
   const timestamp = new Date().toISOString();
 
   return options.supabase
@@ -79,11 +93,15 @@ export async function createContentReleaseRecord(options: {
     .single();
 }
 
+/**
+ * Stores immutable snapshots of the items attached to a release so delivery is
+ * not affected by later title or URL changes in the source content.
+ */
 export async function createContentReleaseItemSnapshots(options: {
   releaseId: string;
   resolvedItems: ResolvedReleaseItem[];
   supabase: AdminSupabase;
-}) {
+}): Promise<ContentReleaseMutationResult> {
   return options.supabase.from("content_release_items").insert(
     options.resolvedItems.map((item) => ({
       item_id: item.itemId,
@@ -95,11 +113,15 @@ export async function createContentReleaseItemSnapshots(options: {
   );
 }
 
+/**
+ * Updates the review status on an editable release and clears any previous
+ * sent timestamp because the draft may still change before delivery.
+ */
 export async function updateContentReleaseStatusRecord(options: {
   releaseId: string;
   status: ContentReleaseRow["status"];
   supabase: AdminSupabase;
-}) {
+}): Promise<ContentReleaseMutationResult> {
   return options.supabase
     .from("content_releases")
     .update({
@@ -110,10 +132,14 @@ export async function updateContentReleaseStatusRecord(options: {
     .eq("id", options.releaseId);
 }
 
+/**
+ * Loads the minimal release fields needed by deletion and review actions that
+ * only care about identity plus current workflow status.
+ */
 export async function loadContentReleaseStatusRecord(options: {
   releaseId: string;
   supabase: AdminSupabase;
-}) {
+}): Promise<QueryResult<ContentReleaseStatusRecord>> {
   return options.supabase
     .from("content_releases")
     .select("id, status")
@@ -121,10 +147,14 @@ export async function loadContentReleaseStatusRecord(options: {
     .maybeSingle();
 }
 
+/**
+ * Deletes the release row and returns its id when the current database policy
+ * allows the admin action to proceed.
+ */
 export async function deleteContentReleaseRecord(options: {
   releaseId: string;
   supabase: AdminSupabase;
-}) {
+}): Promise<QueryResult<ContentReleaseIdRecord>> {
   return options.supabase
     .from("content_releases")
     .delete()
@@ -133,13 +163,17 @@ export async function deleteContentReleaseRecord(options: {
     .maybeSingle();
 }
 
+/**
+ * Transitions a reviewed release into the queued state and resets delivery
+ * cursors so the background worker can start from a clean batch boundary.
+ */
 export async function queueContentReleaseDeliveryRecord(options: {
   itemCount: number;
   release: Pick<ContentReleaseRow, "delivery_summary">;
   releaseId: string;
   requestedBy: string;
   supabase: AdminSupabase;
-}) {
+}): Promise<ContentReleaseMutationResult> {
   const now = new Date().toISOString();
 
   return options.supabase
@@ -161,11 +195,16 @@ export async function queueContentReleaseDeliveryRecord(options: {
     .eq("id", options.releaseId);
 }
 
+/**
+ * Restores the release status after the background worker could not be started,
+ * preserving queued releases as queued while returning newly queued drafts to
+ * the approved state.
+ */
 export async function revertQueuedContentReleaseRecord(options: {
   isResumingQueuedRelease: boolean;
   releaseId: string;
   supabase: AdminSupabase;
-}) {
+}): Promise<ContentReleaseMutationResult> {
   const revertTimestamp = new Date().toISOString();
 
   return options.supabase

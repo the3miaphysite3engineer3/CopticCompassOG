@@ -1,5 +1,8 @@
 import { defineMessages } from "@/lib/translations/defineMessages";
 
+/**
+ * Localized copy for the grammar hub, lesson pages, and exercise forms.
+ */
 export const grammarMessages = defineMessages({
   en: {
     "grammar.title": "Coptic Grammar",

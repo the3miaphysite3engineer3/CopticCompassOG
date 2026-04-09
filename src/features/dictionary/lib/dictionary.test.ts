@@ -1,9 +1,13 @@
 import { describe, expect, it } from "vitest";
+
+import type { LexicalEntry } from "@/features/dictionary/types";
+
 import {
   getDictionaryEntryById,
   getDictionaryEntryRelations,
+  listDictionaryEntryIds,
+  toDictionaryClientEntry,
 } from "./dictionary";
-import type { LexicalEntry } from "@/features/dictionary/types";
 
 function createEntry(
   overrides: Partial<LexicalEntry> & Pick<LexicalEntry, "id" | "headword">,
@@ -76,6 +80,16 @@ describe("dictionary helpers", () => {
     expect(getDictionaryEntryById("missing", dictionary)).toBeNull();
   });
 
+  it("returns the stable ordered list of entry ids for sitemap and params use", () => {
+    expect(listDictionaryEntryIds(dictionary)).toEqual([
+      "cd_20",
+      "cd_20a",
+      "cd_493",
+      "cd_493a",
+      "cd_493b",
+    ]);
+  });
+
   it("returns child entries for a base lemma", () => {
     const baseEntry = getDictionaryEntryById("cd_493", dictionary);
 
@@ -99,5 +113,14 @@ describe("dictionary helpers", () => {
       parentEntry: { id: "cd_493", headword: "ⲁⲛⲟⲕ" },
       relatedEntries: [{ id: "cd_493b", headword: "ⲛⲑⲱⲟⲩ" }],
     });
+  });
+
+  it("builds a reduced client payload without raw dictionary fields", () => {
+    expect(toDictionaryClientEntry(dictionary[0]!)).toMatchObject({
+      id: "cd_20",
+      headword: "ϣⲏⲣⲓ",
+      english_meanings: ["son"],
+    });
+    expect("raw" in toDictionaryClientEntry(dictionary[0]!)).toBe(false);
   });
 });

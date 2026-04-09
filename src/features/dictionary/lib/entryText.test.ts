@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { buildEntryDescription } from "@/features/dictionary/lib/entryText";
 import type { LexicalEntry } from "@/features/dictionary/types";
 

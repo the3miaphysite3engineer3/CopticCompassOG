@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
 import StructuredData from "@/components/StructuredData";
+import { listPublishedGrammarLessonsForPublication } from "@/features/grammar/lib/grammarContentGraph";
 import PublicationDetailPageClient from "@/features/publications/components/PublicationDetailPageClient";
+import { buildPublicationOpenGraphImageUrl } from "@/features/publications/lib/publicationOpenGraph";
 import {
   buildPublicationDescription,
   buildPublicationTitle,
@@ -10,8 +12,6 @@ import {
   getRelatedPublications,
   publications,
 } from "@/features/publications/lib/publications";
-import { buildPublicationOpenGraphImageUrl } from "@/features/publications/lib/publicationOpenGraph";
-import { listPublishedGrammarLessonsForPublication } from "@/features/grammar/lib/grammarContentGraph";
 import { getTranslation } from "@/lib/i18n";
 import {
   createLanguageAlternates,
@@ -19,12 +19,14 @@ import {
   getPublicationsPath,
 } from "@/lib/locale";
 import { createPageSocialMetadata, createSocialImage } from "@/lib/metadata";
-import { siteConfig } from "@/lib/site";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
+import { siteConfig } from "@/lib/site";
 import {
   createBreadcrumbStructuredData,
   createPublicationStructuredData,
 } from "@/lib/structuredData";
+
+import type { Metadata } from "next";
 
 export const dynamicParams = false;
 
@@ -88,6 +90,10 @@ export async function generateMetadata({
   };
 }
 
+/**
+ * Renders one localized publication detail page together with its publication
+ * and breadcrumb structured data.
+ */
 export default async function PublicationDetailPage({
   params,
 }: {

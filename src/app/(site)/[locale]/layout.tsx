@@ -1,6 +1,11 @@
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
+import "@/app/globals.css";
 import { AppFrame } from "@/components/AppFrame";
-import { createRootLayoutMetadata } from "@/lib/metadata";
+import { antinoou } from "@/lib/fonts";
 import { PUBLIC_LOCALES } from "@/lib/locale";
+import { createRootLayoutMetadata } from "@/lib/metadata";
 import { requirePublicLocale } from "@/lib/publicLocaleRouting";
 
 export async function generateMetadata({
@@ -16,6 +21,10 @@ export function generateStaticParams() {
   return PUBLIC_LOCALES.map((locale) => ({ locale }));
 }
 
+/**
+ * Provides the static-friendly root layout for localized public pages while
+ * enforcing a supported locale segment for the subtree.
+ */
 export default async function SiteLayout({
   children,
   params,
@@ -26,8 +35,14 @@ export default async function SiteLayout({
   const locale = requirePublicLocale((await params).locale);
 
   return (
-    <AppFrame initialLanguage={locale} localeRouting>
-      {children}
-    </AppFrame>
+    <html lang={locale} suppressHydrationWarning>
+      <body className={antinoou.variable}>
+        <AppFrame initialLanguage={locale} localeRouting>
+          {children}
+        </AppFrame>
+        <Analytics />
+        <SpeedInsights />
+      </body>
+    </html>
   );
 }

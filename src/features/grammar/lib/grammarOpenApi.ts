@@ -7,6 +7,10 @@ import {
   type OpenApiDocument,
 } from "./grammarOpenApiShared";
 
+/**
+ * Returns the complete OpenAPI document for the published grammar API,
+ * including shared metadata, path definitions, and component schemas.
+ */
 export function getGrammarOpenApiDocument(): OpenApiDocument {
   const context = createGrammarOpenApiContext();
 

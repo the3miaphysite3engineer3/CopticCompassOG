@@ -1,5 +1,8 @@
 import { defineMessages } from "@/lib/translations/defineMessages";
 
+/**
+ * Localized shared UI copy for navigation, footer, and language controls.
+ */
 export const sharedMessages = defineMessages({
   en: {
     "lang.toggle": "Toggle language",

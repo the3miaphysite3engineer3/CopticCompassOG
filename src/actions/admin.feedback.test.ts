@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import {
   createAdminFormData,
   createContactMessageAdminFormData,
@@ -54,7 +55,7 @@ describe("admin moderation actions", () => {
 
   it("updates submissions, stores review metadata, and emails the student", async () => {
     const {
-      dispatchLoggedNotificationEmailMock,
+      queueLoggedNotificationEmailMock,
       revalidatePathMock,
       submissionUpdateEqMock,
       submissionUpdateMock,
@@ -78,7 +79,7 @@ describe("admin moderation actions", () => {
       "id",
       "11111111-1111-4111-8111-111111111111",
     );
-    expect(dispatchLoggedNotificationEmailMock).toHaveBeenCalledWith(
+    expect(queueLoggedNotificationEmailMock).toHaveBeenCalledWith(
       expect.objectContaining({
         aggregateId: "11111111-1111-4111-8111-111111111111",
         aggregateType: "submission",
@@ -95,7 +96,7 @@ describe("admin moderation actions", () => {
   });
 
   it("still completes when the student review email cannot be sent", async () => {
-    const { dispatchLoggedNotificationEmailMock, submitFeedback } =
+    const { queueLoggedNotificationEmailMock, submitFeedback } =
       await loadAdminModule({
         feedbackNotificationResult: {
           success: false,
@@ -107,7 +108,7 @@ describe("admin moderation actions", () => {
       submitFeedback(createAdminFormData()),
     ).resolves.toBeUndefined();
 
-    expect(dispatchLoggedNotificationEmailMock).toHaveBeenCalledOnce();
+    expect(queueLoggedNotificationEmailMock).toHaveBeenCalledOnce();
   });
 
   it("soft deletes duplicate submissions and revalidates instructor and student views", async () => {

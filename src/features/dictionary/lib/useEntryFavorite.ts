@@ -1,14 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
+
 import { createClient } from "@/lib/supabase/client";
 import { isMissingSupabaseTableError } from "@/lib/supabase/errors";
+
 import type {
   EntryFavoriteErrorCode,
   EntryFavoriteInsert,
   EntryFavoriteRow,
 } from "./entryActions";
 
+/**
+ * Loads and toggles the current user's favorite state for a dictionary entry,
+ * including optimistic updates and table-availability handling.
+ */
 export function useEntryFavorite(entryId: string, userId: string | null) {
   const [favorite, setFavorite] = useState<EntryFavoriteRow | null>(null);
   const [errorCode, setErrorCode] = useState<EntryFavoriteErrorCode | null>(
@@ -92,6 +98,9 @@ export function useEntryFavorite(entryId: string, userId: string | null) {
     };
   }, [entryId, userId]);
 
+  /**
+   * Optimistically saves or removes the favorite row for the current user.
+   */
   async function toggleFavorite() {
     if (!userId || isLoading) {
       return;

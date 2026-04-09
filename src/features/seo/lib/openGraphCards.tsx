@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
 import { siteConfig } from "@/lib/site";
+
+import type { ReactNode } from "react";
 
 type OpenGraphStat = {
   label: string;
@@ -334,6 +335,10 @@ function OpenGraphFooter({
   );
 }
 
+/**
+ * Renders the generic site overview Open Graph card used for the homepage and
+ * as the fallback preview when a specific resource cannot be resolved.
+ */
 export function renderSiteOpenGraphCard({
   descriptor,
   eyebrow,
@@ -428,6 +433,10 @@ export function renderSiteOpenGraphCard({
   );
 }
 
+/**
+ * Renders the dictionary-entry Open Graph card with gloss, part-of-speech, and
+ * related-form callouts.
+ */
 export function renderEntryOpenGraphCard({
   footerLabel,
   gloss,
@@ -560,6 +569,10 @@ export function renderEntryOpenGraphCard({
   );
 }
 
+/**
+ * Renders the grammar-lesson Open Graph card with lesson metadata and summary
+ * statistics.
+ */
 export function renderLessonOpenGraphCard({
   eyebrow,
   footerLabel,
@@ -643,6 +656,10 @@ export function renderLessonOpenGraphCard({
   );
 }
 
+/**
+ * Renders the publication Open Graph card with status, language, subtitle, and
+ * summary metadata.
+ */
 export function renderPublicationOpenGraphCard({
   eyebrow,
   footerLabel,

@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
 import { Flag, Loader2, MessageSquareText } from "lucide-react";
+import { useActionState, useEffect, useRef } from "react";
+
 import {
   submitEntryReport,
   type EntryReportActionState,
@@ -9,17 +10,18 @@ import {
 import { FormField } from "@/components/FormField";
 import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
-import type { Language } from "@/types/i18n";
 import type { LexicalEntry } from "@/features/dictionary/types";
+import type { Language } from "@/types/i18n";
+
+import {
+  ENTRY_REPORT_REASON_LABEL_KEYS,
+  type EntryActionNotice,
+} from "../lib/entryActionBar";
 import {
   ENTRY_REPORT_MAX_COMMENTARY_LENGTH,
   ENTRY_REPORT_MIN_COMMENTARY_LENGTH,
   ENTRY_REPORT_REASONS,
 } from "../lib/entryActions";
-import {
-  ENTRY_REPORT_REASON_LABEL_KEYS,
-  type EntryActionNotice,
-} from "../lib/entryActionBar";
 
 type EntryReportPanelProps = {
   entry: LexicalEntry;

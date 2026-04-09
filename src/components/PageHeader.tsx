@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
 import { Badge } from "@/components/Badge";
 import { cx } from "@/lib/classes";
+
+import type { ReactNode } from "react";
 
 type PageHeaderTone = "default" | "brand" | "sky" | "analytics";
 type PageHeaderSize = "hero" | "page" | "compact";

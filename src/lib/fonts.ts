@@ -1,5 +1,8 @@
 import localFont from "next/font/local";
 
+/**
+ * Registers the Antinoou font family used for rendered Coptic text.
+ */
 export const antinoou = localFont({
   src: [
     {

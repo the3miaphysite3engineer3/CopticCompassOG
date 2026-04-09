@@ -1,6 +1,10 @@
-import type { MetadataRoute } from "next";
 import { siteConfig } from "@/lib/site";
 
+import type { MetadataRoute } from "next";
+
+/**
+ * Returns the production crawl policy and sitemap location for search engines.
+ */
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {

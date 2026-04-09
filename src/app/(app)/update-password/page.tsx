@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import Link from "next/link";
+
 import { updatePassword } from "@/actions/auth";
 import { Button, buttonClassName } from "@/components/Button";
 import { FormField } from "@/components/FormField";
@@ -14,6 +14,8 @@ import { createNoIndexMetadata } from "@/lib/metadata";
 import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
 import { requireAuthenticatedPageSession } from "@/lib/supabase/auth";
 
+import type { Metadata } from "next";
+
 export async function generateMetadata(): Promise<Metadata> {
   const language = await getPreferredLanguage();
 
@@ -23,6 +25,10 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
+/**
+ * Renders the authenticated password-update page for the non-localized auth
+ * surface.
+ */
 export default async function UpdatePasswordPage({
   searchParams,
 }: {

@@ -1,8 +1,9 @@
-import type { GrammarFootnoteDocument } from "../../schema.ts";
 import {
   grammarLesson01Id,
   grammarLesson01SourceIds,
 } from "../lesson-01-ids.ts";
+
+import type { GrammarFootnoteDocument } from "../../schema.ts";
 
 const lessonId = grammarLesson01Id;
 

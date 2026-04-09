@@ -1,5 +1,5 @@
-import type { Json, Tables } from "@/types/supabase";
 import { redactEmailAddress } from "@/lib/privacy";
+import type { Json, Tables } from "@/types/supabase";
 
 export type NotificationEventRow = Tables<"notification_events">;
 export type NotificationDeliveryRow = Tables<"notification_deliveries">;
@@ -9,6 +9,9 @@ export type AdminNotificationEvent = NotificationEventRow & {
   latestDelivery: NotificationDeliveryRow | null;
 };
 
+/**
+ * Narrows JSON payload fragments to plain objects before field extraction.
+ */
 function asObject(value: Json) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return null;
@@ -17,6 +20,9 @@ function asObject(value: Json) {
   return value as Record<string, Json | undefined>;
 }
 
+/**
+ * Reads a non-empty string field from a JSON notification payload.
+ */
 function getStringValue(payload: Json, key: string) {
   const record = asObject(payload);
   const value = record?.[key];
@@ -24,6 +30,9 @@ function getStringValue(payload: Json, key: string) {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
 }
 
+/**
+ * Reads a numeric field from a JSON notification payload.
+ */
 function getNumberValue(payload: Json, key: string) {
   const record = asObject(payload);
   const value = record?.[key];
@@ -31,6 +40,10 @@ function getNumberValue(payload: Json, key: string) {
   return typeof value === "number" ? value : null;
 }
 
+/**
+ * Sorts admin notification events by delivery status priority and then by most
+ * recent creation time.
+ */
 export function compareAdminNotificationPriority(
   left: AdminNotificationEvent,
   right: AdminNotificationEvent,
@@ -51,6 +64,9 @@ export function compareAdminNotificationPriority(
   );
 }
 
+/**
+ * Formats a stored notification event type into a short admin-facing label.
+ */
 export function formatNotificationEventType(eventType: string) {
   switch (eventType) {
     case "contact_message_received":
@@ -74,6 +90,9 @@ export function formatNotificationEventType(eventType: string) {
   }
 }
 
+/**
+ * Formats a stored aggregate type into a short admin-facing label.
+ */
 export function formatNotificationAggregateType(aggregateType: string) {
   switch (aggregateType) {
     case "contact_message":
@@ -91,6 +110,9 @@ export function formatNotificationAggregateType(aggregateType: string) {
   }
 }
 
+/**
+ * Formats a notification timestamp for the admin UI.
+ */
 export function formatNotificationTimestamp(timestamp: string) {
   return new Date(timestamp).toLocaleString("en-US", {
     dateStyle: "medium",
@@ -98,6 +120,10 @@ export function formatNotificationTimestamp(timestamp: string) {
   });
 }
 
+/**
+ * Extracts context badges from an admin notification event payload so the list
+ * view can show the most relevant identifying metadata inline.
+ */
 export function getNotificationContextBadges(event: AdminNotificationEvent) {
   const badges: string[] = [];
 

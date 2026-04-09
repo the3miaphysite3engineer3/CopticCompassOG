@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { getGrammarOpenApiDocument } from "./grammarOpenApi";
 
 describe("grammar OpenAPI document", () => {

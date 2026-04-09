@@ -1,18 +1,20 @@
 "use client";
 
-import { useState, useEffect, useActionState } from "react";
-import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
-import { loadBrowserUser } from "@/lib/supabase/clientAuth";
-import { submitExercise } from "@/actions/exercises";
-import type { User } from "@supabase/supabase-js";
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { useState, useEffect, useActionState } from "react";
+
+import { submitExercise } from "@/actions/exercises";
 import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
 import { getDashboardPath } from "@/lib/locale";
+import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
+import { loadBrowserUser } from "@/lib/supabase/clientAuth";
 import type { Language } from "@/types/i18n";
 
-export type ExerciseFormQuestion = {
+import type { User } from "@supabase/supabase-js";
+
+type ExerciseFormQuestion = {
   id: string;
   prompt: string;
   minLength?: number;
@@ -52,6 +54,14 @@ export function ExerciseForm({
   const [submissionIntentId, setSubmissionIntentId] = useState<string | null>(
     null,
   );
+  const userId = user?.id ?? null;
+  let submitLabel = t("exercise.submit");
+
+  if (isPending) {
+    submitLabel = t("exercise.submitting");
+  } else if (!submissionIntentId) {
+    submitLabel = t("exercise.preparingSubmission");
+  }
 
   useEffect(() => {
     if (!authAvailable) {
@@ -96,7 +106,7 @@ export function ExerciseForm({
         return;
       }
 
-      if (!user) {
+      if (!userId) {
         setSubmissionIntentId(null);
         return;
       }
@@ -106,19 +116,20 @@ export function ExerciseForm({
           return current;
         }
 
-        return createSubmissionIntentId(user.id, lessonSlug, exerciseId);
+        return createSubmissionIntentId(userId, lessonSlug, exerciseId);
       });
     });
 
     return () => {
       cancelled = true;
     };
-  }, [exerciseId, lessonSlug, user?.id]);
+  }, [exerciseId, lessonSlug, userId]);
 
-  if (loading)
+  if (loading) {
     return (
       <div className="animate-pulse h-20 bg-sky-50 dark:bg-sky-900/20 rounded-xl mt-6"></div>
     );
+  }
 
   if (!authAvailable) {
     return (
@@ -205,11 +216,7 @@ export function ExerciseForm({
           disabled={isPending || !submissionIntentId}
           className="btn-primary w-full sm:w-auto flex justify-center items-center gap-2 px-8"
         >
-          {isPending
-            ? t("exercise.submitting")
-            : !submissionIntentId
-              ? t("exercise.preparingSubmission")
-              : t("exercise.submit")}
+          {submitLabel}
           <ArrowRight size={20} />
         </button>
       </div>

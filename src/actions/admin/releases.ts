@@ -1,6 +1,8 @@
 "use server";
 
+import { getContentReleaseCandidateMap } from "@/features/communications/lib/releaseCandidates";
 import {
+  type ContentReleaseRow,
   buildContentReleaseEmailHtml,
   buildContentReleaseEmailText,
   deriveContentReleaseType,
@@ -10,12 +12,19 @@ import {
   isContentReleaseEditableStatus,
   isContentReleaseLocaleMode,
 } from "@/features/communications/lib/releases";
-import { getContentReleaseCandidateMap } from "@/features/communications/lib/releaseCandidates";
-import { dispatchLoggedNotificationEmail } from "@/lib/notifications/events";
 import { getNotificationEmailEnv } from "@/lib/notifications/config";
+import { dispatchLoggedNotificationEmail } from "@/lib/notifications/events";
 import { revalidateAdminPaths } from "@/lib/server/revalidation";
 import { invokeSupabaseEdgeFunction } from "@/lib/supabase/functions";
-import { getValidatedAdminContext } from "./shared";
+import {
+  getFormString,
+  hasLengthInRange,
+  isUuid,
+  normalizeMultiline,
+  normalizeWhitespace,
+} from "@/lib/validation";
+import type { Language } from "@/types/i18n";
+
 import {
   createContentReleaseItemSnapshots,
   createContentReleaseRecord,
@@ -26,20 +35,193 @@ import {
   revertQueuedContentReleaseRecord,
   updateContentReleaseStatusRecord,
 } from "./releasePersistence";
-import {
-  getFormString,
-  hasLengthInRange,
-  isUuid,
-  normalizeMultiline,
-  normalizeWhitespace,
-} from "@/lib/validation";
-import type { Language } from "@/types/i18n";
+import { getValidatedAdminContext, type AdminSupabase } from "./shared";
+
 import type {
   ContentReleaseDraftState,
   DeleteContentReleaseState,
   SendContentReleaseState,
 } from "./states";
 
+type ParsedContentReleaseDraft = {
+  audienceSegment: ContentReleaseRow["audience_segment"];
+  bodyEn: string;
+  bodyNl: string;
+  localeMode: ContentReleaseRow["locale_mode"];
+  releaseType: NonNullable<ReturnType<typeof deriveContentReleaseType>>;
+  resolvedItems: ReturnType<typeof getContentReleaseCandidateMap> extends Map<
+    string,
+    infer Candidate
+  >
+    ? Candidate[]
+    : never;
+  subjectEn: string;
+  subjectNl: string;
+};
+
+const RELEASE_COPY_VALIDATION_ERROR =
+  "Provide the required localized subject and message copy for this release.";
+
+/**
+ * Reads the checked release-item ids from form data and returns them in the
+ * normalized order expected by the admin release workflow.
+ */
+function getSelectedReleaseItems(formData: FormData) {
+  return formData
+    .getAll("release_item")
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => normalizeWhitespace(value))
+    .filter((value) => value.length > 0);
+}
+
+/**
+ * Resolves the submitted item ids against the current release-candidate map so
+ * draft creation stores stable snapshots instead of raw form values.
+ */
+function getResolvedReleaseItems(selectedItems: string[]) {
+  const candidateMap = getContentReleaseCandidateMap();
+
+  return selectedItems
+    .map((selectedItem) => candidateMap.get(selectedItem) ?? null)
+    .filter((item): item is NonNullable<typeof item> => item !== null);
+}
+
+type ReleaseCopyFieldValidation = {
+  max: number;
+  value: string;
+};
+
+/**
+ * Returns the localized copy fields that are required for the selected locale
+ * mode so validation can stay data-driven instead of branching per field.
+ */
+function getRequiredReleaseCopyFields(options: {
+  bodyEn: string;
+  bodyNl: string;
+  localeMode: string;
+  subjectEn: string;
+  subjectNl: string;
+}): ReleaseCopyFieldValidation[] {
+  const requiredFields: ReleaseCopyFieldValidation[] = [];
+
+  if (options.localeMode === "localized" || options.localeMode === "en_only") {
+    requiredFields.push(
+      { max: 160, value: options.subjectEn },
+      { max: 8000, value: options.bodyEn },
+    );
+  }
+
+  if (options.localeMode === "localized" || options.localeMode === "nl_only") {
+    requiredFields.push(
+      { max: 160, value: options.subjectNl },
+      { max: 8000, value: options.bodyNl },
+    );
+  }
+
+  return requiredFields;
+}
+
+/**
+ * Validates that the localized subject/body fields required by the chosen
+ * locale mode are present and within the supported length limits.
+ */
+function getReleaseCopyValidationError(options: {
+  bodyEn: string;
+  bodyNl: string;
+  localeMode: string;
+  subjectEn: string;
+  subjectNl: string;
+}) {
+  return getRequiredReleaseCopyFields(options).every((field) =>
+    hasLengthInRange(field.value, { min: 1, max: field.max }),
+  )
+    ? null
+    : RELEASE_COPY_VALIDATION_ERROR;
+}
+
+/**
+ * Validates the release draft form and resolves the selected content items
+ * into the typed shape used by draft persistence and preview delivery.
+ */
+function parseContentReleaseDraft(
+  formData: FormData,
+): { error: string } | { values: ParsedContentReleaseDraft } {
+  const audienceSegment = normalizeWhitespace(
+    getFormString(formData, "audience_segment"),
+  );
+  const localeMode = normalizeWhitespace(
+    getFormString(formData, "locale_mode"),
+  );
+  const subjectEn = normalizeWhitespace(getFormString(formData, "subject_en"));
+  const subjectNl = normalizeWhitespace(getFormString(formData, "subject_nl"));
+  const bodyEn = normalizeMultiline(getFormString(formData, "body_en"));
+  const bodyNl = normalizeMultiline(getFormString(formData, "body_nl"));
+  const selectedItems = getSelectedReleaseItems(formData);
+
+  if (
+    !isContentReleaseAudienceSegment(audienceSegment) ||
+    !isContentReleaseLocaleMode(localeMode)
+  ) {
+    return {
+      error: "Choose a valid audience segment and locale mode.",
+    };
+  }
+
+  if (selectedItems.length === 0) {
+    return {
+      error: "Select at least one lesson or publication for this release.",
+    };
+  }
+
+  const resolvedItems = getResolvedReleaseItems(selectedItems);
+
+  if (resolvedItems.length !== selectedItems.length) {
+    return {
+      error: "One or more selected release items could not be found.",
+    };
+  }
+
+  const releaseType = deriveContentReleaseType(
+    resolvedItems.map((item) => item.itemType),
+  );
+
+  if (!releaseType) {
+    return {
+      error: "Could not determine the release type from the selected items.",
+    };
+  }
+
+  const copyValidationError = getReleaseCopyValidationError({
+    bodyEn,
+    bodyNl,
+    localeMode,
+    subjectEn,
+    subjectNl,
+  });
+  if (copyValidationError) {
+    return {
+      error: copyValidationError,
+    };
+  }
+
+  return {
+    values: {
+      audienceSegment,
+      bodyEn,
+      bodyNl,
+      localeMode,
+      releaseType,
+      resolvedItems,
+      subjectEn,
+      subjectNl,
+    },
+  };
+}
+
+/**
+ * Creates a release draft row plus immutable item snapshots so later previews
+ * and deliveries operate on the reviewed draft content rather than live pages.
+ */
 export async function createContentReleaseDraft(
   _prevState: ContentReleaseDraftState | null,
   formData: FormData,
@@ -53,80 +235,24 @@ export async function createContentReleaseDraft(
   }
 
   const { supabase } = adminContext;
-  const audienceSegment = normalizeWhitespace(
-    getFormString(formData, "audience_segment"),
-  );
-  const localeMode = normalizeWhitespace(
-    getFormString(formData, "locale_mode"),
-  );
-  const subjectEn = normalizeWhitespace(getFormString(formData, "subject_en"));
-  const subjectNl = normalizeWhitespace(getFormString(formData, "subject_nl"));
-  const bodyEn = normalizeMultiline(getFormString(formData, "body_en"));
-  const bodyNl = normalizeMultiline(getFormString(formData, "body_nl"));
-  const selectedItems = formData
-    .getAll("release_item")
-    .filter((value): value is string => typeof value === "string")
-    .map((value) => normalizeWhitespace(value))
-    .filter((value) => value.length > 0);
+  const parseResult = parseContentReleaseDraft(formData);
 
-  if (
-    !isContentReleaseAudienceSegment(audienceSegment) ||
-    !isContentReleaseLocaleMode(localeMode)
-  ) {
+  if ("error" in parseResult) {
     return {
       success: false,
-      error: "Choose a valid audience segment and locale mode.",
+      error: parseResult.error,
     };
   }
-
-  if (selectedItems.length === 0) {
-    return {
-      success: false,
-      error: "Select at least one lesson or publication for this release.",
-    };
-  }
-
-  const candidateMap = getContentReleaseCandidateMap();
-  const resolvedItems = selectedItems
-    .map((selectedItem) => candidateMap.get(selectedItem) ?? null)
-    .filter((item): item is NonNullable<typeof item> => item !== null);
-
-  if (resolvedItems.length !== selectedItems.length) {
-    return {
-      success: false,
-      error: "One or more selected release items could not be found.",
-    };
-  }
-
-  const releaseType = deriveContentReleaseType(
-    resolvedItems.map((item) => item.itemType),
-  );
-
-  if (!releaseType) {
-    return {
-      success: false,
-      error: "Could not determine the release type from the selected items.",
-    };
-  }
-
-  const requiresEnglish =
-    localeMode === "localized" || localeMode === "en_only";
-  const requiresDutch = localeMode === "localized" || localeMode === "nl_only";
-
-  if (
-    (requiresEnglish &&
-      (!hasLengthInRange(subjectEn, { min: 1, max: 160 }) ||
-        !hasLengthInRange(bodyEn, { min: 1, max: 8000 }))) ||
-    (requiresDutch &&
-      (!hasLengthInRange(subjectNl, { min: 1, max: 160 }) ||
-        !hasLengthInRange(bodyNl, { min: 1, max: 8000 })))
-  ) {
-    return {
-      success: false,
-      error:
-        "Provide the required localized subject and message copy for this release.",
-    };
-  }
+  const {
+    audienceSegment,
+    bodyEn,
+    bodyNl,
+    localeMode,
+    releaseType,
+    resolvedItems,
+    subjectEn,
+    subjectNl,
+  } = parseResult.values;
 
   const { data: release, error: releaseError } =
     await createContentReleaseRecord({
@@ -167,7 +293,14 @@ export async function createContentReleaseDraft(
   return { success: true };
 }
 
-export async function updateContentReleaseStatus(formData: FormData) {
+/**
+ * Applies an admin review decision to a release that is still editable.
+ * Invalid payloads are rejected quietly because this action is driven by form
+ * posts rather than direct user-visible mutation feedback.
+ */
+export async function updateContentReleaseStatus(
+  formData: FormData,
+): Promise<void> {
   const adminContext = await getValidatedAdminContext();
   if (!adminContext) {
     console.warn(
@@ -202,6 +335,11 @@ export async function updateContentReleaseStatus(formData: FormData) {
   revalidateAdminPaths();
 }
 
+/**
+ * Deletes a release only when it is still safe to remove from history.
+ * Sent or in-flight releases stay preserved so delivery auditing remains
+ * accurate.
+ */
 export async function deleteContentReleaseDraft(
   _prevState: DeleteContentReleaseState | null,
   formData: FormData,
@@ -291,6 +429,77 @@ export async function deleteContentReleaseDraft(
   };
 }
 
+/**
+ * Returns the blocking message for a release that cannot transition into the
+ * queued delivery state yet.
+ */
+function getReleaseSendBlockedMessage(
+  release: Pick<ContentReleaseRow, "status">,
+) {
+  if (release.status === "sending") {
+    return "This release is already being delivered in the background.";
+  }
+
+  if (release.status === "sent") {
+    return "This release has already been delivered.";
+  }
+
+  if (release.status !== "approved") {
+    return "Approve the release draft before sending it.";
+  }
+
+  return null;
+}
+
+/**
+ * Moves an approved release into the queued state before the worker is invoked.
+ */
+async function queueReleaseForDelivery(options: {
+  itemCount: number;
+  release: ContentReleaseRow;
+  releaseId: string;
+  requestedBy: string;
+  supabase: AdminSupabase;
+}) {
+  return queueContentReleaseDeliveryRecord({
+    itemCount: options.itemCount,
+    release: options.release,
+    releaseId: options.releaseId,
+    requestedBy: options.requestedBy,
+    supabase: options.supabase,
+  });
+}
+
+/**
+ * Reverts the queued state when the background worker could not be started.
+ */
+async function getReleaseWorkerStartFailureState(options: {
+  isResumingQueuedRelease: boolean;
+  releaseId: string;
+  supabase: AdminSupabase;
+}): Promise<SendContentReleaseState> {
+  const { error: revertError } = await revertQueuedContentReleaseRecord({
+    isResumingQueuedRelease: options.isResumingQueuedRelease,
+    releaseId: options.releaseId,
+    supabase: options.supabase,
+  });
+
+  if (revertError) {
+    console.error("Error reverting content release queue state:", revertError);
+  }
+
+  revalidateAdminPaths();
+
+  return {
+    success: false,
+    message: "The background release worker could not be started right now.",
+  };
+}
+
+/**
+ * Queues a reviewed release for background delivery, or resumes an already
+ * queued release whose worker chain stalled before completion.
+ */
 export async function sendContentRelease(
   _prevState: SendContentReleaseState | null,
   formData: FormData,
@@ -326,31 +535,16 @@ export async function sendContentRelease(
   const { items: releaseItems, release } = deliveryContext;
   const isResumingQueuedRelease = release.status === "queued";
 
-  if (isResumingQueuedRelease) {
-    // Keep the current cursor/summary so stalled batch chains can be resumed safely.
-  } else {
-    if (release.status === "sending") {
+  if (!isResumingQueuedRelease) {
+    const blockedMessage = getReleaseSendBlockedMessage(release);
+    if (blockedMessage) {
       return {
         success: false,
-        message: "This release is already being delivered in the background.",
+        message: blockedMessage,
       };
     }
 
-    if (release.status === "sent") {
-      return {
-        success: false,
-        message: "This release has already been delivered.",
-      };
-    }
-
-    if (release.status !== "approved") {
-      return {
-        success: false,
-        message: "Approve the release draft before sending it.",
-      };
-    }
-
-    const { error: queueError } = await queueContentReleaseDeliveryRecord({
+    const { error: queueError } = await queueReleaseForDelivery({
       itemCount: releaseItems.length,
       release,
       releaseId,
@@ -375,25 +569,11 @@ export async function sendContentRelease(
   );
 
   if (!invokeResult.success) {
-    const { error: revertError } = await revertQueuedContentReleaseRecord({
+    return getReleaseWorkerStartFailureState({
       isResumingQueuedRelease,
       releaseId,
       supabase,
     });
-
-    if (revertError) {
-      console.error(
-        "Error reverting content release queue state:",
-        revertError,
-      );
-    }
-
-    revalidateAdminPaths();
-
-    return {
-      success: false,
-      message: "The background release worker could not be started right now.",
-    };
   }
 
   revalidateAdminPaths();
@@ -406,6 +586,66 @@ export async function sendContentRelease(
   };
 }
 
+async function dispatchReleasePreviewEmail(options: {
+  copy: ReturnType<typeof getContentReleaseCopyForLocale> & {
+    subject: string;
+    body: string;
+  };
+  env: NonNullable<ReturnType<typeof getNotificationEmailEnv>> & {
+    ownerAlertEmail: string;
+  };
+  release: ContentReleaseRow;
+  releaseId: string;
+  releaseItems: NonNullable<
+    Awaited<ReturnType<typeof loadContentReleaseForDelivery>>
+  >["items"];
+}): Promise<SendContentReleaseState> {
+  const result = await dispatchLoggedNotificationEmail({
+    aggregateId: options.releaseId,
+    aggregateType: "content_release",
+    eventType: "content_release_test_sent",
+    payload: {
+      audience_segment: options.release.audience_segment,
+      item_count: options.releaseItems.length,
+      locale: options.copy.language,
+      locale_mode: options.release.locale_mode,
+      preview: "true",
+      release_type: options.release.release_type,
+    },
+    subject: `[Coptic Compass Preview] ${options.copy.subject}`,
+    html: buildContentReleaseEmailHtml({
+      body: options.copy.body,
+      items: options.releaseItems,
+      language: options.copy.language,
+      subject: `[Coptic Compass Preview] ${options.copy.subject}`,
+    }),
+    text: buildContentReleaseEmailText({
+      body: options.copy.body,
+      items: options.releaseItems,
+      language: options.copy.language,
+    }),
+    to: options.env.ownerAlertEmail,
+  });
+
+  revalidateAdminPaths();
+
+  if (!result.success) {
+    return {
+      success: false,
+      message: "The preview email could not be sent right now.",
+    };
+  }
+
+  return {
+    success: true,
+    message: `Preview sent to ${options.env.ownerAlertEmail}.`,
+  };
+}
+
+/**
+ * Sends one owner-only preview of the current release snapshots using the
+ * selected locale so copy and item ordering can be reviewed before delivery.
+ */
 export async function sendContentReleasePreview(
   _prevState: SendContentReleaseState | null,
   formData: FormData,
@@ -460,44 +700,11 @@ export async function sendContentReleasePreview(
     };
   }
 
-  const result = await dispatchLoggedNotificationEmail({
-    aggregateId: releaseId,
-    aggregateType: "content_release",
-    eventType: "content_release_test_sent",
-    payload: {
-      audience_segment: release.audience_segment,
-      item_count: releaseItems.length,
-      locale: copy.language,
-      locale_mode: release.locale_mode,
-      preview: "true",
-      release_type: release.release_type,
-    },
-    subject: `[Coptic Compass Preview] ${copy.subject}`,
-    html: buildContentReleaseEmailHtml({
-      body: copy.body,
-      items: releaseItems,
-      language: copy.language,
-      subject: `[Coptic Compass Preview] ${copy.subject}`,
-    }),
-    text: buildContentReleaseEmailText({
-      body: copy.body,
-      items: releaseItems,
-      language: copy.language,
-    }),
-    to: env.ownerAlertEmail,
+  return dispatchReleasePreviewEmail({
+    copy: copy as typeof copy & { subject: string; body: string },
+    env,
+    release,
+    releaseId,
+    releaseItems,
   });
-
-  revalidateAdminPaths();
-
-  if (!result.success) {
-    return {
-      success: false,
-      message: "The preview email could not be sent right now.",
-    };
-  }
-
-  return {
-    success: true,
-    message: `Preview sent to ${env.ownerAlertEmail}.`,
-  };
 }

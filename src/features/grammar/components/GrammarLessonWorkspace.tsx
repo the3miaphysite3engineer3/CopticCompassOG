@@ -1,16 +1,18 @@
 "use client";
 
-import type { ReactNode } from "react";
 import {
   PanelLeftClose,
   PanelLeftOpen,
   PanelRightClose,
   PanelRightOpen,
 } from "lucide-react";
+
 import { Button } from "@/components/Button";
 import { SurfacePanel } from "@/components/SurfacePanel";
-import { cx } from "@/lib/classes";
 import { GrammarLessonOutline } from "@/features/grammar/components/GrammarLessonPrimitives";
+import { cx } from "@/lib/classes";
+
+import type { ReactNode } from "react";
 
 type LessonRailSide = "left" | "right";
 
@@ -102,13 +104,11 @@ function DesktopRailToggle({
   onToggle: () => void;
   side: LessonRailSide;
 }) {
-  const Icon = collapsed
-    ? side === "left"
-      ? PanelLeftOpen
-      : PanelRightOpen
-    : side === "left"
-      ? PanelLeftClose
-      : PanelRightClose;
+  let Icon = side === "left" ? PanelLeftClose : PanelRightClose;
+
+  if (collapsed) {
+    Icon = side === "left" ? PanelLeftOpen : PanelRightOpen;
+  }
 
   return (
     <Button

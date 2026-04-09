@@ -1,14 +1,14 @@
 import {
+  buildPublicationTitle,
+  type Publication,
+} from "@/features/publications/lib/publications";
+import {
   buildOpenGraphImageUrl,
   getOpenGraphSectionFooter,
 } from "@/features/seo/lib/openGraph";
 import type { Language } from "@/types/i18n";
-import {
-  buildPublicationTitle,
-  type Publication,
-} from "@/features/publications/lib/publications";
 
-export type PublicationOpenGraphPreview = {
+type PublicationOpenGraphPreview = {
   eyebrow: string;
   footerLabel: string;
   languageLabel: string;
@@ -18,6 +18,9 @@ export type PublicationOpenGraphPreview = {
   title: string;
 };
 
+/**
+ * Returns the localized availability label shown on publication preview cards.
+ */
 function getPublicationStatusLabel(publication: Publication, locale: Language) {
   if (locale === "nl") {
     return publication.status === "published" ? "Nu beschikbaar" : "Binnenkort";
@@ -26,6 +29,9 @@ function getPublicationStatusLabel(publication: Publication, locale: Language) {
   return publication.status === "published" ? "Available now" : "Forthcoming";
 }
 
+/**
+ * Builds the `/api/og` image URL for one publication preview card.
+ */
 export function buildPublicationOpenGraphImageUrl(
   publicationId: string,
   language: Language,
@@ -39,6 +45,10 @@ export function buildPublicationOpenGraphImageUrl(
   });
 }
 
+/**
+ * Builds the publication Open Graph preview payload with localized status and
+ * summary metadata.
+ */
 export function buildPublicationOpenGraphPreview(
   publication: Publication,
   locale: Language,

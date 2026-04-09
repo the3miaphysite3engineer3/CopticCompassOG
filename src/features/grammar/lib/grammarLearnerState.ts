@@ -28,7 +28,7 @@ export type GrammarLessonLearnerSummary = {
     | null;
 };
 
-export type GrammarLearnerDashboardStats = {
+type GrammarLearnerDashboardStats = {
   totalLessons: number;
   startedLessons: number;
   completedLessons: number;
@@ -44,6 +44,10 @@ type GrammarLessonLearnerRows = {
   sectionProgressRows: readonly SectionProgressRow[];
 };
 
+/**
+ * Combines the user's lesson progress, notes, and bookmarks with the lesson
+ * bundle to produce the learner-facing summary used throughout the dashboard.
+ */
 export function buildGrammarLessonLearnerSummary({
   bookmarkRows,
   lessonBundle,
@@ -105,6 +109,10 @@ export function buildGrammarLessonLearnerSummary({
   };
 }
 
+/**
+ * Builds the aggregate dashboard stats derived from per-lesson learner
+ * summaries.
+ */
 export function buildGrammarLearnerDashboardStats(
   summaries: readonly GrammarLessonLearnerSummary[],
 ): GrammarLearnerDashboardStats {

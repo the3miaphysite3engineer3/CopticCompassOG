@@ -1,17 +1,18 @@
-import type { Metadata } from "next";
 import StructuredData from "@/components/StructuredData";
 import AnalyticsPageClient from "@/features/analytics/components/AnalyticsPageClient";
 import { createAnalyticsSnapshots } from "@/features/analytics/lib/analytics";
-import { getDictionary } from "@/features/dictionary/lib/dictionary";
+import { getDictionaryClientEntries } from "@/features/dictionary/lib/dictionary";
 import { getTranslation } from "@/lib/i18n";
-import { createLocalizedPageMetadata } from "@/lib/metadata";
 import {
   getAnalyticsPath,
   getDictionaryPath,
   getLocalizedHomePath,
 } from "@/lib/locale";
+import { createLocalizedPageMetadata } from "@/lib/metadata";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
 import { createBreadcrumbStructuredData } from "@/lib/structuredData";
+
+import type { Metadata } from "next";
 
 function buildAnalyticsDescription(locale: "en" | "nl") {
   return locale === "nl"
@@ -38,6 +39,10 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Renders the localized dictionary analytics page together with its breadcrumb
+ * structured data and precomputed analytics snapshots.
+ */
 export default async function AnalyticsPage({
   params,
 }: {
@@ -45,7 +50,7 @@ export default async function AnalyticsPage({
 }) {
   const { locale } = await params;
   const resolvedLocale = resolvePublicLocale(locale);
-  const dictionary = getDictionary();
+  const dictionary = getDictionaryClientEntries();
   return (
     <>
       <StructuredData
@@ -64,10 +69,7 @@ export default async function AnalyticsPage({
           },
         ])}
       />
-      <AnalyticsPageClient
-        snapshots={createAnalyticsSnapshots(dictionary)}
-        dictionary={dictionary}
-      />
+      <AnalyticsPageClient snapshots={createAnalyticsSnapshots(dictionary)} />
     </>
   );
 }

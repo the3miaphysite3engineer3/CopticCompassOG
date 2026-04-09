@@ -9,7 +9,9 @@ import {
   GrammarLessonTable,
 } from "@/features/grammar/components/GrammarLessonPrimitives";
 import { cx } from "@/lib/classes";
+
 import { GrammarInlineRenderer } from "./GrammarInlineRenderer";
+
 import type {
   GrammarBlockRenderHelperProps,
   GrammarRenderMode,
@@ -20,6 +22,10 @@ type GrammarTableBlockRendererProps = GrammarBlockRenderHelperProps & {
   renderMode: GrammarRenderMode;
 };
 
+/**
+ * Computes the minimum mobile table width that keeps grammar tables readable
+ * when they overflow horizontally.
+ */
 function getTableMobileMinWidthRem(
   columnCount: number,
   useRowHeaderLayout: boolean,
@@ -55,6 +61,10 @@ function renderTableColumnLabel(
   );
 }
 
+/**
+ * Renders the card-based mobile fallback for tables that opt into the `cards`
+ * layout on small screens.
+ */
 function GrammarTableMobileCards({
   block,
   inheritTextColor,
@@ -100,6 +110,10 @@ function GrammarTableMobileCards({
   );
 }
 
+/**
+ * Renders one structured grammar table block in either scrollable-table or
+ * mobile-card form depending on the block config and render mode.
+ */
 export function GrammarTableBlockRenderer({
   block,
   inheritTextColor,
@@ -121,27 +135,9 @@ export function GrammarTableBlockRenderer({
     useRowHeaderLayout,
   );
   const useMobileCards = renderMode === "web" && block.mobileLayout === "cards";
-
-  const tableElement = (
-    <GrammarLessonTable
-      className={useMobileCards ? "hidden sm:block" : undefined}
-      hasStickyLeadingColumn={useRowHeaderLayout}
-      mobileMinWidthRem={mobileMinWidthRem}
-      mobileLayout={block.mobileLayout ?? "scroll"}
-      tableId={block.id}
-      tableClassName={useFixedLayout ? "table-fixed" : undefined}
-    >
-      {hasExplicitColumnWidths ? (
-        <colgroup>
-          {block.columns.map((column) => (
-            <col
-              key={column.id}
-              style={column.width ? { width: column.width } : undefined}
-            />
-          ))}
-        </colgroup>
-      ) : null}
-      {useCustomHeaderRows ? (
+  const tableHeader = (() => {
+    if (useCustomHeaderRows) {
+      return (
         <thead>
           {block.headerRows?.map((headerRow) => (
             <tr key={headerRow.id} className="bg-stone-100 dark:bg-stone-800">
@@ -171,20 +167,49 @@ export function GrammarTableBlockRenderer({
             </tr>
           ))}
         </thead>
-      ) : block.hideHeader ? null : (
-        <thead>
-          <tr className="bg-stone-100 dark:bg-stone-800">
-            {block.columns.map((column) => (
-              <th
-                key={column.id}
-                className="border-b px-3 py-2 text-center text-sm font-semibold leading-5 dark:border-stone-700 sm:p-3 sm:text-base"
-              >
-                {renderTableColumnLabel(column, language, lessonBundle)}
-              </th>
-            ))}
-          </tr>
-        </thead>
-      )}
+      );
+    }
+
+    if (block.hideHeader) {
+      return null;
+    }
+
+    return (
+      <thead>
+        <tr className="bg-stone-100 dark:bg-stone-800">
+          {block.columns.map((column) => (
+            <th
+              key={column.id}
+              className="border-b px-3 py-2 text-center text-sm font-semibold leading-5 dark:border-stone-700 sm:p-3 sm:text-base"
+            >
+              {renderTableColumnLabel(column, language, lessonBundle)}
+            </th>
+          ))}
+        </tr>
+      </thead>
+    );
+  })();
+
+  const tableElement = (
+    <GrammarLessonTable
+      className={useMobileCards ? "hidden sm:block" : undefined}
+      hasStickyLeadingColumn={useRowHeaderLayout}
+      mobileMinWidthRem={mobileMinWidthRem}
+      mobileLayout={block.mobileLayout ?? "scroll"}
+      tableId={block.id}
+      tableClassName={useFixedLayout ? "table-fixed" : undefined}
+    >
+      {hasExplicitColumnWidths ? (
+        <colgroup>
+          {block.columns.map((column) => (
+            <col
+              key={column.id}
+              style={column.width ? { width: column.width } : undefined}
+            />
+          ))}
+        </colgroup>
+      ) : null}
+      {tableHeader}
       <tbody className="divide-y divide-stone-200 dark:divide-stone-800">
         {block.rows.map((row) => (
           <tr

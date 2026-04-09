@@ -1,8 +1,13 @@
-import type { SupabaseClient, User } from "@supabase/supabase-js";
 import type { Database } from "@/types/supabase";
+
+import type { SupabaseClient, User } from "@supabase/supabase-js";
 
 type BrowserSupabaseClient = SupabaseClient<Database>;
 
+/**
+ * Extracts a string error message from the mixed error shapes returned by
+ * browser auth flows and fetch wrappers.
+ */
 function getErrorMessage(error: unknown) {
   if (error instanceof Error) {
     return error.message;
@@ -20,6 +25,10 @@ function getErrorMessage(error: unknown) {
   return "";
 }
 
+/**
+ * Detects the refresh-token failures that should clear local browser auth
+ * state instead of surfacing stale-session noise to the current page.
+ */
 export function isInvalidRefreshTokenError(error: unknown) {
   const message = getErrorMessage(error).toLowerCase();
   return (
@@ -28,15 +37,25 @@ export function isInvalidRefreshTokenError(error: unknown) {
   );
 }
 
+/**
+ * Clears the browser-local Supabase session as a best-effort recovery step
+ * after a stale or missing refresh token is detected.
+ */
 async function clearBrowserSession(supabase: BrowserSupabaseClient) {
   try {
     await supabase.auth.signOut({ scope: "local" });
   } catch {
-    // Best effort only. The important part is preventing stale-session noise
-    // from breaking the current page flow.
+    /**
+     * Session cleanup is best-effort so stale local auth does not block the
+     * current page flow.
+     */
   }
 }
 
+/**
+ * Loads the current browser user and clears the local session when Supabase
+ * reports an invalid refresh token.
+ */
 export async function loadBrowserUser(
   supabase: BrowserSupabaseClient,
 ): Promise<User | null> {

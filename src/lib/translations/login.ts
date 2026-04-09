@@ -1,5 +1,9 @@
 import { defineMessages } from "@/lib/translations/defineMessages";
 
+/**
+ * Localized copy for sign-in, signup, password reset, and password update
+ * flows.
+ */
 export const loginMessages = defineMessages({
   en: {
     "login.title": "Welcome to Coptic Compass",

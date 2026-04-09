@@ -1,12 +1,22 @@
 import { hasLengthInRange, normalizeWhitespace } from "@/lib/validation";
 
+/**
+ * The maximum persisted profile full-name length accepted by the profile form.
+ */
 export const MAX_PROFILE_FULL_NAME_LENGTH = 120;
 
+/**
+ * Normalizes a profile full name and collapses blank input to `null`.
+ */
 export function normalizeProfileFullName(value: string) {
   const normalized = normalizeWhitespace(value);
   return normalized.length > 0 ? normalized : null;
 }
 
+/**
+ * Validates a normalized profile full name against the persisted length
+ * constraints.
+ */
 export function isValidProfileFullName(value: string | null) {
   return (
     value === null ||
@@ -17,6 +27,10 @@ export function isValidProfileFullName(value: string | null) {
   );
 }
 
+/**
+ * Extracts the storage object path for a user avatar only when the URL points
+ * at the expected storage origin and user-specific avatar prefix.
+ */
 export function getAvatarStorageObjectPath(
   avatarUrl: string,
   {

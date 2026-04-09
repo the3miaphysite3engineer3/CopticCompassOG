@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import Link from "next/link";
+
 import { resetPassword } from "@/actions/auth";
 import { Button, buttonClassName } from "@/components/Button";
 import { FormField } from "@/components/FormField";
@@ -10,7 +11,8 @@ import { AuthFlashNoticeCleaner } from "@/features/auth/components/AuthFlashNoti
 import { getTranslation } from "@/lib/i18n";
 import { createNoIndexMetadata } from "@/lib/metadata";
 import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
-import Link from "next/link";
+
+import type { Metadata } from "next";
 
 export async function generateMetadata(): Promise<Metadata> {
   const language = await getPreferredLanguage();
@@ -21,6 +23,9 @@ export async function generateMetadata(): Promise<Metadata> {
   });
 }
 
+/**
+ * Renders the password-reset request page for the non-localized auth surface.
+ */
 export default async function ForgotPasswordPage({
   searchParams,
 }: {

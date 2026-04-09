@@ -1,20 +1,20 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { flushSync } from "react-dom";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { Button } from "@/components/Button";
+import { DownloadPdfButton } from "@/components/DownloadPdfButton";
+import { useLanguage } from "@/components/LanguageProvider";
+import { PageHeader } from "@/components/PageHeader";
+import { PageShell, pageShellAccents } from "@/components/PageShell";
 import type {
   GrammarLessonBundle,
   GrammarSectionDocument,
 } from "@/content/grammar/schema";
-import { useLanguage } from "@/components/LanguageProvider";
-import { DownloadPdfButton } from "@/components/DownloadPdfButton";
-import { PageHeader } from "@/components/PageHeader";
-import { PageShell, pageShellAccents } from "@/components/PageShell";
-import { cx } from "@/lib/classes";
 import {
   type GrammarAdjacentLessonLink,
   GrammarLessonBottomNavigation,
@@ -23,21 +23,22 @@ import {
   GrammarLessonNotesPanel,
   GrammarLessonSectionProgressButton,
 } from "@/features/grammar/components/GrammarLessonLearnerPanel";
+import { GrammarLessonRenderProvider } from "@/features/grammar/components/GrammarLessonRenderContext";
+import { GrammarLessonConceptSummary } from "@/features/grammar/components/GrammarLessonSemantics";
 import {
   GrammarLessonReadingWorkspace,
   GrammarLessonStudyWorkspace,
 } from "@/features/grammar/components/GrammarLessonWorkspace";
-import { GrammarLessonRenderProvider } from "@/features/grammar/components/GrammarLessonRenderContext";
-import { GrammarLessonConceptSummary } from "@/features/grammar/components/GrammarLessonSemantics";
 import { getGrammarLessonAbbreviationSectionId } from "@/features/grammar/lib/grammarPresentation";
 import {
   useActiveLessonSectionId,
   usePersistentLessonRailState,
   usePersistentLessonWorkspaceMode,
 } from "@/features/grammar/lib/lessonWorkspaceState";
-import { getGrammarPath, getLocalizedHomePath } from "@/lib/locale";
 import { useGrammarLessonLearnerState } from "@/features/grammar/lib/useGrammarLessonLearnerState";
 import { GrammarLessonDocumentRenderer } from "@/features/grammar/renderers/GrammarLessonDocumentRenderer";
+import { cx } from "@/lib/classes";
+import { getGrammarPath, getLocalizedHomePath } from "@/lib/locale";
 
 type GrammarLessonPageClientProps = {
   lessonBundle: GrammarLessonBundle;

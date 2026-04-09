@@ -308,10 +308,17 @@ const DASHBOARD_COPY = {
   },
 } as const satisfies Record<Language, unknown>;
 
+/**
+ * Returns the localized dashboard copy bundle used by the student dashboard
+ * UI.
+ */
 export function getDashboardCopy(language: Language) {
   return DASHBOARD_COPY[language];
 }
 
+/**
+ * Formats a dashboard date string for the selected UI language.
+ */
 export function formatDashboardDate(value: string | null, language: Language) {
   if (!value) {
     return null;
@@ -320,6 +327,10 @@ export function formatDashboardDate(value: string | null, language: Language) {
   return new Date(value).toLocaleDateString(DATE_LOCALES[language]);
 }
 
+/**
+ * Replaces the provider placeholder in dashboard copy strings for externally
+ * managed auth providers.
+ */
 export function formatDashboardProviderDescription(
   template: string,
   providerLabel: string,

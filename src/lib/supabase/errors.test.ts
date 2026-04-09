@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { isMissingSupabaseTableError } from "./errors";
 
 describe("isMissingSupabaseTableError", () => {

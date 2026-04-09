@@ -14,6 +14,10 @@ type InvokeSupabaseEdgeFunctionResult<T = unknown> =
       success: false;
     };
 
+/**
+ * Invokes a Supabase Edge Function with the service-role key and returns a
+ * non-throwing success/error envelope for callers.
+ */
 export async function invokeSupabaseEdgeFunction<T = unknown>(
   functionName: string,
   payload?: Json,
@@ -73,6 +77,9 @@ export async function invokeSupabaseEdgeFunction<T = unknown>(
   };
 }
 
+/**
+ * Parses a JSON response body defensively and returns `null` for invalid JSON.
+ */
 function safeParseJson(value: string) {
   try {
     return JSON.parse(value) as Record<string, unknown>;

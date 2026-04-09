@@ -1,11 +1,11 @@
+import type { GrammarLessonBundle } from "@/content/grammar/schema";
 import {
   buildOpenGraphImageUrl,
   getOpenGraphSectionFooter,
 } from "@/features/seo/lib/openGraph";
-import type { GrammarLessonBundle } from "@/content/grammar/schema";
 import type { Language } from "@/types/i18n";
 
-export type LessonOpenGraphPreview = {
+type LessonOpenGraphPreview = {
   eyebrow: string;
   footerLabel: string;
   lessonLabel: string;
@@ -17,6 +17,10 @@ export type LessonOpenGraphPreview = {
   title: string;
 };
 
+/**
+ * Formats a localized count label for lesson stats such as sections, concepts,
+ * and exercises.
+ */
 function formatCount(
   count: number,
   locale: Language,
@@ -27,6 +31,9 @@ function formatCount(
   return `${value} ${count === 1 ? singular : plural}`;
 }
 
+/**
+ * Builds the `/api/og` image URL for one grammar lesson preview card.
+ */
 export function buildLessonOpenGraphImageUrl(
   slug: string,
   language: Language,
@@ -40,6 +47,10 @@ export function buildLessonOpenGraphImageUrl(
   });
 }
 
+/**
+ * Builds the grammar-lesson Open Graph preview payload from one published
+ * lesson bundle and its localized counts.
+ */
 export function buildLessonOpenGraphPreview(
   lessonBundle: GrammarLessonBundle,
   locale: Language,

@@ -1,5 +1,6 @@
-import type { GrammarLessonDocument } from "../../schema.ts";
 import { grammarDatasetRights } from "../rights.ts";
+
+import type { GrammarLessonDocument } from "../../schema.ts";
 
 export const grammarLesson02Document: GrammarLessonDocument = {
   id: "grammar.lesson.02",

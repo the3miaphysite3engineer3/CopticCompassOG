@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+
 import type { SwaggerUiModule } from "swagger-ui-dist";
 
 type SwaggerDocsClientProps = {

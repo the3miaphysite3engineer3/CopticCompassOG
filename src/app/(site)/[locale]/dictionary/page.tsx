@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
 import StructuredData from "@/components/StructuredData";
 import DictionaryPageClient from "@/features/dictionary/components/DictionaryPageClient";
 import { createLocalizedPageMetadata } from "@/lib/metadata";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
 import { siteConfig } from "@/lib/site";
 import { createDictionaryPageStructuredData } from "@/lib/structuredData";
+
+import type { Metadata } from "next";
 
 function buildDictionaryDescription(locale: "en" | "nl") {
   if (locale === "nl") {
@@ -37,6 +38,9 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Renders the localized dictionary landing page with its structured data.
+ */
 export default async function DictionaryPage({
   params,
 }: {

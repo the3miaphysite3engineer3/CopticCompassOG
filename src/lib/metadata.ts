@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import { buildOpenGraphImageUrl } from "@/features/seo/lib/openGraph";
 import {
   createLanguageAlternates,
@@ -8,6 +7,8 @@ import {
 import { buildPageTitle, siteConfig } from "@/lib/site";
 import type { Language } from "@/types/i18n";
 
+import type { Metadata } from "next";
+
 type SocialImage = {
   alt: string;
   height: number;
@@ -15,6 +16,10 @@ type SocialImage = {
   width: number;
 };
 
+/**
+ * Normalizes a social preview image into the Open Graph and Twitter card
+ * dimensions used across the site.
+ */
 export function createSocialImage(url: string, alt: string): SocialImage {
   return {
     url,
@@ -39,6 +44,9 @@ function getTwitterImages(images: SocialImage[]) {
   return images.map((image) => image.url);
 }
 
+/**
+ * Builds the social metadata block shared by page-level metadata helpers.
+ */
 export function createPageSocialMetadata({
   title,
   description,
@@ -68,6 +76,9 @@ export function createPageSocialMetadata({
   };
 }
 
+/**
+ * Returns the root layout metadata shared by every localized site page.
+ */
 export function createRootLayoutMetadata(locale: Language): Metadata {
   return {
     metadataBase: new URL(siteConfig.liveUrl),
@@ -106,6 +117,9 @@ export function createRootLayoutMetadata(locale: Language): Metadata {
   };
 }
 
+/**
+ * Builds canonical metadata for a non-localized page path.
+ */
 export function createPageMetadata({
   title,
   description,
@@ -130,6 +144,10 @@ export function createPageMetadata({
   };
 }
 
+/**
+ * Builds localized metadata with canonical and alternate-language links for a
+ * translated page.
+ */
 export function createLocalizedPageMetadata({
   title,
   description,
@@ -160,6 +178,10 @@ export function createLocalizedPageMetadata({
   };
 }
 
+/**
+ * Builds metadata for pages that should stay out of search indexes while
+ * preserving a title and optional description.
+ */
 export function createNoIndexMetadata({
   title,
   description,

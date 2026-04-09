@@ -1,12 +1,14 @@
 "use client";
 
 import { Heart, Flag, Loader2, Share2 } from "lucide-react";
+
 import { AuthGatedActionButton } from "@/components/AuthGatedActionButton";
 import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
+import type { LexicalEntry } from "@/features/dictionary/types";
 import { cx } from "@/lib/classes";
 import { useOptionalAuthGate } from "@/lib/supabase/useOptionalAuthGate";
-import type { LexicalEntry } from "@/features/dictionary/types";
+
 import { EntryReportPanel } from "./EntryReportPanel";
 import { EntrySharePanel } from "./EntrySharePanel";
 import { ENTRY_FAVORITE_ERROR_LABEL_KEYS } from "../lib/entryActionBar";
@@ -72,6 +74,18 @@ export function EntryActionBar({
     : null;
   const isReportPanelVisible = authGate.isAuthenticated && isReportOpen;
   const sharePanelId = `entry-share-panel-${entry.id}`;
+  let favoriteLabel = t("entry.actions.favorite");
+
+  if (isLoading) {
+    favoriteLabel = t("entry.actions.favoriteLoading");
+  } else if (isPending) {
+    favoriteLabel =
+      pendingAction === "remove"
+        ? t("entry.actions.favoriteRemoving")
+        : t("entry.actions.favoriteSaving");
+  } else if (isFavorited) {
+    favoriteLabel = t("entry.actions.favorited");
+  }
 
   return (
     <div className="space-y-4">
@@ -128,15 +142,7 @@ export function EntryActionBar({
             ) : (
               <Heart className={cx("h-4 w-4", isFavorited && "fill-current")} />
             )}
-            {isLoading
-              ? t("entry.actions.favoriteLoading")
-              : isPending
-                ? pendingAction === "remove"
-                  ? t("entry.actions.favoriteRemoving")
-                  : t("entry.actions.favoriteSaving")
-                : isFavorited
-                  ? t("entry.actions.favorited")
-                  : t("entry.actions.favorite")}
+            {favoriteLabel}
           </AuthGatedActionButton>
 
           <AuthGatedActionButton

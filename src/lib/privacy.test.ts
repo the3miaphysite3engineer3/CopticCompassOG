@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { redactEmailAddress } from "./privacy";
 
 describe("redactEmailAddress", () => {

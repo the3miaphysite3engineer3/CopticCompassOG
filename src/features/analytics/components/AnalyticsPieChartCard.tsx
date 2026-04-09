@@ -1,6 +1,5 @@
 "use client";
 
-import type { CSSProperties, ReactNode } from "react";
 import {
   Cell,
   Legend,
@@ -9,7 +8,10 @@ import {
   ResponsiveContainer,
   Tooltip,
 } from "recharts";
+
 import { SurfacePanel } from "@/components/SurfacePanel";
+
+import type { CSSProperties, ReactNode } from "react";
 
 const CHART_LEGEND_STYLE = {
   fontSize: "12px",

@@ -1,4 +1,5 @@
 import type { TranslationKey } from "@/lib/i18n";
+
 import type { EntryFavoriteErrorCode, EntryReportReason } from "./entryActions";
 
 export type EntryActionNotice = {
@@ -9,7 +10,7 @@ export type EntryActionNotice = {
 export type EntryLockedAction = "favorite" | "report" | null;
 export type EntryLockedActionName = Exclude<EntryLockedAction, null>;
 
-export type EntryActionBarState = {
+type EntryActionBarState = {
   activeLockedAction: EntryLockedAction;
   isReportOpen: boolean;
   isShareOpen: boolean;
@@ -17,7 +18,7 @@ export type EntryActionBarState = {
   shareNotice: EntryActionNotice;
 };
 
-export type EntryActionBarAction =
+type EntryActionBarAction =
   | { type: "closeReportPanel" }
   | { type: "favoriteClicked" }
   | {
@@ -52,6 +53,9 @@ export const ENTRY_FAVORITE_ERROR_LABEL_KEYS: Record<
   "update-failed": "entry.actions.favoriteError.updateFailed",
 };
 
+/**
+ * Returns the closed/default action-bar state for a dictionary entry.
+ */
 export function createEntryActionBarInitialState(): EntryActionBarState {
   return {
     activeLockedAction: null,
@@ -62,6 +66,10 @@ export function createEntryActionBarInitialState(): EntryActionBarState {
   };
 }
 
+/**
+ * Reduces action-bar UI events such as panel toggles, auth locks, and share or
+ * report notices into the next entry action-bar state.
+ */
 export function entryActionBarReducer(
   state: EntryActionBarState,
   action: EntryActionBarAction,
@@ -93,11 +101,17 @@ export function entryActionBarReducer(
         shareNotice: null,
       };
     case "setLockedActionVisibility":
+      if (action.visible) {
+        return {
+          ...state,
+          activeLockedAction: action.lockedAction,
+        };
+      }
+
       return {
         ...state,
-        activeLockedAction: action.visible
-          ? action.lockedAction
-          : state.activeLockedAction === action.lockedAction
+        activeLockedAction:
+          state.activeLockedAction === action.lockedAction
             ? null
             : state.activeLockedAction,
       };

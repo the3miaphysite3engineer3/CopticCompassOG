@@ -5,33 +5,62 @@ import {
 } from "@/features/notifications/lib/notifications";
 import type { AppSupabaseClient, QueryResult } from "@/lib/supabase/queryTypes";
 
+const ADMIN_NOTIFICATION_SENT_HISTORY_LIMIT = 18;
+
+/**
+ * Loads all failed/queued notifications plus a capped recent sent history
+ * window, then attaches delivery attempts for the admin log UI.
+ */
 export async function getAdminNotificationEvents(
   supabase: AppSupabaseClient,
-  limit = 18,
+  limit = ADMIN_NOTIFICATION_SENT_HISTORY_LIMIT,
 ): Promise<QueryResult<AdminNotificationEvent[]>> {
-  const notificationEventsResult = await supabase
-    .from("notification_events")
-    .select("*")
-    .order("created_at", { ascending: false })
-    .limit(limit);
+  const [attentionEventsResult, historyEventsResult] = await Promise.all([
+    supabase
+      .from("notification_events")
+      .select("*")
+      .in("status", ["failed", "queued"])
+      .order("created_at", { ascending: false }),
+    supabase
+      .from("notification_events")
+      .select("*")
+      .eq("status", "sent")
+      .order("created_at", { ascending: false })
+      .limit(limit),
+  ]);
 
-  if (notificationEventsResult.error || !notificationEventsResult.data) {
+  if (
+    attentionEventsResult.error ||
+    !attentionEventsResult.data ||
+    historyEventsResult.error ||
+    !historyEventsResult.data
+  ) {
+    let error = { message: "Could not load notification activity." };
+    if (attentionEventsResult.error) {
+      error = { message: attentionEventsResult.error.message };
+    } else if (historyEventsResult.error) {
+      error = { message: historyEventsResult.error.message };
+    }
+
     return {
       data: null,
-      error: notificationEventsResult.error
-        ? { message: notificationEventsResult.error.message }
-        : { message: "Could not load notification activity." },
+      error,
     };
   }
 
-  if (notificationEventsResult.data.length === 0) {
+  const notificationEvents = [
+    ...attentionEventsResult.data,
+    ...historyEventsResult.data,
+  ];
+
+  if (notificationEvents.length === 0) {
     return {
       data: [],
       error: null,
     };
   }
 
-  const eventIds = notificationEventsResult.data.map((event) => event.id);
+  const eventIds = notificationEvents.map((event) => event.id);
   const deliveriesResult = await supabase
     .from("notification_deliveries")
     .select("*")
@@ -54,7 +83,7 @@ export async function getAdminNotificationEvents(
   }
 
   return {
-    data: notificationEventsResult.data
+    data: notificationEvents
       .map((event) => {
         const deliveries = deliveriesByEventId.get(event.id) ?? [];
         return {

@@ -1,16 +1,19 @@
 "use client";
 
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import type { User } from "@supabase/supabase-js";
+
 import type { GrammarLessonBundle } from "@/content/grammar/schema";
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
 import { loadBrowserUser } from "@/lib/supabase/clientAuth";
+
 import {
   createEmptyGrammarLessonLearnerRecords,
   loadGrammarLessonLearnerRecords,
   syncGrammarLessonProgress,
   type GrammarLessonLearnerRecords,
 } from "./grammarLessonLearnerClient";
+
+import type { User } from "@supabase/supabase-js";
 
 export type GrammarLessonLearnerStatus =
   | "loading"
@@ -30,6 +33,10 @@ type UseGrammarLessonLearnerDataResult = {
   user: User | null;
 };
 
+/**
+ * Loads the current browser user together with the persisted learner records
+ * for one lesson and keeps that state synchronized with auth changes.
+ */
 export function useGrammarLessonLearnerData(
   lessonBundle: GrammarLessonBundle,
 ): UseGrammarLessonLearnerDataResult {

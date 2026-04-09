@@ -7,6 +7,10 @@ import {
   type Language,
 } from "../_shared/contentReleaseDelivery.ts";
 
+/**
+ * Builds the REST headers used for direct Supabase calls from the worker,
+ * using the service-role key for both bearer auth and the `apikey` header.
+ */
 export function buildSupabaseRestHeaders(serviceRoleKey: string) {
   return {
     Authorization: `Bearer ${serviceRoleKey}`,
@@ -15,7 +19,11 @@ export function buildSupabaseRestHeaders(serviceRoleKey: string) {
   };
 }
 
-export async function fetchSupabaseJson<T>(options: {
+/**
+ * Issues a JSON-based REST request against Supabase and returns the parsed
+ * payload plus status information instead of throwing on non-2xx responses.
+ */
+async function fetchSupabaseJson<T>(options: {
   method?: "GET" | "PATCH" | "POST";
   path: string;
   preferRepresentation?: boolean;
@@ -61,7 +69,11 @@ export async function fetchSupabaseJson<T>(options: {
   };
 }
 
-export async function fetchSupabaseCount(options: {
+/**
+ * Fetches an exact row count through the REST API and normalizes missing or
+ * malformed count metadata to zero when the request itself succeeds.
+ */
+async function fetchSupabaseCount(options: {
   path: string;
   serviceRoleKey: string;
   supabaseUrl: string;
@@ -97,6 +109,10 @@ export async function fetchSupabaseCount(options: {
   };
 }
 
+/**
+ * Loads the release row the worker should operate on. Errors are logged and
+ * surfaced as `null` so the caller can decide whether to stop or retry later.
+ */
 export async function loadRelease(options: {
   releaseId: string;
   serviceRoleKey: string;
@@ -120,6 +136,10 @@ export async function loadRelease(options: {
   return result.data?.[0] ?? null;
 }
 
+/**
+ * Atomically claims a queued release for delivery by transitioning it to the
+ * sending state. A null result means the release could not be claimed cleanly.
+ */
 export async function claimQueuedRelease(options: {
   releaseId: string;
   serviceRoleKey: string;
@@ -153,6 +173,10 @@ export async function claimQueuedRelease(options: {
   return result.data?.[0] ?? null;
 }
 
+/**
+ * Loads the snapshotted items attached to a release in creation order so the
+ * worker can build a stable email payload for every recipient batch.
+ */
 export async function loadReleaseItems(options: {
   releaseId: string;
   serviceRoleKey: string;
@@ -176,6 +200,10 @@ export async function loadReleaseItems(options: {
   return result.data ?? [];
 }
 
+/**
+ * Counts the currently subscribed contacts for the requested segment, with an
+ * optional locale filter for localized broadcast eligibility checks.
+ */
 export async function countAudienceContacts(options: {
   audienceSegment: ContentReleaseRecord["audience_segment"];
   locale?: Language;
@@ -204,6 +232,10 @@ export async function countAudienceContacts(options: {
   return result.count ?? 0;
 }
 
+/**
+ * Loads one page of subscribed contacts ordered by email so the worker can use
+ * the last delivered email address as a stable cursor between batches.
+ */
 export async function loadAudienceContacts(options: {
   audienceSegment: ContentReleaseRecord["audience_segment"];
   cursor: string | null;
@@ -247,6 +279,10 @@ export async function loadAudienceContacts(options: {
   );
 }
 
+/**
+ * Persists the worker's intermediate cursor and delivery summary before the
+ * next batch is queued, keeping partial progress visible in the admin state.
+ */
 export async function updateQueuedReleaseProgress(options: {
   cursor: string | null;
   lastDeliveryError: string | null;
@@ -280,6 +316,10 @@ export async function updateQueuedReleaseProgress(options: {
   }
 }
 
+/**
+ * Writes the terminal delivery state for a release, including the final cursor,
+ * summary, error message, and sent timestamp when delivery fully succeeded.
+ */
 export async function finalizeRelease(options: {
   cursor: string | null;
   lastDeliveryError: string | null;
@@ -316,6 +356,10 @@ export async function finalizeRelease(options: {
   }
 }
 
+/**
+ * Calls the next worker batch through the Edge Function endpoint so large
+ * releases can continue asynchronously without one long-running invocation.
+ */
 export async function invokeNextBatch(options: {
   releaseId: string;
   serviceRoleKey: string;

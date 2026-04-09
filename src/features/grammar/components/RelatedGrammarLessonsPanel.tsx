@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+
 import { SurfacePanel } from "@/components/SurfacePanel";
-import { getGrammarLessonPath } from "@/features/grammar/lib/grammarPaths";
 import type { GrammarLessonReference } from "@/features/grammar/lib/grammarContentGraph";
+import { getGrammarLessonPath } from "@/features/grammar/lib/grammarPaths";
 import type { Language } from "@/types/i18n";
 
 type RelatedGrammarLessonsPanelProps = {

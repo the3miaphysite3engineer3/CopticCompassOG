@@ -1,17 +1,13 @@
 import { Badge } from "@/components/Badge";
-import { surfacePanelClassName } from "@/components/SurfacePanel";
 import { EmptyState } from "@/components/EmptyState";
-import { AdminOverflowDisclosure } from "@/features/admin/components/AdminListPrimitives";
-import { AdminAudienceContactCard } from "@/features/communications/components/AdminAudienceContactCard";
-import { CreateContentReleaseForm } from "@/features/communications/components/CreateContentReleaseForm";
-import { SyncAudienceContactsForm } from "@/features/communications/components/SyncAudienceContactsForm";
-import { AdminNotificationEventCard } from "@/features/notifications/components/AdminNotificationEventCard";
+import { surfacePanelClassName } from "@/components/SurfacePanel";
 import {
   AdminContentReleasesList,
   AdminContactMessagesList,
   AdminEntryReportsList,
   AdminSubmissionsList,
 } from "@/features/admin/components/AdminFilteredLists";
+import { AdminOverflowDisclosure } from "@/features/admin/components/AdminListPrimitives";
 import { AdminPersistentSection } from "@/features/admin/components/AdminPersistentSection";
 import {
   countActionableContentReleases,
@@ -23,6 +19,10 @@ import {
 } from "@/features/admin/lib/dashboardData";
 import { splitAdminVisibleItems } from "@/features/admin/lib/listPrimitives";
 import type { AdminWorkspaceMode } from "@/features/admin/lib/workspaceMode";
+import { AdminAudienceContactCard } from "@/features/communications/components/AdminAudienceContactCard";
+import { CreateContentReleaseForm } from "@/features/communications/components/CreateContentReleaseForm";
+import { SyncAudienceContactsForm } from "@/features/communications/components/SyncAudienceContactsForm";
+import { AdminNotificationEventCard } from "@/features/notifications/components/AdminNotificationEventCard";
 
 function AdminDatabaseErrorState({ message }: { message: string }) {
   return (
@@ -97,12 +97,16 @@ export function AdminWorkspaceQuickJump({
   } as const;
 
   const links = allLinks[mode];
-  const modeDescription =
-    mode === "review"
-      ? "Stay inside the live teaching queues. History now lives inside each section, so this view stays focused on work that still needs you."
-      : mode === "communications"
-        ? "Focus on outbound announcements and audience health without carrying the review queues with you."
-        : "Inspect delivery health and operational alerts without the rest of the workspace competing for attention.";
+  let modeDescription =
+    "Inspect delivery health and operational alerts without the rest of the workspace competing for attention.";
+
+  if (mode === "review") {
+    modeDescription =
+      "Stay inside the live teaching queues. History now lives inside each section, so this view stays focused on work that still needs you.";
+  } else if (mode === "communications") {
+    modeDescription =
+      "Focus on outbound announcements and audience health without carrying the review queues with you.";
+  }
 
   return (
     <nav className="app-sticky-panel mb-8 rounded-[2rem] border border-stone-200/80 bg-white/85 p-4 shadow-lg backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/75 dark:shadow-black/20">
@@ -561,12 +565,49 @@ export function AdminAudienceSection({
     overflow: overflowAudienceContacts,
     visible: visibleAudienceContacts,
   } = splitAdminVisibleItems(audience.items);
+  const audienceContent = (() => {
+    if (audience.error) {
+      return (
+        <AdminDatabaseErrorState message="Database Error: Could not load audience contacts. Make sure you've run the latest SQL setup script." />
+      );
+    }
+
+    if (audience.items.length === 0) {
+      return (
+        <EmptyState
+          title="No audience contacts yet."
+          description="Opt-ins from the contact form, signup flow, and dashboard preferences will appear here."
+        />
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        {showSyncForm ? <SyncAudienceContactsForm /> : null}
+
+        {visibleAudienceContacts.map((contact) => (
+          <AdminAudienceContactCard key={contact.id} contact={contact} />
+        ))}
+
+        {overflowAudienceContacts.length > 0 ? (
+          <AdminOverflowDisclosure
+            count={overflowAudienceContacts.length}
+            label="audience contact"
+          >
+            {overflowAudienceContacts.map((contact) => (
+              <AdminAudienceContactCard key={contact.id} contact={contact} />
+            ))}
+          </AdminOverflowDisclosure>
+        ) : null}
+      </div>
+    );
+  })();
 
   return (
     <AdminPersistentSection
       id="admin-audience"
       title="Audience communication"
-      description="Track who has opted into release emails before you start sending lesson or publication announcements."
+      description="Track who has opted into release emails before you start sending lesson or publication announcements. The list keeps actionable contacts in full and shows a recent inactive window below them."
       summary={
         metrics.totalAudienceContactsCount === 0
           ? "No contacts yet"
@@ -590,33 +631,7 @@ export function AdminAudienceSection({
       }
       defaultOpen={defaultOpen}
     >
-      {audience.error ? (
-        <AdminDatabaseErrorState message="Database Error: Could not load audience contacts. Make sure you've run the latest SQL setup script." />
-      ) : audience.items.length === 0 ? (
-        <EmptyState
-          title="No audience contacts yet."
-          description="Opt-ins from the contact form, signup flow, and dashboard preferences will appear here."
-        />
-      ) : (
-        <div className="space-y-6">
-          {showSyncForm ? <SyncAudienceContactsForm /> : null}
-
-          {visibleAudienceContacts.map((contact) => (
-            <AdminAudienceContactCard key={contact.id} contact={contact} />
-          ))}
-
-          {overflowAudienceContacts.length > 0 ? (
-            <AdminOverflowDisclosure
-              count={overflowAudienceContacts.length}
-              label="audience contact"
-            >
-              {overflowAudienceContacts.map((contact) => (
-                <AdminAudienceContactCard key={contact.id} contact={contact} />
-              ))}
-            </AdminOverflowDisclosure>
-          ) : null}
-        </div>
-      )}
+      {audienceContent}
     </AdminPersistentSection>
   );
 }
@@ -632,6 +647,24 @@ export function AdminReleasesSection({
   const queuedCount = contentReleases.items.filter(
     (release) => release.status === "queued" || release.status === "sending",
   ).length;
+  const releasesContent = (() => {
+    if (contentReleases.error) {
+      return (
+        <AdminDatabaseErrorState message="Database Error: Could not load content releases. Make sure you've run the latest SQL setup script." />
+      );
+    }
+
+    if (contentReleases.items.length === 0) {
+      return (
+        <EmptyState
+          title="No release drafts yet."
+          description="Create a draft above to snapshot the published lessons or publications you want to announce."
+        />
+      );
+    }
+
+    return <AdminContentReleasesList releases={contentReleases.items} />;
+  })();
 
   return (
     <AdminPersistentSection
@@ -668,16 +701,7 @@ export function AdminReleasesSection({
           />
         ) : null}
 
-        {contentReleases.error ? (
-          <AdminDatabaseErrorState message="Database Error: Could not load content releases. Make sure you've run the latest SQL setup script." />
-        ) : contentReleases.items.length === 0 ? (
-          <EmptyState
-            title="No release drafts yet."
-            description="Create a draft above to snapshot the published lessons or publications you want to announce."
-          />
-        ) : (
-          <AdminContentReleasesList releases={contentReleases.items} />
-        )}
+        {releasesContent}
       </div>
     </AdminPersistentSection>
   );
@@ -689,6 +713,24 @@ export function AdminContactInboxSection({
   contactMessages: AdminDashboardData["contactMessages"];
 }) {
   const openMessageCount = countOpenContactMessages(contactMessages.items);
+  const contactMessagesContent = (() => {
+    if (contactMessages.error) {
+      return (
+        <AdminDatabaseErrorState message="Database Error: Could not load contact messages. Make sure you've run the latest SQL setup script." />
+      );
+    }
+
+    if (contactMessages.items.length === 0) {
+      return (
+        <EmptyState
+          title="No contact messages yet."
+          description="When visitors send a message from the contact page, it will appear here for follow-up."
+        />
+      );
+    }
+
+    return <AdminContactMessagesList messages={contactMessages.items} />;
+  })();
 
   return (
     <AdminPersistentSection
@@ -717,16 +759,7 @@ export function AdminContactInboxSection({
       }
       defaultOpen={Boolean(contactMessages.error) || openMessageCount > 0}
     >
-      {contactMessages.error ? (
-        <AdminDatabaseErrorState message="Database Error: Could not load contact messages. Make sure you've run the latest SQL setup script." />
-      ) : contactMessages.items.length === 0 ? (
-        <EmptyState
-          title="No contact messages yet."
-          description="When visitors send a message from the contact page, it will appear here for follow-up."
-        />
-      ) : (
-        <AdminContactMessagesList messages={contactMessages.items} />
-      )}
+      {contactMessagesContent}
     </AdminPersistentSection>
   );
 }
@@ -753,16 +786,109 @@ export function AdminNotificationsSection({
     overflow: overflowHistoryNotifications,
     visible: visibleHistoryNotifications,
   } = splitAdminVisibleItems(historyNotifications);
+  const notificationsContent = (() => {
+    if (notifications.error) {
+      return (
+        <AdminDatabaseErrorState message="Database Error: Could not load notification activity. Make sure you've run the latest SQL setup script." />
+      );
+    }
+
+    if (notifications.items.length === 0) {
+      return (
+        <EmptyState
+          title="No notification activity yet."
+          description="Notification events will appear here once contact alerts, submission alerts, and review emails have been sent."
+        />
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge
+              tone={attentionNotifications.length > 0 ? "accent" : "surface"}
+              size="xs"
+            >
+              Needs attention: {attentionNotifications.length}
+            </Badge>
+            <p className="text-sm text-stone-600 dark:text-stone-400">
+              Failures and still-queued notifications stay at the top.
+            </p>
+          </div>
+
+          {attentionNotifications.length === 0 ? (
+            <div className="rounded-2xl border border-stone-200/80 bg-stone-50/80 px-5 py-4 text-sm leading-7 text-stone-600 dark:border-stone-800 dark:bg-stone-950/40 dark:text-stone-400">
+              No notification issues are waiting right now.
+            </div>
+          ) : (
+            <>
+              {visibleAttentionNotifications.map((event) => (
+                <AdminNotificationEventCard key={event.id} event={event} />
+              ))}
+
+              {overflowAttentionNotifications.length > 0 ? (
+                <AdminOverflowDisclosure
+                  count={overflowAttentionNotifications.length}
+                  label="notification"
+                >
+                  {overflowAttentionNotifications.map((event) => (
+                    <AdminNotificationEventCard key={event.id} event={event} />
+                  ))}
+                </AdminOverflowDisclosure>
+              ) : null}
+            </>
+          )}
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <Badge tone="surface" size="xs">
+              Recent delivery log: {historyNotifications.length}
+            </Badge>
+            <p className="text-sm text-stone-600 dark:text-stone-400">
+              Successful sends stay available here as a quieter recent audit
+              trail.
+            </p>
+          </div>
+
+          {historyNotifications.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-stone-200/80 bg-stone-50/60 px-5 py-4 text-sm leading-7 text-stone-500 dark:border-stone-800 dark:bg-stone-950/25 dark:text-stone-400">
+              Successful sends will collect here once the system starts
+              delivering notifications.
+            </div>
+          ) : (
+            <>
+              {visibleHistoryNotifications.map((event) => (
+                <AdminNotificationEventCard key={event.id} event={event} />
+              ))}
+
+              {overflowHistoryNotifications.length > 0 ? (
+                <AdminOverflowDisclosure
+                  count={overflowHistoryNotifications.length}
+                  label="history event"
+                >
+                  {overflowHistoryNotifications.map((event) => (
+                    <AdminNotificationEventCard key={event.id} event={event} />
+                  ))}
+                </AdminOverflowDisclosure>
+              ) : null}
+            </>
+          )}
+        </div>
+      </div>
+    );
+  })();
 
   return (
     <AdminPersistentSection
       id="admin-notifications"
       title="Notification log"
-      description="Use this as a reference area for delivery health: failed or queued events first, then the quieter success log beneath."
+      description="Use this as a reference area for delivery health: failed or queued events first, then a bounded recent success log beneath."
       summary={
         metrics.recentNotificationCount === 0
           ? "No notification activity yet"
-          : `${metrics.failedNotificationCount} failed · ${metrics.sentNotificationCount} sent`
+          : `${metrics.failedNotificationCount} failed · ${metrics.sentNotificationCount} sent in recent log`
       }
       headerBadges={
         <>
@@ -773,101 +899,13 @@ export function AdminNotificationsSection({
             Failed: {metrics.failedNotificationCount}
           </Badge>
           <Badge tone="coptic" size="xs">
-            Sent: {metrics.sentNotificationCount}
+            Recent sent: {metrics.sentNotificationCount}
           </Badge>
         </>
       }
       defaultOpen={defaultOpen}
     >
-      {notifications.error ? (
-        <AdminDatabaseErrorState message="Database Error: Could not load notification activity. Make sure you've run the latest SQL setup script." />
-      ) : notifications.items.length === 0 ? (
-        <EmptyState
-          title="No notification activity yet."
-          description="Notification events will appear here once contact alerts, submission alerts, and review emails have been sent."
-        />
-      ) : (
-        <div className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge
-                tone={attentionNotifications.length > 0 ? "accent" : "surface"}
-                size="xs"
-              >
-                Needs attention: {attentionNotifications.length}
-              </Badge>
-              <p className="text-sm text-stone-600 dark:text-stone-400">
-                Failures and still-queued notifications stay at the top.
-              </p>
-            </div>
-
-            {attentionNotifications.length === 0 ? (
-              <div className="rounded-2xl border border-stone-200/80 bg-stone-50/80 px-5 py-4 text-sm leading-7 text-stone-600 dark:border-stone-800 dark:bg-stone-950/40 dark:text-stone-400">
-                No notification issues are waiting right now.
-              </div>
-            ) : (
-              <>
-                {visibleAttentionNotifications.map((event) => (
-                  <AdminNotificationEventCard key={event.id} event={event} />
-                ))}
-
-                {overflowAttentionNotifications.length > 0 ? (
-                  <AdminOverflowDisclosure
-                    count={overflowAttentionNotifications.length}
-                    label="notification"
-                  >
-                    {overflowAttentionNotifications.map((event) => (
-                      <AdminNotificationEventCard
-                        key={event.id}
-                        event={event}
-                      />
-                    ))}
-                  </AdminOverflowDisclosure>
-                ) : null}
-              </>
-            )}
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge tone="surface" size="xs">
-                Recent delivery log: {historyNotifications.length}
-              </Badge>
-              <p className="text-sm text-stone-600 dark:text-stone-400">
-                Successful sends stay available here as a quieter recent audit
-                trail.
-              </p>
-            </div>
-
-            {historyNotifications.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-stone-200/80 bg-stone-50/60 px-5 py-4 text-sm leading-7 text-stone-500 dark:border-stone-800 dark:bg-stone-950/25 dark:text-stone-400">
-                Successful sends will collect here once the system starts
-                delivering notifications.
-              </div>
-            ) : (
-              <>
-                {visibleHistoryNotifications.map((event) => (
-                  <AdminNotificationEventCard key={event.id} event={event} />
-                ))}
-
-                {overflowHistoryNotifications.length > 0 ? (
-                  <AdminOverflowDisclosure
-                    count={overflowHistoryNotifications.length}
-                    label="history event"
-                  >
-                    {overflowHistoryNotifications.map((event) => (
-                      <AdminNotificationEventCard
-                        key={event.id}
-                        event={event}
-                      />
-                    ))}
-                  </AdminOverflowDisclosure>
-                ) : null}
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {notificationsContent}
     </AdminPersistentSection>
   );
 }
@@ -880,6 +918,24 @@ export function AdminEntryReportsSection({
   const openReportCount = countOpenEntryReports(
     entryReports.items.map((item) => item.report),
   );
+  const entryReportsContent = (() => {
+    if (entryReports.error) {
+      return (
+        <AdminDatabaseErrorState message="Database Error: Could not load dictionary entry reports. Make sure you've run the latest SQL setup script." />
+      );
+    }
+
+    if (entryReports.items.length === 0) {
+      return (
+        <EmptyState
+          title="No dictionary reports yet."
+          description="When readers flag entries from the dictionary, they will appear here for review."
+        />
+      );
+    }
+
+    return <AdminEntryReportsList reports={entryReports.items} />;
+  })();
 
   return (
     <AdminPersistentSection
@@ -908,16 +964,7 @@ export function AdminEntryReportsSection({
       }
       defaultOpen={Boolean(entryReports.error) || openReportCount > 0}
     >
-      {entryReports.error ? (
-        <AdminDatabaseErrorState message="Database Error: Could not load dictionary entry reports. Make sure you've run the latest SQL setup script." />
-      ) : entryReports.items.length === 0 ? (
-        <EmptyState
-          title="No dictionary reports yet."
-          description="When readers flag entries from the dictionary, they will appear here for review."
-        />
-      ) : (
-        <AdminEntryReportsList reports={entryReports.items} />
-      )}
+      {entryReportsContent}
     </AdminPersistentSection>
   );
 }

@@ -1,4 +1,3 @@
-import * as React from "react";
 import {
   Html,
   Head,
@@ -8,6 +7,8 @@ import {
   Heading,
   Hr,
 } from "@react-email/components";
+import * as React from "react";
+
 import { mailBrand } from "@/lib/communications/mailBrand";
 
 type ContactEmailTemplateProps = {

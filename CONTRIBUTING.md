@@ -103,6 +103,7 @@ Before opening a PR, run:
 
 ```bash
 npm run format:check
+npm run knip
 npm run lint
 npm run test
 npm run build

@@ -1,20 +1,26 @@
-import type { User } from "@supabase/supabase-js";
 import { redirect } from "next/navigation";
+
 import { getProfileRole } from "@/features/profile/lib/server/queries";
+import { getAuthenticatedUser } from "@/lib/supabase/authQueries";
 import {
   getAuthUnavailableLoginPath,
   getLoginPath,
   hasSupabaseRuntimeEnv,
 } from "@/lib/supabase/config";
-import { getAuthenticatedUser } from "@/lib/supabase/authQueries";
 import type { AppSupabaseClient } from "@/lib/supabase/queryTypes";
 import { createClient } from "@/lib/supabase/server";
+
+import type { User } from "@supabase/supabase-js";
 
 type AuthenticatedServerContext = {
   supabase: AppSupabaseClient;
   user: User;
 };
 
+/**
+ * Returns the authenticated server context used by server actions and pages
+ * that need both the current user and the bound Supabase client.
+ */
 export async function getAuthenticatedServerContext(): Promise<AuthenticatedServerContext | null> {
   if (!hasSupabaseRuntimeEnv()) {
     return null;
@@ -30,6 +36,10 @@ export async function getAuthenticatedServerContext(): Promise<AuthenticatedServ
   return { supabase, user };
 }
 
+/**
+ * Returns the authenticated server context only when the current profile role
+ * is admin.
+ */
 export async function getAdminServerContext(): Promise<AuthenticatedServerContext | null> {
   const authContext = await getAuthenticatedServerContext();
 
@@ -41,6 +51,10 @@ export async function getAdminServerContext(): Promise<AuthenticatedServerContex
   return role === "admin" ? authContext : null;
 }
 
+/**
+ * Ensures a page request has an authenticated user and redirects to the
+ * appropriate login flow when auth is unavailable or missing.
+ */
 export async function requireAuthenticatedPageSession(
   redirectTo: string,
 ): Promise<AuthenticatedServerContext> {
@@ -57,6 +71,10 @@ export async function requireAuthenticatedPageSession(
   return authContext;
 }
 
+/**
+ * Ensures the current page session belongs to an admin user and redirects
+ * non-admin users back to the dashboard.
+ */
 export async function requireAdminPageSession(
   redirectTo = "/admin",
 ): Promise<AuthenticatedServerContext> {

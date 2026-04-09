@@ -1,4 +1,3 @@
-import { NextRequest } from "next/server";
 import {
   listGrammarApiConcepts,
   resolveGrammarLessonFilter,
@@ -8,8 +7,14 @@ import {
   publicApiOptionsResponse,
 } from "@/lib/api/cors";
 
+import type { NextRequest } from "next/server";
+
 export const dynamic = "force-static";
 
+/**
+ * Returns published grammar concepts, optionally filtered to one lesson slug
+ * or lesson id after validating the lesson query parameter.
+ */
 export function GET(request: NextRequest) {
   const lessonFilter = request.nextUrl.searchParams.get("lesson");
   const lessonId = resolveGrammarLessonFilter(lessonFilter);
@@ -26,6 +31,9 @@ export function GET(request: NextRequest) {
   return publicApiJsonResponse(listGrammarApiConcepts(lessonId ?? undefined));
 }
 
+/**
+ * Returns the CORS preflight response for the grammar concepts collection.
+ */
 export function OPTIONS() {
   return publicApiOptionsResponse();
 }

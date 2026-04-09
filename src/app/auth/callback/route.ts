@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
-import { getSiteUrl } from "@/lib/site";
 
+import { getSiteUrl } from "@/lib/site";
+import { createClient } from "@/lib/supabase/server";
+
+/**
+ * Resolves the post-auth redirect target while keeping navigation on the same
+ * origin. Invalid or cross-origin targets fall back to the dashboard.
+ */
 function getSafeRedirectUrl(next: string, baseUrl: string) {
   const fallbackUrl = new URL("/dashboard", baseUrl);
 
@@ -15,18 +20,19 @@ function getSafeRedirectUrl(next: string, baseUrl: string) {
       return targetUrl;
     }
   } catch {
-    // Ignore malformed redirect targets and fall back to the dashboard.
+    return fallbackUrl;
   }
 
   return fallbackUrl;
 }
 
+/**
+ * Exchanges the Supabase auth code and redirects either to the requested
+ * in-app destination or to the login page with an auth failure state.
+ */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
-
-  // if "next" is in param, use it as the redirect URL
-  // this is used for password reset or dynamic redirects
   const next = searchParams.get("next") ?? "/";
 
   const configuredSiteUrl =
@@ -44,7 +50,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // Redirect to login if token exchange fails (e.g. invalid or expired link)
   const loginUrl = new URL("/login", baseUrl);
   loginUrl.searchParams.set("state", "login-error");
   loginUrl.searchParams.set("messageType", "error");

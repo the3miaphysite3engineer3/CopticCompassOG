@@ -4,6 +4,10 @@ import {
   type GrammarOpenApiContext,
 } from "./grammarOpenApiShared";
 
+/**
+ * Builds the reusable OpenAPI components shared by the grammar API endpoints,
+ * including shared parameters, error responses, and schema definitions.
+ */
 export function buildGrammarOpenApiComponents(context: GrammarOpenApiContext) {
   const {
     apiIndex,

@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import {
   ArrowLeft,
   ArrowRight,
@@ -8,12 +7,14 @@ import {
   CheckCircle2,
   NotebookPen,
 } from "lucide-react";
+import Link from "next/link";
+
 import { Badge } from "@/components/Badge";
 import { StatusNotice } from "@/components/StatusNotice";
+import type { GrammarLessonLearnerSummary } from "@/features/grammar/lib/grammarLearnerState";
 import { cx } from "@/lib/classes";
 import { getDashboardPath } from "@/lib/locale";
 import type { Language } from "@/types/i18n";
-import type { GrammarLessonLearnerSummary } from "@/features/grammar/lib/grammarLearnerState";
 
 export type GrammarAdjacentLessonLink = {
   href: string;
@@ -106,6 +107,22 @@ export function GrammarLessonLearnerPanel({
     );
   }
 
+  const lastViewedLabel = summary.lastViewedAt
+    ? (() => {
+        const formattedDate = new Date(
+          summary.lastViewedAt,
+        ).toLocaleDateString();
+        return language === "nl"
+          ? `Laatst geopend op ${formattedDate}`
+          : `Last opened on ${formattedDate}`;
+      })()
+    : null;
+  let bookmarkLabel = language === "nl" ? "Les opslaan" : "Save lesson";
+
+  if (summary.isBookmarked) {
+    bookmarkLabel = language === "nl" ? "Opgeslagen" : "Saved";
+  }
+
   return (
     <section className="overflow-hidden rounded-2xl border border-stone-200/90 bg-white/70 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/40">
       <div className="border-b border-stone-200/80 px-4 py-3 dark:border-stone-800/80">
@@ -160,11 +177,9 @@ export function GrammarLessonLearnerPanel({
           ) : null}
         </div>
 
-        {summary.lastViewedAt ? (
+        {lastViewedLabel ? (
           <p className="text-xs text-stone-500 dark:text-stone-400">
-            {language === "nl"
-              ? `Laatst geopend op ${new Date(summary.lastViewedAt).toLocaleDateString()}`
-              : `Last opened on ${new Date(summary.lastViewedAt).toLocaleDateString()}`}
+            {lastViewedLabel}
           </p>
         ) : null}
 
@@ -183,13 +198,7 @@ export function GrammarLessonLearnerPanel({
             )}
           >
             <Bookmark className="h-4 w-4" />
-            {summary.isBookmarked
-              ? language === "nl"
-                ? "Opgeslagen"
-                : "Saved"
-              : language === "nl"
-                ? "Les opslaan"
-                : "Save lesson"}
+            {bookmarkLabel}
           </button>
           <Link
             href={getDashboardPath(language)}
@@ -222,14 +231,11 @@ function LessonNavigationCard({
 }) {
   const isPrevious = direction === "previous";
   const Icon = isPrevious ? ArrowLeft : ArrowRight;
-  const eyebrow =
-    language === "nl"
-      ? isPrevious
-        ? "Vorige les"
-        : "Volgende les"
-      : isPrevious
-        ? "Previous lesson"
-        : "Next lesson";
+  let eyebrow = isPrevious ? "Previous lesson" : "Next lesson";
+
+  if (language === "nl") {
+    eyebrow = isPrevious ? "Vorige les" : "Volgende les";
+  }
   const unavailableLabel =
     language === "nl" ? "Niet beschikbaar" : "Unavailable";
 
@@ -370,6 +376,14 @@ export function GrammarLessonSectionProgressButton({
   language: Language;
   onToggle: () => Promise<void>;
 }) {
+  let buttonLabel =
+    language === "nl" ? "Markeer als voltooid" : "Mark as completed";
+
+  if (isCompleted) {
+    buttonLabel =
+      language === "nl" ? "Paragraaf voltooid" : "Section completed";
+  }
+
   return (
     <button
       type="button"
@@ -385,13 +399,7 @@ export function GrammarLessonSectionProgressButton({
       )}
     >
       <CheckCircle2 className="h-4 w-4" />
-      {isCompleted
-        ? language === "nl"
-          ? "Paragraaf voltooid"
-          : "Section completed"
-        : language === "nl"
-          ? "Markeer als voltooid"
-          : "Mark as completed"}
+      {buttonLabel}
     </button>
   );
 }
@@ -409,6 +417,12 @@ export function GrammarLessonNotesPanel({
 }: GrammarLessonNotesPanelProps) {
   if (status !== "ready") {
     return null;
+  }
+
+  let saveNoteLabel = language === "nl" ? "Notities opslaan" : "Save notes";
+
+  if (isNotePending) {
+    saveNoteLabel = language === "nl" ? "Opslaan..." : "Saving...";
   }
 
   return (
@@ -463,13 +477,7 @@ export function GrammarLessonNotesPanel({
             disabled={isNotePending || !hasUnsavedNoteChanges}
             className="btn-primary px-5"
           >
-            {isNotePending
-              ? language === "nl"
-                ? "Opslaan..."
-                : "Saving..."
-              : language === "nl"
-                ? "Notities opslaan"
-                : "Save notes"}
+            {saveNoteLabel}
           </button>
         </div>
 

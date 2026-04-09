@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
+
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
 import { loadBrowserUser } from "@/lib/supabase/clientAuth";
+
+import type { User } from "@supabase/supabase-js";
 
 type NavbarAuthLinkProps = {
   dashboardHref: string;

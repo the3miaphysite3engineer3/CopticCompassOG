@@ -1,38 +1,43 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import Link from "next/link";
 import { ArrowLeft, Filter } from "lucide-react";
-import { buttonClassName } from "@/components/Button";
+import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
+
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { buttonClassName } from "@/components/Button";
 import { CompactSelect } from "@/components/CompactSelect";
-import {
-  type AnalyticsSnapshotMap,
-  type EtymologyFilter,
-} from "@/features/analytics/lib/analytics";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
-import { cx } from "@/lib/classes";
-import { getDictionaryPath, getLocalizedHomePath } from "@/lib/locale";
+import {
+  type AnalyticsSnapshotMap,
+  type EtymologyFilter,
+} from "@/features/analytics/lib/analytics";
+import {
+  buildAnalyticsChartDrilldown,
+  buildAnalyticsStatDrilldown,
+  type AnalyticsDrilldownPage,
+  type AnalyticsDrilldown,
+} from "@/features/analytics/lib/analyticsDrilldown";
+import { useAnalyticsThemeColors } from "@/features/analytics/lib/useAnalyticsThemeColors";
+import { DictionaryResultsSection } from "@/features/dictionary/components/DictionaryResultsSection";
 import {
   type AnalyticsDialect,
   dialectFilterOptions,
   getDialectFilterOptionLabel,
 } from "@/features/dictionary/config";
+import type { DictionaryClientEntry } from "@/features/dictionary/types";
+import { cx } from "@/lib/classes";
 import type { TranslationKey } from "@/lib/i18n";
-import type { LexicalEntry } from "@/features/dictionary/types";
-import { AnalyticsSlideOver } from "./AnalyticsSlideOver";
+import { getDictionaryPath, getLocalizedHomePath } from "@/lib/locale";
+
 import { AnalyticsPieChartCard } from "./AnalyticsPieChartCard";
-import {
-  buildAnalyticsChartDrilldown,
-  buildAnalyticsStatDrilldown,
-  filterAnalyticsEntries,
-  type AnalyticsDrilldown,
-} from "@/features/analytics/lib/analyticsDrilldown";
-import { useAnalyticsThemeColors } from "@/features/analytics/lib/useAnalyticsThemeColors";
-import { DictionaryResultsSection } from "@/features/dictionary/components/DictionaryResultsSection";
+import { AnalyticsSlideOver } from "./AnalyticsSlideOver";
+
+const ANALYTICS_DRILLDOWN_PAGE_SIZE = 50;
+
 type AnalyticsStatCardProps = {
   accentClassName: string;
   title: string;
@@ -76,23 +81,221 @@ function AnalyticsStatCard({
 
 type AnalyticsPageClientProps = {
   snapshots: AnalyticsSnapshotMap;
-  dictionary: LexicalEntry[];
 };
+
+type AnalyticsChartClickPayload = {
+  name?: string;
+  payload?: {
+    originalName?: string;
+  };
+};
+
+function isAnalyticsChartClickPayload(
+  value: unknown,
+): value is AnalyticsChartClickPayload {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as AnalyticsChartClickPayload;
+  return (
+    candidate.payload === undefined || typeof candidate.payload === "object"
+  );
+}
+
+/**
+ * Serializes the active analytics drilldown state into the public API query
+ * shape so the slide-over can request only the current page of entries.
+ */
+function buildAnalyticsDrilldownUrl(options: {
+  drilldown: AnalyticsDrilldown;
+  limit: number;
+  offset: number;
+  selectedDialect: AnalyticsDialect;
+  selectedEtymology: EtymologyFilter;
+}) {
+  const params = new URLSearchParams({
+    dialect: options.selectedDialect,
+    etymology: options.selectedEtymology,
+    kind: options.drilldown.kind,
+    limit: String(options.limit),
+    offset: String(options.offset),
+    title: options.drilldown.title,
+  });
+
+  if (options.drilldown.kind === "stat") {
+    params.set("statType", options.drilldown.type);
+  } else {
+    params.set("chartType", options.drilldown.chartType);
+    params.set("originalName", options.drilldown.originalName);
+  }
+
+  return `/api/v1/analytics/drilldown?${params.toString()}`;
+}
 
 export default function AnalyticsPageClient({
   snapshots,
-  dictionary,
 }: AnalyticsPageClientProps) {
   const [selectedDialect, setSelectedDialect] = useState<AnalyticsDialect>("B");
   const [selectedEtymology, setSelectedEtymology] =
     useState<EtymologyFilter>("ALL");
   const [slideOverFilter, setSlideOverFilter] =
     useState<AnalyticsDrilldown | null>(null);
+  const [slideOverResults, setSlideOverResults] = useState<
+    DictionaryClientEntry[]
+  >([]);
+  const [slideOverDictionaryLength, setSlideOverDictionaryLength] = useState(0);
+  const [slideOverTotalMatches, setSlideOverTotalMatches] = useState(0);
+  const [hasMoreSlideOverResults, setHasMoreSlideOverResults] = useState(false);
+  const [isSlideOverLoading, setSlideOverLoading] = useState(false);
+  const [isSlideOverLoadingMore, setSlideOverLoadingMore] = useState(false);
+  const activeDrilldownKeyRef = useRef("");
 
   const { language, t } = useLanguage();
   const stats =
     snapshots[selectedDialect]?.[selectedEtymology] ?? snapshots.ALL.ALL;
   const { colors, isThemeReady } = useAnalyticsThemeColors();
+
+  useEffect(() => {
+    if (!slideOverFilter) {
+      activeDrilldownKeyRef.current = "";
+      setSlideOverResults([]);
+      setSlideOverDictionaryLength(0);
+      setSlideOverTotalMatches(0);
+      setHasMoreSlideOverResults(false);
+      setSlideOverLoading(false);
+      setSlideOverLoadingMore(false);
+      return;
+    }
+
+    const activeSlideOverFilter = slideOverFilter;
+    const controller = new AbortController();
+    const requestKey = JSON.stringify({
+      drilldown: activeSlideOverFilter,
+      selectedDialect,
+      selectedEtymology,
+    });
+    activeDrilldownKeyRef.current = requestKey;
+    setSlideOverLoading(true);
+    setSlideOverLoadingMore(false);
+
+    async function loadDrilldownPage() {
+      try {
+        const response = await fetch(
+          buildAnalyticsDrilldownUrl({
+            drilldown: activeSlideOverFilter,
+            limit: ANALYTICS_DRILLDOWN_PAGE_SIZE,
+            offset: 0,
+            selectedDialect,
+            selectedEtymology,
+          }),
+          { signal: controller.signal },
+        );
+        if (!response.ok) {
+          throw new Error("Analytics drilldown is unavailable");
+        }
+
+        const page = (await response.json()) as AnalyticsDrilldownPage;
+        if (
+          controller.signal.aborted ||
+          activeDrilldownKeyRef.current !== requestKey
+        ) {
+          return;
+        }
+
+        setSlideOverDictionaryLength(page.totalEntries);
+        setSlideOverResults(page.entries);
+        setSlideOverTotalMatches(page.totalMatches);
+        setHasMoreSlideOverResults(page.hasMore);
+      } catch (error) {
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        console.warn("Analytics drilldown data is unavailable.", error);
+        if (activeDrilldownKeyRef.current !== requestKey) {
+          return;
+        }
+
+        setSlideOverDictionaryLength(0);
+        setSlideOverResults([]);
+        setSlideOverTotalMatches(0);
+        setHasMoreSlideOverResults(false);
+      } finally {
+        if (
+          controller.signal.aborted ||
+          activeDrilldownKeyRef.current !== requestKey
+        ) {
+          return;
+        }
+
+        setSlideOverLoading(false);
+      }
+    }
+
+    void loadDrilldownPage();
+
+    return () => {
+      controller.abort();
+    };
+  }, [selectedDialect, selectedEtymology, slideOverFilter]);
+
+  const loadMoreSlideOverResults = () => {
+    if (
+      !slideOverFilter ||
+      isSlideOverLoading ||
+      isSlideOverLoadingMore ||
+      !hasMoreSlideOverResults
+    ) {
+      return;
+    }
+
+    const activeSlideOverFilter = slideOverFilter;
+    const requestKey = activeDrilldownKeyRef.current;
+    setSlideOverLoadingMore(true);
+
+    async function loadNextPage() {
+      try {
+        const response = await fetch(
+          buildAnalyticsDrilldownUrl({
+            drilldown: activeSlideOverFilter,
+            limit: ANALYTICS_DRILLDOWN_PAGE_SIZE,
+            offset: slideOverResults.length,
+            selectedDialect,
+            selectedEtymology,
+          }),
+        );
+        if (!response.ok) {
+          throw new Error("Analytics drilldown page is unavailable");
+        }
+
+        const page = (await response.json()) as AnalyticsDrilldownPage;
+        if (activeDrilldownKeyRef.current !== requestKey) {
+          return;
+        }
+
+        setSlideOverDictionaryLength(page.totalEntries);
+        setSlideOverResults((previousResults) =>
+          activeDrilldownKeyRef.current === requestKey
+            ? [...previousResults, ...page.entries]
+            : previousResults,
+        );
+        setSlideOverTotalMatches(page.totalMatches);
+        setHasMoreSlideOverResults(page.hasMore);
+      } catch (error) {
+        console.warn(
+          "Analytics drilldown results could not be extended.",
+          error,
+        );
+      } finally {
+        if (activeDrilldownKeyRef.current === requestKey) {
+          setSlideOverLoadingMore(false);
+        }
+      }
+    }
+
+    void loadNextPage();
+  };
 
   const handleStatClick = (type: "total" | "unknown" | "uncertain") => {
     setSlideOverFilter(
@@ -105,13 +308,14 @@ export default function AnalyticsPageClient({
     );
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleChartClick = (data: any, type: string) => {
-    if (!data?.payload?.originalName) return;
+  const handleChartClick = (data: unknown, type: string) => {
+    if (!isAnalyticsChartClickPayload(data) || !data.payload?.originalName) {
+      return;
+    }
     setSlideOverFilter(
       buildAnalyticsChartDrilldown({
         originalName: data.payload.originalName,
-        title: data.name,
+        title: data.name ?? data.payload.originalName,
         type: type as
           | "derivation"
           | "etymology"
@@ -123,23 +327,13 @@ export default function AnalyticsPageClient({
     );
   };
 
-  const slideOverResults = useMemo(() => {
-    return filterAnalyticsEntries({
-      dictionary,
-      drilldown: slideOverFilter,
-      selectedDialect,
-      selectedEtymology,
-    });
-  }, [dictionary, selectedDialect, selectedEtymology, slideOverFilter]);
-
   const posChartData = useMemo(
     () =>
       stats.posChartData.map((datum) => ({
         ...datum,
         originalName: datum.name,
         name:
-          t(("dict." + datum.name.toLowerCase()) as TranslationKey) ??
-          datum.name,
+          t(`dict.${datum.name.toLowerCase()}` as TranslationKey) ?? datum.name,
       })),
     [stats.posChartData, t],
   );
@@ -405,13 +599,17 @@ export default function AnalyticsPageClient({
         title={slideOverFilter?.title ?? "Details"}
       >
         <DictionaryResultsSection
-          dictionaryLength={dictionary.length}
+          dictionaryLength={slideOverDictionaryLength}
           filteredResults={slideOverResults}
-          loading={false}
+          hasMoreResults={hasMoreSlideOverResults}
+          loading={Boolean(slideOverFilter) && isSlideOverLoading}
+          loadingMore={isSlideOverLoadingMore}
+          onLoadMore={loadMoreSlideOverResults}
           query=""
           selectedDialect={selectedDialect}
           selectedPartOfSpeech="ALL"
           scrollContainerId="analytics-slideover-scroll"
+          totalMatches={slideOverTotalMatches}
         />
       </AnalyticsSlideOver>
     </PageShell>

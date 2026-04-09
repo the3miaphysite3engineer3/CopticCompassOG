@@ -25,7 +25,7 @@ export type ResendBroadcastEnv = {
   segments: BroadcastSegmentMap;
 };
 
-export type ProcessContentReleaseEnv = {
+type ProcessContentReleaseEnv = {
   notificationFromEmail: string;
   resendApiKey: string;
   serviceRoleKey: string;
@@ -56,6 +56,11 @@ function normalizeOptionalEnvValue(value: string | undefined) {
   return normalized.length > 0 ? normalized : null;
 }
 
+/**
+ * Loads the required environment for the per-recipient release worker.
+ * Returning null lets the request handler fail fast before touching Supabase or
+ * the email provider when any mandatory secret is missing.
+ */
 export function getProcessContentReleaseEnv(): ProcessContentReleaseEnv | null {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -81,6 +86,10 @@ export function getProcessContentReleaseEnv(): ProcessContentReleaseEnv | null {
   };
 }
 
+/**
+ * Loads the optional broadcast configuration. Returning null signals that the
+ * worker should skip broadcast delivery and fall back to per-recipient sends.
+ */
 export function getResendBroadcastEnv(): ResendBroadcastEnv | null {
   const resendApiKey = normalizeOptionalEnvValue(
     Deno.env.get("RESEND_API_KEY_FULL_ACCESS"),

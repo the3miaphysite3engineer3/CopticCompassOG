@@ -1,10 +1,12 @@
 "use client";
 
+import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, ArrowUpRight } from "lucide-react";
+
 import { Badge } from "@/components/Badge";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
@@ -14,7 +16,6 @@ import {
   getPublicationPath,
   type Publication,
 } from "@/features/publications/lib/publications";
-import { useLanguage } from "@/components/LanguageProvider";
 import { getLocalizedHomePath, getPublicationsPath } from "@/lib/locale";
 
 const LANGUAGE_BADGE_CLASS_NAMES: Record<Publication["lang"], string> = {

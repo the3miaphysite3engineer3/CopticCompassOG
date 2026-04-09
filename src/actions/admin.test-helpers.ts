@@ -1,6 +1,6 @@
 import { vi } from "vitest";
 
-export type AdminModuleContext = {
+type AdminModuleContext = {
   contactUpdateEqMock: ReturnType<typeof vi.fn>;
   contentReleaseDeleteEqMock: ReturnType<typeof vi.fn>;
   contentReleaseItemInsertMock: ReturnType<typeof vi.fn>;
@@ -12,6 +12,7 @@ export type AdminModuleContext = {
   getAdminServerContextMock: ReturnType<typeof vi.fn>;
   invokeSupabaseEdgeFunctionMock: ReturnType<typeof vi.fn>;
   profileMaybeSingleMock: ReturnType<typeof vi.fn>;
+  queueLoggedNotificationEmailMock: ReturnType<typeof vi.fn>;
   revalidatePathMock: ReturnType<typeof vi.fn>;
   reportUpdateEqMock: ReturnType<typeof vi.fn>;
   sendContentRelease: typeof import("./admin").sendContentRelease;
@@ -27,7 +28,7 @@ export type AdminModuleContext = {
   updateEntryReportStatus: typeof import("./admin").updateEntryReportStatus;
 };
 
-export type AdminHarnessOptions = {
+type AdminHarnessOptions = {
   audienceContacts?: AudienceContactFixture[];
   contactUpdateError?: { message?: string } | null;
   existingReleaseEvents?: {
@@ -45,7 +46,7 @@ export type AdminHarnessOptions = {
   contentReleaseUpdateError?: { message?: string } | null;
   feedbackNotificationResult?:
     | { error: string; success: false }
-    | { id: string | null; success: true };
+    | { eventId: string; jobId: string; success: true };
   hasEnv?: boolean;
   hasResendAudienceEnv?: boolean;
   invokeWorkerResult?:
@@ -257,7 +258,7 @@ export function createContentReleasePreviewFormData(
   return formData;
 }
 
-export function createDefaultSubmission(): SubmissionFixture {
+function createDefaultSubmission(): SubmissionFixture {
   return {
     exercise_id: "grammar.exercise.lesson01.001",
     lesson_slug: "lesson-1",
@@ -523,21 +524,19 @@ function mockAdminDependencies(
   mocks: ReturnType<typeof createSupabaseMocks>,
 ) {
   const revalidatePathMock = vi.fn();
-  const dispatchLoggedNotificationEmailMock = vi
-    .fn()
-    .mockImplementation((payload: { aggregateType?: string }) =>
-      Promise.resolve(
-        payload.aggregateType === "content_release"
-          ? (options.releaseNotificationResult ?? {
-              success: true,
-              id: "email_789",
-            })
-          : (options.feedbackNotificationResult ?? {
-              success: true,
-              id: "email_123",
-            }),
-      ),
-    );
+  const dispatchLoggedNotificationEmailMock = vi.fn().mockResolvedValue(
+    options.releaseNotificationResult ?? {
+      success: true,
+      id: "email_789",
+    },
+  );
+  const queueLoggedNotificationEmailMock = vi.fn().mockResolvedValue(
+    options.feedbackNotificationResult ?? {
+      eventId: "event_123",
+      jobId: "job_123",
+      success: true,
+    },
+  );
   const getNotificationEmailEnvMock = vi.fn().mockReturnValue({
     notificationFromEmail: "notifications@example.com",
     ownerAlertEmail: "owner@example.com",
@@ -588,12 +587,14 @@ function mockAdminDependencies(
   }));
   vi.doMock("@/lib/notifications/events", () => ({
     dispatchLoggedNotificationEmail: dispatchLoggedNotificationEmailMock,
+    queueLoggedNotificationEmail: queueLoggedNotificationEmailMock,
   }));
 
   return {
     dispatchLoggedNotificationEmailMock,
     getAdminServerContextMock,
     invokeSupabaseEdgeFunctionMock,
+    queueLoggedNotificationEmailMock,
     revalidatePathMock,
     syncStoredAudienceContactToResendMock,
   };

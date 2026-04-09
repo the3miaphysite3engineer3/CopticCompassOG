@@ -1,4 +1,5 @@
 import { ChevronDown } from "lucide-react";
+
 import { surfacePanelClassName } from "@/components/SurfacePanel";
 import { SubmissionFeedbackPanel } from "@/features/submissions/components/SubmissionFeedbackPanel";
 import type { SubmissionRow } from "@/features/submissions/types";
@@ -6,8 +7,8 @@ import {
   formatLessonSlug,
   formatSubmissionDate,
 } from "@/features/submissions/utils";
-import { cx } from "@/lib/classes";
 import type { Language } from "@/types/i18n";
+
 import { getDashboardCopy } from "../lib/dashboardCopy";
 
 export function DashboardRecentExerciseDisclosure({

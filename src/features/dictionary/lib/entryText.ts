@@ -57,9 +57,11 @@ export function toPlainText(value: string) {
     .trim();
 }
 
+/**
+ * Removes imported grammar shorthand from the start of a gloss so metadata and
+ * summaries surface the first real lexical meaning instead.
+ */
 function stripLeadIn(value: string) {
-  // Imported meanings often start with grammar shorthand such as "tr" or
-  // "nn"; strip those prefixes so metadata surfaces a real gloss.
   let cleaned = toPlainText(value.replace(/\[[^\]]+\]/g, ""))
     .replace(/^[|―—–-]+\s*/, "")
     .trim();
@@ -99,6 +101,10 @@ function isPureGrammarLeadIn(value: string) {
   );
 }
 
+/**
+ * Returns the first gloss that reads like a user-facing summary instead of a
+ * bare grammar label or import shorthand fragment.
+ */
 export function getEntrySummary(entry: LexicalEntry, locale: Language = "en") {
   const meanings =
     locale === "nl" && entry.dutch_meanings
@@ -115,6 +121,10 @@ export function getEntrySummary(entry: LexicalEntry, locale: Language = "en") {
   return "";
 }
 
+/**
+ * Builds the meta description used for dictionary entry pages from the chosen
+ * headword, part of speech, and first meaningful gloss when available.
+ */
 export function buildEntryDescription(
   entry: LexicalEntry,
   locale: Language = "en",

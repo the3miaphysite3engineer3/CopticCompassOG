@@ -1,3 +1,7 @@
+/**
+ * Verifies the bearer token used by internal webhook and edge-function calls.
+ * This is intended for server-to-server authentication, not end-user sessions.
+ */
 export function hasExpectedBearerToken(
   request: Request,
   expectedToken: string,

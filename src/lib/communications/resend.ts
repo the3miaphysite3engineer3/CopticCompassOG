@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+
 import { hasAudienceSubscriptions } from "@/features/communications/lib/communications";
 import { assertServerOnly } from "@/lib/server/assertServerOnly";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
@@ -7,6 +8,11 @@ import type { Tables, TablesInsert, TablesUpdate } from "@/types/supabase";
 type AudienceContactRow = Tables<"audience_contacts">;
 type AudienceContactSyncStateRow = Tables<"audience_contact_sync_state">;
 type ServiceRoleClient = ReturnType<typeof createServiceRoleClient>;
+type ResendContactLookup = Awaited<ReturnType<Resend["contacts"]["get"]>>;
+type ResendContactUpsert = {
+  contactId: string;
+  segmentsAppliedOnCreate: boolean;
+};
 
 type ResendAudienceSegments = {
   books: string;
@@ -35,7 +41,7 @@ type ResendAudienceEnv = {
   segments: ResendAudienceSegments;
 };
 
-export type ResendAudienceSyncResult =
+type ResendAudienceSyncResult =
   | {
       contact: AudienceContactRow;
       syncState: AudienceContactSyncStateRow | null;
@@ -54,7 +60,13 @@ export type ResendAudienceSyncResult =
       success: false;
     };
 
-export function getResendAudienceEnv(): ResendAudienceEnv | null {
+/**
+ * Loads the Resend audience sync configuration from environment variables.
+ * Returns null when the required global segment ids are missing so callers can
+ * skip syncing instead of partially managing contacts against an incomplete
+ * segment map.
+ */
+function getResendAudienceEnv(): ResendAudienceEnv | null {
   assertServerOnly("getResendAudienceEnv");
 
   const resendApiKey = process.env.RESEND_API_KEY_FULL_ACCESS;
@@ -108,10 +120,99 @@ export function getResendAudienceEnv(): ResendAudienceEnv | null {
   };
 }
 
+/**
+ * Indicates whether the app has enough Resend configuration to manage audience
+ * contacts and their segment assignments.
+ */
 export function hasResendAudienceEnv() {
   return getResendAudienceEnv() !== null;
 }
 
+async function persistSuccessfulResendSyncState(options: {
+  audienceContactId: string;
+  contactId: string;
+  supabase: ServiceRoleClient;
+}) {
+  return persistAudienceContactSyncState(
+    options.audienceContactId,
+    {
+      last_error: null,
+      last_synced_at: new Date().toISOString(),
+      provider: "resend",
+      provider_contact_id: options.contactId,
+    },
+    options.supabase,
+  );
+}
+
+async function persistFailedResendSyncState(options: {
+  audienceContactId: string;
+  errorMessage: string;
+  supabase: ServiceRoleClient;
+}) {
+  return persistAudienceContactSyncState(
+    options.audienceContactId,
+    {
+      last_error: options.errorMessage,
+      provider: "resend",
+    },
+    options.supabase,
+  );
+}
+
+async function syncManagedResendSegments(options: {
+  contactId: string;
+  desiredSegmentIds: Set<string>;
+  managedSegmentIds: Set<string>;
+  resend: Resend;
+}) {
+  const { data: currentSegments, error: currentSegmentsError } =
+    await options.resend.contacts.segments.list({
+      contactId: options.contactId,
+    });
+
+  if (currentSegmentsError) {
+    throw new Error(currentSegmentsError.message);
+  }
+
+  const existingSegmentIds = new Set(
+    (currentSegments?.data ?? [])
+      .map((segment) => segment.id)
+      .filter((segmentId) => options.managedSegmentIds.has(segmentId)),
+  );
+
+  for (const segmentId of options.desiredSegmentIds) {
+    if (!existingSegmentIds.has(segmentId)) {
+      const { error } = await options.resend.contacts.segments.add({
+        contactId: options.contactId,
+        segmentId,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    }
+  }
+
+  for (const segmentId of existingSegmentIds) {
+    if (!options.desiredSegmentIds.has(segmentId)) {
+      const { error } = await options.resend.contacts.segments.remove({
+        contactId: options.contactId,
+        segmentId,
+      });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+    }
+  }
+}
+
+/**
+ * Synchronizes one stored audience contact to Resend and records the resulting
+ * sync state in Supabase. Missing configuration is treated as a skipped success
+ * so admin tools can distinguish "not configured" from actual sync failures.
+ */
 export async function syncStoredAudienceContactToResend(
   contact: AudienceContactRow,
   supabase?: ServiceRoleClient,
@@ -150,16 +251,11 @@ export async function syncStoredAudienceContactToResend(
     const contactId = upsertedContact.contactId;
 
     if (upsertedContact.segmentsAppliedOnCreate) {
-      const syncState = await persistAudienceContactSyncState(
-        contact.id,
-        {
-          last_error: null,
-          last_synced_at: new Date().toISOString(),
-          provider: "resend",
-          provider_contact_id: contactId,
-        },
-        serviceRoleClient,
-      );
+      const syncState = await persistSuccessfulResendSyncState({
+        audienceContactId: contact.id,
+        contactId,
+        supabase: serviceRoleClient,
+      });
 
       return {
         contact,
@@ -168,57 +264,17 @@ export async function syncStoredAudienceContactToResend(
       };
     }
 
-    const { data: currentSegments, error: currentSegmentsError } =
-      await resend.contacts.segments.list({
-        contactId,
-      });
-
-    if (currentSegmentsError) {
-      throw new Error(currentSegmentsError.message);
-    }
-
-    const existingSegmentIds = new Set(
-      (currentSegments?.data ?? [])
-        .map((segment) => segment.id)
-        .filter((segmentId) => managedSegmentIds.has(segmentId)),
-    );
-
-    for (const segmentId of desiredSegmentIds) {
-      if (!existingSegmentIds.has(segmentId)) {
-        const { error } = await resend.contacts.segments.add({
-          contactId,
-          segmentId,
-        });
-
-        if (error) {
-          throw new Error(error.message);
-        }
-      }
-    }
-
-    for (const segmentId of existingSegmentIds) {
-      if (!desiredSegmentIds.has(segmentId)) {
-        const { error } = await resend.contacts.segments.remove({
-          contactId,
-          segmentId,
-        });
-
-        if (error) {
-          throw new Error(error.message);
-        }
-      }
-    }
-
-    const syncState = await persistAudienceContactSyncState(
-      contact.id,
-      {
-        last_error: null,
-        last_synced_at: new Date().toISOString(),
-        provider: "resend",
-        provider_contact_id: contactId,
-      },
-      serviceRoleClient,
-    );
+    await syncManagedResendSegments({
+      contactId,
+      desiredSegmentIds,
+      managedSegmentIds,
+      resend,
+    });
+    const syncState = await persistSuccessfulResendSyncState({
+      audienceContactId: contact.id,
+      contactId,
+      supabase: serviceRoleClient,
+    });
 
     return {
       contact,
@@ -229,14 +285,11 @@ export async function syncStoredAudienceContactToResend(
     const errorMessage =
       error instanceof Error ? error.message : "Audience contact sync failed.";
 
-    const syncState = await persistAudienceContactSyncState(
-      contact.id,
-      {
-        last_error: errorMessage,
-        provider: "resend",
-      },
-      serviceRoleClient,
-    );
+    const syncState = await persistFailedResendSyncState({
+      audienceContactId: contact.id,
+      errorMessage,
+      supabase: serviceRoleClient,
+    });
 
     return {
       contact,
@@ -247,6 +300,11 @@ export async function syncStoredAudienceContactToResend(
   }
 }
 
+/**
+ * Returns the full set of Resend segment ids owned by this application,
+ * including optional locale-specific segments, so sync can remove stale managed
+ * memberships without touching unrelated manual segments.
+ */
 function getManagedSegmentIds(
   env: Pick<ResendAudienceEnv, "localizedSegments" | "segments">,
 ) {
@@ -265,6 +323,10 @@ function getManagedSegmentIds(
   return new Set(segmentIds);
 }
 
+/**
+ * Computes the segments a contact should belong to based on their opt-ins and
+ * preferred locale. Locale-specific segments are added only when configured.
+ */
 function getDesiredSegmentIds(
   contact: Pick<
     AudienceContactRow,
@@ -302,54 +364,61 @@ function getDesiredSegmentIds(
   return desiredSegmentIds;
 }
 
-async function upsertResendContact(options: {
+async function lookupExistingResendContact(options: {
   contact: AudienceContactRow;
-  desiredSegmentIds: string[];
   existingSyncState: AudienceContactSyncStateRow | null;
+  resend: Resend;
+}): Promise<ResendContactLookup> {
+  if (options.existingSyncState?.provider_contact_id) {
+    return options.resend.contacts.get({
+      id: options.existingSyncState.provider_contact_id,
+    });
+  }
+
+  return options.resend.contacts.get({
+    email: options.contact.email,
+  });
+}
+
+async function updateExistingResendContact(options: {
+  contact: AudienceContactRow;
+  contactId: string;
   firstName: string | null;
   lastName: string | null;
   resend: Resend;
-}) {
-  const unsubscribed = !hasAudienceSubscriptions(options.contact);
-  const existingContactLookup = options.existingSyncState?.provider_contact_id
-    ? await options.resend.contacts.get({
-        id: options.existingSyncState.provider_contact_id,
-      })
-    : await options.resend.contacts.get({
-        email: options.contact.email,
-      });
+  unsubscribed: boolean;
+}): Promise<ResendContactUpsert> {
+  const updatedContact = await options.resend.contacts.update({
+    email: options.contact.email,
+    firstName: options.firstName,
+    lastName: options.lastName,
+    unsubscribed: options.unsubscribed,
+  });
 
-  if (!existingContactLookup.error && existingContactLookup.data?.id) {
-    const updatedContact = await options.resend.contacts.update({
-      email: options.contact.email,
-      firstName: options.firstName,
-      lastName: options.lastName,
-      unsubscribed,
-    });
-
-    if (updatedContact.error) {
-      throw new Error(updatedContact.error.message);
-    }
-
-    return {
-      contactId: existingContactLookup.data.id,
-      segmentsAppliedOnCreate: false,
-    };
+  if (updatedContact.error) {
+    throw new Error(updatedContact.error.message);
   }
 
-  if (
-    existingContactLookup.error &&
-    existingContactLookup.error.name !== "not_found"
-  ) {
-    throw new Error(existingContactLookup.error.message);
-  }
+  return {
+    contactId: options.contactId,
+    segmentsAppliedOnCreate: false,
+  };
+}
 
+async function createResendContact(options: {
+  contact: AudienceContactRow;
+  desiredSegmentIds: string[];
+  firstName: string | null;
+  lastName: string | null;
+  resend: Resend;
+  unsubscribed: boolean;
+}): Promise<ResendContactUpsert> {
   const createdContact = await options.resend.contacts.create({
     email: options.contact.email,
     firstName: options.firstName ?? undefined,
     lastName: options.lastName ?? undefined,
     segments: options.desiredSegmentIds.map((id) => ({ id })),
-    unsubscribed,
+    unsubscribed: options.unsubscribed,
   });
 
   if (!createdContact.error && createdContact.data?.id) {
@@ -364,6 +433,53 @@ async function upsertResendContact(options: {
   );
 }
 
+async function upsertResendContact(options: {
+  contact: AudienceContactRow;
+  desiredSegmentIds: string[];
+  existingSyncState: AudienceContactSyncStateRow | null;
+  firstName: string | null;
+  lastName: string | null;
+  resend: Resend;
+}) {
+  const unsubscribed = !hasAudienceSubscriptions(options.contact);
+  const existingContactLookup = await lookupExistingResendContact({
+    contact: options.contact,
+    existingSyncState: options.existingSyncState,
+    resend: options.resend,
+  });
+
+  if (!existingContactLookup.error && existingContactLookup.data?.id) {
+    return updateExistingResendContact({
+      contact: options.contact,
+      contactId: existingContactLookup.data.id,
+      firstName: options.firstName,
+      lastName: options.lastName,
+      resend: options.resend,
+      unsubscribed,
+    });
+  }
+
+  if (
+    existingContactLookup.error &&
+    existingContactLookup.error.name !== "not_found"
+  ) {
+    throw new Error(existingContactLookup.error.message);
+  }
+
+  return createResendContact({
+    contact: options.contact,
+    desiredSegmentIds: options.desiredSegmentIds,
+    firstName: options.firstName,
+    lastName: options.lastName,
+    resend: options.resend,
+    unsubscribed,
+  });
+}
+
+/**
+ * Upserts the local sync-state row for a contact. This keeps the last known
+ * provider contact id and any failure details in one place for later retries.
+ */
 async function persistAudienceContactSyncState(
   audienceContactId: string,
   payload: Omit<
@@ -395,6 +511,10 @@ async function persistAudienceContactSyncState(
   return data;
 }
 
+/**
+ * Loads the previous sync-state row for a contact so retries can reuse the
+ * last known provider contact id when available.
+ */
 async function getAudienceContactSyncState(
   audienceContactId: string,
   supabase?: ServiceRoleClient,

@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
 import { AdminDashboardPage } from "@/features/admin/components/AdminDashboardPage";
 import { resolveAdminWorkspaceMode } from "@/features/admin/lib/workspaceMode";
 import { createNoIndexMetadata } from "@/lib/metadata";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = createNoIndexMetadata({
   title: "Instructor Workspace",
@@ -9,6 +10,10 @@ export const metadata: Metadata = createNoIndexMetadata({
     "Private instructor workspace for reviewing grammar submissions.",
 });
 
+/**
+ * Loads the private instructor workspace and seeds it with the requested view
+ * mode from the URL.
+ */
 export default async function AdminPage({
   searchParams,
 }: {

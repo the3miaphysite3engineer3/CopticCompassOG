@@ -1,5 +1,3 @@
-import type { Language } from "@/types/i18n";
-export type { Language };
 import { contactMessages } from "@/lib/translations/contact";
 import { dictionaryMessages } from "@/lib/translations/dictionary";
 import { grammarMessages } from "@/lib/translations/grammar";
@@ -7,6 +5,9 @@ import { homeMessages } from "@/lib/translations/home";
 import { loginMessages } from "@/lib/translations/login";
 import { publicationsMessages } from "@/lib/translations/publications";
 import { sharedMessages } from "@/lib/translations/shared";
+import type { Language } from "@/types/i18n";
+
+export type { Language };
 
 const en = {
   ...sharedMessages.en,
@@ -19,7 +20,7 @@ const en = {
 } as const;
 
 export type TranslationKey = keyof typeof en;
-export type TranslationDictionary = Readonly<Record<TranslationKey, string>>;
+type TranslationDictionary = Readonly<Record<TranslationKey, string>>;
 
 const nl = {
   ...sharedMessages.nl,
@@ -31,7 +32,7 @@ const nl = {
   ...loginMessages.nl,
 } satisfies TranslationDictionary;
 
-export const translations = {
+const translations = {
   en,
   nl,
 } satisfies Record<Language, TranslationDictionary>;
@@ -39,10 +40,17 @@ export const translations = {
 export const DEFAULT_LANGUAGE: Language = "en";
 export const LANGUAGE_STORAGE_KEY = "app-language";
 
+/**
+ * Narrows an arbitrary string to one of the supported application locales.
+ */
 export function isLanguage(value: string): value is Language {
   return value === "en" || value === "nl";
 }
 
+/**
+ * Returns the localized message string for a validated language and
+ * translation key pair.
+ */
 export function getTranslation(
   language: Language,
   key: TranslationKey,

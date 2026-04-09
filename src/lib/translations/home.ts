@@ -1,5 +1,8 @@
 import { defineMessages } from "@/lib/translations/defineMessages";
 
+/**
+ * Localized marketing copy for the home page feature areas and calls to action.
+ */
 export const homeMessages = defineMessages({
   en: {
     "home.eyebrow": "Coptic Dictionary, Grammar, and Publications",

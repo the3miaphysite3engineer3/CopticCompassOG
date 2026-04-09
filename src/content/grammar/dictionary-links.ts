@@ -1,5 +1,5 @@
-import { getDictionary } from "../../features/dictionary/lib/dictionary.ts";
-import type { LexicalEntry } from "../../features/dictionary/types.ts";
+import { getGrammarDictionaryData } from "./dictionary-data.ts";
+
 import type {
   GrammarBlock,
   GrammarConceptDocument,
@@ -12,6 +12,7 @@ import type {
   GrammarLessonDocument,
   Localized,
 } from "./schema.ts";
+import type { LexicalEntry } from "../../features/dictionary/types.ts";
 
 let bohairicDictionaryLookupCache: Map<string, string> | null = null;
 
@@ -74,7 +75,7 @@ function getBohairicDictionaryLookup() {
 
   const formsToEntryIds = new Map<string, Set<string>>();
 
-  for (const entry of getDictionary()) {
+  for (const entry of getGrammarDictionaryData()) {
     for (const form of collectBohairicForms(entry)) {
       const normalizedForm = normalizeBohairicLookupCandidate(form);
 
@@ -347,14 +348,15 @@ function enrichExampleDocument(
     example.dictionaryRefs.length === 0
       ? getBohairicDictionaryEntryIdForWord(example.coptic)
       : null;
-  const dictionaryRefs =
-    example.dictionaryRefs.length > 0
-      ? [...example.dictionaryRefs]
-      : tokenDictionaryRefs.length > 0
-        ? [...new Set(tokenDictionaryRefs)]
-        : dictionaryEntryId
-          ? [dictionaryEntryId]
-          : [];
+  let dictionaryRefs: string[] = [];
+
+  if (example.dictionaryRefs.length > 0) {
+    dictionaryRefs = [...example.dictionaryRefs];
+  } else if (tokenDictionaryRefs.length > 0) {
+    dictionaryRefs = [...new Set(tokenDictionaryRefs)];
+  } else if (dictionaryEntryId) {
+    dictionaryRefs = [dictionaryEntryId];
+  }
 
   return {
     ...example,

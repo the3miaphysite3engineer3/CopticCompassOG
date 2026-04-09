@@ -1,12 +1,16 @@
 "use client";
 
 import { useEffect } from "react";
+
 import { useLanguage } from "@/components/LanguageProvider";
 import { pageShellAccents } from "@/components/PageShell";
 import { RouteErrorState } from "@/components/RouteErrorState";
 import { getDashboardCopy } from "@/features/dashboard/lib/dashboardCopy";
 import { getGrammarPath } from "@/lib/locale";
 
+/**
+ * Renders the fallback error boundary for the localized learner dashboard.
+ */
 export default function Error({
   error,
   reset,

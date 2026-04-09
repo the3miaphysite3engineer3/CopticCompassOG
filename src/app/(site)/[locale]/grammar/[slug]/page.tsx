@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
 import StructuredData from "@/components/StructuredData";
 import { GrammarLessonPageClient } from "@/features/grammar/components/GrammarLessonPageClient";
 import {
@@ -8,14 +8,14 @@ import {
   getPublishedGrammarLessonBundleBySlug,
   listPublishedGrammarLessons,
 } from "@/features/grammar/lib/grammarDataset";
-import { buildLessonOpenGraphImageUrl } from "@/features/grammar/lib/lessonOpenGraph";
 import { getGrammarLessonPath } from "@/features/grammar/lib/grammarPaths";
+import { buildLessonOpenGraphImageUrl } from "@/features/grammar/lib/lessonOpenGraph";
+import { getTranslation } from "@/lib/i18n";
 import {
   createLanguageAlternates,
   getGrammarPath,
   getLocalizedHomePath,
 } from "@/lib/locale";
-import { getTranslation } from "@/lib/i18n";
 import { createPageSocialMetadata, createSocialImage } from "@/lib/metadata";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
 import { siteConfig } from "@/lib/site";
@@ -23,6 +23,8 @@ import {
   createBreadcrumbStructuredData,
   createGrammarLessonStructuredData,
 } from "@/lib/structuredData";
+
+import type { Metadata } from "next";
 
 export const dynamicParams = false;
 
@@ -88,6 +90,10 @@ export async function generateMetadata({
   };
 }
 
+/**
+ * Renders one published localized grammar lesson page together with its
+ * breadcrumb and lesson structured data.
+ */
 export default async function GrammarLessonPage({
   params,
 }: {

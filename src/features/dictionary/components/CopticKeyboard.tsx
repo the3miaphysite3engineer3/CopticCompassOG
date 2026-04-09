@@ -1,5 +1,6 @@
-import React from "react";
 import { X } from "lucide-react";
+import React from "react";
+
 import { antinoou } from "@/lib/fonts";
 
 const COPTIC_LETTERS = [
@@ -37,8 +38,10 @@ const COPTIC_LETTERS = [
   "ϯ",
 ];
 
-// Diacritics stay separate so users can compose them onto the previous base
-// letter instead of choosing from every possible precombined glyph.
+/**
+ * Keep diacritics separate so users can compose them onto the previous base
+ * letter instead of choosing from every possible precombined glyph.
+ */
 const DIACRITICS = [
   { char: "\u0300", label: "̀  (Jinkim)" },
   { char: "\u0304", label: "̄  (Stroke)" },
@@ -52,13 +55,19 @@ interface CopticKeyboardProps {
   onClose: () => void;
 }
 
+/**
+ * Renders the on-screen Coptic keyboard used by dictionary search inputs,
+ * including separate diacritics and a backspace control.
+ */
 export default function CopticKeyboard({
   onAppend,
   onBackspace,
   isOpen,
   onClose,
 }: CopticKeyboardProps) {
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return (
     <div className="absolute top-[calc(100%+0.75rem)] right-0 z-[70] w-full md:w-[640px] bg-white/95 dark:bg-stone-900/92 backdrop-blur-xl border border-stone-200 dark:border-stone-700/80 rounded-3xl p-4 md:p-5 shadow-2xl">
@@ -102,7 +111,7 @@ export default function CopticKeyboard({
             <span
               className={`${antinoou.className} mr-2 inline-flex items-center text-xl leading-none opacity-60`}
             >
-              {"◌" + d.char}
+              {`◌${d.char}`}
             </span>
             <span className="text-xs font-sans font-medium text-emerald-600 dark:text-emerald-500/80">
               {d.label.replace(d.char, "").trim()}

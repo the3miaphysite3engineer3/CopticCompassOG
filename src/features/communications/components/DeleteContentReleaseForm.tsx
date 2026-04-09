@@ -1,7 +1,8 @@
 "use client";
 
-import { startTransition, useActionState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { startTransition, useActionState, useEffect } from "react";
+
 import { deleteContentReleaseDraft } from "@/actions/admin";
 import type { DeleteContentReleaseState } from "@/actions/admin/states";
 import { Button } from "@/components/Button";
@@ -23,6 +24,13 @@ export function DeleteContentReleaseForm({
     DeleteContentReleaseState | null,
     FormData
   >(deleteContentReleaseDraft, null);
+  let buttonLabel = "Delete draft";
+
+  if (isPending) {
+    buttonLabel = "Deleting draft...";
+  } else if (state?.success) {
+    buttonLabel = "Refreshing...";
+  }
 
   useEffect(() => {
     if (!state?.success) {
@@ -71,11 +79,7 @@ export function DeleteContentReleaseForm({
           className="border-rose-200 bg-white/90 text-rose-700 hover:border-rose-300 hover:bg-rose-100 dark:border-rose-900/60 dark:bg-rose-950/10 dark:text-rose-200 dark:hover:bg-rose-950/30"
           disabled={isPending || state?.success === true}
         >
-          {isPending
-            ? "Deleting draft..."
-            : state?.success
-              ? "Refreshing..."
-              : "Delete draft"}
+          {buttonLabel}
         </Button>
       </div>
 

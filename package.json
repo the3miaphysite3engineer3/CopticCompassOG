@@ -36,12 +36,13 @@
     "db:push": "supabase db push --linked",
     "db:drift:check": "supabase db diff --linked --schema public",
     "data:grammar:export": "node --experimental-default-type=module --experimental-strip-types scripts/exportGrammar.mts",
-    "lint": "eslint",
+    "lint": "eslint --max-warnings=0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:e2e": "playwright test",
-    "test:e2e:local": "npm run build && npm run test:e2e"
+    "test:e2e:local": "npm run build && npm run test:e2e",
+    "knip": "knip"
   },
   "dependencies": {
     "@react-email/components": "^1.0.10",
@@ -72,11 +73,12 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.7",
-    "google-translate-api-x": "^10.7.2",
+    "eslint-plugin-import": "^2.31.0",
+    "knip": "^5.88.1",
+    "postcss": "^8.4.49",
     "prettier": "^3.5.3",
     "supabase": "^2.84.7",
     "tailwindcss": "^4",
-    "ts-node": "^10.9.2",
     "typescript": "^5",
     "vitest": "^4.1.0"
   }

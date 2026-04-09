@@ -1,5 +1,6 @@
 import {
   compareAudienceContactPriority,
+  hasAudienceSubscriptions,
   type AdminAudienceContactRow,
 } from "@/features/communications/lib/communications";
 import {
@@ -9,40 +10,142 @@ import {
 } from "@/features/communications/lib/releases";
 import type { AppSupabaseClient, QueryResult } from "@/lib/supabase/queryTypes";
 
-export async function getAdminAudienceContacts(
-  supabase: AppSupabaseClient,
-  limit?: number,
-): Promise<QueryResult<AdminAudienceContactRow[]>> {
-  let audienceContactsQuery = supabase
-    .from("audience_contacts")
-    .select("*")
-    .order("updated_at", { ascending: false });
+const ADMIN_AUDIENCE_INACTIVE_HISTORY_LIMIT = 50;
+const ADMIN_CONTENT_RELEASE_HISTORY_LIMIT = 12;
 
-  if (typeof limit === "number") {
-    audienceContactsQuery = audienceContactsQuery.limit(limit);
+function compareAdminAudienceContactPriority(
+  left: AdminAudienceContactRow,
+  right: AdminAudienceContactRow,
+) {
+  const leftHasSyncError = Boolean(left.syncState?.last_error);
+  const rightHasSyncError = Boolean(right.syncState?.last_error);
+
+  if (leftHasSyncError !== rightHasSyncError) {
+    return Number(rightHasSyncError) - Number(leftHasSyncError);
   }
 
-  const audienceContactsResult = await audienceContactsQuery;
+  const leftHasSubscriptions = hasAudienceSubscriptions(left);
+  const rightHasSubscriptions = hasAudienceSubscriptions(right);
 
-  if (audienceContactsResult.error || !audienceContactsResult.data) {
+  if (leftHasSubscriptions !== rightHasSubscriptions) {
+    return Number(rightHasSubscriptions) - Number(leftHasSubscriptions);
+  }
+
+  return compareAudienceContactPriority(left, right);
+}
+
+/**
+ * Loads all actionable audience contacts plus a capped recent inactive window,
+ * then joins each contact with its latest Resend sync state.
+ */
+export async function getAdminAudienceContacts(
+  supabase: AppSupabaseClient,
+  limit = ADMIN_AUDIENCE_INACTIVE_HISTORY_LIMIT,
+): Promise<QueryResult<AdminAudienceContactRow[]>> {
+  const [
+    subscribedContactsResult,
+    erroredSyncStatesResult,
+    inactiveContactsResult,
+  ] = await Promise.all([
+    supabase
+      .from("audience_contacts")
+      .select("*")
+      .or(
+        "books_opt_in.eq.true,general_updates_opt_in.eq.true,lessons_opt_in.eq.true",
+      )
+      .order("updated_at", { ascending: false }),
+    supabase
+      .from("audience_contact_sync_state")
+      .select("*")
+      .not("last_error", "is", null),
+    supabase
+      .from("audience_contacts")
+      .select("*")
+      .eq("books_opt_in", false)
+      .eq("general_updates_opt_in", false)
+      .eq("lessons_opt_in", false)
+      .order("updated_at", { ascending: false })
+      .limit(limit),
+  ]);
+
+  if (
+    subscribedContactsResult.error ||
+    !subscribedContactsResult.data ||
+    erroredSyncStatesResult.error ||
+    !erroredSyncStatesResult.data ||
+    inactiveContactsResult.error ||
+    !inactiveContactsResult.data
+  ) {
+    let error = { message: "Could not load audience contacts." };
+    if (subscribedContactsResult.error) {
+      error = { message: subscribedContactsResult.error.message };
+    } else if (erroredSyncStatesResult.error) {
+      error = { message: erroredSyncStatesResult.error.message };
+    } else if (inactiveContactsResult.error) {
+      error = { message: inactiveContactsResult.error.message };
+    }
+
     return {
       data: null,
-      error: audienceContactsResult.error
-        ? { message: audienceContactsResult.error.message }
-        : { message: "Could not load audience contacts." },
+      error,
     };
   }
 
-  if (audienceContactsResult.data.length === 0) {
+  const subscribedContacts = subscribedContactsResult.data;
+  const erroredContactIds = Array.from(
+    new Set(
+      erroredSyncStatesResult.data.map(
+        (syncState) => syncState.audience_contact_id,
+      ),
+    ),
+  );
+  const subscribedContactIds = new Set(
+    subscribedContacts.map((contact) => contact.id),
+  );
+  const missingErroredContactIds = erroredContactIds.filter(
+    (contactId) => !subscribedContactIds.has(contactId),
+  );
+
+  let erroredContacts: typeof subscribedContacts = [];
+  if (missingErroredContactIds.length > 0) {
+    const erroredContactsResult = await supabase
+      .from("audience_contacts")
+      .select("*")
+      .in("id", missingErroredContactIds);
+
+    if (erroredContactsResult.error || !erroredContactsResult.data) {
+      return {
+        data: null,
+        error: erroredContactsResult.error
+          ? { message: erroredContactsResult.error.message }
+          : { message: "Could not load audience contacts." },
+      };
+    }
+
+    erroredContacts = erroredContactsResult.data;
+  }
+
+  const actionableContactIds = new Set([
+    ...subscribedContacts.map((contact) => contact.id),
+    ...erroredContacts.map((contact) => contact.id),
+  ]);
+  const inactiveContacts = inactiveContactsResult.data.filter(
+    (contact) => !actionableContactIds.has(contact.id),
+  );
+  const audienceContacts = [
+    ...subscribedContacts,
+    ...erroredContacts,
+    ...inactiveContacts,
+  ];
+
+  if (audienceContacts.length === 0) {
     return {
       data: [],
       error: null,
     };
   }
 
-  const audienceContactIds = audienceContactsResult.data.map(
-    (contact) => contact.id,
-  );
+  const audienceContactIds = audienceContacts.map((contact) => contact.id);
   const syncStatesResult = await supabase
     .from("audience_contact_sync_state")
     .select("*")
@@ -63,43 +166,70 @@ export async function getAdminAudienceContacts(
   );
 
   return {
-    data: audienceContactsResult.data
+    data: audienceContacts
       .map((contact) => ({
         ...contact,
         syncState: syncStateByContactId.get(contact.id) ?? null,
       }))
-      .sort(compareAudienceContactPriority),
+      .sort(compareAdminAudienceContactPriority),
     error: null,
   };
 }
 
+/**
+ * Loads all active release drafts/deliveries plus a capped recent finished
+ * history window, then attaches their snapshotted items for the admin UI.
+ */
 export async function getAdminContentReleases(
   supabase: AppSupabaseClient,
-  limit = 12,
+  limit = ADMIN_CONTENT_RELEASE_HISTORY_LIMIT,
 ): Promise<QueryResult<AdminContentRelease[]>> {
-  const contentReleasesResult = await supabase
-    .from("content_releases")
-    .select("*")
-    .order("updated_at", { ascending: false })
-    .limit(limit);
+  const [activeReleasesResult, historyReleasesResult] = await Promise.all([
+    supabase
+      .from("content_releases")
+      .select("*")
+      .in("status", ["draft", "approved", "queued", "sending"])
+      .order("updated_at", { ascending: false }),
+    supabase
+      .from("content_releases")
+      .select("*")
+      .in("status", ["sent", "cancelled"])
+      .order("updated_at", { ascending: false })
+      .limit(limit),
+  ]);
 
-  if (contentReleasesResult.error || !contentReleasesResult.data) {
+  if (
+    activeReleasesResult.error ||
+    !activeReleasesResult.data ||
+    historyReleasesResult.error ||
+    !historyReleasesResult.data
+  ) {
+    let error = { message: "Could not load content releases." };
+    if (activeReleasesResult.error) {
+      error = { message: activeReleasesResult.error.message };
+    } else if (historyReleasesResult.error) {
+      error = { message: historyReleasesResult.error.message };
+    }
+
     return {
       data: null,
-      error: contentReleasesResult.error
-        ? { message: contentReleasesResult.error.message }
-        : { message: "Could not load content releases." },
+      error,
     };
   }
 
-  if (contentReleasesResult.data.length === 0) {
+  const contentReleases = [
+    ...activeReleasesResult.data,
+    ...historyReleasesResult.data,
+  ];
+
+  if (contentReleases.length === 0) {
     return {
       data: [],
       error: null,
     };
   }
 
-  const releaseIds = contentReleasesResult.data.map((release) => release.id);
+  const releaseIds = contentReleases.map((release) => release.id);
   const releaseItemsResult = await supabase
     .from("content_release_items")
     .select("*")
@@ -122,7 +252,7 @@ export async function getAdminContentReleases(
   }
 
   return {
-    data: contentReleasesResult.data
+    data: contentReleases
       .map((release) => ({
         ...release,
         items: itemsByReleaseId.get(release.id) ?? [],

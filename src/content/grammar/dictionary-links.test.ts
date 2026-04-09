@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
-import type { GrammarBlock, GrammarInline } from "./schema.ts";
+
 import {
   enrichGrammarDatasetSnapshotWithDictionaryLinks,
   getBohairicDictionaryEntryIdForWord,
 } from "./dictionary-links.ts";
 import { getGrammarDatasetSnapshot } from "./registry.ts";
+
+import type { GrammarBlock, GrammarInline } from "./schema.ts";
 
 function getParagraphCopticNode(
   block: GrammarBlock | undefined,

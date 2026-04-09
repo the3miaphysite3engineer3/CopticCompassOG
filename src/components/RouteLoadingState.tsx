@@ -1,8 +1,9 @@
-import type { ReactNode } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { cx } from "@/lib/classes";
+
+import type { ReactNode } from "react";
 
 type RouteLoadingStateProps = {
   accents?: readonly string[];

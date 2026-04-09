@@ -12,6 +12,10 @@ type SourceRouteContext = {
   }>;
 };
 
+/**
+ * Returns one published grammar source by canonical id, or a 404 payload when
+ * the id is unknown.
+ */
 export async function GET(_request: Request, context: SourceRouteContext) {
   const { id } = await context.params;
   const source = getGrammarApiSourceById(id);
@@ -28,6 +32,9 @@ export async function GET(_request: Request, context: SourceRouteContext) {
   return publicApiJsonResponse(source);
 }
 
+/**
+ * Returns the CORS preflight response for the source-detail endpoint.
+ */
 export function OPTIONS() {
   return publicApiOptionsResponse();
 }

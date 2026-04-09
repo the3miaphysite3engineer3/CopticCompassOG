@@ -1,24 +1,28 @@
-import type { ReactNode } from "react";
 import { Footer } from "@/components/Footer";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { Navbar } from "@/components/Navbar";
 import { ThemeProvider } from "@/components/ThemeProvider";
-import { getCspNonce } from "@/lib/server/csp";
 import type { Language } from "@/types/i18n";
+
+import type { ReactNode } from "react";
 
 type AppFrameProps = {
   children: ReactNode;
   initialLanguage: Language;
   localeRouting?: boolean;
+  nonce?: string;
 };
 
-export async function AppFrame({
+/**
+ * Wraps the shared site chrome around a route subtree while allowing the app
+ * shell to opt into a CSP nonce only when its root layout requires one.
+ */
+export function AppFrame({
   children,
   initialLanguage,
   localeRouting = false,
+  nonce,
 }: AppFrameProps) {
-  const nonce = await getCspNonce();
-
   return (
     <ThemeProvider
       attribute="class"

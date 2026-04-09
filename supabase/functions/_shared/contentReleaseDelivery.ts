@@ -71,6 +71,17 @@ function asOptionalString(value: unknown) {
   return normalized.length > 0 ? normalized : null;
 }
 
+function readSummaryCount(
+  summary: Record<string, unknown> | null,
+  key: keyof ContentReleaseDeliverySummary,
+) {
+  return asOptionalNumber(summary?.[key]) ?? 0;
+}
+
+/**
+ * Validates the raw edge-function invocation payload and extracts the release id
+ * needed to resume or start delivery work.
+ */
 export function parseContentReleaseInvocationPayload(payload: unknown) {
   const data = asObject(payload);
   const releaseId = asOptionalString(data?.releaseId);
@@ -101,7 +112,7 @@ export function getAudienceSegmentOptInColumn(
   }
 }
 
-export function getContentReleaseDeliveryLanguage(
+function getContentReleaseDeliveryLanguage(
   release: Pick<ContentReleaseRecord, "locale_mode">,
   preferredLocale: Language,
 ): Language {
@@ -116,6 +127,10 @@ export function getContentReleaseDeliveryLanguage(
   return preferredLocale === "nl" ? "nl" : "en";
 }
 
+/**
+ * Resolves the effective subject/body pair for a recipient based on the
+ * release locale mode and the recipient's preferred language.
+ */
 export function getContentReleaseCopyForLocale(
   release: Pick<
     ContentReleaseRecord,
@@ -136,6 +151,10 @@ export function getContentReleaseCopyForLocale(
   };
 }
 
+/**
+ * Builds the plain-text variant of a content release email, keeping the item
+ * listing and branded footer consistent with the HTML version.
+ */
 export function buildContentReleaseEmailText(options: {
   body: string;
   items: Pick<ContentReleaseItemRecord, "title_snapshot" | "url_snapshot">[];
@@ -165,6 +184,11 @@ export function buildContentReleaseEmailText(options: {
   return [intro, "", itemsHeading, itemsList, "", ...footerLines].join("\n");
 }
 
+/**
+ * Builds the HTML variant of a content release email.
+ * All dynamic content is escaped before interpolation so release copy and item
+ * snapshots can be rendered safely inside the email template.
+ */
 export function buildContentReleaseEmailHtml(options: {
   body: string;
   items: Pick<ContentReleaseItemRecord, "title_snapshot" | "url_snapshot">[];
@@ -252,6 +276,10 @@ export function buildContentReleaseNotificationDedupeKey(options: {
   return `${options.eventType}:${options.releaseId}:${normalizeEmail(options.recipient)}`;
 }
 
+/**
+ * Parses the loosely typed delivery summary JSON into a stable structure with
+ * zero defaults so workers can safely accumulate counters across batches.
+ */
 export function getContentReleaseDeliverySummary(
   release: Pick<ContentReleaseRecord, "delivery_summary">,
 ): ContentReleaseDeliverySummary {
@@ -260,19 +288,30 @@ export function getContentReleaseDeliverySummary(
 
   return {
     ...(broadcasts ? { broadcasts } : {}),
-    eligible_recipient_count:
-      asOptionalNumber(summary?.eligible_recipient_count) ?? 0,
-    failed_count: asOptionalNumber(summary?.failed_count) ?? 0,
-    item_count: asOptionalNumber(summary?.item_count) ?? 0,
-    processed_recipient_count:
-      asOptionalNumber(summary?.processed_recipient_count) ?? 0,
-    remaining_recipient_count:
-      asOptionalNumber(summary?.remaining_recipient_count) ?? 0,
-    sent_count: asOptionalNumber(summary?.sent_count) ?? 0,
-    skipped_count: asOptionalNumber(summary?.skipped_count) ?? 0,
+    eligible_recipient_count: readSummaryCount(
+      summary,
+      "eligible_recipient_count",
+    ),
+    failed_count: readSummaryCount(summary, "failed_count"),
+    item_count: readSummaryCount(summary, "item_count"),
+    processed_recipient_count: readSummaryCount(
+      summary,
+      "processed_recipient_count",
+    ),
+    remaining_recipient_count: readSummaryCount(
+      summary,
+      "remaining_recipient_count",
+    ),
+    sent_count: readSummaryCount(summary, "sent_count"),
+    skipped_count: readSummaryCount(summary, "skipped_count"),
   };
 }
 
+/**
+ * Extracts only valid per-language broadcast records from the stored summary.
+ * Invalid or partial entries are ignored so downstream reporting can rely on a
+ * consistent "sent broadcast" shape.
+ */
 export function getContentReleaseBroadcastDeliveries(
   release: Pick<ContentReleaseRecord, "delivery_summary">,
 ) {
@@ -284,35 +323,7 @@ export function getContentReleaseBroadcastDeliveries(
   }
 
   const parsedEntries = (["en", "nl"] as const)
-    .map((language) => {
-      const entry = asObject(broadcasts[language]);
-      const id = asOptionalString(entry?.id);
-      const segmentId = asOptionalString(entry?.segment_id);
-      const subject = asOptionalString(entry?.subject);
-      const recipientCount = asOptionalNumber(entry?.recipient_count);
-      const status = asOptionalString(entry?.status);
-
-      if (
-        !id ||
-        !segmentId ||
-        !subject ||
-        recipientCount === null ||
-        status !== "sent"
-      ) {
-        return null;
-      }
-
-      return [
-        language,
-        {
-          id,
-          recipient_count: recipientCount,
-          segment_id: segmentId,
-          status,
-          subject,
-        } satisfies ContentReleaseBroadcastDelivery,
-      ] as const;
-    })
+    .map((language) => getBroadcastDeliveryEntry(language, broadcasts))
     .filter(
       (entry): entry is readonly [Language, ContentReleaseBroadcastDelivery] =>
         entry !== null,
@@ -327,6 +338,70 @@ export function getContentReleaseBroadcastDeliveries(
   >;
 }
 
+/**
+ * Parses one per-language broadcast summary entry and discards incomplete or
+ * non-sent records.
+ */
+function getBroadcastDeliveryEntry(
+  language: Language,
+  broadcasts: Record<string, unknown>,
+) {
+  const entry = asObject(broadcasts[language]);
+  const id = asOptionalString(entry?.id);
+  const segmentId = asOptionalString(entry?.segment_id);
+  const subject = asOptionalString(entry?.subject);
+  const recipientCount = asOptionalNumber(entry?.recipient_count);
+  const status = asOptionalString(entry?.status);
+  const parsedEntry = {
+    id,
+    recipientCount,
+    segmentId,
+    status,
+    subject,
+  };
+
+  if (!hasCompleteSentBroadcastDelivery(parsedEntry)) {
+    return null;
+  }
+
+  return [
+    language,
+    {
+      id: parsedEntry.id,
+      recipient_count: parsedEntry.recipientCount,
+      segment_id: parsedEntry.segmentId,
+      status: parsedEntry.status,
+      subject: parsedEntry.subject,
+    } satisfies ContentReleaseBroadcastDelivery,
+  ] as const;
+}
+
+function hasCompleteSentBroadcastDelivery(options: {
+  id: string | null;
+  recipientCount: number | null;
+  segmentId: string | null;
+  status: string | null;
+  subject: string | null;
+}): options is {
+  id: string;
+  recipientCount: number;
+  segmentId: string;
+  status: "sent";
+  subject: string;
+} {
+  return (
+    options.id !== null &&
+    options.segmentId !== null &&
+    options.subject !== null &&
+    options.recipientCount !== null &&
+    options.status === "sent"
+  );
+}
+
+/**
+ * Merges one delivery batch into the running summary while preserving the total
+ * eligible recipient and item counts for the overall release.
+ */
 export function mergeContentReleaseDeliverySummary(options: {
   batch: {
     failedCount: number;

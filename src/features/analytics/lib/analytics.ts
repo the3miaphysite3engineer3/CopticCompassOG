@@ -2,9 +2,9 @@ import {
   ANALYTICS_DIALECTS,
   type AnalyticsDialect,
 } from "@/features/dictionary/config";
-import type { LexicalEntry } from "@/features/dictionary/types";
+import type { DictionaryClientEntry } from "@/features/dictionary/types";
 
-export type AnalyticsChartDatum = {
+type AnalyticsChartDatum = {
   name: string;
   value: number;
 };
@@ -31,8 +31,13 @@ export type AnalyticsSnapshotMap = Record<
   AnalyticsDialect,
   Record<EtymologyFilter, AnalyticsSnapshot>
 >;
+
+/**
+ * Reduces one filtered dictionary slice into the chart and summary metrics used
+ * by the analytics views.
+ */
 function createAnalyticsSnapshot(
-  dictionary: LexicalEntry[],
+  dictionary: readonly DictionaryClientEntry[],
 ): AnalyticsSnapshot {
   const posCounts: Record<string, number> = {
     V: 0,
@@ -188,8 +193,12 @@ function createAnalyticsSnapshot(
   };
 }
 
+/**
+ * Builds analytics snapshots for every dialect and etymology filter
+ * combination from the current dictionary dataset.
+ */
 export function createAnalyticsSnapshots(
-  dictionary: LexicalEntry[],
+  dictionary: readonly DictionaryClientEntry[],
 ): AnalyticsSnapshotMap {
   return ANALYTICS_DIALECTS.reduce<AnalyticsSnapshotMap>(
     (snapshots, dialect) => {

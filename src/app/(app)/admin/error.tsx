@@ -1,9 +1,13 @@
 "use client";
 
 import { useEffect } from "react";
+
 import { pageShellAccents } from "@/components/PageShell";
 import { RouteErrorState } from "@/components/RouteErrorState";
 
+/**
+ * Renders the fallback error boundary for the private instructor workspace.
+ */
 export default function Error({
   error,
   reset,

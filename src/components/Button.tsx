@@ -1,13 +1,9 @@
-import type { ButtonHTMLAttributes } from "react";
 import { cx } from "@/lib/classes";
 
-export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "ghost"
-  | "social"
-  | "link";
-export type ButtonSize = "sm" | "md" | "lg";
+import type { ButtonHTMLAttributes } from "react";
+
+type ButtonVariant = "primary" | "secondary" | "ghost" | "social" | "link";
+type ButtonSize = "sm" | "md" | "lg";
 
 type ButtonClassNameOptions = {
   className?: string;

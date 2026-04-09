@@ -1,32 +1,34 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
+
 import { ImageResponse } from "next/og";
-import { buildEntryOpenGraphPreview } from "@/features/dictionary/lib/entryOpenGraph";
+
 import {
-  getDictionary,
+  getDictionaryEntryById,
   getDictionaryEntryRelations,
 } from "@/features/dictionary/lib/dictionary";
-import { buildLessonOpenGraphPreview } from "@/features/grammar/lib/lessonOpenGraph";
+import { buildEntryOpenGraphPreview } from "@/features/dictionary/lib/entryOpenGraph";
 import {
   getPublishedGrammarLessonBundleBySlug,
   listPublishedGrammarLessons,
 } from "@/features/grammar/lib/grammarDataset";
+import { buildLessonOpenGraphPreview } from "@/features/grammar/lib/lessonOpenGraph";
+import { buildPublicationOpenGraphPreview } from "@/features/publications/lib/publicationOpenGraph";
+import {
+  getPublicationById,
+  publications,
+} from "@/features/publications/lib/publications";
+import {
+  getOpenGraphBrandLabel,
+  getOpenGraphSectionFooter,
+  normalizeOpenGraphCardType,
+} from "@/features/seo/lib/openGraph";
 import {
   renderEntryOpenGraphCard,
   renderLessonOpenGraphCard,
   renderPublicationOpenGraphCard,
   renderSiteOpenGraphCard,
 } from "@/features/seo/lib/openGraphCards";
-import {
-  getOpenGraphBrandLabel,
-  getOpenGraphSectionFooter,
-  normalizeOpenGraphCardType,
-} from "@/features/seo/lib/openGraph";
-import { buildPublicationOpenGraphPreview } from "@/features/publications/lib/publicationOpenGraph";
-import {
-  getPublicationById,
-  publications,
-} from "@/features/publications/lib/publications";
 import { isPublicLocale } from "@/lib/locale";
 import { siteConfig } from "@/lib/site";
 
@@ -34,6 +36,10 @@ const antinoouFontPromise = readFile(
   join(process.cwd(), "src/fonts/AntinoouFont-1.0.6/Antinoou.ttf"),
 );
 
+/**
+ * Renders the generic site card used for the homepage and for unresolved Open
+ * Graph resources.
+ */
 function renderGenericCard(locale: string) {
   const language = isPublicLocale(locale) ? locale : "en";
 
@@ -78,19 +84,19 @@ function renderGenericCard(locale: string) {
   });
 }
 
+/**
+ * Renders a dictionary-entry card and falls back to the generic site card when
+ * the requested entry id cannot be resolved.
+ */
 function renderEntryCard(id: string, locale: string) {
   const language = isPublicLocale(locale) ? locale : "en";
-  const dictionary = getDictionary();
-  const entry = dictionary.find((item) => item.id === id);
+  const entry = getDictionaryEntryById(id);
 
   if (!entry) {
     return renderGenericCard(locale);
   }
 
-  const { parentEntry, relatedEntries } = getDictionaryEntryRelations(
-    entry,
-    dictionary,
-  );
+  const { parentEntry, relatedEntries } = getDictionaryEntryRelations(entry);
   const preview = buildEntryOpenGraphPreview({
     entry,
     language,
@@ -113,6 +119,10 @@ function renderEntryCard(id: string, locale: string) {
   });
 }
 
+/**
+ * Renders a grammar-lesson card and falls back to the generic site card when
+ * the lesson slug is unknown.
+ */
 function renderLessonCard(slug: string, locale: string) {
   const language = isPublicLocale(locale) ? locale : "en";
   const lessonBundle = getPublishedGrammarLessonBundleBySlug(slug);
@@ -126,6 +136,10 @@ function renderLessonCard(slug: string, locale: string) {
   return renderLessonOpenGraphCard(preview);
 }
 
+/**
+ * Renders a publication card and falls back to the generic site card when the
+ * publication id is unknown.
+ */
 function renderPublicationCard(id: string, locale: string) {
   const language = isPublicLocale(locale) ? locale : "en";
   const publication = getPublicationById(id);
@@ -138,6 +152,10 @@ function renderPublicationCard(id: string, locale: string) {
   return renderPublicationOpenGraphCard(preview);
 }
 
+/**
+ * Generates the Open Graph image response for site, dictionary, grammar, and
+ * publication previews based on the request query parameters.
+ */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const type = normalizeOpenGraphCardType(searchParams.get("type"));
@@ -145,14 +163,15 @@ export async function GET(request: Request) {
   const slug = searchParams.get("slug");
   const locale = searchParams.get("locale") ?? "en";
   const antinoouFont = await antinoouFontPromise;
-  const imageContent =
-    type === "entry" && id
-      ? renderEntryCard(id, locale)
-      : type === "lesson" && slug
-        ? renderLessonCard(slug, locale)
-        : type === "publication" && id
-          ? renderPublicationCard(id, locale)
-          : renderGenericCard(locale);
+  let imageContent = renderGenericCard(locale);
+
+  if (type === "entry" && id) {
+    imageContent = renderEntryCard(id, locale);
+  } else if (type === "lesson" && slug) {
+    imageContent = renderLessonCard(slug, locale);
+  } else if (type === "publication" && id) {
+    imageContent = renderPublicationCard(id, locale);
+  }
 
   return new ImageResponse(imageContent, {
     fonts: [

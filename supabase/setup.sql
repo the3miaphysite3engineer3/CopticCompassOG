@@ -84,6 +84,25 @@ create table if not exists public.notification_deliveries (
   created_at timestamptz not null default timezone('utc', now())
 );
 
+create table if not exists public.notification_email_jobs (
+  id uuid primary key default gen_random_uuid(),
+  notification_event_id uuid not null unique references public.notification_events (id) on delete cascade,
+  subject text not null,
+  from_email text,
+  to_recipients text[] not null check (cardinality(to_recipients) > 0),
+  cc_recipients text[] not null default '{}'::text[],
+  bcc_recipients text[] not null default '{}'::text[],
+  reply_to_recipients text[] not null default '{}'::text[],
+  html_body text,
+  text_body text not null,
+  status text not null default 'queued' check (
+    status in ('queued', 'processing', 'sent', 'failed')
+  ),
+  last_error text,
+  processed_at timestamptz,
+  created_at timestamptz not null default timezone('utc', now())
+);
+
 create table if not exists public.audience_contacts (
   id uuid primary key default gen_random_uuid(),
   profile_id uuid references public.profiles (id) on delete set null,
@@ -283,6 +302,9 @@ create index if not exists notification_deliveries_event_id_idx
 create index if not exists notification_deliveries_status_created_at_idx
   on public.notification_deliveries (status, created_at desc);
 
+create index if not exists notification_email_jobs_status_created_at_idx
+  on public.notification_email_jobs (status, created_at asc);
+
 create index if not exists audience_contacts_profile_id_idx
   on public.audience_contacts (profile_id);
 
@@ -476,6 +498,7 @@ alter table public.submissions enable row level security;
 alter table public.contact_messages enable row level security;
 alter table public.notification_events enable row level security;
 alter table public.notification_deliveries enable row level security;
+alter table public.notification_email_jobs enable row level security;
 alter table public.audience_contacts enable row level security;
 alter table public.audience_contact_sync_state enable row level security;
 alter table public.audience_opt_in_requests enable row level security;

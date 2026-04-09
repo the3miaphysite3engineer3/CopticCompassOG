@@ -1,9 +1,10 @@
 "use client";
 
 import { useLanguage } from "@/components/LanguageProvider";
+import type { LexicalEntry } from "@/features/dictionary/types";
 import { RelatedGrammarLessonsPanel } from "@/features/grammar/components/RelatedGrammarLessonsPanel";
 import type { GrammarLessonReference } from "@/features/grammar/lib/grammarContentGraph";
-import type { LexicalEntry } from "@/features/dictionary/types";
+
 import DictionaryEntryCard from "./DictionaryEntry";
 import { EntryActionBar } from "./EntryActionBar";
 import EntryRelationsPanel from "./EntryRelationsPanel";

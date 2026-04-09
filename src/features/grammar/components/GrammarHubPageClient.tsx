@@ -1,11 +1,12 @@
 "use client";
 
-import type { GrammarLessonIndexItem } from "@/content/grammar/schema";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
+import type { GrammarLessonIndexItem } from "@/content/grammar/schema";
 import { getLocalizedHomePath } from "@/lib/locale";
+
 import { GrammarLessonCard } from "./GrammarLessonCard";
 
 type GrammarHubPageClientProps = {

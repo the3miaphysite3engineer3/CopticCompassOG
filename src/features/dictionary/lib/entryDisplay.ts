@@ -3,13 +3,17 @@ import {
   type DialectFilter,
   type DictionaryDialectCode,
 } from "@/features/dictionary/config";
-import type { LexicalEntry } from "@/features/dictionary/types";
+import type { DictionaryClientEntry } from "@/features/dictionary/types";
 
 type DialectEntryTuple = [
   DictionaryDialectCode,
-  NonNullable<LexicalEntry["dialects"][DictionaryDialectCode]>,
+  NonNullable<DictionaryClientEntry["dialects"][DictionaryDialectCode]>,
 ];
 
+/**
+ * Joins the available dialect forms into the compact display string used across
+ * search results and entry headers.
+ */
 export function formatDialectForms(
   forms: DialectEntryTuple[1],
   headwordFallback: string,
@@ -22,17 +26,30 @@ export function formatDialectForms(
   parts.push(absoluteWithVariants);
 
   const bound: string[] = [];
-  if (forms.nominal) bound.push(forms.nominal);
-  if (forms.pronominal) bound.push(forms.pronominal);
+  if (forms.nominal) {
+    bound.push(forms.nominal);
+  }
+  if (forms.pronominal) {
+    bound.push(forms.pronominal);
+  }
 
-  if (bound.length > 0) parts.push(bound.join("/"));
-  if (forms.stative) parts.push(forms.stative);
+  if (bound.length > 0) {
+    parts.push(bound.join("/"));
+  }
+  if (forms.stative) {
+    parts.push(forms.stative);
+  }
 
   return parts.join(" ");
 }
 
+/**
+ * Picks the primary dialect to display for an entry, honoring the selected
+ * filter when that dialect is present and otherwise falling back to Sahidic or
+ * the first available dialect.
+ */
 export function getPreferredEntryDialectKey(
-  entry: LexicalEntry,
+  entry: DictionaryClientEntry,
   selectedDialect: DialectFilter = DEFAULT_DICTIONARY_DIALECT_FILTER,
 ) {
   const dialectKeys = Object.keys(entry.dialects) as DictionaryDialectCode[];
@@ -47,8 +64,12 @@ export function getPreferredEntryDialectKey(
   return primaryDialectKey;
 }
 
+/**
+ * Resolves the human-readable spelling shown for an entry under the active
+ * dialect filter.
+ */
 export function getPreferredEntryDisplaySpelling(
-  entry: LexicalEntry,
+  entry: DictionaryClientEntry,
   selectedDialect: DialectFilter = DEFAULT_DICTIONARY_DIALECT_FILTER,
 ) {
   const primaryDialectKey = getPreferredEntryDialectKey(entry, selectedDialect);

@@ -1,3 +1,4 @@
+import type { ContentReleaseCandidate } from "@/features/communications/lib/releases";
 import { listPublishedGrammarLessons } from "@/features/grammar/lib/grammarDataset";
 import { getGrammarLessonPath } from "@/features/grammar/lib/grammarPaths";
 import {
@@ -6,8 +7,11 @@ import {
   publications,
 } from "@/features/publications/lib/publications";
 import { assertServerOnly } from "@/lib/server/assertServerOnly";
-import type { ContentReleaseCandidate } from "@/features/communications/lib/releases";
 
+/**
+ * Builds the complete list of currently publishable lesson and publication
+ * items that admins can attach to a content release draft.
+ */
 export function listContentReleaseCandidates(): ContentReleaseCandidate[] {
   assertServerOnly("listContentReleaseCandidates");
 
@@ -36,6 +40,10 @@ export function listContentReleaseCandidates(): ContentReleaseCandidate[] {
   return [...lessonCandidates, ...publicationCandidates];
 }
 
+/**
+ * Indexes release candidates by the persisted `type:id` key stored on release
+ * items so admin actions can validate selections quickly.
+ */
 export function getContentReleaseCandidateMap() {
   assertServerOnly("getContentReleaseCandidateMap");
 

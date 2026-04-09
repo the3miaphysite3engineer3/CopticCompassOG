@@ -18,13 +18,17 @@ export type AudiencePreferencesRow = Pick<
   | "source"
 >;
 
-export type AudiencePreferences = {
+export interface AudiencePreferences {
   booksOptIn: boolean;
   generalUpdatesOptIn: boolean;
   lessonsOptIn: boolean;
   locale: Language;
-};
+}
 
+/**
+ * Normalizes a stored audience contact row into the smaller preferences shape
+ * used by forms and dashboard views.
+ */
 export function getAudiencePreferences(
   contact:
     | Pick<
@@ -43,6 +47,9 @@ export function getAudiencePreferences(
   };
 }
 
+/**
+ * Returns whether a contact has at least one active audience subscription.
+ */
 export function hasAudienceSubscriptions(
   contact:
     | Pick<
@@ -66,6 +73,10 @@ export function hasAudienceSubscriptions(
   );
 }
 
+/**
+ * Sorts audience contacts by active-subscription priority first, then by most
+ * recently updated.
+ */
 export function compareAudienceContactPriority(
   left: AudienceContactRow,
   right: AudienceContactRow,
@@ -82,6 +93,9 @@ export function compareAudienceContactPriority(
   );
 }
 
+/**
+ * Returns the localized human-readable label for an audience signup source.
+ */
 export function getAudienceSourceLabel(
   source: AudienceContactRow["source"],
   language: Language = "en",
@@ -95,6 +109,9 @@ export function getAudienceSourceLabel(
   return labels[source];
 }
 
+/**
+ * Returns the localized label for an audience contact locale value.
+ */
 export function getAudienceLocaleLabel(
   locale: AudienceContactRow["locale"],
   language: Language = "en",

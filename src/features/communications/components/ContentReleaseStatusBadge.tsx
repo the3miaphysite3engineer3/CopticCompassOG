@@ -7,16 +7,17 @@ export function ContentReleaseStatusBadge({
 }: {
   status: ContentReleaseRow["status"];
 }) {
-  const tone =
-    status === "draft"
-      ? "surface"
-      : status === "approved" || status === "queued"
-        ? "accent"
-        : status === "sending"
-          ? "neutral"
-          : status === "sent"
-            ? "coptic"
-            : "flat";
+  let tone: "accent" | "coptic" | "flat" | "neutral" | "surface" = "flat";
+
+  if (status === "draft") {
+    tone = "surface";
+  } else if (status === "approved" || status === "queued") {
+    tone = "accent";
+  } else if (status === "sending") {
+    tone = "neutral";
+  } else if (status === "sent") {
+    tone = "coptic";
+  }
 
   return (
     <Badge tone={tone} size="xs">

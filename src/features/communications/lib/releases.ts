@@ -1,6 +1,6 @@
+import { getMailFooterLines, mailBrand } from "@/lib/communications/mailBrand";
 import type { Language } from "@/types/i18n";
 import type { Json, Tables } from "@/types/supabase";
-import { getMailFooterLines, mailBrand } from "@/lib/communications/mailBrand";
 
 export type ContentReleaseRow = Tables<"content_releases">;
 export type ContentReleaseItemRow = Tables<"content_release_items">;
@@ -19,7 +19,7 @@ export type AdminContentRelease = ContentReleaseRow & {
   items: ContentReleaseItemRow[];
 };
 
-export type ContentReleaseDeliverySummary = {
+type ContentReleaseDeliverySummary = {
   broadcasts?: Array<{
     id: string;
     language: Language;
@@ -58,6 +58,10 @@ export const CONTENT_RELEASE_DELETABLE_STATUSES = [
   "cancelled",
 ] as const satisfies readonly ContentReleaseRow["status"][];
 
+/**
+ * Collapses the selected item types into the release type stored on the parent
+ * release row.
+ */
 export function deriveContentReleaseType(
   itemTypes: ContentReleaseItemRow["item_type"][],
 ): ContentReleaseRow["release_type"] | null {
@@ -74,6 +78,9 @@ export function deriveContentReleaseType(
   return uniqueItemTypes[0] === "lesson" ? "lesson" : "publication";
 }
 
+/**
+ * Narrows audience-segment form values before they are persisted on a release.
+ */
 export function isContentReleaseAudienceSegment(
   value: string,
 ): value is ContentReleaseRow["audience_segment"] {
@@ -82,6 +89,9 @@ export function isContentReleaseAudienceSegment(
   );
 }
 
+/**
+ * Narrows locale-mode form values before they are persisted on a release.
+ */
 export function isContentReleaseLocaleMode(
   value: string,
 ): value is ContentReleaseRow["locale_mode"] {
@@ -90,6 +100,9 @@ export function isContentReleaseLocaleMode(
   );
 }
 
+/**
+ * Identifies statuses that can still be edited from the admin workspace.
+ */
 export function isContentReleaseEditableStatus(
   value: string,
 ): value is (typeof CONTENT_RELEASE_EDITABLE_STATUSES)[number] {
@@ -98,6 +111,9 @@ export function isContentReleaseEditableStatus(
   );
 }
 
+/**
+ * Identifies statuses that still allow the whole release draft to be deleted.
+ */
 export function isContentReleaseDeletableStatus(
   value: string,
 ): value is (typeof CONTENT_RELEASE_DELETABLE_STATUSES)[number] {
@@ -106,6 +122,9 @@ export function isContentReleaseDeletableStatus(
   );
 }
 
+/**
+ * Formats the stored release type for admin labels and status surfaces.
+ */
 export function formatContentReleaseType(
   releaseType: ContentReleaseRow["release_type"],
 ) {
@@ -121,6 +140,9 @@ export function formatContentReleaseType(
   }
 }
 
+/**
+ * Formats the stored release status for admin labels and status surfaces.
+ */
 export function formatContentReleaseStatus(
   status: ContentReleaseRow["status"],
 ) {
@@ -142,6 +164,9 @@ export function formatContentReleaseStatus(
   }
 }
 
+/**
+ * Formats the saved audience segment for admin-facing copy.
+ */
 export function formatContentReleaseAudienceSegment(
   segment: ContentReleaseRow["audience_segment"],
 ) {
@@ -157,6 +182,9 @@ export function formatContentReleaseAudienceSegment(
   }
 }
 
+/**
+ * Formats the stored locale mode for admin-facing copy.
+ */
 export function formatContentReleaseLocaleMode(
   localeMode: ContentReleaseRow["locale_mode"],
 ) {
@@ -172,6 +200,10 @@ export function formatContentReleaseLocaleMode(
   }
 }
 
+/**
+ * Orders release rows by operational urgency so active deliveries and drafts
+ * surface above historical items in the admin workspace.
+ */
 export function compareContentReleasePriority(
   left: AdminContentRelease,
   right: AdminContentRelease,
@@ -195,6 +227,10 @@ export function compareContentReleasePriority(
   );
 }
 
+/**
+ * Parses the optional delivery-summary JSON into the typed counts and broadcast
+ * metadata shown in admin status cards.
+ */
 export function getContentReleaseDeliverySummary(
   release: Pick<ContentReleaseRow, "delivery_summary">,
 ): ContentReleaseDeliverySummary {
@@ -219,7 +255,11 @@ export function getContentReleaseDeliverySummary(
   };
 }
 
-export function getContentReleaseDeliveryLanguage(
+/**
+ * Resolves which language variant should be delivered to a recipient under the
+ * release locale mode and their preferred locale.
+ */
+function getContentReleaseDeliveryLanguage(
   release: Pick<ContentReleaseRow, "locale_mode">,
   preferredLocale: Language,
 ): Language {
@@ -234,6 +274,10 @@ export function getContentReleaseDeliveryLanguage(
   return preferredLocale === "nl" ? "nl" : "en";
 }
 
+/**
+ * Selects the localized subject/body pair used to render an outbound release
+ * email for one recipient.
+ */
 export function getContentReleaseCopyForLocale(
   release: Pick<
     ContentReleaseRow,
@@ -254,6 +298,10 @@ export function getContentReleaseCopyForLocale(
   };
 }
 
+/**
+ * Builds the plain-text fallback body for release emails, including the item
+ * list and shared branded footer.
+ */
 export function buildContentReleaseEmailText(options: {
   body: string;
   items: Pick<ContentReleaseItemRow, "title_snapshot" | "url_snapshot">[];
@@ -276,6 +324,9 @@ export function buildContentReleaseEmailText(options: {
   ].join("\n");
 }
 
+/**
+ * Builds the branded HTML variant used for content release emails.
+ */
 export function buildContentReleaseEmailHtml(options: {
   body: string;
   items: Pick<ContentReleaseItemRow, "title_snapshot" | "url_snapshot">[];

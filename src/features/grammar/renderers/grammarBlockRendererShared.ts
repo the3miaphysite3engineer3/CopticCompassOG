@@ -1,10 +1,15 @@
-import type { ReactNode } from "react";
 import type {
   GrammarBlock,
   GrammarLessonBundle,
 } from "@/content/grammar/schema";
 import type { Language } from "@/types/i18n";
 
+import type { ReactNode } from "react";
+
+/**
+ * Shared renderer contracts used by the grammar block and inline rendering
+ * helpers.
+ */
 export type RenderGrammarBlocks = (
   blocks: readonly GrammarBlock[],
   options?: {

@@ -1,8 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
-import { useState, useTransition } from "react";
-import Link from "next/link";
 import {
   ChevronDown,
   KeyRound,
@@ -10,12 +7,15 @@ import {
   TriangleAlert,
   UserRound,
 } from "lucide-react";
+import Link from "next/link";
+import { useState, useTransition } from "react";
+
 import { updatePasswordFromDashboard } from "@/actions/auth";
 import { Badge } from "@/components/Badge";
 import { FormField } from "@/components/FormField";
+import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
-import { useLanguage } from "@/components/LanguageProvider";
 import { CommunicationPreferencesForm } from "@/features/communications/components/CommunicationPreferencesForm";
 import {
   getAudiencePreferences,
@@ -25,10 +25,12 @@ import {
   formatDashboardProviderDescription,
   getDashboardCopy,
 } from "@/features/dashboard/lib/dashboardCopy";
-import { cx } from "@/lib/classes";
 import { ProfileForm } from "@/features/profile/components/ProfileForm";
+import { cx } from "@/lib/classes";
 import { getContactPath, getPrivacyPath } from "@/lib/locale";
 import type { Tables } from "@/types/supabase";
+
+import type { ReactNode } from "react";
 
 type AccountSettingsPanelProps = {
   audienceContact: AudiencePreferencesRow | null;

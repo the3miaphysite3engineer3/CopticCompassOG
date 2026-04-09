@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import Link from "next/link";
+
 import "swagger-ui-dist/swagger-ui.css";
 import "./swagger-overrides.css";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
@@ -8,6 +8,8 @@ import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SwaggerDocsClient } from "@/features/grammar/components/SwaggerDocsClient";
 import { getDevelopersPath, getGrammarPath } from "@/lib/locale";
 import { createPageMetadata } from "@/lib/metadata";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Coptic Compass Grammar API Docs",
@@ -23,6 +25,9 @@ const docsHighlights = [
   "Rights metadata included in the dataset",
 ];
 
+/**
+ * Renders the Swagger-backed documentation page for the public grammar API.
+ */
 export default function ApiDocsPage() {
   return (
     <PageShell

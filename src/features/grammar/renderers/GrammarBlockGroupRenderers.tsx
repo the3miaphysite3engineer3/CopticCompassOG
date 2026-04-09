@@ -5,6 +5,7 @@ import { ExerciseForm } from "@/features/grammar/components/ExerciseForm";
 import { GrammarLessonCard } from "@/features/grammar/components/GrammarLessonPrimitives";
 import { getEntryPath } from "@/lib/locale";
 import type { Language } from "@/types/i18n";
+
 import type { GrammarBlockRenderHelperProps } from "./grammarBlockRendererShared";
 
 type GrammarExerciseGroupBlockProps = GrammarBlockRenderHelperProps & {
@@ -16,6 +17,10 @@ type GrammarExampleGroupBlockProps = GrammarBlockRenderHelperProps & {
   exampleIds: readonly string[];
 };
 
+/**
+ * Renders the grouped exercise and example helper blocks referenced from the
+ * structured grammar lesson content model.
+ */
 function renderExampleCopticText(text: string) {
   if (text.startsWith("Ø-")) {
     return (
@@ -84,6 +89,10 @@ function getExampleGroupItems(
   );
 }
 
+/**
+ * Resolves and renders the exercise-group block referenced by a lesson
+ * document.
+ */
 export function GrammarExerciseGroupBlock({
   exerciseIds,
   language,
@@ -129,6 +138,10 @@ export function GrammarExerciseGroupBlock({
   );
 }
 
+/**
+ * Resolves and renders the example-group block referenced by a lesson
+ * document, including the optional two-column layout.
+ */
 export function GrammarExampleGroupBlock({
   columns = 1,
   exampleIds,
@@ -141,6 +154,41 @@ export function GrammarExampleGroupBlock({
     return null;
   }
 
+  const renderExampleContent = (example: (typeof examples)[number]) => {
+    if (example.copticSegments && example.copticSegments.length > 0) {
+      return example.copticSegments.map((segment, segmentIndex) =>
+        renderExampleCopticSegments(
+          segment.text,
+          segment.dictionaryEntryId,
+          segmentIndex,
+          language,
+        ),
+      );
+    }
+
+    if (
+      example.dictionaryRefs.length === 1 &&
+      !/\s/.test(example.coptic.trim())
+    ) {
+      return (
+        <a
+          href={renderDictionaryEntryHref(
+            example.dictionaryRefs[0] ?? "",
+            language,
+          )}
+          target="_blank"
+          rel="noreferrer noopener"
+          data-dictionary-entry-id={example.dictionaryRefs[0]}
+          className="no-underline"
+        >
+          {renderExampleCopticText(example.coptic)}
+        </a>
+      );
+    }
+
+    return renderExampleCopticText(example.coptic);
+  };
+
   const renderExampleList = (items: typeof examples) => (
     <ul className="space-y-3">
       {items.map((example) => (
@@ -149,32 +197,7 @@ export function GrammarExampleGroupBlock({
           className="leading-7 text-stone-700 dark:text-stone-300"
         >
           <span className="font-coptic text-xl text-emerald-600 dark:text-emerald-400">
-            {example.copticSegments && example.copticSegments.length > 0 ? (
-              example.copticSegments.map((segment, segmentIndex) =>
-                renderExampleCopticSegments(
-                  segment.text,
-                  segment.dictionaryEntryId,
-                  segmentIndex,
-                  language,
-                ),
-              )
-            ) : example.dictionaryRefs.length === 1 &&
-              !/\s/.test(example.coptic.trim()) ? (
-              <a
-                href={renderDictionaryEntryHref(
-                  example.dictionaryRefs[0] ?? "",
-                  language,
-                )}
-                target="_blank"
-                rel="noreferrer noopener"
-                data-dictionary-entry-id={example.dictionaryRefs[0]}
-                className="no-underline"
-              >
-                {renderExampleCopticText(example.coptic)}
-              </a>
-            ) : (
-              renderExampleCopticText(example.coptic)
-            )}
+            {renderExampleContent(example)}
           </span>
           <span className="ml-3">{example.translation[language]}</span>
         </li>

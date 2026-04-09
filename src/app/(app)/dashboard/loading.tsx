@@ -11,6 +11,9 @@ function LoadingBlock({ className }: { className: string }) {
   );
 }
 
+/**
+ * Renders the loading skeleton for the private learner dashboard.
+ */
 export default function Loading() {
   return (
     <RouteLoadingState

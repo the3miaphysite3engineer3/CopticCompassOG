@@ -1,4 +1,5 @@
 import { ChevronDown } from "lucide-react";
+
 import { Badge } from "@/components/Badge";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import {
@@ -8,6 +9,7 @@ import {
   getContentReleaseDeliverySummary,
   type AdminContentRelease,
 } from "@/features/communications/lib/releases";
+
 import { ContentReleaseReviewForm } from "./ContentReleaseReviewForm";
 import { ContentReleaseStatusBadge } from "./ContentReleaseStatusBadge";
 import { DeleteContentReleaseForm } from "./DeleteContentReleaseForm";
@@ -38,6 +40,25 @@ export function AdminContentReleaseCard({
     release.status === "queued" ||
     release.status === "sending" ||
     Boolean(release.last_delivery_error);
+  let deliveryStatusLabel = (
+    <span className="text-stone-500 dark:text-stone-400">
+      Created on {formatContentReleaseTimestamp(release.created_at)}
+    </span>
+  );
+
+  if (release.sent_at) {
+    deliveryStatusLabel = (
+      <span className="text-stone-500 dark:text-stone-400">
+        Sent on {formatContentReleaseTimestamp(release.sent_at)}
+      </span>
+    );
+  } else if (release.delivery_started_at) {
+    deliveryStatusLabel = (
+      <span className="text-stone-500 dark:text-stone-400">
+        Started {formatContentReleaseTimestamp(release.delivery_started_at)}
+      </span>
+    );
+  }
 
   return (
     <SurfacePanel
@@ -97,23 +118,7 @@ export function AdminContentReleaseCard({
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium text-stone-700 [&::-webkit-details-marker]:hidden dark:text-stone-200">
                 <div className="flex flex-wrap items-center gap-3">
                   <span>Delivery log</span>
-                  {release.sent_at ? (
-                    <span className="text-stone-500 dark:text-stone-400">
-                      Sent on {formatContentReleaseTimestamp(release.sent_at)}
-                    </span>
-                  ) : release.delivery_started_at ? (
-                    <span className="text-stone-500 dark:text-stone-400">
-                      Started{" "}
-                      {formatContentReleaseTimestamp(
-                        release.delivery_started_at,
-                      )}
-                    </span>
-                  ) : (
-                    <span className="text-stone-500 dark:text-stone-400">
-                      Created on{" "}
-                      {formatContentReleaseTimestamp(release.created_at)}
-                    </span>
-                  )}
+                  {deliveryStatusLabel}
                 </div>
 
                 <div className="flex items-center gap-2 text-stone-500 dark:text-stone-400">

@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
 import Link from "next/link";
+
 import { Badge } from "@/components/Badge";
 import { useLanguage } from "@/components/LanguageProvider";
 import { surfacePanelClassName } from "@/components/SurfacePanel";
@@ -14,15 +14,18 @@ import {
   formatDialectForms,
   getPreferredEntryDialectKey,
 } from "@/features/dictionary/lib/entryDisplay";
-import type { LexicalEntry } from "@/features/dictionary/types";
+import type { DictionaryClientEntry } from "@/features/dictionary/types";
 import { cx } from "@/lib/classes";
 import { antinoou } from "@/lib/fonts";
 import { getEntryPath } from "@/lib/locale";
+
 import DialectSiglum from "./DialectSiglum";
 import HighlightText from "./HighlightText";
 
+import type { ReactNode } from "react";
+
 type DictionaryEntryCardProps = {
-  entry: LexicalEntry;
+  entry: DictionaryClientEntry;
   query?: string;
   selectedDialect?: DialectFilter;
   headingLevel?: "h1" | "h2";
@@ -32,7 +35,7 @@ type DictionaryEntryCardProps = {
 
 type DialectEntryTuple = [
   DictionaryDialectCode,
-  NonNullable<LexicalEntry["dialects"][DictionaryDialectCode]>,
+  NonNullable<DictionaryClientEntry["dialects"][DictionaryDialectCode]>,
 ];
 
 export default function DictionaryEntryCard({
@@ -53,8 +56,10 @@ export default function DictionaryEntryCard({
     : undefined;
 
   if (primaryForms) {
-    // The heading compresses the absolute, variant, bound, and stative
-    // spellings into the compact notation used throughout the dictionary UI.
+    /**
+     * Collapse the selected dialect's forms into the compact heading notation
+     * used throughout the dictionary UI.
+     */
     headerSpelling = formatDialectForms(primaryForms, entry.headword);
   }
 

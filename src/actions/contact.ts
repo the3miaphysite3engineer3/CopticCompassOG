@@ -1,6 +1,7 @@
 "use server";
 
 import * as React from "react";
+
 import {
   AudienceOptInConfirmationEmail,
   getAudienceOptInConfirmationSubject,
@@ -10,19 +11,21 @@ import {
   getContactInquiryLabel,
   isContactInquiryValue,
 } from "@/features/contact/lib/contact";
+import type { ContactInquiryValue } from "@/features/contact/lib/contact";
 import {
   buildAudienceOptInConfirmationUrl,
   createAudienceOptInRequest,
 } from "@/lib/communications/optInRequests";
-import { dispatchLoggedNotificationEmail } from "@/lib/notifications/events";
+import { queueLoggedNotificationEmail } from "@/lib/notifications/events";
+import { redactEmailAddress } from "@/lib/privacy";
 import {
   consumeRateLimit,
   getClientRateLimitIdentifier,
   hasAvailableRateLimitProtection,
 } from "@/lib/rateLimit";
-import { redactEmailAddress } from "@/lib/privacy";
-import { isMissingSupabaseTableError } from "@/lib/supabase/errors";
+import { withScalabilityTimer } from "@/lib/server/observability";
 import { hasSupabaseServiceRoleEnv } from "@/lib/supabase/config";
+import { isMissingSupabaseTableError } from "@/lib/supabase/errors";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
 import {
   getFormLanguage,
@@ -84,43 +87,76 @@ const CONTACT_ACTION_COPY: Record<
   },
 };
 
-export async function sendContactEmail(
-  _prevState: ContactFormState | null,
-  formData: FormData,
-): Promise<ContactFormState> {
-  const language = getFormLanguage(formData);
-  const copy = CONTACT_ACTION_COPY[language];
-  const name = normalizeWhitespace(getFormString(formData, "name"));
-  const email = normalizeWhitespace(
-    getFormString(formData, "email"),
-  ).toLowerCase();
-  const inquiryType = normalizeWhitespace(
-    getFormString(formData, "inquiryType"),
-  );
-  const message = normalizeMultiline(getFormString(formData, "message"));
-  const honeypot = normalizeWhitespace(getFormString(formData, "website"));
-  const wantsUpdates = formData.has("wants_updates");
+type ContactActionCopy = (typeof CONTACT_ACTION_COPY)[Language];
 
-  if (honeypot) {
+type ParsedContactSubmission = {
+  copy: ContactActionCopy;
+  email: string;
+  honeypot: string;
+  inquiryType: string;
+  language: Language;
+  message: string;
+  name: string;
+  wantsUpdates: boolean;
+};
+
+/**
+ * Normalizes raw contact-form input into a predictable server-side shape before
+ * validation, storage, and notification side effects run.
+ */
+function parseContactSubmission(formData: FormData): ParsedContactSubmission {
+  const language = getFormLanguage(formData);
+
+  return {
+    copy: CONTACT_ACTION_COPY[language],
+    email: normalizeWhitespace(getFormString(formData, "email")).toLowerCase(),
+    honeypot: normalizeWhitespace(getFormString(formData, "website")),
+    inquiryType: normalizeWhitespace(getFormString(formData, "inquiryType")),
+    language,
+    message: normalizeMultiline(getFormString(formData, "message")),
+    name: normalizeWhitespace(getFormString(formData, "name")),
+    wantsUpdates: formData.has("wants_updates"),
+  };
+}
+
+/**
+ * Applies the contact-form guardrails in one place, including the honeypot
+ * spam bypass and the service-role/storage checks needed before persistence.
+ */
+function validateContactSubmission(
+  submission: ParsedContactSubmission,
+): ContactFormState | null {
+  if (submission.honeypot) {
     return { success: true };
   }
 
   if (!hasSupabaseServiceRoleEnv()) {
-    return { success: false, error: copy.storageUnavailable };
+    return { success: false, error: submission.copy.storageUnavailable };
   }
 
   if (
-    !hasLengthInRange(name, { min: 1, max: 100 }) ||
-    !isValidEmail(email) ||
-    !isContactInquiryValue(inquiryType) ||
-    !hasLengthInRange(message, { min: 5, max: 5000 })
+    !hasLengthInRange(submission.name, { min: 1, max: 100 }) ||
+    !isValidEmail(submission.email) ||
+    !isContactInquiryValue(submission.inquiryType) ||
+    !hasLengthInRange(submission.message, { min: 5, max: 5000 })
   ) {
     return {
       success: false,
-      error: copy.invalid,
+      error: submission.copy.invalid,
     };
   }
 
+  return null;
+}
+
+/**
+ * Consumes one contact-form rate-limit token and returns a user-facing state
+ * instead of throwing so the action can fail gracefully when protection is
+ * unavailable or the caller is temporarily blocked.
+ */
+async function enforceContactRateLimit(
+  copy: ContactActionCopy,
+): Promise<ContactFormState | null> {
   if (!hasAvailableRateLimitProtection()) {
     return {
       success: false,
@@ -143,17 +179,180 @@ export async function sendContactEmail(
     };
   }
 
+  return null;
+}
+
+/**
+ * Notifies the site owner about a stored contact submission. The action treats
+ * this as a best-effort side effect and logs failures without blocking success.
+ */
+async function sendContactOwnerNotification(options: {
+  contactMessageId: string | null;
+  email: string;
+  inquiryLabel: string;
+  inquiryType: string;
+  language: Language;
+  message: string;
+  name: string;
+  wantsUpdates: boolean;
+}) {
+  if (!process.env.CONTACT_EMAIL || !options.contactMessageId) {
+    return;
+  }
+
+  const notificationResult = await queueLoggedNotificationEmail({
+    aggregateId: options.contactMessageId,
+    aggregateType: "contact_message",
+    eventType: "contact_message_received",
+    payload: {
+      inquiry_type: options.inquiryType,
+      locale: options.language,
+      sender_email: redactEmailAddress(options.email),
+      wants_updates: options.wantsUpdates,
+    },
+    to: process.env.CONTACT_EMAIL,
+    replyTo: options.email,
+    subject: `Coptic Compass contact: ${options.inquiryLabel} from ${options.name}`,
+    react: React.createElement(ContactEmailTemplate, {
+      name: options.name,
+      email: options.email,
+      inquiryLabel: options.inquiryLabel,
+      message: options.message,
+    }),
+    text: [
+      `Name: ${options.name}`,
+      `Email: ${options.email}`,
+      `Type: ${options.inquiryLabel}`,
+      `Locale: ${options.language}`,
+      `Wants updates: ${options.wantsUpdates ? "yes" : "no"}`,
+      "",
+      "Message:",
+      options.message,
+    ].join("\n"),
+  });
+
+  if (!notificationResult.success) {
+    console.error("Failed to send contact alert email", {
+      contactMessageId: options.contactMessageId,
+      error: notificationResult.error,
+      email: redactEmailAddress(options.email),
+      inquiryType: options.inquiryType,
+    });
+  }
+}
+
+/**
+ * Creates the opt-in request and sends the double opt-in email for visitors
+ * who asked for updates from the contact form. Contact submission success is
+ * preserved even when the opt-in request or email delivery fails.
+ */
+async function sendContactUpdatesConfirmation(options: {
+  copy: ContactActionCopy;
+  email: string;
+  language: Language;
+  name: string;
+}) {
+  try {
+    const { request, token } = await createAudienceOptInRequest({
+      booksRequested: true,
+      email: options.email,
+      fullName: options.name,
+      generalUpdatesRequested: true,
+      lessonsRequested: true,
+      locale: options.language,
+      source: "contact_form",
+    });
+
+    const confirmationUrl = buildAudienceOptInConfirmationUrl(
+      options.language,
+      token,
+    );
+    const confirmationResult = await queueLoggedNotificationEmail({
+      aggregateId: request.id,
+      aggregateType: "audience_opt_in_request",
+      eventType: "audience_opt_in_requested",
+      payload: {
+        email: redactEmailAddress(options.email),
+        locale: options.language,
+        source: "contact_form",
+        topics: {
+          books: true,
+          general_updates: true,
+          lessons: true,
+        },
+      },
+      to: options.email,
+      subject: getAudienceOptInConfirmationSubject(options.language),
+      react: React.createElement(AudienceOptInConfirmationEmail, {
+        confirmationUrl,
+        language: options.language,
+        recipientName: options.name,
+      }),
+      text: [
+        options.language === "nl"
+          ? "Bevestig je Coptic Compass e-mailupdates via deze link:"
+          : "Confirm your Coptic Compass email updates with this link:",
+        confirmationUrl,
+        "",
+        options.language === "nl"
+          ? "Heb je dit niet aangevraagd, dan kun je deze e-mail gerust negeren."
+          : "If you did not request this, you can safely ignore this email.",
+      ].join("\n"),
+    });
+
+    if (!confirmationResult.success) {
+      console.error("Failed to send audience opt-in confirmation email", {
+        audienceOptInRequestId: request.id,
+        email: redactEmailAddress(options.email),
+        error: confirmationResult.error,
+        locale: options.language,
+      });
+    }
+
+    return confirmationResult.success
+      ? options.copy.successConfirmation
+      : options.copy.successConfirmationIssue;
+  } catch (error) {
+    console.error(
+      "Failed to create audience opt-in request from contact form",
+      {
+        email: redactEmailAddress(options.email),
+        error,
+        name: options.name,
+      },
+    );
+    return options.copy.successConfirmationIssue;
+  }
+}
+
+function summarizeContactFormState(state: ContactFormState) {
+  let outcome = "error";
+
+  if (state.success) {
+    outcome = state.message ? "success" : "filtered";
+  }
+
+  return {
+    outcome,
+    success: state.success,
+  };
+}
+
+async function processStoredContactSubmission(
+  submission: ParsedContactSubmission,
+  inquiryType: ContactInquiryValue,
+): Promise<ContactFormState> {
   try {
     const supabase = createServiceRoleClient();
     const { data: contactMessage, error } = await supabase
       .from("contact_messages")
       .insert({
-        name,
-        email,
+        name: submission.name,
+        email: submission.email,
         inquiry_type: inquiryType,
-        message,
-        locale: language,
-        wants_updates: wantsUpdates,
+        message: submission.message,
+        locale: submission.language,
+        wants_updates: submission.wantsUpdates,
       })
       .select("id")
       .single();
@@ -167,130 +366,32 @@ export async function sendContactEmail(
       });
 
       if (isMissingSupabaseTableError(error)) {
-        return { success: false, error: copy.storageUnavailable };
+        return { success: false, error: submission.copy.storageUnavailable };
       }
 
-      return { success: false, error: copy.submitFailed };
+      return { success: false, error: submission.copy.submitFailed };
     }
 
     const inquiryLabel = getContactInquiryLabel(inquiryType);
-    if (process.env.CONTACT_EMAIL && contactMessage) {
-      const notificationResult = await dispatchLoggedNotificationEmail({
-        aggregateId: contactMessage.id,
-        aggregateType: "contact_message",
-        eventType: "contact_message_received",
-        payload: {
-          inquiry_type: inquiryType,
-          locale: language,
-          sender_email: redactEmailAddress(email),
-          wants_updates: wantsUpdates,
-        },
-        to: process.env.CONTACT_EMAIL,
-        replyTo: email,
-        subject: `Coptic Compass contact: ${inquiryLabel} from ${name}`,
-        react: React.createElement(ContactEmailTemplate, {
-          name,
-          email,
-          inquiryLabel,
-          message,
-        }),
-        text: [
-          `Name: ${name}`,
-          `Email: ${email}`,
-          `Type: ${inquiryLabel}`,
-          `Locale: ${language}`,
-          `Wants updates: ${wantsUpdates ? "yes" : "no"}`,
-          "",
-          "Message:",
-          message,
-        ].join("\n"),
-      });
+    await sendContactOwnerNotification({
+      contactMessageId: contactMessage?.id ?? null,
+      email: submission.email,
+      inquiryLabel,
+      inquiryType,
+      language: submission.language,
+      message: submission.message,
+      name: submission.name,
+      wantsUpdates: submission.wantsUpdates,
+    });
 
-      if (!notificationResult.success) {
-        console.error("Failed to send contact alert email", {
-          contactMessageId: contactMessage.id,
-          error: notificationResult.error,
-          email: redactEmailAddress(email),
-          inquiryType,
-        });
-      }
-    }
-
-    let successMessage = copy.success;
-
-    if (wantsUpdates) {
-      try {
-        const { request, token } = await createAudienceOptInRequest({
-          booksRequested: true,
-          email,
-          fullName: name,
-          generalUpdatesRequested: true,
-          lessonsRequested: true,
-          locale: language,
-          source: "contact_form",
-        });
-
-        const confirmationUrl = buildAudienceOptInConfirmationUrl(
-          language,
-          token,
-        );
-        const confirmationResult = await dispatchLoggedNotificationEmail({
-          aggregateId: request.id,
-          aggregateType: "audience_opt_in_request",
-          eventType: "audience_opt_in_requested",
-          payload: {
-            email: redactEmailAddress(email),
-            locale: language,
-            source: "contact_form",
-            topics: {
-              books: true,
-              general_updates: true,
-              lessons: true,
-            },
-          },
-          to: email,
-          subject: getAudienceOptInConfirmationSubject(language),
-          react: React.createElement(AudienceOptInConfirmationEmail, {
-            confirmationUrl,
-            language,
-            recipientName: name,
-          }),
-          text: [
-            language === "nl"
-              ? "Bevestig je Coptic Compass e-mailupdates via deze link:"
-              : "Confirm your Coptic Compass email updates with this link:",
-            confirmationUrl,
-            "",
-            language === "nl"
-              ? "Heb je dit niet aangevraagd, dan kun je deze e-mail gerust negeren."
-              : "If you did not request this, you can safely ignore this email.",
-          ].join("\n"),
-        });
-
-        successMessage = confirmationResult.success
-          ? copy.successConfirmation
-          : copy.successConfirmationIssue;
-
-        if (!confirmationResult.success) {
-          console.error("Failed to send audience opt-in confirmation email", {
-            audienceOptInRequestId: request.id,
-            email: redactEmailAddress(email),
-            error: confirmationResult.error,
-            locale: language,
-          });
-        }
-      } catch (error) {
-        console.error(
-          "Failed to create audience opt-in request from contact form",
-          {
-            email: redactEmailAddress(email),
-            error,
-            name,
-          },
-        );
-        successMessage = copy.successConfirmationIssue;
-      }
-    }
+    const successMessage = submission.wantsUpdates
+      ? await sendContactUpdatesConfirmation({
+          copy: submission.copy,
+          email: submission.email,
+          language: submission.language,
+          name: submission.name,
+        })
+      : submission.copy.success;
 
     return {
       success: true,
@@ -298,6 +399,45 @@ export async function sendContactEmail(
     };
   } catch (error) {
     console.error("Failed to handle contact message", error);
-    return { success: false, error: copy.submitFailed };
+    return { success: false, error: submission.copy.submitFailed };
   }
+}
+
+/**
+ * Persists a contact submission, sends the owner alert, and optionally starts
+ * the audience opt-in flow. Notification failures are treated as non-blocking
+ * so a successfully stored message can still return success to the visitor.
+ */
+export async function sendContactEmail(
+  _prevState: ContactFormState | null,
+  formData: FormData,
+): Promise<ContactFormState> {
+  const submission = parseContactSubmission(formData);
+  return withScalabilityTimer(
+    "action.contact.send_contact_email",
+    async () => {
+      const validationState = validateContactSubmission(submission);
+
+      if (validationState) {
+        return validationState;
+      }
+
+      const rateLimitState = await enforceContactRateLimit(submission.copy);
+      if (rateLimitState) {
+        return rateLimitState;
+      }
+
+      const inquiryType = submission.inquiryType as ContactInquiryValue;
+      return processStoredContactSubmission(submission, inquiryType);
+    },
+    {
+      metadata: {
+        honeypotFilled: Boolean(submission.honeypot),
+        inquiryType: submission.inquiryType,
+        language: submission.language,
+        wantsUpdates: submission.wantsUpdates,
+      },
+      summarizeResult: summarizeContactFormState,
+    },
+  );
 }

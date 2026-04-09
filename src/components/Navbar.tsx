@@ -1,14 +1,12 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
+import { Menu, X } from "lucide-react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X } from "lucide-react";
-import { ThemeToggle } from "./ThemeToggle";
-import { LanguageToggle } from "./LanguageToggle";
-import { useLanguage } from "./LanguageProvider";
+
 import {
   getContactPath,
   getDashboardPath,
@@ -18,6 +16,10 @@ import {
   getPublicationsPath,
 } from "@/lib/locale";
 import { getLoginPath } from "@/lib/supabase/config";
+
+import { useLanguage } from "./LanguageProvider";
+import { LanguageToggle } from "./LanguageToggle";
+import { ThemeToggle } from "./ThemeToggle";
 
 const NavbarAuthLink = dynamic(
   () =>

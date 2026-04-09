@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
 import { Download, Lock } from "lucide-react";
+import { useState } from "react";
+
 import { AuthGatedActionButton } from "@/components/AuthGatedActionButton";
 import { buttonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
 import { cx } from "@/lib/classes";
 import { useOptionalAuthGate } from "@/lib/supabase/useOptionalAuthGate";
+
 import type { jsPDF as JsPdfInstance } from "jspdf";
 
 type PdfLifecycleCallback = () => Promise<void> | void;
@@ -36,6 +38,10 @@ const PDF_BUTTON_COPY = {
   },
 } as const;
 
+/**
+ * Waits for two paint cycles so layout and style changes settle before the
+ * lesson content is captured into an image.
+ */
 function waitForNextPaint() {
   return new Promise<void>((resolve) => {
     requestAnimationFrame(() => {
@@ -44,6 +50,10 @@ function waitForNextPaint() {
   });
 }
 
+/**
+ * Captures a lesson node as a high-resolution image and writes it into a
+ * paginated A4 PDF after optional pre/post capture hooks run.
+ */
 export function DownloadPdfButton({
   targetId,
   fileName,
@@ -56,10 +66,14 @@ export function DownloadPdfButton({
   const copy = PDF_BUTTON_COPY[language];
 
   const handleDownload = async () => {
-    if (!authGate.isAuthenticated) return;
+    if (!authGate.isAuthenticated) {
+      return;
+    }
 
     const targetElement = document.getElementById(targetId);
-    if (!targetElement) return;
+    if (!targetElement) {
+      return;
+    }
 
     setIsGenerating(true);
 
@@ -69,18 +83,19 @@ export function DownloadPdfButton({
         await waitForNextPaint();
       }
 
-      // Dynamically import modern PDF compilers
+      /**
+       * Load the client-only capture and PDF libraries lazily so they do not
+       * inflate the initial page bundle.
+       */
       const { toPng } = await import("html-to-image");
       const { jsPDF } = await import("jspdf");
 
-      // Render native image via browser's SVG renderer instantly on the live node (no invisible clones)
       const dataUrl = await toPng(targetElement, {
         cacheBust: true,
         pixelRatio: 2,
         backgroundColor: "#ffffff",
       });
 
-      // Construct A4 container (210mm x 297mm)
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -100,12 +115,14 @@ export function DownloadPdfButton({
       let heightLeft = imgHeight;
       let position = margin;
 
+      /**
+       * Add white margin guards and a timestamped footer so each generated page
+       * remains printable even when the captured lesson image extends edge to
+       * edge.
+       */
       const addProtectedMarginsAndFooter = (doc: JsPdfInstance) => {
-        // Draw white rectangle to protect the top margin from image bleed
         doc.setFillColor(255, 255, 255);
         doc.rect(0, 0, pdfWidth, margin, "F");
-
-        // Draw white rectangle to protect the bottom margin
         doc.rect(0, pageHeight - margin, pdfWidth, margin, "F");
 
         const now = new Date().toLocaleString(
@@ -121,12 +138,14 @@ export function DownloadPdfButton({
         );
       };
 
-      // Plot first page
+      /**
+       * Reuse the same tall capture across pages by shifting it upward until
+       * the full lesson has been written into the PDF.
+       */
       pdf.addImage(dataUrl, "PNG", margin, position, contentWidth, imgHeight);
       addProtectedMarginsAndFooter(pdf);
       heightLeft -= contentHeight;
 
-      // Plot all subsequent cascading pages if the content is lengthy
       while (heightLeft > 0) {
         position = position - contentHeight;
         pdf.addPage();

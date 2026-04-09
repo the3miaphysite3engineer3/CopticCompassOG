@@ -1,5 +1,8 @@
 import { defineMessages } from "@/lib/translations/defineMessages";
 
+/**
+ * Localized copy for publication listing and detail pages.
+ */
 export const publicationsMessages = defineMessages({
   en: {
     "publications.badge": "Publication",

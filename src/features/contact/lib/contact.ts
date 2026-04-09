@@ -7,6 +7,10 @@ type ContactInquiryOption = {
   emailLabel: string;
 };
 
+/**
+ * Declares the supported contact inquiry categories used by the form, email
+ * notifications, and admin filters.
+ */
 export const contactInquiryOptions = [
   {
     value: "dictionary_feedback",
@@ -37,6 +41,10 @@ export const contactInquiryOptions = [
 
 export type ContactInquiryValue =
   (typeof contactInquiryOptions)[number]["value"];
+
+/**
+ * Lists the contact-message workflow states used in admin triage.
+ */
 export const CONTACT_MESSAGE_STATUSES = [
   "new",
   "in_progress",
@@ -62,30 +70,49 @@ const contactMessageStatusPriority: Record<ContactMessageStatus, number> = {
   archived: 3,
 };
 
+/**
+ * Narrows a raw inquiry value to one of the supported contact inquiry types.
+ */
 export function isContactInquiryValue(
   value: string,
 ): value is ContactInquiryValue {
   return contactInquiryMap.has(value);
 }
 
+/**
+ * Returns the email-facing label for a validated contact inquiry value.
+ */
 export function getContactInquiryLabel(value: ContactInquiryValue) {
   return contactInquiryMap.get(value) ?? "General Message";
 }
 
+/**
+ * Returns the email-facing label for any inquiry value, falling back to the
+ * general-message label for unknown values.
+ */
 export function formatContactInquiryLabel(value: string) {
   return contactInquiryMap.get(value) ?? "General Message";
 }
 
+/**
+ * Narrows a raw status string to one of the supported contact message states.
+ */
 export function isContactMessageStatus(
   value: string,
 ): value is ContactMessageStatus {
   return CONTACT_MESSAGE_STATUSES.includes(value as ContactMessageStatus);
 }
 
+/**
+ * Returns the admin-facing label for a contact message status.
+ */
 export function formatContactMessageStatus(status: ContactMessageStatus) {
   return contactMessageStatusLabelMap[status];
 }
 
+/**
+ * Sorts contact messages by workflow priority first and then by newest first.
+ */
 export function compareContactMessagePriority(
   left: Pick<ContactMessageRow, "created_at" | "status">,
   right: Pick<ContactMessageRow, "created_at" | "status">,

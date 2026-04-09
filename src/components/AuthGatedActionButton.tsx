@@ -1,5 +1,6 @@
 "use client";
 
+import { Lock } from "lucide-react";
 import {
   useEffect,
   useId,
@@ -8,9 +9,9 @@ import {
   type ButtonHTMLAttributes,
   type ReactNode,
 } from "react";
-import { Lock } from "lucide-react";
-import { cx } from "@/lib/classes";
+
 import { FloatingTooltip } from "@/components/FloatingTooltip";
+import { cx } from "@/lib/classes";
 
 type AuthGatedActionButtonProps = Omit<
   ButtonHTMLAttributes<HTMLButtonElement>,

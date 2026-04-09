@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { getPublicationById } from "./publications";
+
 import {
   buildPublicationOpenGraphImageUrl,
   buildPublicationOpenGraphPreview,
 } from "./publicationOpenGraph";
+import { getPublicationById } from "./publications";
 
 describe("publication Open Graph helpers", () => {
   it("builds a stable publication-specific Open Graph image URL", () => {

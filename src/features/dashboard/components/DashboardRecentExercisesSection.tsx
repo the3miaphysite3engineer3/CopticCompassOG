@@ -1,6 +1,7 @@
 import { SubmissionEmptyState } from "@/features/submissions/components/SubmissionEmptyState";
 import type { SubmissionRow } from "@/features/submissions/types";
 import type { Language } from "@/types/i18n";
+
 import { DashboardRecentExerciseDisclosure } from "./DashboardRecentExerciseDisclosure";
 import { getDashboardCopy } from "../lib/dashboardCopy";
 

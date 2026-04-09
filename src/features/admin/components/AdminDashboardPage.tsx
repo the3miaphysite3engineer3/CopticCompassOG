@@ -1,4 +1,5 @@
-import type { ReactNode } from "react";
+import { PageHeader } from "@/components/PageHeader";
+import { PageShell, pageShellAccents } from "@/components/PageShell";
 import {
   AdminAudienceSection,
   AdminCommunicationsDesk,
@@ -18,10 +19,10 @@ import {
   loadAdminSystemDashboardData,
   loadAdminWorkspaceOverview,
 } from "@/features/admin/lib/dashboardData";
-import { PageHeader } from "@/components/PageHeader";
-import { PageShell, pageShellAccents } from "@/components/PageShell";
-import { requireAdminPageSession } from "@/lib/supabase/auth";
 import type { AdminWorkspaceMode } from "@/features/admin/lib/workspaceMode";
+import { requireAdminPageSession } from "@/lib/supabase/auth";
+
+import type { ReactNode } from "react";
 
 export async function AdminDashboardPage({
   initialMode = "review",

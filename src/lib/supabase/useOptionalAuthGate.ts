@@ -1,16 +1,22 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import type { User } from "@supabase/supabase-js";
+
 import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
 import { loadBrowserUser } from "@/lib/supabase/clientAuth";
 
-export type OptionalAuthGateStatus =
+import type { User } from "@supabase/supabase-js";
+
+type OptionalAuthGateStatus =
   | "loading"
   | "signed-in"
   | "signed-out"
   | "unavailable";
 
+/**
+ * Tracks the optional browser auth state for UI that can adapt to auth when it
+ * is configured but should still render when auth is unavailable.
+ */
 export function useOptionalAuthGate() {
   const authAvailable = hasSupabaseEnv();
   const [status, setStatus] = useState<OptionalAuthGateStatus>(

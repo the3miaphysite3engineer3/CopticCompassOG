@@ -1,10 +1,17 @@
 import { isLanguage, DEFAULT_LANGUAGE, type Language } from "@/lib/i18n";
 
+/**
+ * Lists the public locales exposed in localized site routes and metadata.
+ */
 export const PUBLIC_LOCALES = [
   "en",
   "nl",
 ] as const satisfies readonly Language[];
 
+/**
+ * Normalizes route fragments so downstream helpers can safely assume a leading
+ * slash and a root fallback.
+ */
 function normalizePath(path: string) {
   if (!path) {
     return "/";
@@ -13,10 +20,34 @@ function normalizePath(path: string) {
   return path.startsWith("/") ? path : `/${path}`;
 }
 
+/**
+ * Narrows an arbitrary string to one of the public locales supported in URLs.
+ */
 export function isPublicLocale(value: string): value is Language {
   return isLanguage(value);
 }
 
+/**
+ * Reads a supported locale prefix from a pathname when the route is already
+ * localized under the public site surface.
+ */
+export function getPublicLocaleFromPathname(
+  pathname: string | null | undefined,
+) {
+  if (!pathname) {
+    return null;
+  }
+
+  const normalizedPath = normalizePath(pathname);
+  const [, maybeLocale] = normalizedPath.split("/");
+
+  return maybeLocale && isPublicLocale(maybeLocale) ? maybeLocale : null;
+}
+
+/**
+ * Prefixes an application path with the requested locale while keeping the
+ * localized homepage at `/locale` rather than `/locale/`.
+ */
 export function getLocalizedPath(locale: Language, path = "/") {
   const normalizedPath = normalizePath(path);
   return normalizedPath === "/" ? `/${locale}` : `/${locale}${normalizedPath}`;
@@ -67,6 +98,10 @@ export function getTermsPath(locale?: Language) {
   return locale ? getLocalizedPath(locale, "/terms") : "/terms";
 }
 
+/**
+ * Removes a supported locale prefix from a pathname so route switching and
+ * alternate-link builders can work with locale-agnostic paths.
+ */
 export function stripLocaleFromPathname(pathname: string) {
   const normalizedPath = normalizePath(pathname);
 
@@ -83,32 +118,55 @@ export function stripLocaleFromPathname(pathname: string) {
   return normalizedPath;
 }
 
+/**
+ * Rebuilds the current pathname under a different locale while preserving the
+ * underlying route segment.
+ */
 export function switchLocalePath(pathname: string, nextLocale: Language) {
   return getLocalizedPath(nextLocale, stripLocaleFromPathname(pathname));
 }
 
+/**
+ * Reattaches search and hash fragments to a pathname while normalizing the
+ * required `?` and `#` prefixes.
+ */
 export function appendSearchAndHash(pathname: string, search = "", hash = "") {
   const normalizedPathname = normalizePath(pathname);
-  const normalizedSearch = !search
-    ? ""
-    : search.startsWith("?")
-      ? search
-      : `?${search}`;
-  const normalizedHash = !hash ? "" : hash.startsWith("#") ? hash : `#${hash}`;
+  let normalizedSearch = "";
+
+  if (search) {
+    normalizedSearch = search.startsWith("?") ? search : `?${search}`;
+  }
+
+  let normalizedHash = "";
+
+  if (hash) {
+    normalizedHash = hash.startsWith("#") ? hash : `#${hash}`;
+  }
 
   return `${normalizedPathname}${normalizedSearch}${normalizedHash}`;
 }
 
+/**
+ * Builds the localized alternate-link map for a canonical route path.
+ */
 export function createLanguageAlternates(path: string) {
   return Object.fromEntries(
     PUBLIC_LOCALES.map((locale) => [locale, getLocalizedPath(locale, path)]),
   ) as Record<Language, string>;
 }
 
+/**
+ * Maps public locales onto the Open Graph locale identifiers used in metadata.
+ */
 export function getOpenGraphLocale(locale: Language) {
   return locale === "nl" ? "nl_BE" : "en_US";
 }
 
-export function getDefaultPublicLocale() {
+/**
+ * Returns the default public locale used when no path, cookie, or header
+ * preference is available.
+ */
+function _getDefaultPublicLocale() {
   return DEFAULT_LANGUAGE;
 }

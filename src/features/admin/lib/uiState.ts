@@ -4,6 +4,10 @@ import { useSyncExternalStore } from "react";
 
 const ADMIN_UI_STORAGE_EVENT = "admin-ui-storage";
 
+/**
+ * Reads a persisted admin UI value from localStorage and degrades to `null`
+ * when storage is unavailable.
+ */
 function getStoredValue(key: string) {
   if (typeof window === "undefined") {
     return null;
@@ -16,6 +20,10 @@ function getStoredValue(key: string) {
   }
 }
 
+/**
+ * Broadcasts a same-tab storage update event so multiple admin panels can stay
+ * in sync without waiting for the browser `storage` event.
+ */
 function dispatchStorageUpdate(key: string) {
   if (typeof window === "undefined") {
     return;
@@ -26,6 +34,10 @@ function dispatchStorageUpdate(key: string) {
   );
 }
 
+/**
+ * Subscribes to both browser storage events and same-tab custom updates for a
+ * persisted admin UI key.
+ */
 function subscribeToStoredValue(key: string, callback: () => void) {
   if (typeof window === "undefined") {
     return () => undefined;
@@ -54,6 +66,10 @@ function subscribeToStoredValue(key: string, callback: () => void) {
   };
 }
 
+/**
+ * Persists admin UI state to localStorage and ignores write failures so the UI
+ * still works in restricted browsing modes.
+ */
 function setStoredValue(key: string, value: string) {
   if (typeof window === "undefined") {
     return;
@@ -63,10 +79,14 @@ function setStoredValue(key: string, value: string) {
     window.localStorage.setItem(key, value);
     dispatchStorageUpdate(key);
   } catch {
-    // Ignore storage write failures so admin UX still works in restricted modes.
+    return;
   }
 }
 
+/**
+ * Persists a boolean disclosure state in localStorage and keeps it synchronized
+ * across tabs and admin panels.
+ */
 export function usePersistentDisclosureState(
   key: string,
   defaultValue: boolean,
@@ -90,6 +110,10 @@ export function usePersistentDisclosureState(
   ] as const;
 }
 
+/**
+ * Persists a constrained filter value in localStorage and ignores unsupported
+ * writes.
+ */
 export function usePersistentFilterState<T extends string>(
   key: string,
   defaultValue: T,
@@ -118,6 +142,10 @@ export function usePersistentFilterState<T extends string>(
   ] as const;
 }
 
+/**
+ * Persists an enum-like UI value in localStorage while validating it against
+ * the allowed values list.
+ */
 export function usePersistentEnumState<T extends string>(
   key: string,
   defaultValue: T,

@@ -2,13 +2,15 @@
 
 import { useLanguage } from "@/components/LanguageProvider";
 import type { Language } from "@/types/i18n";
-import type { LexicalEntry } from "../types";
-import type { EntryActionNotice } from "./entryActionBar";
+
 import {
   buildEntryShareLinks,
   buildEntrySharePayload,
   resolveEntryShareUrl,
 } from "./entryShare";
+
+import type { LexicalEntry } from "../types";
+import type { EntryActionNotice } from "./entryActionBar";
 
 type UseEntryShareActionsOptions = {
   entry: LexicalEntry;
@@ -18,6 +20,10 @@ type UseEntryShareActionsOptions = {
   relatedEntries: readonly LexicalEntry[];
 };
 
+/**
+ * Builds the localized share payload and exposes clipboard/native-share
+ * handlers for a dictionary entry.
+ */
 export function useEntryShareActions({
   entry,
   language,
@@ -41,6 +47,10 @@ export function useEntryShareActions({
   const canUseNativeShare =
     typeof navigator !== "undefined" && typeof navigator.share === "function";
 
+  /**
+   * Copies share content to the clipboard and reports the result through the
+   * action-bar notice channel.
+   */
   async function writeToClipboard(value: string, successMessage: string) {
     if (typeof navigator === "undefined" || !navigator.clipboard) {
       onNoticeChange({
@@ -64,6 +74,9 @@ export function useEntryShareActions({
     }
   }
 
+  /**
+   * Copies the canonical entry URL only.
+   */
   async function copyLink() {
     await writeToClipboard(
       sharePayload.url,
@@ -71,6 +84,9 @@ export function useEntryShareActions({
     );
   }
 
+  /**
+   * Copies the full share text plus URL.
+   */
   async function copyText() {
     await writeToClipboard(
       sharePayload.copyText,
@@ -78,6 +94,9 @@ export function useEntryShareActions({
     );
   }
 
+  /**
+   * Invokes the browser native share sheet when available.
+   */
   async function nativeShare() {
     if (
       typeof navigator === "undefined" ||

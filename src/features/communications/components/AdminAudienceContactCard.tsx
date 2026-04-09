@@ -25,6 +25,16 @@ export function AdminAudienceContactCard({
 }) {
   const isSubscribed = hasAudienceSubscriptions(contact);
   const syncState = contact.syncState;
+  let syncTone: "coptic" | "neutral" | "surface" = "surface";
+  let syncLabel = "Resend pending";
+
+  if (syncState?.last_error) {
+    syncTone = "neutral";
+    syncLabel = "Resend error";
+  } else if (syncState?.last_synced_at) {
+    syncTone = "coptic";
+    syncLabel = "Resend synced";
+  }
 
   return (
     <SurfacePanel rounded="3xl" className="space-y-5 p-6">
@@ -42,21 +52,8 @@ export function AdminAudienceContactCard({
           <Badge tone={isSubscribed ? "accent" : "neutral"} size="xs">
             {isSubscribed ? "Subscribed" : "Paused"}
           </Badge>
-          <Badge
-            tone={
-              syncState?.last_error
-                ? "neutral"
-                : syncState?.last_synced_at
-                  ? "coptic"
-                  : "surface"
-            }
-            size="xs"
-          >
-            {syncState?.last_error
-              ? "Resend error"
-              : syncState?.last_synced_at
-                ? "Resend synced"
-                : "Resend pending"}
+          <Badge tone={syncTone} size="xs">
+            {syncLabel}
           </Badge>
           <Badge tone="surface" size="xs">
             {getAudienceSourceLabel(contact.source)}

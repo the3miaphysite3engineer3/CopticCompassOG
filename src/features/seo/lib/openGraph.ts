@@ -1,12 +1,8 @@
 import { siteConfig } from "@/lib/site";
 import type { Language } from "@/types/i18n";
 
-export type OpenGraphCardType = "site" | "entry" | "lesson" | "publication";
-export type OpenGraphSection =
-  | "dictionary"
-  | "grammar"
-  | "publications"
-  | "site";
+type OpenGraphCardType = "site" | "entry" | "lesson" | "publication";
+type OpenGraphSection = "dictionary" | "grammar" | "publications" | "site";
 
 type OpenGraphImageUrlInput =
   | {
@@ -27,6 +23,10 @@ type OpenGraphImageUrlInput =
       type: "lesson";
     };
 
+/**
+ * Narrows arbitrary query-string input to one of the supported Open Graph card
+ * variants, defaulting to the generic site card for unknown values.
+ */
 export function normalizeOpenGraphCardType(
   value: string | null | undefined,
 ): OpenGraphCardType {
@@ -40,6 +40,10 @@ export function normalizeOpenGraphCardType(
   }
 }
 
+/**
+ * Builds the `/api/og` image URL for a site, entry, lesson, or publication
+ * preview card.
+ */
 export function buildOpenGraphImageUrl(input: OpenGraphImageUrlInput) {
   const baseUrl = input.baseUrl ?? siteConfig.liveUrl;
   const params = new URLSearchParams({
@@ -61,10 +65,16 @@ export function buildOpenGraphImageUrl(input: OpenGraphImageUrlInput) {
   return `${baseUrl}/api/og?${params.toString()}`;
 }
 
+/**
+ * Returns the localized brand label used inside generated Open Graph cards.
+ */
 export function getOpenGraphBrandLabel(locale: Language) {
   return locale === "nl" ? "Koptisch Kompas" : siteConfig.brandName;
 }
 
+/**
+ * Returns the localized footer label for one Open Graph card section.
+ */
 export function getOpenGraphSectionFooter(
   section: OpenGraphSection,
   locale: Language,

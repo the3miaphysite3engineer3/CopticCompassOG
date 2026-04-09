@@ -1,5 +1,10 @@
 import { buildSupabaseRestHeaders } from "./supabaseRest.ts";
 
+/**
+ * Inserts the notification event row used to audit one content-release email.
+ * Duplicate dedupe keys are treated as a handled no-op so the worker can resume
+ * safely.
+ */
 export async function insertNotificationEvent(options: {
   aggregateId: string;
   aggregateType: string;
@@ -70,6 +75,10 @@ export async function insertNotificationEvent(options: {
   return null;
 }
 
+/**
+ * Records the outcome of one notification delivery attempt for a content
+ * release recipient.
+ */
 export async function insertNotificationDelivery(options: {
   error: string | null;
   eventId: string;
@@ -104,6 +113,10 @@ export async function insertNotificationDelivery(options: {
   }
 }
 
+/**
+ * Marks the parent notification event as sent or failed after delivery has
+ * finished.
+ */
 export async function updateNotificationEventStatus(options: {
   eventId: string;
   lastError: string | null;

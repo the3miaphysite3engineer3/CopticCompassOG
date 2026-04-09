@@ -1,9 +1,11 @@
+import { buildOpenGraphImageUrl } from "@/features/seo/lib/openGraph";
 import { siteConfig } from "@/lib/site";
 import type { Language } from "@/types/i18n";
-import type { LexicalEntry } from "../types";
+
 import { getPreferredEntryDisplaySpelling } from "./entryDisplay";
 import { getEntrySummary, toPlainText } from "./entryText";
-import { buildOpenGraphImageUrl } from "@/features/seo/lib/openGraph";
+
+import type { LexicalEntry } from "../types";
 
 type BuildEntryOpenGraphPreviewOptions = {
   entry: LexicalEntry;
@@ -12,7 +14,7 @@ type BuildEntryOpenGraphPreviewOptions = {
   relatedEntries?: readonly LexicalEntry[];
 };
 
-export type EntryOpenGraphPreview = {
+type EntryOpenGraphPreview = {
   gloss: string;
   heading: string;
   relatedForms: string[];
@@ -23,6 +25,10 @@ function getDisplayForm(entry: LexicalEntry) {
   return toPlainText(getPreferredEntryDisplaySpelling(entry));
 }
 
+/**
+ * Collects up to two distinct related forms for the entry preview, preferring
+ * resolved parent/related entries while avoiding duplicate ids and spellings.
+ */
 function collectRelatedForms(
   entry: LexicalEntry,
   parentEntry: LexicalEntry | null | undefined,
@@ -55,6 +61,9 @@ function collectRelatedForms(
   return forms;
 }
 
+/**
+ * Builds the `/api/og` image URL for one dictionary entry preview card.
+ */
 export function buildEntryOpenGraphImageUrl(
   entryId: string,
   language: Language,
@@ -68,6 +77,10 @@ export function buildEntryOpenGraphImageUrl(
   });
 }
 
+/**
+ * Builds the dictionary-entry Open Graph preview payload, including a
+ * localized fallback gloss when the entry summary is empty.
+ */
 export function buildEntryOpenGraphPreview({
   entry,
   language,

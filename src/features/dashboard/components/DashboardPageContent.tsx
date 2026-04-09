@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+
 import { logout } from "@/actions/auth";
 import { Badge } from "@/components/Badge";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
@@ -6,12 +7,12 @@ import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { DashboardRecentExercisesSection } from "@/features/dashboard/components/DashboardRecentExercisesSection";
 import { DashboardWelcomePanel } from "@/features/dashboard/components/DashboardWelcomePanel";
+import { getDashboardCopy } from "@/features/dashboard/lib/dashboardCopy";
+import { loadDashboardPageData } from "@/features/dashboard/lib/server/pageData";
 import { DictionaryFavoritesOverview } from "@/features/dictionary/components/DictionaryFavoritesOverview";
+import { DEFAULT_DICTIONARY_DIALECT_FILTER } from "@/features/dictionary/config";
 import { GrammarDashboardOverview } from "@/features/grammar/components/GrammarDashboardOverview";
 import { AccountSettingsPanel } from "@/features/profile/components/AccountSettingsPanel";
-import { getDashboardCopy } from "@/features/dashboard/lib/dashboardCopy";
-import { DEFAULT_DICTIONARY_DIALECT_FILTER } from "@/features/dictionary/config";
-import { loadDashboardPageData } from "@/features/dashboard/lib/server/pageData";
 import { getTranslation } from "@/lib/i18n";
 import { getDashboardPath, getLocalizedHomePath } from "@/lib/locale";
 import { requireAuthenticatedPageSession } from "@/lib/supabase/auth";

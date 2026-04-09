@@ -18,16 +18,16 @@ import type {
   GrammarSourceDocument,
 } from "@/content/grammar/schema";
 
-export type GrammarApiEnvelope<T> = GrammarVersionedExport<T>;
-export type GrammarApiLessonStatus = "published";
-export type GrammarApiPathExample = {
+type GrammarApiEnvelope<T> = GrammarVersionedExport<T>;
+type GrammarApiLessonStatus = "published";
+type GrammarApiPathExample = {
   path: string;
   description: string;
 };
-export type GrammarApiEndpointDescription = GrammarApiPathExample & {
+type GrammarApiEndpointDescription = GrammarApiPathExample & {
   queryParameters?: string[];
 };
-export type GrammarApiIndex = {
+type GrammarApiIndex = {
   name: string;
   description: string;
   schemaVersion: GrammarManifest["schemaVersion"];
@@ -47,24 +47,41 @@ export type GrammarApiIndex = {
   examples: GrammarApiPathExample[];
 };
 
+/**
+ * Returns the published-only grammar dataset snapshot used by the public API
+ * and static grammar data exports.
+ */
 function getPublishedGrammarApiSnapshot() {
   return createPublishedGrammarDatasetSnapshot(getGrammarDatasetSnapshot());
 }
 
+/**
+ * Returns the manifest paired with the published grammar API snapshot.
+ */
 function getGrammarApiManifestSnapshot(): GrammarManifest {
   return getPublishedGrammarApiSnapshot().manifest;
 }
 
+/**
+ * Returns the published grammar manifest wrapped for external consumers.
+ */
 export function getGrammarApiManifest() {
   return getGrammarApiManifestSnapshot();
 }
 
+/**
+ * Narrows API lesson status filters to the currently supported public value.
+ */
 export function isGrammarLessonStatus(
   value: string | null,
 ): value is GrammarApiLessonStatus {
   return value === "published";
 }
 
+/**
+ * Resolves a lesson filter supplied as either a lesson slug or canonical
+ * lesson id into the canonical lesson id used by dataset records.
+ */
 export function resolveGrammarLessonFilter(
   lessonFilter: string | null | undefined,
 ): GrammarLessonId | null {
@@ -93,6 +110,10 @@ export function resolveGrammarLessonFilter(
   );
 }
 
+/**
+ * Lists grammar lesson index items for the API, optionally filtered to the
+ * public published status.
+ */
 export function listGrammarApiLessons(
   status?: GrammarApiLessonStatus,
 ): GrammarApiEnvelope<GrammarLessonIndexItem[]> {
@@ -104,6 +125,9 @@ export function listGrammarApiLessons(
   return createGrammarVersionedExport(manifest, lessons);
 }
 
+/**
+ * Returns the full published lesson bundle for a lesson slug.
+ */
 export function getGrammarApiLessonBySlug(
   slug: string,
 ): GrammarApiEnvelope<GrammarLessonBundle> | null {
@@ -120,6 +144,9 @@ export function getGrammarApiLessonBySlug(
   );
 }
 
+/**
+ * Lists published example records, optionally scoped to one lesson.
+ */
 export function listGrammarApiExamples(
   lessonId?: GrammarLessonId,
 ): GrammarApiEnvelope<GrammarExampleDocument[]> {
@@ -131,6 +158,9 @@ export function listGrammarApiExamples(
   return createGrammarVersionedExport(snapshot.manifest, examples);
 }
 
+/**
+ * Lists published exercise records, optionally scoped to one lesson.
+ */
 export function listGrammarApiExercises(
   lessonId?: GrammarLessonId,
 ): GrammarApiEnvelope<GrammarExerciseDocument[]> {
@@ -142,6 +172,10 @@ export function listGrammarApiExercises(
   return createGrammarVersionedExport(snapshot.manifest, exercises);
 }
 
+/**
+ * Lists published concept records, optionally filtered to concepts referenced
+ * by one lesson.
+ */
 export function listGrammarApiConcepts(
   lessonId?: GrammarLessonId,
 ): GrammarApiEnvelope<GrammarConceptDocument[]> {
@@ -155,6 +189,9 @@ export function listGrammarApiConcepts(
   return createGrammarVersionedExport(snapshot.manifest, concepts);
 }
 
+/**
+ * Returns a single published concept record by canonical id.
+ */
 export function getGrammarApiConceptById(
   id: string,
 ): GrammarApiEnvelope<GrammarConceptDocument> | null {
@@ -168,6 +205,9 @@ export function getGrammarApiConceptById(
   return createGrammarVersionedExport(snapshot.manifest, concept);
 }
 
+/**
+ * Lists published footnote records, optionally scoped to one lesson.
+ */
 export function listGrammarApiFootnotes(
   lessonId?: GrammarLessonId,
 ): GrammarApiEnvelope<GrammarFootnoteDocument[]> {
@@ -179,6 +219,10 @@ export function listGrammarApiFootnotes(
   return createGrammarVersionedExport(snapshot.manifest, footnotes);
 }
 
+/**
+ * Lists published source records, optionally filtered to the sources attached
+ * to one lesson.
+ */
 export function listGrammarApiSources(
   lessonId?: GrammarLessonId,
 ): GrammarApiEnvelope<GrammarSourceDocument[]> {
@@ -199,6 +243,9 @@ export function listGrammarApiSources(
   return createGrammarVersionedExport(snapshot.manifest, sources);
 }
 
+/**
+ * Returns a single published source record by canonical id.
+ */
 export function getGrammarApiSourceById(
   id: string,
 ): GrammarApiEnvelope<GrammarSourceDocument> | null {
@@ -212,6 +259,10 @@ export function getGrammarApiSourceById(
   return createGrammarVersionedExport(snapshot.manifest, source);
 }
 
+/**
+ * Builds the human-readable API index served alongside the grammar endpoints
+ * and static export paths.
+ */
 export function getGrammarApiIndex(): GrammarApiIndex {
   const manifest = getGrammarApiManifestSnapshot();
   const lessonStatuses = manifest.lessons.reduce(

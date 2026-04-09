@@ -1,10 +1,11 @@
 "use client";
 
 import { SlidersHorizontal } from "lucide-react";
+
 import { CheckboxField } from "@/components/CheckboxField";
 import { CompactSelect } from "@/components/CompactSelect";
-import { useLanguage } from "@/components/LanguageProvider";
 import { FormLabel } from "@/components/FormField";
+import { useLanguage } from "@/components/LanguageProvider";
 import {
   dialectFilterOptions,
   dictionaryPartOfSpeechFilterOptions,

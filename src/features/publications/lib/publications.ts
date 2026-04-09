@@ -1,5 +1,5 @@
-import type { Language } from "@/types/i18n";
 import { getLocalizedPath } from "@/lib/locale";
+import type { Language } from "@/types/i18n";
 
 export type LanguageBadge = "COP" | "NL" | "EN";
 export type PublicationSchemaType =
@@ -107,15 +107,25 @@ export const publications: Publication[] = [
   },
 ];
 
+/**
+ * Returns the localized publications route for a publication id.
+ */
 export function getPublicationPath(id: string, locale?: Language) {
   const path = `/publications/${id}`;
   return locale ? getLocalizedPath(locale, path) : path;
 }
 
+/**
+ * Loads one publication definition from the in-repo publications catalog.
+ */
 export function getPublicationById(id: string) {
   return publications.find((publication) => publication.id === id) ?? null;
 }
 
+/**
+ * Returns related publications by preferring shared language and schema type
+ * before truncating the list to the requested limit.
+ */
 export function getRelatedPublications(id: string, limit = 3) {
   const currentPublication = getPublicationById(id);
 
@@ -138,36 +148,37 @@ export function getRelatedPublications(id: string, limit = 3) {
     .slice(0, limit);
 }
 
+/**
+ * Builds the display title used across metadata and publication detail views.
+ */
 export function buildPublicationTitle(publication: Publication) {
   return publication.subtitle
     ? `${publication.title}: ${publication.subtitle}`
     : publication.title;
 }
 
+/**
+ * Builds the localized publication description used by metadata and share
+ * surfaces from the summary, format, availability, and author details.
+ */
 export function buildPublicationDescription(
   publication: Publication,
   locale: Language = "en",
 ) {
-  const formatLabel =
-    locale === "nl"
-      ? publication.schemaType === "Book"
-        ? "boek"
-        : publication.schemaType === "ScholarlyArticle"
-          ? "onderzoeksartikel"
-          : "creatief werk"
-      : publication.schemaType === "Book"
-        ? "book"
-        : publication.schemaType === "ScholarlyArticle"
-          ? "research article"
-          : "creative work";
-  const availabilityLabel =
-    locale === "nl"
-      ? publication.status === "published"
-        ? "Nu beschikbaar."
-        : "Binnenkort beschikbaar."
-      : publication.status === "published"
-        ? "Available now."
-        : "Forthcoming.";
+  let formatLabel = locale === "nl" ? "creatief werk" : "creative work";
+
+  if (publication.schemaType === "Book") {
+    formatLabel = locale === "nl" ? "boek" : "book";
+  } else if (publication.schemaType === "ScholarlyArticle") {
+    formatLabel = locale === "nl" ? "onderzoeksartikel" : "research article";
+  }
+
+  let availabilityLabel =
+    locale === "nl" ? "Binnenkort beschikbaar." : "Forthcoming.";
+
+  if (publication.status === "published") {
+    availabilityLabel = locale === "nl" ? "Nu beschikbaar." : "Available now.";
+  }
   const authorLabel = locale === "nl" ? "door" : "by";
   const platformLabel =
     locale === "nl" ? "via Coptic Compass" : "available through Coptic Compass";

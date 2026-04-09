@@ -1,8 +1,9 @@
-import type { PartOfSpeech } from "../config.ts";
 import { normalizeDialectKey } from "../config.ts";
+
+import type { PartOfSpeech } from "../config.ts";
 import type { DialectForms, LexicalEntry, LexicalGender } from "../types.ts";
 
-export interface DictionarySourceRow {
+interface DictionarySourceRow {
   word: string;
   meaning: string;
 }
@@ -13,9 +14,11 @@ export function stripSourceHtml(value: string) {
   return value.replace(/<[^>]+>/g, "");
 }
 
-// The source spreadsheet encodes part-of-speech shorthand at the start of the
-// meaning field, so we infer the typed enum from those recurring prefixes.
-export function classifyPOS(meaning: string): PartOfSpeech {
+/**
+ * Infers the typed part of speech from the shorthand prefixes used in the
+ * source spreadsheet's meaning column.
+ */
+function classifyPOS(meaning: string): PartOfSpeech {
   const normalizedMeaning = meaning.trim().toLowerCase();
 
   if (
@@ -102,10 +105,7 @@ export function classifyPOS(meaning: string): PartOfSpeech {
   return "N";
 }
 
-export function classifyNounGender(
-  meaning: string,
-  pos: PartOfSpeech,
-): LexicalGender {
+function classifyNounGender(meaning: string, pos: PartOfSpeech): LexicalGender {
   const firstMeaningLine = meaning.trim().split("\n")[0]?.trim() ?? "";
   const loweredMeaning = meaning.toLowerCase();
 
@@ -133,7 +133,7 @@ export function classifyNounGender(
   return gender;
 }
 
-export function extractGreek(meaning: string): string[] {
+function extractGreek(meaning: string): string[] {
   const matches = meaning.match(/\[(.*?)\]/g);
 
   if (!matches) {
@@ -143,7 +143,7 @@ export function extractGreek(meaning: string): string[] {
   return matches.map((match) => match.slice(1, -1).trim());
 }
 
-export function splitMeaningLines(meaning: string): string[] {
+function splitMeaningLines(meaning: string): string[] {
   return meaning
     .split("\n")
     .map((line) => line.trim())
@@ -154,8 +154,10 @@ export function extractDialectsAndHeadword(wordRaw: string): {
   headword: string;
   dialects: Record<string, DialectForms>;
 } {
-  // Each parenthesized line carries one or more dialect sigla followed by the
-  // form to store for that grammatical state.
+  /**
+   * Each parenthesized line carries one or more dialect sigla followed by the
+   * form to store for that grammatical state.
+   */
   const lines = wordRaw.split("\n");
   const dialectsObj: Record<string, DialectForms> = {};
   let primaryHeadword = "";

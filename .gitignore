@@ -45,3 +45,11 @@ supabase/.temp/
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# temp/scratch scripts and outputs
+/scratch/
+knip.txt
+knip.out.json
+lint.json
+fix_*.mjs
+fix_*.js

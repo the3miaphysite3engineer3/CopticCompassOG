@@ -3,10 +3,10 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 type ExercisesModuleContext = {
   duplicateLookupMaybeSingleMock: ReturnType<typeof vi.fn>;
   consumeRateLimitMock: ReturnType<typeof vi.fn>;
-  dispatchLoggedOwnerAlertEmailMock: ReturnType<typeof vi.fn>;
   getAuthenticatedServerContextMock: ReturnType<typeof vi.fn>;
   insertMock: ReturnType<typeof vi.fn>;
   insertSingleMock: ReturnType<typeof vi.fn>;
+  queueLoggedOwnerAlertEmailMock: ReturnType<typeof vi.fn>;
   revalidatePathMock: ReturnType<typeof vi.fn>;
   submitExercise: typeof import("./exercises").submitExercise;
 };
@@ -64,7 +64,7 @@ async function loadExercisesModule(options?: {
   recentDuplicate?: boolean;
   sendOwnerAlertResult?:
     | { error: string; success: false }
-    | { id: string | null; success: true };
+    | { eventId: string; jobId: string; success: true };
   user?: { email?: string | null; id: string } | null;
 }) {
   vi.resetModules();
@@ -112,11 +112,13 @@ async function loadExercisesModule(options?: {
           },
         },
   );
-  const dispatchLoggedOwnerAlertEmailMock = vi
-    .fn()
-    .mockResolvedValue(
-      options?.sendOwnerAlertResult ?? { success: true, id: "email_123" },
-    );
+  const queueLoggedOwnerAlertEmailMock = vi.fn().mockResolvedValue(
+    options?.sendOwnerAlertResult ?? {
+      eventId: "event_123",
+      jobId: "job_123",
+      success: true,
+    },
+  );
 
   vi.doMock("next/cache", () => ({
     revalidatePath: revalidatePathMock,
@@ -135,7 +137,7 @@ async function loadExercisesModule(options?: {
     hasSupabaseRuntimeEnv: vi.fn(() => options?.hasEnv ?? true),
   }));
   vi.doMock("@/lib/notifications/events", () => ({
-    dispatchLoggedOwnerAlertEmail: dispatchLoggedOwnerAlertEmailMock,
+    queueLoggedOwnerAlertEmail: queueLoggedOwnerAlertEmailMock,
   }));
 
   const mod = await import("./exercises");
@@ -144,10 +146,10 @@ async function loadExercisesModule(options?: {
     ...mod,
     duplicateLookupMaybeSingleMock,
     consumeRateLimitMock,
-    dispatchLoggedOwnerAlertEmailMock,
     getAuthenticatedServerContextMock,
     insertMock,
     insertSingleMock,
+    queueLoggedOwnerAlertEmailMock,
     revalidatePathMock,
   } satisfies ExercisesModuleContext;
 }
@@ -287,7 +289,7 @@ describe("exercise submission action", () => {
   it("returns success without inserting when a matching recent submission already exists", async () => {
     const {
       consumeRateLimitMock,
-      dispatchLoggedOwnerAlertEmailMock,
+      queueLoggedOwnerAlertEmailMock,
       insertMock,
       revalidatePathMock,
       submitExercise,
@@ -303,7 +305,7 @@ describe("exercise submission action", () => {
 
     expect(consumeRateLimitMock).not.toHaveBeenCalled();
     expect(insertMock).not.toHaveBeenCalled();
-    expect(dispatchLoggedOwnerAlertEmailMock).not.toHaveBeenCalled();
+    expect(queueLoggedOwnerAlertEmailMock).not.toHaveBeenCalled();
     expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard");
     expect(revalidatePathMock).toHaveBeenCalledWith("/grammar/lesson-1");
   });
@@ -327,7 +329,7 @@ describe("exercise submission action", () => {
 
   it("stores canonical prompts and submission metadata, then alerts the owner", async () => {
     const {
-      dispatchLoggedOwnerAlertEmailMock,
+      queueLoggedOwnerAlertEmailMock,
       insertMock,
       revalidatePathMock,
       submitExercise,
@@ -366,7 +368,7 @@ describe("exercise submission action", () => {
         user_id: "user_123",
       }),
     ]);
-    expect(dispatchLoggedOwnerAlertEmailMock).toHaveBeenCalledWith(
+    expect(queueLoggedOwnerAlertEmailMock).toHaveBeenCalledWith(
       expect.objectContaining({
         aggregateId: "submission_123",
         aggregateType: "submission",
@@ -380,7 +382,7 @@ describe("exercise submission action", () => {
   });
 
   it("returns success even if the owner alert email fails after the submission is stored", async () => {
-    const { dispatchLoggedOwnerAlertEmailMock, insertMock, submitExercise } =
+    const { insertMock, queueLoggedOwnerAlertEmailMock, submitExercise } =
       await loadExercisesModule({
         sendOwnerAlertResult: {
           success: false,
@@ -395,12 +397,12 @@ describe("exercise submission action", () => {
     });
 
     expect(insertMock).toHaveBeenCalledOnce();
-    expect(dispatchLoggedOwnerAlertEmailMock).toHaveBeenCalledOnce();
+    expect(queueLoggedOwnerAlertEmailMock).toHaveBeenCalledOnce();
   });
 
   it("treats a duplicate submission intent as an already-stored success", async () => {
     const {
-      dispatchLoggedOwnerAlertEmailMock,
+      queueLoggedOwnerAlertEmailMock,
       insertMock,
       revalidatePathMock,
       submitExercise,
@@ -418,7 +420,7 @@ describe("exercise submission action", () => {
     });
 
     expect(insertMock).toHaveBeenCalledOnce();
-    expect(dispatchLoggedOwnerAlertEmailMock).not.toHaveBeenCalled();
+    expect(queueLoggedOwnerAlertEmailMock).not.toHaveBeenCalled();
     expect(revalidatePathMock).toHaveBeenCalledWith("/dashboard");
     expect(revalidatePathMock).toHaveBeenCalledWith("/grammar/lesson-1");
   });
