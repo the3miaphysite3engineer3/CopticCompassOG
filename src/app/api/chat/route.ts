@@ -11,6 +11,9 @@ import {
   createOpenRouterChatCompletion,
   type OpenRouterChatMessage,
 } from "@/lib/openrouter";
+import { getAuthenticatedUser } from "@/lib/supabase/authQueries";
+import { hasSupabaseRuntimeEnv } from "@/lib/supabase/config";
+import { createClient } from "@/lib/supabase/server";
 
 export const maxDuration = 30;
 export const runtime = "nodejs";
@@ -255,7 +258,7 @@ function toInferenceProvider(value: unknown): InferenceProvider {
     return "openrouter";
   }
 
-  return "openrouter";
+  return "gemini";
 }
 
 function createStaticAssistantStream(responseText: string) {
@@ -315,6 +318,31 @@ function toPageContext(value: unknown): PageContext {
 
 export async function POST(req: Request) {
   try {
+    if (!hasSupabaseRuntimeEnv()) {
+      return new Response(
+        JSON.stringify({
+          error: "Shenute AI chat is unavailable right now.",
+        }),
+        {
+          status: 503,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
+    const supabase = await createClient();
+    const authenticatedUser = await getAuthenticatedUser(supabase);
+
+    if (!authenticatedUser) {
+      return new Response(
+        JSON.stringify({ error: "Sign in required to use Shenute AI chat." }),
+        {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        },
+      );
+    }
+
     const payload: {
       id?: unknown;
       inferenceProvider?: unknown;
