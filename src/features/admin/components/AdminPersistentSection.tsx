@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronDown } from "lucide-react";
+
 import { Badge } from "@/components/Badge";
 import { surfacePanelClassName } from "@/components/SurfacePanel";
 import { usePersistentDisclosureState } from "@/features/admin/lib/uiState";

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { getGrammarDatasetSnapshot } from "./registry.ts";
 
 const copticCharacterPattern = /\p{Script=Coptic}/u;

@@ -1,14 +1,15 @@
 "use client";
 
-import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import Link from "next/link";
+
 import { cx } from "@/lib/classes";
 
-export type BreadcrumbTrailItem = {
+export interface BreadcrumbTrailItem {
   label: string;
   href?: string;
   labelClassName?: string;
-};
+}
 
 type BreadcrumbTrailProps = {
   items: readonly BreadcrumbTrailItem[];

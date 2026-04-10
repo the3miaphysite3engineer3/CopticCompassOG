@@ -1,10 +1,13 @@
 "use client";
 
-import type { RefObject } from "react";
 import { Keyboard, Search, X } from "lucide-react";
-import CopticKeyboard from "./CopticKeyboard";
+
 import { useLanguage } from "@/components/LanguageProvider";
 import { antinoou } from "@/lib/fonts";
+
+import CopticKeyboard from "./CopticKeyboard";
+
+import type { RefObject } from "react";
 
 type DictionarySearchBarProps = {
   isKeyboardOpen: boolean;

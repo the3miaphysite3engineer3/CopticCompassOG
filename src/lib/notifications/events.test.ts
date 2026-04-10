@@ -3,17 +3,23 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 type NotificationsEventsModuleContext = {
   createServiceRoleClientMock: ReturnType<typeof vi.fn>;
   dispatchLoggedNotificationEmail: typeof import("./events").dispatchLoggedNotificationEmail;
-  dispatchLoggedOwnerAlertEmail: typeof import("./events").dispatchLoggedOwnerAlertEmail;
   getNotificationEmailEnvMock: ReturnType<typeof vi.fn>;
   hasSupabaseServiceRoleEnvMock: ReturnType<typeof vi.fn>;
   notificationDeliveriesInsertMock: ReturnType<typeof vi.fn>;
+  notificationEmailJobsInsertMock: ReturnType<typeof vi.fn>;
   notificationEventsInsertMock: ReturnType<typeof vi.fn>;
   notificationEventsUpdateEqMock: ReturnType<typeof vi.fn>;
+  invokeSupabaseEdgeFunctionMock: ReturnType<typeof vi.fn>;
+  queueLoggedNotificationEmail: typeof import("./events").queueLoggedNotificationEmail;
+  queueLoggedOwnerAlertEmail: typeof import("./events").queueLoggedOwnerAlertEmail;
   sendNotificationEmailMock: ReturnType<typeof vi.fn>;
 };
 
 async function loadNotificationsEventsModule(options?: {
   hasServiceRoleEnv?: boolean;
+  invokeWorkerResult?:
+    | { data: Record<string, unknown> | null; status: number; success: true }
+    | { error: string; status: number; success: false };
   notificationEmailEnv?: {
     notificationFromEmail: string;
     ownerAlertEmail: string | null;
@@ -30,6 +36,10 @@ async function loadNotificationsEventsModule(options?: {
     error: null,
   });
   const notificationDeliveriesInsertMock = vi.fn().mockResolvedValue({
+    error: null,
+  });
+  const notificationEmailJobsInsertMock = vi.fn().mockResolvedValue({
+    data: { id: "job_123" },
     error: null,
   });
   const notificationEventsUpdateEqMock = vi.fn().mockResolvedValue({
@@ -56,6 +66,16 @@ async function loadNotificationsEventsModule(options?: {
         };
       }
 
+      if (table === "notification_email_jobs") {
+        return {
+          insert: vi.fn(() => ({
+            select: vi.fn(() => ({
+              single: notificationEmailJobsInsertMock,
+            })),
+          })),
+        };
+      }
+
       throw new Error(`Unexpected notification table: ${table}`);
     }),
   });
@@ -67,6 +87,13 @@ async function loadNotificationsEventsModule(options?: {
     .mockResolvedValue(
       options?.sendNotificationResult ?? { success: true, id: "email_123" },
     );
+  const invokeSupabaseEdgeFunctionMock = vi.fn().mockResolvedValue(
+    options?.invokeWorkerResult ?? {
+      data: { jobId: "job_123", queued: true, success: true },
+      status: 202,
+      success: true,
+    },
+  );
   const getNotificationEmailEnvMock = vi.fn().mockReturnValue(
     options?.notificationEmailEnv ?? {
       notificationFromEmail: "notifications@example.com",
@@ -87,6 +114,9 @@ async function loadNotificationsEventsModule(options?: {
   vi.doMock("@/lib/supabase/serviceRole", () => ({
     createServiceRoleClient: createServiceRoleClientMock,
   }));
+  vi.doMock("@/lib/supabase/functions", () => ({
+    invokeSupabaseEdgeFunction: invokeSupabaseEdgeFunctionMock,
+  }));
 
   const mod = await import("./events");
 
@@ -96,8 +126,10 @@ async function loadNotificationsEventsModule(options?: {
     getNotificationEmailEnvMock,
     hasSupabaseServiceRoleEnvMock,
     notificationDeliveriesInsertMock,
+    notificationEmailJobsInsertMock,
     notificationEventsInsertMock,
     notificationEventsUpdateEqMock,
+    invokeSupabaseEdgeFunctionMock,
     sendNotificationEmailMock,
   } satisfies NotificationsEventsModuleContext;
 }
@@ -221,31 +253,61 @@ describe("logged notification events", () => {
     );
   });
 
-  it("uses the configured owner alert email for owner alerts", async () => {
+  it("stores a queued event, persists an email job, and starts the worker", async () => {
     const {
-      dispatchLoggedOwnerAlertEmail,
-      getNotificationEmailEnvMock,
-      sendNotificationEmailMock,
+      invokeSupabaseEdgeFunctionMock,
+      notificationEmailJobsInsertMock,
+      notificationEventsInsertMock,
+      queueLoggedNotificationEmail,
     } = await loadNotificationsEventsModule();
 
     await expect(
-      dispatchLoggedOwnerAlertEmail({
-        aggregateId: "report_123",
-        aggregateType: "entry_report",
-        eventType: "dictionary_entry_report_submitted",
-        subject: "Report received",
-        text: "A new dictionary report was submitted.",
+      queueLoggedNotificationEmail({
+        aggregateId: "contact_123",
+        aggregateType: "contact_message",
+        eventType: "contact_message_received",
+        subject: "New contact",
+        text: "A new contact message arrived.",
+        to: "owner@example.com",
       }),
     ).resolves.toEqual({
+      eventId: "event_123",
+      jobId: "job_123",
       success: true,
-      id: "email_123",
+    });
+
+    expect(notificationEventsInsertMock).toHaveBeenCalledOnce();
+    expect(notificationEmailJobsInsertMock).toHaveBeenCalledOnce();
+    expect(invokeSupabaseEdgeFunctionMock).toHaveBeenCalledWith(
+      "process-notification-email",
+      {
+        jobId: "job_123",
+      },
+    );
+  });
+
+  it("queues owner alerts with the configured owner recipient", async () => {
+    const {
+      getNotificationEmailEnvMock,
+      notificationEmailJobsInsertMock,
+      queueLoggedOwnerAlertEmail,
+    } = await loadNotificationsEventsModule();
+
+    await expect(
+      queueLoggedOwnerAlertEmail({
+        aggregateId: "submission_123",
+        aggregateType: "submission",
+        eventType: "exercise_submission_received",
+        subject: "New submission",
+        text: "A new submission arrived.",
+      }),
+    ).resolves.toEqual({
+      eventId: "event_123",
+      jobId: "job_123",
+      success: true,
     });
 
     expect(getNotificationEmailEnvMock).toHaveBeenCalledOnce();
-    expect(sendNotificationEmailMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        to: "owner@example.com",
-      }),
-    );
+    expect(notificationEmailJobsInsertMock).toHaveBeenCalledOnce();
   });
 });

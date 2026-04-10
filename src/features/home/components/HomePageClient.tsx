@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import {
   ArrowRight,
   BookOpen,
@@ -9,6 +7,9 @@ import {
   LibraryBig,
   type LucideIcon,
 } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";

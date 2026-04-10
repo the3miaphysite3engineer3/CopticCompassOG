@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
 import { ChevronDown } from "lucide-react";
-import { cx } from "@/lib/classes";
+import { useEffect, useRef, useState, type ReactNode } from "react";
+
 import { useLanguage } from "@/components/LanguageProvider";
+import { cx } from "@/lib/classes";
+
 import { useGrammarLessonRenderContext } from "./GrammarLessonRenderContext";
 
 type GrammarLessonSectionProps = {
@@ -290,13 +292,16 @@ export function GrammarLessonTable({
     };
   }, [language, mobileMinWidthRem, renderMode]);
 
-  const mobileScrollHint = hasStickyLeadingColumn
-    ? language === "en"
-      ? "Swipe sideways. Labels stay pinned."
-      : "Veeg zijwaarts. Labels blijven staan."
-    : language === "en"
-      ? "Swipe sideways to compare"
-      : "Veeg zijwaarts om te vergelijken";
+  let mobileScrollHint = "Veeg zijwaarts om te vergelijken";
+
+  if (hasStickyLeadingColumn) {
+    mobileScrollHint =
+      language === "en"
+        ? "Swipe sideways. Labels stay pinned."
+        : "Veeg zijwaarts. Labels blijven staan.";
+  } else if (language === "en") {
+    mobileScrollHint = "Swipe sideways to compare";
+  }
   const tableStyle =
     renderMode === "pdf" || !mobileMinWidthRem
       ? undefined

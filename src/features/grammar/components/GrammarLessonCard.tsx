@@ -1,11 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowRight, BookOpenText, Clock3 } from "lucide-react";
+import Link from "next/link";
+
 import { Badge } from "@/components/Badge";
-import { cx } from "@/lib/classes";
 import type { GrammarLessonIndexItem } from "@/content/grammar/schema";
 import { getGrammarLessonPath } from "@/features/grammar/lib/grammarPaths";
+import { cx } from "@/lib/classes";
 import type { Language } from "@/types/i18n";
 
 type GrammarLessonCardProps = {

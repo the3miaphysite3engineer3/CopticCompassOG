@@ -4,6 +4,10 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 
 const GRAMMAR_WORKSPACE_STORAGE_EVENT = "grammar-workspace-storage";
 
+/**
+ * Reads a persisted lesson-workspace value from localStorage and degrades to
+ * `null` when storage is unavailable.
+ */
 function getStoredValue(key: string) {
   if (typeof window === "undefined") {
     return null;
@@ -16,6 +20,9 @@ function getStoredValue(key: string) {
   }
 }
 
+/**
+ * Broadcasts a same-tab lesson-workspace storage update event.
+ */
 function dispatchStorageUpdate(key: string) {
   if (typeof window === "undefined") {
     return;
@@ -26,6 +33,10 @@ function dispatchStorageUpdate(key: string) {
   );
 }
 
+/**
+ * Subscribes to both browser storage events and same-tab custom updates for a
+ * lesson-workspace storage key.
+ */
 function subscribeToStoredValue(key: string, callback: () => void) {
   if (typeof window === "undefined") {
     return () => undefined;
@@ -54,6 +65,10 @@ function subscribeToStoredValue(key: string, callback: () => void) {
   };
 }
 
+/**
+ * Persists lesson workspace UI state to localStorage and ignores write
+ * failures so the reading view still works in restricted browsers.
+ */
 function setStoredValue(key: string, value: string) {
   if (typeof window === "undefined") {
     return;
@@ -63,10 +78,13 @@ function setStoredValue(key: string, value: string) {
     window.localStorage.setItem(key, value);
     dispatchStorageUpdate(key);
   } catch {
-    // Ignore storage write failures so the lesson view still works.
+    return;
   }
 }
 
+/**
+ * Builds the localStorage key for one lesson rail collapse state.
+ */
 function getLessonWorkspaceStorageKey(
   lessonId: string,
   rail: "left" | "right",
@@ -74,10 +92,16 @@ function getLessonWorkspaceStorageKey(
   return `grammar-lesson:${lessonId}:${rail}-rail`;
 }
 
+/**
+ * Builds the localStorage key for one lesson workspace mode.
+ */
 function getLessonWorkspaceModeStorageKey(lessonId: string) {
   return `grammar-lesson:${lessonId}:workspace-mode`;
 }
 
+/**
+ * Persists the collapsed state for one lesson workspace rail.
+ */
 export function usePersistentLessonRailState(
   lessonId: string,
   rail: "left" | "right",
@@ -104,6 +128,9 @@ export function usePersistentLessonRailState(
   ] as const;
 }
 
+/**
+ * Persists the lesson workspace mode between reading and study layouts.
+ */
 export function usePersistentLessonWorkspaceMode(
   lessonId: string,
   defaultValue: "reading" | "study" = "reading",
@@ -126,6 +153,9 @@ export function usePersistentLessonWorkspaceMode(
   ] as const;
 }
 
+/**
+ * Resolves a CSS length token into pixels for scroll-offset calculations.
+ */
 function resolveCssLengthToPx(value: string, fallback: number) {
   const trimmed = value.trim();
 
@@ -153,6 +183,10 @@ function resolveCssLengthToPx(value: string, fallback: number) {
   return numericValue;
 }
 
+/**
+ * Reads the current root anchor offset custom property used by lesson section
+ * scrolling and active-section tracking.
+ */
 function getAnchorOffsetPx() {
   if (typeof window === "undefined") {
     return 140;
@@ -165,6 +199,10 @@ function getAnchorOffsetPx() {
   );
 }
 
+/**
+ * Tracks the currently active lesson section id based on viewport or scroll
+ * container position.
+ */
 export function useActiveLessonSectionId(
   sectionIds: readonly string[],
   scrollContainer: HTMLElement | null = null,

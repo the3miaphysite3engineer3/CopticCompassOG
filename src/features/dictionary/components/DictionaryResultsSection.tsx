@@ -1,46 +1,66 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+
 import { Badge } from "@/components/Badge";
 import { EmptyState } from "@/components/EmptyState";
-import DialectSiglum from "./DialectSiglum";
-import DictionaryEntryCard from "./DictionaryEntry";
 import { useLanguage } from "@/components/LanguageProvider";
 import {
   getPartOfSpeechFilterLabel,
   type DialectFilter,
   type DictionaryPartOfSpeechFilter,
 } from "@/features/dictionary/config";
-import type { LexicalEntry } from "@/features/dictionary/types";
+import type { DictionaryClientEntry } from "@/features/dictionary/types";
 
-const PAGE_SIZE = 50;
+import DialectSiglum from "./DialectSiglum";
+import DictionaryEntryCard from "./DictionaryEntry";
 
 type DictionaryResultsSectionProps = {
   dictionaryLength: number;
-  filteredResults: LexicalEntry[];
+  filteredResults: DictionaryClientEntry[];
+  hasMoreResults?: boolean;
   loading: boolean;
+  loadingMore?: boolean;
+  onLoadMore?: () => void;
   query: string;
   selectedDialect: DialectFilter;
   selectedPartOfSpeech: DictionaryPartOfSpeechFilter;
   scrollContainerId?: string;
+  totalMatches: number;
 };
 
 export function DictionaryResultsSection({
   dictionaryLength,
   filteredResults,
+  hasMoreResults = false,
   loading,
+  loadingMore = false,
+  onLoadMore,
   query,
   selectedDialect,
   selectedPartOfSpeech,
   scrollContainerId,
+  totalMatches,
 }: DictionaryResultsSectionProps) {
   const { t } = useLanguage();
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const observerTarget = useRef<HTMLDivElement>(null);
+  const loadMoreRequestedRef = useRef(false);
 
   useEffect(() => {
+    if (!loadingMore) {
+      loadMoreRequestedRef.current = false;
+    }
+  }, [filteredResults.length, hasMoreResults, loadingMore]);
+
+  useEffect(() => {
+    if (!hasMoreResults || !onLoadMore) {
+      return;
+    }
+
     const target = observerTarget.current;
-    if (!target) return;
+    if (!target) {
+      return;
+    }
 
     const rootTarget = scrollContainerId
       ? document.getElementById(scrollContainerId)
@@ -48,18 +68,29 @@ export function DictionaryResultsSection({
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting) {
-          setVisibleCount((previousCount) => previousCount + PAGE_SIZE);
+        if (
+          !entries[0]?.isIntersecting ||
+          loadingMore ||
+          loadMoreRequestedRef.current
+        ) {
+          return;
         }
+
+        loadMoreRequestedRef.current = true;
+        onLoadMore();
       },
       { threshold: 0.1, root: rootTarget },
     );
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [filteredResults.length, scrollContainerId]);
-
-  const visibleResults = filteredResults.slice(0, visibleCount);
+  }, [
+    filteredResults.length,
+    hasMoreResults,
+    loadingMore,
+    onLoadMore,
+    scrollContainerId,
+  ]);
 
   return (
     <>
@@ -69,8 +100,8 @@ export function DictionaryResultsSection({
             {query.trim().length === 0 &&
             selectedPartOfSpeech === "ALL" &&
             selectedDialect === "ALL"
-              ? `${t("dict.showing")} ${visibleResults.length} ${t("dict.outOf")} ${dictionaryLength} ${t("dict.entries")}`
-              : `${t("dict.found")} ${filteredResults.length} ${t("dict.results")}`}
+              ? `${t("dict.showing")} ${filteredResults.length} ${t("dict.outOf")} ${dictionaryLength} ${t("dict.entries")}`
+              : `${t("dict.found")} ${totalMatches} ${t("dict.results")}`}
           </Badge>
 
           {(selectedPartOfSpeech !== "ALL" || selectedDialect !== "ALL") && (
@@ -111,7 +142,7 @@ export function DictionaryResultsSection({
       )}
 
       <div className="grid gap-6">
-        {visibleResults.map((entry) => (
+        {filteredResults.map((entry) => (
           <DictionaryEntryCard
             key={entry.id}
             entry={entry}
@@ -121,7 +152,7 @@ export function DictionaryResultsSection({
         ))}
       </div>
 
-      {visibleCount < filteredResults.length && (
+      {hasMoreResults && (
         <div
           ref={observerTarget}
           className="mt-10 flex h-20 w-full items-center justify-center"

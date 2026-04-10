@@ -5,6 +5,7 @@ import {
   parseProfileSignupPayload,
   redactEmailAddress,
 } from "../_shared/profileSignupAlert.ts";
+import { hasExpectedBearerToken } from "../_shared/requestAuth.ts";
 
 declare const Deno: {
   env: {
@@ -13,6 +14,17 @@ declare const Deno: {
   serve(handler: (request: Request) => Response | Promise<Response>): void;
 };
 
+type SignupAlertEnv = {
+  notificationFromEmail: string;
+  ownerAlertEmail: string;
+  resendApiKey: string;
+  supabaseServiceRoleKey: string;
+  supabaseUrl: string;
+};
+
+/**
+ * Builds small JSON responses for the webhook handler.
+ */
 function jsonResponse(status: number, body: Record<string, unknown>) {
   return new Response(JSON.stringify(body), {
     headers: {
@@ -22,6 +34,10 @@ function jsonResponse(status: number, body: Record<string, unknown>) {
   });
 }
 
+/**
+ * Sends the owner-alert email through Resend and returns a non-throwing result
+ * that callers can audit and persist.
+ */
 async function sendResendEmail(options: {
   from: string;
   resendApiKey: string;
@@ -55,6 +71,10 @@ async function sendResendEmail(options: {
   };
 }
 
+/**
+ * Builds the service-role headers used by the webhook to write notification
+ * audit rows through the Supabase REST API.
+ */
 function buildSupabaseRestHeaders(serviceRoleKey: string) {
   return {
     Authorization: `Bearer ${serviceRoleKey}`,
@@ -63,6 +83,10 @@ function buildSupabaseRestHeaders(serviceRoleKey: string) {
   };
 }
 
+/**
+ * Creates the parent notification-event row for one signup alert email.
+ * Duplicate dedupe keys are treated as a safe no-op for retried webhooks.
+ */
 async function insertNotificationEvent(options: {
   aggregateId: string;
   aggregateType: string;
@@ -128,6 +152,9 @@ async function insertNotificationEvent(options: {
   return null;
 }
 
+/**
+ * Records one signup-alert delivery attempt on the notification delivery log.
+ */
 async function insertNotificationDelivery(options: {
   error: string | null;
   eventId: string;
@@ -162,6 +189,10 @@ async function insertNotificationDelivery(options: {
   }
 }
 
+/**
+ * Marks the parent signup notification event as sent or failed after delivery
+ * has completed.
+ */
 async function updateNotificationEventStatus(options: {
   eventId: string;
   lastError: string | null;
@@ -191,11 +222,10 @@ async function updateNotificationEventStatus(options: {
   }
 }
 
-Deno.serve(async (request) => {
-  if (request.method !== "POST") {
-    return jsonResponse(405, { error: "Method not allowed." });
-  }
-
+/**
+ * Loads the secrets required to deliver and audit signup owner alerts.
+ */
+function getSignupAlertEnv() {
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
   const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
   const resendApiKey = Deno.env.get("RESEND_API_KEY");
@@ -209,21 +239,208 @@ Deno.serve(async (request) => {
     !ownerAlertEmail ||
     !notificationFromEmail
   ) {
+    return null;
+  }
+
+  return {
+    notificationFromEmail,
+    ownerAlertEmail,
+    resendApiKey,
+    supabaseServiceRoleKey,
+    supabaseUrl,
+  } satisfies SignupAlertEnv;
+}
+
+/**
+ * Produces the redacted recipient value written to notification audit tables.
+ */
+function getRedactedRecipient(email: string) {
+  return redactEmailAddress(email) ?? "[redacted email]";
+}
+
+/**
+ * Parses the incoming webhook JSON and returns a ready-made error response when
+ * the body is invalid.
+ */
+async function parseSignupAlertRequestPayload(request: Request) {
+  try {
+    return {
+      payload: await request.json(),
+      response: null,
+    };
+  } catch (error) {
+    console.error("Failed to parse signup alert webhook payload.", error);
+    return {
+      payload: null,
+      response: jsonResponse(400, { error: "Invalid JSON payload." }),
+    };
+  }
+}
+
+/**
+ * Builds the notification-event insert payload for a parsed signup record.
+ */
+function getSignupAlertEventInsertOptions(options: {
+  ownerAlertEmail: string;
+  ownerAlertSubject: string;
+  signupRecord: NonNullable<ReturnType<typeof parseProfileSignupPayload>>;
+  supabaseServiceRoleKey: string;
+  supabaseUrl: string;
+}) {
+  return {
+    aggregateId: options.signupRecord.id,
+    aggregateType: "profile",
+    dedupeKey: buildProfileSignupNotificationDedupeKey(options.signupRecord),
+    eventType: "profile_signup",
+    payload: buildProfileSignupNotificationPayload(options.signupRecord),
+    recipient: getRedactedRecipient(options.ownerAlertEmail),
+    subject: options.ownerAlertSubject,
+    supabaseServiceRoleKey: options.supabaseServiceRoleKey,
+    supabaseUrl: options.supabaseUrl,
+  };
+}
+
+/**
+ * Sends the signup alert email and records the matching notification outcome
+ * before returning the webhook response.
+ */
+async function deliverSignupOwnerAlert(options: {
+  env: SignupAlertEnv;
+  notificationEventId: string | null;
+  ownerAlert: ReturnType<typeof buildProfileSignupOwnerAlert>;
+  profileId: string;
+}) {
+  const emailResult = await sendResendEmail({
+    from: options.env.notificationFromEmail,
+    resendApiKey: options.env.resendApiKey,
+    subject: options.ownerAlert.subject,
+    text: options.ownerAlert.text,
+    to: options.env.ownerAlertEmail,
+  });
+
+  if (!emailResult.success) {
+    await recordFailedSignupAlert({
+      emailError: emailResult.error,
+      eventId: options.notificationEventId,
+      ownerAlertEmail: options.env.ownerAlertEmail,
+      supabaseServiceRoleKey: options.env.supabaseServiceRoleKey,
+      supabaseUrl: options.env.supabaseUrl,
+    });
+
+    console.error("Failed to send signup alert email.", {
+      error: emailResult.error,
+      profileId: options.profileId,
+    });
+    return jsonResponse(502, { error: "Failed to send signup alert email." });
+  }
+
+  await recordSentSignupAlert({
+    eventId: options.notificationEventId,
+    ownerAlertEmail: options.env.ownerAlertEmail,
+    providerMessageId: emailResult.id,
+    supabaseServiceRoleKey: options.env.supabaseServiceRoleKey,
+    supabaseUrl: options.env.supabaseUrl,
+  });
+
+  return jsonResponse(200, {
+    success: true,
+    profileId: options.profileId,
+  });
+}
+
+/**
+ * Records a failed signup alert in the notification audit tables.
+ */
+async function recordFailedSignupAlert(options: {
+  emailError: string;
+  eventId: string | null;
+  ownerAlertEmail: string;
+  supabaseServiceRoleKey: string;
+  supabaseUrl: string;
+}) {
+  if (!options.eventId) {
+    return;
+  }
+
+  const recipient = getRedactedRecipient(options.ownerAlertEmail);
+  await insertNotificationDelivery({
+    error: options.emailError,
+    eventId: options.eventId,
+    providerMessageId: null,
+    recipient,
+    status: "failed",
+    supabaseServiceRoleKey: options.supabaseServiceRoleKey,
+    supabaseUrl: options.supabaseUrl,
+  });
+  await updateNotificationEventStatus({
+    eventId: options.eventId,
+    lastError: options.emailError,
+    status: "failed",
+    supabaseServiceRoleKey: options.supabaseServiceRoleKey,
+    supabaseUrl: options.supabaseUrl,
+  });
+}
+
+/**
+ * Records a successful signup alert in the notification audit tables.
+ */
+async function recordSentSignupAlert(options: {
+  eventId: string | null;
+  ownerAlertEmail: string;
+  providerMessageId: string | null;
+  supabaseServiceRoleKey: string;
+  supabaseUrl: string;
+}) {
+  if (!options.eventId) {
+    return;
+  }
+
+  const recipient = getRedactedRecipient(options.ownerAlertEmail);
+  await insertNotificationDelivery({
+    error: null,
+    eventId: options.eventId,
+    providerMessageId: options.providerMessageId,
+    recipient,
+    status: "sent",
+    supabaseServiceRoleKey: options.supabaseServiceRoleKey,
+    supabaseUrl: options.supabaseUrl,
+  });
+  await updateNotificationEventStatus({
+    eventId: options.eventId,
+    lastError: null,
+    status: "sent",
+    supabaseServiceRoleKey: options.supabaseServiceRoleKey,
+    supabaseUrl: options.supabaseUrl,
+  });
+}
+
+/**
+ * Validates the webhook request, parses the profile insert payload, and sends
+ * the owner alert when the event has not already been processed.
+ */
+async function handleProfileSignupAlertRequest(request: Request) {
+  if (request.method !== "POST") {
+    return jsonResponse(405, { error: "Method not allowed." });
+  }
+
+  const env = getSignupAlertEnv();
+  if (!env) {
     console.error("Missing one or more signup alert email secrets.");
     return jsonResponse(500, {
       error: "Signup alert email service is not configured.",
     });
   }
 
-  let payload: unknown;
-  try {
-    payload = await request.json();
-  } catch (error) {
-    console.error("Failed to parse signup alert webhook payload.", error);
-    return jsonResponse(400, { error: "Invalid JSON payload." });
+  if (!hasExpectedBearerToken(request, env.supabaseServiceRoleKey)) {
+    return jsonResponse(401, { error: "Unauthorized." });
   }
 
-  const signupRecord = parseProfileSignupPayload(payload);
+  const parsedPayload = await parseSignupAlertRequestPayload(request);
+  if (parsedPayload.response) {
+    return parsedPayload.response;
+  }
+
+  const signupRecord = parseProfileSignupPayload(parsedPayload.payload);
   if (!signupRecord) {
     return jsonResponse(202, {
       ignored: true,
@@ -232,17 +449,16 @@ Deno.serve(async (request) => {
   }
 
   const ownerAlert = buildProfileSignupOwnerAlert(signupRecord);
-  const notificationEvent = await insertNotificationEvent({
-    aggregateId: signupRecord.id,
-    aggregateType: "profile",
-    dedupeKey: buildProfileSignupNotificationDedupeKey(signupRecord),
-    eventType: "profile_signup",
-    payload: buildProfileSignupNotificationPayload(signupRecord),
-    recipient: redactEmailAddress(ownerAlertEmail) ?? "[redacted email]",
-    subject: ownerAlert.subject,
-    supabaseServiceRoleKey,
-    supabaseUrl,
+  const notificationEventOptions = getSignupAlertEventInsertOptions({
+    ownerAlertEmail: env.ownerAlertEmail,
+    ownerAlertSubject: ownerAlert.subject,
+    signupRecord,
+    supabaseServiceRoleKey: env.supabaseServiceRoleKey,
+    supabaseUrl: env.supabaseUrl,
   });
+  const notificationEvent = await insertNotificationEvent(
+    notificationEventOptions,
+  );
 
   if (notificationEvent?.duplicate) {
     return jsonResponse(200, {
@@ -252,62 +468,12 @@ Deno.serve(async (request) => {
     });
   }
 
-  const emailResult = await sendResendEmail({
-    from: notificationFromEmail,
-    resendApiKey,
-    subject: ownerAlert.subject,
-    text: ownerAlert.text,
-    to: ownerAlertEmail,
-  });
-
-  if (!emailResult.success) {
-    if (notificationEvent?.eventId) {
-      await insertNotificationDelivery({
-        error: emailResult.error,
-        eventId: notificationEvent.eventId,
-        providerMessageId: null,
-        recipient: redactEmailAddress(ownerAlertEmail) ?? "[redacted email]",
-        status: "failed",
-        supabaseServiceRoleKey,
-        supabaseUrl,
-      });
-      await updateNotificationEventStatus({
-        eventId: notificationEvent.eventId,
-        lastError: emailResult.error,
-        status: "failed",
-        supabaseServiceRoleKey,
-        supabaseUrl,
-      });
-    }
-
-    console.error("Failed to send signup alert email.", {
-      error: emailResult.error,
-      profileId: signupRecord.id,
-    });
-    return jsonResponse(502, { error: "Failed to send signup alert email." });
-  }
-
-  if (notificationEvent?.eventId) {
-    await insertNotificationDelivery({
-      error: null,
-      eventId: notificationEvent.eventId,
-      providerMessageId: emailResult.id,
-      recipient: redactEmailAddress(ownerAlertEmail) ?? "[redacted email]",
-      status: "sent",
-      supabaseServiceRoleKey,
-      supabaseUrl,
-    });
-    await updateNotificationEventStatus({
-      eventId: notificationEvent.eventId,
-      lastError: null,
-      status: "sent",
-      supabaseServiceRoleKey,
-      supabaseUrl,
-    });
-  }
-
-  return jsonResponse(200, {
-    success: true,
+  return deliverSignupOwnerAlert({
+    env,
+    notificationEventId: notificationEvent?.eventId ?? null,
+    ownerAlert,
     profileId: signupRecord.id,
   });
-});
+}
+
+Deno.serve(handleProfileSignupAlertRequest);

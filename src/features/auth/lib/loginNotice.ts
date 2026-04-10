@@ -1,5 +1,9 @@
 const FLASH_PARAM_KEYS = ["message", "messageType", "state"] as const;
 
+/**
+ * Removes transient login flash parameters from a URL after they have been
+ * displayed.
+ */
 export function stripLoginFlashParams(
   pathname: string,
   searchParams: URLSearchParams,

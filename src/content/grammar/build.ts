@@ -1,3 +1,6 @@
+import { enrichGrammarDatasetSnapshotWithDictionaryLinks } from "./dictionary-links.ts";
+import { getGrammarDatasetSnapshot } from "./registry.ts";
+
 import type {
   GrammarDatasetSnapshot,
   GrammarManifest,
@@ -5,8 +8,6 @@ import type {
   GrammarLessonDocument,
   GrammarLessonIndexItem,
 } from "./schema.ts";
-import { enrichGrammarDatasetSnapshotWithDictionaryLinks } from "./dictionary-links.ts";
-import { getGrammarDatasetSnapshot } from "./registry.ts";
 
 function createGrammarLessonBundleFromSnapshot(
   lesson: GrammarLessonDocument,
@@ -274,7 +275,7 @@ export type GrammarVersionedExport<T> = {
   data: T;
 };
 
-export type GrammarStaticExportFile = {
+type GrammarStaticExportFile = {
   outputPath: string;
   payload: unknown;
 };

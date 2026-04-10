@@ -1,6 +1,7 @@
-import type { ReactNode, SelectHTMLAttributes } from "react";
 import { FormLabel } from "@/components/FormField";
 import { cx } from "@/lib/classes";
+
+import type { ReactNode, SelectHTMLAttributes } from "react";
 
 type CompactSelectProps = SelectHTMLAttributes<HTMLSelectElement> & {
   label: ReactNode;

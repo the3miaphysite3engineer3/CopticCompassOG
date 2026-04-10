@@ -1,3 +1,7 @@
+/**
+ * Minimal local typings for the Swagger UI browser bundle used by the API docs
+ * page.
+ */
 declare module "swagger-ui-dist" {
   export type SwaggerUiDocumentExpansion = "full" | "list" | "none";
 

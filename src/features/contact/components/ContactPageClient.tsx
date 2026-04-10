@@ -1,18 +1,19 @@
 "use client";
 
-import { useActionState } from "react";
 import { ArrowRight, Mail, MessageSquare, User } from "lucide-react";
+import { useActionState } from "react";
+
 import { sendContactEmail, type ContactFormState } from "@/actions/contact";
-import { Button } from "@/components/Button";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { Button } from "@/components/Button";
 import { CheckboxField } from "@/components/CheckboxField";
-import { contactInquiryOptions } from "@/features/contact/lib/contact";
-import { useLanguage } from "@/components/LanguageProvider";
 import { FormField } from "@/components/FormField";
+import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
+import { contactInquiryOptions } from "@/features/contact/lib/contact";
 import { getLocalizedHomePath } from "@/lib/locale";
 
 export default function ContactPageClient() {

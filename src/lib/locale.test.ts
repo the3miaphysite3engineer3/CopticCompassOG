@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { appendSearchAndHash } from "./locale";
+
+import { appendSearchAndHash, getPublicLocaleFromPathname } from "./locale";
 
 describe("appendSearchAndHash", () => {
   it("preserves both query strings and hashes", () => {
@@ -16,5 +17,18 @@ describe("appendSearchAndHash", () => {
 
   it("returns the pathname unchanged when search and hash are empty", () => {
     expect(appendSearchAndHash("/en/grammar")).toBe("/en/grammar");
+  });
+});
+
+describe("getPublicLocaleFromPathname", () => {
+  it("returns the locale for localized public routes", () => {
+    expect(getPublicLocaleFromPathname("/en")).toBe("en");
+    expect(getPublicLocaleFromPathname("/nl/privacy")).toBe("nl");
+  });
+
+  it("returns null for non-localized routes", () => {
+    expect(getPublicLocaleFromPathname("/login")).toBeNull();
+    expect(getPublicLocaleFromPathname("/dashboard")).toBeNull();
+    expect(getPublicLocaleFromPathname(null)).toBeNull();
   });
 });

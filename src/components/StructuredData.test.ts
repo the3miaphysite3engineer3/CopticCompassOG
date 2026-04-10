@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { normalizeStructuredData } from "./StructuredData";
 
 describe("normalizeStructuredData", () => {

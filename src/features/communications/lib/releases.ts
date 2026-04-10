@@ -1,3 +1,4 @@
+import { getMailFooterLines, mailBrand } from "@/lib/communications/mailBrand";
 import type { Language } from "@/types/i18n";
 import type { Json, Tables } from "@/types/supabase";
 
@@ -18,7 +19,7 @@ export type AdminContentRelease = ContentReleaseRow & {
   items: ContentReleaseItemRow[];
 };
 
-export type ContentReleaseDeliverySummary = {
+type ContentReleaseDeliverySummary = {
   broadcasts?: Array<{
     id: string;
     language: Language;
@@ -52,6 +53,15 @@ export const CONTENT_RELEASE_EDITABLE_STATUSES = [
   "cancelled",
 ] as const satisfies readonly ContentReleaseRow["status"][];
 
+export const CONTENT_RELEASE_DELETABLE_STATUSES = [
+  "draft",
+  "cancelled",
+] as const satisfies readonly ContentReleaseRow["status"][];
+
+/**
+ * Collapses the selected item types into the release type stored on the parent
+ * release row.
+ */
 export function deriveContentReleaseType(
   itemTypes: ContentReleaseItemRow["item_type"][],
 ): ContentReleaseRow["release_type"] | null {
@@ -68,6 +78,9 @@ export function deriveContentReleaseType(
   return uniqueItemTypes[0] === "lesson" ? "lesson" : "publication";
 }
 
+/**
+ * Narrows audience-segment form values before they are persisted on a release.
+ */
 export function isContentReleaseAudienceSegment(
   value: string,
 ): value is ContentReleaseRow["audience_segment"] {
@@ -76,6 +89,9 @@ export function isContentReleaseAudienceSegment(
   );
 }
 
+/**
+ * Narrows locale-mode form values before they are persisted on a release.
+ */
 export function isContentReleaseLocaleMode(
   value: string,
 ): value is ContentReleaseRow["locale_mode"] {
@@ -84,6 +100,9 @@ export function isContentReleaseLocaleMode(
   );
 }
 
+/**
+ * Identifies statuses that can still be edited from the admin workspace.
+ */
 export function isContentReleaseEditableStatus(
   value: string,
 ): value is (typeof CONTENT_RELEASE_EDITABLE_STATUSES)[number] {
@@ -92,6 +111,20 @@ export function isContentReleaseEditableStatus(
   );
 }
 
+/**
+ * Identifies statuses that still allow the whole release draft to be deleted.
+ */
+export function isContentReleaseDeletableStatus(
+  value: string,
+): value is (typeof CONTENT_RELEASE_DELETABLE_STATUSES)[number] {
+  return CONTENT_RELEASE_DELETABLE_STATUSES.includes(
+    value as (typeof CONTENT_RELEASE_DELETABLE_STATUSES)[number],
+  );
+}
+
+/**
+ * Formats the stored release type for admin labels and status surfaces.
+ */
 export function formatContentReleaseType(
   releaseType: ContentReleaseRow["release_type"],
 ) {
@@ -107,6 +140,9 @@ export function formatContentReleaseType(
   }
 }
 
+/**
+ * Formats the stored release status for admin labels and status surfaces.
+ */
 export function formatContentReleaseStatus(
   status: ContentReleaseRow["status"],
 ) {
@@ -128,6 +164,9 @@ export function formatContentReleaseStatus(
   }
 }
 
+/**
+ * Formats the saved audience segment for admin-facing copy.
+ */
 export function formatContentReleaseAudienceSegment(
   segment: ContentReleaseRow["audience_segment"],
 ) {
@@ -143,6 +182,9 @@ export function formatContentReleaseAudienceSegment(
   }
 }
 
+/**
+ * Formats the stored locale mode for admin-facing copy.
+ */
 export function formatContentReleaseLocaleMode(
   localeMode: ContentReleaseRow["locale_mode"],
 ) {
@@ -158,6 +200,10 @@ export function formatContentReleaseLocaleMode(
   }
 }
 
+/**
+ * Orders release rows by operational urgency so active deliveries and drafts
+ * surface above historical items in the admin workspace.
+ */
 export function compareContentReleasePriority(
   left: AdminContentRelease,
   right: AdminContentRelease,
@@ -181,6 +227,10 @@ export function compareContentReleasePriority(
   );
 }
 
+/**
+ * Parses the optional delivery-summary JSON into the typed counts and broadcast
+ * metadata shown in admin status cards.
+ */
 export function getContentReleaseDeliverySummary(
   release: Pick<ContentReleaseRow, "delivery_summary">,
 ): ContentReleaseDeliverySummary {
@@ -205,7 +255,11 @@ export function getContentReleaseDeliverySummary(
   };
 }
 
-export function getContentReleaseDeliveryLanguage(
+/**
+ * Resolves which language variant should be delivered to a recipient under the
+ * release locale mode and their preferred locale.
+ */
+function getContentReleaseDeliveryLanguage(
   release: Pick<ContentReleaseRow, "locale_mode">,
   preferredLocale: Language,
 ): Language {
@@ -220,6 +274,10 @@ export function getContentReleaseDeliveryLanguage(
   return preferredLocale === "nl" ? "nl" : "en";
 }
 
+/**
+ * Selects the localized subject/body pair used to render an outbound release
+ * email for one recipient.
+ */
 export function getContentReleaseCopyForLocale(
   release: Pick<
     ContentReleaseRow,
@@ -240,6 +298,10 @@ export function getContentReleaseCopyForLocale(
   };
 }
 
+/**
+ * Builds the plain-text fallback body for release emails, including the item
+ * list and shared branded footer.
+ */
 export function buildContentReleaseEmailText(options: {
   body: string;
   items: Pick<ContentReleaseItemRow, "title_snapshot" | "url_snapshot">[];
@@ -252,7 +314,74 @@ export function buildContentReleaseEmailText(options: {
     .map((item) => `- ${item.title_snapshot}: ${item.url_snapshot}`)
     .join("\n");
 
-  return [intro, "", itemsHeading, itemsList].join("\n");
+  return [
+    intro,
+    "",
+    itemsHeading,
+    itemsList,
+    "",
+    ...getMailFooterLines(options.language),
+  ].join("\n");
+}
+
+/**
+ * Builds the branded HTML variant used for content release emails.
+ */
+export function buildContentReleaseEmailHtml(options: {
+  body: string;
+  items: Pick<ContentReleaseItemRow, "title_snapshot" | "url_snapshot">[];
+  language: Language;
+  subject: string;
+}) {
+  const intro = escapeHtml(options.body.trim()).replace(/\n/g, "<br />");
+  const itemsHeading =
+    options.language === "nl" ? "In deze release" : "In this release";
+  const footer = getMailFooterLines(options.language).map(escapeHtml);
+  const introLabel =
+    options.language === "nl"
+      ? "Nieuwe updates van Coptic Compass"
+      : "New updates from Coptic Compass";
+
+  const itemsHtml = options.items
+    .map(
+      (item) => `
+        <li style="margin:0 0 14px;">
+          <a href="${escapeHtml(item.url_snapshot)}" style="color:#0284c7;text-decoration:none;font-weight:600;">
+            ${escapeHtml(item.title_snapshot)}
+          </a>
+          <div style="margin-top:4px;font-size:13px;color:#57534e;">${escapeHtml(item.url_snapshot)}</div>
+        </li>`,
+    )
+    .join("");
+
+  return `<!doctype html>
+<html>
+  <body style="margin:0;background:#f5f5f4;padding:24px 12px;font-family:Aptos,Segoe UI,Helvetica Neue,Arial,sans-serif;color:#1c1917;">
+    <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #e7e5e4;border-radius:24px;overflow:hidden;box-shadow:0 8px 32px rgba(24,30,27,0.08);">
+      <div style="padding:28px 32px;background:linear-gradient(135deg,#ecfdf5 0%,#f0f9ff 100%);border-bottom:1px solid #e7e5e4;">
+        <div style="font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:#059669;font-weight:700;">${escapeHtml(
+          introLabel,
+        )}</div>
+        <h1 style="margin:10px 0 0;font-size:28px;line-height:1.2;color:#1c1917;">${escapeHtml(
+          options.subject,
+        )}</h1>
+      </div>
+      <div style="padding:32px;">
+        <p style="margin:0 0 20px;font-size:16px;line-height:1.7;color:#292524;">${intro}</p>
+        <h2 style="margin:0 0 14px;font-size:18px;line-height:1.4;color:#1c1917;">${escapeHtml(
+          itemsHeading,
+        )}</h2>
+        <ul style="margin:0;padding-left:20px;">${itemsHtml}</ul>
+      </div>
+      <div style="padding:24px 32px;border-top:1px solid #e7e5e4;background:#fafaf9;font-size:13px;line-height:1.7;color:#57534e;">
+        <div>${footer[0]}</div>
+        <div style="font-weight:700;color:#1c1917;">${footer[1]}</div>
+        <div>${footer[2]}</div>
+        <div style="margin-top:8px;"><a href="${mailBrand.liveUrl}" style="color:#059669;text-decoration:none;">${footer[3]}</a></div>
+      </div>
+    </div>
+  </body>
+</html>`;
 }
 
 function asObject(
@@ -310,4 +439,13 @@ function getBroadcastSummaryEntries(summary: Record<string, Json | undefined>) {
     .filter((entry) => entry !== null);
 
   return entries.length > 0 ? entries : undefined;
+}
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }

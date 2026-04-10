@@ -1,6 +1,5 @@
 "use client";
 
-import type { ReactNode } from "react";
 import type { GrammarInline } from "@/content/grammar/schema";
 import { GrammarAbbreviation } from "@/features/grammar/components/GrammarAbbreviation";
 import {
@@ -10,6 +9,8 @@ import {
 import { getEntryPath } from "@/lib/locale";
 import type { Language } from "@/types/i18n";
 
+import type { ReactNode } from "react";
+
 type GrammarInlineRendererProps = {
   nodes: readonly GrammarInline[];
   language: Language;
@@ -18,6 +19,10 @@ type GrammarInlineRendererProps = {
   enableAbbreviationLinks?: boolean;
 };
 
+/**
+ * Builds dictionary entry links for inline Coptic tokens that reference the
+ * lexicon.
+ */
 function renderDictionaryEntryHref(
   dictionaryEntryId: string,
   language: Language,
@@ -146,6 +151,10 @@ function getCompoundAbbreviationMatch(
   return null;
 }
 
+/**
+ * Renders one inline grammar node into the matching text, emphasis, concept,
+ * footnote, or dictionary-link element.
+ */
 function renderInlineNode(
   node: GrammarInline,
   language: Language,
@@ -318,6 +327,10 @@ function renderInlineNode(
   }
 }
 
+/**
+ * Recursively renders the structured inline grammar node tree, including the
+ * special abbreviation-link compaction rules used in lessons.
+ */
 export function GrammarInlineRenderer({
   nodes,
   language,

@@ -15,15 +15,22 @@ import type {
 } from "@/content/grammar/schema";
 import type { Language } from "@/types/i18n";
 
-export type GrammarLessonOutlineItem = Pick<
+type GrammarLessonOutlineItem = Pick<
   GrammarSectionDocument,
   "id" | "slug" | "title"
 >;
 
+/**
+ * Formats a localized count label for SEO and metadata copy.
+ */
 function pluralize(count: number, singular: string, plural: string) {
   return `${count} ${count === 1 ? singular : plural}`;
 }
 
+/**
+ * Builds the localized SEO title for a grammar lesson from the lesson number
+ * and summary text.
+ */
 export function buildGrammarLessonSeoTitle(
   lesson: Pick<GrammarLessonDocument, "number" | "summary">,
   locale: Language = "en",
@@ -36,6 +43,10 @@ export function buildGrammarLessonSeoTitle(
     : `Coptic Grammar Lesson ${lessonNumber}: ${normalizedSummary}`;
 }
 
+/**
+ * Builds the localized SEO description for a grammar lesson, including the
+ * lesson footprint in sections, concepts, and exercises.
+ */
 export function buildGrammarLessonSeoDescription(
   lessonBundle: GrammarLessonBundle,
   locale: Language = "en",
@@ -59,18 +70,31 @@ export function buildGrammarLessonSeoDescription(
     : `${description} Includes ${lessonFootprint} for structured Coptic study.`;
 }
 
-export function getGrammarManifestData() {
+/**
+ * Returns the generated grammar manifest used by APIs and static exports.
+ */
+function _getGrammarManifestData() {
   return getGrammarManifest();
 }
 
+/**
+ * Lists every grammar lesson index item, including unpublished lessons.
+ */
 export function listGrammarLessons(): GrammarLessonIndexItem[] {
   return listGrammarLessonIndexItems();
 }
 
+/**
+ * Lists only published grammar lesson index items.
+ */
 export function listPublishedGrammarLessons(): GrammarLessonIndexItem[] {
   return listGrammarLessons().filter((lesson) => lesson.status === "published");
 }
 
+/**
+ * Resolves a lesson bundle by slug, including concepts and exercises derived
+ * from the underlying lesson document.
+ */
 export function getGrammarLessonBundleBySlug(
   slug: string,
 ): GrammarLessonBundle | null {
@@ -83,6 +107,9 @@ export function getGrammarLessonBundleBySlug(
   return createGrammarLessonBundle(lesson);
 }
 
+/**
+ * Resolves a lesson bundle only when the lesson exists and is published.
+ */
 export function getPublishedGrammarLessonBundleBySlug(
   slug: string,
 ): GrammarLessonBundle | null {
@@ -95,6 +122,10 @@ export function getPublishedGrammarLessonBundleBySlug(
   return bundle;
 }
 
+/**
+ * Builds the ordered section outline for a lesson so navigation can follow the
+ * lesson's declared section order rather than raw storage order.
+ */
 export function getGrammarLessonOutlineBySlug(
   slug: string,
 ): GrammarLessonOutlineItem[] | null {
@@ -120,6 +151,10 @@ export function getGrammarLessonOutlineBySlug(
     }));
 }
 
+/**
+ * Returns the generated grammar export snapshot used by static APIs and build
+ * outputs.
+ */
 export function getGrammarExportData() {
   return createGrammarExportSnapshot();
 }

@@ -6,6 +6,9 @@ import type { Tables } from "@/types/supabase";
 const AUDIENCE_CONTACT_PREFERENCES_SELECT =
   "id, email, locale, source, books_opt_in, general_updates_opt_in, lessons_opt_in, profile_id";
 
+/**
+ * Loads the current profile row for the authenticated user.
+ */
 export async function getProfile(
   supabase: AppSupabaseClient,
   userId: string,
@@ -23,6 +26,10 @@ export async function getProfile(
   return data;
 }
 
+/**
+ * Resolves the audience-contact preferences associated with a profile, first
+ * by direct profile link and then by normalized email as a fallback.
+ */
 export async function getAudienceContactForProfile(
   supabase: AppSupabaseClient,
   userId: string,
@@ -59,6 +66,9 @@ export async function getAudienceContactForProfile(
   return data;
 }
 
+/**
+ * Loads the stored profile role used by server-side admin checks.
+ */
 export async function getProfileRole(
   supabase: AppSupabaseClient,
   userId: string,

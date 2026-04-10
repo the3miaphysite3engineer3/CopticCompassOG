@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { ChevronDown } from "lucide-react";
+import Link from "next/link";
+
 import { Badge } from "@/components/Badge";
 import { surfacePanelClassName } from "@/components/SurfacePanel";
 import { ContactMessageReviewForm } from "@/features/contact/components/ContactMessageReviewForm";
@@ -21,9 +22,9 @@ import {
   formatLessonSlug,
   formatSubmissionDate,
 } from "@/features/submissions/utils";
+import { cx } from "@/lib/classes";
 import { antinoou } from "@/lib/fonts";
 import { getEntryPath } from "@/lib/locale";
-import { cx } from "@/lib/classes";
 
 function buildPreview(text: string, maxLength = 180) {
   const normalized = text.replace(/\s+/g, " ").trim();
@@ -101,7 +102,7 @@ function AdminItemDisclosure({
   );
 }
 
-export function AdminSubmissionDisclosure({
+function _AdminSubmissionDisclosure({
   defaultOpen = false,
   submission,
 }: {

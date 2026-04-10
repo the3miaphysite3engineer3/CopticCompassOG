@@ -1,15 +1,14 @@
-import type { User } from "@supabase/supabase-js";
-import { getUserEntryFavorites } from "@/features/dictionary/lib/server/queries";
 import { getDictionaryEntryById } from "@/features/dictionary/lib/dictionary";
 import type { EntryFavoriteWithEntry } from "@/features/dictionary/lib/entryActions";
-import {
-  buildGrammarLessonLearnerSummary,
-  type GrammarLessonLearnerSummary,
-} from "@/features/grammar/lib/grammarLearnerState";
+import { getUserEntryFavorites } from "@/features/dictionary/lib/server/queries";
 import {
   getPublishedGrammarLessonBundleBySlug,
   listPublishedGrammarLessons,
 } from "@/features/grammar/lib/grammarDataset";
+import {
+  buildGrammarLessonLearnerSummary,
+  type GrammarLessonLearnerSummary,
+} from "@/features/grammar/lib/grammarLearnerState";
 import {
   getUserLessonBookmarks,
   getUserLessonNotes,
@@ -26,7 +25,9 @@ import type { AppSupabaseClient } from "@/lib/supabase/queryTypes";
 import type { Language } from "@/types/i18n";
 import type { Tables } from "@/types/supabase";
 
-export type DashboardPageData = {
+import type { User } from "@supabase/supabase-js";
+
+type DashboardPageData = {
   audienceContact: Awaited<ReturnType<typeof getAudienceContactForProfile>>;
   canUpdatePassword: boolean;
   grammarLessonSummaries: GrammarLessonLearnerSummary[];
@@ -36,6 +37,10 @@ export type DashboardPageData = {
   submissions: Awaited<ReturnType<typeof getUserSubmissions>>;
 };
 
+/**
+ * Enriches favorite rows with the corresponding dictionary entry so the
+ * dashboard can render saved headwords without a second lookup phase.
+ */
 function buildSavedDictionaryEntries(
   entryFavorites: Awaited<ReturnType<typeof getUserEntryFavorites>>,
 ): EntryFavoriteWithEntry[] {
@@ -45,6 +50,10 @@ function buildSavedDictionaryEntries(
   }));
 }
 
+/**
+ * Builds learner-facing lesson summaries by combining the published grammar
+ * lesson dataset with the user's bookmarks, notes, and progress rows.
+ */
 function buildGrammarLessonSummaries({
   lessonBookmarks,
   lessonNotes,
@@ -73,6 +82,10 @@ function buildGrammarLessonSummaries({
     );
 }
 
+/**
+ * Loads the user dashboard read model, combining profile, audience, progress,
+ * saved entries, and submissions into one server-side payload.
+ */
 export async function loadDashboardPageData({
   locale,
   supabase,

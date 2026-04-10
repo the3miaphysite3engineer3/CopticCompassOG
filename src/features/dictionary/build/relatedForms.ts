@@ -1,15 +1,16 @@
-import type { LexicalEntry } from "../types.ts";
 import { normalizeDialectKey } from "../config.ts";
 import { stripSourceHtml } from "./rawEntry.ts";
 
-export type RelatedFormLabel =
+import type { LexicalEntry } from "../types.ts";
+
+type RelatedFormLabel =
   | "female"
   | "imperative"
   | "male"
   | "noun male"
   | "plural";
 
-export interface RelatedFormCandidate {
+interface RelatedFormCandidate {
   parentEntryId: string;
   parentHeadword: string;
   relationLabel: RelatedFormLabel;
@@ -26,6 +27,10 @@ const supportedRelatedFormLabels = new Set<RelatedFormLabel>([
   "plural",
 ]);
 
+/**
+ * Extracts structured related-form hints from the raw word field so the build
+ * pipeline can connect inflected or derived entries back to a parent lemma.
+ */
 export function extractRelatedFormCandidates(
   entry: Pick<LexicalEntry, "id" | "headword" | "raw">,
 ): RelatedFormCandidate[] {

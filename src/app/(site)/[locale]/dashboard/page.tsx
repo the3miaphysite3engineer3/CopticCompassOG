@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
 import { DashboardPageContent } from "@/features/dashboard/components/DashboardPageContent";
 import { getDashboardCopy } from "@/features/dashboard/lib/dashboardCopy";
 import { createNoIndexMetadata } from "@/lib/metadata";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
+
+import type { Metadata } from "next";
 
 export async function generateMetadata({
   params,
@@ -19,6 +20,9 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Renders the localized private learner dashboard page.
+ */
 export default async function LocalizedDashboardPage({
   params,
 }: {

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema-json",
+  "entry": [
+    "src/app/**/{page,layout,loading,not-found,error,route}.ts?(x)",
+    "supabase/functions/**/index.ts",
+    "scripts/**/*.mts"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "supabase/functions/**/*.ts",
+    "scripts/**/*.mts"
+  ],
+  "ignoreDependencies": ["tailwindcss"]
+}

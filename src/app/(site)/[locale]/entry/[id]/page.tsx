@@ -1,36 +1,40 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import EntryPageHeader from "@/features/dictionary/components/EntryPageHeader";
-import EntryPageClient from "@/features/dictionary/components/EntryPageClient";
+
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import StructuredData from "@/components/StructuredData";
+import EntryPageClient from "@/features/dictionary/components/EntryPageClient";
+import EntryPageHeader from "@/features/dictionary/components/EntryPageHeader";
+import {
+  getDictionaryEntryById,
+  getDictionaryEntryRelations,
+} from "@/features/dictionary/lib/dictionary";
 import { buildEntryOpenGraphImageUrl } from "@/features/dictionary/lib/entryOpenGraph";
 import {
   buildEntryDescription,
   toPlainText,
 } from "@/features/dictionary/lib/entryText";
-import {
-  getDictionary,
-  getDictionaryEntryRelations,
-} from "@/features/dictionary/lib/dictionary";
 import { listPublishedGrammarLessonsForEntry } from "@/features/grammar/lib/grammarContentGraph";
+import { getTranslation } from "@/lib/i18n";
 import {
   createLanguageAlternates,
   getDictionaryPath,
   getEntryPath,
   getLocalizedHomePath,
-  getOpenGraphLocale,
 } from "@/lib/locale";
-import { getTranslation } from "@/lib/i18n";
-import { buildPageTitle, siteConfig } from "@/lib/site";
+import { createPageSocialMetadata, createSocialImage } from "@/lib/metadata";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
+import { siteConfig } from "@/lib/site";
 import {
   createBreadcrumbStructuredData,
   createDefinedTermStructuredData,
 } from "@/lib/structuredData";
 
-// Render dictionary entries on demand so the deployment stays within output
-// size limits while preserving stable, crawlable metadata per entry.
+import type { Metadata } from "next";
+
+/**
+ * Render dictionary entries on demand so build output stays within deployment
+ * limits while entry metadata remains stable and crawlable.
+ */
 export const revalidate = 86400;
 
 export async function generateMetadata({
@@ -40,8 +44,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const resolvedParams = await params;
   const locale = resolvePublicLocale(resolvedParams.locale);
-  const dictionary = getDictionary();
-  const entry = dictionary.find((item) => item.id === resolvedParams.id);
+  const entry = getDictionaryEntryById(resolvedParams.id);
 
   if (!entry) {
     return {
@@ -61,6 +64,12 @@ export async function generateMetadata({
   const description = buildEntryDescription(entry, locale);
   const path = getEntryPath(entry.id, locale);
   const imageUrl = buildEntryOpenGraphImageUrl(entry.id, locale);
+  const image = createSocialImage(
+    imageUrl,
+    locale === "nl"
+      ? `${headword} | ${siteConfig.brandName} woordenboeklemma`
+      : `${headword} | ${siteConfig.brandName} dictionary entry`,
+  );
 
   return {
     metadataBase: new URL(siteConfig.liveUrl),
@@ -70,25 +79,13 @@ export async function generateMetadata({
       canonical: path,
       languages: createLanguageAlternates(`/entry/${entry.id}`),
     },
-    openGraph: {
-      title: buildPageTitle(title),
+    ...createPageSocialMetadata({
+      title,
       description,
-      url: `${siteConfig.liveUrl}${path}`,
-      locale: getOpenGraphLocale(locale),
-      images: [
-        {
-          url: imageUrl,
-          width: 1200,
-          height: 630,
-          alt: title,
-        },
-      ],
-    },
-    twitter: {
-      title: buildPageTitle(title),
-      description,
-      images: [imageUrl],
-    },
+      path,
+      locale,
+      images: [image],
+    }),
   };
 }
 
@@ -99,17 +96,13 @@ export default async function EntryPage({
 }) {
   const resolvedParams = await params;
   const locale = resolvePublicLocale(resolvedParams.locale);
-  const dictionary = getDictionary();
-  const entry = dictionary.find((e) => e.id === resolvedParams.id);
+  const entry = getDictionaryEntryById(resolvedParams.id);
 
   if (!entry) {
     notFound();
   }
 
-  const { parentEntry, relatedEntries } = getDictionaryEntryRelations(
-    entry,
-    dictionary,
-  );
+  const { parentEntry, relatedEntries } = getDictionaryEntryRelations(entry);
   const headword = toPlainText(entry.headword);
   const relatedGrammarLessons = listPublishedGrammarLessonsForEntry(entry.id);
 

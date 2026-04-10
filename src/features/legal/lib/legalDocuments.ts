@@ -1,15 +1,15 @@
 import type { Language } from "@/types/i18n";
 
-export type LegalDocumentSection = {
+export interface LegalDocumentSection {
   title: string;
   body: string;
-};
+}
 
-export type LegalDocument = {
+export interface LegalDocument {
   title: string;
   description: string;
   sections: readonly LegalDocumentSection[];
-};
+}
 
 const PRIVACY_DOCUMENTS = {
   en: {
@@ -122,10 +122,16 @@ const TERMS_DOCUMENTS = {
   },
 } as const satisfies Record<Language, LegalDocument>;
 
+/**
+ * Returns the localized privacy-policy copy rendered on the legal page.
+ */
 export function getPrivacyDocument(locale: Language): LegalDocument {
   return PRIVACY_DOCUMENTS[locale];
 }
 
+/**
+ * Returns the localized terms-of-service copy rendered on the legal page.
+ */
 export function getTermsDocument(locale: Language): LegalDocument {
   return TERMS_DOCUMENTS[locale];
 }

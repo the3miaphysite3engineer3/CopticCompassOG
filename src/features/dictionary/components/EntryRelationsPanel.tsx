@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
+
 import { Badge } from "@/components/Badge";
-import { SurfacePanel } from "@/components/SurfacePanel";
 import { useLanguage } from "@/components/LanguageProvider";
+import { SurfacePanel } from "@/components/SurfacePanel";
 import type {
   LexicalEntry,
   LexicalRelationType,

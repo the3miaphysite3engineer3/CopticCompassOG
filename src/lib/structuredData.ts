@@ -7,14 +7,6 @@ import {
   toPlainText,
 } from "@/features/dictionary/lib/entryText";
 import type { LexicalEntry } from "@/features/dictionary/types";
-import { DEFAULT_LANGUAGE } from "@/lib/i18n";
-import {
-  getDictionaryPath,
-  getEntryPath,
-  getGrammarPath,
-  getLocalizedHomePath,
-  getPublicationsPath,
-} from "@/lib/locale";
 import {
   buildGrammarLessonSeoDescription,
   buildGrammarLessonSeoTitle,
@@ -25,11 +17,19 @@ import {
   getPublicationPath,
   type Publication,
 } from "@/features/publications/lib/publications";
+import { DEFAULT_LANGUAGE } from "@/lib/i18n";
+import {
+  getDictionaryPath,
+  getEntryPath,
+  getGrammarPath,
+  getLocalizedHomePath,
+  getPublicationsPath,
+} from "@/lib/locale";
 import { siteConfig } from "@/lib/site";
 import type { Language } from "@/types/i18n";
 
 type JsonLd = Record<string, unknown>;
-export type BreadcrumbStructuredDataItem = {
+type BreadcrumbStructuredDataItem = {
   name: string;
   path: string;
 };
@@ -103,6 +103,10 @@ const STRUCTURED_DATA_COPY = {
   },
 } as const;
 
+/**
+ * Resolves a relative application path against the canonical production site
+ * URL so JSON-LD records always use absolute identifiers.
+ */
 function absoluteUrl(path: string) {
   return new URL(path, siteConfig.liveUrl).toString();
 }
@@ -147,6 +151,10 @@ function getPublicationAbsoluteUrl(publication: Publication, locale: Language) {
   return absoluteUrl(getPublicationPath(publication.id, locale));
 }
 
+/**
+ * Builds the structured-data record for one publication, including optional
+ * cover art, external link, and forthcoming status metadata when present.
+ */
 function getPublicationStructuredData(
   publication: Publication,
   locale: Language = DEFAULT_LANGUAGE,
@@ -193,6 +201,9 @@ function getPublicationStructuredData(
   };
 }
 
+/**
+ * Builds a breadcrumb list JSON-LD payload for a page-level breadcrumb trail.
+ */
 export function createBreadcrumbStructuredData(
   items: readonly BreadcrumbStructuredDataItem[],
 ): JsonLd {
@@ -208,6 +219,10 @@ export function createBreadcrumbStructuredData(
   };
 }
 
+/**
+ * Maps publication language codes onto schema.org language codes for
+ * publication structured data.
+ */
 function languageCode(lang: Publication["lang"]) {
   switch (lang) {
     case "COP":
@@ -221,6 +236,10 @@ function languageCode(lang: Publication["lang"]) {
   }
 }
 
+/**
+ * Builds the site-level WebSite structured data, including the dictionary
+ * search action used by search engines.
+ */
 export function createWebSiteStructuredData(
   locale: Language = DEFAULT_LANGUAGE,
 ): JsonLd {
@@ -252,6 +271,10 @@ export function createWebSiteStructuredData(
   };
 }
 
+/**
+ * Builds the dictionary hub structured data as a collection page plus
+ * defined-term set.
+ */
 export function createDictionaryPageStructuredData(
   locale: Language = DEFAULT_LANGUAGE,
 ): JsonLd[] {
@@ -297,6 +320,10 @@ export function createDictionaryPageStructuredData(
   ];
 }
 
+/**
+ * Builds the grammar hub structured data for the published lesson collection
+ * page and ordered lesson list.
+ */
 export function createGrammarHubStructuredData(
   lessons: readonly GrammarLessonIndexItem[],
   locale: Language = DEFAULT_LANGUAGE,
@@ -347,6 +374,10 @@ export function createGrammarHubStructuredData(
   ];
 }
 
+/**
+ * Builds the learning-resource structured data for one published grammar
+ * lesson bundle.
+ */
 export function createGrammarLessonStructuredData(
   lessonBundle: GrammarLessonBundle,
   locale: Language = DEFAULT_LANGUAGE,
@@ -392,6 +423,10 @@ export function createGrammarLessonStructuredData(
   };
 }
 
+/**
+ * Builds the defined-term structured data for a dictionary entry, collapsing
+ * dialect spellings into alternate labels for the same lexical concept.
+ */
 export function createDefinedTermStructuredData(
   entry: LexicalEntry,
   locale: Language = DEFAULT_LANGUAGE,
@@ -399,8 +434,6 @@ export function createDefinedTermStructuredData(
   const headword = toPlainText(entry.headword);
   const entryPath = getEntryPath(entry.id, locale);
   const copy = getStructuredDataCopy(locale);
-  // Search engines benefit from seeing every distinct dialect spelling as an
-  // alternate label for the same lexical entry.
   const alternateNames = Array.from(
     new Set(
       Object.values(entry.dialects)
@@ -455,6 +488,10 @@ export function createDefinedTermStructuredData(
   };
 }
 
+/**
+ * Builds the publications hub structured data as a collection page, ordered
+ * item list, and per-publication work records.
+ */
 export function createPublicationsStructuredData(
   publications: Publication[],
   locale: Language = DEFAULT_LANGUAGE,
@@ -500,6 +537,9 @@ export function createPublicationsStructuredData(
   ];
 }
 
+/**
+ * Returns the structured-data record for a single publication detail page.
+ */
 export function createPublicationStructuredData(
   publication: Publication,
   locale: Language = DEFAULT_LANGUAGE,

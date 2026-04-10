@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+
 import {
   getAuthUnavailableLoginPath,
   getLoginPath,
@@ -8,6 +9,10 @@ import {
 import { requiresAuthSessionProxy } from "@/lib/supabase/proxyRoutes";
 import type { Database } from "@/types/supabase";
 
+/**
+ * Creates the forwarded middleware response while preserving any request
+ * headers added upstream.
+ */
 function createForwardedResponse(requestHeaders: Headers) {
   return NextResponse.next({
     request: {
@@ -16,6 +21,10 @@ function createForwardedResponse(requestHeaders: Headers) {
   });
 }
 
+/**
+ * Refreshes the Supabase auth session for routes that require it and returns
+ * either the forwarded response or the appropriate login redirect.
+ */
 export async function updateSession(
   request: NextRequest,
   requestHeaders?: Headers,
@@ -31,9 +40,6 @@ export async function updateSession(
   }
 
   const env = getSupabaseRuntimeEnv();
-
-  // Public pages should stay reachable even if auth is not configured, while
-  // private routes still redirect to a login page that explains the issue.
   if (!env) {
     return NextResponse.redirect(
       new URL(getAuthUnavailableLoginPath(pathname), request.url),
@@ -57,8 +63,10 @@ export async function updateSession(
     },
   });
 
-  // getUser() refreshes the auth session before route gating, so redirects are
-  // based on the current cookie state rather than stale middleware data.
+  /**
+   * Refreshes the auth session before route gating so redirects use current
+   * cookie state instead of stale middleware data.
+   */
   const {
     data: { user },
   } = await supabase.auth.getUser();

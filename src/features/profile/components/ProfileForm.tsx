@@ -1,17 +1,18 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import { useState } from "react";
 import imageCompression from "browser-image-compression";
+import { useState } from "react";
+
 import { updateProfile } from "@/actions/profile";
 import { Button, buttonClassName } from "@/components/Button";
-import { useLanguage } from "@/components/LanguageProvider";
-import { createClient } from "@/lib/supabase/client";
 import { FormField } from "@/components/FormField";
+import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { getDashboardCopy } from "@/features/dashboard/lib/dashboardCopy";
 import { antinoou } from "@/lib/fonts";
+import { createClient } from "@/lib/supabase/client";
 import type { Tables } from "@/types/supabase";
 
 export function ProfileForm({
@@ -75,8 +76,6 @@ export function ProfileForm({
       const { data } = supabase.storage.from("avatars").getPublicUrl(filePath);
       setAvatarUrl(data.publicUrl);
       setPendingAvatarStoragePath(filePath);
-
-      // Auto-clear the "Uploading to server..." success message
       setTimeout(() => setStatus(null), 3000);
     } catch (error: unknown) {
       const errorMessage =

@@ -3,6 +3,7 @@ import { SurfacePanel } from "@/components/SurfacePanel";
 import { antinoou } from "@/lib/fonts";
 import type { Language } from "@/types/i18n";
 import type { Tables } from "@/types/supabase";
+
 import { getDashboardCopy } from "../lib/dashboardCopy";
 
 export function DashboardWelcomePanel({

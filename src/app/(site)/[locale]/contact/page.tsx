@@ -1,7 +1,8 @@
-import type { Metadata } from "next";
 import ContactPageClient from "@/features/contact/components/ContactPageClient";
 import { createLocalizedPageMetadata } from "@/lib/metadata";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
+
+import type { Metadata } from "next";
 
 function buildContactDescription(locale: "en" | "nl") {
   return locale === "nl"
@@ -25,6 +26,9 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Renders the localized public contact page.
+ */
 export default function ContactPage() {
   return <ContactPageClient />;
 }

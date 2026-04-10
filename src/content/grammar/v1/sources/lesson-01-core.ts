@@ -1,5 +1,6 @@
-import type { GrammarSourceDocument } from "../../schema.ts";
 import { grammarLesson01SourceIds } from "../lesson-01-ids.ts";
+
+import type { GrammarSourceDocument } from "../../schema.ts";
 
 export const grammarLesson01CoreSources: readonly GrammarSourceDocument[] = [
   {

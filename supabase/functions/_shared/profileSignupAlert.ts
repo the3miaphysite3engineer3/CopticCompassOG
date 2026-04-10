@@ -1,4 +1,4 @@
-export type DatabaseWebhookPayload<RecordType = Record<string, unknown>> = {
+type DatabaseWebhookPayload<RecordType = Record<string, unknown>> = {
   old_record?: RecordType | null;
   record?: RecordType | null;
   schema?: string;
@@ -6,13 +6,17 @@ export type DatabaseWebhookPayload<RecordType = Record<string, unknown>> = {
   type?: string;
 };
 
-export type ProfileSignupRecord = {
+type ProfileSignupRecord = {
   createdAt: string | null;
   email: string | null;
   fullName: string | null;
   id: string;
 };
 
+/**
+ * Redacts an email address before it is written into notification payloads or
+ * logs that do not need the full recipient value.
+ */
 export function redactEmailAddress(email: string | null | undefined) {
   if (!email) {
     return null;
@@ -50,6 +54,10 @@ function asOptionalString(value: unknown) {
   return normalized.length > 0 ? normalized : null;
 }
 
+/**
+ * Parses the profile-insert webhook payload into the minimal record required by
+ * the signup alert worker, ignoring other webhook types and malformed rows.
+ */
 export function parseProfileSignupPayload(
   payload: unknown,
 ): ProfileSignupRecord | null {
@@ -84,13 +92,16 @@ export function parseProfileSignupPayload(
   };
 }
 
+/**
+ * Builds the owner-alert email subject and body for a new profile signup.
+ */
 export function buildProfileSignupOwnerAlert(record: ProfileSignupRecord) {
   const subjectTarget = record.email ?? record.fullName ?? record.id;
 
   return {
-    subject: `New user signup: ${subjectTarget}`,
+    subject: `New Coptic Compass signup: ${subjectTarget}`,
     text: [
-      "A new user account has been created.",
+      "A new Coptic Compass user account has been created.",
       "",
       `Profile ID: ${record.id}`,
       `Email: ${record.email ?? "Not provided"}`,
@@ -100,6 +111,10 @@ export function buildProfileSignupOwnerAlert(record: ProfileSignupRecord) {
   };
 }
 
+/**
+ * Shapes the non-sensitive notification payload stored alongside the signup
+ * alert event.
+ */
 export function buildProfileSignupNotificationPayload(
   record: ProfileSignupRecord,
 ) {
@@ -110,6 +125,10 @@ export function buildProfileSignupNotificationPayload(
   };
 }
 
+/**
+ * Returns the deterministic dedupe key used to avoid double-sending signup
+ * owner alerts for the same profile.
+ */
 export function buildProfileSignupNotificationDedupeKey(
   record: ProfileSignupRecord,
 ) {

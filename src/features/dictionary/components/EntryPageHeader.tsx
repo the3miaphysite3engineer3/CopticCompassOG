@@ -1,7 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
+
 import { Badge } from "@/components/Badge";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { useLanguage } from "@/components/LanguageProvider";

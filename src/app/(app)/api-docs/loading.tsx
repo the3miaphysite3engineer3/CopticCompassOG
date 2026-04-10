@@ -11,6 +11,9 @@ function LoadingBlock({ className }: { className: string }) {
   );
 }
 
+/**
+ * Renders the loading skeleton for the API documentation page.
+ */
 export default function Loading() {
   return (
     <RouteLoadingState

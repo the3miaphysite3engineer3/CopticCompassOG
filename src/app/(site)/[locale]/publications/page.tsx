@@ -1,15 +1,16 @@
-import type { Metadata } from "next";
 import StructuredData from "@/components/StructuredData";
 import PublicationsPageClient from "@/features/publications/components/PublicationsPageClient";
 import { publications } from "@/features/publications/lib/publications";
 import { getTranslation } from "@/lib/i18n";
-import { createLocalizedPageMetadata } from "@/lib/metadata";
 import { getLocalizedHomePath, getPublicationsPath } from "@/lib/locale";
+import { createLocalizedPageMetadata } from "@/lib/metadata";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
 import {
   createBreadcrumbStructuredData,
   createPublicationsStructuredData,
 } from "@/lib/structuredData";
+
+import type { Metadata } from "next";
 
 function buildPublicationsDescription(locale: "en" | "nl") {
   return locale === "nl"
@@ -36,6 +37,10 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Renders the localized publications index with breadcrumb and catalog
+ * structured data.
+ */
 export default async function PublicationsPage({
   params,
 }: {

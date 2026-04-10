@@ -1,22 +1,31 @@
-import { ReactNode, useEffect } from "react";
 import { X } from "lucide-react";
-import { cx } from "@/lib/classes";
+import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
-export type AnalyticsSlideOverProps = {
+import { cx } from "@/lib/classes";
+
+import type { ReactNode } from "react";
+
+type AnalyticsSlideOverProps = {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
 };
 
+/**
+ * Renders a portal-based analytics panel that locks body scroll while open and
+ * closes when the backdrop or Escape key is used.
+ */
 export function AnalyticsSlideOver({
   isOpen,
   onClose,
   title,
   children,
 }: AnalyticsSlideOverProps) {
-  // Prevent body scrolling when open
+  /**
+   * Lock body scroll while the panel is mounted.
+   */
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
@@ -28,7 +37,9 @@ export function AnalyticsSlideOver({
     };
   }, [isOpen]);
 
-  // Handle escape key
+  /**
+   * Close the panel on Escape while it is open.
+   */
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
@@ -39,11 +50,12 @@ export function AnalyticsSlideOver({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    return null;
+  }
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex justify-end overflow-hidden">
-      {/* Backdrop */}
       <div
         className={cx(
           "fixed inset-0 bg-stone-900/40 backdrop-blur-sm transition-opacity duration-300 dark:bg-black/60",
@@ -52,14 +64,12 @@ export function AnalyticsSlideOver({
         onClick={onClose}
       />
 
-      {/* Slide-over Panel */}
       <div
         className={cx(
           "relative flex h-full w-full max-w-2xl flex-col bg-stone-50 shadow-2xl transition-transform duration-300 ease-in-out dark:bg-stone-950",
           isOpen ? "translate-x-0" : "translate-x-full",
         )}
       >
-        {/* Header */}
         <header className="flex items-center justify-between border-b border-stone-200 px-6 py-4 dark:border-stone-800">
           <h2 className="text-xl font-bold text-stone-800 dark:text-stone-200">
             {title}
@@ -73,7 +83,6 @@ export function AnalyticsSlideOver({
           </button>
         </header>
 
-        {/* Content (scrollable) */}
         <div
           id="analytics-slideover-scroll"
           className="flex-1 min-h-0 overflow-y-auto px-6 py-6"

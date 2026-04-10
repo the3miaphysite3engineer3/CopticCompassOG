@@ -4,10 +4,10 @@ import {
   useCallback,
   useDeferredValue,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
+
 import {
   DEFAULT_DICTIONARY_DIALECT_FILTER,
   DEFAULT_PART_OF_SPEECH_FILTER,
@@ -16,27 +16,84 @@ import {
   type DictionaryPartOfSpeechFilter,
 } from "@/features/dictionary/config";
 import {
-  prepareDictionaryForSearch,
-  searchPreparedDictionary,
-  type PreparedLexicalEntry,
+  DEFAULT_DICTIONARY_SEARCH_PAGE_SIZE,
+  type DictionarySearchPage,
 } from "@/features/dictionary/search";
-import type { LexicalEntry } from "@/features/dictionary/types";
+import type { DictionaryClientEntry } from "@/features/dictionary/types";
 import { createClient } from "@/lib/supabase/client";
 import { loadBrowserUser } from "@/lib/supabase/clientAuth";
 
 type UseDictionarySearchOptions = {
-  dictionaryPath: string;
+  searchPath: string;
 };
 
+type DictionarySearchRequestOptions = {
+  exactMatch: boolean;
+  limit: number;
+  offset: number;
+  query: string;
+  selectedDialect: DialectFilter;
+  selectedPartOfSpeech: DictionaryPartOfSpeechFilter;
+};
+
+/**
+ * Builds the public dictionary search URL for the current query, filters, and
+ * page boundary without leaking default values into the request string.
+ */
+function buildDictionarySearchUrl(
+  searchPath: string,
+  {
+    exactMatch,
+    limit,
+    offset,
+    query,
+    selectedDialect,
+    selectedPartOfSpeech,
+  }: DictionarySearchRequestOptions,
+) {
+  const params = new URLSearchParams();
+  const trimmedQuery = query.trim();
+
+  if (trimmedQuery.length > 0) {
+    params.set("q", trimmedQuery);
+  }
+
+  if (selectedDialect !== "ALL") {
+    params.set("dialect", selectedDialect);
+  }
+
+  if (selectedPartOfSpeech !== "ALL") {
+    params.set("partOfSpeech", selectedPartOfSpeech);
+  }
+
+  if (exactMatch) {
+    params.set("exact", "true");
+  }
+
+  params.set("limit", String(limit));
+
+  if (offset > 0) {
+    params.set("offset", String(offset));
+  }
+
+  return `${searchPath}?${params.toString()}`;
+}
+
+/**
+ * Loads dictionary search results page by page, applies saved user dialect
+ * preferences, and exposes the state used by the interactive dictionary UI.
+ */
 export function useDictionarySearch({
-  dictionaryPath,
+  searchPath,
 }: UseDictionarySearchOptions) {
-  const [dictionary, setDictionary] = useState<LexicalEntry[]>([]);
-  const [preparedDictionary, setPreparedDictionary] = useState<
-    PreparedLexicalEntry[]
+  const [dictionaryLength, setDictionaryLength] = useState(0);
+  const [filteredResults, setFilteredResults] = useState<
+    DictionaryClientEntry[]
   >([]);
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMoreResults, setHasMoreResults] = useState(false);
   const [isKeyboardOpen, setKeyboardOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const selectionRef = useRef({ start: 0, end: 0 });
@@ -47,54 +104,30 @@ export function useDictionarySearch({
   );
   const [exactMatch, setExactMatch] = useState<boolean>(false);
   const [preferenceUserId, setPreferenceUserId] = useState<string | null>(null);
+  const [totalMatches, setTotalMatches] = useState(0);
+  const [initialSearchStateReady, setInitialSearchStateReady] = useState(false);
   const deferredQuery = useDeferredValue(query);
+  const activeSearchKeyRef = useRef("");
   const hasDeepLinkedQueryRef = useRef(false);
 
   useEffect(() => {
-    // Deep-linked searches hydrate from ?q=... so shared dictionary URLs open
-    // with the intended query already applied.
-    let cancelled = false;
+    /**
+     * Deep-linked searches hydrate from `?q=` so shared dictionary URLs open
+     * with the intended query and the broadest dialect filter already applied.
+     */
+    const initialQuery =
+      typeof window === "undefined"
+        ? ""
+        : (new URLSearchParams(window.location.search).get("q")?.trim() ?? "");
+    hasDeepLinkedQueryRef.current = initialQuery.length > 0;
 
-    async function loadDictionary() {
-      const initialQuery =
-        typeof window === "undefined"
-          ? ""
-          : (new URLSearchParams(window.location.search).get("q")?.trim() ??
-            "");
-      hasDeepLinkedQueryRef.current = initialQuery.length > 0;
-
-      try {
-        const response = await fetch(dictionaryPath);
-        if (!response.ok) {
-          throw new Error("JSON not found");
-        }
-
-        const data = (await response.json()) as LexicalEntry[];
-        if (!cancelled) {
-          if (initialQuery) {
-            setQuery(initialQuery);
-            setSelectedDialectState("ALL");
-          }
-          setDictionary(data);
-          setPreparedDictionary(prepareDictionaryForSearch(data));
-          setLoading(false);
-        }
-      } catch {
-        console.warn("Target language dictionary missing...");
-        if (!cancelled) {
-          setDictionary([]);
-          setPreparedDictionary([]);
-          setLoading(false);
-        }
-      }
+    if (initialQuery.length > 0) {
+      setQuery(initialQuery);
+      setSelectedDialectState("ALL");
     }
 
-    void loadDictionary();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [dictionaryPath]);
+    setInitialSearchStateReady(true);
+  }, []);
 
   useEffect(() => {
     const supabaseClient = createClient();
@@ -163,7 +196,9 @@ export function useDictionarySearch({
   const restoreInputSelection = useCallback((cursorPosition: number) => {
     requestAnimationFrame(() => {
       const input = searchInputRef.current;
-      if (!input) return;
+      if (!input) {
+        return;
+      }
 
       input.focus();
       input.setSelectionRange(cursorPosition, cursorPosition);
@@ -171,42 +206,166 @@ export function useDictionarySearch({
     });
   }, []);
 
-  const filteredResults = useMemo(() => {
-    let results =
-      deferredQuery.trim().length > 0
-        ? searchPreparedDictionary(
-            deferredQuery,
-            preparedDictionary,
+  /**
+   * Force the paginated results list to reset when the effective search state
+   * changes so page boundaries do not leak across different filter sets.
+   */
+  const resultsKey = `${deferredQuery}\u0000${selectedPartOfSpeech}\u0000${selectedDialect}\u0000${exactMatch}`;
+
+  useEffect(() => {
+    if (!initialSearchStateReady) {
+      return;
+    }
+
+    const controller = new AbortController();
+    const requestKey = resultsKey;
+    activeSearchKeyRef.current = requestKey;
+    setLoading(true);
+    setLoadingMore(false);
+
+    async function loadFirstPage() {
+      try {
+        const response = await fetch(
+          buildDictionarySearchUrl(searchPath, {
             exactMatch,
-          )
-        : dictionary;
+            limit: DEFAULT_DICTIONARY_SEARCH_PAGE_SIZE,
+            offset: 0,
+            query: deferredQuery,
+            selectedDialect,
+            selectedPartOfSpeech,
+          }),
+          { signal: controller.signal },
+        );
 
-    if (selectedPartOfSpeech !== "ALL") {
-      results = results.filter((result) => result.pos === selectedPartOfSpeech);
+        if (!response.ok) {
+          throw new Error("Dictionary search is unavailable");
+        }
+
+        const page = (await response.json()) as DictionarySearchPage;
+        if (
+          controller.signal.aborted ||
+          activeSearchKeyRef.current !== requestKey
+        ) {
+          return;
+        }
+
+        setDictionaryLength(page.totalEntries);
+        setFilteredResults(page.entries);
+        setHasMoreResults(page.hasMore);
+        setTotalMatches(page.totalMatches);
+      } catch (error) {
+        if (controller.signal.aborted) {
+          return;
+        }
+
+        console.warn("Dictionary search results are unavailable.", error);
+        if (activeSearchKeyRef.current !== requestKey) {
+          return;
+        }
+
+        setDictionaryLength(0);
+        setFilteredResults([]);
+        setHasMoreResults(false);
+        setTotalMatches(0);
+      } finally {
+        if (
+          controller.signal.aborted ||
+          activeSearchKeyRef.current !== requestKey
+        ) {
+          return;
+        }
+
+        setLoading(false);
+      }
     }
 
-    if (selectedDialect !== "ALL") {
-      results = results.filter(
-        (result) => result.dialects[selectedDialect] !== undefined,
-      );
-    }
+    void loadFirstPage();
 
-    return results;
+    return () => {
+      controller.abort();
+    };
   }, [
     deferredQuery,
-    dictionary,
-    preparedDictionary,
-    selectedPartOfSpeech,
-    selectedDialect,
     exactMatch,
+    initialSearchStateReady,
+    resultsKey,
+    searchPath,
+    selectedDialect,
+    selectedPartOfSpeech,
+  ]);
+
+  const loadMoreResults = useCallback(() => {
+    if (!initialSearchStateReady || loading || loadingMore || !hasMoreResults) {
+      return;
+    }
+
+    const requestKey = resultsKey;
+    setLoadingMore(true);
+
+    async function loadNextPage() {
+      try {
+        const response = await fetch(
+          buildDictionarySearchUrl(searchPath, {
+            exactMatch,
+            limit: DEFAULT_DICTIONARY_SEARCH_PAGE_SIZE,
+            offset: filteredResults.length,
+            query: deferredQuery,
+            selectedDialect,
+            selectedPartOfSpeech,
+          }),
+        );
+
+        if (!response.ok) {
+          throw new Error("Dictionary search page is unavailable");
+        }
+
+        const page = (await response.json()) as DictionarySearchPage;
+        if (activeSearchKeyRef.current !== requestKey) {
+          return;
+        }
+
+        setDictionaryLength(page.totalEntries);
+        setFilteredResults((previousResults) =>
+          activeSearchKeyRef.current === requestKey
+            ? [...previousResults, ...page.entries]
+            : previousResults,
+        );
+        setHasMoreResults(page.hasMore);
+        setTotalMatches(page.totalMatches);
+      } catch (error) {
+        console.warn("Dictionary results could not be extended.", error);
+      } finally {
+        if (activeSearchKeyRef.current === requestKey) {
+          setLoadingMore(false);
+        }
+      }
+    }
+
+    void loadNextPage();
+  }, [
+    deferredQuery,
+    exactMatch,
+    filteredResults.length,
+    hasMoreResults,
+    initialSearchStateReady,
+    loading,
+    loadingMore,
+    resultsKey,
+    searchPath,
+    selectedDialect,
+    selectedPartOfSpeech,
   ]);
 
   const handleKeyboardAppend = useCallback(
     (char: string) => {
-      setQuery((prev) => {
-        const start = Math.min(selectionRef.current.start, prev.length);
-        const end = Math.min(selectionRef.current.end, prev.length);
-        const nextQuery = prev.slice(0, start) + char + prev.slice(end);
+      setQuery((previousQuery) => {
+        const start = Math.min(
+          selectionRef.current.start,
+          previousQuery.length,
+        );
+        const end = Math.min(selectionRef.current.end, previousQuery.length);
+        const nextQuery =
+          previousQuery.slice(0, start) + char + previousQuery.slice(end);
         const nextCursor = start + char.length;
 
         selectionRef.current = { start: nextCursor, end: nextCursor };
@@ -219,12 +378,13 @@ export function useDictionarySearch({
   );
 
   const handleKeyboardBackspace = useCallback(() => {
-    setQuery((prev) => {
-      const start = Math.min(selectionRef.current.start, prev.length);
-      const end = Math.min(selectionRef.current.end, prev.length);
+    setQuery((previousQuery) => {
+      const start = Math.min(selectionRef.current.start, previousQuery.length);
+      const end = Math.min(selectionRef.current.end, previousQuery.length);
 
       if (start !== end) {
-        const nextQuery = prev.slice(0, start) + prev.slice(end);
+        const nextQuery =
+          previousQuery.slice(0, start) + previousQuery.slice(end);
         selectionRef.current = { start, end: start };
         restoreInputSelection(start);
         return nextQuery;
@@ -232,20 +392,18 @@ export function useDictionarySearch({
 
       if (start === 0) {
         restoreInputSelection(0);
-        return prev;
+        return previousQuery;
       }
 
       const nextCursor = start - 1;
-      const nextQuery = prev.slice(0, nextCursor) + prev.slice(end);
+      const nextQuery =
+        previousQuery.slice(0, nextCursor) + previousQuery.slice(end);
       selectionRef.current = { start: nextCursor, end: nextCursor };
       restoreInputSelection(nextCursor);
       return nextQuery;
     });
   }, [restoreInputSelection]);
 
-  // Infinite-scroll rendering resets when query or filters change, so the list
-  // gets a stable key derived from the effective search state.
-  const resultsKey = `${deferredQuery}\u0000${selectedPartOfSpeech}\u0000${selectedDialect}\u0000${exactMatch}`;
   const setSelectedDialect = useCallback(
     (value: DialectFilter) => {
       setSelectedDialectState(value);
@@ -268,24 +426,28 @@ export function useDictionarySearch({
   );
 
   return {
-    dictionaryLength: dictionary.length,
+    dictionaryLength,
+    exactMatch,
     filteredResults,
     handleKeyboardAppend,
     handleKeyboardBackspace,
     handleSelectionChange,
+    hasMoreResults,
     isKeyboardOpen,
+    loadMoreResults,
     loading,
+    loadingMore,
     query,
     resultsKey,
     searchInputRef,
     selectedDialect,
     selectedPartOfSpeech,
+    setExactMatch,
     setKeyboardOpen,
     setQuery,
     setSelectedDialect,
     setSelectedPartOfSpeech,
-    exactMatch,
-    setExactMatch,
+    totalMatches,
     visibleQuery: deferredQuery,
   };
 }

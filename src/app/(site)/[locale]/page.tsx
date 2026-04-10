@@ -1,10 +1,11 @@
-import type { Metadata } from "next";
 import StructuredData from "@/components/StructuredData";
 import HomePageClient from "@/features/home/components/HomePageClient";
 import { createLocalizedPageMetadata } from "@/lib/metadata";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
 import { siteConfig } from "@/lib/site";
 import { createWebSiteStructuredData } from "@/lib/structuredData";
+
+import type { Metadata } from "next";
 
 function buildHomeDescription(locale: "en" | "nl") {
   if (locale === "nl") {
@@ -37,6 +38,9 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Renders the localized home page together with website structured data.
+ */
 export default async function HomePage({
   params,
 }: {

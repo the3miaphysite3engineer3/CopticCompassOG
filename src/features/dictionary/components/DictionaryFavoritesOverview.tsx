@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import { Badge } from "@/components/Badge";
 import { EmptyState } from "@/components/EmptyState";
 import { SurfacePanel } from "@/components/SurfacePanel";
@@ -7,8 +8,8 @@ import {
   getDashboardCopy,
 } from "@/features/dashboard/lib/dashboardCopy";
 import type { DialectFilter } from "@/features/dictionary/config";
-import { getPreferredEntryDisplaySpelling } from "@/features/dictionary/lib/entryDisplay";
 import type { EntryFavoriteWithEntry } from "@/features/dictionary/lib/entryActions";
+import { getPreferredEntryDisplaySpelling } from "@/features/dictionary/lib/entryDisplay";
 import { antinoou } from "@/lib/fonts";
 import { getEntryPath } from "@/lib/locale";
 import type { Language } from "@/types/i18n";

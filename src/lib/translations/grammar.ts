@@ -1,5 +1,8 @@
 import { defineMessages } from "@/lib/translations/defineMessages";
 
+/**
+ * Localized copy for the grammar hub, lesson pages, and exercise forms.
+ */
 export const grammarMessages = defineMessages({
   en: {
     "grammar.title": "Coptic Grammar",
@@ -26,6 +29,7 @@ export const grammarMessages = defineMessages({
       "Your answers have been securely saved. Kyrillos will review them shortly.",
     "exercise.viewDashboard": "View My Dashboard",
     "exercise.answerPlaceholder": "Type your translation here...",
+    "exercise.preparingSubmission": "Preparing secure submission...",
     "exercise.submitting": "Submitting securely...",
     "exercise.submit": "Submit Translations",
   },
@@ -54,6 +58,7 @@ export const grammarMessages = defineMessages({
       "Je antwoorden zijn veilig opgeslagen. Kyrillos zal ze binnenkort nakijken.",
     "exercise.viewDashboard": "Mijn dashboard bekijken",
     "exercise.answerPlaceholder": "Typ hier je vertaling...",
+    "exercise.preparingSubmission": "Veilige verzending voorbereiden...",
     "exercise.submitting": "Veilig verzenden...",
     "exercise.submit": "Vertalingen verzenden",
   },

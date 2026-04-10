@@ -1,5 +1,9 @@
 import { assertServerOnly } from "@/lib/server/assertServerOnly";
 
+/**
+ * Returns the notification-email environment only when the required Resend and
+ * sender configuration is present.
+ */
 export function getNotificationEmailEnv() {
   assertServerOnly("getNotificationEmailEnv");
 
@@ -17,6 +21,10 @@ export function getNotificationEmailEnv() {
   };
 }
 
-export function hasNotificationEmailEnv() {
+/**
+ * Reports whether notification email delivery is configured in the current
+ * environment.
+ */
+function _hasNotificationEmailEnv() {
   return getNotificationEmailEnv() !== null;
 }

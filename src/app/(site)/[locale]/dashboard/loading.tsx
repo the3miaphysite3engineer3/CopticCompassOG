@@ -15,6 +15,9 @@ function LoadingBlock({ className }: { className: string }) {
   );
 }
 
+/**
+ * Renders the loading skeleton for the localized learner dashboard.
+ */
 export default function Loading() {
   const { language } = useLanguage();
   const copy = getDashboardCopy(language);

@@ -1,8 +1,10 @@
 import { getEntryPath } from "@/lib/locale";
 import type { Language } from "@/types/i18n";
-import type { LexicalEntry } from "../types";
+
 import { getPreferredEntryDisplaySpelling } from "./entryDisplay";
 import { getEntrySummary, toPlainText } from "./entryText";
+
+import type { LexicalEntry } from "../types";
 
 export type EntrySharePayload = {
   copyText: string;
@@ -20,6 +22,10 @@ type BuildEntrySharePayloadOptions = {
   url: string;
 };
 
+/**
+ * Ensures a summary line ends with terminal punctuation before it is embedded
+ * into share text.
+ */
 function ensureSentence(value: string) {
   if (!value) {
     return "";
@@ -32,6 +38,10 @@ function getShareDisplayForm(entry: LexicalEntry) {
   return toPlainText(getPreferredEntryDisplaySpelling(entry));
 }
 
+/**
+ * Collects up to two distinct related forms for share text while skipping the
+ * current entry and duplicate spellings.
+ */
 function collectRelatedShareForms(
   entry: LexicalEntry,
   parentEntry: LexicalEntry | null | undefined,
@@ -64,6 +74,10 @@ function collectRelatedShareForms(
   return labels;
 }
 
+/**
+ * Resolves the share URL for an entry, preferring the current browser URL and
+ * otherwise reconstructing it from the localized entry path.
+ */
 export function resolveEntryShareUrl(
   entryId: string,
   language: Language,
@@ -86,6 +100,10 @@ export function resolveEntryShareUrl(
   return new URL(pathname, baseUrl).toString();
 }
 
+/**
+ * Builds the share payload used by native share, clipboard copy, and social
+ * share links for one dictionary entry.
+ */
 export function buildEntrySharePayload({
   entry,
   language,
@@ -100,12 +118,14 @@ export function buildEntrySharePayload({
     parentEntry,
     relatedEntries,
   );
-  const relatedLine =
-    relatedForms.length > 0
-      ? language === "nl"
+  let relatedLine = "";
+
+  if (relatedForms.length > 0) {
+    relatedLine =
+      language === "nl"
         ? `Verwante vormen: ${relatedForms.join(" • ")}`
-        : `Related forms: ${relatedForms.join(" • ")}`
-      : "";
+        : `Related forms: ${relatedForms.join(" • ")}`;
+  }
 
   const lines =
     language === "nl"
@@ -135,6 +155,9 @@ export function buildEntrySharePayload({
   };
 }
 
+/**
+ * Builds the platform-specific social share URLs for an entry share payload.
+ */
 export function buildEntryShareLinks(payload: EntrySharePayload) {
   const encodedUrl = encodeURIComponent(payload.url);
   const encodedText = encodeURIComponent(payload.text);

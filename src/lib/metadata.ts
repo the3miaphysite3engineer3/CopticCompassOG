@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import { buildOpenGraphImageUrl } from "@/features/seo/lib/openGraph";
 import {
   createLanguageAlternates,
   getLocalizedPath,
@@ -7,17 +7,78 @@ import {
 import { buildPageTitle, siteConfig } from "@/lib/site";
 import type { Language } from "@/types/i18n";
 
+import type { Metadata } from "next";
+
+type SocialImage = {
+  alt: string;
+  height: number;
+  url: string;
+  width: number;
+};
+
+/**
+ * Normalizes a social preview image into the Open Graph and Twitter card
+ * dimensions used across the site.
+ */
+export function createSocialImage(url: string, alt: string): SocialImage {
+  return {
+    url,
+    width: 1200,
+    height: 630,
+    alt,
+  };
+}
+
 function getSocialImages() {
   return [
-    {
-      url: `${siteConfig.liveUrl}/api/og`,
-      width: 1200,
-      height: 630,
-      alt: "Coptic Compass social preview",
-    },
+    createSocialImage(
+      buildOpenGraphImageUrl({
+        type: "site",
+      }),
+      "Coptic Compass social preview",
+    ),
   ];
 }
 
+function getTwitterImages(images: SocialImage[]) {
+  return images.map((image) => image.url);
+}
+
+/**
+ * Builds the social metadata block shared by page-level metadata helpers.
+ */
+export function createPageSocialMetadata({
+  title,
+  description,
+  path,
+  locale,
+  images = getSocialImages(),
+}: {
+  title: string;
+  description: string;
+  path: string;
+  locale?: Language;
+  images?: SocialImage[];
+}) {
+  return {
+    openGraph: {
+      title: buildPageTitle(title),
+      description,
+      url: `${siteConfig.liveUrl}${path}`,
+      ...(locale ? { locale: getOpenGraphLocale(locale) } : {}),
+      images,
+    },
+    twitter: {
+      title: buildPageTitle(title),
+      description,
+      images: getTwitterImages(images),
+    },
+  };
+}
+
+/**
+ * Returns the root layout metadata shared by every localized site page.
+ */
 export function createRootLayoutMetadata(locale: Language): Metadata {
   return {
     metadataBase: new URL(siteConfig.liveUrl),
@@ -56,6 +117,9 @@ export function createRootLayoutMetadata(locale: Language): Metadata {
   };
 }
 
+/**
+ * Builds canonical metadata for a non-localized page path.
+ */
 export function createPageMetadata({
   title,
   description,
@@ -72,20 +136,18 @@ export function createPageMetadata({
     alternates: {
       canonical: path,
     },
-    openGraph: {
-      title: buildPageTitle(title),
+    ...createPageSocialMetadata({
+      title,
       description,
-      url: `${siteConfig.liveUrl}${path}`,
-      images: getSocialImages(),
-    },
-    twitter: {
-      title: buildPageTitle(title),
-      description,
-      images: getSocialImages().map((image) => image.url),
-    },
+      path,
+    }),
   };
 }
 
+/**
+ * Builds localized metadata with canonical and alternate-language links for a
+ * translated page.
+ */
 export function createLocalizedPageMetadata({
   title,
   description,
@@ -107,21 +169,19 @@ export function createLocalizedPageMetadata({
       canonical: localizedPath,
       languages: createLanguageAlternates(path),
     },
-    openGraph: {
-      title: buildPageTitle(title),
+    ...createPageSocialMetadata({
+      title,
       description,
-      url: `${siteConfig.liveUrl}${localizedPath}`,
-      locale: getOpenGraphLocale(locale),
-      images: getSocialImages(),
-    },
-    twitter: {
-      title: buildPageTitle(title),
-      description,
-      images: getSocialImages().map((image) => image.url),
-    },
+      path: localizedPath,
+      locale,
+    }),
   };
 }
 
+/**
+ * Builds metadata for pages that should stay out of search indexes while
+ * preserving a title and optional description.
+ */
 export function createNoIndexMetadata({
   title,
   description,

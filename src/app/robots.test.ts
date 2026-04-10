@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import robots from "./robots";
 
 describe("robots route", () => {

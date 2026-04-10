@@ -1,14 +1,15 @@
 "use client";
 
 import { useState, useTransition } from "react";
+
 import { updateCommunicationPreferences } from "@/actions/communications";
 import { Button } from "@/components/Button";
 import { CheckboxField } from "@/components/CheckboxField";
 import { FormField, FormHint } from "@/components/FormField";
-import { StatusNotice } from "@/components/StatusNotice";
 import { useLanguage } from "@/components/LanguageProvider";
-import { getDashboardCopy } from "@/features/dashboard/lib/dashboardCopy";
+import { StatusNotice } from "@/components/StatusNotice";
 import type { AudiencePreferences } from "@/features/communications/lib/communications";
+import { getDashboardCopy } from "@/features/dashboard/lib/dashboardCopy";
 
 type CommunicationPreferencesFormProps = {
   deliveryEmail: string | null;

@@ -1,12 +1,14 @@
 "use client";
 
 import { useState } from "react";
+
 import type {
   GrammarLessonBundle,
   GrammarSectionDocument,
 } from "@/content/grammar/schema";
 import { createClient } from "@/lib/supabase/client";
 import { normalizeMultiline } from "@/lib/validation";
+
 import {
   buildGrammarLessonLearnerSummary,
   type GrammarLessonLearnerSummary,
@@ -55,6 +57,10 @@ function createEmptySummary(lessonBundle: GrammarLessonBundle) {
   });
 }
 
+/**
+ * Combines learner data loading with bookmark, note, and section-completion
+ * mutations for one grammar lesson.
+ */
 export function useGrammarLessonLearnerState(
   lessonBundle: GrammarLessonBundle,
 ): UseGrammarLessonLearnerStateResult {
@@ -87,11 +93,18 @@ export function useGrammarLessonLearnerState(
   const hasUnsavedNoteChanges = normalizedNoteText !== savedNoteText;
   const completedSectionIds = sectionProgressRows.map((row) => row.section_id);
 
+  /**
+   * Switches the learner UI into the unavailable state after a persistence
+   * backend failure.
+   */
   function applyUnavailableState() {
     setStatus("unavailable");
     setErrorMessage(null);
   }
 
+  /**
+   * Saves or removes the lesson bookmark for the current learner.
+   */
   async function toggleBookmark() {
     if (!user) {
       setStatus("signed-out");
@@ -145,6 +158,10 @@ export function useGrammarLessonLearnerState(
     setIsBookmarkPending(false);
   }
 
+  /**
+   * Saves or removes one section-completion row and then synchronizes the
+   * lesson-level progress summary.
+   */
   async function toggleSectionComplete(section: GrammarSectionDocument) {
     if (!user) {
       setStatus("signed-out");
@@ -278,6 +295,10 @@ export function useGrammarLessonLearnerState(
     setPendingSectionId(null);
   }
 
+  /**
+   * Saves the current lesson note, deleting the row entirely when the note is
+   * cleared.
+   */
   async function saveNote() {
     if (!user) {
       setStatus("signed-out");

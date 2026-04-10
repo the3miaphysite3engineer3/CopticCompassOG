@@ -1,23 +1,38 @@
 "use client";
 
-import { useState, useEffect, useActionState } from "react";
-import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
-import { loadBrowserUser } from "@/lib/supabase/clientAuth";
-import { submitExercise } from "@/actions/exercises";
-import type { User } from "@supabase/supabase-js";
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
+import { useState, useEffect, useActionState } from "react";
+
+import { submitExercise } from "@/actions/exercises";
 import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
 import { getDashboardPath } from "@/lib/locale";
+import { createClient, hasSupabaseEnv } from "@/lib/supabase/client";
+import { loadBrowserUser } from "@/lib/supabase/clientAuth";
 import type { Language } from "@/types/i18n";
 
-export type ExerciseFormQuestion = {
+import type { User } from "@supabase/supabase-js";
+
+type ExerciseFormQuestion = {
   id: string;
   prompt: string;
   minLength?: number;
   maxLength?: number;
 };
+
+function createSubmissionIntentId(
+  userId: string,
+  lessonSlug: string,
+  exerciseId: string,
+) {
+  return (
+    globalThis.crypto?.randomUUID?.() ??
+    `${userId}:${exerciseId}:${lessonSlug}:${Date.now().toString(36)}:${Math.random()
+      .toString(36)
+      .slice(2, 12)}`
+  );
+}
 
 export function ExerciseForm({
   lessonSlug,
@@ -36,6 +51,17 @@ export function ExerciseForm({
   const [loading, setLoading] = useState(authAvailable);
 
   const [state, formAction, isPending] = useActionState(submitExercise, null);
+  const [submissionIntentId, setSubmissionIntentId] = useState<string | null>(
+    null,
+  );
+  const userId = user?.id ?? null;
+  let submitLabel = t("exercise.submit");
+
+  if (isPending) {
+    submitLabel = t("exercise.submitting");
+  } else if (!submissionIntentId) {
+    submitLabel = t("exercise.preparingSubmission");
+  }
 
   useEffect(() => {
     if (!authAvailable) {
@@ -72,10 +98,38 @@ export function ExerciseForm({
     };
   }, [authAvailable]);
 
-  if (loading)
+  useEffect(() => {
+    let cancelled = false;
+
+    queueMicrotask(() => {
+      if (cancelled) {
+        return;
+      }
+
+      if (!userId) {
+        setSubmissionIntentId(null);
+        return;
+      }
+
+      setSubmissionIntentId((current) => {
+        if (current) {
+          return current;
+        }
+
+        return createSubmissionIntentId(userId, lessonSlug, exerciseId);
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [exerciseId, lessonSlug, userId]);
+
+  if (loading) {
     return (
       <div className="animate-pulse h-20 bg-sky-50 dark:bg-sky-900/20 rounded-xl mt-6"></div>
     );
+  }
 
   if (!authAvailable) {
     return (
@@ -128,6 +182,11 @@ export function ExerciseForm({
       <input type="hidden" name="lessonSlug" value={lessonSlug} />
       <input type="hidden" name="exerciseId" value={exerciseId} />
       <input type="hidden" name="exerciseLanguage" value={language} />
+      <input
+        type="hidden"
+        name="submissionIntentId"
+        value={submissionIntentId ?? ""}
+      />
       {questions.map((question, idx) => (
         <div
           key={question.id}
@@ -154,10 +213,10 @@ export function ExerciseForm({
       <div className="pt-4">
         <button
           type="submit"
-          disabled={isPending}
+          disabled={isPending || !submissionIntentId}
           className="btn-primary w-full sm:w-auto flex justify-center items-center gap-2 px-8"
         >
-          {isPending ? t("exercise.submitting") : t("exercise.submit")}
+          {submitLabel}
           <ArrowRight size={20} />
         </button>
       </div>

@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
 import { cx } from "@/lib/classes";
+
+import type { ReactNode } from "react";
 
 type FormLabelTone = "default" | "muted";
 

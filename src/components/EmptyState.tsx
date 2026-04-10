@@ -1,6 +1,7 @@
-import type { ReactNode } from "react";
-import { cx } from "@/lib/classes";
 import { SurfacePanel } from "@/components/SurfacePanel";
+import { cx } from "@/lib/classes";
+
+import type { ReactNode } from "react";
 
 type EmptyStateProps = {
   children?: ReactNode;

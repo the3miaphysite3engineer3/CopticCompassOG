@@ -1,5 +1,8 @@
 import { defineMessages } from "@/lib/translations/defineMessages";
 
+/**
+ * Localized copy for dictionary search, entry actions, and favorites surfaces.
+ */
 export const dictionaryMessages = defineMessages({
   en: {
     "dict.title": "Coptic Dictionary",

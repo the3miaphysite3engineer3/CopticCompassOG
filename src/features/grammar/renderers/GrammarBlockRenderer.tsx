@@ -4,17 +4,19 @@ import type {
   GrammarBlock,
   GrammarLessonBundle,
 } from "@/content/grammar/schema";
-import type { Language } from "@/types/i18n";
-import { cx } from "@/lib/classes";
+import { Footnote } from "@/features/grammar/components/Footnote";
 import { GrammarLessonCard } from "@/features/grammar/components/GrammarLessonPrimitives";
 import { useGrammarLessonRenderContext } from "@/features/grammar/components/GrammarLessonRenderContext";
-import { Footnote } from "@/features/grammar/components/Footnote";
+import { cx } from "@/lib/classes";
+import type { Language } from "@/types/i18n";
+
 import {
   GrammarExampleGroupBlock,
   GrammarExerciseGroupBlock,
 } from "./GrammarBlockGroupRenderers";
 import { GrammarTableBlockRenderer } from "./GrammarBlockTableRenderer";
 import { GrammarInlineRenderer } from "./GrammarInlineRenderer";
+
 import type { RenderGrammarBlocks } from "./grammarBlockRendererShared";
 
 type GrammarBlockRendererProps = {
@@ -25,6 +27,10 @@ type GrammarBlockRendererProps = {
   inheritTextColor?: boolean;
 };
 
+/**
+ * Renders one inline footnote reference either as a live endnote trigger or as
+ * a plain fallback marker when the lesson bundle is incomplete.
+ */
 function renderFootnoteRef(
   ref: string,
   key: string,
@@ -61,6 +67,9 @@ function renderFootnoteRef(
   );
 }
 
+/**
+ * Renders one structured grammar block into the matching lesson UI component.
+ */
 function renderBlock(
   block: GrammarBlock,
   index: number,
@@ -230,6 +239,10 @@ function renderBlock(
   }
 }
 
+/**
+ * Recursively renders the structured lesson block tree for web and PDF
+ * presentation modes.
+ */
 export function GrammarBlockRenderer({
   blocks,
   language,

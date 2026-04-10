@@ -1,13 +1,14 @@
-import type {
-  GrammarBlock,
-  GrammarConceptDocument,
-  GrammarInline,
-} from "../../schema.ts";
 import {
   grammarLesson01ConceptIds,
   grammarLesson01Id,
   grammarLesson01SourceIds,
 } from "../lesson-01-ids.ts";
+
+import type {
+  GrammarBlock,
+  GrammarConceptDocument,
+  GrammarInline,
+} from "../../schema.ts";
 
 const text = (value: string): GrammarInline => ({ type: "text", text: value });
 const coptic = (value: string): GrammarInline => ({

@@ -5,11 +5,11 @@ type ContactModuleContext = {
   consumeRateLimitMock: ReturnType<typeof vi.fn>;
   createAudienceOptInRequestMock: ReturnType<typeof vi.fn>;
   createServiceRoleClientMock: ReturnType<typeof vi.fn>;
-  dispatchLoggedNotificationEmailMock: ReturnType<typeof vi.fn>;
   getClientRateLimitIdentifierMock: ReturnType<typeof vi.fn>;
   hasSupabaseServiceRoleEnvMock: ReturnType<typeof vi.fn>;
   insertMock: ReturnType<typeof vi.fn>;
   insertSingleMock: ReturnType<typeof vi.fn>;
+  queueLoggedNotificationEmailMock: ReturnType<typeof vi.fn>;
   sendContactEmail: typeof import("./contact").sendContactEmail;
 };
 
@@ -55,7 +55,7 @@ async function loadContactModule(options?: {
   } | null;
   notificationResult?:
     | { error: string; success: false }
-    | { id: string | null; success: true };
+    | { eventId: string; jobId: string; success: true };
   rateLimitOk?: boolean;
 }) {
   vi.resetModules();
@@ -103,11 +103,13 @@ async function loadContactModule(options?: {
   const hasSupabaseServiceRoleEnvMock = vi
     .fn()
     .mockReturnValue(options?.hasStorageEnv ?? true);
-  const dispatchLoggedNotificationEmailMock = vi
-    .fn()
-    .mockResolvedValue(
-      options?.notificationResult ?? { success: true, id: "email_123" },
-    );
+  const queueLoggedNotificationEmailMock = vi.fn().mockResolvedValue(
+    options?.notificationResult ?? {
+      eventId: "event_123",
+      jobId: "job_123",
+      success: true,
+    },
+  );
 
   vi.doMock("@/lib/rateLimit", () => ({
     consumeRateLimit: consumeRateLimitMock,
@@ -127,7 +129,7 @@ async function loadContactModule(options?: {
     createAudienceOptInRequest: createAudienceOptInRequestMock,
   }));
   vi.doMock("@/lib/notifications/events", () => ({
-    dispatchLoggedNotificationEmail: dispatchLoggedNotificationEmailMock,
+    queueLoggedNotificationEmail: queueLoggedNotificationEmailMock,
   }));
 
   const mod = await import("./contact");
@@ -138,11 +140,11 @@ async function loadContactModule(options?: {
     consumeRateLimitMock,
     createAudienceOptInRequestMock,
     createServiceRoleClientMock,
-    dispatchLoggedNotificationEmailMock,
     getClientRateLimitIdentifierMock,
     hasSupabaseServiceRoleEnvMock,
     insertMock,
     insertSingleMock,
+    queueLoggedNotificationEmailMock,
   } satisfies ContactModuleContext;
 }
 
@@ -169,7 +171,7 @@ describe("contact action", () => {
   it("silently accepts honeypot submissions without storing or notifying", async () => {
     const {
       createServiceRoleClientMock,
-      dispatchLoggedNotificationEmailMock,
+      queueLoggedNotificationEmailMock,
       sendContactEmail,
     } = await loadContactModule();
 
@@ -183,13 +185,13 @@ describe("contact action", () => {
     });
 
     expect(createServiceRoleClientMock).not.toHaveBeenCalled();
-    expect(dispatchLoggedNotificationEmailMock).not.toHaveBeenCalled();
+    expect(queueLoggedNotificationEmailMock).not.toHaveBeenCalled();
   });
 
   it("rejects invalid contact payloads before rate limiting or storing", async () => {
     const {
       consumeRateLimitMock,
-      dispatchLoggedNotificationEmailMock,
+      queueLoggedNotificationEmailMock,
       insertMock,
       sendContactEmail,
     } = await loadContactModule();
@@ -210,17 +212,14 @@ describe("contact action", () => {
 
     expect(consumeRateLimitMock).not.toHaveBeenCalled();
     expect(insertMock).not.toHaveBeenCalled();
-    expect(dispatchLoggedNotificationEmailMock).not.toHaveBeenCalled();
+    expect(queueLoggedNotificationEmailMock).not.toHaveBeenCalled();
   });
 
   it("returns a friendly error when contact submissions are rate limited", async () => {
-    const {
-      dispatchLoggedNotificationEmailMock,
-      insertMock,
-      sendContactEmail,
-    } = await loadContactModule({
-      rateLimitOk: false,
-    });
+    const { queueLoggedNotificationEmailMock, insertMock, sendContactEmail } =
+      await loadContactModule({
+        rateLimitOk: false,
+      });
 
     await expect(
       sendContactEmail(null, createContactFormData()),
@@ -231,7 +230,7 @@ describe("contact action", () => {
     });
 
     expect(insertMock).not.toHaveBeenCalled();
-    expect(dispatchLoggedNotificationEmailMock).not.toHaveBeenCalled();
+    expect(queueLoggedNotificationEmailMock).not.toHaveBeenCalled();
   });
 
   it("fails closed when shared rate limiting is unavailable", async () => {
@@ -253,7 +252,7 @@ describe("contact action", () => {
   });
 
   it("returns a configuration error when the contact_messages table is unavailable", async () => {
-    const { dispatchLoggedNotificationEmailMock, sendContactEmail } =
+    const { queueLoggedNotificationEmailMock, sendContactEmail } =
       await loadContactModule({
         insertError: {
           code: "42P01",
@@ -268,14 +267,14 @@ describe("contact action", () => {
       error: "Contact form storage is not configured yet.",
     });
 
-    expect(dispatchLoggedNotificationEmailMock).not.toHaveBeenCalled();
+    expect(queueLoggedNotificationEmailMock).not.toHaveBeenCalled();
   });
 
   it("stores normalized contact messages and sends both the owner alert and update confirmation request", async () => {
     const {
       buildAudienceOptInConfirmationUrlMock,
       createAudienceOptInRequestMock,
-      dispatchLoggedNotificationEmailMock,
+      queueLoggedNotificationEmailMock,
       insertMock,
       sendContactEmail,
     } = await loadContactModule();
@@ -306,7 +305,7 @@ describe("contact action", () => {
       name: "Test User",
       wants_updates: true,
     });
-    expect(dispatchLoggedNotificationEmailMock).toHaveBeenCalledWith(
+    expect(queueLoggedNotificationEmailMock).toHaveBeenCalledWith(
       expect.objectContaining({
         aggregateId: "contact_123",
         aggregateType: "contact_message",
@@ -315,7 +314,8 @@ describe("contact action", () => {
           sender_email: "se***@example.com",
         }),
         replyTo: "sender@example.com",
-        subject: "New Contact: Publication / Book Inquiry from Test User",
+        subject:
+          "Coptic Compass contact: Publication / Book Inquiry from Test User",
         text: expect.stringContaining("Wants updates: yes"),
         to: "owner@example.com",
       }),
@@ -333,7 +333,7 @@ describe("contact action", () => {
       "nl",
       "test-token",
     );
-    expect(dispatchLoggedNotificationEmailMock).toHaveBeenCalledWith(
+    expect(queueLoggedNotificationEmailMock).toHaveBeenCalledWith(
       expect.objectContaining({
         aggregateId: "opt_in_123",
         aggregateType: "audience_opt_in_request",
@@ -341,7 +341,7 @@ describe("contact action", () => {
         payload: expect.objectContaining({
           email: "se***@example.com",
         }),
-        subject: "Bevestig je e-mailupdates",
+        subject: "Bevestig je Coptic Compass e-mailupdates",
         to: "sender@example.com",
         text: expect.stringContaining(
           "https://example.com/en/communications/confirm?token=test-token",
@@ -351,16 +351,13 @@ describe("contact action", () => {
   });
 
   it("returns success even if the owner alert email fails after the message is stored", async () => {
-    const {
-      dispatchLoggedNotificationEmailMock,
-      insertMock,
-      sendContactEmail,
-    } = await loadContactModule({
-      notificationResult: {
-        success: false,
-        error: "Domain not verified",
-      },
-    });
+    const { queueLoggedNotificationEmailMock, insertMock, sendContactEmail } =
+      await loadContactModule({
+        notificationResult: {
+          success: false,
+          error: "Domain not verified",
+        },
+      });
 
     await expect(
       sendContactEmail(null, createContactFormData()),
@@ -370,15 +367,19 @@ describe("contact action", () => {
     });
 
     expect(insertMock).toHaveBeenCalledOnce();
-    expect(dispatchLoggedNotificationEmailMock).toHaveBeenCalledOnce();
+    expect(queueLoggedNotificationEmailMock).toHaveBeenCalledOnce();
   });
 
   it("keeps the inquiry successful even if the update confirmation email cannot be sent", async () => {
-    const { dispatchLoggedNotificationEmailMock, sendContactEmail } =
+    const { queueLoggedNotificationEmailMock, sendContactEmail } =
       await loadContactModule();
 
-    dispatchLoggedNotificationEmailMock
-      .mockResolvedValueOnce({ success: true, id: "owner_email_1" })
+    queueLoggedNotificationEmailMock
+      .mockResolvedValueOnce({
+        eventId: "event_owner_1",
+        jobId: "job_owner_1",
+        success: true,
+      })
       .mockResolvedValueOnce({
         success: false,
         error: "Provider unavailable",
@@ -392,6 +393,6 @@ describe("contact action", () => {
         "Message sent successfully, but I could not send the update confirmation email just now.",
     });
 
-    expect(dispatchLoggedNotificationEmailMock).toHaveBeenCalledTimes(2);
+    expect(queueLoggedNotificationEmailMock).toHaveBeenCalledTimes(2);
   });
 });

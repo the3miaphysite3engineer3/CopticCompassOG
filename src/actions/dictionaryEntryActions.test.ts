@@ -2,13 +2,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 type DictionaryEntryActionsModuleContext = {
   consumeRateLimitMock: ReturnType<typeof vi.fn>;
-  dispatchLoggedOwnerAlertEmailMock: ReturnType<typeof vi.fn>;
   fromMock: ReturnType<typeof vi.fn>;
   getAuthenticatedServerContextMock: ReturnType<typeof vi.fn>;
   getDictionaryEntryByIdMock: ReturnType<typeof vi.fn>;
   hasSupabaseRuntimeEnvMock: ReturnType<typeof vi.fn>;
   insertMock: ReturnType<typeof vi.fn>;
   insertSingleMock: ReturnType<typeof vi.fn>;
+  queueLoggedOwnerAlertEmailMock: ReturnType<typeof vi.fn>;
   submitEntryReport: typeof import("./dictionaryEntryActions").submitEntryReport;
 };
 
@@ -117,12 +117,12 @@ async function loadDictionaryEntryActionsModule(options?: {
   const getUserRateLimitIdentifierMock = vi
     .fn()
     .mockReturnValue("hashed-user-id");
-  const dispatchLoggedOwnerAlertEmailMock = vi
+  const queueLoggedOwnerAlertEmailMock = vi
     .fn()
     .mockResolvedValue(
       options?.sendEmailError
         ? { success: false, error: options.sendEmailError.message }
-        : { success: true, id: "email_123" },
+        : { eventId: "event_123", jobId: "job_123", success: true },
     );
 
   vi.doMock("@/features/dictionary/lib/dictionary", () => ({
@@ -142,7 +142,7 @@ async function loadDictionaryEntryActionsModule(options?: {
     hasSupabaseRuntimeEnv: hasSupabaseRuntimeEnvMock,
   }));
   vi.doMock("@/lib/notifications/events", () => ({
-    dispatchLoggedOwnerAlertEmail: dispatchLoggedOwnerAlertEmailMock,
+    queueLoggedOwnerAlertEmail: queueLoggedOwnerAlertEmailMock,
   }));
 
   const mod = await import("./dictionaryEntryActions");
@@ -150,13 +150,13 @@ async function loadDictionaryEntryActionsModule(options?: {
   return {
     ...mod,
     consumeRateLimitMock,
-    dispatchLoggedOwnerAlertEmailMock,
     fromMock,
     getAuthenticatedServerContextMock,
     getDictionaryEntryByIdMock,
     hasSupabaseRuntimeEnvMock,
     insertMock,
     insertSingleMock,
+    queueLoggedOwnerAlertEmailMock,
   } satisfies DictionaryEntryActionsModuleContext;
 }
 
@@ -218,7 +218,7 @@ describe("dictionary entry actions", () => {
   });
 
   it("returns a friendly error when report submissions are rate limited", async () => {
-    const { dispatchLoggedOwnerAlertEmailMock, insertMock, submitEntryReport } =
+    const { insertMock, queueLoggedOwnerAlertEmailMock, submitEntryReport } =
       await loadDictionaryEntryActionsModule({
         rateLimitOk: false,
       });
@@ -232,7 +232,7 @@ describe("dictionary entry actions", () => {
     });
 
     expect(insertMock).not.toHaveBeenCalled();
-    expect(dispatchLoggedOwnerAlertEmailMock).not.toHaveBeenCalled();
+    expect(queueLoggedOwnerAlertEmailMock).not.toHaveBeenCalled();
   });
 
   it("fails closed when shared rate limiting is unavailable", async () => {
@@ -257,7 +257,7 @@ describe("dictionary entry actions", () => {
     const consoleErrorSpy = vi
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    const { dispatchLoggedOwnerAlertEmailMock, submitEntryReport } =
+    const { queueLoggedOwnerAlertEmailMock, submitEntryReport } =
       await loadDictionaryEntryActionsModule({
         insertError: {
           code: "42P01",
@@ -272,7 +272,7 @@ describe("dictionary entry actions", () => {
       error: "Entry reports are not configured yet.",
     });
 
-    expect(dispatchLoggedOwnerAlertEmailMock).not.toHaveBeenCalled();
+    expect(queueLoggedOwnerAlertEmailMock).not.toHaveBeenCalled();
     consoleErrorSpy.mockRestore();
   });
 
@@ -280,7 +280,7 @@ describe("dictionary entry actions", () => {
     const consoleErrorSpy = vi
       .spyOn(console, "error")
       .mockImplementation(() => {});
-    const { dispatchLoggedOwnerAlertEmailMock, insertMock, submitEntryReport } =
+    const { insertMock, queueLoggedOwnerAlertEmailMock, submitEntryReport } =
       await loadDictionaryEntryActionsModule({
         sendEmailError: {
           message: "Domain not verified",
@@ -311,7 +311,7 @@ describe("dictionary entry actions", () => {
       status: "open",
       user_id: "user-123",
     });
-    expect(dispatchLoggedOwnerAlertEmailMock).toHaveBeenCalledWith(
+    expect(queueLoggedOwnerAlertEmailMock).toHaveBeenCalledWith(
       expect.objectContaining({
         aggregateId: "report_123",
         aggregateType: "entry_report",
@@ -319,7 +319,7 @@ describe("dictionary entry actions", () => {
         payload: expect.objectContaining({
           reporter_email: "re***@example.com",
         }),
-        subject: "Dictionary entry report: ϭⲟⲗ (cd_173)",
+        subject: "Coptic Compass entry report: ϭⲟⲗ (cd_173)",
         text: expect.stringContaining("Reason: translation"),
       }),
     );

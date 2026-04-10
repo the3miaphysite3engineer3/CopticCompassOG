@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { grammarLessons } from "./lessons";
 
 describe("grammar lesson metadata", () => {

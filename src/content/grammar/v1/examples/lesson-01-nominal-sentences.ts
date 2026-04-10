@@ -1,8 +1,9 @@
-import type { GrammarExampleDocument } from "../../schema.ts";
 import {
   grammarLesson01ConceptIds,
   grammarLesson01Id,
 } from "../lesson-01-ids.ts";
+
+import type { GrammarExampleDocument } from "../../schema.ts";
 
 const lessonId = grammarLesson01Id;
 const sectionId = `${lessonId}.section.bipartite-nominal-sentence`;

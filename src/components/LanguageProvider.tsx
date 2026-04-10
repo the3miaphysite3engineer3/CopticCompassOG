@@ -1,5 +1,6 @@
 "use client";
 
+import { usePathname, useRouter } from "next/navigation";
 import {
   createContext,
   startTransition,
@@ -8,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { usePathname, useRouter } from "next/navigation";
+
 import {
   DEFAULT_LANGUAGE,
   LANGUAGE_STORAGE_KEY,

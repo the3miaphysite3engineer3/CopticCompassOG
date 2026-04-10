@@ -1,4 +1,5 @@
 import { siteConfig } from "@/lib/site";
+
 import { getGrammarApiIndex, getGrammarApiManifest } from "./grammarApi";
 
 export type OpenApiDocument = Record<string, unknown>;
@@ -14,6 +15,9 @@ export type GrammarOpenApiContext = {
   manifest: ReturnType<typeof getGrammarApiManifest>;
 };
 
+/**
+ * Declares the tag groups exposed in the generated grammar OpenAPI document.
+ */
 export const GRAMMAR_OPEN_API_TAGS = [
   {
     name: "Index",
@@ -46,6 +50,10 @@ export const GRAMMAR_OPEN_API_TAGS = [
   },
 ] as const;
 
+/**
+ * Builds the shared schema fragment used for localized English/Dutch text
+ * fields in the grammar API spec.
+ */
 export function createLocalizedStringSchema(description: string) {
   return {
     type: "object",
@@ -63,6 +71,10 @@ export function createLocalizedStringSchema(description: string) {
   };
 }
 
+/**
+ * Wraps a schema reference in the versioned response envelope used by the
+ * public grammar API exports.
+ */
 export function createVersionedEnvelopeSchema(
   dataSchemaRef: string,
   description: string,
@@ -93,6 +105,10 @@ export function createVersionedEnvelopeSchema(
   };
 }
 
+/**
+ * Resolves the example values and site metadata used while generating the
+ * grammar OpenAPI document.
+ */
 export function createGrammarOpenApiContext(): GrammarOpenApiContext {
   const apiIndex = getGrammarApiIndex();
   const manifest = getGrammarApiManifest();
@@ -112,6 +128,9 @@ export function createGrammarOpenApiContext(): GrammarOpenApiContext {
   };
 }
 
+/**
+ * Builds the top-level OpenAPI info block for the published grammar dataset.
+ */
 export function buildGrammarOpenApiInfo(context: GrammarOpenApiContext) {
   const { apiIndex, authorName, liveUrl, manifest } = context;
 

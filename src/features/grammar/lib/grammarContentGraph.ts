@@ -22,6 +22,10 @@ type GrammarContentGraph = {
 
 let cachedGraph: GrammarContentGraph | null = null;
 
+/**
+ * Increments the occurrence count for a referenced dictionary entry while
+ * safely ignoring empty or missing ids.
+ */
 function incrementEntryCount(
   entryCounts: Map<string, number>,
   entryId?: string,
@@ -33,6 +37,10 @@ function incrementEntryCount(
   entryCounts.set(entryId, (entryCounts.get(entryId) ?? 0) + 1);
 }
 
+/**
+ * Walks inline grammar nodes and counts every linked dictionary entry
+ * reference that appears in the current inline tree.
+ */
 function collectEntryIdsFromInlineNodes(
   nodes: readonly GrammarInline[],
   entryCounts: Map<string, number>,
@@ -60,6 +68,11 @@ function collectEntryIdsFromInlineNodes(
   }
 }
 
+/**
+ * Walks block-level grammar content recursively so dictionary references inside
+ * paragraphs, lists, tables, callouts, and nested structures all contribute to
+ * the lesson's ranked entry list.
+ */
 function collectEntryIdsFromBlocks(
   blocks: readonly GrammarBlock[],
   entryCounts: Map<string, number>,
@@ -103,6 +116,10 @@ function collectEntryIdsFromBlocks(
   }
 }
 
+/**
+ * Reduces a lesson index item to the compact reference shape stored in the
+ * grammar content graph.
+ */
 function createLessonReference(
   lesson: GrammarLessonIndexItem,
 ): GrammarLessonReference {
@@ -115,6 +132,10 @@ function createLessonReference(
   };
 }
 
+/**
+ * Builds the ranked dictionary-entry list for one lesson by counting
+ * references across sections, concepts, examples, exercises, and footnotes.
+ */
 function collectRankedEntryIdsForLesson(lessonBundle: GrammarLessonBundle) {
   const entryCounts = new Map<string, number>();
 
@@ -156,6 +177,10 @@ function collectRankedEntryIdsForLesson(lessonBundle: GrammarLessonBundle) {
     .map(([entryId]) => entryId);
 }
 
+/**
+ * Builds the cached grammar content graph that links published lessons to
+ * dictionary entries and publication sources.
+ */
 function buildGraph(): GrammarContentGraph {
   const lessonsByEntryId = new Map<string, GrammarLessonReference[]>();
   const lessonsByPublicationId = new Map<string, GrammarLessonReference[]>();
@@ -202,6 +227,9 @@ function buildGraph(): GrammarContentGraph {
   };
 }
 
+/**
+ * Returns the memoized grammar content graph, building it on first access.
+ */
 function getGraph() {
   if (!cachedGraph) {
     cachedGraph = buildGraph();
@@ -210,17 +238,27 @@ function getGraph() {
   return cachedGraph;
 }
 
+/**
+ * Lists published lessons that reference the requested dictionary entry.
+ */
 export function listPublishedGrammarLessonsForEntry(entryId: string) {
   return getGraph().lessonsByEntryId.get(entryId) ?? [];
 }
 
+/**
+ * Lists published lessons that cite the requested publication source.
+ */
 export function listPublishedGrammarLessonsForPublication(
   publicationId: string,
 ) {
   return getGraph().lessonsByPublicationId.get(publicationId) ?? [];
 }
 
-export function listRankedDictionaryEntryIdsForPublishedLesson(
+/**
+ * Returns the most strongly referenced dictionary entry ids for a published
+ * lesson, truncated to the requested limit.
+ */
+function _listRankedDictionaryEntryIdsForPublishedLesson(
   slug: string,
   limit = 12,
 ) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useReducer } from "react";
+
 import {
   createEntryActionBarInitialState,
   entryActionBarReducer,
@@ -8,6 +9,10 @@ import {
   type EntryLockedActionName,
 } from "./entryActionBar";
 
+/**
+ * Wraps the entry action-bar reducer with stable event handlers for the share,
+ * report, and auth-locked interactions used by the entry UI.
+ */
 export function useEntryActionBarState() {
   const [state, dispatch] = useReducer(
     entryActionBarReducer,

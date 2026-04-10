@@ -1,5 +1,8 @@
 import { defineMessages } from "@/lib/translations/defineMessages";
 
+/**
+ * Localized copy for the public contact page and admin contact workflows.
+ */
 export const contactMessages = defineMessages({
   en: {
     "contact.title": "Get in Touch",

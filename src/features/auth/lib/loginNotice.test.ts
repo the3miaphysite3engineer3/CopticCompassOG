@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { stripLoginFlashParams } from "./loginNotice";
 
 describe("stripLoginFlashParams", () => {

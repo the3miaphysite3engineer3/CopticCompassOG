@@ -12,6 +12,10 @@ type LessonRouteContext = {
   }>;
 };
 
+/**
+ * Returns one published grammar lesson bundle by slug, or a 404 payload when
+ * the slug is unknown.
+ */
 export async function GET(_request: Request, context: LessonRouteContext) {
   const { slug } = await context.params;
   const lesson = getGrammarApiLessonBySlug(slug);
@@ -28,6 +32,9 @@ export async function GET(_request: Request, context: LessonRouteContext) {
   return publicApiJsonResponse(lesson);
 }
 
+/**
+ * Returns the CORS preflight response for the lesson-detail endpoint.
+ */
 export function OPTIONS() {
   return publicApiOptionsResponse();
 }

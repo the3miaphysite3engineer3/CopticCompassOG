@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { getAccountAuthSettings } from "./accountSettings";
 
 describe("account settings auth state", () => {

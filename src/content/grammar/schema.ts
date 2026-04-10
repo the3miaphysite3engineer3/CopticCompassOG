@@ -196,7 +196,7 @@ export type GrammarTableHeaderRow = {
   cells: GrammarTableHeaderCell[];
 };
 
-export type GrammarTableHeaderCell = {
+type GrammarTableHeaderCell = {
   id: string;
   label: Localized<string>;
   inlineLabel?: Localized<GrammarInline[]>;

@@ -1,9 +1,8 @@
-import type { ReactNode } from "react";
 import type {
   GrammarLessonBundle,
   GrammarSectionDocument,
 } from "@/content/grammar/schema";
-import type { Language } from "@/types/i18n";
+import { GrammarAbbreviation } from "@/features/grammar/components/GrammarAbbreviation";
 import {
   GrammarLessonEndnotes,
   GrammarLessonSection,
@@ -12,12 +11,15 @@ import {
   GrammarLessonConceptGlossary as GrammarLessonConceptGlossarySection,
   GrammarLessonBibliography as GrammarLessonBibliographySection,
 } from "@/features/grammar/components/GrammarLessonSemantics";
-import { GrammarAbbreviation } from "@/features/grammar/components/GrammarAbbreviation";
 import {
   getGrammarLessonAbbreviationAnchorId,
   getGrammarLessonAbbreviationSectionId,
 } from "@/features/grammar/lib/grammarPresentation";
+import type { Language } from "@/types/i18n";
+
 import { GrammarBlockRenderer } from "./GrammarBlockRenderer";
+
+import type { ReactNode } from "react";
 
 type GrammarLessonDocumentRendererProps = {
   lessonBundle: GrammarLessonBundle;
@@ -25,6 +27,10 @@ type GrammarLessonDocumentRendererProps = {
   renderSectionFooter?: (section: GrammarSectionDocument) => ReactNode;
 };
 
+/**
+ * Renders the standard abbreviation appendix that appears after the lesson
+ * sections and semantic reference material.
+ */
 function GrammarLessonAbbreviationAppendix({
   lessonId,
   language,
@@ -135,6 +141,9 @@ function GrammarLessonAbbreviationAppendix({
   );
 }
 
+/**
+ * Orders the lesson sections according to the published section-order list.
+ */
 function getOrderedSections(
   lessonBundle: GrammarLessonBundle,
 ): GrammarSectionDocument[] {
@@ -151,6 +160,10 @@ function getOrderedSections(
     );
 }
 
+/**
+ * Renders the full published grammar lesson document, including sections,
+ * glossary, bibliography, abbreviation appendix, and endnotes.
+ */
 export function GrammarLessonDocumentRenderer({
   lessonBundle,
   language,

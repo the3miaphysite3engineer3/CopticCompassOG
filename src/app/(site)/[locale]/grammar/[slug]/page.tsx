@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
 import StructuredData from "@/components/StructuredData";
 import { GrammarLessonPageClient } from "@/features/grammar/components/GrammarLessonPageClient";
 import {
@@ -9,19 +9,22 @@ import {
   listPublishedGrammarLessons,
 } from "@/features/grammar/lib/grammarDataset";
 import { getGrammarLessonPath } from "@/features/grammar/lib/grammarPaths";
+import { buildLessonOpenGraphImageUrl } from "@/features/grammar/lib/lessonOpenGraph";
+import { getTranslation } from "@/lib/i18n";
 import {
   createLanguageAlternates,
   getGrammarPath,
   getLocalizedHomePath,
-  getOpenGraphLocale,
 } from "@/lib/locale";
-import { getTranslation } from "@/lib/i18n";
+import { createPageSocialMetadata, createSocialImage } from "@/lib/metadata";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
-import { buildPageTitle, siteConfig } from "@/lib/site";
+import { siteConfig } from "@/lib/site";
 import {
   createBreadcrumbStructuredData,
   createGrammarLessonStructuredData,
 } from "@/lib/structuredData";
+
+import type { Metadata } from "next";
 
 export const dynamicParams = false;
 
@@ -58,6 +61,14 @@ export async function generateMetadata({
   const title = buildGrammarLessonSeoTitle(lessonBundle.lesson, locale);
   const description = buildGrammarLessonSeoDescription(lessonBundle, locale);
   const path = getGrammarLessonPath(lessonBundle.lesson.slug, locale);
+  const imageUrl = buildLessonOpenGraphImageUrl(
+    lessonBundle.lesson.slug,
+    locale,
+  );
+  const image = createSocialImage(
+    imageUrl,
+    `${lessonBundle.lesson.title[locale]} | ${siteConfig.brandName} Grammar`,
+  );
 
   return {
     metadataBase: new URL(siteConfig.liveUrl),
@@ -69,19 +80,20 @@ export async function generateMetadata({
         `/grammar/${lessonBundle.lesson.slug}`,
       ),
     },
-    openGraph: {
-      title: buildPageTitle(title),
+    ...createPageSocialMetadata({
+      title,
       description,
-      url: `${siteConfig.liveUrl}${path}`,
-      locale: getOpenGraphLocale(locale),
-    },
-    twitter: {
-      title: buildPageTitle(title),
-      description,
-    },
+      path,
+      locale,
+      images: [image],
+    }),
   };
 }
 
+/**
+ * Renders one published localized grammar lesson page together with its
+ * breadcrumb and lesson structured data.
+ */
 export default async function GrammarLessonPage({
   params,
 }: {

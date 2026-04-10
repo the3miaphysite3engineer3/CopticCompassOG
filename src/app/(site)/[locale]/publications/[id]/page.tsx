@@ -1,7 +1,9 @@
-import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+
 import StructuredData from "@/components/StructuredData";
+import { listPublishedGrammarLessonsForPublication } from "@/features/grammar/lib/grammarContentGraph";
 import PublicationDetailPageClient from "@/features/publications/components/PublicationDetailPageClient";
+import { buildPublicationOpenGraphImageUrl } from "@/features/publications/lib/publicationOpenGraph";
 import {
   buildPublicationDescription,
   buildPublicationTitle,
@@ -10,20 +12,21 @@ import {
   getRelatedPublications,
   publications,
 } from "@/features/publications/lib/publications";
-import { listPublishedGrammarLessonsForPublication } from "@/features/grammar/lib/grammarContentGraph";
 import { getTranslation } from "@/lib/i18n";
 import {
   createLanguageAlternates,
   getLocalizedHomePath,
-  getOpenGraphLocale,
   getPublicationsPath,
 } from "@/lib/locale";
-import { buildPageTitle, siteConfig } from "@/lib/site";
+import { createPageSocialMetadata, createSocialImage } from "@/lib/metadata";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
+import { siteConfig } from "@/lib/site";
 import {
   createBreadcrumbStructuredData,
   createPublicationStructuredData,
 } from "@/lib/structuredData";
+
+import type { Metadata } from "next";
 
 export const dynamicParams = false;
 
@@ -56,9 +59,11 @@ export async function generateMetadata({
   const title = buildPublicationTitle(publication);
   const description = buildPublicationDescription(publication, locale);
   const path = getPublicationPath(publication.id, locale);
-  const imageUrl = publication.image
-    ? `${siteConfig.liveUrl}${publication.image}`
-    : undefined;
+  const imageUrl = buildPublicationOpenGraphImageUrl(publication.id, locale);
+  const image = createSocialImage(
+    imageUrl,
+    `${title} | ${siteConfig.brandName} Publications`,
+  );
   const shouldIndex = publication.status === "published";
 
   return {
@@ -75,30 +80,20 @@ export async function generateMetadata({
       canonical: path,
       languages: createLanguageAlternates(`/publications/${publication.id}`),
     },
-    openGraph: {
-      title: buildPageTitle(title),
+    ...createPageSocialMetadata({
+      title,
       description,
-      url: `${siteConfig.liveUrl}${path}`,
-      locale: getOpenGraphLocale(locale),
-      ...(imageUrl
-        ? {
-            images: [
-              {
-                url: imageUrl,
-                alt: title,
-              },
-            ],
-          }
-        : {}),
-    },
-    twitter: {
-      title: buildPageTitle(title),
-      description,
-      ...(imageUrl ? { images: [imageUrl] } : {}),
-    },
+      path,
+      locale,
+      images: [image],
+    }),
   };
 }
 
+/**
+ * Renders one localized publication detail page together with its publication
+ * and breadcrumb structured data.
+ */
 export default async function PublicationDetailPage({
   params,
 }: {

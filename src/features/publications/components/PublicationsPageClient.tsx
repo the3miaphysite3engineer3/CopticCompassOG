@@ -1,8 +1,9 @@
 "use client";
 
-import Link from "next/link";
-import Image from "next/image";
 import { ArrowRight, ArrowUpRight } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
@@ -10,9 +11,11 @@ import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { surfacePanelClassName } from "@/components/SurfacePanel";
 import {
   getPublicationPath,
+  publications,
+} from "@/features/publications/lib/publications";
+import type {
   LanguageBadge,
   Publication,
-  publications,
 } from "@/features/publications/lib/publications";
 import { getLocalizedHomePath } from "@/lib/locale";
 

@@ -6,6 +6,10 @@ import type {
 } from "@/features/grammar/types";
 import type { AppSupabaseClient } from "@/lib/supabase/queryTypes";
 
+/**
+ * Loads lesson-level progress rows for one user, ordered by most recently
+ * viewed lesson first.
+ */
 export async function getUserLessonProgressRows(
   supabase: AppSupabaseClient,
   userId: string,
@@ -19,6 +23,10 @@ export async function getUserLessonProgressRows(
   return data ?? [];
 }
 
+/**
+ * Loads section-level completion rows for one user, ordered by most recently
+ * completed section first.
+ */
 export async function getUserSectionProgressRows(
   supabase: AppSupabaseClient,
   userId: string,
@@ -32,6 +40,9 @@ export async function getUserSectionProgressRows(
   return data ?? [];
 }
 
+/**
+ * Loads the user's lesson bookmarks in reverse chronological order.
+ */
 export async function getUserLessonBookmarks(
   supabase: AppSupabaseClient,
   userId: string,
@@ -45,6 +56,9 @@ export async function getUserLessonBookmarks(
   return data ?? [];
 }
 
+/**
+ * Loads the user's lesson notes in most recently updated order.
+ */
 export async function getUserLessonNotes(
   supabase: AppSupabaseClient,
   userId: string,

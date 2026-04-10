@@ -8,9 +8,10 @@ import {
   type RefObject,
 } from "react";
 import { createPortal } from "react-dom";
+
 import { cx } from "@/lib/classes";
 
-export type FloatingTooltipAlign = "center" | "left" | "right";
+type FloatingTooltipAlign = "center" | "left" | "right";
 type FloatingTooltipPlacement = "top" | "bottom";
 
 type FloatingTooltipPosition = {
@@ -82,12 +83,13 @@ export function FloatingTooltip({
         window.innerWidth - tooltipRect.width - VIEWPORT_PADDING,
       );
 
-      const idealLeft =
-        align === "left"
-          ? anchorRect.left
-          : align === "right"
-            ? anchorRect.right - tooltipRect.width
-            : anchorCenter - tooltipRect.width / 2;
+      let idealLeft = anchorCenter - tooltipRect.width / 2;
+
+      if (align === "left") {
+        idealLeft = anchorRect.left;
+      } else if (align === "right") {
+        idealLeft = anchorRect.right - tooltipRect.width;
+      }
 
       const left = clamp(idealLeft, VIEWPORT_PADDING, maxLeft);
       const topPlacement = anchorRect.top - tooltipRect.height - TOOLTIP_GAP;

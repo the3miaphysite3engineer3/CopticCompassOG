@@ -1,7 +1,8 @@
-import type { GrammarManifest } from "../schema.ts";
-import { grammarDatasetRights } from "./rights.ts";
 import { grammarLesson01Document } from "./lessons/lesson-01.ts";
 import { grammarLesson02Document } from "./lessons/lesson-02.ts";
+import { grammarDatasetRights } from "./rights.ts";
+
+import type { GrammarManifest } from "../schema.ts";
 
 const datasetVersion = "2026-03-22";
 const generatedAt = "2026-03-22T00:00:00.000Z";

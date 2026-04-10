@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
+import { FaGoogle } from "react-icons/fa";
+
 import { login, signup, signInWithGoogle } from "@/actions/auth";
 import { Button, buttonClassName } from "@/components/Button";
-import type { TranslationKey } from "@/lib/i18n";
 import { FormField } from "@/components/FormField";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
@@ -10,8 +12,7 @@ import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { AuthFlashNoticeCleaner } from "@/features/auth/components/AuthFlashNoticeCleaner";
-import Link from "next/link";
-import { FaGoogle } from "react-icons/fa";
+import type { TranslationKey } from "@/lib/i18n";
 
 const NOTICE_TRANSLATION_KEYS = {
   "auth-unavailable": "login.notice.authUnavailable",

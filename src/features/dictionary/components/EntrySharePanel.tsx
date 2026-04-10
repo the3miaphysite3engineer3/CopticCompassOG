@@ -2,13 +2,15 @@
 
 import { Copy, Facebook, Link2, Linkedin, Share2 } from "lucide-react";
 import { FaXTwitter } from "react-icons/fa6";
+
 import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
-import {
-  buildEntryShareLinks,
-  type EntrySharePayload,
-} from "../lib/entryShare";
+
 import type { EntryActionNotice } from "../lib/entryActionBar";
+import type {
+  buildEntryShareLinks,
+  EntrySharePayload,
+} from "../lib/entryShare";
 
 type EntrySharePanelProps = {
   canUseNativeShare: boolean;

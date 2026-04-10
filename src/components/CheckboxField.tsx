@@ -1,5 +1,6 @@
-import type { InputHTMLAttributes, ReactNode } from "react";
 import { cx } from "@/lib/classes";
+
+import type { InputHTMLAttributes, ReactNode } from "react";
 
 type CheckboxFieldProps = Omit<
   InputHTMLAttributes<HTMLInputElement>,

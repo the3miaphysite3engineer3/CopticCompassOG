@@ -1,10 +1,11 @@
 import { createHash, randomBytes } from "node:crypto";
+
 import { syncAudienceContact } from "@/lib/communications/audience";
-import { assertServerOnly } from "@/lib/server/assertServerOnly";
-import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
 import { isLanguage, type Language } from "@/lib/i18n";
 import { getLocalizedPath } from "@/lib/locale";
+import { assertServerOnly } from "@/lib/server/assertServerOnly";
 import { getSiteUrl, siteConfig } from "@/lib/site";
+import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
 import { normalizeWhitespace } from "@/lib/validation";
 import type { Tables, TablesInsert, TablesUpdate } from "@/types/supabase";
 
@@ -13,7 +14,7 @@ type AudienceOptInRequestSource = AudienceOptInRequestRow["source"];
 
 const AUDIENCE_OPT_IN_TOKEN_TTL_MS = 1000 * 60 * 60 * 24 * 7;
 
-export type CreateAudienceOptInRequestInput = {
+type CreateAudienceOptInRequestInput = {
   booksRequested: boolean;
   email: string;
   fullName?: string | null;
@@ -23,12 +24,12 @@ export type CreateAudienceOptInRequestInput = {
   source: AudienceOptInRequestSource;
 };
 
-export type CreateAudienceOptInRequestResult = {
+type CreateAudienceOptInRequestResult = {
   request: AudienceOptInRequestRow;
   token: string;
 };
 
-export type ConfirmAudienceOptInRequestResult =
+type ConfirmAudienceOptInRequestResult =
   | {
       request: AudienceOptInRequestRow | null;
       status: "confirmed" | "already_confirmed";
@@ -40,31 +41,55 @@ export type ConfirmAudienceOptInRequestResult =
       success: false;
     };
 
+/**
+ * Normalizes an audience email address before it is stored or used for
+ * lookups.
+ */
 function normalizeAudienceEmail(email: string) {
   return normalizeWhitespace(email).toLowerCase();
 }
 
+/**
+ * Normalizes an optional audience full name and collapses blank input to
+ * `null`.
+ */
 function normalizeAudienceFullName(value?: string | null) {
   const normalized = normalizeWhitespace(value ?? "");
   return normalized.length > 0 ? normalized : null;
 }
 
+/**
+ * Resolves an optional locale value to a supported audience locale.
+ */
 function normalizeAudienceLocale(locale?: Language | null) {
   return locale && isLanguage(locale) ? locale : "en";
 }
 
+/**
+ * Generates the raw confirmation token that will be sent to the subscriber.
+ */
 function createOptInToken() {
   return randomBytes(24).toString("base64url");
 }
 
+/**
+ * Hashes a confirmation token before it is persisted so the raw token only
+ * travels in the email link.
+ */
 function hashOptInToken(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
 
+/**
+ * Returns the ISO timestamp when a newly issued opt-in token should expire.
+ */
 function getAudienceOptInExpiry() {
   return new Date(Date.now() + AUDIENCE_OPT_IN_TOKEN_TTL_MS).toISOString();
 }
 
+/**
+ * Builds the absolute confirmation URL for an audience double-opt-in token.
+ */
 export function buildAudienceOptInConfirmationUrl(
   locale: Language,
   token: string,
@@ -80,6 +105,10 @@ export function buildAudienceOptInConfirmationUrl(
   return url.toString();
 }
 
+/**
+ * Creates or refreshes an audience opt-in request and returns the stored row
+ * together with the unhashed confirmation token for email delivery.
+ */
 export async function createAudienceOptInRequest({
   booksRequested,
   email,
@@ -158,6 +187,11 @@ export async function createAudienceOptInRequest({
   };
 }
 
+/**
+ * Confirms an audience opt-in token, synchronizes the contact into the
+ * audience list, and marks the request as confirmed when the token is valid
+ * and unexpired.
+ */
 export async function confirmAudienceOptInRequest(
   token: string,
 ): Promise<ConfirmAudienceOptInRequestResult> {

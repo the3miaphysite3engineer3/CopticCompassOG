@@ -2,26 +2,31 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+
 import {
   consumeRateLimit,
   getClientRateLimitIdentifier,
   hasAvailableRateLimitProtection,
 } from "@/lib/rateLimit";
+import { revalidateDashboardPaths } from "@/lib/server/revalidation";
+import { getSiteUrl } from "@/lib/site";
 import {
   getAuthUnavailableLoginPath,
   getLoginPath,
   hasSupabaseRuntimeEnv,
 } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
-import { getSiteUrl } from "@/lib/site";
 import {
   getFormString,
   hasLengthInRange,
   isValidEmail,
   normalizeWhitespace,
 } from "@/lib/validation";
-import { revalidateDashboardPaths } from "@/lib/server/revalidation";
 
+/**
+ * Accepts only same-origin path redirects from form submissions and falls back
+ * to the dashboard when the target is missing or unsafe.
+ */
 function getSafeRedirectTarget(value: FormDataEntryValue | null) {
   if (
     typeof value !== "string" ||
@@ -34,6 +39,10 @@ function getSafeRedirectTarget(value: FormDataEntryValue | null) {
   return value;
 }
 
+/**
+ * Normalizes the submitted auth email into the lowercase form used by Supabase
+ * login, signup, and password-reset actions.
+ */
 function getNormalizedEmail(formData: FormData) {
   return normalizeWhitespace(getFormString(formData, "email")).toLowerCase();
 }
@@ -42,6 +51,10 @@ function getPassword(formData: FormData) {
   return getFormString(formData, "password");
 }
 
+/**
+ * Resolves the trusted app origin used for auth redirect callbacks and strips
+ * any trailing slash before it is embedded into provider URLs.
+ */
 function getTrustedAuthBaseUrl() {
   const baseUrl = getSiteUrl()?.toString() ?? "https://kyrilloswannes.com";
   return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
@@ -59,7 +72,17 @@ type PasswordUpdateResult =
         | "update-error";
       message: string;
     };
+type DashboardPasswordUpdateState =
+  | { success: true }
+  | {
+      success: false;
+      error: string;
+    };
 
+/**
+ * Updates the currently authenticated user's password after validating input
+ * and enforcing the shared password-update rate limit.
+ */
 async function updatePasswordWithResult(
   password: string,
 ): Promise<PasswordUpdateResult> {
@@ -132,7 +155,11 @@ async function updatePasswordWithResult(
   return { success: true };
 }
 
-export async function login(formData: FormData) {
+/**
+ * Signs a user in with email and password, rate-limiting the attempt and then
+ * redirecting to either the requested page or a login-state error.
+ */
+export async function login(formData: FormData): Promise<void> {
   const redirectTo = getSafeRedirectTarget(formData.get("redirectTo"));
   const email = getNormalizedEmail(formData);
   const password = getPassword(formData);
@@ -186,7 +213,11 @@ export async function login(formData: FormData) {
   redirect(redirectTo);
 }
 
-export async function signup(formData: FormData) {
+/**
+ * Creates an email/password account and redirects either to the confirmation
+ * flow or directly to the requested app page when Supabase returns a session.
+ */
+export async function signup(formData: FormData): Promise<void> {
   const redirectTo = getSafeRedirectTarget(formData.get("redirectTo"));
 
   if (!hasSupabaseRuntimeEnv()) {
@@ -252,7 +283,11 @@ export async function signup(formData: FormData) {
   redirect(redirectTo);
 }
 
-export async function logout(formData?: FormData) {
+/**
+ * Signs the current user out and redirects back to the login flow for the
+ * chosen destination.
+ */
+export async function logout(formData?: FormData): Promise<void> {
   const redirectTo =
     formData instanceof FormData
       ? getSafeRedirectTarget(formData.get("redirectTo"))
@@ -268,7 +303,11 @@ export async function logout(formData?: FormData) {
   redirect(getLoginPath(redirectTo));
 }
 
-export async function resetPassword(formData: FormData) {
+/**
+ * Starts the password-reset email flow after validating the email address and
+ * applying the shared reset rate limit.
+ */
+export async function resetPassword(formData: FormData): Promise<void> {
   if (!hasSupabaseRuntimeEnv()) {
     redirect(getAuthUnavailableLoginPath());
   }
@@ -308,7 +347,11 @@ export async function resetPassword(formData: FormData) {
   redirect("/forgot-password?state=forgot-success&messageType=success");
 }
 
-export async function updatePassword(formData: FormData) {
+/**
+ * Handles password updates from the standalone reset-password route and maps
+ * each failure state to the corresponding redirect message.
+ */
+export async function updatePassword(formData: FormData): Promise<void> {
   const password = getPassword(formData);
   const result = await updatePasswordWithResult(password);
 
@@ -335,7 +378,13 @@ export async function updatePassword(formData: FormData) {
   redirect("/dashboard");
 }
 
-export async function updatePasswordFromDashboard(formData: FormData) {
+/**
+ * Updates the password from the authenticated dashboard profile flow and
+ * returns a structured state instead of redirecting the current page.
+ */
+export async function updatePasswordFromDashboard(
+  formData: FormData,
+): Promise<DashboardPasswordUpdateState> {
   const password = getPassword(formData);
   const confirmPassword = getFormString(formData, "confirm_password");
 
@@ -358,7 +407,11 @@ export async function updatePasswordFromDashboard(formData: FormData) {
   return { success: true };
 }
 
-export async function signInWithGoogle(formData: FormData) {
+/**
+ * Starts the Google OAuth sign-in flow and redirects the browser to the
+ * provider authorization URL returned by Supabase.
+ */
+export async function signInWithGoogle(formData: FormData): Promise<void> {
   const redirectTo = getSafeRedirectTarget(formData.get("redirectTo"));
 
   if (!hasSupabaseRuntimeEnv()) {

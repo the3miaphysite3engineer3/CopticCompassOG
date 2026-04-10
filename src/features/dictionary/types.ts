@@ -3,6 +3,10 @@ import type {
   PartOfSpeech,
 } from "@/features/dictionary/config";
 
+/**
+ * Shared dictionary domain types used by the build pipeline, search helpers,
+ * and entry UI.
+ */
 export type LexicalGender = "" | "BOTH" | "F" | "M";
 export type LexicalRelationType =
   | "feminine-counterpart"
@@ -21,6 +25,10 @@ export type DictionaryDialectFormsMap = Partial<
   Record<DictionaryDialectCode, DialectForms>
 >;
 
+/**
+ * Represents one normalized dictionary entry as consumed by the app and the
+ * generated public JSON snapshot.
+ */
 export interface LexicalEntry {
   id: string;
   headword: string;
@@ -39,3 +47,21 @@ export interface LexicalEntry {
     meaning: string;
   };
 }
+
+/**
+ * Represents the reduced dictionary shape needed by search-result cards and
+ * analytics drilldowns without shipping the full raw/source payload.
+ */
+export type DictionaryClientEntry = Pick<
+  LexicalEntry,
+  | "dialects"
+  | "dutch_meanings"
+  | "english_meanings"
+  | "etymology"
+  | "gender"
+  | "greek_equivalents"
+  | "headword"
+  | "id"
+  | "pos"
+  | "relationType"
+>;

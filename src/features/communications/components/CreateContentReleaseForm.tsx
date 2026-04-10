@@ -1,10 +1,12 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
 import { ChevronDown } from "lucide-react";
+import { useActionState, useEffect, useRef } from "react";
+
 import { createContentReleaseDraft } from "@/actions/admin";
 import type { ContentReleaseDraftState } from "@/actions/admin/states";
 import { Badge } from "@/components/Badge";
+import { Button } from "@/components/Button";
 import { FormField } from "@/components/FormField";
 import { StatusNotice } from "@/components/StatusNotice";
 import {
@@ -269,13 +271,9 @@ export function CreateContentReleaseForm({
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
-          <button
-            type="submit"
-            className="btn-primary px-6"
-            disabled={isPending}
-          >
+          <Button type="submit" disabled={isPending}>
             {isPending ? "Saving draft..." : "Create release draft"}
-          </button>
+          </Button>
           <p className="text-sm text-stone-500 dark:text-stone-400">
             Drafts snapshot the selected titles and URLs so later content edits
             do not silently change the outgoing release.

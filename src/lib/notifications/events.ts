@@ -1,14 +1,16 @@
-import type { ReactElement } from "react";
 import { getNotificationEmailEnv } from "@/lib/notifications/config";
-import { redactEmailAddress } from "@/lib/privacy";
 import {
   sendNotificationEmail,
   type NotificationEmailResult,
 } from "@/lib/notifications/email";
+import { redactEmailAddress } from "@/lib/privacy";
 import { assertServerOnly } from "@/lib/server/assertServerOnly";
 import { hasSupabaseServiceRoleEnv } from "@/lib/supabase/config";
+import { invokeSupabaseEdgeFunction } from "@/lib/supabase/functions";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
 import type { Json, TablesInsert, TablesUpdate } from "@/types/supabase";
+
+import type { ReactElement } from "react";
 
 type EmailRecipients = string | readonly string[];
 
@@ -19,6 +21,7 @@ type LoggedNotificationEmailOptions = {
   cc?: EmailRecipients;
   dedupeKey?: string | null;
   eventType: string;
+  html?: string;
   payload?: Json;
   react?: ReactElement;
   replyTo?: EmailRecipients;
@@ -28,6 +31,16 @@ type LoggedNotificationEmailOptions = {
 };
 
 type LoggedOwnerAlertOptions = Omit<LoggedNotificationEmailOptions, "to">;
+type NotificationQueueResult =
+  | {
+      eventId: string;
+      jobId: string;
+      success: true;
+    }
+  | {
+      error: string;
+      success: false;
+    };
 
 function normalizeRecipients(value: EmailRecipients) {
   return Array.isArray(value) ? [...value] : [value];
@@ -97,13 +110,112 @@ async function insertNotificationEvent(options: {
   };
 }
 
+async function insertNotificationEmailJob(options: {
+  bcc?: EmailRecipients;
+  cc?: EmailRecipients;
+  fromEmail?: string;
+  html?: string;
+  notificationEventId: string;
+  replyTo?: EmailRecipients;
+  subject: string;
+  supabase: ReturnType<typeof createServiceRoleClient>;
+  text: string;
+  to: EmailRecipients;
+}): Promise<{ id: string } | null> {
+  const jobInsert = {
+    ...(options.fromEmail ? { from_email: options.fromEmail } : {}),
+    ...(options.html ? { html_body: options.html } : {}),
+    ...(options.bcc
+      ? { bcc_recipients: normalizeRecipients(options.bcc) }
+      : {}),
+    ...(options.cc ? { cc_recipients: normalizeRecipients(options.cc) } : {}),
+    ...(options.replyTo
+      ? { reply_to_recipients: normalizeRecipients(options.replyTo) }
+      : {}),
+    notification_event_id: options.notificationEventId,
+    subject: options.subject,
+    text_body: options.text,
+    to_recipients: normalizeRecipients(options.to),
+  } satisfies TablesInsert<"notification_email_jobs">;
+
+  const { data, error } = await options.supabase
+    .from("notification_email_jobs")
+    .insert(jobInsert)
+    .select("id")
+    .single();
+
+  if (error) {
+    console.error("Failed to queue notification email job", {
+      code: error.code,
+      eventId: options.notificationEventId,
+      message: error.message,
+    });
+    return null;
+  }
+
+  if (!data?.id) {
+    console.error("Notification email job insert did not return an id", {
+      eventId: options.notificationEventId,
+    });
+    return null;
+  }
+
+  return {
+    id: data.id,
+  };
+}
+
+async function updateNotificationEventStatus(options: {
+  eventId: string;
+  lastError: string | null;
+  status: "failed" | "sent";
+  supabase: ReturnType<typeof createServiceRoleClient>;
+}) {
+  const { error } = await options.supabase
+    .from("notification_events")
+    .update({
+      last_error: options.lastError,
+      processed_at: new Date().toISOString(),
+      status: options.status,
+    } satisfies TablesUpdate<"notification_events">)
+    .eq("id", options.eventId);
+
+  if (error) {
+    console.error("Failed to update notification event status", {
+      code: error.code,
+      eventId: options.eventId,
+      message: error.message,
+      status: options.status,
+    });
+  }
+}
+
+async function renderNotificationEmailHtml(options: {
+  html?: string;
+  react?: ReactElement;
+}) {
+  if (options.html) {
+    return options.html;
+  }
+
+  if (options.react) {
+    const { renderToStaticMarkup } = await import("react-dom/server");
+    return renderToStaticMarkup(options.react);
+  }
+
+  return undefined;
+}
+
+/**
+ * Persists the delivery attempt and updates the parent notification event so
+ * admins can audit whether the email was sent, failed, or partially processed.
+ */
 async function recordNotificationOutcome(options: {
   eventId: string;
   recipient: string;
   result: NotificationEmailResult;
   supabase: ReturnType<typeof createServiceRoleClient>;
 }) {
-  const processedAt = new Date().toISOString();
   const deliveryStatus: "sent" | "failed" = options.result.success
     ? "sent"
     : "failed";
@@ -130,25 +242,19 @@ async function recordNotificationOutcome(options: {
     });
   }
 
-  const { error: eventUpdateError } = await options.supabase
-    .from("notification_events")
-    .update({
-      last_error: options.result.success ? null : options.result.error,
-      processed_at: processedAt,
-      status: deliveryStatus,
-    } satisfies TablesUpdate<"notification_events">)
-    .eq("id", options.eventId);
-
-  if (eventUpdateError) {
-    console.error("Failed to update notification event status", {
-      code: eventUpdateError.code,
-      eventId: options.eventId,
-      message: eventUpdateError.message,
-      status: deliveryStatus,
-    });
-  }
+  await updateNotificationEventStatus({
+    eventId: options.eventId,
+    lastError: options.result.success ? null : options.result.error,
+    status: deliveryStatus,
+    supabase: options.supabase,
+  });
 }
 
+/**
+ * Sends an email and, when notification storage is configured, records the
+ * event plus the final delivery outcome. Delivery is attempted even if event
+ * persistence fails so user-facing flows can degrade without blocking.
+ */
 export async function dispatchLoggedNotificationEmail(
   options: LoggedNotificationEmailOptions,
 ): Promise<NotificationEmailResult> {
@@ -169,6 +275,7 @@ export async function dispatchLoggedNotificationEmail(
   const result = await sendNotificationEmail({
     ...(options.bcc ? { bcc: options.bcc } : {}),
     ...(options.cc ? { cc: options.cc } : {}),
+    ...(options.html ? { html: options.html } : {}),
     ...(options.react ? { react: options.react } : {}),
     ...(options.replyTo ? { replyTo: options.replyTo } : {}),
     subject: options.subject,
@@ -188,20 +295,105 @@ export async function dispatchLoggedNotificationEmail(
   return result;
 }
 
-export async function dispatchLoggedOwnerAlertEmail(
+/**
+ * Stores a queued notification event plus a worker job, then asks the
+ * background edge function to deliver it without blocking the current action.
+ */
+export async function queueLoggedNotificationEmail(
+  options: LoggedNotificationEmailOptions,
+): Promise<NotificationQueueResult> {
+  assertServerOnly("queueLoggedNotificationEmail");
+
+  const recipient = redactRecipients(options.to);
+  const storedEvent = await insertNotificationEvent({
+    aggregateId: options.aggregateId,
+    aggregateType: options.aggregateType,
+    channel: "email",
+    dedupeKey: options.dedupeKey,
+    eventType: options.eventType,
+    payload: options.payload,
+    recipient,
+    subject: options.subject,
+  });
+
+  if (!storedEvent) {
+    return {
+      error: "Could not queue the notification event.",
+      success: false,
+    };
+  }
+
+  const queuedJob = await insertNotificationEmailJob({
+    bcc: options.bcc,
+    cc: options.cc,
+    fromEmail: undefined,
+    html: await renderNotificationEmailHtml({
+      html: options.html,
+      react: options.react,
+    }),
+    notificationEventId: storedEvent.id,
+    replyTo: options.replyTo,
+    subject: options.subject,
+    supabase: storedEvent.supabase,
+    text: options.text,
+    to: options.to,
+  });
+
+  if (!queuedJob) {
+    await updateNotificationEventStatus({
+      eventId: storedEvent.id,
+      lastError: "Could not queue the notification email job.",
+      status: "failed",
+      supabase: storedEvent.supabase,
+    });
+
+    return {
+      error: "Could not queue the notification email job.",
+      success: false,
+    };
+  }
+
+  const invocation = await invokeSupabaseEdgeFunction(
+    "process-notification-email",
+    {
+      jobId: queuedJob.id,
+    },
+  );
+
+  if (!invocation.success) {
+    console.error("Failed to start queued notification email worker", {
+      error: invocation.error,
+      eventId: storedEvent.id,
+      jobId: queuedJob.id,
+      status: invocation.status,
+    });
+  }
+
+  return {
+    eventId: storedEvent.id,
+    jobId: queuedJob.id,
+    success: true,
+  };
+}
+
+/**
+ * Queues an owner-alert email for background delivery after resolving the
+ * configured owner recipient.
+ */
+export async function queueLoggedOwnerAlertEmail(
   options: LoggedOwnerAlertOptions,
-): Promise<NotificationEmailResult> {
-  assertServerOnly("dispatchLoggedOwnerAlertEmail");
+): Promise<NotificationQueueResult> {
+  assertServerOnly("queueLoggedOwnerAlertEmail");
 
   const env = getNotificationEmailEnv();
   if (!env || !env.ownerAlertEmail) {
     return {
-      success: false,
       error: "Owner alert email service is not configured.",
+      success: false,
     };
   }
 
-  return dispatchLoggedNotificationEmail({
+  return queueLoggedNotificationEmail({
     ...options,
     to: env.ownerAlertEmail,
   });

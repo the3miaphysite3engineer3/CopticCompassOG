@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+
 import type { LexicalEntry } from "@/features/dictionary/types";
+
 import {
   createDefinedTermStructuredData,
   createDictionaryPageStructuredData,

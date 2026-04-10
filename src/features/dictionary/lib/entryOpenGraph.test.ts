@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+
 import type { LexicalEntry } from "@/features/dictionary/types";
+
 import {
   buildEntryOpenGraphImageUrl,
   buildEntryOpenGraphPreview,
@@ -30,7 +32,7 @@ describe("entry Open Graph helpers", () => {
   it("builds a stable entry-specific Open Graph image URL", () => {
     expect(
       buildEntryOpenGraphImageUrl("cd_173", "nl", "https://example.com"),
-    ).toBe("https://example.com/api/og?id=cd_173&locale=nl&type=entry");
+    ).toBe("https://example.com/api/og?type=entry&locale=nl&id=cd_173");
   });
 
   it("builds a preview with gloss and capped related forms", () => {

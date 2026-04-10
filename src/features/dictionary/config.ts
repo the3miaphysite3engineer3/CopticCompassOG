@@ -122,7 +122,7 @@ export function getPartOfSpeechFilterLabel(
   return option ? translate(option.labelKey) : partOfSpeech;
 }
 
-export function isDictionaryDialectCode(
+function _isDictionaryDialectCode(
   value: string,
 ): value is DictionaryDialectCode {
   return DICTIONARY_DIALECT_CODES.includes(value as DictionaryDialectCode);
@@ -132,9 +132,23 @@ export function isDialectFilter(value: string): value is DialectFilter {
   return ANALYTICS_DIALECTS.includes(value as DialectFilter);
 }
 
+/**
+ * Validates the public dictionary part-of-speech filter accepted by the
+ * dictionary page and search API.
+ */
+export function isDictionaryPartOfSpeechFilter(
+  value: string,
+): value is DictionaryPartOfSpeechFilter {
+  return dictionaryPartOfSpeechFilterOptions.some(
+    (option) => option.value === value,
+  );
+}
+
+/**
+ * Normalizes legacy dialect sigla from imported source files into the stable
+ * codes used by the typed dictionary UI and analytics layers.
+ */
 export function normalizeDialectKey(dialectKey: string): string {
-  // Import scripts still encounter legacy sigla from source spreadsheets, so
-  // we normalize them before they reach the typed UI and analytics layers.
   const trimmedKey = dialectKey.trim();
 
   if (trimmedKey === "sA") {

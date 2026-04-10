@@ -11,7 +11,7 @@ import { getAuthenticatedServerContext } from "@/lib/supabase/auth";
 import { hasSupabaseServiceRoleEnv } from "@/lib/supabase/config";
 import { getFormLanguage, normalizeWhitespace } from "@/lib/validation";
 
-export type CommunicationPreferencesState = {
+type CommunicationPreferencesState = {
   message?: string;
   success: boolean;
 };
@@ -42,19 +42,40 @@ const COMMUNICATION_ACTION_COPY: Record<
   },
 };
 
-export async function updateCommunicationPreferences(
+type CommunicationPreferenceContext =
+  | {
+      error: CommunicationPreferencesState;
+    }
+  | {
+      email: string;
+      language: Language;
+      profile: Awaited<ReturnType<typeof getProfile>>;
+      user: NonNullable<
+        Awaited<ReturnType<typeof getAuthenticatedServerContext>>
+      >["user"];
+    };
+
+/**
+ * Loads the authenticated profile/email context required to sync communication
+ * preferences, or returns the translated failure state for the action.
+ */
+async function getCommunicationPreferenceContext(
   formData: FormData,
-): Promise<CommunicationPreferencesState> {
+): Promise<CommunicationPreferenceContext> {
   const language = getFormLanguage(formData);
   const copy = COMMUNICATION_ACTION_COPY[language];
 
   if (!hasSupabaseServiceRoleEnv()) {
-    return { success: false, message: copy.storageUnavailable };
+    return {
+      error: { success: false, message: copy.storageUnavailable },
+    };
   }
 
   const authContext = await getAuthenticatedServerContext();
   if (!authContext) {
-    return { success: false, message: copy.authRequired };
+    return {
+      error: { success: false, message: copy.authRequired },
+    };
   }
 
   const profile = await getProfile(authContext.supabase, authContext.user.id);
@@ -63,18 +84,39 @@ export async function updateCommunicationPreferences(
   );
 
   if (!email) {
-    return { success: false, message: copy.saveFailed };
+    return {
+      error: { success: false, message: copy.saveFailed },
+    };
   }
+
+  return {
+    email,
+    language,
+    profile,
+    user: authContext.user,
+  };
+}
+
+export async function updateCommunicationPreferences(
+  formData: FormData,
+): Promise<CommunicationPreferencesState> {
+  const context = await getCommunicationPreferenceContext(formData);
+  if ("error" in context) {
+    return context.error;
+  }
+
+  const copy = COMMUNICATION_ACTION_COPY[context.language];
 
   try {
     await syncAudienceContact({
       booksOptIn: formData.has("books_opt_in"),
-      email,
-      fullName: profile?.full_name ?? authContext.user.user_metadata?.full_name,
+      email: context.email,
+      fullName:
+        context.profile?.full_name ?? context.user.user_metadata?.full_name,
       generalUpdatesOptIn: formData.has("general_updates_opt_in"),
       lessonsOptIn: formData.has("lessons_opt_in"),
-      locale: language,
-      profileId: authContext.user.id,
+      locale: context.language,
+      profileId: context.user.id,
       source: "dashboard",
     });
 

@@ -1,9 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { getDevelopersPath, getPrivacyPath, getTermsPath } from "@/lib/locale";
-import { useLanguage } from "./LanguageProvider";
 import { FaXTwitter, FaInstagram, FaGithub } from "react-icons/fa6";
+
+import { getDevelopersPath, getPrivacyPath, getTermsPath } from "@/lib/locale";
+
+import { useLanguage } from "./LanguageProvider";
 
 export function Footer() {
   const { language, t } = useLanguage();

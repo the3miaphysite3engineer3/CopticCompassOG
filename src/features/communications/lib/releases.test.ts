@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
+
+import { listContentReleaseCandidates } from "./releaseCandidates";
 import {
   compareContentReleasePriority,
   deriveContentReleaseType,
   getContentReleaseDeliverySummary,
 } from "./releases";
-import { listContentReleaseCandidates } from "./releaseCandidates";
 
 describe("content release helpers", () => {
   it("lists published lesson and publication candidates", () => {

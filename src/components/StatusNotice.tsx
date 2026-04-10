@@ -1,5 +1,6 @@
-import type { ReactNode } from "react";
 import { cx } from "@/lib/classes";
+
+import type { ReactNode } from "react";
 
 type StatusNoticeTone = "default" | "error" | "info" | "success";
 type StatusNoticeSize = "compact" | "comfortable";

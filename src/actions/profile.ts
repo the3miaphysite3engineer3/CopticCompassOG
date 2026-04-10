@@ -13,42 +13,59 @@ import {
   hasSupabaseRuntimeEnv,
 } from "@/lib/supabase/config";
 
-export async function updateProfile(formData: FormData) {
-  if (!hasSupabaseRuntimeEnv()) {
-    return { success: false, error: "Supabase environment missing." };
-  }
+type ProfileUpdateState =
+  | { success: true }
+  | {
+      success: false;
+      error: string;
+    };
+type ProfileUpdateFieldsResult =
+  | { error: string }
+  | {
+      updates: {
+        avatar_url?: string | null;
+        full_name?: string | null;
+      };
+    };
 
+/**
+ * Resolves the trusted Supabase storage origin used to verify that uploaded
+ * avatar URLs belong to the authenticated user's storage bucket path.
+ */
+function resolveSupabaseStorageOrigin() {
   const supabaseEnv = getSupabaseRuntimeEnv();
   if (!supabaseEnv) {
-    return { success: false, error: "Supabase environment missing." };
+    return null;
   }
 
-  const authContext = await getAuthenticatedServerContext();
-  if (!authContext) {
-    return { success: false, error: "You must be logged in." };
-  }
-  const { supabase, user } = authContext;
-
-  let storageOrigin: string;
   try {
-    storageOrigin = new URL(supabaseEnv.url).origin;
+    return new URL(supabaseEnv.url).origin;
   } catch {
-    return { success: false, error: "Supabase environment missing." };
+    return null;
   }
+}
 
-  const rawFullName = formData.get("full_name");
-  const rawAvatarUrl = formData.get("avatar_url");
+/**
+ * Validates the profile fields this action accepts and only returns the
+ * whitelisted columns that may be updated on the caller's profile row.
+ */
+function parseProfileUpdateFields(options: {
+  formData: FormData;
+  storageOrigin: string;
+  userId: string;
+}): ProfileUpdateFieldsResult {
+  const rawFullName = options.formData.get("full_name");
+  const rawAvatarUrl = options.formData.get("avatar_url");
 
   let fullName: string | null | undefined;
   if (rawFullName !== null) {
     if (typeof rawFullName !== "string") {
-      return { success: false, error: "Full name is invalid." };
+      return { error: "Full name is invalid." };
     }
 
     fullName = normalizeProfileFullName(rawFullName);
     if (!isValidProfileFullName(fullName)) {
       return {
-        success: false,
         error: `Full name must be ${MAX_PROFILE_FULL_NAME_LENGTH} characters or fewer.`,
       };
     }
@@ -57,7 +74,7 @@ export async function updateProfile(formData: FormData) {
   let avatarUrl: string | null | undefined;
   if (rawAvatarUrl !== null) {
     if (typeof rawAvatarUrl !== "string") {
-      return { success: false, error: "Avatar URL is invalid." };
+      return { error: "Avatar URL is invalid." };
     }
 
     const trimmedAvatarUrl = rawAvatarUrl.trim();
@@ -66,22 +83,56 @@ export async function updateProfile(formData: FormData) {
       avatarUrl = null;
     } else if (
       !getAvatarStorageObjectPath(trimmedAvatarUrl, {
-        storageOrigin,
-        userId: user.id,
+        storageOrigin: options.storageOrigin,
+        userId: options.userId,
       })
     ) {
-      return { success: false, error: "Avatar URL is invalid." };
+      return { error: "Avatar URL is invalid." };
     } else {
       avatarUrl = trimmedAvatarUrl;
     }
   }
 
-  // Ensure users only update the fields permitted (full_name and avatar_url)
-  // RLS database rules prevent role manipulation anyway, but avoiding it in the payload is cleaner.
-  const updates = {
-    ...(fullName !== undefined && { full_name: fullName }),
-    ...(avatarUrl !== undefined && { avatar_url: avatarUrl }),
+  return {
+    updates: {
+      ...(fullName !== undefined && { full_name: fullName }),
+      ...(avatarUrl !== undefined && { avatar_url: avatarUrl }),
+    },
   };
+}
+
+/**
+ * Updates the authenticated user's editable profile fields and revalidates the
+ * dashboard once the profile row is successfully persisted.
+ */
+export async function updateProfile(
+  formData: FormData,
+): Promise<ProfileUpdateState> {
+  if (!hasSupabaseRuntimeEnv()) {
+    return { success: false, error: "Supabase environment missing." };
+  }
+
+  const storageOrigin = resolveSupabaseStorageOrigin();
+  if (!storageOrigin) {
+    return { success: false, error: "Supabase environment missing." };
+  }
+
+  const authContext = await getAuthenticatedServerContext();
+  if (!authContext) {
+    return { success: false, error: "You must be logged in." };
+  }
+  const { supabase, user } = authContext;
+  const parseResult = parseProfileUpdateFields({
+    formData,
+    storageOrigin,
+    userId: user.id,
+  });
+
+  if ("error" in parseResult) {
+    return { success: false, error: parseResult.error };
+  }
+
+  const { updates } = parseResult;
 
   const { error } = await supabase
     .from("profiles")

@@ -1,14 +1,17 @@
-import type { Metadata } from "next";
 import Link from "next/link";
+
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { confirmAudienceOptInRequest } from "@/lib/communications/optInRequests";
 import { getTranslation } from "@/lib/i18n";
+import type { TranslationKey } from "@/lib/i18n";
 import { getContactPath, getLocalizedHomePath } from "@/lib/locale";
 import { createNoIndexMetadata } from "@/lib/metadata";
 import { resolvePublicLocale } from "@/lib/publicLocaleRouting";
+
+import type { Metadata } from "next";
 
 export async function generateMetadata({
   params,
@@ -24,6 +27,10 @@ export async function generateMetadata({
   });
 }
 
+/**
+ * Confirms one audience opt-in token and renders the localized confirmation
+ * result page.
+ */
 export default async function CommunicationConfirmPage({
   params,
   searchParams,
@@ -35,15 +42,21 @@ export default async function CommunicationConfirmPage({
   const resolvedLocale = resolvePublicLocale(locale);
   const { token } = await searchParams;
   const confirmationResult = await confirmAudienceOptInRequest(token ?? "");
+  let messageKey: TranslationKey = "contact.confirm.invalid";
 
-  const messageKey =
-    confirmationResult.status === "confirmed"
-      ? "contact.confirm.confirmed"
-      : confirmationResult.status === "already_confirmed"
-        ? "contact.confirm.alreadyConfirmed"
-        : confirmationResult.status === "expired"
-          ? "contact.confirm.expired"
-          : "contact.confirm.invalid";
+  switch (confirmationResult.status) {
+    case "confirmed":
+      messageKey = "contact.confirm.confirmed";
+      break;
+    case "already_confirmed":
+      messageKey = "contact.confirm.alreadyConfirmed";
+      break;
+    case "expired":
+      messageKey = "contact.confirm.expired";
+      break;
+    default:
+      break;
+  }
 
   return (
     <PageShell

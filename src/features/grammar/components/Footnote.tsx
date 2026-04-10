@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { cx } from "@/lib/classes";
+
 import { FloatingTooltip } from "@/components/FloatingTooltip";
+import { cx } from "@/lib/classes";
+
 import { useGrammarLessonRenderContext } from "./GrammarLessonRenderContext";
 
 type FootnoteAlign = "center" | "left" | "right";

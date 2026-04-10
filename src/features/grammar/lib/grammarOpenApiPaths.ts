@@ -1,5 +1,9 @@
 import type { GrammarOpenApiContext } from "./grammarOpenApiShared";
 
+/**
+ * Builds the path map for the published grammar OpenAPI document using the
+ * current dataset examples and shared parameter/response components.
+ */
 export function buildGrammarOpenApiPaths(context: GrammarOpenApiContext) {
   const {
     apiIndex,

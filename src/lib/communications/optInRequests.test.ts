@@ -22,12 +22,17 @@ async function loadOptInModule(options?: {
 
   const selectEqMock = vi.fn((column: string) => ({
     maybeSingle: vi.fn().mockResolvedValue({
-      data:
-        column === "email"
-          ? (options?.existingRequestByEmail ?? null)
-          : column === "token_hash"
-            ? (options?.tokenLookupRequest ?? null)
-            : null,
+      data: (() => {
+        if (column === "email") {
+          return options?.existingRequestByEmail ?? null;
+        }
+
+        if (column === "token_hash") {
+          return options?.tokenLookupRequest ?? null;
+        }
+
+        return null;
+      })(),
       error: null,
     }),
   }));

@@ -1,16 +1,20 @@
 import type { TranslationKey } from "@/lib/i18n";
 import type { Language } from "@/types/i18n";
 
-export type GrammarLessonSlug = "lesson-1" | "lesson-2";
-export type GrammarLessonStatus = "available" | "comingSoon";
-export type GrammarLessonLocalizedLabel = Record<Language, string>;
+/**
+ * Defines the legacy lesson metadata used by older grammar surfaces that still
+ * rely on the simplified lesson registry.
+ */
+type GrammarLessonSlug = "lesson-1" | "lesson-2";
+type GrammarLessonStatus = "available" | "comingSoon";
+type GrammarLessonLocalizedLabel = Record<Language, string>;
 
-export type GrammarLessonSectionDefinition = {
+type GrammarLessonSectionDefinition = {
   id: string;
   title: GrammarLessonLocalizedLabel;
 };
 
-export type GrammarLessonDefinition = {
+type GrammarLessonDefinition = {
   id: string;
   slug: GrammarLessonSlug;
   number: string;
@@ -107,28 +111,43 @@ export const grammarLessons = [
   },
 ] as const satisfies readonly GrammarLessonDefinition[];
 
-export function getGrammarLessonBySlug(slug: GrammarLessonSlug) {
+/**
+ * Resolves one lesson definition from the simplified grammar lesson registry.
+ */
+function _getGrammarLessonBySlug(slug: GrammarLessonSlug) {
   return grammarLessons.find((lesson) => lesson.slug === slug) ?? null;
 }
 
-export function getGrammarLessonSectionById(
+/**
+ * Resolves one section definition from the simplified lesson registry.
+ */
+function _getGrammarLessonSectionById(
   lesson: GrammarLessonDefinition,
   sectionId: string,
 ) {
   return lesson.sections.find((section) => section.id === sectionId) ?? null;
 }
 
-export function getLocalizedGrammarLessonLabel(
+/**
+ * Returns the localized label text for a lesson or section.
+ */
+function _getLocalizedGrammarLessonLabel(
   language: Language,
   label: GrammarLessonLocalizedLabel,
 ) {
   return label[language];
 }
 
-export function getGrammarLessonRoute(slug: GrammarLessonSlug) {
+/**
+ * Builds the app route for one simplified grammar lesson.
+ */
+function _getGrammarLessonRoute(slug: GrammarLessonSlug) {
   return `/grammar/${slug}`;
 }
 
-export function isAvailableGrammarLesson(lesson: GrammarLessonDefinition) {
+/**
+ * Narrows the simplified lesson registry to currently available lessons.
+ */
+function _isAvailableGrammarLesson(lesson: GrammarLessonDefinition) {
   return lesson.status === "available";
 }

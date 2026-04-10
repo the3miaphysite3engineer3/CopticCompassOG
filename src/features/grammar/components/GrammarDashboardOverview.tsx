@@ -1,4 +1,5 @@
 import Link from "next/link";
+
 import { Badge } from "@/components/Badge";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import {
@@ -23,6 +24,16 @@ export function GrammarDashboardOverview({
 }: GrammarDashboardOverviewProps) {
   const stats = buildGrammarLearnerDashboardStats(lessonSummaries);
   const copy = getDashboardCopy(language);
+  const lastViewedLabel = (summary: GrammarLessonLearnerSummary) => {
+    if (!summary.lastViewedAt) {
+      return copy.grammar.notStartedYet;
+    }
+
+    const formattedDate = formatDashboardDate(summary.lastViewedAt, language);
+    return language === "nl"
+      ? `Laatst bekeken op ${formattedDate}`
+      : `Last visited on ${formattedDate}`;
+  };
 
   return (
     <section className="space-y-6">
@@ -115,11 +126,7 @@ export function GrammarDashboardOverview({
                   </div>
 
                   <p className="mt-4 text-sm text-stone-500 dark:text-stone-400">
-                    {summary.lastViewedAt
-                      ? language === "nl"
-                        ? `Laatst bekeken op ${formatDashboardDate(summary.lastViewedAt, language)}`
-                        : `Last visited on ${formatDashboardDate(summary.lastViewedAt, language)}`
-                      : copy.grammar.notStartedYet}
+                    {lastViewedLabel(summary)}
                   </p>
                 </div>
 

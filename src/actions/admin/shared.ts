@@ -8,6 +8,10 @@ export type ValidatedAdminContext = NonNullable<
 >;
 export type AdminSupabase = ValidatedAdminContext["supabase"];
 
+/**
+ * Returns the authenticated admin Supabase context only when runtime env vars
+ * and admin session state are both available.
+ */
 export async function getValidatedAdminContext(): Promise<ValidatedAdminContext | null> {
   if (!hasSupabaseRuntimeEnv()) {
     return null;

@@ -1,5 +1,5 @@
-import type { Metadata } from "next";
 import Link from "next/link";
+
 import "swagger-ui-dist/swagger-ui.css";
 import "./swagger-overrides.css";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
@@ -8,6 +8,8 @@ import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SwaggerDocsClient } from "@/features/grammar/components/SwaggerDocsClient";
 import { getDevelopersPath, getGrammarPath } from "@/lib/locale";
 import { createPageMetadata } from "@/lib/metadata";
+
+import type { Metadata } from "next";
 
 export const metadata: Metadata = createPageMetadata({
   title: "Coptic Compass Grammar + Shenute AI API Docs",
@@ -56,6 +58,9 @@ curl -X POST "https://kyrilloswannes.com/api/ocr?lang=cop" \
 # 2) Coptic Compass forwards to OCR_SERVICE_URL
 # 3) Upstream OCR response is returned to the client`; 
 
+/**
+ * Renders the Swagger-backed documentation page for the public grammar API.
+ */
 export default function ApiDocsPage() {
   return (
     <PageShell

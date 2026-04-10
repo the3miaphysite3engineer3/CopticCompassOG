@@ -1,5 +1,10 @@
 import { readProjectJsonFile } from "@/lib/server/projectFiles";
 
+/**
+ * Reads the generated dictionary payload to expose a best-effort entry count
+ * for site copy and metadata without failing app startup when the file is
+ * unavailable.
+ */
 function getDictionaryEntryCount() {
   try {
     const dictionary = readProjectJsonFile<unknown[]>(
@@ -19,6 +24,10 @@ const siteAuthor = {
   github: "https://github.com/KyroHub",
 };
 
+/**
+ * Builds the site-level description string and appends the current dictionary
+ * entry count when that build-time statistic is available.
+ */
 function buildSiteDescription(entryCount: number) {
   const searchableEntries = entryCount
     ? ` It currently includes ${entryCount.toLocaleString()} searchable entries.`
@@ -53,10 +62,18 @@ export const siteConfig = {
   dictionaryEntryCount,
 };
 
+/**
+ * Formats a page title with the site brand suffix used across metadata and UI
+ * headings.
+ */
 export function buildPageTitle(title: string) {
   return `${title} | ${siteConfig.brandName}`;
 }
 
+/**
+ * Resolves the first valid absolute site URL from deployment-specific
+ * environment variables, falling back to the canonical production URL.
+ */
 export function getSiteUrl() {
   const candidates = [
     process.env.NEXT_PUBLIC_SITE_URL,

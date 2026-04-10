@@ -1,32 +1,38 @@
 "use client";
 
-import Link from "next/link";
 import { BarChart3 } from "lucide-react";
-import { buttonClassName } from "@/components/Button";
+import Link from "next/link";
+
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { buttonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
+import { useDictionarySearch } from "@/features/dictionary/hooks/useDictionarySearch";
 import { getAnalyticsPath, getLocalizedHomePath } from "@/lib/locale";
+
 import { DictionaryFilters } from "./DictionaryFilters";
 import { DictionaryResultsSection } from "./DictionaryResultsSection";
 import { DictionarySearchBar } from "./DictionarySearchBar";
-import { useDictionarySearch } from "@/features/dictionary/hooks/useDictionarySearch";
 
 type DictionaryPageBodyProps = {
-  dictionaryPath: string;
+  searchPath: string;
 };
 
-function DictionaryPageBody({ dictionaryPath }: DictionaryPageBodyProps) {
+function DictionaryPageBody({ searchPath }: DictionaryPageBodyProps) {
   const { language, t } = useLanguage();
   const {
     dictionaryLength,
+    exactMatch,
     filteredResults,
     handleKeyboardAppend,
     handleKeyboardBackspace,
     handleSelectionChange,
+    hasMoreResults,
     isKeyboardOpen,
+    loadMoreResults,
     loading,
+    loadingMore,
     query,
     resultsKey,
     searchInputRef,
@@ -36,10 +42,10 @@ function DictionaryPageBody({ dictionaryPath }: DictionaryPageBodyProps) {
     setQuery,
     setSelectedDialect,
     setSelectedPartOfSpeech,
-    exactMatch,
     setExactMatch,
     visibleQuery,
-  } = useDictionarySearch({ dictionaryPath });
+    totalMatches,
+  } = useDictionarySearch({ searchPath });
 
   return (
     <PageShell
@@ -105,19 +111,21 @@ function DictionaryPageBody({ dictionaryPath }: DictionaryPageBodyProps) {
         key={resultsKey}
         dictionaryLength={dictionaryLength}
         filteredResults={filteredResults}
+        hasMoreResults={hasMoreResults}
         loading={loading}
+        loadingMore={loadingMore}
+        onLoadMore={loadMoreResults}
         query={visibleQuery}
         selectedDialect={selectedDialect}
         selectedPartOfSpeech={selectedPartOfSpeech}
+        totalMatches={totalMatches}
       />
     </PageShell>
   );
 }
 
 export default function DictionaryPageClient() {
-  const dictionaryPath = "/data/dictionary.json";
+  const searchPath = "/api/v1/dictionary/search";
 
-  return (
-    <DictionaryPageBody key={dictionaryPath} dictionaryPath={dictionaryPath} />
-  );
+  return <DictionaryPageBody key={searchPath} searchPath={searchPath} />;
 }

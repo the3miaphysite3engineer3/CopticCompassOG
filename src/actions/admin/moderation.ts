@@ -1,5 +1,7 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
+
 import {
   isContactMessageStatus,
   type ContactMessageStatus,
@@ -8,11 +10,17 @@ import {
   isEntryReportStatus,
   type EntryReportStatus,
 } from "@/features/dictionary/lib/entryActions";
-import { revalidatePath } from "next/cache";
-import { getValidatedAdminContext } from "./shared";
 import { getFormString, isUuid, normalizeWhitespace } from "@/lib/validation";
 
-export async function updateEntryReportStatus(formData: FormData) {
+import { getValidatedAdminContext } from "./shared";
+
+/**
+ * Applies a moderation status update to one dictionary entry report. Invalid
+ * payloads are rejected quietly because this action is driven by admin forms.
+ */
+export async function updateEntryReportStatus(
+  formData: FormData,
+): Promise<void> {
   const adminContext = await getValidatedAdminContext();
   if (!adminContext) {
     console.warn(
@@ -48,7 +56,13 @@ export async function updateEntryReportStatus(formData: FormData) {
   revalidatePath("/admin");
 }
 
-export async function updateContactMessageStatus(formData: FormData) {
+/**
+ * Updates the review state of a stored contact message and records the
+ * response timestamp when the message has been marked as answered.
+ */
+export async function updateContactMessageStatus(
+  formData: FormData,
+): Promise<void> {
   const adminContext = await getValidatedAdminContext();
   if (!adminContext) {
     console.warn(

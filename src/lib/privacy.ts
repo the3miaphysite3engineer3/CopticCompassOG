@@ -1,3 +1,7 @@
+/**
+ * Masks the local part of an email address for logs and notifications while
+ * preserving enough detail to help operators identify the account.
+ */
 export function redactEmailAddress(email: string | null | undefined) {
   if (!email) {
     return null;

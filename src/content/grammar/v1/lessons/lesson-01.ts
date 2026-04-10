@@ -1,8 +1,5 @@
-import type {
-  GrammarBlock,
-  GrammarInline,
-  GrammarLessonDocument,
-} from "../../schema.ts";
+import { grammarLesson01NominalSentenceExamples } from "../examples/lesson-01-nominal-sentences.ts";
+import { grammarLesson01ZeroDeterminationExamples } from "../examples/lesson-01-zero-determination.ts";
 import { grammarLesson01Exercise01 } from "../exercises/lesson-01-exercise-01.ts";
 import {
   grammarLesson01ConceptIdList,
@@ -10,9 +7,13 @@ import {
   grammarLesson01Id,
   grammarLesson01SourceIdList,
 } from "../lesson-01-ids.ts";
-import { grammarLesson01NominalSentenceExamples } from "../examples/lesson-01-nominal-sentences.ts";
-import { grammarLesson01ZeroDeterminationExamples } from "../examples/lesson-01-zero-determination.ts";
 import { grammarDatasetRights } from "../rights.ts";
+
+import type {
+  GrammarBlock,
+  GrammarInline,
+  GrammarLessonDocument,
+} from "../../schema.ts";
 
 const text = (value: string): GrammarInline => ({ type: "text", text: value });
 const coptic = (value: string, dictionaryEntryId?: string): GrammarInline => ({

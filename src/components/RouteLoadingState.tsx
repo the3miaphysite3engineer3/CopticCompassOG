@@ -1,8 +1,10 @@
-import type { ReactNode } from "react";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell } from "@/components/PageShell";
+import type { PageShellWidth } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { cx } from "@/lib/classes";
+
+import type { ReactNode } from "react";
 
 type RouteLoadingStateProps = {
   accents?: readonly string[];
@@ -12,6 +14,7 @@ type RouteLoadingStateProps = {
   skeleton?: ReactNode;
   title: string;
   tone?: "default" | "brand" | "sky" | "analytics";
+  width?: PageShellWidth;
 };
 
 function LoadingBlock({ className }: { className: string }) {
@@ -62,12 +65,14 @@ export function RouteLoadingState({
   skeleton,
   title,
   tone = "default",
+  width,
 }: RouteLoadingStateProps) {
   return (
     <PageShell
-      className="min-h-screen px-6 py-14 md:px-10"
-      contentClassName={cx("mx-auto max-w-6xl space-y-10", panelClassName)}
+      className="min-h-[80vh] px-6 py-14 md:px-10"
+      contentClassName={cx("mx-auto space-y-10", panelClassName)}
       accents={accents}
+      width={width}
     >
       <PageHeader
         eyebrow={eyebrow}

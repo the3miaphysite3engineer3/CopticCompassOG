@@ -34,6 +34,10 @@ export type GrammarLessonLearnerRecords = {
   sectionProgressRows: SectionProgressRow[];
 };
 
+/**
+ * Returns the empty learner-record shape used when lesson persistence is
+ * unavailable or has not been loaded yet.
+ */
 export function createEmptyGrammarLessonLearnerRecords(): GrammarLessonLearnerRecords {
   return {
     bookmark: null,
@@ -43,6 +47,10 @@ export function createEmptyGrammarLessonLearnerRecords(): GrammarLessonLearnerRe
   };
 }
 
+/**
+ * Maps Supabase persistence errors onto learner-state availability and a
+ * caller-facing fallback message.
+ */
 export function resolveGrammarLessonPersistenceError(
   error: SupabaseLikeError,
   fallbackMessage: string,
@@ -60,6 +68,10 @@ export function resolveGrammarLessonPersistenceError(
   };
 }
 
+/**
+ * Returns the lesson completion timestamp only when every section has been
+ * completed.
+ */
 export function getLessonCompletionTimestamp({
   completedSections,
   currentCompletedAt,
@@ -76,6 +88,9 @@ export function getLessonCompletionTimestamp({
   return currentCompletedAt ?? new Date().toISOString();
 }
 
+/**
+ * Removes one section-progress row from the in-memory learner state.
+ */
 export function removeSectionProgressRow(
   rows: readonly SectionProgressRow[],
   sectionId: string,
@@ -83,6 +98,9 @@ export function removeSectionProgressRow(
   return rows.filter((row) => row.section_id !== sectionId);
 }
 
+/**
+ * Replaces or inserts one section-progress row in the in-memory learner state.
+ */
 export function upsertSectionProgressRow(
   rows: readonly SectionProgressRow[],
   nextRow: SectionProgressRow,
@@ -93,6 +111,10 @@ export function upsertSectionProgressRow(
   ];
 }
 
+/**
+ * Loads all persisted learner records for one lesson in parallel, including
+ * lesson progress, section progress, bookmarks, and notes.
+ */
 export async function loadGrammarLessonLearnerRecords(
   supabase: AppSupabaseClient,
   userId: string,
@@ -162,6 +184,9 @@ export async function loadGrammarLessonLearnerRecords(
   };
 }
 
+/**
+ * Upserts the lesson-level progress row after section progress changes.
+ */
 export async function syncGrammarLessonProgress(
   supabase: AppSupabaseClient,
   {
@@ -212,6 +237,9 @@ export async function syncGrammarLessonProgress(
   };
 }
 
+/**
+ * Deletes the learner's bookmark row for one lesson.
+ */
 export async function deleteGrammarLessonBookmark(
   supabase: AppSupabaseClient,
   userId: string,
@@ -240,6 +268,9 @@ export async function deleteGrammarLessonBookmark(
   };
 }
 
+/**
+ * Creates or refreshes the learner's bookmark row for one lesson.
+ */
 export async function saveGrammarLessonBookmark(
   supabase: AppSupabaseClient,
   userId: string,
@@ -275,6 +306,9 @@ export async function saveGrammarLessonBookmark(
   };
 }
 
+/**
+ * Deletes one section-progress row for the current learner.
+ */
 export async function deleteGrammarSectionProgress(
   supabase: AppSupabaseClient,
   userId: string,
@@ -303,6 +337,9 @@ export async function deleteGrammarSectionProgress(
   };
 }
 
+/**
+ * Creates or refreshes one section-progress row for the current learner.
+ */
 export async function saveGrammarSectionProgress(
   supabase: AppSupabaseClient,
   userId: string,
@@ -342,6 +379,9 @@ export async function saveGrammarSectionProgress(
   };
 }
 
+/**
+ * Deletes the learner's saved note for one lesson.
+ */
 export async function deleteGrammarLessonNote(
   supabase: AppSupabaseClient,
   userId: string,
@@ -370,6 +410,9 @@ export async function deleteGrammarLessonNote(
   };
 }
 
+/**
+ * Creates or refreshes the learner's saved note for one lesson.
+ */
 export async function saveGrammarLessonNote(
   supabase: AppSupabaseClient,
   userId: string,

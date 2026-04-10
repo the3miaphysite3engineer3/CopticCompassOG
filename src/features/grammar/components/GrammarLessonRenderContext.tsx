@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 
-export type GrammarLessonRenderMode = "web" | "pdf";
+type GrammarLessonRenderMode = "web" | "pdf";
 
 type FootnoteEntry = {
   number: number;

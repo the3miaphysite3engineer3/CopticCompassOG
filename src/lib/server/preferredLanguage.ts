@@ -1,10 +1,15 @@
 import { cookies, headers } from "next/headers";
-import { assertServerOnly } from "@/lib/server/assertServerOnly";
+
 import { DEFAULT_LANGUAGE, LANGUAGE_STORAGE_KEY, isLanguage } from "@/lib/i18n";
+import { assertServerOnly } from "@/lib/server/assertServerOnly";
 import type { Language } from "@/types/i18n";
 
 assertServerOnly("preferredLanguage");
 
+/**
+ * Extracts the first supported application language from an
+ * `Accept-Language` header value.
+ */
 function getLanguageFromAcceptLanguage(acceptLanguage: string | null) {
   if (!acceptLanguage) {
     return null;
@@ -24,15 +29,11 @@ function getLanguageFromAcceptLanguage(acceptLanguage: string | null) {
   return null;
 }
 
-export function getLanguageFromPathname(pathname: string | null | undefined) {
-  if (!pathname) {
-    return null;
-  }
-
-  const [, maybeLocale] = pathname.split("/");
-  return maybeLocale && isLanguage(maybeLocale) ? maybeLocale : null;
-}
-
+/**
+ * Resolves the preferred UI language from the persisted cookie first, then
+ * falls back to the request `Accept-Language` header and finally the default
+ * locale.
+ */
 export async function getPreferredLanguage(): Promise<Language> {
   const cookieStore = await cookies();
   const storedLanguage = cookieStore.get(LANGUAGE_STORAGE_KEY)?.value;
@@ -46,17 +47,4 @@ export async function getPreferredLanguage(): Promise<Language> {
     getLanguageFromAcceptLanguage(headerStore.get("accept-language")) ??
     DEFAULT_LANGUAGE
   );
-}
-
-export async function getDocumentLanguage(): Promise<Language> {
-  const headerStore = await headers();
-  const pathnameLanguage = getLanguageFromPathname(
-    headerStore.get("x-pathname"),
-  );
-
-  if (pathnameLanguage) {
-    return pathnameLanguage;
-  }
-
-  return getPreferredLanguage();
 }

@@ -1,3 +1,7 @@
+/**
+ * Generated Supabase database types used throughout the app for typed row and
+ * insert/update helpers.
+ */
 export type Json =
   | string
   | number
@@ -199,6 +203,65 @@ export type Database = {
             columns: ["event_id"];
             foreignKeyName: "notification_deliveries_event_id_fkey";
             isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "notification_events";
+          },
+        ];
+      };
+      notification_email_jobs: {
+        Row: {
+          bcc_recipients: string[];
+          cc_recipients: string[];
+          created_at: string;
+          from_email: string | null;
+          html_body: string | null;
+          id: string;
+          last_error: string | null;
+          notification_event_id: string;
+          processed_at: string | null;
+          reply_to_recipients: string[];
+          status: "failed" | "processing" | "queued" | "sent";
+          subject: string;
+          text_body: string;
+          to_recipients: string[];
+        };
+        Insert: {
+          bcc_recipients?: string[];
+          cc_recipients?: string[];
+          created_at?: string;
+          from_email?: string | null;
+          html_body?: string | null;
+          id?: string;
+          last_error?: string | null;
+          notification_event_id: string;
+          processed_at?: string | null;
+          reply_to_recipients?: string[];
+          status?: "failed" | "processing" | "queued" | "sent";
+          subject: string;
+          text_body: string;
+          to_recipients: string[];
+        };
+        Update: {
+          bcc_recipients?: string[];
+          cc_recipients?: string[];
+          created_at?: string;
+          from_email?: string | null;
+          html_body?: string | null;
+          id?: string;
+          last_error?: string | null;
+          notification_event_id?: string;
+          processed_at?: string | null;
+          reply_to_recipients?: string[];
+          status?: "failed" | "processing" | "queued" | "sent";
+          subject?: string;
+          text_body?: string;
+          to_recipients?: string[];
+        };
+        Relationships: [
+          {
+            columns: ["notification_event_id"];
+            foreignKeyName: "notification_email_jobs_notification_event_id_fkey";
+            isOneToOne: true;
             referencedColumns: ["id"];
             referencedRelation: "notification_events";
           },
@@ -644,6 +707,9 @@ export type Database = {
         Row: {
           answers: Json | null;
           created_at: string;
+          deleted_at: string | null;
+          deleted_by: string | null;
+          deletion_reason: string | null;
           exercise_id: string | null;
           feedback_text: string | null;
           id: string;
@@ -652,6 +718,7 @@ export type Database = {
           reviewed_at: string | null;
           reviewed_by: string | null;
           status: "pending" | "reviewed";
+          submission_intent_id: string | null;
           submitted_language: "en" | "nl" | null;
           submitted_text: string;
           user_id: string;
@@ -659,6 +726,9 @@ export type Database = {
         Insert: {
           answers?: Json | null;
           created_at?: string;
+          deleted_at?: string | null;
+          deleted_by?: string | null;
+          deletion_reason?: string | null;
           exercise_id?: string | null;
           feedback_text?: string | null;
           id?: string;
@@ -667,6 +737,7 @@ export type Database = {
           reviewed_at?: string | null;
           reviewed_by?: string | null;
           status?: "pending" | "reviewed";
+          submission_intent_id?: string | null;
           submitted_language?: "en" | "nl" | null;
           submitted_text: string;
           user_id: string;
@@ -674,6 +745,9 @@ export type Database = {
         Update: {
           answers?: Json | null;
           created_at?: string;
+          deleted_at?: string | null;
+          deleted_by?: string | null;
+          deletion_reason?: string | null;
           exercise_id?: string | null;
           feedback_text?: string | null;
           id?: string;
@@ -682,6 +756,7 @@ export type Database = {
           reviewed_at?: string | null;
           reviewed_by?: string | null;
           status?: "pending" | "reviewed";
+          submission_intent_id?: string | null;
           submitted_language?: "en" | "nl" | null;
           submitted_text?: string;
           user_id?: string;
