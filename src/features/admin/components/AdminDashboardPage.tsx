@@ -3,6 +3,7 @@ import {
   AdminContactInboxSection,
   AdminEntryReportsSection,
   AdminNotificationsSection,
+  AdminRagKnowledgeSection,
   AdminReleasesSection,
   AdminSubmissionsSection,
   AdminWorkspaceQuickJump,
@@ -48,6 +49,7 @@ export async function AdminDashboardPage({
       <AdminWorkspaceQuickJump overview={workspaceOverview} />
 
       <div className="space-y-8">
+        <AdminRagKnowledgeSection />
         <AdminSubmissionsSection submissions={dashboardData.submissions} />
         <AdminAudienceSection audience={dashboardData.audience} />
         <AdminReleasesSection contentReleases={dashboardData.contentReleases} />

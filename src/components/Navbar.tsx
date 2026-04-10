@@ -10,6 +10,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { LanguageToggle } from "./LanguageToggle";
 import { useLanguage } from "./LanguageProvider";
 import {
+  getChatPath,
   getContactPath,
   getDashboardPath,
   getDictionaryPath,
@@ -50,6 +51,7 @@ export function Navbar() {
     { href: getPublicationsPath(language), label: t("nav.publications") },
     { href: getDictionaryPath(language), label: t("nav.dictionary") },
     { href: getGrammarPath(language), label: t("nav.grammar") },
+    { href: getChatPath(), label: t("nav.chat") },
     { href: getContactPath(language), label: t("nav.contact") },
   ];
 

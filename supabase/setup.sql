@@ -1,4 +1,5 @@
 create extension if not exists pgcrypto;
+create extension if not exists vector;
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users (id) on delete cascade,
@@ -227,6 +228,13 @@ create table if not exists public.entry_reports (
   created_at timestamptz not null default timezone('utc', now())
 );
 
+create table if not exists public.coptic_documents (
+  id bigserial primary key,
+  content text not null,
+  metadata jsonb not null default '{}'::jsonb,
+  embedding vector(768) not null
+);
+
 create index if not exists submissions_user_id_idx
   on public.submissions (user_id);
 
@@ -318,6 +326,27 @@ create index if not exists content_releases_status_created_at_idx
 
 create index if not exists content_releases_segment_created_at_idx
   on public.content_releases (audience_segment, created_at desc);
+
+create index if not exists coptic_documents_embedding_idx
+  on public.coptic_documents
+  using hnsw (embedding vector_ip_ops);
+
+alter table public.coptic_documents enable row level security;
+
+drop policy if exists "Allow public read access to coptic documents"
+  on public.coptic_documents;
+create policy "Allow public read access to coptic documents"
+  on public.coptic_documents
+  for select
+  using (true);
+
+drop policy if exists "Allow service role to manage documents"
+  on public.coptic_documents;
+create policy "Allow service role to manage documents"
+  on public.coptic_documents
+  for all
+  using (auth.role() = 'service_role')
+  with check (auth.role() = 'service_role');
 
 create index if not exists content_releases_delivery_requested_at_idx
   on public.content_releases (delivery_requested_at desc);

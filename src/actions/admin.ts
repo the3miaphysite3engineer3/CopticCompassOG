@@ -6,6 +6,7 @@ import {
   sendContentReleasePreview as sendContentReleasePreviewAction,
   updateContentReleaseStatus as updateContentReleaseStatusAction,
 } from "./admin/releases";
+import { ingestRagPdf as ingestRagPdfAction } from "./admin/rag";
 import { syncAudienceContactsWithResend as syncAudienceContactsWithResendAction } from "./admin/audience";
 import {
   updateContactMessageStatus as updateContactMessageStatusAction,
@@ -14,6 +15,7 @@ import {
 import { submitFeedback as submitFeedbackAction } from "./admin/submissions";
 import type {
   ContentReleaseDraftState,
+  RagIngestionState,
   SendContentReleaseState,
   SyncAudienceContactsState,
 } from "./admin/states";
@@ -60,4 +62,11 @@ export async function syncAudienceContactsWithResend(
 
 export async function updateContactMessageStatus(formData: FormData) {
   return updateContactMessageStatusAction(formData);
+}
+
+export async function ingestRagPdf(
+  prevState: RagIngestionState | null,
+  formData: FormData,
+): Promise<RagIngestionState> {
+  return ingestRagPdfAction(prevState, formData);
 }

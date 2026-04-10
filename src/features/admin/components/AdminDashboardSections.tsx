@@ -11,6 +11,7 @@ import {
   AdminEntryReportsList,
   AdminSubmissionsList,
 } from "@/features/admin/components/AdminFilteredLists";
+import { AdminRagIngestionForm } from "@/features/admin/components/AdminRagIngestionForm";
 import { AdminPersistentSection } from "@/features/admin/components/AdminPersistentSection";
 import {
   countActionableContentReleases,
@@ -200,6 +201,30 @@ export function AdminSubmissionsSection({
       ) : (
         <AdminSubmissionsList submissions={submissions.items} />
       )}
+    </AdminPersistentSection>
+  );
+}
+
+export function AdminRagKnowledgeSection() {
+  return (
+    <AdminPersistentSection
+      id="admin-rag-knowledge"
+      title="RAG knowledge ingestion"
+      description="Upload knowledge files to enrich Shenute AI context. Files are parsed, OCR-checked, chunked (default target 1600 chars with 200 overlap), embedded via your selected provider (Hugging Face or Gemini), and stored in pgvector. RAG status also tracks dictionary.json and grammar JSON knowledge sources."
+      summary="Multi-file ingestion with OCR + embeddings"
+      headerBadges={
+        <>
+          <Badge tone="coptic" size="xs">
+            Embeddings: selectable
+          </Badge>
+          <Badge tone="surface" size="xs">
+            Destination: coptic_documents
+          </Badge>
+        </>
+      }
+      defaultOpen
+    >
+      <AdminRagIngestionForm />
     </AdminPersistentSection>
   );
 }

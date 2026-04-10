@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { Footer } from "@/components/Footer";
+import { FloatingAiAssistant } from "@/components/FloatingAiAssistant";
 import { LanguageProvider } from "@/components/LanguageProvider";
 import { Navbar } from "@/components/Navbar";
 import { ThemeProvider } from "@/components/ThemeProvider";
@@ -34,6 +35,7 @@ export async function AppFrame({
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
+          <FloatingAiAssistant />
         </div>
       </LanguageProvider>
     </ThemeProvider>
