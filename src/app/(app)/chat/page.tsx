@@ -617,7 +617,11 @@ export default function ChatAI() {
                         return <p key={index}>{part.text}</p>;
                       })
                   ) : (
-                    <p>{typeof m.content === "string" ? m.content : ""}</p>
+                    <p>
+                      {"content" in m && typeof (m as any).content === "string"
+                        ? (m as any).content
+                        : ""}
+                    </p>
                   )}
 
                   {m.role === "assistant" ? (

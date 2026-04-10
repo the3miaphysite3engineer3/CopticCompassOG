@@ -74,8 +74,7 @@ export async function POST(request: Request) {
         : fileValue.name;
 
     const enableOcrRaw = formData.get("enable_ocr");
-    const enableOcr =
-      enableOcrRaw === "on" || enableOcrRaw === "true" || enableOcrRaw === true;
+    const enableOcr = enableOcrRaw === "on" || enableOcrRaw === "true";
 
     const embeddingProviderRaw = formData.get("embedding_provider");
     const embeddingProvider =

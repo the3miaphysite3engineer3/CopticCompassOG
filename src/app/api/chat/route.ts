@@ -138,8 +138,8 @@ function hasOpenRouterConfigured() {
 }
 
 function extractMessageText(message: UIMessage): string {
-  if (typeof message.content === "string") {
-    return message.content;
+  if ("content" in message && typeof (message as any).content === "string") {
+    return (message as any).content;
   }
 
   if (!Array.isArray(message.parts)) {
@@ -385,13 +385,13 @@ ${contextText}
     if (inferenceProvider === "openrouter") {
       const completion = await createOpenRouterChatCompletion(
         [
-          { role: "system", content: systemPrompt },
+          { role: "system" as const, content: systemPrompt },
           ...toOpenRouterMessages(messages, chatId),
           ...(latestMessageText
             ? []
             : [
                 {
-                  role: "user",
+                  role: "user" as const,
                   content: "Please answer the latest user request.",
                 },
               ]),
@@ -399,7 +399,7 @@ ${contextText}
         { enableReasoning: true },
       );
 
-      const openRouterMessage = completion.choices[0]?.message as
+      const openRouterMessage = completion?.choices?.[0]?.message as
         | {
             content?: string | null;
             reasoning_details?: unknown;
@@ -425,13 +425,13 @@ ${contextText}
 
     try {
       const completion = await createHfChatCompletion([
-        { role: "system", content: systemPrompt },
+        { role: "system" as const, content: systemPrompt },
         ...toOpenAiMessages(messages),
         ...(latestMessageText
           ? []
           : [
               {
-                role: "user",
+                role: "user" as const,
                 content: "Please answer the latest user request.",
               },
             ]),
@@ -480,13 +480,13 @@ ${contextText}
         try {
           const fallbackCompletion = await createOpenRouterChatCompletion(
             [
-              { role: "system", content: systemPrompt },
+              { role: "system" as const, content: systemPrompt },
               ...toOpenRouterMessages(messages, chatId),
               ...(latestMessageText
                 ? []
                 : [
                     {
-                      role: "user",
+                      role: "user" as const,
                       content: "Please answer the latest user request.",
                     },
                   ]),
