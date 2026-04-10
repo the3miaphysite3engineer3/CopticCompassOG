@@ -2,11 +2,13 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { processOCRImage } from "@/actions/ocrActions";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+
+import { processOCRImage } from "@/actions/ocrActions";
+import { useOptionalAuthGate } from "@/lib/supabase/useOptionalAuthGate";
 
 type ChatProvider = "gemini" | "hf" | "openrouter";
 
@@ -14,6 +16,24 @@ type TextMessagePart = {
   text: string;
   type: "text";
 };
+
+type ChatMessageLike = {
+  content?: unknown;
+  id: string;
+  parts?: unknown;
+  role: "assistant" | "system" | "user";
+};
+
+type ChatFeedbackSignal = "admin_feedback" | "dislike" | "like";
+type ChatReactionSignal = Extract<ChatFeedbackSignal, "dislike" | "like">;
+
+type FeedbackStateByMessage = Record<
+  string,
+  {
+    message: string;
+    status: "error" | "pending" | "success";
+  }
+>;
 
 type PageContextPayload = {
   excerpt: string;
@@ -29,6 +49,62 @@ function isTextMessagePart(part: unknown): part is TextMessagePart {
 
   const candidate = part as { text?: unknown; type?: unknown };
   return candidate.type === "text" && typeof candidate.text === "string";
+}
+
+function getMessageText(message: ChatMessageLike) {
+  if (typeof message.content === "string") {
+    return message.content.trim();
+  }
+
+  if (!Array.isArray(message.parts)) {
+    return "";
+  }
+
+  return message.parts
+    .filter(isTextMessagePart)
+    .map((part) => part.text)
+    .join("\n")
+    .trim();
+}
+
+function findPreviousUserMessage(messages: ChatMessageLike[], startIndex: number) {
+  for (let index = startIndex - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message.role !== "user") {
+      continue;
+    }
+
+    const text = getMessageText(message);
+    if (text.length > 0) {
+      return message;
+    }
+  }
+
+  return null;
+}
+
+function toChatProvider(value: string): ChatProvider {
+  if (value === "gemini") {
+    return "gemini";
+  }
+
+  if (value === "hf") {
+    return "hf";
+  }
+
+  return "openrouter";
+}
+
+function getFeedbackStatusClass(status: "error" | "pending" | "success") {
+  if (status === "error") {
+    return "text-rose-700 dark:text-rose-300";
+  }
+
+  if (status === "pending") {
+    return "text-stone-500 dark:text-stone-300";
+  }
+
+  return "text-emerald-700 dark:text-emerald-300";
 }
 
 function buildPageContext(pathname: string): PageContextPayload {
@@ -81,6 +157,17 @@ export function FloatingAiAssistant() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const captureCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
+  const chatSessionIdRef = useRef(crypto.randomUUID());
+
+  const { isAuthenticated, isReady } = useOptionalAuthGate();
+  const [selectedReactionByMessage, setSelectedReactionByMessage] = useState<
+    Record<string, ChatReactionSignal>
+  >({});
+  const [adminFeedbackDraftByMessage, setAdminFeedbackDraftByMessage] = useState<
+    Record<string, string>
+  >({});
+  const [feedbackStateByMessage, setFeedbackStateByMessage] =
+    useState<FeedbackStateByMessage>({});
 
   const pageContext = useMemo(() => buildPageContext(pathname), [pathname]);
 
@@ -100,6 +187,7 @@ export function FloatingAiAssistant() {
   });
 
   const isLoading = status !== "ready";
+  const typedMessages = messages as ChatMessageLike[];
 
   function clearSelectedImage() {
     setSelectedImage(null);
@@ -301,6 +389,160 @@ export function FloatingAiAssistant() {
     clearSelectedImage();
   }
 
+  async function submitFeedbackSignal(options: {
+    assistantMessage: ChatMessageLike;
+    feedbackText?: string;
+    promptMessage: ChatMessageLike | null;
+    signal: ChatFeedbackSignal;
+  }) {
+    if (!isAuthenticated) {
+      setFeedbackStateByMessage((current) => ({
+        ...current,
+        [options.assistantMessage.id]: {
+          message: "Sign in to send feedback signals.",
+          status: "error",
+        },
+      }));
+      return false;
+    }
+
+    const assistantResponse = getMessageText(options.assistantMessage);
+    const prompt = options.promptMessage ? getMessageText(options.promptMessage) : "";
+
+    if (!assistantResponse || !prompt) {
+      setFeedbackStateByMessage((current) => ({
+        ...current,
+        [options.assistantMessage.id]: {
+          message: "Could not resolve prompt/response for this feedback.",
+          status: "error",
+        },
+      }));
+      return false;
+    }
+
+    setFeedbackStateByMessage((current) => ({
+      ...current,
+      [options.assistantMessage.id]: {
+        message: "Saving feedback...",
+        status: "pending",
+      },
+    }));
+
+    try {
+      const response = await fetch("/api/chat/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          assistantMessageId: options.assistantMessage.id,
+          assistantResponse,
+          chatId: chatSessionIdRef.current,
+          feedbackText: options.feedbackText,
+          inferenceProvider,
+          pageContext,
+          prompt,
+          signal: options.signal,
+          userMessageId: options.promptMessage?.id,
+        }),
+      });
+
+      const payload = (await response.json()) as {
+        error?: string;
+        ragIngested?: boolean;
+        ragWarning?: string;
+        success?: boolean;
+      };
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error ?? "Could not save feedback.");
+      }
+
+      let successMessage = "Saved.";
+      if (payload.ragIngested) {
+        successMessage = "Saved and added to RAG learning.";
+      } else if (payload.ragWarning) {
+        successMessage = `Saved. RAG ingest warning: ${payload.ragWarning}`;
+      }
+
+      setFeedbackStateByMessage((current) => ({
+        ...current,
+        [options.assistantMessage.id]: {
+          message: successMessage,
+          status: "success",
+        },
+      }));
+
+      return true;
+    } catch (feedbackError) {
+      setFeedbackStateByMessage((current) => ({
+        ...current,
+        [options.assistantMessage.id]: {
+          message:
+            feedbackError instanceof Error
+              ? feedbackError.message
+              : "Could not save feedback.",
+          status: "error",
+        },
+      }));
+      return false;
+    }
+  }
+
+  async function handleReaction(
+    signal: ChatReactionSignal,
+    assistantMessage: ChatMessageLike,
+    promptMessage: ChatMessageLike | null,
+  ) {
+    const success = await submitFeedbackSignal({
+      assistantMessage,
+      promptMessage,
+      signal,
+    });
+
+    if (!success) {
+      return;
+    }
+
+    setSelectedReactionByMessage((current) => ({
+      ...current,
+      [assistantMessage.id]: signal,
+    }));
+  }
+
+  async function handleAdminFeedbackSubmit(
+    assistantMessage: ChatMessageLike,
+    promptMessage: ChatMessageLike | null,
+  ) {
+    const draft = adminFeedbackDraftByMessage[assistantMessage.id]?.trim() ?? "";
+    if (!draft) {
+      setFeedbackStateByMessage((current) => ({
+        ...current,
+        [assistantMessage.id]: {
+          message: "Write admin feedback before submitting.",
+          status: "error",
+        },
+      }));
+      return;
+    }
+
+    const success = await submitFeedbackSignal({
+      assistantMessage,
+      feedbackText: draft,
+      promptMessage,
+      signal: "admin_feedback",
+    });
+
+    if (!success) {
+      return;
+    }
+
+    setAdminFeedbackDraftByMessage((current) => ({
+      ...current,
+      [assistantMessage.id]: "",
+    }));
+  }
+
   return (
     <div className="fixed bottom-5 right-5 z-50">
       {isOpen ? (
@@ -335,14 +577,7 @@ export function FloatingAiAssistant() {
                 className="rounded-md border border-stone-300 bg-white px-1.5 py-0.5 text-[11px] dark:border-stone-600 dark:bg-stone-800"
                 value={inferenceProvider}
                 onChange={(event) => {
-                  const value = event.target.value;
-                  setInferenceProvider(
-                    value === "gemini"
-                      ? "gemini"
-                      : value === "hf"
-                        ? "hf"
-                        : "openrouter",
-                  );
+                  setInferenceProvider(toChatProvider(event.target.value));
                 }}
                 disabled={isLoading}
               >
@@ -359,51 +594,142 @@ export function FloatingAiAssistant() {
                 Ask anything about this page, Coptic grammar, vocabulary, or translation.
               </div>
             ) : (
-              messages.map((message) => (
-                <article
-                  key={message.id}
-                  className={
-                    message.role === "user"
-                      ? "ml-8 rounded-2xl rounded-tr-sm bg-sky-600 px-3 py-2 text-sm text-white"
-                      : "mr-8 rounded-2xl rounded-tl-sm border border-stone-200 bg-white px-3 py-2 text-sm text-stone-800 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
-                  }
-                >
-                  {Array.isArray(message.parts)
-                    ? message.parts.filter(isTextMessagePart).map((part, index) => {
-                        if (message.role === "assistant") {
-                          return (
-                            <ReactMarkdown
-                              key={index}
-                              remarkPlugins={[remarkGfm]}
-                              components={{
-                                a: ({ ...props }) => (
-                                  <a
-                                    {...props}
-                                    target="_blank"
-                                    rel="noreferrer"
-                                    className="underline"
-                                  />
-                                ),
-                                code: ({ className, children, ...props }) => (
-                                  <code
-                                    className={`rounded bg-stone-200/70 px-1 py-0.5 text-[0.95em] dark:bg-stone-800 ${className || ""}`}
-                                    {...props}
-                                  >
-                                    {children}
-                                  </code>
-                                ),
-                              }}
-                            >
-                              {part.text}
-                            </ReactMarkdown>
-                          );
-                        }
+              messages.map((message, index) => {
+                const assistantMessage = message as ChatMessageLike;
+                const promptMessage =
+                  message.role === "assistant"
+                    ? findPreviousUserMessage(typedMessages, index)
+                    : null;
+                const feedbackState = feedbackStateByMessage[message.id];
+                const selectedReaction = selectedReactionByMessage[message.id];
+                const adminDraft = adminFeedbackDraftByMessage[message.id] ?? "";
+                const isFeedbackPending = feedbackState?.status === "pending";
 
-                        return <p key={index}>{part.text}</p>;
-                      })
-                    : null}
-                </article>
-              ))
+                return (
+                  <article
+                    key={message.id}
+                    className={
+                      message.role === "user"
+                        ? "ml-8 rounded-2xl rounded-tr-sm bg-sky-600 px-3 py-2 text-sm text-white"
+                        : "mr-8 rounded-2xl rounded-tl-sm border border-stone-200 bg-white px-3 py-2 text-sm text-stone-800 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+                    }
+                  >
+                    {Array.isArray(message.parts)
+                      ? message.parts.filter(isTextMessagePart).map((part, partIndex) => {
+                          if (message.role === "assistant") {
+                            return (
+                              <ReactMarkdown
+                                key={partIndex}
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                  a: ({ ...props }) => (
+                                    <a
+                                      {...props}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className="underline"
+                                    />
+                                  ),
+                                  code: ({ className, children, ...props }) => (
+                                    <code
+                                      className={`rounded bg-stone-200/70 px-1 py-0.5 text-[0.95em] dark:bg-stone-800 ${className || ""}`}
+                                      {...props}
+                                    >
+                                      {children}
+                                    </code>
+                                  ),
+                                }}
+                              >
+                                {part.text}
+                              </ReactMarkdown>
+                            );
+                          }
+
+                          return <p key={partIndex}>{part.text}</p>;
+                        })
+                      : null}
+
+                    {message.role === "assistant" ? (
+                      <div className="mt-2 space-y-2 border-t border-stone-200 pt-2 text-[11px] dark:border-stone-700">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void handleReaction("like", assistantMessage, promptMessage);
+                            }}
+                            disabled={!isAuthenticated || isFeedbackPending}
+                            className={`rounded border px-2 py-1 font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${
+                              selectedReaction === "like"
+                                ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                                : "border-stone-300 text-stone-700 hover:bg-stone-100 dark:border-stone-600 dark:text-stone-200 dark:hover:bg-stone-800"
+                            }`}
+                          >
+                            Like
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              void handleReaction("dislike", assistantMessage, promptMessage);
+                            }}
+                            disabled={!isAuthenticated || isFeedbackPending}
+                            className={`rounded border px-2 py-1 font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${
+                              selectedReaction === "dislike"
+                                ? "border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
+                                : "border-stone-300 text-stone-700 hover:bg-stone-100 dark:border-stone-600 dark:text-stone-200 dark:hover:bg-stone-800"
+                            }`}
+                          >
+                            Dislike
+                          </button>
+                        </div>
+
+                        <details className="rounded border border-stone-200 p-2 dark:border-stone-700">
+                          <summary className="cursor-pointer font-semibold text-stone-700 dark:text-stone-200">
+                            Admin note for RAG learning
+                          </summary>
+                          <div className="mt-2 space-y-2">
+                            <textarea
+                              value={adminDraft}
+                              onChange={(event) => {
+                                const value = event.target.value;
+                                setAdminFeedbackDraftByMessage((current) => ({
+                                  ...current,
+                                  [message.id]: value,
+                                }));
+                              }}
+                              placeholder="Admin only: add written feedback tied to this prompt/response."
+                              rows={3}
+                              disabled={!isAuthenticated || isFeedbackPending}
+                              className="w-full rounded border border-stone-300 bg-white px-2 py-1 text-[11px] text-stone-900 dark:border-stone-600 dark:bg-stone-950 dark:text-stone-100"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                void handleAdminFeedbackSubmit(assistantMessage, promptMessage);
+                              }}
+                              disabled={!isAuthenticated || isFeedbackPending}
+                              className="rounded bg-stone-900 px-2 py-1 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60 dark:bg-stone-100 dark:text-stone-900"
+                            >
+                              Submit admin note
+                            </button>
+                          </div>
+                        </details>
+
+                        {feedbackState ? (
+                          <p className={getFeedbackStatusClass(feedbackState.status)}>
+                            {feedbackState.message}
+                          </p>
+                        ) : null}
+
+                        {!isAuthenticated && isReady ? (
+                          <p className="text-stone-500 dark:text-stone-400">
+                            Sign in to send learning feedback signals.
+                          </p>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </article>
+                );
+              })
             )}
 
             {isLoading ? (
@@ -488,6 +814,7 @@ export function FloatingAiAssistant() {
                     Remove
                   </button>
                 </div>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={selectedImagePreviewUrl}
                   alt="Selected for OCR"

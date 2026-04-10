@@ -2,10 +2,12 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
-import { processOCRImage } from "@/actions/ocrActions";
+import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { useEffect, useMemo, useRef, useState } from "react";
+
+import { processOCRImage } from "@/actions/ocrActions";
+import { useOptionalAuthGate } from "@/lib/supabase/useOptionalAuthGate";
 
 type ChatProvider = "gemini" | "hf" | "openrouter";
 
@@ -14,6 +16,24 @@ type TextMessagePart = {
   type: "text";
 };
 
+type ChatMessageLike = {
+  content?: unknown;
+  id: string;
+  parts?: unknown;
+  role: "assistant" | "system" | "user";
+};
+
+type ChatFeedbackSignal = "admin_feedback" | "dislike" | "like";
+type ChatReactionSignal = Extract<ChatFeedbackSignal, "dislike" | "like">;
+
+type FeedbackStateByMessage = Record<
+  string,
+  {
+    message: string;
+    status: "error" | "pending" | "success";
+  }
+>;
+
 function isTextMessagePart(part: unknown): part is TextMessagePart {
   if (!part || typeof part !== "object") {
     return false;
@@ -21,6 +41,62 @@ function isTextMessagePart(part: unknown): part is TextMessagePart {
 
   const candidate = part as { text?: unknown; type?: unknown };
   return candidate.type === "text" && typeof candidate.text === "string";
+}
+
+function getMessageText(message: ChatMessageLike) {
+  if (typeof message.content === "string") {
+    return message.content.trim();
+  }
+
+  if (!Array.isArray(message.parts)) {
+    return "";
+  }
+
+  return message.parts
+    .filter(isTextMessagePart)
+    .map((part) => part.text)
+    .join("\n")
+    .trim();
+}
+
+function findPreviousUserMessage(messages: ChatMessageLike[], startIndex: number) {
+  for (let index = startIndex - 1; index >= 0; index -= 1) {
+    const message = messages[index];
+    if (message.role !== "user") {
+      continue;
+    }
+
+    const text = getMessageText(message);
+    if (text.length > 0) {
+      return message;
+    }
+  }
+
+  return null;
+}
+
+function toChatProvider(value: string): ChatProvider {
+  if (value === "gemini") {
+    return "gemini";
+  }
+
+  if (value === "hf") {
+    return "hf";
+  }
+
+  return "openrouter";
+}
+
+function getFeedbackStatusClass(status: "error" | "pending" | "success") {
+  if (status === "error") {
+    return "text-rose-700 dark:text-rose-300";
+  }
+
+  if (status === "pending") {
+    return "text-slate-600 dark:text-slate-300";
+  }
+
+  return "text-emerald-700 dark:text-emerald-300";
 }
 
 export default function ChatAI() {
@@ -42,6 +118,17 @@ export default function ChatAI() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const captureCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
+  const chatSessionIdRef = useRef(crypto.randomUUID());
+
+  const { isAuthenticated, isReady } = useOptionalAuthGate();
+  const [selectedReactionByMessage, setSelectedReactionByMessage] = useState<
+    Record<string, ChatReactionSignal>
+  >({});
+  const [adminFeedbackDraftByMessage, setAdminFeedbackDraftByMessage] = useState<
+    Record<string, string>
+  >({});
+  const [feedbackStateByMessage, setFeedbackStateByMessage] =
+    useState<FeedbackStateByMessage>({});
 
   const transport = useMemo(
     () =>
@@ -59,6 +146,7 @@ export default function ChatAI() {
   });
 
   const isLoading = status !== "ready";
+  const typedMessages = messages as ChatMessageLike[];
 
   function clearSelectedImage() {
     setSelectedImage(null);
@@ -251,6 +339,159 @@ export default function ChatAI() {
     clearSelectedImage();
   };
 
+  async function submitFeedbackSignal(options: {
+    assistantMessage: ChatMessageLike;
+    feedbackText?: string;
+    promptMessage: ChatMessageLike | null;
+    signal: ChatFeedbackSignal;
+  }) {
+    if (!isAuthenticated) {
+      setFeedbackStateByMessage((current) => ({
+        ...current,
+        [options.assistantMessage.id]: {
+          message: "Sign in to send feedback signals.",
+          status: "error",
+        },
+      }));
+      return false;
+    }
+
+    const assistantResponse = getMessageText(options.assistantMessage);
+    const prompt = options.promptMessage ? getMessageText(options.promptMessage) : "";
+
+    if (!assistantResponse || !prompt) {
+      setFeedbackStateByMessage((current) => ({
+        ...current,
+        [options.assistantMessage.id]: {
+          message: "Could not resolve prompt/response for this feedback.",
+          status: "error",
+        },
+      }));
+      return false;
+    }
+
+    setFeedbackStateByMessage((current) => ({
+      ...current,
+      [options.assistantMessage.id]: {
+        message: "Saving feedback...",
+        status: "pending",
+      },
+    }));
+
+    try {
+      const response = await fetch("/api/chat/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          assistantMessageId: options.assistantMessage.id,
+          assistantResponse,
+          chatId: chatSessionIdRef.current,
+          feedbackText: options.feedbackText,
+          inferenceProvider,
+          prompt,
+          signal: options.signal,
+          userMessageId: options.promptMessage?.id,
+        }),
+      });
+
+      const payload = (await response.json()) as {
+        error?: string;
+        ragIngested?: boolean;
+        ragWarning?: string;
+        success?: boolean;
+      };
+
+      if (!response.ok || !payload.success) {
+        throw new Error(payload.error ?? "Could not save feedback.");
+      }
+
+      let successMessage = "Saved.";
+      if (payload.ragIngested) {
+        successMessage = "Saved and added to RAG learning.";
+      } else if (payload.ragWarning) {
+        successMessage = `Saved. RAG ingest warning: ${payload.ragWarning}`;
+      }
+
+      setFeedbackStateByMessage((current) => ({
+        ...current,
+        [options.assistantMessage.id]: {
+          message: successMessage,
+          status: "success",
+        },
+      }));
+
+      return true;
+    } catch (feedbackError) {
+      setFeedbackStateByMessage((current) => ({
+        ...current,
+        [options.assistantMessage.id]: {
+          message:
+            feedbackError instanceof Error
+              ? feedbackError.message
+              : "Could not save feedback.",
+          status: "error",
+        },
+      }));
+      return false;
+    }
+  }
+
+  async function handleReaction(
+    signal: ChatReactionSignal,
+    assistantMessage: ChatMessageLike,
+    promptMessage: ChatMessageLike | null,
+  ) {
+    const success = await submitFeedbackSignal({
+      assistantMessage,
+      promptMessage,
+      signal,
+    });
+
+    if (!success) {
+      return;
+    }
+
+    setSelectedReactionByMessage((current) => ({
+      ...current,
+      [assistantMessage.id]: signal,
+    }));
+  }
+
+  async function handleAdminFeedbackSubmit(
+    assistantMessage: ChatMessageLike,
+    promptMessage: ChatMessageLike | null,
+  ) {
+    const draft = adminFeedbackDraftByMessage[assistantMessage.id]?.trim() ?? "";
+    if (!draft) {
+      setFeedbackStateByMessage((current) => ({
+        ...current,
+        [assistantMessage.id]: {
+          message: "Write admin feedback before submitting.",
+          status: "error",
+        },
+      }));
+      return;
+    }
+
+    const success = await submitFeedbackSignal({
+      assistantMessage,
+      feedbackText: draft,
+      promptMessage,
+      signal: "admin_feedback",
+    });
+
+    if (!success) {
+      return;
+    }
+
+    setAdminFeedbackDraftByMessage((current) => ({
+      ...current,
+      [assistantMessage.id]: "",
+    }));
+  }
+
   return (
     <div className="max-w-3xl mx-auto flex flex-col h-[85vh] py-8">
       <div className="flex justify-between items-center mb-6 px-4">
@@ -267,15 +508,9 @@ export default function ChatAI() {
             <select
               className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-900"
               value={inferenceProvider}
-              onChange={(event) =>
-                setInferenceProvider(
-                  event.target.value === "gemini"
-                    ? "gemini"
-                    : event.target.value === "hf"
-                      ? "hf"
-                      : "openrouter",
-                )
-              }
+              onChange={(event) => {
+                setInferenceProvider(toChatProvider(event.target.value));
+              }}
               disabled={isLoading}
             >
               <option value="hf">Hugging Face</option>
@@ -296,7 +531,18 @@ export default function ChatAI() {
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto w-full p-4 mb-4 space-y-5 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-[#0c1222] shadow-inner font-sans">
-          {messages.map((m) => (
+          {messages.map((m, index) => {
+            const assistantMessage = m as ChatMessageLike;
+            const promptMessage =
+              m.role === "assistant"
+                ? findPreviousUserMessage(typedMessages, index)
+                : null;
+            const feedbackState = feedbackStateByMessage[m.id];
+            const selectedReaction = selectedReactionByMessage[m.id];
+            const adminDraft = adminFeedbackDraftByMessage[m.id] ?? "";
+            const isFeedbackPending = feedbackState?.status === "pending";
+
+            return (
             <div key={m.id} className={`flex gap-3 max-w-[85%] ${m.role === 'user' ? 'ml-auto flex-row-reverse' : 'mr-auto'}`}>
               <div className={`h-8 w-8 rounded-full flex items-center justify-center font-bold text-sm shrink-0 mt-1 shadow-sm ${
                 m.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-emerald-600 text-white'
@@ -310,7 +556,9 @@ export default function ChatAI() {
               }`}>
                 {Array.isArray(m.parts)
                   ? m.parts.filter(isTextMessagePart).map((part, index: number) => {
-                      if (part.type !== "text") return null;
+                      if (part.type !== "text") {
+                        return null;
+                      }
                       if (m.role === "assistant") {
                         return (
                           <ReactMarkdown
@@ -343,9 +591,88 @@ export default function ChatAI() {
                       return <p key={index}>{part.text}</p>;
                     })
                   : <p>{typeof m.content === "string" ? m.content : ""}</p>}
+
+                {m.role === "assistant" ? (
+                  <div className="mt-3 space-y-2 border-t border-slate-200 pt-3 text-xs dark:border-slate-700">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void handleReaction("like", assistantMessage, promptMessage);
+                        }}
+                        disabled={!isAuthenticated || isFeedbackPending}
+                        className={`rounded-md border px-2 py-1 font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${
+                          selectedReaction === "like"
+                            ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+                            : "border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+                        }`}
+                      >
+                        Like
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          void handleReaction("dislike", assistantMessage, promptMessage);
+                        }}
+                        disabled={!isAuthenticated || isFeedbackPending}
+                        className={`rounded-md border px-2 py-1 font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${
+                          selectedReaction === "dislike"
+                            ? "border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
+                            : "border-slate-300 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:text-slate-200 dark:hover:bg-slate-800"
+                        }`}
+                      >
+                        Dislike
+                      </button>
+                    </div>
+
+                    <details className="rounded-md border border-slate-200 p-2 dark:border-slate-700">
+                      <summary className="cursor-pointer font-semibold text-slate-700 dark:text-slate-200">
+                        Admin note for RAG learning
+                      </summary>
+                      <div className="mt-2 space-y-2">
+                        <textarea
+                          value={adminDraft}
+                          onChange={(event) => {
+                            const value = event.target.value;
+                            setAdminFeedbackDraftByMessage((current) => ({
+                              ...current,
+                              [m.id]: value,
+                            }));
+                          }}
+                          placeholder="Admin only: add written feedback tied to this prompt/response."
+                          rows={3}
+                          disabled={!isAuthenticated || isFeedbackPending}
+                          className="w-full rounded-md border border-slate-300 bg-white px-2 py-1 text-xs text-slate-900 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => {
+                            void handleAdminFeedbackSubmit(assistantMessage, promptMessage);
+                          }}
+                          disabled={!isAuthenticated || isFeedbackPending}
+                          className="rounded-md bg-slate-900 px-2 py-1 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-100 dark:text-slate-900"
+                        >
+                          Submit admin note
+                        </button>
+                      </div>
+                    </details>
+
+                    {feedbackState ? (
+                      <p className={getFeedbackStatusClass(feedbackState.status)}>
+                        {feedbackState.message}
+                      </p>
+                    ) : null}
+
+                    {!isAuthenticated && isReady ? (
+                      <p className="text-slate-500 dark:text-slate-400">
+                        Sign in to send learning feedback signals.
+                      </p>
+                    ) : null}
+                  </div>
+                ) : null}
               </div>
             </div>
-          ))}
+          )})}
           {isLoading && (
             <div className="flex items-center gap-3 mr-auto max-w-[85%]">
               <div className="h-8 w-8 rounded-full bg-emerald-600 flex items-center justify-center text-white text-sm font-bold shadow-sm shrink-0">ⲁ</div>
@@ -434,6 +761,7 @@ export default function ChatAI() {
                 Remove
               </button>
             </div>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={selectedImagePreviewUrl}
               alt="Selected for OCR"
