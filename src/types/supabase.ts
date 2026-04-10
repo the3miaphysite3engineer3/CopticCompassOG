@@ -119,6 +119,27 @@ export type Database = {
         };
         Relationships: [];
       };
+      coptic_documents: {
+        Row: {
+          content: string;
+          embedding: string | null;
+          id: number;
+          metadata: Json | null;
+        };
+        Insert: {
+          content: string;
+          embedding?: string | null;
+          id?: number;
+          metadata?: Json | null;
+        };
+        Update: {
+          content?: string;
+          embedding?: string | null;
+          id?: number;
+          metadata?: Json | null;
+        };
+        Relationships: [];
+      };
       notification_events: {
         Row: {
           aggregate_id: string;

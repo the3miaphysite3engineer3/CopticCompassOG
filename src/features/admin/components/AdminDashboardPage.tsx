@@ -6,7 +6,9 @@ import {
   AdminContactInboxSection,
   AdminEntryReportsSection,
   AdminNotificationsSection,
+  AdminRagKnowledgeSection,
   AdminReleasesSection,
+  AdminReviewInboxSummary,
   AdminSubmissionsSection,
   AdminSystemHealthSummary,
   AdminWorkspaceQuickJump,
@@ -77,6 +79,7 @@ export async function AdminDashboardPage({
           <AdminNotificationsSection
             notifications={dashboardData.notifications}
           />
+          <AdminRagKnowledgeSection />
         </div>
       </>
     );
@@ -94,6 +97,7 @@ export async function AdminDashboardPage({
             contactMessages={dashboardData.contactMessages}
           />
           <AdminEntryReportsSection entryReports={dashboardData.entryReports} />
+          <AdminRagKnowledgeSection />
         </div>
       </>
     );
@@ -120,20 +124,9 @@ export async function AdminDashboardPage({
         className="mb-12"
       />
 
-      <AdminWorkspaceQuickJump overview={workspaceOverview} />
-
-      <div className="space-y-8">
-        <AdminSubmissionsSection submissions={dashboardData.submissions} />
-        <AdminAudienceSection audience={dashboardData.audience} />
-        <AdminReleasesSection contentReleases={dashboardData.contentReleases} />
-        <AdminContactInboxSection
-          contactMessages={dashboardData.contactMessages}
-        />
-        <AdminNotificationsSection
-          notifications={dashboardData.notifications}
-        />
-        <AdminEntryReportsSection entryReports={dashboardData.entryReports} />
-      </div>
+      <AdminWorkspaceModeShell mode={mode} overview={workspaceOverview}>
+        {modeContent}
+      </AdminWorkspaceModeShell>
     </PageShell>
   );
 }

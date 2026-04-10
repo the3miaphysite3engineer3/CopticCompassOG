@@ -11,6 +11,7 @@ import {
   generateOpenRouterEmbeddings,
 } from "@/lib/openrouter";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
+import type { Json } from "@/types/supabase";
 
 const CHUNK_SIZE = 1600;
 const CHUNK_OVERLAP = 200;
@@ -18,11 +19,15 @@ const OCR_MIN_TEXT_LENGTH = 250;
 const EMBEDDING_BATCH_SIZE = Number(
   process.env.RAG_EMBEDDING_BATCH_SIZE ?? "32",
 );
+const GEMINI_EMBEDDING_OUTPUT_DIMENSION = Number(
+  process.env.GEMINI_EMBEDDING_OUTPUT_DIMENSION ?? "3072",
+);
 const INSERT_BATCH_SIZE = Number(process.env.RAG_INSERT_BATCH_SIZE ?? "50");
 const OCR_TIMEOUT_MS = Number(process.env.RAG_OCR_TIMEOUT_MS ?? "90000");
 const OCR_MAX_RETRIES = Number(process.env.RAG_OCR_MAX_RETRIES ?? "2");
 const DB_INSERT_MAX_RETRIES = Number(process.env.RAG_DB_INSERT_MAX_RETRIES ?? "3");
 const RETRY_BASE_MS = Number(process.env.RAG_RETRY_BASE_MS ?? "1500");
+const RAG_VECTOR_DIMENSIONS = Number(process.env.RAG_VECTOR_DIMENSIONS ?? "768");
 const OCR_UPLOAD_FIELD_FALLBACKS = [
   "file",
   "image",
@@ -146,6 +151,25 @@ type IngestionLogStoreEntry = {
   error?: string;
   logs: RagIngestionLogEntry[];
   updatedAt: number;
+};
+
+type CopticDocumentsInsertRow = {
+  content: string;
+  embedding: string;
+  metadata: Json;
+};
+
+type PdfReconciliationSummary = {
+  extractedChars: number;
+  ocrChars: number;
+  similarity: number;
+  strategy:
+    | "ocr_only"
+    | "pdf_only"
+    | "prefer_ocr"
+    | "prefer_pdf"
+    | "verified_match"
+    | "verified_merge";
 };
 
 type GlobalWithRagLogStore = typeof globalThis & {
@@ -365,6 +389,160 @@ function normalizeWhitespace(value: string) {
   return value.replace(/\s+/g, " ").trim();
 }
 
+function tokenizeForComparison(value: string) {
+  return normalizeWhitespace(value)
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(" ")
+    .filter((token) => token.length >= 3);
+}
+
+function calculateTokenJaccardSimilarity(leftText: string, rightText: string) {
+  const leftTokens = new Set(tokenizeForComparison(leftText));
+  const rightTokens = new Set(tokenizeForComparison(rightText));
+
+  if (leftTokens.size === 0 && rightTokens.size === 0) {
+    return 1;
+  }
+
+  if (leftTokens.size === 0 || rightTokens.size === 0) {
+    return 0;
+  }
+
+  let overlapCount = 0;
+  for (const token of leftTokens) {
+    if (rightTokens.has(token)) {
+      overlapCount += 1;
+    }
+  }
+
+  const unionCount = leftTokens.size + rightTokens.size - overlapCount;
+  return unionCount > 0 ? overlapCount / unionCount : 0;
+}
+
+function splitIntoSemanticSegments(value: string) {
+  return value
+    .split(/\n{2,}|(?<=[.!?])\s+/u)
+    .map((segment) => normalizeWhitespace(segment))
+    .filter((segment) => segment.length > 0);
+}
+
+function mergeUniqueSegments(primaryText: string, secondaryText: string) {
+  const merged: string[] = [];
+  const seen = new Set<string>();
+
+  for (const segment of [
+    ...splitIntoSemanticSegments(primaryText),
+    ...splitIntoSemanticSegments(secondaryText),
+  ]) {
+    const key = segment.toLowerCase();
+    if (seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    merged.push(segment);
+  }
+
+  return merged.join("\n\n");
+}
+
+function reconcilePdfExtractedAndOcrText(
+  extractedText: string,
+  ocrText: string,
+): { summary: PdfReconciliationSummary; text: string } {
+  const normalizedExtracted = normalizeWhitespace(extractedText);
+  const normalizedOcr = normalizeWhitespace(ocrText);
+
+  if (!normalizedExtracted && !normalizedOcr) {
+    return {
+      summary: {
+        extractedChars: 0,
+        ocrChars: 0,
+        similarity: 1,
+        strategy: "pdf_only",
+      },
+      text: "",
+    };
+  }
+
+  if (!normalizedExtracted) {
+    return {
+      summary: {
+        extractedChars: 0,
+        ocrChars: normalizedOcr.length,
+        similarity: 0,
+        strategy: "ocr_only",
+      },
+      text: normalizedOcr,
+    };
+  }
+
+  if (!normalizedOcr) {
+    return {
+      summary: {
+        extractedChars: normalizedExtracted.length,
+        ocrChars: 0,
+        similarity: 0,
+        strategy: "pdf_only",
+      },
+      text: normalizedExtracted,
+    };
+  }
+
+  const similarity = calculateTokenJaccardSimilarity(
+    normalizedExtracted,
+    normalizedOcr,
+  );
+
+  if (similarity >= 0.85) {
+    const preferredText =
+      normalizedExtracted.length >= normalizedOcr.length
+        ? normalizedExtracted
+        : normalizedOcr;
+    const strategy =
+      preferredText === normalizedExtracted ? "prefer_pdf" : "prefer_ocr";
+
+    return {
+      summary: {
+        extractedChars: normalizedExtracted.length,
+        ocrChars: normalizedOcr.length,
+        similarity,
+        strategy,
+      },
+      text: preferredText,
+    };
+  }
+
+  if (similarity >= 0.45) {
+    const preferredText =
+      normalizedExtracted.length >= normalizedOcr.length
+        ? normalizedExtracted
+        : normalizedOcr;
+
+    return {
+      summary: {
+        extractedChars: normalizedExtracted.length,
+        ocrChars: normalizedOcr.length,
+        similarity,
+        strategy: "verified_match",
+      },
+      text: preferredText,
+    };
+  }
+
+  const mergedText = mergeUniqueSegments(normalizedExtracted, normalizedOcr);
+  return {
+    summary: {
+      extractedChars: normalizedExtracted.length,
+      ocrChars: normalizedOcr.length,
+      similarity,
+      strategy: "verified_merge",
+    },
+    text: mergedText,
+  };
+}
+
 function getFileExtension(fileName: string) {
   const extension = fileName.split(".").pop();
   return extension ? extension.toLowerCase() : "";
@@ -487,6 +665,31 @@ function createVectorLiteral(embedding: number[]) {
   return `[${embedding.join(",")}]`;
 }
 
+function normalizeEmbeddingDimensions(
+  embedding: number[],
+  targetDimensions = RAG_VECTOR_DIMENSIONS,
+) {
+  if (embedding.length === targetDimensions) {
+    return embedding;
+  }
+
+  if (embedding.length > targetDimensions) {
+    return embedding.slice(0, targetDimensions);
+  }
+
+  return [...embedding, ...new Array(targetDimensions - embedding.length).fill(0)];
+}
+
+function getExpectedVectorDimensionsFromInsertError(message: string) {
+  const match = message.match(/expected\s+(\d+)\s+dimensions?,\s*not\s+\d+/i);
+  if (!match) {
+    return null;
+  }
+
+  const parsed = Number(match[1]);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
 function extractOcrText(payload: unknown): string {
   const candidates = collectTextCandidates(payload);
   return candidates.find((candidate) => candidate.length > 0) ?? "";
@@ -603,7 +806,11 @@ async function extractSourceText(
   file: File,
   sourceType: SourceType,
   enableOcr: boolean,
-): Promise<{ ocrUsed: boolean; text: string }> {
+): Promise<{
+  ocrUsed: boolean;
+  reconciliation?: PdfReconciliationSummary;
+  text: string;
+}> {
   if (sourceType === "image") {
     const text = await runOcr(file);
     return { ocrUsed: Boolean(text), text };
@@ -617,18 +824,31 @@ async function extractSourceText(
     return { ocrUsed: false, text: await extractTextFile(file) };
   }
 
-  let text = await extractPdfText(file);
-  let ocrUsed = false;
+  const extractedText = await extractPdfText(file);
 
-  if (enableOcr && text.length < OCR_MIN_TEXT_LENGTH) {
-    const ocrText = await runOcr(file);
-    if (ocrText) {
-      text = [text, ocrText].filter(Boolean).join("\n\n");
-      ocrUsed = true;
-    }
+  if (!enableOcr) {
+    return { ocrUsed: false, text: extractedText };
   }
 
-  return { ocrUsed, text };
+  try {
+    const ocrText = await runOcr(file);
+    if (!ocrText) {
+      return { ocrUsed: false, text: extractedText };
+    }
+
+    const reconciled = reconcilePdfExtractedAndOcrText(extractedText, ocrText);
+    return {
+      ocrUsed: true,
+      reconciliation: reconciled.summary,
+      text: reconciled.text,
+    };
+  } catch (error) {
+    if (normalizeWhitespace(extractedText).length >= OCR_MIN_TEXT_LENGTH) {
+      return { ocrUsed: false, text: extractedText };
+    }
+
+    throw error;
+  }
 }
 
 async function generateEmbeddings(
@@ -654,7 +874,7 @@ async function generateEmbeddings(
         values: batch,
         providerOptions: {
           google: {
-            outputDimensionality: 768,
+            outputDimensionality: GEMINI_EMBEDDING_OUTPUT_DIMENSION,
             taskType: "RETRIEVAL_DOCUMENT",
           },
         },
@@ -751,12 +971,24 @@ export async function ingestRagFile({
 
     const extractStartMs = Date.now();
     logIngestion(ingestionId, `Extracting text from ${sourceType} source...`, logs);
-    const { ocrUsed, text } = await extractSourceText(file, sourceType, enableOcr);
+    const { ocrUsed, reconciliation, text } = await extractSourceText(
+      file,
+      sourceType,
+      enableOcr,
+    );
     logIngestion(
       ingestionId,
       `Text extraction finished in ${Date.now() - extractStartMs} ms (${text.length} chars, OCR used=${ocrUsed}).`,
       logs,
     );
+
+    if (sourceType === "pdf" && reconciliation) {
+      logIngestion(
+        ingestionId,
+        `PDF verification: strategy=${reconciliation.strategy}, similarity=${reconciliation.similarity.toFixed(2)}, extractedChars=${reconciliation.extractedChars}, ocrChars=${reconciliation.ocrChars}.`,
+        logs,
+      );
+    }
 
     if (normalizeWhitespace(text).length < 60) {
       logIngestion(ingestionId, "Extraction produced insufficient text content.", logs);
@@ -817,6 +1049,8 @@ export async function ingestRagFile({
       };
     }
 
+    const sourceDimensions = embeddings[0]?.length ?? 0;
+
     const serviceRoleClient = createServiceRoleClient();
     const uploadedAt = new Date().toISOString();
 
@@ -827,39 +1061,64 @@ export async function ingestRagFile({
           ? OPENROUTER_EMBEDDING_MODEL
           : HF_EMBEDDING_MODEL;
 
-    const rows = chunks.map((chunk, index) => ({
-      content: chunk,
-      embedding: createVectorLiteral(embeddings[index]),
-      metadata: {
-        chunkIndex: index,
-        fileName: file.name,
-        mimeType: file.type || "application/octet-stream",
-        ocrUsed,
-        sourceName: sourceTitle,
-        sourceType,
-        totalChunks: chunks.length,
-        uploadedAt,
-        uploadedBy: userId,
-        embeddingModel: embeddingModelName,
-      },
-    }));
+    function buildRows(targetDimensions: number): CopticDocumentsInsertRow[] {
+      const normalizedEmbeddings = embeddings.map((embedding) =>
+        normalizeEmbeddingDimensions(embedding, targetDimensions),
+      );
+
+      return chunks.map((chunk, index) => ({
+        content: chunk,
+        embedding: createVectorLiteral(normalizedEmbeddings[index]),
+        metadata: {
+          chunkIndex: index,
+          embeddingDimensions: targetDimensions,
+          fileName: file.name,
+          mimeType: file.type || "application/octet-stream",
+          ocrUsed,
+          sourceName: sourceTitle,
+          sourceEmbeddingDimensions: sourceDimensions,
+          sourceType,
+          totalChunks: chunks.length,
+          uploadedAt,
+          uploadedBy: userId,
+          embeddingModel: embeddingModelName,
+        },
+      }));
+    }
+
+    let activeVectorDimensions = RAG_VECTOR_DIMENSIONS;
+    if (sourceDimensions !== activeVectorDimensions) {
+      logIngestion(
+        ingestionId,
+        `Embedding dimension reconciliation applied: source=${sourceDimensions}, target=${activeVectorDimensions}.`,
+        logs,
+      );
+    }
+
+    let rows: CopticDocumentsInsertRow[] = buildRows(activeVectorDimensions);
+
+    const copticDocumentsTable = serviceRoleClient.from(
+      "coptic_documents",
+    ) as unknown as {
+      insert: (
+        values: CopticDocumentsInsertRow[],
+      ) => Promise<{ error: { message: string } | null }>;
+    };
 
     const insertStartMs = Date.now();
     for (let start = 0; start < rows.length; start += INSERT_BATCH_SIZE) {
-      const batch = rows.slice(start, start + INSERT_BATCH_SIZE);
       const batchNumber = Math.floor(start / INSERT_BATCH_SIZE) + 1;
       const batchStartMs = Date.now();
       logIngestion(
         ingestionId,
-        `Inserting database batch ${batchNumber} with ${batch.length} rows...`,
+        `Inserting database batch ${batchNumber} with ${Math.min(INSERT_BATCH_SIZE, rows.length - start)} rows...`,
         logs,
       );
 
       let inserted = false;
       for (let attempt = 1; attempt <= DB_INSERT_MAX_RETRIES; attempt += 1) {
-        const { error } = await serviceRoleClient
-          .from("coptic_documents")
-          .insert(batch);
+        const batch = rows.slice(start, start + INSERT_BATCH_SIZE);
+        const { error } = await copticDocumentsTable.insert(batch);
 
         if (!error) {
           inserted = true;
@@ -868,6 +1127,23 @@ export async function ingestRagFile({
 
         if (isMissingCopticDocumentsTable(error)) {
           throw new Error(buildMissingCopticDocumentsTableError());
+        }
+
+        const expectedDimensions = getExpectedVectorDimensionsFromInsertError(
+          error.message,
+        );
+        if (
+          expectedDimensions &&
+          expectedDimensions !== activeVectorDimensions
+        ) {
+          activeVectorDimensions = expectedDimensions;
+          rows = buildRows(activeVectorDimensions);
+          logIngestion(
+            ingestionId,
+            `Database expects vector(${expectedDimensions}). Rebuilding embeddings for remaining batches with target=${expectedDimensions}.`,
+            logs,
+          );
+          continue;
         }
 
         if (attempt >= DB_INSERT_MAX_RETRIES || !shouldRetryNetworkError(error)) {

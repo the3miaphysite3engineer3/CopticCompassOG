@@ -1,7 +1,5 @@
 import Link from "next/link";
 
-import "swagger-ui-dist/swagger-ui.css";
-import "./swagger-overrides.css";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
