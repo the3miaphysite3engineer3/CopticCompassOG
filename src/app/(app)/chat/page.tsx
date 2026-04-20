@@ -648,33 +648,26 @@ export default function ChatAI() {
           />
         </div>
 
-        <div className="flex flex-col gap-2 text-sm font-medium text-stone-600 dark:text-stone-300 lg:items-end">
+        <label className="flex w-full max-w-xs flex-col gap-2 text-sm font-medium text-stone-600 dark:text-stone-300 sm:w-auto lg:items-end">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400">
-            Provider
+            AI mode
           </span>
-          <p>Shenute AI</p>
-        </div>
-        <div className="flex items-center gap-3">
-          <p className="text-sm font-medium text-slate-500">Coptic Scholar</p>
-          <div className="text-xs text-slate-600 dark:text-slate-300">
-            <span className="mr-2">Provider</span>
-            <select
-              className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-900"
-              value={inferenceProvider}
-              onChange={(event) => {
-                setInferenceProvider(toChatProvider(event.target.value));
-              }}
-              disabled={isLoading || isChatAccessBlocked}
-            >
-              <option value="hf">Shenute AI Learner (HF)</option>
-              <option value="gemini">Shenute AI Learner (Gemini)</option>
-              <option value="openrouter">
-                Shenute AI Learner (OpenRouter)
-              </option>
-              <option value="thoth">Shenute AI Expert (THOTH AI)</option>
-            </select>
-          </div>
-        </div>
+          <select
+            id="chat-inference-provider"
+            name="chat_inference_provider"
+            className="compact-select-base h-11 min-w-[15rem] max-w-full bg-white/85 text-sm dark:bg-stone-900"
+            value={inferenceProvider}
+            onChange={(event) => {
+              setInferenceProvider(toChatProvider(event.target.value));
+            }}
+            disabled={isLoading || isChatAccessBlocked}
+          >
+            <option value="thoth">Expert (THOTH AI)</option>
+            <option value="gemini">Learner (Gemini)</option>
+            <option value="openrouter">Learner (OpenRouter)</option>
+            <option value="hf">Learner (HF)</option>
+          </select>
+        </label>
       </div>
 
       <details className="mx-4 mb-4 rounded-md border border-slate-200 bg-white p-3 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
@@ -1087,24 +1080,6 @@ export default function ChatAI() {
                   className="mb-3 w-full rounded-2xl border border-stone-200 dark:border-stone-700"
                 />
                 <canvas ref={captureCanvasRef} className="hidden" />
-                <div className="flex items-center gap-3">
-                  <span className="mr-2">Provider</span>
-                  <select
-                    className="rounded-md border border-slate-300 bg-white px-2 py-1 text-xs dark:border-slate-700 dark:bg-slate-900"
-                    value={inferenceProvider}
-                    onChange={(event) => {
-                      setInferenceProvider(toChatProvider(event.target.value));
-                    }}
-                    disabled={isLoading || isChatAccessBlocked}
-                  >
-                    <option value="hf">Shenute AI Learner (HF)</option>
-                    <option value="gemini">Shenute AI Learner (Gemini)</option>
-                    <option value="openrouter">
-                      Shenute AI Learner (OpenRouter)
-                    </option>
-                    <option value="thoth">Shenute AI Expert (THOTH AI)</option>
-                  </select>
-                </div>
                 <div className="mt-3 flex justify-end gap-2">
                   <button
                     type="button"
