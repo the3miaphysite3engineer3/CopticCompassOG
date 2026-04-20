@@ -45,6 +45,7 @@ next-env.d.ts
 
 # temp/scratch scripts and outputs
 /scratch/
+/tmp/distill/
 knip.txt
 knip.out.json
 lint.json

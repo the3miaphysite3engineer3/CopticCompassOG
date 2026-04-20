@@ -99,6 +99,10 @@ function toChatProvider(value: string): ChatProvider {
     return "hf";
   }
 
+  if (value === "openrouter") {
+    return "openrouter";
+  }
+
   if (value === "thoth") {
     return "thoth";
   }
