@@ -1,0 +1,142 @@
+# Environment & Deployment Setup
+
+This document covers runtime assumptions, environment variables, Supabase webhooks, and CI/CD configuration.
+
+## Runtime Assumptions
+
+- Production is currently designed around Next.js running on the Node.js runtime, typically on Vercel.
+- Cloudflare works well in front of the app as DNS, CDN, or proxy, but the app is not currently structured for Cloudflare Workers or other Edge-only runtimes.
+- Some server modules read local project files at build or request time, including dictionary JSON files in `public/data`, grammar exports, and source timestamps used by the sitemap.
+- If you later want to move more of the app to Edge or Worker runtimes, these filesystem reads should be replaced with build-time imports, generated manifests, or storage/API-backed lookups.
+
+## Environment Setup
+
+Copy the example file only if you want to enable Supabase auth, profile avatars, contact email, owner notifications, or distributed rate limiting locally:
+
+```bash
+cp .env.example .env.local
+```
+
+Then replace the placeholder values in `.env.local` with your own local credentials.
+
+Additional notes:
+
+- `SUPABASE_SERVICE_ROLE_KEY` is only needed for trusted server-side workflows such as internal message persistence or notification dispatching.
+- `CONTACT_EMAIL` is the public contact inbox destination.
+- `OWNER_ALERT_EMAIL` is for operational alerts such as new signups or exercise submissions.
+- `NOTIFICATION_FROM_EMAIL` is the sender identity used by app-generated notification emails.
+
+Important:
+
+- `.env.local` is gitignored and should never be committed.
+- `.env.example` contains placeholders only and is safe to track.
+- If you skip environment setup, public pages and the read-only grammar API still work, but auth, dashboards, avatar uploads, instructor review, and email-backed features may be unavailable.
+
+## Environment Variable Reference
+
+The complete placeholder set lives in `.env.example`. The list below highlights the most important variables by subsystem.
+
+### Core App and Supabase
+
+- `NEXT_PUBLIC_SITE_URL`
+- `SITE_URL`
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+### Shenute AI / LLM Routing
+
+- `OPENROUTER_API_KEY`
+- `OPENROUTER_BASE_URL`
+- `OPENROUTER_CHAT_MODEL`
+- `OPENROUTER_EMBEDDING_MODEL`
+- `OPENROUTER_HTTP_REFERER`
+- `OPENROUTER_APP_TITLE`
+- `GEMINI_API_KEY`
+- `GEMINI_CHAT_MODEL` (optional)
+- `GEMINI_EMBEDDING_MODEL` (optional)
+- `GEMINI_EMBEDDING_OUTPUT_DIMENSION` (default `3072`)
+- `HF_TOKEN`
+- `HF_CHAT_MODEL` (optional)
+- `HF_EMBEDDING_MODEL` (optional)
+- `THOTH_API_KEY`
+- `THOTH_BASE_URL`
+- `THOTH_RESPONSE_MODE`
+- `THOTH_CHAT_TIMEOUT_MS`
+
+### OCR
+
+- `OCR_SERVICE_URL`
+- `OCR_UPLOAD_FIELD`
+
+### RAG Ingestion Tuning
+
+- `RAG_EMBEDDING_BATCH_SIZE`
+- `RAG_INSERT_BATCH_SIZE`
+- `RAG_OCR_TIMEOUT_MS`
+- `RAG_OCR_MAX_RETRIES`
+- `RAG_DB_INSERT_MAX_RETRIES`
+- `RAG_RETRY_BASE_MS`
+- `RAG_VECTOR_DIMENSIONS`
+
+### Embedding Network Retry Tuning
+
+- `HF_EMBEDDING_TIMEOUT_MS`
+- `HF_EMBEDDING_MAX_RETRIES`
+- `HF_EMBEDDING_RETRY_BASE_MS`
+- `OPENROUTER_EMBEDDING_TIMEOUT_MS`
+- `OPENROUTER_EMBEDDING_MAX_RETRIES`
+- `OPENROUTER_EMBEDDING_RETRY_BASE_MS`
+
+## Supabase Webhooks & Background Work
+
+### Signup Alert Webhook
+
+This repo includes a Supabase Edge Function at `supabase/functions/profile-signup-alert` that sends an owner alert whenever a new row is inserted into `public.profiles`.
+
+To enable signup alerts in a Supabase project:
+
+1. Set function secrets for `RESEND_API_KEY`, `OWNER_ALERT_EMAIL`, and `NOTIFICATION_FROM_EMAIL`.
+2. Deploy the function: `supabase functions deploy profile-signup-alert --project-ref <your-project-ref>`
+3. Create a database webhook on `public.profiles` for `INSERT` events.
+4. Choose `Supabase Edge Functions` as the webhook target, select `profile-signup-alert`, and add the auth header with service key.
+
+The function now rejects unauthenticated requests in code as well, so the webhook must send `Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>`.
+
+### Background Release Delivery
+
+This repo includes a Supabase Edge Function at `supabase/functions/process-content-release` for background delivery of approved content releases. When Resend segment configuration is available, the worker hands release sends off to provider-native broadcasts. If that configuration is missing, it falls back to direct per-recipient delivery from the worker.
+
+To enable background release sends in a Supabase project:
+
+1. Set function secrets for `NOTIFICATION_FROM_EMAIL` and at least one Resend key: `RESEND_API_KEY` or `RESEND_API_KEY_FULL_ACCESS`.
+2. Deploy the function: `supabase functions deploy process-content-release --project-ref <your-project-ref>`
+3. Make sure the latest release delivery migrations have been pushed so `content_releases` includes the queue metadata columns.
+
+The worker validates its bearer token in code, so any caller must send `Authorization: Bearer <SUPABASE_SERVICE_ROLE_KEY>`.
+
+### Resend Audience Sync
+
+Audience opt-ins can be mirrored into Resend Contacts and Segments so provider-native broadcasts are possible.
+Set these app environment variables where your Next.js server runs:
+
+- `RESEND_API_KEY_FULL_ACCESS`
+- `RESEND_LESSONS_SEGMENT_ID`
+- `RESEND_BOOKS_SEGMENT_ID`
+- `RESEND_GENERAL_SEGMENT_ID`
+- (And optional EN/NL localized segments)
+
+## CI/CD (GitHub Actions + Vercel)
+
+The CI workflow in `.github/workflows/ci.yml` now includes Vercel deployment jobs:
+
+- PRs to `main` (same-repo PRs) deploy a preview after checks pass.
+- Pushes to `main` deploy production after checks pass.
+
+Set these repository secrets in GitHub before enabling deployment:
+
+- `VERCEL_TOKEN`
+- `VERCEL_ORG_ID`
+- `VERCEL_PROJECT_ID`
+
+If these secrets are missing, the deploy jobs are skipped and CI checks still run.
