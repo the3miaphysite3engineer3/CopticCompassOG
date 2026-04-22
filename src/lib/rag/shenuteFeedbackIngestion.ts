@@ -22,25 +22,25 @@ const CHAT_FEEDBACK_THOTH_INPUT_LIMIT = Number(
   process.env.CHAT_FEEDBACK_THOTH_INPUT_LIMIT ?? "4000",
 );
 
-export type ChatFeedbackSignal = "admin_feedback" | "dislike" | "like";
-export type ChatFeedbackEmbeddingProvider = "gemini" | "hf" | "openrouter";
+export type ShenuteFeedbackSignal = "admin_feedback" | "dislike" | "like";
+export type ShenuteFeedbackEmbeddingProvider = "gemini" | "hf" | "openrouter";
 
-export type ChatFeedbackPageContext = {
+export type ShenuteFeedbackPageContext = {
   excerpt?: string;
   path?: string;
   title?: string;
   url?: string;
 };
 
-type IngestChatFeedbackSignalOptions = {
+type IngestShenuteFeedbackSignalOptions = {
   assistantMessageId?: string;
   assistantResponse: string;
-  chatId?: string;
+  shenuteSessionId?: string;
   feedbackText?: string;
-  inferenceProvider: ChatFeedbackEmbeddingProvider;
-  pageContext?: ChatFeedbackPageContext;
+  inferenceProvider: ShenuteFeedbackEmbeddingProvider;
+  pageContext?: ShenuteFeedbackPageContext;
   prompt: string;
-  signal: ChatFeedbackSignal;
+  signal: ShenuteFeedbackSignal;
   userId: string;
   userMessageId?: string;
 };
@@ -77,7 +77,7 @@ function normalizeEmbeddingDimensions(
   ];
 }
 
-function getSignalLearningLine(signal: ChatFeedbackSignal) {
+function getSignalLearningLine(signal: ShenuteFeedbackSignal) {
   if (signal === "like") {
     return "Learner signal: helpful response (like).";
   }
@@ -122,7 +122,7 @@ async function maybeRefineAdminFeedbackWithThoth(options: {
   assistantResponse: string;
   feedbackText?: string;
   prompt: string;
-  signal: ChatFeedbackSignal;
+  signal: ShenuteFeedbackSignal;
   userId: string;
 }) {
   if (options.signal !== "admin_feedback" || !options.feedbackText) {
@@ -148,7 +148,7 @@ async function maybeRefineAdminFeedbackWithThoth(options: {
         feedbackText: trimmedFeedbackText,
         prompt: options.prompt,
       }),
-      user: `chat-feedback-admin-refine:${options.userId}`,
+      user: `shenute-feedback-admin-refine:${options.userId}`,
     });
 
     const refinedFeedbackText =
@@ -167,7 +167,7 @@ async function maybeRefineAdminFeedbackWithThoth(options: {
 }
 
 async function generateFeedbackEmbedding(options: {
-  provider: ChatFeedbackEmbeddingProvider;
+  provider: ShenuteFeedbackEmbeddingProvider;
   text: string;
 }) {
   if (options.provider === "gemini") {
@@ -228,12 +228,12 @@ function buildFeedbackLearningContent(options: {
   feedbackText?: string;
   isThothRefinedFeedback?: boolean;
   prompt: string;
-  signal: ChatFeedbackSignal;
+  signal: ShenuteFeedbackSignal;
 }) {
   const signalLine = getSignalLearningLine(options.signal);
 
   const sections = [
-    "Type: chat_prompt_feedback",
+    "Type: shenute_prompt_feedback",
     signalLine,
     "",
     "Prompt:",
@@ -259,7 +259,7 @@ function buildFeedbackLearningContent(options: {
 function buildFeedbackDocumentRow(options: {
   assistantMessageId?: string;
   assistantResponse: string;
-  chatId?: string;
+  shenuteSessionId?: string;
   content: string;
   embedding: string;
   metadata: Json;
@@ -272,8 +272,8 @@ function buildFeedbackDocumentRow(options: {
 }
 
 // eslint-disable-next-line complexity, max-lines-per-function
-export async function ingestChatFeedbackLearningSignal(
-  options: IngestChatFeedbackSignalOptions,
+export async function ingestShenuteFeedbackLearningSignal(
+  options: IngestShenuteFeedbackSignalOptions,
 ) {
   const uploadedAt = new Date().toISOString();
   const thothRefinedFeedbackText = await maybeRefineAdminFeedbackWithThoth({
@@ -311,7 +311,7 @@ export async function ingestChatFeedbackLearningSignal(
         ? (feedbackTextForLearning ?? null)
         : null,
     adminFeedbackRefinementProvider: thothRefinedFeedbackText ? "thoth" : null,
-    chatId: options.chatId ?? null,
+    shenuteSessionId: options.shenuteSessionId ?? null,
     createdAt: uploadedAt,
     embeddingDimensions: targetEmbedding.length,
     embeddingModel: model,
@@ -332,8 +332,8 @@ export async function ingestChatFeedbackLearningSignal(
     ),
     signal: options.signal,
     sourceEmbeddingDimensions: embedding.length,
-    sourceName: "chat_feedback_signal",
-    sourceType: "chat_feedback_signal",
+    sourceName: "shenute_feedback_signal",
+    sourceType: "shenute_feedback_signal",
     uploadedAt,
     uploadedBy: options.userId,
     userMessageId: options.userMessageId ?? null,
@@ -342,7 +342,7 @@ export async function ingestChatFeedbackLearningSignal(
   const row = buildFeedbackDocumentRow({
     assistantMessageId: options.assistantMessageId,
     assistantResponse: options.assistantResponse,
-    chatId: options.chatId,
+    shenuteSessionId: options.shenuteSessionId,
     content,
     embedding: createVectorLiteral(targetEmbedding),
     metadata,
@@ -360,7 +360,7 @@ export async function ingestChatFeedbackLearningSignal(
   const { error } = await copticDocumentsTable.insert([row]);
   if (error) {
     throw new Error(
-      `Failed to ingest chat feedback into RAG: ${error.message}`,
+      `Failed to ingest Shenute feedback into RAG: ${error.message}`,
     );
   }
 

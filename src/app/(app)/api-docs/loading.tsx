@@ -1,6 +1,22 @@
+"use client";
+
+import { useLanguage } from "@/components/LanguageProvider";
 import { pageShellAccents } from "@/components/PageShell";
 import { RouteLoadingState } from "@/components/RouteLoadingState";
 import { SurfacePanel } from "@/components/SurfacePanel";
+
+const API_DOCS_LOADING_COPY = {
+  en: {
+    description:
+      "Loading the OpenAPI explorer, developer shortcuts, and dataset notes.",
+    title: "Preparing the API docs",
+  },
+  nl: {
+    description:
+      "De OpenAPI-verkenner, ontwikkelaarssnelkoppelingen en datasetnotities worden geladen.",
+    title: "API-docs voorbereiden",
+  },
+} as const;
 
 function LoadingBlock({ className }: { className: string }) {
   return (
@@ -15,11 +31,13 @@ function LoadingBlock({ className }: { className: string }) {
  * Renders the loading skeleton for the API documentation page.
  */
 export default function Loading() {
+  const { language } = useLanguage();
+  const copy = API_DOCS_LOADING_COPY[language];
+
   return (
     <RouteLoadingState
-      eyebrow="Developer Docs"
-      title="Preparing the API docs"
-      description="Loading the OpenAPI explorer, developer shortcuts, and dataset notes."
+      title={copy.title}
+      description={copy.description}
       tone="sky"
       accents={[
         pageShellAccents.topRightSkyOrb,

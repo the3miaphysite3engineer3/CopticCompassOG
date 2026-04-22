@@ -1,10 +1,24 @@
+"use client";
+
 import { updateContentReleaseStatus } from "@/actions/admin";
 import { FormField } from "@/components/FormField";
+import { useLanguage } from "@/components/LanguageProvider";
 import {
   CONTENT_RELEASE_EDITABLE_STATUSES,
   formatContentReleaseStatus,
   type ContentReleaseRow,
 } from "@/features/communications/lib/releases";
+
+const contentReleaseReviewFormCopy = {
+  en: {
+    label: "Draft status",
+    save: "Save draft state",
+  },
+  nl: {
+    label: "Conceptstatus",
+    save: "Conceptstatus opslaan",
+  },
+} as const;
 
 export function ContentReleaseReviewForm({
   releaseId,
@@ -13,6 +27,9 @@ export function ContentReleaseReviewForm({
   releaseId: string;
   status: ContentReleaseRow["status"];
 }) {
+  const { language } = useLanguage();
+  const copy = contentReleaseReviewFormCopy[language];
+
   if (status !== "draft" && status !== "approved" && status !== "cancelled") {
     return null;
   }
@@ -31,7 +48,7 @@ export function ContentReleaseReviewForm({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
         <FormField
           htmlFor={`content-release-status-${releaseId}`}
-          label="Draft status"
+          label={copy.label}
           labelTone="muted"
           className="min-w-[14rem] flex-1"
         >
@@ -43,14 +60,14 @@ export function ContentReleaseReviewForm({
           >
             {CONTENT_RELEASE_EDITABLE_STATUSES.map((nextStatus) => (
               <option key={nextStatus} value={nextStatus}>
-                {formatContentReleaseStatus(nextStatus)}
+                {formatContentReleaseStatus(nextStatus, language)}
               </option>
             ))}
           </select>
         </FormField>
 
         <button type="submit" className="btn-primary px-5">
-          Save draft state
+          {copy.save}
         </button>
       </div>
     </form>

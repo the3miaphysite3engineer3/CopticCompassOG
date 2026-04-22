@@ -4,6 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, type ReactNode } from "react";
 
 import { Badge } from "@/components/Badge";
+import { useLanguage } from "@/components/LanguageProvider";
 import type { AdminWorkspaceOverview } from "@/features/admin/lib/dashboardData";
 import { usePersistentEnumState } from "@/features/admin/lib/uiState";
 import {
@@ -11,6 +12,52 @@ import {
   type AdminWorkspaceMode,
 } from "@/features/admin/lib/workspaceMode";
 import { cx } from "@/lib/classes";
+import type { Language } from "@/types/i18n";
+
+const workspaceModeShellCopy = {
+  en: {
+    badge: "Workspace Mode",
+    description:
+      "Switch between active review work, outbound communications, and system visibility without carrying the whole admin page with you.",
+    labels: {
+      communications: "Communications",
+      review: "Review",
+      system: "System",
+    },
+  },
+  nl: {
+    badge: "Werkruimtemodus",
+    description:
+      "Schakel tussen actieve beoordelingen, uitgaande communicatie en systeemoverzicht zonder de hele adminpagina mee te nemen.",
+    labels: {
+      communications: "Communicatie",
+      review: "Beoordeling",
+      system: "Systeem",
+    },
+  },
+} as const satisfies Record<
+  Language,
+  {
+    badge: string;
+    description: string;
+    labels: Record<AdminWorkspaceMode, string>;
+  }
+>;
+
+function formatAdminCount(value: number, language: Language) {
+  return value.toLocaleString(language === "nl" ? "nl-BE" : "en-US");
+}
+
+function formatCountLabel(
+  value: number,
+  singular: string,
+  plural: string,
+  language: Language,
+) {
+  return `${formatAdminCount(value, language)} ${
+    value === 1 ? singular : plural
+  }`;
+}
 
 function getModeSummaryCount(
   mode: AdminWorkspaceMode,
@@ -32,30 +79,102 @@ function getModeSummaryCount(
   }
 }
 
-function getModeLabel(mode: AdminWorkspaceMode) {
-  switch (mode) {
-    case "review":
-      return "Review";
-    case "communications":
-      return "Communications";
-    case "system":
-      return "System";
-    default:
-      return mode;
-  }
+function getModeLabel(mode: AdminWorkspaceMode, language: Language) {
+  return workspaceModeShellCopy[language].labels[mode];
 }
 
 function getModeDescription(
   mode: AdminWorkspaceMode,
   overview: AdminWorkspaceOverview,
+  language: Language,
 ) {
+  if (language === "nl") {
+    switch (mode) {
+      case "review":
+        return [
+          formatCountLabel(
+            overview.pendingSubmissionCount,
+            "inzending",
+            "inzendingen",
+            language,
+          ),
+          formatCountLabel(
+            overview.openContactMessageCount,
+            "inboxgesprek",
+            "inboxgesprekken",
+            language,
+          ),
+          formatCountLabel(
+            overview.openEntryReportCount,
+            "rapport",
+            "rapporten",
+            language,
+          ),
+        ].join(", ");
+      case "communications":
+        return [
+          formatCountLabel(
+            overview.actionableReleaseCount,
+            "actieve release",
+            "actieve releases",
+            language,
+          ),
+          formatCountLabel(
+            overview.audienceSyncErrorCount,
+            "synchronisatieprobleem",
+            "synchronisatieproblemen",
+            language,
+          ),
+        ].join(", ");
+      case "system":
+        return `${formatCountLabel(
+          overview.failedNotificationCount,
+          "mislukte melding",
+          "mislukte meldingen",
+          language,
+        )} te controleren`;
+      default:
+        return "";
+    }
+  }
+
   switch (mode) {
     case "review":
-      return `${overview.pendingSubmissionCount} submissions, ${overview.openContactMessageCount} inbox threads, ${overview.openEntryReportCount} reports`;
+      return `${formatCountLabel(
+        overview.pendingSubmissionCount,
+        "submission",
+        "submissions",
+        language,
+      )}, ${formatCountLabel(
+        overview.openContactMessageCount,
+        "inbox thread",
+        "inbox threads",
+        language,
+      )}, ${formatCountLabel(
+        overview.openEntryReportCount,
+        "report",
+        "reports",
+        language,
+      )}`;
     case "communications":
-      return `${overview.actionableReleaseCount} active releases, ${overview.audienceSyncErrorCount} sync issues`;
+      return `${formatCountLabel(
+        overview.actionableReleaseCount,
+        "active release",
+        "active releases",
+        language,
+      )}, ${formatCountLabel(
+        overview.audienceSyncErrorCount,
+        "sync issue",
+        "sync issues",
+        language,
+      )}`;
     case "system":
-      return `${overview.failedNotificationCount} failed notifications to inspect`;
+      return `${formatCountLabel(
+        overview.failedNotificationCount,
+        "failed notification",
+        "failed notifications",
+        language,
+      )} to inspect`;
     default:
       return "";
   }
@@ -70,6 +189,8 @@ export function AdminWorkspaceModeShell({
   mode: AdminWorkspaceMode;
   overview: AdminWorkspaceOverview;
 }) {
+  const { language } = useLanguage();
+  const copy = workspaceModeShellCopy[language];
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -138,11 +259,10 @@ export function AdminWorkspaceModeShell({
       <nav className="app-sticky-panel rounded-[2rem] border border-stone-200/80 bg-white/90 p-4 shadow-lg backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/80 dark:shadow-black/20">
         <div className="mb-4 flex flex-wrap items-center gap-2">
           <Badge tone="flat" size="xs" caps>
-            Workspace Mode
+            {copy.badge}
           </Badge>
           <p className="text-sm text-stone-600 dark:text-stone-400">
-            Switch between active review work, outbound communications, and
-            system visibility without carrying the whole admin page with you.
+            {copy.description}
           </p>
         </div>
 
@@ -172,7 +292,7 @@ export function AdminWorkspaceModeShell({
                         : "text-stone-900 dark:text-stone-100",
                     )}
                   >
-                    {getModeLabel(nextMode)}
+                    {getModeLabel(nextMode, language)}
                   </span>
                   <Badge tone={isActive ? "accent" : "surface"} size="xs">
                     {summaryCount}
@@ -180,7 +300,7 @@ export function AdminWorkspaceModeShell({
                 </div>
 
                 <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
-                  {getModeDescription(nextMode, overview)}
+                  {getModeDescription(nextMode, overview, language)}
                 </p>
               </button>
             );

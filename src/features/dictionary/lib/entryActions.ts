@@ -1,4 +1,5 @@
 import type { LexicalEntry } from "@/features/dictionary/types";
+import type { Language } from "@/types/i18n";
 import type { Tables, TablesInsert, TablesUpdate } from "@/types/supabase";
 
 export const ENTRY_REPORT_REASONS = [
@@ -67,33 +68,56 @@ export type EntryReportWithEntry = {
   report: AdminEntryReport;
 };
 
-const ENTRY_REPORT_REASON_LABELS: Record<EntryReportReason, string> = {
-  typo: "Typo or spelling issue",
-  translation: "Translation issue",
-  grammar: "Grammar issue",
-  relation: "Wrong relation or grouping",
-  other: "Other",
-};
+const ENTRY_REPORT_REASON_LABELS = {
+  en: {
+    typo: "Typo or spelling issue",
+    translation: "Translation issue",
+    grammar: "Grammar issue",
+    relation: "Wrong relation or grouping",
+    other: "Other",
+  },
+  nl: {
+    typo: "Type- of spelfout",
+    translation: "Vertaalprobleem",
+    grammar: "Grammaticaal probleem",
+    relation: "Verkeerde relatie of groepering",
+    other: "Overig",
+  },
+} as const satisfies Record<Language, Record<EntryReportReason, string>>;
 
-const ENTRY_REPORT_STATUS_LABELS: Record<EntryReportStatus, string> = {
-  open: "Open",
-  reviewed: "Reviewed",
-  resolved: "Resolved",
-  dismissed: "Dismissed",
-};
+const ENTRY_REPORT_STATUS_LABELS = {
+  en: {
+    open: "Open",
+    reviewed: "Reviewed",
+    resolved: "Resolved",
+    dismissed: "Dismissed",
+  },
+  nl: {
+    open: "Open",
+    reviewed: "Beoordeeld",
+    resolved: "Opgelost",
+    dismissed: "Afgewezen",
+  },
+} as const satisfies Record<Language, Record<EntryReportStatus, string>>;
 
 /**
  * Returns the user-facing label for a validated entry report reason.
  */
-export function formatEntryReportReason(reason: EntryReportReason) {
-  return ENTRY_REPORT_REASON_LABELS[reason];
+export function formatEntryReportReason(
+  reason: EntryReportReason,
+  language: Language = "en",
+) {
+  return ENTRY_REPORT_REASON_LABELS[language][reason];
 }
 
 /**
  * Returns the admin-facing label for a validated entry report status.
  */
-export function formatEntryReportStatus(status: EntryReportStatus) {
-  return ENTRY_REPORT_STATUS_LABELS[status];
+export function formatEntryReportStatus(
+  status: EntryReportStatus,
+  language: Language = "en",
+) {
+  return ENTRY_REPORT_STATUS_LABELS[language][status];
 }
 
 const ENTRY_REPORT_STATUS_PRIORITY: Record<EntryReportStatus, number> = {

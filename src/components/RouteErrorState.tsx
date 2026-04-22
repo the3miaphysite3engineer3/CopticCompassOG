@@ -15,7 +15,9 @@ type RouteErrorStateProps = {
   accents?: readonly string[];
   description: string;
   details?: ReactNode;
+  fallbackDetails?: ReactNode;
   eyebrow?: string;
+  noticeTitle?: string;
   panelClassName?: string;
   primaryHref?: string;
   primaryLabel?: string;
@@ -29,7 +31,9 @@ export function RouteErrorState({
   accents,
   description,
   details,
+  fallbackDetails,
   eyebrow,
+  noticeTitle = "Something interrupted this page",
   panelClassName,
   primaryHref,
   primaryLabel,
@@ -59,9 +63,10 @@ export function RouteErrorState({
           tone="error"
           size="comfortable"
           align="left"
-          title="Something interrupted this page"
+          title={noticeTitle}
         >
           {details ??
+            fallbackDetails ??
             "Please try loading the page again. If the issue continues, come back in a moment."}
         </StatusNotice>
 

@@ -22,11 +22,10 @@ const developerCopy = {
     title: "Developers",
     seoTitle: "Coptic Compass Grammar + Shenute AI APIs for Developers",
     description:
-      "Explore the public Coptic Compass grammar API plus Shenute AI chat and OCR-backed image integration patterns for developer workflows.",
-    eyebrow: "Developer Platform",
+      "Explore the public Coptic Compass grammar API plus Shenute AI and OCR-backed image integration patterns for developer workflows.",
     heroTitle: "Build on grammar and Shenute AI APIs",
     heroDescription:
-      "The grammar API exposes a read-only, versioned dataset for lessons, concepts, examples, exercises, footnotes, and sources, while /api/chat powers Shenute AI interactions with provider selection and OCR-backed image context.",
+      "The grammar API exposes a read-only, versioned dataset for lessons, concepts, examples, exercises, footnotes, and sources, while /api/shenute powers Shenute AI interactions with provider selection and OCR-backed image context.",
     primaryCta: "Open API Docs",
     secondaryCta: "View OpenAPI JSON",
     discoveryTitle: "Start here",
@@ -38,7 +37,7 @@ const developerCopy = {
       "Fetch /api/v1/grammar/lessons for the published lesson index.",
       "Load /api/v1/grammar/lessons/[slug] for full lesson payloads.",
       "Use /api/openapi.json when generating clients or importing the schema into tooling.",
-      "Send POST /api/chat requests for Shenute AI responses (default provider: openrouter).",
+      "Send POST /api/shenute requests for Shenute AI responses (default provider: openrouter).",
       "Send image OCR requests to POST /api/ocr so Coptic Compass forwards them to OCR_SERVICE_URL.",
     ],
     integrationTitle: "Integration notes",
@@ -48,7 +47,7 @@ const developerCopy = {
       "The lesson filter accepts either a lesson slug or a canonical lesson id.",
       "For browser apps on another origin, a backend proxy is the safest default.",
       "Shenute AI supports provider values: openrouter, gemini, and hf.",
-      "Image upload and camera capture flows run OCR first and append extracted text under [Image OCR Context] before calling /api/chat.",
+      "Image upload and camera capture flows run OCR first and append extracted text under [Image OCR Context] before calling /api/shenute.",
       "Set OCR_SERVICE_URL and optionally OCR_UPLOAD_FIELD when your OCR backend requires a specific multipart field name.",
       "The /api/ocr endpoint proxies multipart OCR uploads and returns upstream OCR responses to the client.",
     ],
@@ -75,10 +74,10 @@ const developerCopy = {
         description: "Machine-readable OpenAPI document.",
       },
       {
-        href: "/api/chat",
-        label: "/api/chat",
+        href: "/api/shenute",
+        label: "/api/shenute",
         description:
-          "Shenute AI chat endpoint with provider routing and fallback handling.",
+          "Shenute AI endpoint with provider routing and fallback handling.",
       },
       {
         href: "/api/ocr",
@@ -114,8 +113,8 @@ const developerCopy = {
         description: "See the public content the API is exposing.",
       },
       {
-        href: "/chat",
-        label: "Shenute AI Chat",
+        href: "/shenute",
+        label: "Shenute AI",
         description:
           "Reference UI for provider selection plus OCR-backed image and camera messaging.",
       },
@@ -133,10 +132,10 @@ const developerCopy = {
 
 const payload = await response.json();
 const lessonTitles = payload.data.map((lesson) => lesson.title.en);`,
-    chatExampleTitle: "Shenute AI request example",
-    chatExampleCaption:
-      "A minimal POST request to /api/chat using OpenRouter as provider.",
-    chatCode: `const response = await fetch("https://kyrilloswannes.com/api/chat", {
+    shenuteExampleTitle: "Shenute AI request example",
+    shenuteExampleCaption:
+      "A minimal POST request to /api/shenute using OpenRouter as provider.",
+    shenuteCode: `const response = await fetch("https://kyrilloswannes.com/api/shenute", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -171,13 +170,12 @@ curl -X POST "https://kyrilloswannes.com/api/ocr?lang=cop" \
   nl: {
     title: "Ontwikkelaars",
     seoTitle:
-      "Koptisch Kompas grammatica- en Shenute AI-API's voor ontwikkelaars",
+      "Coptic Compass-API's voor grammatica en Shenute AI voor ontwikkelaars",
     description:
-      "Verken de publieke grammatica-API van Koptisch Kompas plus Shenute AI-chat en OCR-ondersteunde afbeeldingsintegratie voor ontwikkelaars.",
-    eyebrow: "Developerplatform",
+      "Verken de publieke grammatica-API van Coptic Compass plus Shenute AI en OCR-ondersteunde afbeeldingsintegratie voor ontwikkelaars.",
     heroTitle: "Bouw voort op grammatica- en Shenute AI-API's",
     heroDescription:
-      "De grammatica-API biedt een alleen-lezen, geversioneerde dataset voor lessen, begrippen, voorbeelden, oefeningen, voetnoten en bronnen, terwijl /api/chat Shenute AI-interacties levert met providerkeuze en OCR-context voor afbeeldingen.",
+      "De grammatica-API biedt een alleen-lezen, geversioneerde dataset voor lessen, begrippen, voorbeelden, oefeningen, voetnoten en bronnen, terwijl /api/shenute Shenute AI-interacties levert met providerkeuze en OCR-context voor afbeeldingen.",
     primaryCta: "Open API-docs",
     secondaryCta: "Bekijk OpenAPI JSON",
     discoveryTitle: "Begin hier",
@@ -189,8 +187,8 @@ curl -X POST "https://kyrilloswannes.com/api/ocr?lang=cop" \
       "Gebruik /api/v1/grammar/lessons voor de index van gepubliceerde lessen.",
       "Laad /api/v1/grammar/lessons/[slug] voor volledige lespayloads.",
       "Gebruik /api/openapi.json om clients te genereren of het schema in tooling te importeren.",
-      "Verstuur POST /api/chat-requests voor Shenute AI-antwoorden (standaardprovider: openrouter).",
-      "Stuur OCR-afbeeldingsrequests naar POST /api/ocr zodat Coptic Compass ze doorstuurt naar OCR_SERVICE_URL.",
+      "Verstuur POST /api/shenute voor Shenute AI-antwoorden (standaardprovider: openrouter).",
+      "Stuur OCR-requests voor afbeeldingen naar POST /api/ocr zodat Coptic Compass ze doorstuurt naar OCR_SERVICE_URL.",
     ],
     integrationTitle: "Integratienotities",
     integrationItems: [
@@ -199,8 +197,8 @@ curl -X POST "https://kyrilloswannes.com/api/ocr?lang=cop" \
       "De lesson-filter accepteert zowel een slug als een canonieke les-id.",
       "Voor browser-apps op een andere origin is een backendproxy de veiligste standaardoptie.",
       "Shenute AI ondersteunt providers: openrouter, gemini en hf.",
-      "Bij upload van afbeeldingen of cameracaptures draait OCR eerst; de geëxtraheerde tekst wordt toegevoegd onder [Image OCR Context] vóór de call naar /api/chat.",
-      "Stel OCR_SERVICE_URL in en optioneel OCR_UPLOAD_FIELD als je OCR-backend een vaste multipart veldnaam vereist.",
+      "Bij upload van afbeeldingen of cameracaptures draait OCR eerst; de geëxtraheerde tekst wordt toegevoegd onder [Image OCR Context] vóór de call naar /api/shenute.",
+      "Stel OCR_SERVICE_URL in en optioneel OCR_UPLOAD_FIELD als uw OCR-backend een vaste multipart-veldnaam vereist.",
       "Het endpoint /api/ocr proxyt multipart OCR-uploads en geeft het upstream OCR-resultaat terug aan de client.",
     ],
     endpointsTitle: "Belangrijke endpoints",
@@ -227,10 +225,10 @@ curl -X POST "https://kyrilloswannes.com/api/ocr?lang=cop" \
         description: "Machineleesbaar OpenAPI-document.",
       },
       {
-        href: "/api/chat",
-        label: "/api/chat",
+        href: "/api/shenute",
+        label: "/api/shenute",
         description:
-          "Shenute AI-chatendpoint met provider-routering en fallback-afhandeling.",
+          "Shenute AI-endpoint met providerkeuze en fallback-afhandeling.",
       },
       {
         href: "/api/ocr",
@@ -241,7 +239,7 @@ curl -X POST "https://kyrilloswannes.com/api/ocr?lang=cop" \
     ],
     exampleTitle: "Voorbeeldrequest",
     exampleCaption:
-      "Een minimale server-side fetch die de titels van gepubliceerde lessen ophaalt.",
+      "Een minimale server-side fetch-aanroep die de titels van gepubliceerde lessen ophaalt.",
     resourcesTitle: "Verwante bronnen",
     resources: [
       {
@@ -265,16 +263,16 @@ curl -X POST "https://kyrilloswannes.com/api/ocr?lang=cop" \
         description: "Bekijk de publieke inhoud die de API ontsluit.",
       },
       {
-        href: "/chat",
-        label: "Shenute AI-chat",
+        href: "/shenute",
+        label: "Shenute AI",
         description:
-          "Referentie-UI met providerkeuze en OCR-ondersteunde beeld- en cameraberichten.",
+          "Referentie-UI met providerkeuze en OCR-ondersteunde afbeeldings- en cameraberichten.",
       },
       {
         href: "/api/ocr",
         label: "OCR-proxyendpoint",
         description:
-          "Verstuur multipart OCR-requests zonder je upstream OCR-service-URL te publiceren.",
+          "Verstuur multipart OCR-requests zonder uw upstream OCR-service-URL te publiceren.",
       },
     ],
     breadcrumbLabel: "Ontwikkelaars",
@@ -284,10 +282,10 @@ curl -X POST "https://kyrilloswannes.com/api/ocr?lang=cop" \
 
 const payload = await response.json();
 const lessonTitles = payload.data.map((lesson) => lesson.title.en);`,
-    chatExampleTitle: "Voorbeeld Shenute AI-request",
-    chatExampleCaption:
-      "Een minimale POST-request naar /api/chat met OpenRouter als provider.",
-    chatCode: `const response = await fetch("https://kyrilloswannes.com/api/chat", {
+    shenuteExampleTitle: "Voorbeeld Shenute AI-request",
+    shenuteExampleCaption:
+      "Een minimale POST-request naar /api/shenute met OpenRouter als provider.",
+    shenuteCode: `const response = await fetch("https://kyrilloswannes.com/api/shenute", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -307,7 +305,7 @@ const streamOfText = await response.text();`,
     ocrExampleCaption:
       "Clients kunnen /api/ocr aanroepen; Coptic Compass stuurt door naar OCR_SERVICE_URL en geeft de upstream OCR-response terug.",
     ocrCode: `# .env.local
-OCR_SERVICE_URL=https://jouw-ocr-service/upload
+OCR_SERVICE_URL=https://your-ocr-service/upload
 # Optioneel voor strikte OCR-backends:
 OCR_UPLOAD_FIELD=file
 
@@ -384,8 +382,6 @@ export default async function DevelopersPage({
       />
 
       <PageHeader
-        eyebrow={copy.eyebrow}
-        eyebrowVariant="badge"
         title={copy.heroTitle}
         description={copy.heroDescription}
         tone="sky"
@@ -516,13 +512,13 @@ export default async function DevelopersPage({
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(18rem,0.9fr)]">
         <SurfacePanel rounded="3xl" variant="elevated" className="p-6 md:p-8">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-            {copy.chatExampleTitle}
+            {copy.shenuteExampleTitle}
           </p>
           <p className="mt-3 text-sm leading-7 text-stone-600 dark:text-stone-300">
-            {copy.chatExampleCaption}
+            {copy.shenuteExampleCaption}
           </p>
           <pre className="mt-5 overflow-x-auto rounded-2xl border border-stone-200/80 bg-stone-950 px-4 py-4 text-sm leading-6 text-stone-100 dark:border-stone-800/80">
-            <code>{copy.chatCode}</code>
+            <code>{copy.shenuteCode}</code>
           </pre>
         </SurfacePanel>
 

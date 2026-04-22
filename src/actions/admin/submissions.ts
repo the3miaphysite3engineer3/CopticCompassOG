@@ -70,14 +70,14 @@ function buildSubmissionReviewNotification(options: {
       ? [
           greetingLine,
           "",
-          `Je oefening voor ${options.lessonLabel} is nagekeken.`,
+          `Uw oefening voor ${options.lessonLabel} is nagekeken.`,
           `Score: ${options.rating}/5`,
           ...exerciseLine,
           "",
           "Feedback:",
           options.feedback,
           "",
-          "Je kan de volledige feedback ook in je dashboard bekijken.",
+          "U kunt de volledige feedback ook in uw dashboard bekijken.",
         ].join("\n")
       : [
           greetingLine,

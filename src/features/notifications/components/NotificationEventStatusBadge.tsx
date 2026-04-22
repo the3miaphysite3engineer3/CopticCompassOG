@@ -1,4 +1,7 @@
+"use client";
+
 import { Badge } from "@/components/Badge";
+import { useLanguage } from "@/components/LanguageProvider";
 import type { NotificationEventRow } from "@/features/notifications/lib/notifications";
 
 type NotificationEventStatusBadgeProps = {
@@ -29,11 +32,22 @@ const STATUS_CONFIG: Record<
 export function NotificationEventStatusBadge({
   status,
 }: NotificationEventStatusBadgeProps) {
+  const { language } = useLanguage();
   const config = STATUS_CONFIG[status];
+  const label =
+    language === "nl"
+      ? (
+          {
+            failed: "Mislukt",
+            queued: "In wachtrij",
+            sent: "Verzonden",
+          } satisfies Record<NotificationEventRow["status"], string>
+        )[status]
+      : config.label;
 
   return (
     <Badge tone={config.tone} size="xs">
-      {config.label}
+      {label}
     </Badge>
   );
 }

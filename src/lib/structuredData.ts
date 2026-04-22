@@ -75,18 +75,18 @@ const STRUCTURED_DATA_COPY = {
       ? `Coptic Compass is een digitaal thuis voor de studie van het Koptisch, met ${siteConfig.dictionaryEntryCount.toLocaleString()} doorzoekbare woordenboeklemma's, grammaticalessen, publicaties, Shenute AI en onderzoekstools.`
       : "Coptic Compass is een digitaal thuis voor de studie van het Koptisch, met een doorzoekbaar woordenboek, grammaticalessen, publicaties, Shenute AI en onderzoekstools.",
     dictionary: {
-      pageName: "Koptisch Woordenboek",
+      pageName: "Koptisch woordenboek",
       pageDescription:
         "Doorzoek het Koptisch-Nederlandse woordenboek op Koptisch, Nederlands of Grieks, met dialectfilters, grammaticale details en een ingebouwd virtueel toetsenbord.",
-      setName: "Koptisch-Nederlands Woordenboek",
+      setName: "Koptisch-Nederlands woordenboek",
       setDescription:
         "Een digitaal Koptisch woordenboek van Coptic Compass met Nederlandse en Griekse glossen, dialectvormen en grammaticale annotaties.",
     },
     grammar: {
-      hubPageName: "Lessen Koptische Grammatica",
+      hubPageName: "Koptische grammaticalessen",
       hubPageDescription:
         "Gestructureerde lessen Koptische grammatica van Coptic Compass, met oefeningen, begrippenlijsten en bronnotities.",
-      hubListName: "Gepubliceerde lessen Koptische grammatica",
+      hubListName: "Gepubliceerde Koptische grammaticalessen",
       learningResourceType: "Grammaticales",
     },
     publications: {

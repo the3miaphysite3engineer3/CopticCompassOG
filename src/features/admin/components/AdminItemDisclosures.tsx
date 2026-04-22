@@ -1,7 +1,10 @@
+"use client";
+
 import { ChevronDown } from "lucide-react";
 import Link from "next/link";
 
 import { Badge } from "@/components/Badge";
+import { useLanguage } from "@/components/LanguageProvider";
 import { surfacePanelClassName } from "@/components/SurfacePanel";
 import { ContactMessageReviewForm } from "@/features/contact/components/ContactMessageReviewForm";
 import { ContactMessageStatusBadge } from "@/features/contact/components/ContactMessageStatusBadge";
@@ -15,16 +18,64 @@ import {
   formatEntryReportReason,
   type EntryReportWithEntry,
 } from "@/features/dictionary/lib/entryActions";
-import { SubmissionReviewForm } from "@/features/submissions/components/SubmissionReviewForm";
-import { SubmissionStatusBadge } from "@/features/submissions/components/SubmissionStatusBadge";
-import type { AdminSubmission } from "@/features/submissions/types";
-import {
-  formatLessonSlug,
-  formatSubmissionDate,
-} from "@/features/submissions/utils";
+import { formatSubmissionDate } from "@/features/submissions/utils";
 import { cx } from "@/lib/classes";
 import { antinoou } from "@/lib/fonts";
 import { getEntryPath } from "@/lib/locale";
+import type { Language } from "@/types/i18n";
+
+const adminItemDisclosureCopy = {
+  en: {
+    answeredOn: "Answered on",
+    collapse: "Collapse",
+    currentMeaning: "Current meaning",
+    entryId: "Entry ID",
+    graded: "Graded",
+    locale: {
+      en: "English",
+      nl: "Dutch",
+    },
+    missingEntry:
+      "This entry is no longer present in the current published dictionary data.",
+    needsReview: "Needs Review",
+    openEntry: "Open entry",
+    receivedOn: "Received on",
+    replyByEmail: "Reply by email",
+    replyDescription:
+      "Reply by email or update the inbox status once you have handled the conversation.",
+    reporter: "Reporter",
+    review: "Review",
+    student: "Student",
+    submittedOn: "Submitted on",
+    unknownUser: "Unknown user",
+    wantsUpdates: "Wants updates",
+  },
+  nl: {
+    answeredOn: "Beantwoord op",
+    collapse: "Inklappen",
+    currentMeaning: "Huidige betekenis",
+    entryId: "Item-ID",
+    graded: "Beoordeeld",
+    locale: {
+      en: "Engels",
+      nl: "Nederlands",
+    },
+    missingEntry:
+      "Dit item staat niet meer in de huidige gepubliceerde woordenboekdata.",
+    needsReview: "Te beoordelen",
+    openEntry: "Item openen",
+    receivedOn: "Ontvangen op",
+    replyByEmail: "Per e-mail antwoorden",
+    replyDescription:
+      "Antwoord per e-mail of werk de inboxstatus bij zodra u het gesprek hebt afgehandeld.",
+    reporter: "Melder",
+    review: "Beoordelen",
+    student: "Student",
+    submittedOn: "Ingediend op",
+    unknownUser: "Onbekende gebruiker",
+    wantsUpdates: "Wil updates ontvangen",
+  },
+} as const;
 
 function buildPreview(text: string, maxLength = 180) {
   const normalized = text.replace(/\s+/g, " ").trim();
@@ -53,6 +104,9 @@ function AdminItemDisclosure({
   title: React.ReactNode;
   titleClassName?: string;
 }) {
+  const { language } = useLanguage();
+  const copy = adminItemDisclosureCopy[language];
+
   return (
     <details
       className={surfacePanelClassName({
@@ -89,8 +143,8 @@ function AdminItemDisclosure({
         </div>
 
         <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-stone-500 dark:text-stone-400">
-          <span className="group-open:hidden">Review</span>
-          <span className="hidden group-open:inline">Collapse</span>
+          <span className="group-open:hidden">{copy.review}</span>
+          <span className="hidden group-open:inline">{copy.collapse}</span>
           <ChevronDown className="mt-1 h-5 w-5 transition-transform duration-200 group-open:rotate-180" />
         </div>
       </summary>
@@ -102,54 +156,11 @@ function AdminItemDisclosure({
   );
 }
 
-function _AdminSubmissionDisclosure({
-  defaultOpen = false,
-  submission,
-}: {
-  defaultOpen?: boolean;
-  submission: AdminSubmission;
-}) {
-  return (
-    <AdminItemDisclosure
-      defaultOpen={defaultOpen}
-      badges={
-        submission.status === "reviewed" ? (
-          <SubmissionStatusBadge
-            label={
-              submission.rating ? `Graded · ${submission.rating}/5` : "Graded"
-            }
-            tone="reviewed"
-          />
-        ) : (
-          <SubmissionStatusBadge label="Needs Review" tone="pending" />
-        )
-      }
-      title={formatLessonSlug(submission.lesson_slug)}
-      metadata={
-        <>
-          <span className="font-medium text-stone-800 dark:text-stone-200">
-            Student: {submission.studentEmail || "Unknown user"}
-          </span>
-          <span>
-            Submitted on {formatSubmissionDate(submission.created_at, "en")}
-          </span>
-        </>
-      }
-      preview={buildPreview(submission.submitted_text)}
-    >
-      <div className="space-y-6">
-        <div className="rounded-2xl border border-stone-100 bg-stone-50 p-5 whitespace-pre-wrap font-coptic text-lg text-stone-700 dark:border-stone-800/50 dark:bg-stone-950 dark:text-stone-300 md:text-xl">
-          {submission.submitted_text}
-        </div>
-
-        <SubmissionReviewForm submission={submission} />
-      </div>
-    </AdminItemDisclosure>
-  );
-}
-
-function formatLocaleLabel(locale: ContactMessageRow["locale"]) {
-  return locale === "nl" ? "Dutch" : "English";
+function formatLocaleLabel(
+  locale: ContactMessageRow["locale"],
+  language: Language,
+) {
+  return adminItemDisclosureCopy[language].locale[locale];
 }
 
 export function AdminContactMessageDisclosure({
@@ -159,6 +170,9 @@ export function AdminContactMessageDisclosure({
   defaultOpen?: boolean;
   message: ContactMessageRow;
 }) {
+  const { language } = useLanguage();
+  const copy = adminItemDisclosureCopy[language];
+
   return (
     <AdminItemDisclosure
       defaultOpen={defaultOpen}
@@ -166,14 +180,14 @@ export function AdminContactMessageDisclosure({
         <>
           <ContactMessageStatusBadge status={message.status} />
           <Badge tone="surface" size="xs">
-            {formatContactInquiryLabel(message.inquiry_type)}
+            {formatContactInquiryLabel(message.inquiry_type, language)}
           </Badge>
           <Badge tone="neutral" size="xs">
-            {formatLocaleLabel(message.locale)}
+            {formatLocaleLabel(message.locale, language)}
           </Badge>
           {message.wants_updates ? (
             <Badge tone="coptic" size="xs">
-              Wants updates
+              {copy.wantsUpdates}
             </Badge>
           ) : null}
         </>
@@ -185,12 +199,12 @@ export function AdminContactMessageDisclosure({
             {message.email}
           </span>
           <span>
-            Received on{" "}
+            {copy.receivedOn}{" "}
             {formatSubmissionDate(message.created_at, message.locale)}
           </span>
           {message.responded_at ? (
             <span>
-              Answered on{" "}
+              {copy.answeredOn}{" "}
               {formatSubmissionDate(message.responded_at, message.locale)}
             </span>
           ) : null}
@@ -201,11 +215,10 @@ export function AdminContactMessageDisclosure({
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p className="text-sm text-stone-500 dark:text-stone-400">
-            Reply by email or update the inbox status once you have handled the
-            conversation.
+            {copy.replyDescription}
           </p>
           <a href={`mailto:${message.email}`} className="btn-secondary px-5">
-            Reply by email
+            {copy.replyByEmail}
           </a>
         </div>
 
@@ -229,8 +242,16 @@ export function AdminEntryReportDisclosure({
   defaultOpen?: boolean;
   reportWithEntry: EntryReportWithEntry;
 }) {
+  const { language } = useLanguage();
+  const copy = adminItemDisclosureCopy[language];
   const { entry, report } = reportWithEntry;
-  const meaningPreview = entry?.english_meanings.slice(0, 2).join("; ") ?? null;
+  const meaningPreview =
+    (language === "nl" && entry?.dutch_meanings?.length
+      ? entry.dutch_meanings
+      : entry?.english_meanings
+    )
+      ?.slice(0, 2)
+      .join("; ") ?? null;
 
   return (
     <AdminItemDisclosure
@@ -239,7 +260,7 @@ export function AdminEntryReportDisclosure({
         <>
           <EntryReportStatusBadge status={report.status} />
           <Badge tone="surface" size="xs">
-            {formatEntryReportReason(report.reason)}
+            {formatEntryReportReason(report.reason, language)}
           </Badge>
         </>
       }
@@ -248,13 +269,16 @@ export function AdminEntryReportDisclosure({
       metadata={
         <>
           <span className="font-medium text-stone-800 dark:text-stone-200">
-            Reporter:{" "}
-            {report.reporterName ?? report.reporterEmail ?? "Unknown user"}
+            {copy.reporter}:{" "}
+            {report.reporterName ?? report.reporterEmail ?? copy.unknownUser}
           </span>
           <span>
-            Submitted on {formatSubmissionDate(report.created_at, "en")}
+            {copy.submittedOn}{" "}
+            {formatSubmissionDate(report.created_at, language)}
           </span>
-          <span>Entry ID: {report.entry_id}</span>
+          <span>
+            {copy.entryId}: {report.entry_id}
+          </span>
         </>
       }
       preview={buildPreview(report.commentary)}
@@ -263,20 +287,19 @@ export function AdminEntryReportDisclosure({
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="text-sm text-stone-600 dark:text-stone-400">
             {meaningPreview ? (
-              <span>Current meaning: {meaningPreview}</span>
-            ) : (
               <span>
-                This entry is no longer present in the current published
-                dictionary data.
+                {copy.currentMeaning}: {meaningPreview}
               </span>
+            ) : (
+              <span>{copy.missingEntry}</span>
             )}
           </div>
 
           <Link
-            href={getEntryPath(report.entry_id, "en")}
+            href={getEntryPath(report.entry_id, language)}
             className="btn-secondary px-5"
           >
-            Open entry
+            {copy.openEntry}
           </Link>
         </div>
 

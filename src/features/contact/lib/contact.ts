@@ -1,4 +1,5 @@
 import type { TranslationKey } from "@/lib/i18n";
+import type { Language } from "@/types/i18n";
 import type { Tables } from "@/types/supabase";
 
 type ContactInquiryOption = {
@@ -57,12 +58,37 @@ export type ContactMessageRow = Tables<"contact_messages">;
 const contactInquiryMap = new Map<string, string>(
   contactInquiryOptions.map((option) => [option.value, option.emailLabel]),
 );
-const contactMessageStatusLabelMap: Record<ContactMessageStatus, string> = {
-  new: "New",
-  in_progress: "In Progress",
-  answered: "Answered",
-  archived: "Archived",
-};
+const contactInquiryAdminLabelMap = {
+  en: {
+    dictionary_feedback: "Dictionary Feedback",
+    general_message: "General Message",
+    grammar_question: "Grammar / Linguistics Question",
+    publication_inquiry: "Publication / Book Inquiry",
+    research_collaboration: "Research Collaboration",
+  },
+  nl: {
+    dictionary_feedback: "Woordenboekfeedback",
+    general_message: "Algemeen bericht",
+    grammar_question: "Grammatica- of taalkundige vraag",
+    publication_inquiry: "Publicatie- of boekvraag",
+    research_collaboration: "Onderzoekssamenwerking",
+  },
+} as const satisfies Record<Language, Record<ContactInquiryValue, string>>;
+
+const contactMessageStatusLabelMap = {
+  en: {
+    new: "New",
+    in_progress: "In Progress",
+    answered: "Answered",
+    archived: "Archived",
+  },
+  nl: {
+    new: "Nieuw",
+    in_progress: "In behandeling",
+    answered: "Beantwoord",
+    archived: "Gearchiveerd",
+  },
+} as const satisfies Record<Language, Record<ContactMessageStatus, string>>;
 const contactMessageStatusPriority: Record<ContactMessageStatus, number> = {
   new: 0,
   in_progress: 1,
@@ -90,8 +116,13 @@ export function getContactInquiryLabel(value: ContactInquiryValue) {
  * Returns the email-facing label for any inquiry value, falling back to the
  * general-message label for unknown values.
  */
-export function formatContactInquiryLabel(value: string) {
-  return contactInquiryMap.get(value) ?? "General Message";
+export function formatContactInquiryLabel(
+  value: string,
+  language: Language = "en",
+) {
+  return isContactInquiryValue(value)
+    ? contactInquiryAdminLabelMap[language][value]
+    : contactInquiryAdminLabelMap[language].general_message;
 }
 
 /**
@@ -106,8 +137,11 @@ export function isContactMessageStatus(
 /**
  * Returns the admin-facing label for a contact message status.
  */
-export function formatContactMessageStatus(status: ContactMessageStatus) {
-  return contactMessageStatusLabelMap[status];
+export function formatContactMessageStatus(
+  status: ContactMessageStatus,
+  language: Language = "en",
+) {
+  return contactMessageStatusLabelMap[language][status];
 }
 
 /**

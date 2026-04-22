@@ -5,13 +5,37 @@ import { useActionState } from "react";
 import { sendContentReleasePreview } from "@/actions/admin";
 import type { SendContentReleaseState } from "@/actions/admin/states";
 import { FormField } from "@/components/FormField";
+import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
+
+const sendContentReleasePreviewFormCopy = {
+  en: {
+    description:
+      "Sends a preview to the configured admin inbox without marking the release as sent.",
+    englishPreview: "English preview",
+    dutchPreview: "Dutch preview",
+    label: "Preview locale",
+    send: "Send preview email",
+    sending: "Sending preview...",
+  },
+  nl: {
+    description:
+      "Verstuurt een preview naar de ingestelde admininbox zonder de release als verzonden te markeren.",
+    englishPreview: "Engelse preview",
+    dutchPreview: "Nederlandse preview",
+    label: "Previewtaal",
+    send: "Previewmail verzenden",
+    sending: "Preview wordt verzonden...",
+  },
+} as const;
 
 export function SendContentReleasePreviewForm({
   releaseId,
 }: {
   releaseId: string;
 }) {
+  const { language } = useLanguage();
+  const copy = sendContentReleasePreviewFormCopy[language];
   const [state, formAction, isPending] = useActionState<
     SendContentReleaseState | null,
     FormData
@@ -27,7 +51,7 @@ export function SendContentReleasePreviewForm({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
         <FormField
           htmlFor={`content-release-preview-locale-${releaseId}`}
-          label="Preview locale"
+          label={copy.label}
           labelTone="muted"
           className="min-w-[14rem] flex-1"
         >
@@ -37,8 +61,8 @@ export function SendContentReleasePreviewForm({
             defaultValue="en"
             className="select-base h-11 rounded-xl text-sm"
           >
-            <option value="en">English preview</option>
-            <option value="nl">Dutch preview</option>
+            <option value="en">{copy.englishPreview}</option>
+            <option value="nl">{copy.dutchPreview}</option>
           </select>
         </FormField>
 
@@ -47,13 +71,12 @@ export function SendContentReleasePreviewForm({
           className="btn-secondary px-5"
           disabled={isPending}
         >
-          {isPending ? "Sending preview..." : "Send preview email"}
+          {isPending ? copy.sending : copy.send}
         </button>
       </div>
 
       <p className="text-sm text-stone-500 dark:text-stone-400">
-        Sends a preview to the configured admin inbox without marking the
-        release as sent.
+        {copy.description}
       </p>
 
       {state?.message ? (

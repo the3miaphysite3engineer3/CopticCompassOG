@@ -28,10 +28,12 @@ const LANG_COLORS: Record<LanguageBadge, string> = {
 function TileInner({
   pub,
   comingSoonLabel,
+  priority = false,
   viewDetailsLabel,
 }: {
   pub: Publication;
   comingSoonLabel: string;
+  priority?: boolean;
   viewDetailsLabel: string;
 }) {
   return (
@@ -52,6 +54,8 @@ function TileInner({
             src={pub.image}
             alt={pub.title}
             fill
+            priority={priority}
+            sizes="(min-width: 1024px) 268px, (min-width: 640px) calc((100vw - 6rem) / 2), calc(100vw - 3rem)"
             className="object-cover object-top group-hover:scale-[1.03] transition-transform duration-700"
           />
         ) : (
@@ -101,10 +105,12 @@ function TileInner({
 function PublicationTile({
   pub,
   comingSoonLabel,
+  priority = false,
   viewDetailsLabel,
 }: {
   pub: Publication;
   comingSoonLabel: string;
+  priority?: boolean;
   viewDetailsLabel: string;
 }) {
   const { language } = useLanguage();
@@ -124,6 +130,7 @@ function PublicationTile({
       <TileInner
         pub={pub}
         comingSoonLabel={comingSoonLabel}
+        priority={priority}
         viewDetailsLabel={viewDetailsLabel}
       />
     </Link>
@@ -158,9 +165,10 @@ export default function PublicationsPageClient() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto w-full">
         {publications.map((pub, i) => (
           <PublicationTile
-            key={i}
+            key={pub.id}
             pub={pub}
             comingSoonLabel={t("home.comingSoon")}
+            priority={i === 0}
             viewDetailsLabel={t("publications.viewDetails")}
           />
         ))}

@@ -29,7 +29,7 @@ export async function generateMetadata({
   return createLocalizedPageMetadata({
     title:
       resolvedLocale === "nl"
-        ? "Lessen Koptische Grammatica"
+        ? "Koptische grammaticalessen"
         : "Coptic Grammar Lessons",
     description: buildGrammarDescription(resolvedLocale),
     path: "/grammar",

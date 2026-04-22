@@ -1,7 +1,7 @@
 "use client";
 
-import { Copy, Facebook, Link2, Linkedin, Share2 } from "lucide-react";
-import { FaXTwitter } from "react-icons/fa6";
+import { Copy, Link2, Share2 } from "lucide-react";
+import { FaFacebookF, FaLinkedinIn, FaXTwitter } from "react-icons/fa6";
 
 import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
@@ -101,7 +101,7 @@ export function EntrySharePanel({
             rel="noreferrer"
             className="btn-secondary justify-center gap-2 px-4"
           >
-            <Facebook className="h-4 w-4" />
+            <FaFacebookF className="h-4 w-4" />
             {t("entry.actions.sharePlatformFacebook")}
           </a>
 
@@ -111,7 +111,7 @@ export function EntrySharePanel({
             rel="noreferrer"
             className="btn-secondary justify-center gap-2 px-4"
           >
-            <Linkedin className="h-4 w-4" />
+            <FaLinkedinIn className="h-4 w-4" />
             {t("entry.actions.sharePlatformLinkedIn")}
           </a>
         </div>

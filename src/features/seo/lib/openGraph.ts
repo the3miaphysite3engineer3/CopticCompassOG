@@ -66,10 +66,10 @@ export function buildOpenGraphImageUrl(input: OpenGraphImageUrlInput) {
 }
 
 /**
- * Returns the localized brand label used inside generated Open Graph cards.
+ * Returns the brand label used inside generated Open Graph cards.
  */
-export function getOpenGraphBrandLabel(locale: Language) {
-  return locale === "nl" ? "Koptisch Kompas" : siteConfig.brandName;
+export function getOpenGraphBrandLabel(_locale: Language) {
+  return siteConfig.brandName;
 }
 
 /**

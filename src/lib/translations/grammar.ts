@@ -34,7 +34,7 @@ export const grammarMessages = defineMessages({
     "exercise.submit": "Submit Translations",
   },
   nl: {
-    "grammar.title": "Koptische Grammatica",
+    "grammar.title": "Koptische grammatica",
     "grammar.subtitle":
       "Interactieve lessen en oefeningen om de Koptische taal te beheersen.",
     "grammar.lessonBadge": "Les",
@@ -43,7 +43,7 @@ export const grammarMessages = defineMessages({
     "grammar.back": "Terug naar grammatica",
     "grammar.lesson1.title": "Les 01",
     "grammar.lesson1.desc":
-      "Beheers de basis van Koptische zelfstandige naamwoorden, determinatoren en onafhankelijke persoonlijke voornaamwoorden.",
+      "Leer de basis van Koptische zelfstandige naamwoorden, determinatoren (bepalers) en onafhankelijke persoonlijke voornaamwoorden.",
     "grammar.lesson2.title": "Les 02",
     "grammar.lesson2.desc":
       "Duik in werkwoordelijke voorvoegsels, bijvoeglijke naamwoorden en het construeren van complexe nominale zinnen.",
@@ -51,13 +51,13 @@ export const grammarMessages = defineMessages({
     "exercise.authUnavailable":
       "Het indienen van oefeningen via login is tijdelijk niet beschikbaar.",
     "exercise.loginPrompt":
-      "Inloggen om je antwoorden te typen en persoonlijke feedback te ontvangen.",
-    "exercise.loginCta": "Inloggen om te oefenen",
+      "Meld u aan om uw antwoorden te typen en persoonlijke feedback te ontvangen.",
+    "exercise.loginCta": "Meld u aan om te oefenen",
     "exercise.submittedTitle": "Vertalingen verzonden!",
     "exercise.submittedBody":
-      "Je antwoorden zijn veilig opgeslagen. Kyrillos zal ze binnenkort nakijken.",
-    "exercise.viewDashboard": "Mijn dashboard bekijken",
-    "exercise.answerPlaceholder": "Typ hier je vertaling...",
+      "Uw antwoorden zijn veilig opgeslagen. Kyrillos kijkt ze binnenkort na.",
+    "exercise.viewDashboard": "Dashboard bekijken",
+    "exercise.answerPlaceholder": "Typ hier uw vertaling...",
     "exercise.preparingSubmission": "Veilige verzending voorbereiden...",
     "exercise.submitting": "Veilig verzenden...",
     "exercise.submit": "Vertalingen verzenden",

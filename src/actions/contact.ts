@@ -79,11 +79,11 @@ const CONTACT_ACTION_COPY: Record<
     storageUnavailable: "De contactopslag is nog niet geconfigureerd.",
     success: "Bericht succesvol verzonden. Ik antwoord binnenkort!",
     successConfirmation:
-      "Bericht succesvol verzonden. Controleer je inbox om e-mailupdates te bevestigen.",
+      "Bericht succesvol verzonden. Controleer uw inbox om e-mailupdates te bevestigen.",
     successConfirmationIssue:
       "Bericht succesvol verzonden, maar ik kon de bevestigingsmail voor updates nu niet versturen.",
     submitFailed:
-      "Je bericht kon nu niet worden verzonden. Probeer het opnieuw.",
+      "Uw bericht kon nu niet worden verzonden. Probeer het opnieuw.",
   },
 };
 
@@ -290,12 +290,12 @@ async function sendContactUpdatesConfirmation(options: {
       }),
       text: [
         options.language === "nl"
-          ? "Bevestig je Coptic Compass e-mailupdates via deze link:"
+          ? "Bevestig uw Coptic Compass e-mailupdates via deze link:"
           : "Confirm your Coptic Compass email updates with this link:",
         confirmationUrl,
         "",
         options.language === "nl"
-          ? "Heb je dit niet aangevraagd, dan kun je deze e-mail gerust negeren."
+          ? "Hebt u dit niet aangevraagd, dan kunt u deze e-mail gerust negeren."
           : "If you did not request this, you can safely ignore this email.",
       ].join("\n"),
     });

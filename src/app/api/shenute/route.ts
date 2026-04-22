@@ -52,17 +52,20 @@ function pruneOpenRouterReasoningStore(
 ) {
   const now = Date.now();
 
-  for (const [chatId, entry] of store.entries()) {
+  for (const [shenuteSessionId, entry] of store.entries()) {
     if (now - entry.updatedAt > OPENROUTER_REASONING_TTL_MS) {
-      store.delete(chatId);
+      store.delete(shenuteSessionId);
     }
   }
 }
 
-function getCachedReasoningDetails(chatId: string, assistantContent: string) {
+function getCachedReasoningDetails(
+  shenuteSessionId: string,
+  assistantContent: string,
+) {
   const store = getOpenRouterReasoningStore();
   pruneOpenRouterReasoningStore(store);
-  const entry = store.get(chatId);
+  const entry = store.get(shenuteSessionId);
   if (!entry) {
     return undefined;
   }
@@ -72,7 +75,7 @@ function getCachedReasoningDetails(chatId: string, assistantContent: string) {
 }
 
 function cacheReasoningDetails(
-  chatId: string,
+  shenuteSessionId: string,
   assistantContent: string,
   reasoningDetails: unknown,
 ) {
@@ -83,7 +86,7 @@ function cacheReasoningDetails(
   const store = getOpenRouterReasoningStore();
   pruneOpenRouterReasoningStore(store);
   const entry =
-    store.get(chatId) ??
+    store.get(shenuteSessionId) ??
     ({
       updatedAt: Date.now(),
       byAssistantContent: new Map<string, unknown>(),
@@ -91,7 +94,7 @@ function cacheReasoningDetails(
 
   entry.byAssistantContent.set(assistantContent, reasoningDetails);
   entry.updatedAt = Date.now();
-  store.set(chatId, entry);
+  store.set(shenuteSessionId, entry);
 }
 
 type PageContext = {
@@ -220,7 +223,7 @@ function getMessageReasoningDetails(message: UIMessage): unknown {
 
 function toOpenRouterMessages(
   messages: UIMessage[],
-  chatId: string,
+  shenuteSessionId: string,
 ): OpenRouterChatMessage[] {
   const openRouterMessages: OpenRouterChatMessage[] = [];
 
@@ -243,7 +246,7 @@ function toOpenRouterMessages(
     if (message.role === "assistant") {
       const reasoningDetails =
         getMessageReasoningDetails(message) ??
-        getCachedReasoningDetails(chatId, content);
+        getCachedReasoningDetails(shenuteSessionId, content);
 
       openRouterMessages.push({
         role: "assistant",
@@ -366,7 +369,7 @@ export async function POST(req: Request) {
     if (!hasSupabaseRuntimeEnv()) {
       return new Response(
         JSON.stringify({
-          error: "Shenute AI chat is unavailable right now.",
+          error: "Shenute AI is unavailable right now.",
         }),
         {
           status: 503,
@@ -380,7 +383,7 @@ export async function POST(req: Request) {
 
     if (!authenticatedUser) {
       return new Response(
-        JSON.stringify({ error: "Sign in required to use Shenute AI chat." }),
+        JSON.stringify({ error: "Sign in required to use Shenute AI." }),
         {
           status: 401,
           headers: { "Content-Type": "application/json" },
@@ -409,7 +412,7 @@ export async function POST(req: Request) {
     const bodyProvider = toOptionalInferenceProvider(payload.inferenceProvider);
     const inferenceProvider = bodyProvider ?? queryProvider ?? "thoth";
     const ragInferenceProvider = toRagInferenceProvider(inferenceProvider);
-    const chatId =
+    const shenuteSessionId =
       typeof payload.id === "string" && payload.id.trim().length > 0
         ? payload.id.trim()
         : "default";
@@ -617,7 +620,7 @@ ${pageContext.excerpt && pageContext.excerpt.length > 0 ? pageContext.excerpt : 
       const completion = await createOpenRouterChatCompletion(
         [
           { role: "system" as const, content: systemPrompt },
-          ...toOpenRouterMessages(messages, chatId),
+          ...toOpenRouterMessages(messages, shenuteSessionId),
           ...(latestMessageText
             ? []
             : [
@@ -645,7 +648,7 @@ ${pageContext.excerpt && pageContext.excerpt.length > 0 ? pageContext.excerpt : 
 
       if (typeof openRouterMessage?.reasoning_details !== "undefined") {
         cacheReasoningDetails(
-          chatId,
+          shenuteSessionId,
           responseText,
           openRouterMessage.reasoning_details,
         );
@@ -727,7 +730,7 @@ ${pageContext.excerpt && pageContext.excerpt.length > 0 ? pageContext.excerpt : 
           const fallbackCompletion = await createOpenRouterChatCompletion(
             [
               { role: "system" as const, content: systemPrompt },
-              ...toOpenRouterMessages(messages, chatId),
+              ...toOpenRouterMessages(messages, shenuteSessionId),
               ...(latestMessageText
                 ? []
                 : [
@@ -749,7 +752,7 @@ ${pageContext.excerpt && pageContext.excerpt.length > 0 ? pageContext.excerpt : 
 
           if (typeof openRouterMessage?.reasoning_details !== "undefined") {
             cacheReasoningDetails(
-              chatId,
+              shenuteSessionId,
               responseText,
               openRouterMessage.reasoning_details,
             );

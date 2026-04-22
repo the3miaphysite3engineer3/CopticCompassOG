@@ -7,6 +7,7 @@ import { startTransition, useRef } from "react";
 import { deleteSubmission } from "@/actions/admin";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
+import { useLanguage } from "@/components/LanguageProvider";
 import { surfacePanelClassName } from "@/components/SurfacePanel";
 import { SubmissionReviewForm } from "@/features/submissions/components/SubmissionReviewForm";
 import { SubmissionStatusBadge } from "@/features/submissions/components/SubmissionStatusBadge";
@@ -16,6 +17,62 @@ import {
   formatSubmissionDate,
 } from "@/features/submissions/utils";
 import { cx } from "@/lib/classes";
+import type { Language } from "@/types/i18n";
+
+const adminSubmissionReviewWorkspaceCopy = {
+  en: {
+    deleteConfirm:
+      "Remove this submission from the student and admin views? Use this for accidental duplicates or test submissions.",
+    deleteDescription:
+      "This is a soft delete: the row stays in the database for audit purposes, but it disappears from the student dashboard and the instructor queues.",
+    deleteTitle: "Remove duplicate or test submission",
+    graded: "Graded",
+    intro:
+      "Keep the queue compact on the left, then review and score the selected submission in a focused panel without expanding every card inline.",
+    needsReview: "Needs Review",
+    open: "Open",
+    panelBadge: "Review Panel",
+    panelDescription:
+      "The queue stays compact on the left while the full submission and grading form stay focused here.",
+    panelTitle: "Select a submission to review.",
+    removeSubmission: "Remove submission",
+    review: "Review",
+    student: "Student",
+    submittedOn: "Submitted on",
+    unknownUser: "Unknown user",
+  },
+  nl: {
+    deleteConfirm:
+      "Deze inzending verwijderen uit de studenten- en adminweergave? Gebruik dit voor toevallige duplicaten of testinzendingen.",
+    deleteDescription:
+      "Dit is een zachte verwijdering: de rij blijft in de database voor auditdoeleinden, maar verdwijnt uit het studentendashboard en de docentwachtrijen.",
+    deleteTitle: "Dubbele of testinzending verwijderen",
+    graded: "Beoordeeld",
+    intro:
+      "Houd de wachtrij compact links en beoordeel de geselecteerde inzending in een gefocust paneel zonder elke kaart inline uit te klappen.",
+    needsReview: "Te beoordelen",
+    open: "Open",
+    panelBadge: "Beoordelingspaneel",
+    panelDescription:
+      "De wachtrij blijft compact links, terwijl de volledige inzending en het beoordelingsformulier hier gefocust blijven.",
+    panelTitle: "Selecteer een inzending om te beoordelen.",
+    removeSubmission: "Inzending verwijderen",
+    review: "Beoordelen",
+    student: "Student",
+    submittedOn: "Ingediend op",
+    unknownUser: "Onbekende gebruiker",
+  },
+} as const;
+
+function getSubmissionStatusLabel({
+  copy,
+  rating,
+}: {
+  copy: (typeof adminSubmissionReviewWorkspaceCopy)[Language];
+  rating: number | null;
+}) {
+  return rating ? `${copy.graded} · ${rating}/5` : copy.graded;
+}
 
 function buildPreview(text: string, maxLength = 160) {
   const normalized = text.replace(/\s+/g, " ").trim();
@@ -41,10 +98,14 @@ function buildSubmissionHref(
 
 function AdminSubmissionQueueItem({
   active,
+  copy,
+  language,
   onSelect,
   submission,
 }: {
   active: boolean;
+  copy: (typeof adminSubmissionReviewWorkspaceCopy)[Language];
+  language: Language;
   onSelect: () => void;
   submission: AdminSubmission;
 }) {
@@ -72,15 +133,14 @@ function AdminSubmissionQueueItem({
           <div className="flex flex-wrap gap-2">
             {submission.status === "reviewed" ? (
               <SubmissionStatusBadge
-                label={
-                  submission.rating
-                    ? `Graded · ${submission.rating}/5`
-                    : "Graded"
-                }
+                label={getSubmissionStatusLabel({
+                  copy,
+                  rating: submission.rating,
+                })}
                 tone="reviewed"
               />
             ) : (
-              <SubmissionStatusBadge label="Needs Review" tone="pending" />
+              <SubmissionStatusBadge label={copy.needsReview} tone="pending" />
             )}
           </div>
 
@@ -90,10 +150,11 @@ function AdminSubmissionQueueItem({
 
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-600 dark:text-stone-400">
             <span className="font-medium text-stone-800 dark:text-stone-200">
-              Student: {submission.studentEmail || "Unknown user"}
+              {copy.student}: {submission.studentEmail || copy.unknownUser}
             </span>
             <span>
-              Submitted on {formatSubmissionDate(submission.created_at, "en")}
+              {copy.submittedOn}{" "}
+              {formatSubmissionDate(submission.created_at, language)}
             </span>
           </div>
 
@@ -103,7 +164,9 @@ function AdminSubmissionQueueItem({
         </div>
 
         <div className="flex shrink-0 items-center gap-2 pt-1 text-sm font-medium text-stone-500 dark:text-stone-400">
-          <span className="hidden sm:inline">{active ? "Open" : "Review"}</span>
+          <span className="hidden sm:inline">
+            {active ? copy.open : copy.review}
+          </span>
           <ChevronRight
             className={cx(
               "h-5 w-5 transition-transform duration-200",
@@ -117,8 +180,12 @@ function AdminSubmissionQueueItem({
 }
 
 function AdminSubmissionReviewPanel({
+  copy,
+  language,
   submission,
 }: {
+  copy: (typeof adminSubmissionReviewWorkspaceCopy)[Language];
+  language: Language;
   submission: AdminSubmission | null;
 }) {
   if (!submission) {
@@ -133,14 +200,13 @@ function AdminSubmissionReviewPanel({
       >
         <div className="space-y-3">
           <Badge tone="surface" size="xs" caps>
-            Review Panel
+            {copy.panelBadge}
           </Badge>
           <p className="text-base font-semibold text-stone-900 dark:text-stone-100">
-            Select a submission to review.
+            {copy.panelTitle}
           </p>
           <p className="max-w-sm text-sm leading-6 text-stone-600 dark:text-stone-400">
-            The queue stays compact on the left while the full submission and
-            grading form stay focused here.
+            {copy.panelDescription}
           </p>
         </div>
       </div>
@@ -161,16 +227,17 @@ function AdminSubmissionReviewPanel({
         <div className="flex flex-wrap gap-2">
           {submission.status === "reviewed" ? (
             <SubmissionStatusBadge
-              label={
-                submission.rating ? `Graded · ${submission.rating}/5` : "Graded"
-              }
+              label={getSubmissionStatusLabel({
+                copy,
+                rating: submission.rating,
+              })}
               tone="reviewed"
             />
           ) : (
-            <SubmissionStatusBadge label="Needs Review" tone="pending" />
+            <SubmissionStatusBadge label={copy.needsReview} tone="pending" />
           )}
           <Badge tone="surface" size="xs">
-            {submission.studentEmail || "Unknown user"}
+            {submission.studentEmail || copy.unknownUser}
           </Badge>
         </div>
 
@@ -179,7 +246,8 @@ function AdminSubmissionReviewPanel({
         </h3>
 
         <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
-          Submitted on {formatSubmissionDate(submission.created_at, "en")}
+          {copy.submittedOn}{" "}
+          {formatSubmissionDate(submission.created_at, language)}
         </p>
       </div>
 
@@ -194,11 +262,7 @@ function AdminSubmissionReviewPanel({
           action={deleteSubmission}
           className="rounded-2xl border border-rose-200/80 bg-rose-50/70 p-5 dark:border-rose-900/40 dark:bg-rose-950/20"
           onSubmit={(event) => {
-            if (
-              !window.confirm(
-                "Remove this submission from the student and admin views? Use this for accidental duplicates or test submissions.",
-              )
-            ) {
+            if (!window.confirm(copy.deleteConfirm)) {
               event.preventDefault();
             }
           }}
@@ -218,12 +282,10 @@ function AdminSubmissionReviewPanel({
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="space-y-2">
               <p className="text-sm font-semibold text-rose-900 dark:text-rose-100">
-                Remove duplicate or test submission
+                {copy.deleteTitle}
               </p>
               <p className="text-sm leading-6 text-rose-700 dark:text-rose-200">
-                This is a soft delete: the row stays in the database for audit
-                purposes, but it disappears from the student dashboard and the
-                instructor queues.
+                {copy.deleteDescription}
               </p>
             </div>
 
@@ -232,7 +294,7 @@ function AdminSubmissionReviewPanel({
               variant="secondary"
               className="border-rose-200 bg-white text-rose-700 hover:bg-rose-50 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-200 dark:hover:bg-rose-950/50"
             >
-              Remove submission
+              {copy.removeSubmission}
             </Button>
           </div>
         </form>
@@ -246,6 +308,8 @@ export function AdminSubmissionReviewWorkspace({
 }: {
   submissions: AdminSubmission[];
 }) {
+  const { language } = useLanguage();
+  const copy = adminSubmissionReviewWorkspaceCopy[language];
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -278,8 +342,7 @@ export function AdminSubmissionReviewWorkspace({
   return (
     <div className="space-y-5">
       <div className="rounded-[1.5rem] border border-stone-200/80 bg-stone-50/80 p-4 text-sm leading-6 text-stone-600 dark:border-stone-800 dark:bg-stone-950/40 dark:text-stone-400">
-        Keep the queue compact on the left, then review and score the selected
-        submission in a focused panel without expanding every card inline.
+        {copy.intro}
       </div>
 
       <div className="grid gap-5 xl:grid-cols-[minmax(0,0.95fr)_minmax(22rem,30rem)]">
@@ -288,6 +351,8 @@ export function AdminSubmissionReviewWorkspace({
             <AdminSubmissionQueueItem
               key={submission.id}
               active={submission.id === selectedSubmission?.id}
+              copy={copy}
+              language={language}
               onSelect={() => handleSelect(submission.id)}
               submission={submission}
             />
@@ -295,7 +360,11 @@ export function AdminSubmissionReviewWorkspace({
         </div>
 
         <div ref={panelRef} className="xl:sticky xl:top-28 xl:self-start">
-          <AdminSubmissionReviewPanel submission={selectedSubmission} />
+          <AdminSubmissionReviewPanel
+            copy={copy}
+            language={language}
+            submission={selectedSubmission}
+          />
         </div>
       </div>
     </div>

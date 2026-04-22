@@ -33,7 +33,7 @@ const PDF_BUTTON_COPY = {
     generating: "PDF wordt gemaakt...",
     loginPrompt:
       "Inloggen of een account aanmaken om lessen als pdf te downloaden",
-    footerLeadIn: "Gedownload van Koptisch Kompas (kyrilloswannes.com) op",
+    footerLeadIn: "Gedownload van Coptic Compass (kyrilloswannes.com) op",
     errorPrefix: "Er is een fout opgetreden bij het maken van de pdf:",
   },
 } as const;

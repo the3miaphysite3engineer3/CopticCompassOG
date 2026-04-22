@@ -1,4 +1,7 @@
+"use client";
+
 import { Badge } from "@/components/Badge";
+import { useLanguage } from "@/components/LanguageProvider";
 import type { ContentReleaseRow } from "@/features/communications/lib/releases";
 import { formatContentReleaseStatus } from "@/features/communications/lib/releases";
 
@@ -7,6 +10,7 @@ export function ContentReleaseStatusBadge({
 }: {
   status: ContentReleaseRow["status"];
 }) {
+  const { language } = useLanguage();
   let tone: "accent" | "coptic" | "flat" | "neutral" | "surface" = "flat";
 
   if (status === "draft") {
@@ -21,7 +25,7 @@ export function ContentReleaseStatusBadge({
 
   return (
     <Badge tone={tone} size="xs">
-      {formatContentReleaseStatus(status)}
+      {formatContentReleaseStatus(status, language)}
     </Badge>
   );
 }

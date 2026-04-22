@@ -1,8 +1,11 @@
+"use client";
+
 import { Badge } from "@/components/Badge";
+import { useLanguage } from "@/components/LanguageProvider";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import {
-  formatNotificationAggregateType,
-  formatNotificationEventType,
+  formatLocalizedNotificationAggregateType,
+  formatLocalizedNotificationEventType,
   formatNotificationTimestamp,
   getNotificationContextBadges,
   type AdminNotificationEvent,
@@ -14,10 +17,33 @@ type AdminNotificationEventCardProps = {
   event: AdminNotificationEvent;
 };
 
+const adminNotificationEventCardCopy = {
+  en: {
+    aggregate: "Aggregate",
+    createdOn: "Created on",
+    lastError: "Last error",
+    latestDeliveryStatus: "Latest delivery status",
+    processedOn: "Processed on",
+    providerMessageId: "Provider message ID",
+    recipient: "Recipient",
+  },
+  nl: {
+    aggregate: "Aggregaat",
+    createdOn: "Aangemaakt op",
+    lastError: "Laatste fout",
+    latestDeliveryStatus: "Laatste leveringsstatus",
+    processedOn: "Verwerkt op",
+    providerMessageId: "Providerbericht-ID",
+    recipient: "Ontvanger",
+  },
+} as const;
+
 export function AdminNotificationEventCard({
   event,
 }: AdminNotificationEventCardProps) {
-  const contextBadges = getNotificationContextBadges(event);
+  const { language } = useLanguage();
+  const copy = adminNotificationEventCardCopy[language];
+  const contextBadges = getNotificationContextBadges(event, language);
 
   return (
     <SurfacePanel
@@ -31,10 +57,13 @@ export function AdminNotificationEventCard({
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <NotificationEventStatusBadge status={event.status} />
             <Badge tone="surface" size="xs">
-              {formatNotificationEventType(event.event_type)}
+              {formatLocalizedNotificationEventType(event.event_type, language)}
             </Badge>
             <Badge tone="neutral" size="xs">
-              {formatNotificationAggregateType(event.aggregate_type)}
+              {formatLocalizedNotificationAggregateType(
+                event.aggregate_type,
+                language,
+              )}
             </Badge>
           </div>
 
@@ -44,24 +73,33 @@ export function AdminNotificationEventCard({
 
           <div className="mt-3 space-y-2 text-sm text-stone-600 dark:text-stone-400">
             <p>
-              Recipient:{" "}
+              {copy.recipient}:{" "}
               <span className="font-semibold text-stone-800 dark:text-stone-200">
                 {event.recipient}
               </span>
             </p>
-            <p>Created on {formatNotificationTimestamp(event.created_at)}</p>
+            <p>
+              {copy.createdOn}{" "}
+              {formatNotificationTimestamp(event.created_at, language)}
+            </p>
             {event.processed_at ? (
               <p>
-                Processed on {formatNotificationTimestamp(event.processed_at)}
+                {copy.processedOn}{" "}
+                {formatNotificationTimestamp(event.processed_at, language)}
               </p>
             ) : null}
             <p>
-              Aggregate: {formatNotificationAggregateType(event.aggregate_type)}{" "}
+              {copy.aggregate}:{" "}
+              {formatLocalizedNotificationAggregateType(
+                event.aggregate_type,
+                language,
+              )}{" "}
               #{event.aggregate_id}
             </p>
             {event.latestDelivery?.provider_message_id ? (
               <p>
-                Provider message ID: {event.latestDelivery.provider_message_id}
+                {copy.providerMessageId}:{" "}
+                {event.latestDelivery.provider_message_id}
               </p>
             ) : null}
           </div>
@@ -80,11 +118,12 @@ export function AdminNotificationEventCard({
 
       {event.status === "failed" && event.last_error ? (
         <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm leading-7 text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">
-          <span className="font-semibold">Last error:</span> {event.last_error}
+          <span className="font-semibold">{copy.lastError}:</span>{" "}
+          {event.last_error}
         </div>
       ) : (
         <div className="rounded-2xl border border-stone-100 bg-stone-50 px-5 py-4 text-sm leading-7 text-stone-600 dark:border-stone-800/50 dark:bg-stone-950 dark:text-stone-300">
-          Latest delivery status:{" "}
+          {copy.latestDeliveryStatus}:{" "}
           <span className="font-semibold text-stone-800 dark:text-stone-200">
             {event.latestDelivery?.status ?? event.status}
           </span>

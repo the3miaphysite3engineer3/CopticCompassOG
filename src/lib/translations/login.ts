@@ -72,11 +72,11 @@ export const loginMessages = defineMessages({
       "Too many account creation attempts. Please try again later.",
   },
   nl: {
-    "login.title": "Welkom bij Koptisch Kompas",
+    "login.title": "Welkom bij Coptic Compass",
     "login.subtitle":
-      "Inloggen om oefeningen op te slaan, feedback te ontvangen en je Koptische studie voort te zetten.",
+      "Meld u aan om oefeningen op te slaan, feedback te ontvangen en uw Koptische studie voort te zetten.",
     "login.email": "E-mailadres",
-    "login.emailPlaceholder": "jij@email.com",
+    "login.emailPlaceholder": "u@email.com",
     "login.password": "Wachtwoord",
     "login.passwordPlaceholder": "••••••••",
     "login.forgotPassword": "Wachtwoord vergeten?",
@@ -86,15 +86,15 @@ export const loginMessages = defineMessages({
     "login.google": "Inloggen met Google",
     "login.metaTitle": "Inloggen",
     "login.metaDescription":
-      "Inlogpagina voor de leeromgeving van Koptisch Kompas.",
+      "Inlogpagina voor de leeromgeving van Coptic Compass.",
     "forgot.metaTitle": "Wachtwoord opnieuw instellen",
     "forgot.metaDescription":
-      "Pagina om het wachtwoord van de leeromgeving van Koptisch Kompas opnieuw in te stellen.",
+      "Pagina om het wachtwoord van de leeromgeving van Coptic Compass opnieuw in te stellen.",
     "forgot.title": "Wachtwoord opnieuw instellen",
     "forgot.subtitle":
-      "Voer het e-mailadres van je account in en we sturen je een link om je wachtwoord opnieuw in te stellen.",
+      "Voer het e-mailadres van uw account in en wij sturen u een link om uw wachtwoord opnieuw in te stellen.",
     "forgot.email": "E-mailadres",
-    "forgot.emailPlaceholder": "jij@example.com",
+    "forgot.emailPlaceholder": "u@example.com",
     "forgot.sendLink": "Resetlink verzenden",
     "forgot.backToSignIn": "Terug naar inloggen",
     "forgot.notice.invalidInput": "Voer een geldig e-mailadres in.",
@@ -102,12 +102,12 @@ export const loginMessages = defineMessages({
     "forgot.notice.rateLimited":
       "Te veel verzoeken. Wacht even en probeer het opnieuw.",
     "forgot.notice.success":
-      "Als er een account bestaat, is er een resetlink verzonden. Controleer je inbox.",
+      "Als er een account bestaat, is er een resetlink verzonden. Controleer uw inbox.",
     "update.metaTitle": "Wachtwoord bijwerken",
     "update.metaDescription":
-      "Pagina om het wachtwoord van de leeromgeving van Koptisch Kompas bij te werken.",
+      "Pagina om het wachtwoord van de leeromgeving van Coptic Compass bij te werken.",
     "update.title": "Nieuw wachtwoord instellen",
-    "update.subtitle": "Kies een sterk nieuw wachtwoord voor je account.",
+    "update.subtitle": "Kies een sterk nieuw wachtwoord voor uw account.",
     "update.password": "Nieuw wachtwoord",
     "update.passwordPlaceholder": "Moet minstens 8 tekens bevatten",
     "update.submit": "Wachtwoord bijwerken",
@@ -123,15 +123,15 @@ export const loginMessages = defineMessages({
     "login.notice.loginInvalidInput":
       "Voer een geldig e-mailadres en wachtwoord in.",
     "login.notice.loginError":
-      "Inloggen is niet gelukt. Controleer je e-mailadres en wachtwoord en probeer het opnieuw.",
+      "Inloggen is niet gelukt. Controleer uw e-mailadres en wachtwoord en probeer het opnieuw.",
     "login.notice.loginRateLimited":
       "Te veel inlogpogingen. Wacht een paar minuten en probeer het opnieuw.",
     "login.notice.signupCheckEmail":
-      "Account aangemaakt. Bevestig eerst je e-mailadres via de e-mail die we hebben gestuurd en log daarna in met hetzelfde e-mailadres en wachtwoord.",
+      "Account aangemaakt. Bevestig eerst uw e-mailadres via de e-mail die wij hebben gestuurd en log daarna in met hetzelfde e-mailadres en wachtwoord.",
     "login.notice.signupConfirmed":
-      "Je e-mailadres is bevestigd. Je kunt nu inloggen met hetzelfde e-mailadres en wachtwoord.",
+      "Uw e-mailadres is bevestigd. U kunt nu inloggen met hetzelfde e-mailadres en wachtwoord.",
     "login.notice.signupError":
-      "Je account kon niet worden aangemaakt. Als je al geregistreerd bent, probeer dan in te loggen.",
+      "Uw account kon niet worden aangemaakt. Als u al geregistreerd bent, probeer dan in te loggen.",
     "login.notice.signupInvalidInput":
       "Gebruik een geldig e-mailadres en een wachtwoord van minstens 8 tekens.",
     "login.notice.signupRateLimited":

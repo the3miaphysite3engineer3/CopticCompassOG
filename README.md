@@ -19,7 +19,7 @@ Coptic Compass is a digital home for Coptic study, bringing together a searchabl
 - A public grammar API with JSON endpoints and OpenAPI documentation for reuse in other tools and teaching workflows.
 - A private student dashboard for profile settings, grammar progress, bookmarks, notes, and exercise submissions.
 - A private instructor workspace with review inboxes, focused submission grading, release drafting, audience sync, and notification health.
-- Shenute AI chat with OCR-assisted image/camera prompts and provider routing across THOTH AI, OpenRouter, Gemini, and Hugging Face.
+- Shenute AI interface with OCR-assisted image/camera prompts and provider routing across THOTH AI, OpenRouter, Gemini, and Hugging Face.
 - English and Dutch interfaces, with legacy non-localized routes redirecting to localized pages.
 
 ## Highlights
@@ -121,9 +121,9 @@ npm run build
 
 The repository includes a production-integrated AI workflow called Shenute AI, plus a server-side OCR proxy and admin-facing RAG ingestion tools.
 
-### Chat API (`/api/chat`)
+### Shenute API (`/api/shenute`)
 
-- Endpoint: `POST /api/chat`
+- Endpoint: `POST /api/shenute`
 - Default provider: `thoth`
 - Supported providers: `thoth`, `openrouter`, `gemini`, `hf`
 - Payload style: AI SDK UI messages
@@ -267,6 +267,10 @@ The complete placeholder set lives in `.env.example`. The list below highlights 
 - `HF_TOKEN`
 - `HF_CHAT_MODEL` (optional)
 - `HF_EMBEDDING_MODEL` (optional)
+- `THOTH_API_KEY`
+- `THOTH_BASE_URL`
+- `THOTH_RESPONSE_MODE`
+- `THOTH_CHAT_TIMEOUT_MS`
 
 ### OCR
 
@@ -419,7 +423,7 @@ Docs and developer pages:
 
 Additional app API surfaces:
 
-- `/api/chat`
+- `/api/shenute`
 - `/api/ocr`
 - `/api/admin/rag/status`
 - `/api/admin/rag/logs`

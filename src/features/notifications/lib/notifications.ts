@@ -1,4 +1,5 @@
 import { redactEmailAddress } from "@/lib/privacy";
+import type { Language } from "@/types/i18n";
 import type { Json, Tables } from "@/types/supabase";
 
 export type NotificationEventRow = Tables<"notification_events">;
@@ -91,6 +92,39 @@ export function formatNotificationEventType(eventType: string) {
 }
 
 /**
+ * Formats a stored notification event type into a short localized admin label.
+ */
+export function formatLocalizedNotificationEventType(
+  eventType: string,
+  language: Language = "en",
+) {
+  if (language === "en") {
+    return formatNotificationEventType(eventType);
+  }
+
+  switch (eventType) {
+    case "contact_message_received":
+      return "Contactbericht";
+    case "content_release_sent":
+      return "Release-e-mail";
+    case "content_release_broadcast_sent":
+      return "Releasebroadcast";
+    case "content_release_test_sent":
+      return "Releasepreview";
+    case "dictionary_entry_report_submitted":
+      return "Woordenboekrapport";
+    case "exercise_submission_received":
+      return "Oefeninzending";
+    case "profile_signup":
+      return "Gebruikersaanmelding";
+    case "submission_reviewed":
+      return "Feedback klaar";
+    default:
+      return eventType.replace(/_/g, " ");
+  }
+}
+
+/**
  * Formats a stored aggregate type into a short admin-facing label.
  */
 export function formatNotificationAggregateType(aggregateType: string) {
@@ -111,21 +145,97 @@ export function formatNotificationAggregateType(aggregateType: string) {
 }
 
 /**
+ * Formats a stored aggregate type into a short localized admin label.
+ */
+export function formatLocalizedNotificationAggregateType(
+  aggregateType: string,
+  language: Language = "en",
+) {
+  if (language === "en") {
+    return formatNotificationAggregateType(aggregateType);
+  }
+
+  switch (aggregateType) {
+    case "contact_message":
+      return "Contact";
+    case "content_release":
+      return "Contentrelease";
+    case "entry_report":
+      return "Itemrapport";
+    case "profile":
+      return "Profiel";
+    case "submission":
+      return "Inzending";
+    default:
+      return aggregateType.replace(/_/g, " ");
+  }
+}
+
+/**
  * Formats a notification timestamp for the admin UI.
  */
-export function formatNotificationTimestamp(timestamp: string) {
-  return new Date(timestamp).toLocaleString("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+export function formatNotificationTimestamp(
+  timestamp: string,
+  language: Language = "en",
+) {
+  return new Date(timestamp).toLocaleString(
+    language === "nl" ? "nl-BE" : "en-US",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  );
 }
 
 /**
  * Extracts context badges from an admin notification event payload so the list
  * view can show the most relevant identifying metadata inline.
  */
-export function getNotificationContextBadges(event: AdminNotificationEvent) {
+export function getNotificationContextBadges(
+  event: AdminNotificationEvent,
+  language: Language = "en",
+) {
   const badges: string[] = [];
+  const copy =
+    language === "nl"
+      ? {
+          audience: "Publiek",
+          email: "E-mail",
+          entry: "Item",
+          exercise: "Oefening",
+          inquiry: "Vraagtype",
+          items: "Items",
+          language: "Taal",
+          lesson: "Les",
+          locale: "Taal",
+          name: "Naam",
+          preview: "Preview",
+          rating: "Score",
+          reason: "Reden",
+          recipients: "Ontvangers",
+          segment: "Segment",
+          sender: "Afzender",
+          type: "Type",
+        }
+      : {
+          audience: "Audience",
+          email: "Email",
+          entry: "Entry",
+          exercise: "Exercise",
+          inquiry: "Inquiry",
+          items: "Items",
+          language: "Language",
+          lesson: "Lesson",
+          locale: "Locale",
+          name: "Name",
+          preview: "Preview",
+          rating: "Rating",
+          reason: "Reason",
+          recipients: "Recipients",
+          segment: "Segment",
+          sender: "Sender",
+          type: "Type",
+        };
 
   switch (event.event_type) {
     case "contact_message_received": {
@@ -134,15 +244,15 @@ export function getNotificationContextBadges(event: AdminNotificationEvent) {
       const locale = getStringValue(event.payload, "locale");
 
       if (inquiryType) {
-        badges.push(`Inquiry: ${inquiryType.replace(/_/g, " ")}`);
+        badges.push(`${copy.inquiry}: ${inquiryType.replace(/_/g, " ")}`);
       }
       if (senderEmail) {
         badges.push(
-          `Sender: ${redactEmailAddress(senderEmail) ?? senderEmail}`,
+          `${copy.sender}: ${redactEmailAddress(senderEmail) ?? senderEmail}`,
         );
       }
       if (locale) {
-        badges.push(`Locale: ${locale.toUpperCase()}`);
+        badges.push(`${copy.locale}: ${locale.toUpperCase()}`);
       }
       break;
     }
@@ -158,25 +268,25 @@ export function getNotificationContextBadges(event: AdminNotificationEvent) {
       const segmentId = getStringValue(event.payload, "segment_id");
 
       if (audienceSegment) {
-        badges.push(`Audience: ${audienceSegment.replace(/_/g, " ")}`);
+        badges.push(`${copy.audience}: ${audienceSegment.replace(/_/g, " ")}`);
       }
       if (releaseType) {
-        badges.push(`Type: ${releaseType.replace(/_/g, " ")}`);
+        badges.push(`${copy.type}: ${releaseType.replace(/_/g, " ")}`);
       }
       if (itemCount !== null) {
-        badges.push(`Items: ${itemCount}`);
+        badges.push(`${copy.items}: ${itemCount}`);
       }
       if (recipientCount !== null) {
-        badges.push(`Recipients: ${recipientCount}`);
+        badges.push(`${copy.recipients}: ${recipientCount}`);
       }
       if (locale) {
-        badges.push(`Locale: ${locale.toUpperCase()}`);
+        badges.push(`${copy.locale}: ${locale.toUpperCase()}`);
       }
       if (segmentId) {
-        badges.push(`Segment: ${segmentId}`);
+        badges.push(`${copy.segment}: ${segmentId}`);
       }
       if (preview === "true") {
-        badges.push("Preview");
+        badges.push(copy.preview);
       }
       break;
     }
@@ -186,13 +296,13 @@ export function getNotificationContextBadges(event: AdminNotificationEvent) {
       const reason = getStringValue(event.payload, "reason");
 
       if (entryId) {
-        badges.push(`Entry: ${entryId}`);
+        badges.push(`${copy.entry}: ${entryId}`);
       }
       if (reason) {
-        badges.push(`Reason: ${reason.replace(/_/g, " ")}`);
+        badges.push(`${copy.reason}: ${reason.replace(/_/g, " ")}`);
       }
       if (locale) {
-        badges.push(`Locale: ${locale.toUpperCase()}`);
+        badges.push(`${copy.locale}: ${locale.toUpperCase()}`);
       }
       break;
     }
@@ -205,13 +315,13 @@ export function getNotificationContextBadges(event: AdminNotificationEvent) {
       );
 
       if (lessonSlug) {
-        badges.push(`Lesson: ${lessonSlug}`);
+        badges.push(`${copy.lesson}: ${lessonSlug}`);
       }
       if (exerciseId) {
-        badges.push(`Exercise: ${exerciseId}`);
+        badges.push(`${copy.exercise}: ${exerciseId}`);
       }
       if (submittedLanguage) {
-        badges.push(`Language: ${submittedLanguage.toUpperCase()}`);
+        badges.push(`${copy.language}: ${submittedLanguage.toUpperCase()}`);
       }
       break;
     }
@@ -221,13 +331,13 @@ export function getNotificationContextBadges(event: AdminNotificationEvent) {
       const rating = getNumberValue(event.payload, "rating");
 
       if (lessonSlug) {
-        badges.push(`Lesson: ${lessonSlug}`);
+        badges.push(`${copy.lesson}: ${lessonSlug}`);
       }
       if (exerciseId) {
-        badges.push(`Exercise: ${exerciseId}`);
+        badges.push(`${copy.exercise}: ${exerciseId}`);
       }
       if (rating !== null) {
-        badges.push(`Rating: ${rating}/5`);
+        badges.push(`${copy.rating}: ${rating}/5`);
       }
       break;
     }
@@ -240,11 +350,11 @@ export function getNotificationContextBadges(event: AdminNotificationEvent) {
 
       if (profileEmail) {
         badges.push(
-          `Email: ${redactEmailAddress(profileEmail) ?? profileEmail}`,
+          `${copy.email}: ${redactEmailAddress(profileEmail) ?? profileEmail}`,
         );
       }
       if (profileFullName) {
-        badges.push(`Name: ${profileFullName}`);
+        badges.push(`${copy.name}: ${profileFullName}`);
       }
       break;
     }

@@ -98,7 +98,7 @@ export function GrammarLessonLearnerPanel({
         tone="info"
       >
         {language === "nl"
-          ? "Meld je aan om je voortgang, bladwijzers en lesnotities op te slaan."
+          ? "Meld u aan om uw voortgang, bladwijzers en lesnotities op te slaan."
           : "Sign in to save your progress, bookmarks, and lesson notes."}
       </AuthGateNotice>
     );
@@ -128,7 +128,7 @@ export function GrammarLessonLearnerPanel({
         </p>
         <div className="flex items-center justify-between gap-4">
           <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">
-            {language === "nl" ? "Jouw voortgang" : "Your progress"}
+            {language === "nl" ? "Uw voortgang" : "Your progress"}
           </h2>
           {summary.isCompleted ? (
             <Badge tone="accent" size="xs">
@@ -443,7 +443,7 @@ export function GrammarLessonNotesPanel({
       <div className="space-y-4 px-6 py-5">
         <p className="text-sm leading-7 text-stone-600 dark:text-stone-300">
           {language === "nl"
-            ? "Bewaar hier je eigen aantekeningen bij deze les. Ze blijven gekoppeld aan dit les-ID in je dashboard."
+            ? "Bewaar hier uw eigen aantekeningen bij deze les. Ze blijven gekoppeld aan dit les-ID in uw dashboard."
             : "Keep your own notes for this lesson here. They stay attached to this lesson id in your dashboard."}
         </p>
 
@@ -454,7 +454,7 @@ export function GrammarLessonNotesPanel({
           className="input-base min-h-[10rem] w-full resize-y px-4 py-3 text-base font-sans"
           placeholder={
             language === "nl"
-              ? "Schrijf hier je samenvatting, vragen of geheugensteuntjes..."
+              ? "Schrijf hier uw samenvatting, vragen of geheugensteuntjes..."
               : "Write your summary, questions, or memory aids here..."
           }
         />

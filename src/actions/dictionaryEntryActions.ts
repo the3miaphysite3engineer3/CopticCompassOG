@@ -59,16 +59,16 @@ const ENTRY_REPORT_COPY: Record<
     success: "Thanks. Your report was submitted successfully.",
   },
   nl: {
-    authRequired: "Meld je eerst aan voordat je een lemma meldt.",
+    authRequired: "Meld u eerst aan voordat u een lemma meldt.",
     invalid: "Kies een reden en voeg een korte toelichting toe.",
     rateLimited:
-      "Er zijn onlangs te veel meldingen verzonden. Wacht even voordat je opnieuw iets indient.",
+      "Er zijn onlangs te veel meldingen verzonden. Wacht even voordat u opnieuw iets indient.",
     rateLimitUnavailable:
       "Het melden van lemma's is tijdelijk niet beschikbaar. Probeer het later opnieuw.",
     storageUnavailable: "Het melden van lemma's is nog niet geconfigureerd.",
     submitFailed:
-      "Je melding kon nu niet worden verzonden. Probeer het opnieuw.",
-    success: "Bedankt. Je melding is succesvol verzonden.",
+      "Uw melding kon nu niet worden verzonden. Probeer het opnieuw.",
+    success: "Bedankt. Uw melding is succesvol verzonden.",
   },
 };
 

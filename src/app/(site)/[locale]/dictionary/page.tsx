@@ -30,7 +30,7 @@ export async function generateMetadata({
   return createLocalizedPageMetadata({
     title:
       resolvedLocale === "nl"
-        ? "Koptisch Woordenboek"
+        ? "Koptisch woordenboek"
         : "Coptic-English Dictionary",
     description: buildDictionaryDescription(resolvedLocale),
     path: "/dictionary",

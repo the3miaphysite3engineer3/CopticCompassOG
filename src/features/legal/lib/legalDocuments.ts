@@ -44,7 +44,7 @@ const PRIVACY_DOCUMENTS = {
     sections: [
       {
         title: "1. Welke gegevens we verzamelen",
-        body: "Wanneer u inlogt via Google-authenticatie, verzamelen we uitsluitend de basisprofielgegevens die u uitdrukkelijk via Google hebt gedeeld, zoals uw naam, profielfoto en e-mailadres. Deze informatie wordt alleen gebruikt om uw persoonlijke sessie op Koptisch Kompas aan te maken en te beheren.",
+        body: "Wanneer u inlogt via Google-authenticatie, verzamelen we uitsluitend de basisprofielgegevens die u uitdrukkelijk via Google hebt gedeeld, zoals uw naam, profielfoto en e-mailadres. Deze informatie wordt alleen gebruikt om uw persoonlijke sessie op Coptic Compass aan te maken en te beheren.",
       },
       {
         title: "2. Hoe we uw gegevens gebruiken",
@@ -100,23 +100,23 @@ const TERMS_DOCUMENTS = {
     sections: [
       {
         title: "1. Voorwaarden",
-        body: "Door Koptisch Kompas te bezoeken en het digitale Koptische woordenboek te gebruiken, gaat u akkoord met deze gebruiksvoorwaarden en alle toepasselijke wet- en regelgeving. U erkent ook zelf verantwoordelijk te zijn voor naleving van eventueel geldende lokale wetten.",
+        body: "Door Coptic Compass te bezoeken en het digitale Koptische woordenboek te gebruiken, gaat u akkoord met deze gebruiksvoorwaarden en alle toepasselijke wet- en regelgeving. U erkent ook zelf verantwoordelijk te zijn voor naleving van eventueel geldende lokale wetten.",
       },
       {
         title: "2. Gebruikslicentie",
-        body: "Er wordt toestemming verleend om de materialen (informatie, tekst of software) op Koptisch Kompas tijdelijk te bekijken voor uitsluitend persoonlijk, niet-commercieel en tijdelijk gebruik in het kader van studie en raadpleging. Dit is een licentie en geen overdracht van eigendom of intellectuele rechten.",
+        body: "Er wordt toestemming verleend om de materialen (informatie, tekst of software) op Coptic Compass tijdelijk te bekijken voor uitsluitend persoonlijk, niet-commercieel en tijdelijk gebruik in het kader van studie en raadpleging. Dit is een licentie en geen overdracht van eigendom of intellectuele rechten.",
       },
       {
         title: "3. Disclaimer",
-        body: "De materialen op Koptisch Kompas worden aangeboden op een 'as is'-basis. De ontwikkelaar geeft geen enkele uitdrukkelijke of impliciete garantie en wijst, voor zover wettelijk toegestaan, alle overige garanties af, waaronder impliciete garanties van verhandelbaarheid, geschiktheid voor een bepaald doel of niet-inbreuk op intellectuele eigendom of andere rechten.",
+        body: "De materialen op Coptic Compass worden aangeboden op een 'as is'-basis. De ontwikkelaar geeft geen enkele uitdrukkelijke of impliciete garantie en wijst, voor zover wettelijk toegestaan, alle overige garanties af, waaronder impliciete garanties van verhandelbaarheid, geschiktheid voor een bepaald doel of niet-inbreuk op intellectuele eigendom of andere rechten.",
       },
       {
         title: "4. Beperkingen van aansprakelijkheid",
-        body: "In geen geval kan Koptisch Kompas aansprakelijk worden gesteld voor enige schade, waaronder maar niet beperkt tot verlies van gegevens, winstderving of bedrijfsonderbreking, die voortvloeit uit het gebruik van of het onvermogen om de materialen op de site te gebruiken, zelfs wanneer op voorhand mondeling of schriftelijk op die mogelijkheid is gewezen.",
+        body: "In geen geval kan Coptic Compass aansprakelijk worden gesteld voor enige schade, waaronder maar niet beperkt tot verlies van gegevens, winstderving of bedrijfsonderbreking, die voortvloeit uit het gebruik van of het onvermogen om de materialen op de site te gebruiken, zelfs wanneer op voorhand mondeling of schriftelijk op die mogelijkheid is gewezen.",
       },
       {
         title: "5. Herzieningen",
-        body: "De materialen op Koptisch Kompas kunnen technische, typografische of fotografische fouten bevatten. Wij garanderen niet dat de materialen op de website volledig accuraat, volledig of actueel zijn. Wij kunnen de inhoud van de website op elk moment zonder voorafgaande kennisgeving wijzigen.",
+        body: "De materialen op Coptic Compass kunnen technische, typografische of fotografische fouten bevatten. Wij garanderen niet dat de materialen op de website volledig accuraat, volledig of actueel zijn. Wij kunnen de inhoud van de website op elk moment zonder voorafgaande kennisgeving wijzigen.",
       },
     ],
   },

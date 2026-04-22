@@ -8,42 +8,78 @@ import type { ContentReleaseDraftState } from "@/actions/admin/states";
 import { Badge } from "@/components/Badge";
 import { Button } from "@/components/Button";
 import { FormField } from "@/components/FormField";
+import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
 import {
   CONTENT_RELEASE_AUDIENCE_SEGMENTS,
   CONTENT_RELEASE_LOCALE_MODES,
+  formatContentReleaseAudienceSegment,
+  formatContentReleaseLocaleMode,
   type ContentReleaseCandidate,
 } from "@/features/communications/lib/releases";
 
-function formatAudienceSegmentLabel(
-  segment: (typeof CONTENT_RELEASE_AUDIENCE_SEGMENTS)[number],
-) {
-  switch (segment) {
-    case "lessons":
-      return "Lesson subscribers";
-    case "books":
-      return "Book subscribers";
-    case "general":
-      return "General update subscribers";
-    default:
-      return segment;
-  }
-}
-
-function formatLocaleModeLabel(
-  localeMode: (typeof CONTENT_RELEASE_LOCALE_MODES)[number],
-) {
-  switch (localeMode) {
-    case "localized":
-      return "Localized EN + NL";
-    case "en_only":
-      return "English only";
-    case "nl_only":
-      return "Dutch only";
-    default:
-      return localeMode;
-  }
-}
+const createContentReleaseFormCopy = {
+  en: {
+    audienceSegment: "Audience segment",
+    bodyEn: "English message",
+    bodyEnPlaceholder:
+      "Share what is new, why it matters, and where the reader should go next.",
+    bodyNl: "Dutch message",
+    bodyNlPlaceholder:
+      "Vat samen wat er nieuw is, waarom het relevant is en waar de lezer verder kan gaan.",
+    collapse: "Collapse",
+    compose: "Compose",
+    create: "Create release draft",
+    description:
+      "Pick published lessons and publications, write the EN/NL copy, and save a release snapshot without keeping the full composer open all the time.",
+    draftSaved: "Draft saved",
+    draftsNotice:
+      "Drafts snapshot the selected titles and URLs so later content edits do not silently change the outgoing release.",
+    lessons: "Lessons",
+    localeMode: "Locale mode",
+    noLessons: "No published grammar lessons are available yet.",
+    noPublications: "No published publications are available yet.",
+    publications: "Publications",
+    publishedLessons: "Published lessons",
+    publishedPublications: "Published publications",
+    saving: "Saving draft...",
+    title: "Draft composer",
+    subjectEn: "English subject",
+    subjectEnPlaceholder: "New Coptic lesson available",
+    subjectNl: "Dutch subject",
+    subjectNlPlaceholder: "Nieuwe Koptische les beschikbaar",
+  },
+  nl: {
+    audienceSegment: "Publiekssegment",
+    bodyEn: "Engelse tekst",
+    bodyEnPlaceholder:
+      "Share what is new, why it matters, and where the reader should go next.",
+    bodyNl: "Nederlandse tekst",
+    bodyNlPlaceholder:
+      "Vat samen wat er nieuw is, waarom het relevant is en waar de lezer verder kan gaan.",
+    collapse: "Inklappen",
+    compose: "Opstellen",
+    create: "Releaseconcept maken",
+    description:
+      "Kies gepubliceerde lessen en publicaties, schrijf de EN/NL-tekst en sla een releasesnapshot op zonder de volledige composer steeds open te houden.",
+    draftSaved: "Concept opgeslagen",
+    draftsNotice:
+      "Concepten leggen de geselecteerde titels en URL's vast, zodat latere inhoudswijzigingen de uitgaande release niet stilzwijgend aanpassen.",
+    lessons: "Lessen",
+    localeMode: "Taalmodus",
+    noLessons: "Er zijn nog geen gepubliceerde grammaticalessen beschikbaar.",
+    noPublications: "Er zijn nog geen gepubliceerde publicaties beschikbaar.",
+    publications: "Publicaties",
+    publishedLessons: "Gepubliceerde lessen",
+    publishedPublications: "Gepubliceerde publicaties",
+    saving: "Concept wordt opgeslagen...",
+    title: "Conceptcomposer",
+    subjectEn: "Engels onderwerp",
+    subjectEnPlaceholder: "New Coptic lesson available",
+    subjectNl: "Nederlands onderwerp",
+    subjectNlPlaceholder: "Nieuwe Koptische les beschikbaar",
+  },
+} as const;
 
 export function CreateContentReleaseForm({
   publicationCandidates,
@@ -52,6 +88,8 @@ export function CreateContentReleaseForm({
   publicationCandidates: ContentReleaseCandidate[];
   lessonCandidates: ContentReleaseCandidate[];
 }) {
+  const { language } = useLanguage();
+  const copy = createContentReleaseFormCopy[language];
   const totalCandidates =
     lessonCandidates.length + publicationCandidates.length;
   const [state, formAction, isPending] = useActionState<
@@ -82,31 +120,35 @@ export function CreateContentReleaseForm({
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone="coptic" size="xs">
-              Draft composer
+              {copy.title}
             </Badge>
             <Badge tone="surface" size="xs">
-              Lessons: {lessonCandidates.length}
+              {copy.lessons}:{" "}
+              {lessonCandidates.length.toLocaleString(
+                language === "nl" ? "nl-BE" : "en-US",
+              )}
             </Badge>
             <Badge tone="surface" size="xs">
-              Publications: {publicationCandidates.length}
+              {copy.publications}:{" "}
+              {publicationCandidates.length.toLocaleString(
+                language === "nl" ? "nl-BE" : "en-US",
+              )}
             </Badge>
             {state?.success ? (
               <Badge tone="coptic" size="xs">
-                Draft saved
+                {copy.draftSaved}
               </Badge>
             ) : null}
           </div>
 
           <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
-            Pick published lessons and publications, write the EN/NL copy, and
-            save a release snapshot without keeping the full composer open all
-            the time.
+            {copy.description}
           </p>
         </div>
 
         <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-stone-500 dark:text-stone-400">
-          <span className="group-open:hidden">Compose</span>
-          <span className="hidden group-open:inline">Collapse</span>
+          <span className="group-open:hidden">{copy.compose}</span>
+          <span className="hidden group-open:inline">{copy.collapse}</span>
           <ChevronDown className="mt-1 h-5 w-5 transition-transform duration-200 group-open:rotate-180" />
         </div>
       </summary>
@@ -117,7 +159,7 @@ export function CreateContentReleaseForm({
         className="space-y-6 border-t border-stone-200/80 p-6 dark:border-stone-800 md:p-7"
       >
         <div className="grid gap-5 md:grid-cols-2">
-          <FormField htmlFor="audience_segment" label="Audience segment">
+          <FormField htmlFor="audience_segment" label={copy.audienceSegment}>
             <select
               id="audience_segment"
               name="audience_segment"
@@ -126,13 +168,13 @@ export function CreateContentReleaseForm({
             >
               {CONTENT_RELEASE_AUDIENCE_SEGMENTS.map((segment) => (
                 <option key={segment} value={segment}>
-                  {formatAudienceSegmentLabel(segment)}
+                  {formatContentReleaseAudienceSegment(segment, language)}
                 </option>
               ))}
             </select>
           </FormField>
 
-          <FormField htmlFor="locale_mode" label="Locale mode">
+          <FormField htmlFor="locale_mode" label={copy.localeMode}>
             <select
               id="locale_mode"
               name="locale_mode"
@@ -141,7 +183,7 @@ export function CreateContentReleaseForm({
             >
               {CONTENT_RELEASE_LOCALE_MODES.map((localeMode) => (
                 <option key={localeMode} value={localeMode}>
-                  {formatLocaleModeLabel(localeMode)}
+                  {formatContentReleaseLocaleMode(localeMode, language)}
                 </option>
               ))}
             </select>
@@ -149,60 +191,62 @@ export function CreateContentReleaseForm({
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
-          <FormField htmlFor="subject_en" label="English subject">
+          <FormField htmlFor="subject_en" label={copy.subjectEn}>
             <input
               id="subject_en"
               name="subject_en"
               type="text"
               className="input-base"
               maxLength={160}
-              placeholder="New Coptic lesson available"
+              placeholder={copy.subjectEnPlaceholder}
             />
           </FormField>
 
-          <FormField htmlFor="subject_nl" label="Dutch subject">
+          <FormField htmlFor="subject_nl" label={copy.subjectNl}>
             <input
               id="subject_nl"
               name="subject_nl"
               type="text"
               className="input-base"
               maxLength={160}
-              placeholder="Nieuwe Koptische les beschikbaar"
+              placeholder={copy.subjectNlPlaceholder}
             />
           </FormField>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
-          <FormField htmlFor="body_en" label="English message">
+          <FormField htmlFor="body_en" label={copy.bodyEn}>
             <textarea
               id="body_en"
               name="body_en"
               rows={6}
               className="textarea-base resize-y"
-              placeholder="Share what is new, why it matters, and where the reader should go next."
+              placeholder={copy.bodyEnPlaceholder}
             />
           </FormField>
 
-          <FormField htmlFor="body_nl" label="Dutch message">
+          <FormField htmlFor="body_nl" label={copy.bodyNl}>
             <textarea
               id="body_nl"
               name="body_nl"
               rows={6}
               className="textarea-base resize-y"
-              placeholder="Vat samen wat er nieuw is, waarom het relevant is en waar de lezer verder kan gaan."
+              placeholder={copy.bodyNlPlaceholder}
             />
           </FormField>
         </div>
 
         <div className="grid gap-5 lg:grid-cols-2">
           <FormField
-            label={`Published lessons (${lessonCandidates.length})`}
+            label={`${copy.publishedLessons} (${lessonCandidates.length.toLocaleString(
+              language === "nl" ? "nl-BE" : "en-US",
+            )})`}
             className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/30"
           >
             <div className="space-y-3">
               {lessonCandidates.length === 0 ? (
                 <p className="text-sm text-stone-500 dark:text-stone-400">
-                  No published grammar lessons are available yet.
+                  {copy.noLessons}
                 </p>
               ) : (
                 lessonCandidates.map((candidate) => (
@@ -220,11 +264,18 @@ export function CreateContentReleaseForm({
                       <span className="block font-semibold text-stone-800 dark:text-stone-100">
                         {candidate.title}
                       </span>
-                      {candidate.summaryEn ? (
-                        <span className="block text-xs text-stone-500 dark:text-stone-400">
-                          {candidate.summaryEn}
-                        </span>
-                      ) : null}
+                      {(() => {
+                        const summary =
+                          language === "nl" && candidate.summaryNl
+                            ? candidate.summaryNl
+                            : candidate.summaryEn;
+
+                        return summary ? (
+                          <span className="block text-xs text-stone-500 dark:text-stone-400">
+                            {summary}
+                          </span>
+                        ) : null;
+                      })()}
                     </span>
                   </label>
                 ))
@@ -233,13 +284,15 @@ export function CreateContentReleaseForm({
           </FormField>
 
           <FormField
-            label={`Published publications (${publicationCandidates.length})`}
+            label={`${copy.publishedPublications} (${publicationCandidates.length.toLocaleString(
+              language === "nl" ? "nl-BE" : "en-US",
+            )})`}
             className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/30"
           >
             <div className="space-y-3">
               {publicationCandidates.length === 0 ? (
                 <p className="text-sm text-stone-500 dark:text-stone-400">
-                  No published publications are available yet.
+                  {copy.noPublications}
                 </p>
               ) : (
                 publicationCandidates.map((candidate) => (
@@ -257,11 +310,18 @@ export function CreateContentReleaseForm({
                       <span className="block font-semibold text-stone-800 dark:text-stone-100">
                         {candidate.title}
                       </span>
-                      {candidate.summaryEn ? (
-                        <span className="block text-xs text-stone-500 dark:text-stone-400">
-                          {candidate.summaryEn}
-                        </span>
-                      ) : null}
+                      {(() => {
+                        const summary =
+                          language === "nl" && candidate.summaryNl
+                            ? candidate.summaryNl
+                            : candidate.summaryEn;
+
+                        return summary ? (
+                          <span className="block text-xs text-stone-500 dark:text-stone-400">
+                            {summary}
+                          </span>
+                        ) : null;
+                      })()}
                     </span>
                   </label>
                 ))
@@ -272,11 +332,10 @@ export function CreateContentReleaseForm({
 
         <div className="flex flex-wrap items-center gap-4">
           <Button type="submit" disabled={isPending}>
-            {isPending ? "Saving draft..." : "Create release draft"}
+            {isPending ? copy.saving : copy.create}
           </Button>
           <p className="text-sm text-stone-500 dark:text-stone-400">
-            Drafts snapshot the selected titles and URLs so later content edits
-            do not silently change the outgoing release.
+            {copy.draftsNotice}
           </p>
         </div>
 

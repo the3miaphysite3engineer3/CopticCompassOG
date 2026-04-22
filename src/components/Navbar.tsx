@@ -8,13 +8,13 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 import {
-  getChatPath,
   getContactPath,
   getDashboardPath,
   getDictionaryPath,
   getGrammarPath,
   getLocalizedHomePath,
   getPublicationsPath,
+  getShenutePath,
 } from "@/lib/locale";
 import { getLoginPath } from "@/lib/supabase/config";
 
@@ -53,7 +53,7 @@ export function Navbar() {
     { href: getPublicationsPath(language), label: t("nav.publications") },
     { href: getDictionaryPath(language), label: t("nav.dictionary") },
     { href: getGrammarPath(language), label: t("nav.grammar") },
-    { href: getChatPath(), label: t("nav.chat") },
+    { href: getShenutePath(), label: t("nav.shenute") },
     { href: getContactPath(language), label: t("nav.contact") },
   ];
 

@@ -129,3 +129,4 @@ npm run test:e2e:local
 - Flag uncertain readings or reconstructions clearly in the PR description
 - Keep UI additions consistent with the academic and reference-focused character of the app
 - Keep English and Dutch user-facing copy aligned when editing localized content
+- Follow the Dutch localization guidance in `docs/dutch-localization-style-guide.md` for tone, terminology, and product naming

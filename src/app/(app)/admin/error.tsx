@@ -2,8 +2,11 @@
 
 import { useEffect } from "react";
 
+import { useLanguage } from "@/components/LanguageProvider";
 import { pageShellAccents } from "@/components/PageShell";
 import { RouteErrorState } from "@/components/RouteErrorState";
+import { adminRouteCopy } from "@/features/admin/lib/adminRouteCopy";
+import { getDashboardPath } from "@/lib/locale";
 
 /**
  * Renders the fallback error boundary for the private instructor workspace.
@@ -15,19 +18,24 @@ export default function Error({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const { language } = useLanguage();
+  const copy = adminRouteCopy[language];
+
   useEffect(() => {
     console.error("Admin route failed to render", error);
   }, [error]);
 
   return (
     <RouteErrorState
-      title="We couldn't load the instructor queue"
-      description="The review workspace ran into a temporary issue while preparing submissions."
-      details="Submission data or review controls were interrupted before the page finished rendering. Try again first, and if the issue persists, return to the student dashboard while we investigate."
+      title={copy.errorTitle}
+      description={copy.errorDescription}
+      details={copy.errorDetails}
+      noticeTitle={copy.errorNoticeTitle}
       tone="analytics"
-      primaryHref="/dashboard"
-      primaryLabel="Open dashboard"
+      primaryHref={getDashboardPath(language)}
+      primaryLabel={copy.errorPrimaryLabel}
       reset={reset}
+      retryLabel={copy.errorRetryLabel}
       accents={[
         pageShellAccents.heroEmeraldArc,
         pageShellAccents.topRightSkyOrbInset,

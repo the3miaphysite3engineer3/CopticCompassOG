@@ -35,7 +35,6 @@ const contributorsCopy = {
     seoTitle: "Contributors",
     description:
       "Meet the contributors behind Coptic Compass, including George Joseph Basilious Tawadrous and Kyrillos Wannes.",
-    eyebrow: "Project Team",
     title: "Contributors",
     subtitle:
       "Coptic Compass is shaped by contributors focused on Coptic language learning, AI-assisted workflows, and high-quality educational tooling.",
@@ -95,20 +94,19 @@ const contributorsCopy = {
     ] satisfies readonly ContributorCard[],
   },
   nl: {
-    seoTitle: "Contributors",
+    seoTitle: "Bijdragers",
     description:
-      "Maak kennis met de contributors achter Coptic Compass, inclusief George Joseph Basilious Tawadrous en Kyrillos Wannes.",
-    eyebrow: "Projectteam",
-    title: "Contributors",
+      "Maak kennis met de bijdragers achter Coptic Compass, onder wie George Joseph Basilious Tawadrous en Kyrillos Wannes.",
+    title: "Bijdragers",
     subtitle:
-      "Coptic Compass wordt gevormd door contributors die zich richten op Koptisch taalonderwijs, AI-ondersteunde workflows en educatieve tools van hoge kwaliteit.",
-    sectionTitle: "Kerncontributors",
-    breadcrumbLabel: "Contributors",
+      "Coptic Compass wordt gevormd door bijdragers die zich richten op Koptisch taalonderwijs, AI-ondersteunde workflows en educatieve tools van hoge kwaliteit.",
+    sectionTitle: "Kernbijdragers",
+    breadcrumbLabel: "Bijdragers",
     contactsHeading: "Contactlinks",
     contributors: [
       {
         name: "George Joseph Basilious Tawadrous",
-        role: "AI Engineer en ontwikkelaar",
+        role: "AI-engineer en ontwikkelaar",
         description:
           "Ondersteunt het project met technische samenwerking en praktische productfeedback voor Koptische leerworkflows.",
         contacts: [
@@ -135,7 +133,7 @@ const contributorsCopy = {
       },
       {
         name: "Kyrillos Wannes",
-        role: "Ontwikkelaar en coptoloog",
+        role: "Ontwikkelaar en koptoloog",
         description:
           "Bouwt en onderhoudt Coptic Compass, inclusief het woordenboek, het grammaticaplatform en Shenute AI-integraties.",
         contacts: [
@@ -256,8 +254,6 @@ export default async function ContributorsPage({
       />
 
       <PageHeader
-        eyebrow={copy.eyebrow}
-        eyebrowVariant="badge"
         title={copy.title}
         description={copy.subtitle}
         tone="sky"

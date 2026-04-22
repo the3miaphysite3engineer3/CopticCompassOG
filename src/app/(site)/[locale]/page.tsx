@@ -30,7 +30,7 @@ export async function generateMetadata({
   return createLocalizedPageMetadata({
     title:
       resolvedLocale === "nl"
-        ? "Koptisch Woordenboek, Grammatica, Publicaties en Shenute AI"
+        ? "Koptisch woordenboek, grammatica, publicaties en Shenute AI"
         : "Coptic Dictionary, Grammar, Publications, and Shenute AI",
     description: buildHomeDescription(resolvedLocale),
     path: "/",

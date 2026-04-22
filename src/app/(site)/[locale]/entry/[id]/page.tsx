@@ -59,7 +59,7 @@ export async function generateMetadata({
   const headword = toPlainText(entry.headword);
   const title =
     locale === "nl"
-      ? `${headword} (${entry.pos}) - Koptisch Woordenboek`
+      ? `${headword} (${entry.pos}) - Koptisch woordenboek`
       : `${headword} (${entry.pos}) - Coptic Dictionary`;
   const description = buildEntryDescription(entry, locale);
   const path = getEntryPath(entry.id, locale);

@@ -136,7 +136,6 @@ export default function PublicationDetailPageClient({
 
           <div className="space-y-4">
             <PageHeader
-              eyebrow={t("nav.publications")}
               align="left"
               title={publication.title}
               tone="brand"

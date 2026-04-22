@@ -9,7 +9,6 @@ import type { Language } from "@/types/i18n";
 type RelatedGrammarLessonsPanelProps = {
   contained?: boolean;
   description: string;
-  eyebrow?: string;
   language: Language;
   lessons: readonly GrammarLessonReference[];
   title: string;
@@ -18,7 +17,6 @@ type RelatedGrammarLessonsPanelProps = {
 export function RelatedGrammarLessonsPanel({
   contained = false,
   description,
-  eyebrow,
   language,
   lessons,
   title,
@@ -30,11 +28,6 @@ export function RelatedGrammarLessonsPanel({
   const sectionContent = (
     <>
       <div className={contained ? "space-y-3" : "space-y-2"}>
-        {eyebrow ? (
-          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-500 dark:text-stone-400">
-            {eyebrow}
-          </p>
-        ) : null}
         <h2
           className={
             contained

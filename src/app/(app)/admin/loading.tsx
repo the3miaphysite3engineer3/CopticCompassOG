@@ -1,6 +1,10 @@
+"use client";
+
+import { useLanguage } from "@/components/LanguageProvider";
 import { pageShellAccents } from "@/components/PageShell";
 import { RouteLoadingState } from "@/components/RouteLoadingState";
 import { SurfacePanel } from "@/components/SurfacePanel";
+import { adminRouteCopy } from "@/features/admin/lib/adminRouteCopy";
 
 function LoadingBlock({ className }: { className: string }) {
   return (
@@ -15,10 +19,13 @@ function LoadingBlock({ className }: { className: string }) {
  * Renders the loading skeleton for the private instructor workspace.
  */
 export default function Loading() {
+  const { language } = useLanguage();
+  const copy = adminRouteCopy[language];
+
   return (
     <RouteLoadingState
-      title="Preparing the review queue"
-      description="Loading exercise submissions, ratings, and instructor tools."
+      title={copy.loadingTitle}
+      description={copy.loadingDescription}
       tone="analytics"
       panelClassName="max-w-5xl"
       accents={[

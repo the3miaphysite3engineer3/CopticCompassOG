@@ -309,8 +309,6 @@ export function GrammarLessonPageClient({
         >
           <div id={lessonContentId}>
             <PageHeader
-              eyebrow={t("grammar.lessonBadge")}
-              eyebrowVariant="badge"
               title={`${t("nav.grammar")} - ${lesson.title[language]}`}
               description={lessonDescription}
               tone="sky"

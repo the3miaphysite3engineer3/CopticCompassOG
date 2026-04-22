@@ -15,6 +15,8 @@ export async function generateMetadata({
   return createRootLayoutMetadata(locale);
 }
 
+export const dynamicParams = false;
+
 export function generateStaticParams() {
   return PUBLIC_LOCALES.map((locale) => ({ locale }));
 }

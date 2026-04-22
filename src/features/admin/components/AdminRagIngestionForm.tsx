@@ -1,24 +1,143 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import type { RagIngestionState } from "@/actions/admin/states";
 import { Badge } from "@/components/Badge";
 import { buttonClassName } from "@/components/Button";
+import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
+import type { Language } from "@/types/i18n";
 
-function formatNumber(value: number) {
-  return new Intl.NumberFormat("en-US").format(value);
+import type { ReactNode } from "react";
+
+const adminRagIngestionFormCopy = {
+  en: {
+    bulkIngest: "Ingest dictionary + grammar JSON",
+    bulkIngesting: "Ingesting dictionary + grammar JSON...",
+    checking: "Checking RAG services...",
+    chunkDetails: "Chunk details",
+    chunkProfile: "Chunk Profile",
+    chunks: "chunks",
+    chunksLabel: "Chunks",
+    defaultChunkProfile:
+      "Default chunk profile: 1600 chars target with 200 chars overlap.",
+    embeddingBatches: "Embedding batches",
+    embeddingProvider: "Embedding provider",
+    entries: "entries",
+    estimatedTokensPerChunk: "Est. tokens per chunk (min / avg / max)",
+    estimatedTokensTotal: "Est. tokens total",
+    failedJsonSources: "Failed JSON sources",
+    fileIngest: "Ingest file into RAG",
+    fileIngesting: "Indexing file into RAG...",
+    forceOcr: "Force OCR for PDF extraction (bypass native PDF text)",
+    insertBatches: "Insert batches",
+    liveLogs: "Live logs are streaming for request",
+    logs: "Logs",
+    logsEmpty:
+      "No ingestion logs yet. Run file or JSON ingestion to populate this stream.",
+    logsRunning:
+      "Ingestion is running. Logs will appear here as batches complete.",
+    loadError: "Could not load RAG status.",
+    ocrNo: "no",
+    ocrUsed: "OCR used",
+    ocrYes: "yes",
+    overlapOverhead: "Overlap overhead",
+    partialFailures: "Partial Failures",
+    provider: "Provider",
+    refresh: "Refresh",
+    requestId: "Request ID",
+    sourceLabel: "Source label",
+    sources: "Sources",
+    sourceTextChars: "Source text chars (normalized)",
+    succeeded: "succeeded",
+    supports: "Supports PDF, DOCX, images (OCR), and text-like files.",
+    systemStatus: "System Status",
+    targetOverlap: "Target size / overlap",
+    totalChunkChars: "Total chunk chars stored",
+    totalChunks: "Total chunks",
+    unknownError: "Unknown error",
+    unknownRequestError: "Unknown ingestion request error.",
+    uploadError: "Could not ingest this file.",
+    jsonError: "Could not ingest dictionary and grammar JSON files.",
+    knowledgeFile: "Knowledge file",
+    minAvgMaxChunkChars: "Min / Avg / Max chunk chars",
+    minAvgMaxChunkWords: "Min / Avg / Max chunk words",
+    runOcr: "Run OCR when PDF text extraction is weak",
+    size: "size",
+  },
+  nl: {
+    bulkIngest: "Woordenboek- en grammatica-JSON invoeren",
+    bulkIngesting: "Woordenboek- en grammatica-JSON wordt ingevoerd...",
+    checking: "RAG-services worden gecontroleerd...",
+    chunkDetails: "Chunkdetails",
+    chunkProfile: "Chunkprofiel",
+    chunks: "chunks",
+    chunksLabel: "Chunks",
+    defaultChunkProfile:
+      "Standaard chunkprofiel: doel van 1600 tekens met 200 tekens overlap.",
+    embeddingBatches: "Embeddingbatches",
+    embeddingProvider: "Embeddingprovider",
+    entries: "items",
+    estimatedTokensPerChunk: "Geschatte tokens per chunk (min / gem. / max)",
+    estimatedTokensTotal: "Geschatte tokens totaal",
+    failedJsonSources: "Mislukte JSON-bronnen",
+    fileIngest: "Bestand in RAG invoeren",
+    fileIngesting: "Bestand wordt in RAG geindexeerd...",
+    forceOcr: "OCR forceren voor PDF-extractie (native PDF-tekst overslaan)",
+    insertBatches: "Invoegbatches",
+    liveLogs: "Live logs streamen voor request",
+    logs: "Logs",
+    logsEmpty:
+      "Nog geen invoerlogs. Start bestands- of JSON-invoer om deze stream te vullen.",
+    logsRunning:
+      "Invoer loopt. Logs verschijnen hier zodra batches klaar zijn.",
+    loadError: "RAG-status kon niet worden geladen.",
+    ocrNo: "nee",
+    ocrUsed: "OCR gebruikt",
+    ocrYes: "ja",
+    overlapOverhead: "Overlapoverhead",
+    partialFailures: "Gedeeltelijke fouten",
+    provider: "Provider",
+    refresh: "Vernieuwen",
+    requestId: "Request-ID",
+    sourceLabel: "Bronlabel",
+    sources: "Bronnen",
+    sourceTextChars: "Bronteksttekens (genormaliseerd)",
+    succeeded: "geslaagd",
+    supports:
+      "Ondersteunt PDF, DOCX, afbeeldingen (OCR) en tekstachtige bestanden.",
+    systemStatus: "Systeemstatus",
+    targetOverlap: "Doelgrootte / overlap",
+    totalChunkChars: "Totaal opgeslagen chunktekens",
+    totalChunks: "Totaal aantal chunks",
+    unknownError: "Onbekende fout",
+    unknownRequestError: "Onbekende invoerrequestfout.",
+    uploadError: "Dit bestand kon niet worden ingevoerd.",
+    jsonError:
+      "Woordenboek- en grammatica-JSON-bestanden konden niet worden ingevoerd.",
+    knowledgeFile: "Kennisbestand",
+    minAvgMaxChunkChars: "Min / Gem. / Max chunktekens",
+    minAvgMaxChunkWords: "Min / Gem. / Max chunkwoorden",
+    runOcr: "OCR uitvoeren wanneer PDF-tekstextractie zwak is",
+    size: "grootte",
+  },
+} as const;
+
+function formatNumber(value: number, language: Language) {
+  return new Intl.NumberFormat(language === "nl" ? "nl-BE" : "en-US").format(
+    value,
+  );
 }
 
-function formatLogTimestamp(value: string) {
+function formatLogTimestamp(value: string, language: Language) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
     return value;
   }
 
-  return date.toLocaleTimeString();
+  return date.toLocaleTimeString(language === "nl" ? "nl-BE" : "en-US");
 }
 
 function toEmbeddingProvider(
@@ -165,7 +284,51 @@ function StatusDot({ healthy }: { healthy: boolean }) {
   );
 }
 
+function RagStatusCard({
+  detail,
+  status,
+}: {
+  detail?: ReactNode;
+  status: RagStatusItem;
+}) {
+  return (
+    <li className="flex min-h-20 items-start gap-3 rounded-2xl border border-stone-200 bg-white/65 p-4 shadow-sm dark:border-stone-800 dark:bg-stone-950/30">
+      <StatusDot healthy={status.healthy} />
+      <span className="min-w-0 text-sm leading-6 text-stone-700 dark:text-stone-200">
+        <span className="block font-semibold">{status.label}</span>
+        {status.note ? (
+          <span className="block text-xs leading-5 text-stone-500 dark:text-stone-400">
+            {status.note}
+          </span>
+        ) : null}
+        {detail}
+      </span>
+    </li>
+  );
+}
+
+function RagMetricCard({
+  children,
+  label,
+}: {
+  children: ReactNode;
+  label: string;
+}) {
+  return (
+    <div className="rounded-2xl border border-stone-200 bg-white/65 p-4 text-sm shadow-sm dark:border-stone-800 dark:bg-stone-950/30">
+      <dt className="text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">
+        {label}
+      </dt>
+      <dd className="mt-2 font-semibold text-stone-800 dark:text-stone-100">
+        {children}
+      </dd>
+    </div>
+  );
+}
+
 export function AdminRagIngestionForm() {
+  const { language } = useLanguage();
+  const copy = adminRagIngestionFormCopy[language];
   const [activeIngestId, setActiveIngestId] = useState<string | null>(null);
   const [activeBulkIngestId, setActiveBulkIngestId] = useState<string | null>(
     null,
@@ -185,7 +348,7 @@ export function AdminRagIngestionForm() {
   const bulkLogs = collectBulkLogs(bulkJsonState);
   const dashboardLogs = collectDashboardLogs(state?.logs, bulkLogs, liveLogs);
 
-  async function loadRagStatus() {
+  const loadRagStatus = useCallback(async () => {
     setStatusLoading(true);
     setRagStatusError(null);
 
@@ -200,7 +363,7 @@ export function AdminRagIngestionForm() {
 
       if (!response.ok || !payload.success) {
         setRagStatus(null);
-        setRagStatusError(payload.error ?? "Could not load RAG status.");
+        setRagStatusError(payload.error ?? copy.loadError);
         return;
       }
 
@@ -208,16 +371,16 @@ export function AdminRagIngestionForm() {
     } catch (error) {
       setRagStatus(null);
       setRagStatusError(
-        error instanceof Error ? error.message : "Could not load RAG status.",
+        error instanceof Error ? error.message : copy.loadError,
       );
     } finally {
       setStatusLoading(false);
     }
-  }
+  }, [copy.loadError]);
 
   useEffect(() => {
     void loadRagStatus();
-  }, []);
+  }, [loadRagStatus]);
 
   useEffect(() => {
     const targets: Array<{ ingestId: string; prefix: boolean }> = [];
@@ -318,11 +481,9 @@ export function AdminRagIngestionForm() {
         filesFailed: 0,
         filesSucceeded: 0,
         ingestId: crypto.randomUUID(),
-        message: "Could not ingest dictionary and grammar JSON files.",
+        message: copy.jsonError,
         error:
-          error instanceof Error
-            ? error.message
-            : "Unknown ingestion request error.",
+          error instanceof Error ? error.message : copy.unknownRequestError,
       });
     } finally {
       setBulkJsonPending(false);
@@ -362,7 +523,7 @@ export function AdminRagIngestionForm() {
         setState({
           success: false,
           embeddingProvider: payload.embeddingProvider,
-          error: payload.error ?? "Could not ingest this file.",
+          error: payload.error ?? copy.uploadError,
           ingestId: payload.ingestId,
           logs: payload.logs,
         });
@@ -388,10 +549,7 @@ export function AdminRagIngestionForm() {
     } catch (error) {
       setState({
         success: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "Could not ingest this file.",
+        error: error instanceof Error ? error.message : copy.uploadError,
       });
     } finally {
       setIsPending(false);
@@ -400,11 +558,16 @@ export function AdminRagIngestionForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <SurfacePanel rounded="4xl" variant="elevated" className="p-5">
-        <div className="mb-3 flex items-center justify-between">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <SurfacePanel
+        rounded="3xl"
+        variant="subtle"
+        shadow="soft"
+        className="p-5"
+      >
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <Badge tone="accent" size="xs" caps>
-            System Status
+            {copy.systemStatus}
           </Badge>
           <button
             type="button"
@@ -413,188 +576,151 @@ export function AdminRagIngestionForm() {
             }}
             className={buttonClassName({ size: "sm", variant: "secondary" })}
           >
-            Refresh
+            {copy.refresh}
           </button>
         </div>
 
         {statusLoading ? (
-          <p className="text-xs text-[#86c8d8]">Checking RAG services...</p>
+          <p className="rounded-2xl border border-stone-200 bg-white/65 px-4 py-3 text-sm text-stone-500 shadow-sm dark:border-stone-800 dark:bg-stone-950/30 dark:text-stone-400">
+            {copy.checking}
+          </p>
         ) : null}
 
         {!statusLoading && ragStatusError ? (
-          <p className="text-xs text-red-300">{ragStatusError}</p>
+          <p className="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-700 shadow-sm dark:border-red-950 dark:bg-red-950/30 dark:text-red-300">
+            {ragStatusError}
+          </p>
         ) : null}
 
         {!statusLoading && !ragStatusError && ragStatus ? (
-          <ul className="space-y-2 text-base">
-            <li className="flex items-start gap-3">
-              <StatusDot healthy={ragStatus.statuses.llm.healthy} />
-              <span className="text-stone-700 dark:text-stone-200">
-                {ragStatus.statuses.llm.label}
-                {ragStatus.statuses.llm.note ? (
-                  <span className="ml-1 text-xs text-stone-500 dark:text-stone-400">
-                    {ragStatus.statuses.llm.note}
-                  </span>
-                ) : null}
-              </span>
-            </li>
-            <li className="flex items-start gap-3">
-              <StatusDot healthy={ragStatus.statuses.embeddingModel.healthy} />
-              <span className="text-stone-700 dark:text-stone-200">
-                {ragStatus.statuses.embeddingModel.label}
-                {ragStatus.statuses.embeddingModel.note ? (
-                  <span className="ml-1 text-xs text-stone-500 dark:text-stone-400">
-                    {ragStatus.statuses.embeddingModel.note}
-                  </span>
-                ) : null}
-              </span>
-            </li>
-            <li className="flex items-start gap-3">
-              <StatusDot
-                healthy={ragStatus.statuses.dictionaryJsonRag.healthy}
-              />
-              <span className="text-stone-700 dark:text-stone-200">
-                {ragStatus.statuses.dictionaryJsonRag.label}
-                {ragStatus.statuses.dictionaryJsonRag.note ? (
-                  <span className="ml-1 text-xs text-stone-500 dark:text-stone-400">
-                    {ragStatus.statuses.dictionaryJsonRag.note}
-                  </span>
-                ) : null}
-              </span>
-            </li>
-            <li className="flex items-start gap-3">
-              <StatusDot healthy={ragStatus.statuses.grammarJsonRag.healthy} />
-              <span className="text-stone-700 dark:text-stone-200">
-                {ragStatus.statuses.grammarJsonRag.label}
-                {ragStatus.statuses.grammarJsonRag.note ? (
-                  <span className="ml-1 text-xs text-stone-500 dark:text-stone-400">
-                    {ragStatus.statuses.grammarJsonRag.note}
-                  </span>
-                ) : null}
-              </span>
-            </li>
-            <li className="flex items-start gap-3">
-              <StatusDot healthy={ragStatus.statuses.vectorDb.healthy} />
-              <span className="text-stone-700 dark:text-stone-200">
-                {ragStatus.statuses.vectorDb.label}
-                {ragStatus.statuses.vectorDb.note ? (
-                  <span className="ml-1 text-xs text-stone-500 dark:text-stone-400">
-                    {ragStatus.statuses.vectorDb.note}
-                  </span>
-                ) : null}
-              </span>
-            </li>
-            <li className="flex items-start gap-3">
-              <StatusDot healthy={ragStatus.statuses.knowledgeBase.healthy} />
-              <span className="text-stone-700 dark:text-stone-200">
-                {ragStatus.statuses.knowledgeBase.label}
-                <span className="ml-1 text-sky-600 dark:text-sky-300">
-                  ({formatNumber(ragStatus.chunkCount)} chunks)
+          <ul className="grid gap-3 md:grid-cols-2">
+            <RagStatusCard status={ragStatus.statuses.llm} />
+            <RagStatusCard status={ragStatus.statuses.embeddingModel} />
+            <RagStatusCard status={ragStatus.statuses.dictionaryJsonRag} />
+            <RagStatusCard status={ragStatus.statuses.grammarJsonRag} />
+            <RagStatusCard status={ragStatus.statuses.vectorDb} />
+            <RagStatusCard
+              status={ragStatus.statuses.knowledgeBase}
+              detail={
+                <span className="mt-1 block text-xs font-semibold text-sky-700 dark:text-sky-300">
+                  {formatNumber(ragStatus.chunkCount, language)} {copy.chunks}
                 </span>
-              </span>
-            </li>
+              }
+            />
           </ul>
         ) : null}
       </SurfacePanel>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <label className="space-y-2">
-          <span className="text-sm font-semibold text-stone-700 dark:text-stone-200">
-            Source label
-          </span>
-          <input
-            name="source_title"
-            type="text"
-            placeholder="Comprehensive Lexicon Volume 2"
-            className="w-full rounded-xl border border-stone-200 bg-white/80 px-3 py-2 text-sm text-stone-900 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-300/35 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
-          />
-        </label>
+      <SurfacePanel
+        rounded="3xl"
+        variant="subtle"
+        shadow="soft"
+        className="p-5"
+      >
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className="space-y-2">
+            <span className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+              {copy.sourceLabel}
+            </span>
+            <input
+              name="source_title"
+              type="text"
+              placeholder="Comprehensive Lexicon Volume 2"
+              className="input-base text-sm"
+            />
+          </label>
 
-        <label className="space-y-2">
-          <span className="text-sm font-semibold text-stone-700 dark:text-stone-200">
-            Knowledge file
-          </span>
-          <input
-            name="file"
-            type="file"
-            accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown,text/csv,application/json,text/xml,text/html,image/*,.pdf,.docx,.txt,.md,.markdown,.csv,.tsv,.json,.xml,.html,.htm,.yaml,.yml"
-            required
-            className="block w-full rounded-xl border border-stone-200 bg-white/80 px-3 py-2 text-sm text-stone-900 shadow-sm file:mr-4 file:rounded-lg file:border-0 file:bg-sky-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-sky-800 focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-300/35 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:file:bg-sky-900/40 dark:file:text-sky-200"
-          />
-        </label>
-      </div>
+          <label className="space-y-2">
+            <span className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+              {copy.knowledgeFile}
+            </span>
+            <input
+              name="file"
+              type="file"
+              accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown,text/csv,application/json,text/xml,text/html,image/*,.pdf,.docx,.txt,.md,.markdown,.csv,.tsv,.json,.xml,.html,.htm,.yaml,.yml"
+              required
+              className="input-base h-auto py-2 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-sky-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-sky-800 dark:file:bg-sky-900/40 dark:file:text-sky-200"
+            />
+          </label>
+        </div>
 
-      <label className="inline-flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300">
-        <input
-          name="enable_ocr"
-          type="checkbox"
-          defaultChecked
-          className="h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-sky-400"
-        />
-        Run OCR when PDF text extraction is weak
-      </label>
+        <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(14rem,18rem)]">
+          <div className="grid gap-2 sm:grid-cols-2">
+            <label className="checkbox-row border border-stone-200/80 bg-white/55 shadow-sm dark:border-stone-800 dark:bg-stone-950/25">
+              <input
+                name="enable_ocr"
+                type="checkbox"
+                defaultChecked
+                className="checkbox-base"
+              />
+              <span className="text-sm leading-6 text-stone-700 dark:text-stone-300">
+                {copy.runOcr}
+              </span>
+            </label>
 
-      <label className="inline-flex items-center gap-2 text-sm text-stone-700 dark:text-stone-300">
-        <input
-          name="force_ocr"
-          type="checkbox"
-          className="h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-sky-400"
-        />
-        Force OCR for PDF extraction (bypass native PDF text)
-      </label>
+            <label className="checkbox-row border border-stone-200/80 bg-white/55 shadow-sm dark:border-stone-800 dark:bg-stone-950/25">
+              <input
+                name="force_ocr"
+                type="checkbox"
+                className="checkbox-base"
+              />
+              <span className="text-sm leading-6 text-stone-700 dark:text-stone-300">
+                {copy.forceOcr}
+              </span>
+            </label>
+          </div>
 
-      <label className="flex flex-col gap-2 text-sm text-stone-700 dark:text-stone-300 md:max-w-xs">
-        <span className="font-semibold text-stone-700 dark:text-stone-200">
-          Embedding provider
-        </span>
-        <select
-          name="embedding_provider"
-          value={embeddingProvider}
-          onChange={(event) => {
-            setEmbeddingProvider(toEmbeddingProvider(event.target.value));
-          }}
-          className="select-base h-11 rounded-xl bg-white/80 text-sm dark:bg-stone-900"
-        >
-          <option value="hf">Hugging Face</option>
-          <option value="gemini">Gemini</option>
-          <option value="openrouter">OpenRouter</option>
-        </select>
-      </label>
+          <label className="flex flex-col gap-2 text-sm text-stone-700 dark:text-stone-300">
+            <span className="font-semibold text-stone-700 dark:text-stone-200">
+              {copy.embeddingProvider}
+            </span>
+            <select
+              name="embedding_provider"
+              value={embeddingProvider}
+              onChange={(event) => {
+                setEmbeddingProvider(toEmbeddingProvider(event.target.value));
+              }}
+              className="compact-select-base"
+            >
+              <option value="hf">Hugging Face</option>
+              <option value="gemini">Gemini</option>
+              <option value="openrouter">OpenRouter</option>
+            </select>
+          </label>
+        </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          type="submit"
-          disabled={isPending}
-          className={buttonClassName({ className: "px-6" })}
-        >
-          {isPending ? "Indexing file into RAG..." : "Ingest file into RAG"}
-        </button>
-        <button
-          type="button"
-          disabled={bulkJsonPending}
-          onClick={() => {
-            void handleIngestJsonSources();
-          }}
-          className={buttonClassName({
-            className: "px-6",
-            variant: "secondary",
-          })}
-        >
-          {bulkJsonPending
-            ? "Ingesting dictionary + grammar JSON..."
-            : "Ingest dictionary + grammar JSON"}
-        </button>
-        <p className="text-xs text-stone-500 dark:text-stone-400">
-          Supports PDF, DOCX, images (OCR), and text-like files.
-        </p>
-        <p className="text-xs text-stone-500 dark:text-stone-400">
-          Default chunk profile: 1600 chars target with 200 chars overlap.
-        </p>
-      </div>
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <button
+            type="submit"
+            disabled={isPending}
+            className={buttonClassName({ className: "px-6" })}
+          >
+            {isPending ? copy.fileIngesting : copy.fileIngest}
+          </button>
+          <button
+            type="button"
+            disabled={bulkJsonPending}
+            onClick={() => {
+              void handleIngestJsonSources();
+            }}
+            className={buttonClassName({
+              className: "px-6",
+              variant: "secondary",
+            })}
+          >
+            {bulkJsonPending ? copy.bulkIngesting : copy.bulkIngest}
+          </button>
+        </div>
+
+        <div className="mt-4 grid gap-2 text-xs leading-5 text-stone-500 dark:text-stone-400 md:grid-cols-2">
+          <p>{copy.supports}</p>
+          <p>{copy.defaultChunkProfile}</p>
+        </div>
+      </SurfacePanel>
 
       {isPending && activeIngestId ? (
         <StatusNotice tone="info" align="left">
-          Live logs are streaming for request <code>RAG:{activeIngestId}</code>.
+          {copy.liveLogs} <code>RAG:{activeIngestId}</code>.
         </StatusNotice>
       ) : null}
 
@@ -617,9 +743,15 @@ export function AdminRagIngestionForm() {
         >
           {bulkJsonState.message}
           {bulkJsonState.ingestId
-            ? ` Request ID: ${bulkJsonState.ingestId}.`
+            ? ` ${copy.requestId}: ${bulkJsonState.ingestId}.`
             : ""}
-          {` Sources: ${formatNumber(bulkJsonState.filesSucceeded)}/${formatNumber(bulkJsonState.filesDiscovered)} succeeded.`}
+          {` ${copy.sources}: ${formatNumber(
+            bulkJsonState.filesSucceeded,
+            language,
+          )}/${formatNumber(
+            bulkJsonState.filesDiscovered,
+            language,
+          )} ${copy.succeeded}.`}
         </StatusNotice>
       ) : null}
 
@@ -638,9 +770,9 @@ export function AdminRagIngestionForm() {
               caps
               className="border-amber-300/80"
             >
-              Partial Failures
+              {copy.partialFailures}
             </Badge>
-            <p className="font-semibold">Failed JSON sources</p>
+            <p className="font-semibold">{copy.failedJsonSources}</p>
           </div>
           <ul className="mt-2 list-disc space-y-1 pl-5">
             {bulkJsonState.results
@@ -648,32 +780,35 @@ export function AdminRagIngestionForm() {
               .slice(0, 5)
               .map((result) => (
                 <li key={result.sourcePath}>
-                  {result.sourcePath}: {result.error ?? "Unknown error"}
+                  {result.sourcePath}: {result.error ?? copy.unknownError}
                 </li>
               ))}
           </ul>
         </SurfacePanel>
       ) : null}
 
-      <SurfacePanel rounded="4xl" variant="elevated" className="p-5">
-        <div className="mb-3 flex items-center justify-between">
+      <SurfacePanel
+        rounded="3xl"
+        variant="subtle"
+        shadow="soft"
+        className="p-5"
+      >
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <Badge tone="surface" size="xs" caps>
-            Logs
+            {copy.logs}
           </Badge>
           <p className="text-[11px] text-stone-500 dark:text-stone-400">
-            {formatNumber(dashboardLogs.length)} entries
+            {formatNumber(dashboardLogs.length, language)} {copy.entries}
           </p>
         </div>
 
         {dashboardLogs.length === 0 ? (
-          <p className="rounded-2xl border border-stone-200 bg-stone-50/80 px-3 py-2 text-xs text-stone-500 dark:border-stone-700 dark:bg-stone-950/40 dark:text-stone-400">
-            {isPending || bulkJsonPending
-              ? "Ingestion is running. Logs will appear here as batches complete."
-              : "No ingestion logs yet. Run file or JSON ingestion to populate this stream."}
+          <p className="rounded-2xl border border-stone-200 bg-white/65 px-4 py-3 text-xs text-stone-500 shadow-sm dark:border-stone-800 dark:bg-stone-950/30 dark:text-stone-400">
+            {isPending || bulkJsonPending ? copy.logsRunning : copy.logsEmpty}
           </p>
         ) : (
           <div
-            className="max-h-64 space-y-1 overflow-y-auto rounded-2xl border border-stone-200 bg-stone-50/80 p-3 font-mono text-[11px] dark:border-stone-700 dark:bg-stone-950/40"
+            className="max-h-64 space-y-1 overflow-y-auto rounded-2xl border border-stone-200 bg-white/65 p-3 font-mono text-[11px] shadow-sm dark:border-stone-800 dark:bg-stone-950/30"
             aria-live="polite"
           >
             {dashboardLogs.map((log, index) => (
@@ -686,7 +821,7 @@ export function AdminRagIngestionForm() {
                 ) : (
                   <>
                     <span className="text-sky-600 dark:text-sky-300">
-                      [{formatLogTimestamp(log.timestamp)}]
+                      [{formatLogTimestamp(log.timestamp, language)}]
                     </span>{" "}
                     {log.sourcePath ? (
                       <span className="text-emerald-700 dark:text-emerald-300">
@@ -706,15 +841,20 @@ export function AdminRagIngestionForm() {
         <StatusNotice tone="success" align="left">
           {state.message}
           {state.embeddingProvider
-            ? ` Provider: ${getEmbeddingProviderLabel(state.embeddingProvider)}.`
+            ? ` ${copy.provider}: ${getEmbeddingProviderLabel(
+                state.embeddingProvider,
+              )}.`
             : ""}
           {typeof state.chunksInserted === "number"
-            ? ` Chunks: ${state.chunksInserted}.`
+            ? ` ${copy.chunksLabel}: ${formatNumber(
+                state.chunksInserted,
+                language,
+              )}.`
             : ""}
           {typeof state.ocrUsed === "boolean"
-            ? ` OCR used: ${state.ocrUsed ? "yes" : "no"}.`
+            ? ` ${copy.ocrUsed}: ${state.ocrUsed ? copy.ocrYes : copy.ocrNo}.`
             : ""}
-          {state.ingestId ? ` Request ID: ${state.ingestId}.` : ""}
+          {state.ingestId ? ` ${copy.requestId}: ${state.ingestId}.` : ""}
         </StatusNotice>
       ) : null}
 
@@ -723,67 +863,63 @@ export function AdminRagIngestionForm() {
           rounded="3xl"
           variant="subtle"
           shadow="soft"
-          className="p-4 text-sm text-stone-700 dark:text-stone-200"
+          className="p-5 text-stone-700 dark:text-stone-200"
         >
           <div className="mb-3 flex items-center gap-2">
             <Badge tone="surface" size="xs" caps>
-              Chunk Profile
+              {copy.chunkProfile}
             </Badge>
-            <p className="font-semibold">Chunk details</p>
+            <p className="font-semibold">{copy.chunkDetails}</p>
           </div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <p>
-              Source text chars (normalized):{" "}
-              {formatNumber(state.chunkStats.sourceTextChars)}
-            </p>
-            <p>
-              Total chunk chars stored:{" "}
-              {formatNumber(state.chunkStats.totalChunkChars)}
-            </p>
-            <p>Total chunks: {formatNumber(state.chunkStats.totalChunks)}</p>
-            <p>
-              Target size / overlap:{" "}
-              {formatNumber(state.chunkStats.chunkSizeTarget)} /{" "}
-              {formatNumber(state.chunkStats.chunkOverlap)}
-            </p>
-            <p>
-              Min / Avg / Max chunk chars:{" "}
-              {formatNumber(state.chunkStats.minChunkChars)} /{" "}
-              {formatNumber(state.chunkStats.avgChunkChars)} /{" "}
-              {formatNumber(state.chunkStats.maxChunkChars)}
-            </p>
-            <p>
-              Min / Avg / Max chunk words:{" "}
-              {formatNumber(state.chunkStats.minChunkWords)} /{" "}
-              {formatNumber(state.chunkStats.avgChunkWords)} /{" "}
-              {formatNumber(state.chunkStats.maxChunkWords)}
-            </p>
-            <p>
-              Est. tokens total:{" "}
-              {formatNumber(state.chunkStats.totalEstimatedTokens)}
-            </p>
-            <p>
-              Est. tokens per chunk (min / avg / max):{" "}
-              {formatNumber(state.chunkStats.minChunkEstimatedTokens)} /{" "}
-              {formatNumber(state.chunkStats.avgChunkEstimatedTokens)} /{" "}
-              {formatNumber(state.chunkStats.maxChunkEstimatedTokens)}
-            </p>
-            <p>
-              Overlap overhead:{" "}
+          <dl className="grid gap-3 sm:grid-cols-2">
+            <RagMetricCard label={copy.sourceTextChars}>
+              {formatNumber(state.chunkStats.sourceTextChars, language)}
+            </RagMetricCard>
+            <RagMetricCard label={copy.totalChunkChars}>
+              {formatNumber(state.chunkStats.totalChunkChars, language)}
+            </RagMetricCard>
+            <RagMetricCard label={copy.totalChunks}>
+              {formatNumber(state.chunkStats.totalChunks, language)}
+            </RagMetricCard>
+            <RagMetricCard label={copy.targetOverlap}>
+              {formatNumber(state.chunkStats.chunkSizeTarget, language)} /{" "}
+              {formatNumber(state.chunkStats.chunkOverlap, language)}
+            </RagMetricCard>
+            <RagMetricCard label={copy.minAvgMaxChunkChars}>
+              {formatNumber(state.chunkStats.minChunkChars, language)} /{" "}
+              {formatNumber(state.chunkStats.avgChunkChars, language)} /{" "}
+              {formatNumber(state.chunkStats.maxChunkChars, language)}
+            </RagMetricCard>
+            <RagMetricCard label={copy.minAvgMaxChunkWords}>
+              {formatNumber(state.chunkStats.minChunkWords, language)} /{" "}
+              {formatNumber(state.chunkStats.avgChunkWords, language)} /{" "}
+              {formatNumber(state.chunkStats.maxChunkWords, language)}
+            </RagMetricCard>
+            <RagMetricCard label={copy.estimatedTokensTotal}>
+              {formatNumber(state.chunkStats.totalEstimatedTokens, language)}
+            </RagMetricCard>
+            <RagMetricCard label={copy.estimatedTokensPerChunk}>
+              {formatNumber(state.chunkStats.minChunkEstimatedTokens, language)}{" "}
+              /{" "}
+              {formatNumber(state.chunkStats.avgChunkEstimatedTokens, language)}{" "}
+              /{" "}
+              {formatNumber(state.chunkStats.maxChunkEstimatedTokens, language)}
+            </RagMetricCard>
+            <RagMetricCard label={copy.overlapOverhead}>
               {state.chunkStats.overlapOverheadPct > 0 ? "+" : ""}
               {state.chunkStats.overlapOverheadPct}%
-            </p>
-            <p>
-              Embedding batches:{" "}
-              {formatNumber(state.chunkStats.embeddingBatchesPlanned)} (size{" "}
-              {formatNumber(state.chunkStats.embeddingBatchSize)})
-            </p>
-            <p>
-              Insert batches:{" "}
-              {formatNumber(state.chunkStats.insertBatchesPlanned)} (size{" "}
-              {formatNumber(state.chunkStats.insertBatchSize)})
-            </p>
-          </div>
+            </RagMetricCard>
+            <RagMetricCard label={copy.embeddingBatches}>
+              {formatNumber(state.chunkStats.embeddingBatchesPlanned, language)}{" "}
+              ({copy.size}{" "}
+              {formatNumber(state.chunkStats.embeddingBatchSize, language)})
+            </RagMetricCard>
+            <RagMetricCard label={copy.insertBatches}>
+              {formatNumber(state.chunkStats.insertBatchesPlanned, language)} (
+              {copy.size}{" "}
+              {formatNumber(state.chunkStats.insertBatchSize, language)})
+            </RagMetricCard>
+          </dl>
         </SurfacePanel>
       ) : null}
     </form>

@@ -34,10 +34,10 @@ const COMMUNICATION_ACTION_COPY: Record<
   },
   nl: {
     authRequired:
-      "Je moet ingelogd zijn om je communicatievoorkeuren bij te werken.",
-    saveFailed: "Je communicatievoorkeuren konden niet worden bijgewerkt.",
+      "U moet ingelogd zijn om uw communicatievoorkeuren bij te werken.",
+    saveFailed: "Uw communicatievoorkeuren konden niet worden bijgewerkt.",
     storageUnavailable:
-      "Je communicatievoorkeuren konden nu niet worden bijgewerkt. Probeer het later opnieuw.",
+      "Uw communicatievoorkeuren konden nu niet worden bijgewerkt. Probeer het later opnieuw.",
     success: "Communicatievoorkeuren bijgewerkt.",
   },
 };

@@ -14,12 +14,57 @@ import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { getLocalizedHomePath } from "@/lib/locale";
 
+const OCR_COPY = {
+  en: {
+    bestFor: "Best for clear manuscript crops and high-contrast scans.",
+    description:
+      "Upload a manuscript photo or scanned page and extract text into a reusable reading surface.",
+    emptyDescription:
+      "Upload an image and run Shenute OCR to preview extracted text here.",
+    emptyTitle: "No OCR output yet",
+    extract: "Extract Text",
+    extractedDescription:
+      "Review the OCR output before reusing it in Shenute AI or research notes.",
+    extractedTitle: "Extracted Text",
+    fallbackError: "Failed to process OCR.",
+    imageLabel: "Knowledge image",
+    running: "Running OCR...",
+    selectedFile: "Selected file:",
+    title: "Shenute OCR",
+    workflowDescription:
+      "The uploaded image is sent to the configured OCR service and returned as plain extracted text for review and reuse.",
+    workflowTitle: "OCR Workflow",
+  },
+  nl: {
+    bestFor:
+      "Werkt het best met duidelijke manuscriptuitsneden en scans met hoog contrast.",
+    description:
+      "Upload een manuscriptfoto of gescande pagina en haal de tekst eruit voor hergebruik in uw studieomgeving.",
+    emptyDescription:
+      "Upload een afbeelding en voer Shenute OCR uit om de herkende tekst hier te bekijken.",
+    emptyTitle: "Nog geen OCR-uitvoer",
+    extract: "Tekst herkennen",
+    extractedDescription:
+      "Controleer de OCR-uitvoer voordat u die opnieuw gebruikt in Shenute AI of onderzoeksnotities.",
+    extractedTitle: "Herkende tekst",
+    fallbackError: "OCR-verwerking is mislukt.",
+    imageLabel: "Kennisafbeelding",
+    running: "OCR uitvoeren...",
+    selectedFile: "Geselecteerd bestand:",
+    title: "Shenute OCR",
+    workflowDescription:
+      "De geuploade afbeelding wordt naar de geconfigureerde OCR-service gestuurd en komt terug als platte herkende tekst voor controle en hergebruik.",
+    workflowTitle: "OCR-workflow",
+  },
+} as const;
+
 /**
  * Provides a lightweight OCR workspace for testing Coptic image extraction
  * without leaving the shared app shell and form styling behind.
  */
 export default function OCRPage() {
   const { language, t } = useLanguage();
+  const copy = OCR_COPY[language];
   const [image, setImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState("");
@@ -54,7 +99,7 @@ export default function OCRPage() {
       setError(
         processingError instanceof Error
           ? processingError.message
-          : "Failed to process OCR.",
+          : copy.fallbackError,
       );
     } finally {
       setLoading(false);
@@ -74,14 +119,14 @@ export default function OCRPage() {
       <BreadcrumbTrail
         items={[
           { label: t("nav.home"), href: getLocalizedHomePath(language) },
-          { label: "Shenute OCR" },
+          { label: copy.title },
         ]}
       />
 
       <SurfacePanel rounded="4xl" shadow="float" className="p-6 md:p-8">
         <PageHeader
-          title="Shenute OCR"
-          description="Upload a manuscript photo or scanned page and extract text into a reusable reading surface."
+          title={copy.title}
+          description={copy.description}
           align="left"
           size="compact"
           tone="sky"
@@ -93,7 +138,7 @@ export default function OCRPage() {
           <div className="space-y-5">
             <label className="block space-y-2">
               <span className="text-sm font-semibold text-stone-700 dark:text-stone-200">
-                Knowledge image
+                {copy.imageLabel}
               </span>
               <input
                 type="file"
@@ -119,10 +164,10 @@ export default function OCRPage() {
                 className={buttonClassName({ className: "px-5" })}
               >
                 <ScanSearch className="h-4 w-4" />
-                {loading ? "Running OCR..." : "Extract Text"}
+                {loading ? copy.running : copy.extract}
               </button>
               <p className="text-sm text-stone-500 dark:text-stone-400">
-                Best for clear manuscript crops and high-contrast scans.
+                {copy.bestFor}
               </p>
             </div>
           </div>
@@ -139,16 +184,15 @@ export default function OCRPage() {
               </div>
               <div className="space-y-2">
                 <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
-                  OCR Workflow
+                  {copy.workflowTitle}
                 </h2>
                 <p className="text-sm leading-6 text-stone-600 dark:text-stone-400">
-                  The uploaded image is sent to the configured OCR service and
-                  returned as plain extracted text for review and reuse.
+                  {copy.workflowDescription}
                 </p>
               </div>
               {image ? (
                 <div className="rounded-2xl border border-stone-200 bg-stone-50/80 px-4 py-3 text-sm text-stone-600 dark:border-stone-700 dark:bg-stone-950/40 dark:text-stone-300">
-                  Selected file:{" "}
+                  {copy.selectedFile}{" "}
                   <span className="font-semibold">{image.name}</span>
                 </div>
               ) : null}
@@ -165,11 +209,10 @@ export default function OCRPage() {
             </div>
             <div>
               <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
-                Extracted Text
+                {copy.extractedTitle}
               </h2>
               <p className="text-sm text-stone-500 dark:text-stone-400">
-                Review the OCR output before reusing it in chat or research
-                notes.
+                {copy.extractedDescription}
               </p>
             </div>
           </div>
@@ -179,8 +222,8 @@ export default function OCRPage() {
         </SurfacePanel>
       ) : (
         <EmptyState
-          title="No OCR output yet"
-          description="Upload an image and run Shenute OCR to preview extracted text here."
+          title={copy.emptyTitle}
+          description={copy.emptyDescription}
         />
       )}
     </PageShell>

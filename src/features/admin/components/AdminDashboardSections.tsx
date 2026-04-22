@@ -24,6 +24,447 @@ import { AdminAudienceContactCard } from "@/features/communications/components/A
 import { CreateContentReleaseForm } from "@/features/communications/components/CreateContentReleaseForm";
 import { SyncAudienceContactsForm } from "@/features/communications/components/SyncAudienceContactsForm";
 import { AdminNotificationEventCard } from "@/features/notifications/components/AdminNotificationEventCard";
+import type { Language } from "@/types/i18n";
+
+const adminDashboardSectionsCopy = {
+  en: {
+    audience: {
+      dbError:
+        "Database Error: Could not load audience contacts. Make sure you've run the latest SQL setup script.",
+      description:
+        "Track who has opted into release emails before you start sending lesson or publication announcements. The list keeps actionable contacts in full and shows a recent inactive window below them.",
+      emptyDescription:
+        "Opt-ins from the contact form, signup flow, and dashboard preferences will appear here.",
+      emptyTitle: "No audience contacts yet.",
+      lessons: "Lessons",
+      noSummary: "No contacts yet",
+      overflowLabel: "audience contact",
+      overflowPluralLabel: "audience contacts",
+      reachable: "reachable",
+      summaryTotal: "total",
+      synced: "Synced",
+      syncErrors: "Sync errors",
+      title: "Audience communication",
+    },
+    communicationsDesk: {
+      activeReleases: "Active releases",
+      audienceSyncDescription:
+        "Push the current audience preferences to Resend before sending a release, especially after new signups or preference changes.",
+      audienceSyncTitle: "Audience sync",
+      badge: "Communications Desk",
+      booksGeneral: "Books + general",
+      description:
+        "Draft new announcements here, keep the audience in sync with Resend, and let the release and contact history sit further down the page instead of crowding the compose flow.",
+      draftInputsDescription:
+        "Published lessons and publications currently available to announce.",
+      draftInputsLabel: "Draft inputs",
+      inQueueDescription:
+        "Releases already queued or actively delivering in the background.",
+      inQueueLabel: "In queue",
+      lessons: "Lessons",
+      reachableAudienceDescription:
+        "Contacts who can receive lessons, books, or general updates now.",
+      reachableAudienceLabel: "Reachable audience",
+      synced: "Synced",
+      syncErrors: "Sync errors",
+      syncHealthDescription:
+        "Contacts with sync issues that need a resend or manual check.",
+      syncHealthLabel: "Sync health",
+      title: "Plan releases without carrying the review queues with you",
+    },
+    contactInbox: {
+      active: "Active",
+      answered: "Answered",
+      dbError:
+        "Database Error: Could not load contact messages. Make sure you've run the latest SQL setup script.",
+      description:
+        "Triage public contact messages, keep track of replies, and note who wants future updates.",
+      emptyDescription:
+        "When visitors send a message from the contact page, it will appear here for follow-up.",
+      emptyTitle: "No contact messages yet.",
+      summaryLabels: {
+        active: "active",
+        none: "No messages",
+        plural: "messages",
+        singular: "message",
+        total: "total",
+      },
+      title: "Contact inbox",
+    },
+    entryReports: {
+      dbError:
+        "Database Error: Could not load dictionary entry reports. Make sure you've run the latest SQL setup script.",
+      description:
+        "Review flagged lemmas, inspect the current published meaning, and move each report through your inbox.",
+      emptyDescription:
+        "When readers flag entries from the dictionary, they will appear here for review.",
+      emptyTitle: "No dictionary reports yet.",
+      open: "Open",
+      resolved: "Resolved",
+      summaryLabels: {
+        active: "active",
+        none: "No reports",
+        plural: "reports",
+        singular: "report",
+        total: "total",
+      },
+      title: "Dictionary entry reports",
+    },
+    notifications: {
+      attentionDescription:
+        "Failures and still-queued notifications stay at the top.",
+      attentionLabel: "Needs attention",
+      dbError:
+        "Database Error: Could not load notification activity. Make sure you've run the latest SQL setup script.",
+      description:
+        "Use this as a reference area for delivery health: failed or queued events first, then a bounded recent success log beneath.",
+      emptyDescription:
+        "Notification events will appear here once contact alerts, submission alerts, and review emails have been sent.",
+      emptyHistory:
+        "Successful sends will collect here once the system starts delivering notifications.",
+      emptyIssues: "No notification issues are waiting right now.",
+      emptyTitle: "No notification activity yet.",
+      failed: "Failed",
+      historyDescription:
+        "Successful sends stay available here as a quieter recent audit trail.",
+      historyLabel: "Recent delivery log",
+      historyOverflowLabel: "history event",
+      historyOverflowPluralLabel: "history events",
+      noSummary: "No notification activity yet",
+      notificationOverflowLabel: "notification",
+      notificationOverflowPluralLabel: "notifications",
+      recentSent: "Recent sent",
+      sentInRecentLog: "sent in recent log",
+      title: "Notification log",
+    },
+    quickJump: {
+      badge: "Quick Jump",
+      descriptions: {
+        communications:
+          "Focus on outbound announcements and audience health without carrying the review queues with you.",
+        review:
+          "Stay inside the live teaching queues. History now lives inside each section, so this view stays focused on work that still needs you.",
+        system:
+          "Inspect delivery health and operational alerts without the rest of the workspace competing for attention.",
+      },
+      links: {
+        alerts: "Alerts",
+        audience: "Audience",
+        inbox: "Inbox",
+        releases: "Releases",
+        reports: "Reports",
+        submissions: "Submissions",
+      },
+    },
+    rag: {
+      description:
+        "Upload knowledge files to enrich Shenute AI context. Files are parsed, OCR-checked, chunked (default target 1600 chars with 200 overlap), embedded via your selected provider (Hugging Face or Gemini), and stored in pgvector. RAG status also tracks dictionary.json and grammar JSON knowledge sources.",
+      destination: "Destination",
+      embeddings: "Embeddings",
+      selectable: "selectable",
+      summary: "Multi-file ingestion with OCR + embeddings",
+      title: "RAG knowledge ingestion",
+    },
+    releases: {
+      active: "active",
+      candidates: "Candidates",
+      dbError:
+        "Database Error: Could not load content releases. Make sure you've run the latest SQL setup script.",
+      description:
+        "Build snapshot-based announcement drafts for published lessons and publications. The list below shows the latest release activity window so the workspace stays lightweight.",
+      emptyDescription:
+        "Create a draft above to snapshot the published lessons or publications you want to announce.",
+      emptyTitle: "No release drafts yet.",
+      inQueue: "In queue",
+      noSummary: "No release drafts yet",
+      readyOrLive: "Ready or live",
+      recentWindow: "in recent window",
+      title: "Release drafts",
+    },
+    reviewInbox: {
+      activeDescription:
+        "Start with the live queues below. Reviewed, archived, and resolved work stays tucked into each section's history view so this mode can stay calm.",
+      activeTitleSuffix: "active items need attention",
+      badge: "Review Inbox",
+      clearDescription:
+        "Nothing urgent is waiting right now. You can still open each section to revisit history or switch into Communications and System when you want the slower administrative work.",
+      clearTitle: "Your review queues are clear",
+      liveQueues: "Live queues",
+      links: {
+        inbox: {
+          label: "Inbox",
+          note: "Open conversations from learners and visitors.",
+        },
+        reports: {
+          label: "Reports",
+          note: "Dictionary feedback and entry issues to resolve.",
+        },
+        submissions: {
+          label: "Submissions",
+          note: "Translation work waiting for scoring and feedback.",
+        },
+      },
+    },
+    submissions: {
+      dbError:
+        "Database Error: Could not load submissions. Make sure you've run the SQL setup script.",
+      description:
+        "Review translation work, assign a score, and return feedback to students.",
+      needsReview: "Needs review",
+      reviewed: "Reviewed",
+      summaryLabels: {
+        active: "active",
+        none: "No submissions",
+        plural: "submissions",
+        singular: "submission",
+        total: "total",
+      },
+      title: "Exercise submissions",
+    },
+    systemHealth: {
+      badge: "System Health",
+      description:
+        "This mode is meant for quiet operational checks. Failures and queued sends surface first, while successful delivery history sits below as a reference log.",
+      failedDescription: "Notifications that need investigation or a resend.",
+      failedLabel: "Failed",
+      failedNotifications: "Failed notifications",
+      issuePlural: "delivery issues need attention",
+      issueSingular: "delivery issue needs attention",
+      queuedDescription:
+        "Events that are waiting to process or still completing.",
+      queuedLabel: "Queued",
+      recentSentDescription:
+        "Successfully delivered notifications in the recent log window.",
+      recentSentLabel: "Recent sent",
+      steadyTitle: "Delivery health is steady",
+    },
+  },
+  nl: {
+    audience: {
+      dbError:
+        "Databasefout: publiekscontacten konden niet worden geladen. Controleer of u het nieuwste SQL-installatiescript hebt uitgevoerd.",
+      description:
+        "Volg wie zich heeft aangemeld voor release-e-mails voordat u les- of publicatieaankondigingen verstuurt. De lijst toont actiegerichte contacten volledig en plaatst een recent inactief venster daaronder.",
+      emptyDescription:
+        "Aanmeldingen via het contactformulier, de registratieflow en dashboardvoorkeuren verschijnen hier.",
+      emptyTitle: "Nog geen publiekscontacten.",
+      lessons: "Lessen",
+      noSummary: "Nog geen contacten",
+      overflowLabel: "publiekscontact",
+      overflowPluralLabel: "publiekscontacten",
+      reachable: "bereikbaar",
+      summaryTotal: "totaal",
+      synced: "Gesynchroniseerd",
+      syncErrors: "Synchronisatiefouten",
+      title: "Publiekscommunicatie",
+    },
+    communicationsDesk: {
+      activeReleases: "Actieve releases",
+      audienceSyncDescription:
+        "Stuur de huidige publieksvoorkeuren naar Resend voordat u een release verstuurt, vooral na nieuwe aanmeldingen of voorkeurwijzigingen.",
+      audienceSyncTitle: "Publiekssynchronisatie",
+      badge: "Communicatiedesk",
+      booksGeneral: "Boeken + algemeen",
+      description:
+        "Maak hier nieuwe aankondigingen, houd het publiek gesynchroniseerd met Resend en laat release- en contactgeschiedenis lager op de pagina staan zodat de opstelstroom rustig blijft.",
+      draftInputsDescription:
+        "Gepubliceerde lessen en publicaties die nu aangekondigd kunnen worden.",
+      draftInputsLabel: "Conceptbronnen",
+      inQueueDescription:
+        "Releases die al in de wachtrij staan of op de achtergrond worden verzonden.",
+      inQueueLabel: "In wachtrij",
+      lessons: "Lessen",
+      reachableAudienceDescription:
+        "Contacten die nu lessen, boeken of algemene updates kunnen ontvangen.",
+      reachableAudienceLabel: "Bereikbaar publiek",
+      synced: "Gesynchroniseerd",
+      syncErrors: "Synchronisatiefouten",
+      syncHealthDescription:
+        "Contacten met synchronisatieproblemen waarvoor opnieuw verzenden of een handmatige controle nodig is.",
+      syncHealthLabel: "Synchronisatiestatus",
+      title: "Plan releases zonder de beoordelingswachtrijen erbij te houden",
+    },
+    contactInbox: {
+      active: "Actief",
+      answered: "Beantwoord",
+      dbError:
+        "Databasefout: contactberichten konden niet worden geladen. Controleer of u het nieuwste SQL-installatiescript hebt uitgevoerd.",
+      description:
+        "Behandel openbare contactberichten, houd antwoorden bij en noteer wie toekomstige updates wil ontvangen.",
+      emptyDescription:
+        "Wanneer bezoekers een bericht via de contactpagina sturen, verschijnt het hier voor opvolging.",
+      emptyTitle: "Nog geen contactberichten.",
+      summaryLabels: {
+        active: "actief",
+        none: "Geen berichten",
+        plural: "berichten",
+        singular: "bericht",
+        total: "totaal",
+      },
+      title: "Contactinbox",
+    },
+    entryReports: {
+      dbError:
+        "Databasefout: woordenboekmeldingen konden niet worden geladen. Controleer of u het nieuwste SQL-installatiescript hebt uitgevoerd.",
+      description:
+        "Beoordeel gemarkeerde lemma's, controleer de huidige gepubliceerde betekenis en verwerk elk rapport in uw inbox.",
+      emptyDescription:
+        "Wanneer lezers woordenboekitems markeren, verschijnen ze hier voor beoordeling.",
+      emptyTitle: "Nog geen woordenboekmeldingen.",
+      open: "Open",
+      resolved: "Opgelost",
+      summaryLabels: {
+        active: "actief",
+        none: "Geen rapporten",
+        plural: "rapporten",
+        singular: "rapport",
+        total: "totaal",
+      },
+      title: "Woordenboekmeldingen",
+    },
+    notifications: {
+      attentionDescription:
+        "Mislukte en nog wachtrijstaande meldingen blijven bovenaan.",
+      attentionLabel: "Vraagt aandacht",
+      dbError:
+        "Databasefout: meldingsactiviteit kon niet worden geladen. Controleer of u het nieuwste SQL-installatiescript hebt uitgevoerd.",
+      description:
+        "Gebruik dit als referentiegebied voor leveringsstatus: mislukte of wachtrijstaande events eerst, daarna een begrensd recent succeslog.",
+      emptyDescription:
+        "Meldingsevents verschijnen hier zodra contactmeldingen, inzendingsmeldingen en beoordelingsmails zijn verstuurd.",
+      emptyHistory:
+        "Succesvolle verzendingen worden hier verzameld zodra het systeem meldingen begint te bezorgen.",
+      emptyIssues: "Er wachten nu geen meldingsproblemen.",
+      emptyTitle: "Nog geen meldingsactiviteit.",
+      failed: "Mislukt",
+      historyDescription:
+        "Succesvolle verzendingen blijven hier beschikbaar als rustig recent auditspoor.",
+      historyLabel: "Recent leveringslog",
+      historyOverflowLabel: "geschiedenisitem",
+      historyOverflowPluralLabel: "geschiedenisitems",
+      noSummary: "Nog geen meldingsactiviteit",
+      notificationOverflowLabel: "melding",
+      notificationOverflowPluralLabel: "meldingen",
+      recentSent: "Recent verzonden",
+      sentInRecentLog: "verzonden in recent log",
+      title: "Meldingenlog",
+    },
+    quickJump: {
+      badge: "Snelle sprong",
+      descriptions: {
+        communications:
+          "Richt u op uitgaande aankondigingen en publieksstatus zonder de beoordelingswachtrijen erbij te houden.",
+        review:
+          "Blijf in de actieve onderwijswachtrijen. Geschiedenis staat nu in elke sectie, zodat deze weergave gericht blijft op werk dat nog aandacht vraagt.",
+        system:
+          "Controleer leveringsstatus en operationele meldingen zonder dat de rest van de werkruimte om aandacht vraagt.",
+      },
+      links: {
+        alerts: "Meldingen",
+        audience: "Publiek",
+        inbox: "Inbox",
+        releases: "Releases",
+        reports: "Rapporten",
+        submissions: "Inzendingen",
+      },
+    },
+    rag: {
+      description:
+        "Upload kennisbestanden om de context van Shenute AI te verrijken. Bestanden worden geparsed, via OCR gecontroleerd, in chunks verdeeld (standaarddoel 1600 tekens met 200 overlap), ingebed via de geselecteerde provider (Hugging Face of Gemini) en opgeslagen in pgvector. De RAG-status volgt ook dictionary.json en grammatica-JSON-kennisbronnen.",
+      destination: "Bestemming",
+      embeddings: "Embeddings",
+      selectable: "selecteerbaar",
+      summary: "Invoer van meerdere bestanden met OCR + embeddings",
+      title: "RAG-kennisinvoer",
+    },
+    releases: {
+      active: "actief",
+      candidates: "Kandidaten",
+      dbError:
+        "Databasefout: releaseconcepten konden niet worden geladen. Controleer of u het nieuwste SQL-installatiescript hebt uitgevoerd.",
+      description:
+        "Maak snapshotgebaseerde aankondigingsconcepten voor gepubliceerde lessen en publicaties. De lijst hieronder toont de nieuwste release-activiteit zodat de werkruimte licht blijft.",
+      emptyDescription:
+        "Maak hierboven een concept om de gepubliceerde lessen of publicaties vast te leggen die u wilt aankondigen.",
+      emptyTitle: "Nog geen releaseconcepten.",
+      inQueue: "In wachtrij",
+      noSummary: "Nog geen releaseconcepten",
+      readyOrLive: "Klaar of live",
+      recentWindow: "in recent venster",
+      title: "Releaseconcepten",
+    },
+    reviewInbox: {
+      activeDescription:
+        "Begin met de actieve wachtrijen hieronder. Beoordeeld, gearchiveerd en opgelost werk staat in de geschiedenis van elke sectie, zodat deze modus rustig blijft.",
+      activeTitleSuffix: "actieve items vragen aandacht",
+      badge: "Beoordelingsinbox",
+      clearDescription:
+        "Er wacht nu niets dringends. U kunt elke sectie openen om geschiedenis te bekijken of overschakelen naar Communicatie en Systeem voor trager administratief werk.",
+      clearTitle: "Uw beoordelingswachtrijen zijn leeg",
+      liveQueues: "Actieve wachtrijen",
+      links: {
+        inbox: {
+          label: "Inbox",
+          note: "Open gesprekken van studenten en bezoekers.",
+        },
+        reports: {
+          label: "Rapporten",
+          note: "Woordenboekfeedback en itemproblemen om op te lossen.",
+        },
+        submissions: {
+          label: "Inzendingen",
+          note: "Vertaalwerk dat wacht op score en feedback.",
+        },
+      },
+    },
+    submissions: {
+      dbError:
+        "Databasefout: inzendingen konden niet worden geladen. Controleer of u het SQL-installatiescript hebt uitgevoerd.",
+      description:
+        "Beoordeel vertaalwerk, geef een score en stuur feedback terug naar studenten.",
+      needsReview: "Te beoordelen",
+      reviewed: "Beoordeeld",
+      summaryLabels: {
+        active: "actief",
+        none: "Geen inzendingen",
+        plural: "inzendingen",
+        singular: "inzending",
+        total: "totaal",
+      },
+      title: "Oefeninzendingen",
+    },
+    systemHealth: {
+      badge: "Systeemstatus",
+      description:
+        "Deze modus is bedoeld voor rustige operationele controles. Mislukkingen en wachtrij-items komen eerst; succesvolle leveringsgeschiedenis staat daaronder als referentielog.",
+      failedDescription:
+        "Meldingen waarvoor onderzoek of opnieuw verzenden nodig is.",
+      failedLabel: "Mislukt",
+      failedNotifications: "Mislukte meldingen",
+      issuePlural: "leveringsproblemen vragen aandacht",
+      issueSingular: "leveringsprobleem vraagt aandacht",
+      queuedDescription:
+        "Events die wachten op verwerking of nog worden afgerond.",
+      queuedLabel: "In wachtrij",
+      recentSentDescription:
+        "Succesvol bezorgde meldingen in het recente logvenster.",
+      recentSentLabel: "Recent verzonden",
+      steadyTitle: "De leveringsstatus is stabiel",
+    },
+  },
+} as const;
+
+type SectionSummaryLabels = {
+  active: string;
+  none: string;
+  plural: string;
+  singular: string;
+  total: string;
+};
+
+function formatAdminNumber(value: number, language: Language) {
+  return value.toLocaleString(language === "nl" ? "nl-BE" : "en-US");
+}
 
 function AdminDatabaseErrorState({ message }: { message: string }) {
   return (
@@ -33,37 +474,52 @@ function AdminDatabaseErrorState({ message }: { message: string }) {
   );
 }
 
-function buildSectionSummary(total: number, active: number, label: string) {
+function buildSectionSummary({
+  active,
+  labels,
+  language,
+  total,
+}: {
+  active: number;
+  labels: SectionSummaryLabels;
+  language: Language;
+  total: number;
+}) {
   if (total === 0) {
-    return `No ${label.toLowerCase()}`;
+    return labels.none;
   }
 
   if (active <= 0) {
-    return `${total} ${label.toLowerCase()}`;
+    return `${formatAdminNumber(total, language)} ${
+      total === 1 ? labels.singular : labels.plural
+    }`;
   }
 
-  return `${active} active · ${total} total`;
+  return `${formatAdminNumber(active, language)} ${labels.active} · ${formatAdminNumber(total, language)} ${labels.total}`;
 }
 
 export function AdminWorkspaceQuickJump({
+  language,
   overview,
   mode,
 }: {
+  language: Language;
   overview: AdminWorkspaceOverview;
   mode: AdminWorkspaceMode;
 }) {
+  const copy = adminDashboardSectionsCopy[language].quickJump;
   const allLinks = {
     communications: [
       {
         count: overview.actionableReleaseCount,
         href: "#admin-releases",
-        label: "Releases",
+        label: copy.links.releases,
         tone: overview.actionableReleaseCount > 0 ? "coptic" : "surface",
       },
       {
         count: overview.audienceSyncErrorCount,
         href: "#admin-audience",
-        label: "Audience",
+        label: copy.links.audience,
         tone: overview.audienceSyncErrorCount > 0 ? "accent" : "surface",
       },
     ],
@@ -71,19 +527,19 @@ export function AdminWorkspaceQuickJump({
       {
         count: overview.pendingSubmissionCount,
         href: "#admin-submissions",
-        label: "Submissions",
+        label: copy.links.submissions,
         tone: overview.pendingSubmissionCount > 0 ? "accent" : "surface",
       },
       {
         count: overview.openContactMessageCount,
         href: "#admin-contact-inbox",
-        label: "Inbox",
+        label: copy.links.inbox,
         tone: overview.openContactMessageCount > 0 ? "accent" : "surface",
       },
       {
         count: overview.openEntryReportCount,
         href: "#admin-entry-reports",
-        label: "Reports",
+        label: copy.links.reports,
         tone: overview.openEntryReportCount > 0 ? "accent" : "surface",
       },
     ],
@@ -91,29 +547,20 @@ export function AdminWorkspaceQuickJump({
       {
         count: overview.failedNotificationCount,
         href: "#admin-notifications",
-        label: "Alerts",
+        label: copy.links.alerts,
         tone: overview.failedNotificationCount > 0 ? "accent" : "surface",
       },
     ],
   } as const;
 
   const links = allLinks[mode];
-  let modeDescription =
-    "Inspect delivery health and operational alerts without the rest of the workspace competing for attention.";
-
-  if (mode === "review") {
-    modeDescription =
-      "Stay inside the live teaching queues. History now lives inside each section, so this view stays focused on work that still needs you.";
-  } else if (mode === "communications") {
-    modeDescription =
-      "Focus on outbound announcements and audience health without carrying the review queues with you.";
-  }
+  const modeDescription = copy.descriptions[mode];
 
   return (
     <nav className="app-sticky-panel mb-8 rounded-[2rem] border border-stone-200/80 bg-white/85 p-4 shadow-lg backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/75 dark:shadow-black/20">
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <Badge tone="flat" size="xs" caps>
-          Quick Jump
+          {copy.badge}
         </Badge>
         <p className="text-sm text-stone-600 dark:text-stone-400">
           {modeDescription}
@@ -132,7 +579,7 @@ export function AdminWorkspaceQuickJump({
               size="sm"
               className="transition hover:-translate-y-0.5"
             >
-              {link.label}: {link.count}
+              {link.label}: {formatAdminNumber(link.count, language)}
             </Badge>
           </a>
         ))}
@@ -142,10 +589,13 @@ export function AdminWorkspaceQuickJump({
 }
 
 export function AdminReviewInboxSummary({
+  language,
   overview,
 }: {
+  language: Language;
   overview: AdminWorkspaceOverview;
 }) {
+  const copy = adminDashboardSectionsCopy[language].reviewInbox;
   const reviewQueueTotal =
     overview.pendingSubmissionCount +
     overview.openContactMessageCount +
@@ -154,22 +604,22 @@ export function AdminReviewInboxSummary({
     {
       count: overview.pendingSubmissionCount,
       href: "#admin-submissions",
-      label: "Submissions",
-      note: "Translation work waiting for scoring and feedback.",
+      label: copy.links.submissions.label,
+      note: copy.links.submissions.note,
       tone: overview.pendingSubmissionCount > 0 ? "accent" : "surface",
     },
     {
       count: overview.openContactMessageCount,
       href: "#admin-contact-inbox",
-      label: "Inbox",
-      note: "Open conversations from learners and visitors.",
+      label: copy.links.inbox.label,
+      note: copy.links.inbox.note,
       tone: overview.openContactMessageCount > 0 ? "accent" : "surface",
     },
     {
       count: overview.openEntryReportCount,
       href: "#admin-entry-reports",
-      label: "Reports",
-      note: "Dictionary feedback and entry issues to resolve.",
+      label: copy.links.reports.label,
+      note: copy.links.reports.note,
       tone: overview.openEntryReportCount > 0 ? "accent" : "surface",
     },
   ] as const;
@@ -179,24 +629,24 @@ export function AdminReviewInboxSummary({
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
           <Badge tone="accent" size="xs" caps>
-            Review Inbox
+            {copy.badge}
           </Badge>
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
               {reviewQueueTotal > 0
-                ? `${reviewQueueTotal} active items need attention`
-                : "Your review queues are clear"}
+                ? `${formatAdminNumber(reviewQueueTotal, language)} ${copy.activeTitleSuffix}`
+                : copy.clearTitle}
             </h2>
             <p className="max-w-3xl text-sm leading-7 text-stone-600 dark:text-stone-400">
               {reviewQueueTotal > 0
-                ? "Start with the live queues below. Reviewed, archived, and resolved work stays tucked into each section's history view so this mode can stay calm."
-                : "Nothing urgent is waiting right now. You can still open each section to revisit history or switch into Communications and System when you want the slower administrative work."}
+                ? copy.activeDescription
+                : copy.clearDescription}
             </p>
           </div>
         </div>
 
         <Badge tone={reviewQueueTotal > 0 ? "coptic" : "surface"} size="sm">
-          Live queues: {reviewQueueTotal}
+          {copy.liveQueues}: {formatAdminNumber(reviewQueueTotal, language)}
         </Badge>
       </div>
 
@@ -212,7 +662,7 @@ export function AdminReviewInboxSummary({
                 {queue.label}
               </span>
               <Badge tone={queue.tone} size="xs">
-                {queue.count}
+                {formatAdminNumber(queue.count, language)}
               </Badge>
             </div>
             <p className="mt-3 text-sm leading-6 text-stone-600 dark:text-stone-400">
@@ -228,12 +678,15 @@ export function AdminReviewInboxSummary({
 export function AdminCommunicationsDesk({
   audience,
   contentReleases,
+  language,
   overview,
 }: {
   audience: AdminDashboardData["audience"];
   contentReleases: AdminDashboardData["contentReleases"];
+  language: Language;
   overview: AdminWorkspaceOverview;
 }) {
+  const copy = adminDashboardSectionsCopy[language].communicationsDesk;
   const totalCandidates =
     contentReleases.lessonReleaseCandidates.length +
     contentReleases.publicationReleaseCandidates.length;
@@ -245,16 +698,14 @@ export function AdminCommunicationsDesk({
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
           <Badge tone="coptic" size="xs" caps>
-            Communications Desk
+            {copy.badge}
           </Badge>
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
-              Plan releases without carrying the review queues with you
+              {copy.title}
             </h2>
             <p className="max-w-3xl text-sm leading-7 text-stone-600 dark:text-stone-400">
-              Draft new announcements here, keep the audience in sync with
-              Resend, and let the release and contact history sit further down
-              the page instead of crowding the compose flow.
+              {copy.description}
             </p>
           </div>
         </div>
@@ -263,7 +714,8 @@ export function AdminCommunicationsDesk({
           tone={overview.actionableReleaseCount > 0 ? "coptic" : "surface"}
           size="sm"
         >
-          Active releases: {overview.actionableReleaseCount}
+          {copy.activeReleases}:{" "}
+          {formatAdminNumber(overview.actionableReleaseCount, language)}
         </Badge>
       </div>
 
@@ -276,13 +728,13 @@ export function AdminCommunicationsDesk({
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-            Reachable audience
+            {copy.reachableAudienceLabel}
           </p>
           <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
-            {reachableAudienceCount}
+            {formatAdminNumber(reachableAudienceCount, language)}
           </p>
           <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
-            Contacts who can receive lessons, books, or general updates now.
+            {copy.reachableAudienceDescription}
           </p>
         </div>
 
@@ -294,13 +746,13 @@ export function AdminCommunicationsDesk({
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-            Sync health
+            {copy.syncHealthLabel}
           </p>
           <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
-            {audience.metrics.resendSyncErrorCount}
+            {formatAdminNumber(audience.metrics.resendSyncErrorCount, language)}
           </p>
           <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
-            Contacts with sync issues that need a resend or manual check.
+            {copy.syncHealthDescription}
           </p>
         </div>
 
@@ -312,13 +764,13 @@ export function AdminCommunicationsDesk({
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-            Draft inputs
+            {copy.draftInputsLabel}
           </p>
           <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
-            {totalCandidates}
+            {formatAdminNumber(totalCandidates, language)}
           </p>
           <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
-            Published lessons and publications currently available to announce.
+            {copy.draftInputsDescription}
           </p>
         </div>
 
@@ -330,18 +782,19 @@ export function AdminCommunicationsDesk({
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-            In queue
+            {copy.inQueueLabel}
           </p>
           <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
-            {
+            {formatAdminNumber(
               contentReleases.items.filter(
                 (release) =>
                   release.status === "queued" || release.status === "sending",
-              ).length
-            }
+              ).length,
+              language,
+            )}
           </p>
           <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
-            Releases already queued or actively delivering in the background.
+            {copy.inQueueDescription}
           </p>
         </div>
       </div>
@@ -361,7 +814,11 @@ export function AdminCommunicationsDesk({
         >
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone="surface" size="xs">
-              Synced: {audience.metrics.resendSyncedAudienceCount}
+              {copy.synced}:{" "}
+              {formatAdminNumber(
+                audience.metrics.resendSyncedAudienceCount,
+                language,
+              )}
             </Badge>
             <Badge
               tone={
@@ -369,35 +826,44 @@ export function AdminCommunicationsDesk({
               }
               size="xs"
             >
-              Sync errors: {audience.metrics.resendSyncErrorCount}
+              {copy.syncErrors}:{" "}
+              {formatAdminNumber(
+                audience.metrics.resendSyncErrorCount,
+                language,
+              )}
             </Badge>
           </div>
 
           <h3 className="mt-4 text-xl font-semibold text-stone-950 dark:text-stone-50">
-            Audience sync
+            {copy.audienceSyncTitle}
           </h3>
           <p className="mt-3 text-sm leading-7 text-stone-600 dark:text-stone-400">
-            Push the current audience preferences to Resend before sending a
-            release, especially after new signups or preference changes.
+            {copy.audienceSyncDescription}
           </p>
 
           <div className="mt-6 space-y-4">
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-4 dark:border-stone-800 dark:bg-stone-950/40">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-                  Lessons
+                  {copy.lessons}
                 </p>
                 <p className="mt-2 text-lg font-semibold text-stone-950 dark:text-stone-50">
-                  {audience.metrics.lessonAudienceCount}
+                  {formatAdminNumber(
+                    audience.metrics.lessonAudienceCount,
+                    language,
+                  )}
                 </p>
               </div>
               <div className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-4 dark:border-stone-800 dark:bg-stone-950/40">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-                  Books + general
+                  {copy.booksGeneral}
                 </p>
                 <p className="mt-2 text-lg font-semibold text-stone-950 dark:text-stone-50">
-                  {audience.metrics.bookAudienceCount +
-                    audience.metrics.generalAudienceCount}
+                  {formatAdminNumber(
+                    audience.metrics.bookAudienceCount +
+                      audience.metrics.generalAudienceCount,
+                    language,
+                  )}
                 </p>
               </div>
             </div>
@@ -411,12 +877,15 @@ export function AdminCommunicationsDesk({
 }
 
 export function AdminSystemHealthSummary({
+  language,
   overview,
   notifications,
 }: {
+  language: Language;
   overview: AdminWorkspaceOverview;
   notifications: AdminDashboardData["notifications"];
 }) {
+  const copy = adminDashboardSectionsCopy[language].systemHealth;
   const queuedNotificationCount = notifications.items.filter(
     (event) => event.status === "queued",
   ).length;
@@ -426,18 +895,23 @@ export function AdminSystemHealthSummary({
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
           <Badge tone="surface" size="xs" caps>
-            System Health
+            {copy.badge}
           </Badge>
           <div className="space-y-2">
             <h2 className="text-2xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
               {overview.failedNotificationCount > 0
-                ? `${overview.failedNotificationCount} delivery issue${overview.failedNotificationCount === 1 ? "" : "s"} need attention`
-                : "Delivery health is steady"}
+                ? `${formatAdminNumber(
+                    overview.failedNotificationCount,
+                    language,
+                  )} ${
+                    overview.failedNotificationCount === 1
+                      ? copy.issueSingular
+                      : copy.issuePlural
+                  }`
+                : copy.steadyTitle}
             </h2>
             <p className="max-w-3xl text-sm leading-7 text-stone-600 dark:text-stone-400">
-              This mode is meant for quiet operational checks. Failures and
-              queued sends surface first, while successful delivery history sits
-              below as a reference log.
+              {copy.description}
             </p>
           </div>
         </div>
@@ -446,7 +920,8 @@ export function AdminSystemHealthSummary({
           tone={overview.failedNotificationCount > 0 ? "accent" : "surface"}
           size="sm"
         >
-          Failed notifications: {overview.failedNotificationCount}
+          {copy.failedNotifications}:{" "}
+          {formatAdminNumber(overview.failedNotificationCount, language)}
         </Badge>
       </div>
 
@@ -459,13 +934,16 @@ export function AdminSystemHealthSummary({
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-            Failed
+            {copy.failedLabel}
           </p>
           <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
-            {notifications.metrics.failedNotificationCount}
+            {formatAdminNumber(
+              notifications.metrics.failedNotificationCount,
+              language,
+            )}
           </p>
           <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
-            Notifications that need investigation or a resend.
+            {copy.failedDescription}
           </p>
         </div>
 
@@ -477,13 +955,13 @@ export function AdminSystemHealthSummary({
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-            Queued
+            {copy.queuedLabel}
           </p>
           <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
-            {queuedNotificationCount}
+            {formatAdminNumber(queuedNotificationCount, language)}
           </p>
           <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
-            Events that are waiting to process or still completing.
+            {copy.queuedDescription}
           </p>
         </div>
 
@@ -495,13 +973,16 @@ export function AdminSystemHealthSummary({
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-            Recent sent
+            {copy.recentSentLabel}
           </p>
           <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
-            {notifications.metrics.sentNotificationCount}
+            {formatAdminNumber(
+              notifications.metrics.sentNotificationCount,
+              language,
+            )}
           </p>
           <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
-            Successfully delivered notifications in the recent log window.
+            {copy.recentSentDescription}
           </p>
         </div>
       </div>
@@ -510,41 +991,46 @@ export function AdminSystemHealthSummary({
 }
 
 export function AdminSubmissionsSection({
+  language,
   submissions,
 }: {
+  language: Language;
   submissions: AdminDashboardData["submissions"];
 }) {
+  const copy = adminDashboardSectionsCopy[language].submissions;
   const pendingCount = countPendingSubmissions(submissions.items);
 
   return (
     <AdminPersistentSection
       id="admin-submissions"
-      title="Exercise submissions"
-      description="Review translation work, assign a score, and return feedback to students."
-      summary={buildSectionSummary(
-        submissions.items.length,
-        pendingCount,
-        "submissions",
-      )}
+      title={copy.title}
+      description={copy.description}
+      summary={buildSectionSummary({
+        active: pendingCount,
+        labels: copy.summaryLabels,
+        language,
+        total: submissions.items.length,
+      })}
       headerBadges={
         <>
           <Badge tone={pendingCount > 0 ? "accent" : "surface"} size="xs">
-            Needs review: {pendingCount}
+            {copy.needsReview}: {formatAdminNumber(pendingCount, language)}
           </Badge>
           <Badge tone="surface" size="xs">
-            Reviewed:{" "}
-            {
+            {copy.reviewed}:{" "}
+            {formatAdminNumber(
               submissions.items.filter(
                 (submission) => submission.status === "reviewed",
-              ).length
-            }
+              ).length,
+              language,
+            )}
           </Badge>
         </>
       }
       defaultOpen
     >
       {submissions.error ? (
-        <AdminDatabaseErrorState message="Database Error: Could not load submissions. Make sure you've run the SQL setup script." />
+        <AdminDatabaseErrorState message={copy.dbError} />
       ) : (
         <AdminSubmissionsList submissions={submissions.items} />
       )}
@@ -552,20 +1038,22 @@ export function AdminSubmissionsSection({
   );
 }
 
-export function AdminRagKnowledgeSection() {
+export function AdminRagKnowledgeSection({ language }: { language: Language }) {
+  const copy = adminDashboardSectionsCopy[language].rag;
+
   return (
     <AdminPersistentSection
       id="admin-rag-knowledge"
-      title="RAG knowledge ingestion"
-      description="Upload knowledge files to enrich Shenute AI context. Files are parsed, OCR-checked, chunked (default target 1600 chars with 200 overlap), embedded via your selected provider (Hugging Face or Gemini), and stored in pgvector. RAG status also tracks dictionary.json and grammar JSON knowledge sources."
-      summary="Multi-file ingestion with OCR + embeddings"
+      title={copy.title}
+      description={copy.description}
+      summary={copy.summary}
       headerBadges={
         <>
           <Badge tone="coptic" size="xs">
-            Embeddings: selectable
+            {copy.embeddings}: {copy.selectable}
           </Badge>
           <Badge tone="surface" size="xs">
-            Destination: coptic_documents
+            {copy.destination}: coptic_documents
           </Badge>
         </>
       }
@@ -578,11 +1066,14 @@ export function AdminRagKnowledgeSection() {
 
 export function AdminAudienceSection({
   audience,
+  language,
   showSyncForm = true,
 }: {
   audience: AdminDashboardData["audience"];
+  language: Language;
   showSyncForm?: boolean;
 }) {
+  const copy = adminDashboardSectionsCopy[language].audience;
   const { metrics } = audience;
   const defaultOpen =
     Boolean(audience.error) || metrics.resendSyncErrorCount > 0;
@@ -592,16 +1083,14 @@ export function AdminAudienceSection({
   } = splitAdminVisibleItems(audience.items);
   const audienceContent = (() => {
     if (audience.error) {
-      return (
-        <AdminDatabaseErrorState message="Database Error: Could not load audience contacts. Make sure you've run the latest SQL setup script." />
-      );
+      return <AdminDatabaseErrorState message={copy.dbError} />;
     }
 
     if (audience.items.length === 0) {
       return (
         <EmptyState
-          title="No audience contacts yet."
-          description="Opt-ins from the contact form, signup flow, and dashboard preferences will appear here."
+          title={copy.emptyTitle}
+          description={copy.emptyDescription}
         />
       );
     }
@@ -617,7 +1106,8 @@ export function AdminAudienceSection({
         {overflowAudienceContacts.length > 0 ? (
           <AdminOverflowDisclosure
             count={overflowAudienceContacts.length}
-            label="audience contact"
+            label={copy.overflowLabel}
+            pluralLabel={copy.overflowPluralLabel}
           >
             {overflowAudienceContacts.map((contact) => (
               <AdminAudienceContactCard key={contact.id} contact={contact} />
@@ -631,26 +1121,35 @@ export function AdminAudienceSection({
   return (
     <AdminPersistentSection
       id="admin-audience"
-      title="Audience communication"
-      description="Track who has opted into release emails before you start sending lesson or publication announcements. The list keeps actionable contacts in full and shows a recent inactive window below them."
+      title={copy.title}
+      description={copy.description}
       summary={
         metrics.totalAudienceContactsCount === 0
-          ? "No contacts yet"
-          : `${metrics.subscribedAudienceContactsCount} reachable · ${metrics.totalAudienceContactsCount} total`
+          ? copy.noSummary
+          : `${formatAdminNumber(
+              metrics.subscribedAudienceContactsCount,
+              language,
+            )} ${copy.reachable} · ${formatAdminNumber(
+              metrics.totalAudienceContactsCount,
+              language,
+            )} ${copy.summaryTotal}`
       }
       headerBadges={
         <>
           <Badge tone="surface" size="xs">
-            Synced: {metrics.resendSyncedAudienceCount}
+            {copy.synced}:{" "}
+            {formatAdminNumber(metrics.resendSyncedAudienceCount, language)}
           </Badge>
           <Badge
             tone={metrics.resendSyncErrorCount > 0 ? "accent" : "surface"}
             size="xs"
           >
-            Sync errors: {metrics.resendSyncErrorCount}
+            {copy.syncErrors}:{" "}
+            {formatAdminNumber(metrics.resendSyncErrorCount, language)}
           </Badge>
           <Badge tone="coptic" size="xs">
-            Lessons: {metrics.lessonAudienceCount}
+            {copy.lessons}:{" "}
+            {formatAdminNumber(metrics.lessonAudienceCount, language)}
           </Badge>
         </>
       }
@@ -663,27 +1162,28 @@ export function AdminAudienceSection({
 
 export function AdminReleasesSection({
   contentReleases,
+  language,
   showComposer = true,
 }: {
   contentReleases: AdminDashboardData["contentReleases"];
+  language: Language;
   showComposer?: boolean;
 }) {
+  const copy = adminDashboardSectionsCopy[language].releases;
   const actionableCount = countActionableContentReleases(contentReleases.items);
   const queuedCount = contentReleases.items.filter(
     (release) => release.status === "queued" || release.status === "sending",
   ).length;
   const releasesContent = (() => {
     if (contentReleases.error) {
-      return (
-        <AdminDatabaseErrorState message="Database Error: Could not load content releases. Make sure you've run the latest SQL setup script." />
-      );
+      return <AdminDatabaseErrorState message={copy.dbError} />;
     }
 
     if (contentReleases.items.length === 0) {
       return (
         <EmptyState
-          title="No release drafts yet."
-          description="Create a draft above to snapshot the published lessons or publications you want to announce."
+          title={copy.emptyTitle}
+          description={copy.emptyDescription}
         />
       );
     }
@@ -694,25 +1194,31 @@ export function AdminReleasesSection({
   return (
     <AdminPersistentSection
       id="admin-releases"
-      title="Release drafts"
-      description="Build snapshot-based announcement drafts for published lessons and publications. The list below shows the latest release activity window so the workspace stays lightweight."
+      title={copy.title}
+      description={copy.description}
       summary={
         contentReleases.items.length === 0
-          ? "No release drafts yet"
-          : `${actionableCount} active · ${contentReleases.items.length} in recent window`
+          ? copy.noSummary
+          : `${formatAdminNumber(actionableCount, language)} ${copy.active} · ${formatAdminNumber(
+              contentReleases.items.length,
+              language,
+            )} ${copy.recentWindow}`
       }
       headerBadges={
         <>
           <Badge tone={actionableCount > 0 ? "coptic" : "surface"} size="xs">
-            Ready or live: {actionableCount}
+            {copy.readyOrLive}: {formatAdminNumber(actionableCount, language)}
           </Badge>
           <Badge tone="surface" size="xs">
-            In queue: {queuedCount}
+            {copy.inQueue}: {formatAdminNumber(queuedCount, language)}
           </Badge>
           <Badge tone="surface" size="xs">
-            Candidates:{" "}
-            {contentReleases.lessonReleaseCandidates.length +
-              contentReleases.publicationReleaseCandidates.length}
+            {copy.candidates}:{" "}
+            {formatAdminNumber(
+              contentReleases.lessonReleaseCandidates.length +
+                contentReleases.publicationReleaseCandidates.length,
+              language,
+            )}
           </Badge>
         </>
       }
@@ -734,22 +1240,23 @@ export function AdminReleasesSection({
 
 export function AdminContactInboxSection({
   contactMessages,
+  language,
 }: {
   contactMessages: AdminDashboardData["contactMessages"];
+  language: Language;
 }) {
+  const copy = adminDashboardSectionsCopy[language].contactInbox;
   const openMessageCount = countOpenContactMessages(contactMessages.items);
   const contactMessagesContent = (() => {
     if (contactMessages.error) {
-      return (
-        <AdminDatabaseErrorState message="Database Error: Could not load contact messages. Make sure you've run the latest SQL setup script." />
-      );
+      return <AdminDatabaseErrorState message={copy.dbError} />;
     }
 
     if (contactMessages.items.length === 0) {
       return (
         <EmptyState
-          title="No contact messages yet."
-          description="When visitors send a message from the contact page, it will appear here for follow-up."
+          title={copy.emptyTitle}
+          description={copy.emptyDescription}
         />
       );
     }
@@ -760,25 +1267,27 @@ export function AdminContactInboxSection({
   return (
     <AdminPersistentSection
       id="admin-contact-inbox"
-      title="Contact inbox"
-      description="Triage public contact messages, keep track of replies, and note who wants future updates."
-      summary={buildSectionSummary(
-        contactMessages.items.length,
-        openMessageCount,
-        "messages",
-      )}
+      title={copy.title}
+      description={copy.description}
+      summary={buildSectionSummary({
+        active: openMessageCount,
+        labels: copy.summaryLabels,
+        language,
+        total: contactMessages.items.length,
+      })}
       headerBadges={
         <>
           <Badge tone={openMessageCount > 0 ? "accent" : "surface"} size="xs">
-            Active: {openMessageCount}
+            {copy.active}: {formatAdminNumber(openMessageCount, language)}
           </Badge>
           <Badge tone="surface" size="xs">
-            Answered:{" "}
-            {
+            {copy.answered}:{" "}
+            {formatAdminNumber(
               contactMessages.items.filter(
                 (message) => message.status === "answered",
-              ).length
-            }
+              ).length,
+              language,
+            )}
           </Badge>
         </>
       }
@@ -790,10 +1299,13 @@ export function AdminContactInboxSection({
 }
 
 export function AdminNotificationsSection({
+  language,
   notifications,
 }: {
+  language: Language;
   notifications: AdminDashboardData["notifications"];
 }) {
+  const copy = adminDashboardSectionsCopy[language].notifications;
   const { metrics } = notifications;
   const attentionNotifications = notifications.items.filter(
     (event) => event.status === "failed" || event.status === "queued",
@@ -813,16 +1325,14 @@ export function AdminNotificationsSection({
   } = splitAdminVisibleItems(historyNotifications);
   const notificationsContent = (() => {
     if (notifications.error) {
-      return (
-        <AdminDatabaseErrorState message="Database Error: Could not load notification activity. Make sure you've run the latest SQL setup script." />
-      );
+      return <AdminDatabaseErrorState message={copy.dbError} />;
     }
 
     if (notifications.items.length === 0) {
       return (
         <EmptyState
-          title="No notification activity yet."
-          description="Notification events will appear here once contact alerts, submission alerts, and review emails have been sent."
+          title={copy.emptyTitle}
+          description={copy.emptyDescription}
         />
       );
     }
@@ -835,16 +1345,17 @@ export function AdminNotificationsSection({
               tone={attentionNotifications.length > 0 ? "accent" : "surface"}
               size="xs"
             >
-              Needs attention: {attentionNotifications.length}
+              {copy.attentionLabel}:{" "}
+              {formatAdminNumber(attentionNotifications.length, language)}
             </Badge>
             <p className="text-sm text-stone-600 dark:text-stone-400">
-              Failures and still-queued notifications stay at the top.
+              {copy.attentionDescription}
             </p>
           </div>
 
           {attentionNotifications.length === 0 ? (
             <div className="rounded-2xl border border-stone-200/80 bg-stone-50/80 px-5 py-4 text-sm leading-7 text-stone-600 dark:border-stone-800 dark:bg-stone-950/40 dark:text-stone-400">
-              No notification issues are waiting right now.
+              {copy.emptyIssues}
             </div>
           ) : (
             <>
@@ -855,7 +1366,8 @@ export function AdminNotificationsSection({
               {overflowAttentionNotifications.length > 0 ? (
                 <AdminOverflowDisclosure
                   count={overflowAttentionNotifications.length}
-                  label="notification"
+                  label={copy.notificationOverflowLabel}
+                  pluralLabel={copy.notificationOverflowPluralLabel}
                 >
                   {overflowAttentionNotifications.map((event) => (
                     <AdminNotificationEventCard key={event.id} event={event} />
@@ -869,18 +1381,17 @@ export function AdminNotificationsSection({
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <Badge tone="surface" size="xs">
-              Recent delivery log: {historyNotifications.length}
+              {copy.historyLabel}:{" "}
+              {formatAdminNumber(historyNotifications.length, language)}
             </Badge>
             <p className="text-sm text-stone-600 dark:text-stone-400">
-              Successful sends stay available here as a quieter recent audit
-              trail.
+              {copy.historyDescription}
             </p>
           </div>
 
           {historyNotifications.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-stone-200/80 bg-stone-50/60 px-5 py-4 text-sm leading-7 text-stone-500 dark:border-stone-800 dark:bg-stone-950/25 dark:text-stone-400">
-              Successful sends will collect here once the system starts
-              delivering notifications.
+              {copy.emptyHistory}
             </div>
           ) : (
             <>
@@ -891,7 +1402,8 @@ export function AdminNotificationsSection({
               {overflowHistoryNotifications.length > 0 ? (
                 <AdminOverflowDisclosure
                   count={overflowHistoryNotifications.length}
-                  label="history event"
+                  label={copy.historyOverflowLabel}
+                  pluralLabel={copy.historyOverflowPluralLabel}
                 >
                   {overflowHistoryNotifications.map((event) => (
                     <AdminNotificationEventCard key={event.id} event={event} />
@@ -908,12 +1420,15 @@ export function AdminNotificationsSection({
   return (
     <AdminPersistentSection
       id="admin-notifications"
-      title="Notification log"
-      description="Use this as a reference area for delivery health: failed or queued events first, then a bounded recent success log beneath."
+      title={copy.title}
+      description={copy.description}
       summary={
         metrics.recentNotificationCount === 0
-          ? "No notification activity yet"
-          : `${metrics.failedNotificationCount} failed · ${metrics.sentNotificationCount} sent in recent log`
+          ? copy.noSummary
+          : `${formatAdminNumber(metrics.failedNotificationCount, language)} ${copy.failed.toLowerCase()} · ${formatAdminNumber(
+              metrics.sentNotificationCount,
+              language,
+            )} ${copy.sentInRecentLog}`
       }
       headerBadges={
         <>
@@ -921,10 +1436,12 @@ export function AdminNotificationsSection({
             tone={metrics.failedNotificationCount > 0 ? "accent" : "surface"}
             size="xs"
           >
-            Failed: {metrics.failedNotificationCount}
+            {copy.failed}:{" "}
+            {formatAdminNumber(metrics.failedNotificationCount, language)}
           </Badge>
           <Badge tone="coptic" size="xs">
-            Recent sent: {metrics.sentNotificationCount}
+            {copy.recentSent}:{" "}
+            {formatAdminNumber(metrics.sentNotificationCount, language)}
           </Badge>
         </>
       }
@@ -937,24 +1454,25 @@ export function AdminNotificationsSection({
 
 export function AdminEntryReportsSection({
   entryReports,
+  language,
 }: {
   entryReports: AdminDashboardData["entryReports"];
+  language: Language;
 }) {
+  const copy = adminDashboardSectionsCopy[language].entryReports;
   const openReportCount = countOpenEntryReports(
     entryReports.items.map((item) => item.report),
   );
   const entryReportsContent = (() => {
     if (entryReports.error) {
-      return (
-        <AdminDatabaseErrorState message="Database Error: Could not load dictionary entry reports. Make sure you've run the latest SQL setup script." />
-      );
+      return <AdminDatabaseErrorState message={copy.dbError} />;
     }
 
     if (entryReports.items.length === 0) {
       return (
         <EmptyState
-          title="No dictionary reports yet."
-          description="When readers flag entries from the dictionary, they will appear here for review."
+          title={copy.emptyTitle}
+          description={copy.emptyDescription}
         />
       );
     }
@@ -965,25 +1483,27 @@ export function AdminEntryReportsSection({
   return (
     <AdminPersistentSection
       id="admin-entry-reports"
-      title="Dictionary entry reports"
-      description="Review flagged lemmas, inspect the current published meaning, and move each report through your inbox."
-      summary={buildSectionSummary(
-        entryReports.items.length,
-        openReportCount,
-        "reports",
-      )}
+      title={copy.title}
+      description={copy.description}
+      summary={buildSectionSummary({
+        active: openReportCount,
+        labels: copy.summaryLabels,
+        language,
+        total: entryReports.items.length,
+      })}
       headerBadges={
         <>
           <Badge tone={openReportCount > 0 ? "accent" : "surface"} size="xs">
-            Open: {openReportCount}
+            {copy.open}: {formatAdminNumber(openReportCount, language)}
           </Badge>
           <Badge tone="surface" size="xs">
-            Resolved:{" "}
-            {
+            {copy.resolved}:{" "}
+            {formatAdminNumber(
               entryReports.items.filter(
                 (item) => item.report.status === "resolved",
-              ).length
-            }
+              ).length,
+              language,
+            )}
           </Badge>
         </>
       }

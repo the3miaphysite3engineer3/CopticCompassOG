@@ -3,8 +3,20 @@
 import { ChevronDown } from "lucide-react";
 
 import { Badge } from "@/components/Badge";
+import { useLanguage } from "@/components/LanguageProvider";
 import { surfacePanelClassName } from "@/components/SurfacePanel";
 import { usePersistentDisclosureState } from "@/features/admin/lib/uiState";
+
+const adminPersistentSectionCopy = {
+  en: {
+    collapse: "Collapse",
+    open: "Open",
+  },
+  nl: {
+    collapse: "Inklappen",
+    open: "Openen",
+  },
+} as const;
 
 export function AdminPersistentSection({
   defaultOpen = false,
@@ -23,6 +35,8 @@ export function AdminPersistentSection({
   summary: string;
   title: string;
 }) {
+  const { language } = useLanguage();
+  const copy = adminPersistentSectionCopy[language];
   const [isOpen, setIsOpen] = usePersistentDisclosureState(
     `admin-section:${id}`,
     defaultOpen,
@@ -60,8 +74,8 @@ export function AdminPersistentSection({
         </div>
 
         <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-stone-500 dark:text-stone-400">
-          <span className="group-open:hidden">Open</span>
-          <span className="hidden group-open:inline">Collapse</span>
+          <span className="group-open:hidden">{copy.open}</span>
+          <span className="hidden group-open:inline">{copy.collapse}</span>
           <ChevronDown className="h-5 w-5 transition-transform duration-200 group-open:rotate-180" />
         </div>
       </summary>

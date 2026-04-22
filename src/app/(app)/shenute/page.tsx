@@ -23,7 +23,7 @@ import { cx } from "@/lib/classes";
 import { getLocalizedHomePath } from "@/lib/locale";
 import { useOptionalAuthGate } from "@/lib/supabase/useOptionalAuthGate";
 
-type ChatProvider = "gemini" | "hf" | "openrouter" | "thoth";
+type ShenuteProvider = "gemini" | "hf" | "openrouter" | "thoth";
 
 type TextMessagePart = {
   text: string;
@@ -37,8 +37,8 @@ type ChatMessageLike = {
   role: "assistant" | "system" | "user";
 };
 
-type ChatFeedbackSignal = "admin_feedback" | "dislike" | "like";
-type ChatReactionSignal = Extract<ChatFeedbackSignal, "dislike" | "like">;
+type ShenuteFeedbackSignal = "admin_feedback" | "dislike" | "like";
+type ShenuteReactionSignal = Extract<ShenuteFeedbackSignal, "dislike" | "like">;
 
 type FeedbackStateByMessage = Record<
   string,
@@ -48,7 +48,152 @@ type FeedbackStateByMessage = Record<
   }
 >;
 
-const CHAT_ACCESS_REQUIRED_MESSAGE = "Please sign in to access Shenute AI.";
+const SHENUTE_COPY = {
+  en: {
+    accessRequired: "Please sign in to access Shenute AI.",
+    addImage: "Add Image",
+    adminNotePlaceholder:
+      "Admin only: add written feedback tied to this prompt and response.",
+    adminNoteSummary: "Admin note for RAG learning",
+    aiMode: "AI mode",
+    architectureLabel: "Architecture:",
+    architectureValue: "RAG (Retrieval Augmented Generation)",
+    baseTechnology: "Base Technology",
+    baseLlmLabel: "Base LLM:",
+    baseLlmValue: "Claude 4.5 Sonnet (upgraded from 3.5)",
+    cameraCapture: "Capture Image",
+    cameraClose: "Close Camera",
+    cameraFrameFailed: "Could not capture camera frame.",
+    cameraImageFailed: "Could not capture image from camera.",
+    cameraNotReady: "Camera is not ready.",
+    cameraNotSupported: "Camera is not supported on this device/browser.",
+    cameraStillLoading: "Camera feed is not ready yet. Try again.",
+    cameraSource: "camera",
+    contact: "Contact",
+    credits: "Credits",
+    creditsAndSpecs: "THOTH AI Credits and Technical Specifications",
+    customPrompts: "Custom instruction prompts (500 plus lines)",
+    dislike: "Dislike",
+    feedbackPromptMissing:
+      "Could not resolve prompt/response for this feedback.",
+    feedbackSaved: "Saved.",
+    feedbackSavedWithRag: "Saved and added to RAG learning.",
+    feedbackSaveFailed: "Could not save feedback.",
+    feedbackSaving: "Saving feedback...",
+    feedbackSignIn: "Sign in to send feedback signals.",
+    feedbackSignInInline: "Sign in to send learning feedback signals",
+    imageAttached: "Image attached",
+    imageOcrContext: "[Image OCR Context]",
+    intro:
+      "Ask about Coptic vocabulary, grammar, translation, and manuscript context without leaving the shared app workspace.",
+    knowledgeBase: "Knowledge Base",
+    like: "Like",
+    nlpCapabilities: "Natural Language Processing and OCR capabilities",
+    noTextExtracted: "No text extracted from the selected image.",
+    ocrFailed: "OCR failed for the selected image.",
+    placeholder: "Ask about a Coptic word, grammar rule, or attached image...",
+    platformLabel: "Platform:",
+    providerGemini: "Learner (Gemini)",
+    providerHf: "Learner (HF)",
+    providerOpenRouter: "Learner (OpenRouter)",
+    providerThoth: "Expert (THOTH AI)",
+    ragWarning: "Saved. RAG ingest warning:",
+    rateLimit: "Rate limit reached. Please try again later.",
+    remove: "Remove",
+    requestFailed: "AI request failed.",
+    runningOcr: "Running OCR...",
+    sendMessage: "Send message",
+    selectedImageAlt: "Selected for OCR",
+    submitAdminNote: "Submit admin note",
+    thothBio1:
+      "Dr. So Miyagawa is an associate professor of linguistics and Egyptology at the University of Tsukuba, specializing in the Ancient Egyptian-Coptic language. Following doctoral research at the University of Gottingen's Seminar for Egyptology and Coptic Studies, his work integrates computational linguistic methods with traditional philological approaches.",
+    thothBio2:
+      "His research focuses on ancient and medieval Nile Valley languages, including Ancient Egyptian-Coptic, Old Nubian, Greek, Arabic, and Meroitic, as well as endangered languages in and around the Japanese Archipelago.",
+    thothRole: "Associate Professor of Linguistics and Egyptology",
+    title: "Shenute AI",
+    uploadSource: "upload",
+    useCamera: "Use Camera",
+    welcomeDescription:
+      "Start with a word, a grammar question, or an image attachment and Shenute AI will keep the conversation grounded in your Coptic study workflow.",
+    welcomeTitle: "Welcome to Shenute AI",
+    writeAdminFeedback: "Write admin feedback before submitting.",
+  },
+  nl: {
+    accessRequired: "Meld u aan om Shenute AI te gebruiken.",
+    addImage: "Afbeelding toevoegen",
+    adminNotePlaceholder:
+      "Alleen voor beheerders: voeg feedback toe bij deze prompt en dit antwoord.",
+    adminNoteSummary: "Beheerdersnotitie voor RAG-learning",
+    aiMode: "AI-modus",
+    architectureLabel: "Architectuur:",
+    architectureValue: "RAG (Retrieval Augmented Generation)",
+    baseTechnology: "Basistechnologie",
+    baseLlmLabel: "Basis-LLM:",
+    baseLlmValue: "Claude 4.5 Sonnet (upgrade vanaf 3.5)",
+    cameraCapture: "Afbeelding vastleggen",
+    cameraClose: "Camera sluiten",
+    cameraFrameFailed: "Het camerabeeld kon niet worden vastgelegd.",
+    cameraImageFailed:
+      "De afbeelding kon niet vanuit de camera worden vastgelegd.",
+    cameraNotReady: "De camera is nog niet klaar.",
+    cameraNotSupported:
+      "De camera wordt niet ondersteund op dit apparaat of in deze browser.",
+    cameraStillLoading: "De camerafeed is nog niet klaar. Probeer het opnieuw.",
+    cameraSource: "camera",
+    contact: "Contact",
+    credits: "Credits",
+    creditsAndSpecs: "THOTH AI-credits en technische specificaties",
+    customPrompts: "Aangepaste instructieprompts (meer dan 500 regels)",
+    dislike: "Niet nuttig",
+    feedbackPromptMissing:
+      "De prompt en het antwoord voor deze feedback konden niet worden bepaald.",
+    feedbackSaved: "Opgeslagen.",
+    feedbackSavedWithRag: "Opgeslagen en toegevoegd aan RAG-learning.",
+    feedbackSaveFailed: "Feedback kon niet worden opgeslagen.",
+    feedbackSaving: "Feedback opslaan...",
+    feedbackSignIn: "Meld u aan om feedbacksignalen te verzenden.",
+    feedbackSignInInline: "Meld u aan om leerfeedback te verzenden",
+    imageAttached: "Afbeelding toegevoegd",
+    imageOcrContext: "[Image OCR Context]",
+    intro:
+      "Stel vragen over Koptische woordenschat, grammatica, vertaling en manuscriptcontext zonder de gedeelde werkruimte te verlaten.",
+    knowledgeBase: "Kennisbank",
+    like: "Nuttig",
+    nlpCapabilities: "Mogelijkheden voor natuurlijke-taalverwerking en OCR",
+    noTextExtracted:
+      "Er is geen tekst uit de geselecteerde afbeelding gehaald.",
+    ocrFailed: "OCR is mislukt voor de geselecteerde afbeelding.",
+    placeholder:
+      "Vraag naar een Koptisch woord, een grammaticaregel of een toegevoegde afbeelding...",
+    platformLabel: "Platform:",
+    providerGemini: "Leerhulp (Gemini)",
+    providerHf: "Leerhulp (HF)",
+    providerOpenRouter: "Leerhulp (OpenRouter)",
+    providerThoth: "Expert (THOTH AI)",
+    ragWarning: "Opgeslagen. RAG-ingest-waarschuwing:",
+    rateLimit: "De limiet is bereikt. Probeer het later opnieuw.",
+    remove: "Verwijderen",
+    requestFailed: "AI-verzoek mislukt.",
+    runningOcr: "OCR uitvoeren...",
+    sendMessage: "Bericht verzenden",
+    selectedImageAlt: "Geselecteerd voor OCR",
+    submitAdminNote: "Beheerdersnotitie verzenden",
+    thothBio1:
+      "Dr. So Miyagawa is hoofddocent taalkunde en egyptologie aan de University of Tsukuba en specialiseert zich in de Oudegyptisch-Koptische taal. Na promotieonderzoek aan het Seminar for Egyptology and Coptic Studies van de University of Gottingen combineert zijn werk computationele taalkundige methoden met traditionele filologische benaderingen.",
+    thothBio2:
+      "Zijn onderzoek richt zich op oude en middeleeuwse talen van de Nijlvallei, waaronder Oudegyptisch-Koptisch, Oudnubisch, Grieks, Arabisch en Meroitisch, naast bedreigde talen in en rond de Japanse archipel.",
+    thothRole: "Hoofddocent taalkunde en egyptologie",
+    title: "Shenute AI",
+    uploadSource: "upload",
+    useCamera: "Camera gebruiken",
+    welcomeDescription:
+      "Begin met een woord, een grammaticavraag of een afbeelding. Shenute AI houdt het gesprek verbonden met uw Koptische studiewerkstroom.",
+    welcomeTitle: "Welkom bij Shenute AI",
+    writeAdminFeedback: "Schrijf beheerdersfeedback voordat u die verzendt.",
+  },
+} as const;
+
+type ShenuteCopy = (typeof SHENUTE_COPY)[keyof typeof SHENUTE_COPY];
 
 function isTextMessagePart(part: unknown): part is TextMessagePart {
   if (!part || typeof part !== "object") {
@@ -94,7 +239,7 @@ function findPreviousUserMessage(
   return null;
 }
 
-function toChatProvider(value: string): ChatProvider {
+function toShenuteProvider(value: string): ShenuteProvider {
   if (value === "gemini") {
     return "gemini";
   }
@@ -134,7 +279,7 @@ function getErrorStatusCode(error: unknown): number | undefined {
   return undefined;
 }
 
-function getChatErrorMessage(error: unknown) {
+function getShenuteErrorMessage(error: unknown, copy: ShenuteCopy) {
   const status = getErrorStatusCode(error);
   const message = error instanceof Error ? error.message : String(error ?? "");
   const normalizedMessage = message.toLowerCase();
@@ -144,7 +289,7 @@ function getChatErrorMessage(error: unknown) {
     normalizedMessage.includes("429") ||
     normalizedMessage.includes("rate limit")
   ) {
-    return "Rate limit reached. Please try again later.";
+    return copy.rateLimit;
   }
 
   if (
@@ -153,10 +298,10 @@ function getChatErrorMessage(error: unknown) {
     normalizedMessage.includes("unauthorized") ||
     normalizedMessage.includes("sign in")
   ) {
-    return CHAT_ACCESS_REQUIRED_MESSAGE;
+    return copy.accessRequired;
   }
 
-  return message || "AI request failed.";
+  return message || copy.requestFailed;
 }
 
 function getFeedbackStatusClass(status: "error" | "pending" | "success") {
@@ -202,14 +347,17 @@ function getReactionButtonClassName(
   return "border-stone-300 text-stone-700 hover:bg-stone-100 dark:border-stone-600 dark:text-stone-200 dark:hover:bg-stone-800";
 }
 
-export default function ChatAI() {
+export default function ShenuteAI() {
   const { language, t } = useLanguage();
+  const copy = SHENUTE_COPY[language];
   const [inferenceProvider, setInferenceProvider] =
-    useState<ChatProvider>("thoth");
+    useState<ShenuteProvider>("thoth");
   const [inputValue, setInputValue] = useState("");
   const [ocrPending, setOcrPending] = useState(false);
   const [ocrError, setOcrError] = useState<string | null>(null);
-  const [chatAccessError, setChatAccessError] = useState<string | null>(null);
+  const [shenuteAccessError, setShenuteAccessError] = useState<string | null>(
+    null,
+  );
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const [selectedImagePreviewUrl, setSelectedImagePreviewUrl] = useState<
     string | null
@@ -224,11 +372,11 @@ export default function ChatAI() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const captureCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
-  const chatSessionIdRef = useRef(crypto.randomUUID());
+  const shenuteSessionIdRef = useRef(crypto.randomUUID());
 
   const { isAuthenticated, isReady } = useOptionalAuthGate();
   const [selectedReactionByMessage, setSelectedReactionByMessage] = useState<
-    Record<string, ChatReactionSignal>
+    Record<string, ShenuteReactionSignal>
   >({});
   const [adminFeedbackDraftByMessage, setAdminFeedbackDraftByMessage] =
     useState<Record<string, string>>({});
@@ -238,7 +386,7 @@ export default function ChatAI() {
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
-        api: "/api/chat",
+        api: "/api/shenute",
       }),
     [],
   );
@@ -248,7 +396,7 @@ export default function ChatAI() {
   });
 
   const isLoading = status !== "ready";
-  const isChatAccessBlocked = isReady && !isAuthenticated;
+  const isShenuteAccessBlocked = isReady && !isAuthenticated;
   const typedMessages = messages as ChatMessageLike[];
 
   function clearSelectedImage() {
@@ -305,7 +453,7 @@ export default function ChatAI() {
       typeof navigator === "undefined" ||
       !navigator.mediaDevices?.getUserMedia
     ) {
-      setCameraError("Camera is not supported on this device/browser.");
+      setCameraError(copy.cameraNotSupported);
       return;
     }
 
@@ -320,7 +468,7 @@ export default function ChatAI() {
       setCameraError(
         cameraOpenError instanceof Error
           ? cameraOpenError.message
-          : "Could not access camera.",
+          : copy.cameraNotSupported,
       );
     }
   }
@@ -330,7 +478,7 @@ export default function ChatAI() {
     const canvasElement = captureCanvasRef.current;
 
     if (!videoElement || !canvasElement) {
-      setCameraError("Camera is not ready.");
+      setCameraError(copy.cameraNotReady);
       return;
     }
 
@@ -338,7 +486,7 @@ export default function ChatAI() {
     const height = videoElement.videoHeight || 720;
 
     if (width <= 0 || height <= 0) {
-      setCameraError("Camera feed is not ready yet. Try again.");
+      setCameraError(copy.cameraStillLoading);
       return;
     }
 
@@ -346,7 +494,7 @@ export default function ChatAI() {
     canvasElement.height = height;
     const context = canvasElement.getContext("2d");
     if (!context) {
-      setCameraError("Could not capture camera frame.");
+      setCameraError(copy.cameraFrameFailed);
       return;
     }
 
@@ -357,7 +505,7 @@ export default function ChatAI() {
     });
 
     if (!blob) {
-      setCameraError("Could not capture image from camera.");
+      setCameraError(copy.cameraImageFailed);
       return;
     }
 
@@ -398,12 +546,12 @@ export default function ChatAI() {
   const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (isChatAccessBlocked) {
-      setChatAccessError(CHAT_ACCESS_REQUIRED_MESSAGE);
+    if (isShenuteAccessBlocked) {
+      setShenuteAccessError(copy.accessRequired);
       return;
     }
 
-    setChatAccessError(null);
+    setShenuteAccessError(null);
 
     if ((!inputValue.trim() && !selectedImage) || isLoading || ocrPending) {
       return;
@@ -426,7 +574,7 @@ export default function ChatAI() {
 
         composedPrompt = [
           composedPrompt,
-          "[Image OCR Context]",
+          copy.imageOcrContext,
           `Image: ${selectedImage.name}`,
           trimmedOcrText,
         ]
@@ -436,7 +584,7 @@ export default function ChatAI() {
         setOcrError(
           ocrProcessingError instanceof Error
             ? ocrProcessingError.message
-            : "OCR failed for the selected image.",
+            : copy.ocrFailed,
         );
         setOcrPending(false);
         return;
@@ -446,7 +594,7 @@ export default function ChatAI() {
     }
 
     if (!composedPrompt.trim()) {
-      setOcrError("No text extracted from the selected image.");
+      setOcrError(copy.noTextExtracted);
       return;
     }
 
@@ -466,13 +614,13 @@ export default function ChatAI() {
     assistantMessage: ChatMessageLike;
     feedbackText?: string;
     promptMessage: ChatMessageLike | null;
-    signal: ChatFeedbackSignal;
+    signal: ShenuteFeedbackSignal;
   }) {
     if (!isAuthenticated) {
       setFeedbackStateByMessage((current) => ({
         ...current,
         [options.assistantMessage.id]: {
-          message: "Sign in to send feedback signals.",
+          message: copy.feedbackSignIn,
           status: "error",
         },
       }));
@@ -488,7 +636,7 @@ export default function ChatAI() {
       setFeedbackStateByMessage((current) => ({
         ...current,
         [options.assistantMessage.id]: {
-          message: "Could not resolve prompt/response for this feedback.",
+          message: copy.feedbackPromptMissing,
           status: "error",
         },
       }));
@@ -498,13 +646,13 @@ export default function ChatAI() {
     setFeedbackStateByMessage((current) => ({
       ...current,
       [options.assistantMessage.id]: {
-        message: "Saving feedback...",
+        message: copy.feedbackSaving,
         status: "pending",
       },
     }));
 
     try {
-      const response = await fetch("/api/chat/feedback", {
+      const response = await fetch("/api/shenute/feedback", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -512,7 +660,7 @@ export default function ChatAI() {
         body: JSON.stringify({
           assistantMessageId: options.assistantMessage.id,
           assistantResponse,
-          chatId: chatSessionIdRef.current,
+          shenuteSessionId: shenuteSessionIdRef.current,
           feedbackText: options.feedbackText,
           inferenceProvider,
           prompt,
@@ -529,14 +677,14 @@ export default function ChatAI() {
       };
 
       if (!response.ok || !payload.success) {
-        throw new Error(payload.error ?? "Could not save feedback.");
+        throw new Error(payload.error ?? copy.feedbackSaveFailed);
       }
 
-      let successMessage = "Saved.";
+      let successMessage: string = copy.feedbackSaved;
       if (payload.ragIngested) {
-        successMessage = "Saved and added to RAG learning.";
+        successMessage = copy.feedbackSavedWithRag;
       } else if (payload.ragWarning) {
-        successMessage = `Saved. RAG ingest warning: ${payload.ragWarning}`;
+        successMessage = `${copy.ragWarning} ${payload.ragWarning}`;
       }
 
       setFeedbackStateByMessage((current) => ({
@@ -555,7 +703,7 @@ export default function ChatAI() {
           message:
             feedbackError instanceof Error
               ? feedbackError.message
-              : "Could not save feedback.",
+              : copy.feedbackSaveFailed,
           status: "error",
         },
       }));
@@ -564,7 +712,7 @@ export default function ChatAI() {
   }
 
   async function handleReaction(
-    signal: ChatReactionSignal,
+    signal: ShenuteReactionSignal,
     assistantMessage: ChatMessageLike,
     promptMessage: ChatMessageLike | null,
   ) {
@@ -594,7 +742,7 @@ export default function ChatAI() {
       setFeedbackStateByMessage((current) => ({
         ...current,
         [assistantMessage.id]: {
-          message: "Write admin feedback before submitting.",
+          message: copy.writeAdminFeedback,
           status: "error",
         },
       }));
@@ -631,15 +779,15 @@ export default function ChatAI() {
       <BreadcrumbTrail
         items={[
           { label: t("nav.home"), href: getLocalizedHomePath(language) },
-          { label: t("nav.chat") },
+          { label: t("nav.shenute") },
         ]}
       />
 
       <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
         <div className="space-y-3">
           <PageHeader
-            title="Shenute AI"
-            description="Ask about Coptic vocabulary, grammar, translation, and manuscript context without leaving the shared app workspace."
+            title={copy.title}
+            description={copy.intro}
             align="left"
             size="compact"
             tone="sky"
@@ -650,52 +798,40 @@ export default function ChatAI() {
 
         <label className="flex w-full max-w-xs flex-col gap-2 text-sm font-medium text-stone-600 dark:text-stone-300 sm:w-auto lg:items-end">
           <span className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400">
-            AI mode
+            {copy.aiMode}
           </span>
           <select
-            id="chat-inference-provider"
-            name="chat_inference_provider"
+            id="shenute-inference-provider"
+            name="shenute_inference_provider"
             className="compact-select-base h-11 min-w-[15rem] max-w-full bg-white/85 text-sm dark:bg-stone-900"
             value={inferenceProvider}
             onChange={(event) => {
-              setInferenceProvider(toChatProvider(event.target.value));
+              setInferenceProvider(toShenuteProvider(event.target.value));
             }}
-            disabled={isLoading || isChatAccessBlocked}
+            disabled={isLoading || isShenuteAccessBlocked}
           >
-            <option value="thoth">Expert (THOTH AI)</option>
-            <option value="gemini">Learner (Gemini)</option>
-            <option value="openrouter">Learner (OpenRouter)</option>
-            <option value="hf">Learner (HF)</option>
+            <option value="thoth">{copy.providerThoth}</option>
+            <option value="gemini">{copy.providerGemini}</option>
+            <option value="openrouter">{copy.providerOpenRouter}</option>
+            <option value="hf">{copy.providerHf}</option>
           </select>
         </label>
       </div>
 
       <details className="mx-4 mb-4 rounded-md border border-slate-200 bg-white p-3 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
         <summary className="cursor-pointer text-sm font-semibold text-slate-800 dark:text-slate-100">
-          THOTH AI Credits and Technical Specifications
+          {copy.creditsAndSpecs}
         </summary>
         <div className="mt-3 space-y-3 leading-relaxed">
           <div>
-            <p className="font-semibold">Credits</p>
+            <p className="font-semibold">{copy.credits}</p>
             <p>Dr. So Miyagawa</p>
-            <p>Associate Professor of Linguistics and Egyptology</p>
+            <p>{copy.thothRole}</p>
             <p>University of Tsukuba</p>
+            <p>{copy.thothBio1}</p>
+            <p>{copy.thothBio2}</p>
             <p>
-              Dr. So Miyagawa is an associate professor of linguistics and
-              Egyptology at the University of Tsukuba, specializing in the
-              Ancient Egyptian-Coptic language. Following doctoral research at
-              the University of Gottingen&apos;s Seminar for Egyptology and
-              Coptic Studies, his work integrates computational linguistic
-              methods with traditional philological approaches.
-            </p>
-            <p>
-              His research focuses on ancient and medieval Nile Valley
-              languages, including Ancient Egyptian-Coptic, Old Nubian, Greek,
-              Arabic, and Meroitic, as well as endangered languages in and
-              around the Japanese Archipelago.
-            </p>
-            <p>
-              Contact:{" "}
+              {copy.contact}:{" "}
               <a
                 className="underline"
                 href="mailto:miyagawa.so.kb@u.tsukuba.ac.jp"
@@ -706,17 +842,21 @@ export default function ChatAI() {
           </div>
 
           <div>
-            <p className="font-semibold">Base Technology</p>
+            <p className="font-semibold">{copy.baseTechnology}</p>
             <ul className="list-disc pl-4">
-              <li>Platform: Dify</li>
-              <li>Base LLM: Claude 4.5 Sonnet (upgraded from 3.5)</li>
-              <li>Architecture: RAG (Retrieval Augmented Generation)</li>
-              <li>Natural Language Processing and OCR capabilities</li>
+              <li>{copy.platformLabel} Dify</li>
+              <li>
+                {copy.baseLlmLabel} {copy.baseLlmValue}
+              </li>
+              <li>
+                {copy.architectureLabel} {copy.architectureValue}
+              </li>
+              <li>{copy.nlpCapabilities}</li>
             </ul>
           </div>
 
           <div>
-            <p className="font-semibold">Knowledge Base</p>
+            <p className="font-semibold">{copy.knowledgeBase}</p>
             <ul className="list-disc pl-4">
               <li>Comprehensive Coptic Lexicon v1.2 (2020)</li>
               <li>Burns, D., Feder, F., John, K., Kupreyev, M., et al.</li>
@@ -724,7 +864,7 @@ export default function ChatAI() {
               <li>A Concise Dictionary of Middle Egyptian (1962)</li>
               <li>Raymond Oliver Faulkner</li>
               <li>Griffith Institute, Oxford</li>
-              <li>Custom instruction prompts (500 plus lines)</li>
+              <li>{copy.customPrompts}</li>
             </ul>
           </div>
 
@@ -746,7 +886,7 @@ export default function ChatAI() {
         shadow="float"
         className="relative overflow-hidden"
       >
-        {isChatAccessBlocked ? (
+        {isShenuteAccessBlocked ? (
           <>
             <div
               aria-hidden="true"
@@ -758,9 +898,9 @@ export default function ChatAI() {
                 align="center"
                 className="w-full max-w-lg shadow-xl"
                 size="comfortable"
-                title="Shenute AI"
+                title={copy.title}
               >
-                {CHAT_ACCESS_REQUIRED_MESSAGE}
+                {copy.accessRequired}
               </AuthGateNotice>
             </div>
           </>
@@ -769,7 +909,7 @@ export default function ChatAI() {
         <div
           className={cx(
             "flex min-h-[72vh] flex-col transition-all duration-300",
-            isChatAccessBlocked &&
+            isShenuteAccessBlocked &&
               "pointer-events-none select-none blur-[6px] opacity-70",
           )}
         >
@@ -785,12 +925,10 @@ export default function ChatAI() {
                   <span className="font-coptic leading-none">Ϣ</span>
                 </div>
                 <h2 className="mb-3 text-2xl font-semibold text-stone-900 dark:text-stone-100">
-                  Welcome to Shenute AI
+                  {copy.welcomeTitle}
                 </h2>
                 <p className="text-stone-600 dark:text-stone-400">
-                  Start with a word, a grammar question, or an image attachment
-                  and Shenute AI will keep the conversation grounded in your
-                  Coptic study workflow.
+                  {copy.welcomeDescription}
                 </p>
               </SurfacePanel>
             </div>
@@ -916,7 +1054,7 @@ export default function ChatAI() {
                                 ),
                               })}
                             >
-                              Like
+                              {copy.like}
                             </button>
                             <button
                               type="button"
@@ -938,13 +1076,13 @@ export default function ChatAI() {
                                 ),
                               })}
                             >
-                              Dislike
+                              {copy.dislike}
                             </button>
                           </div>
 
                           <details className="rounded-2xl border border-stone-200 bg-stone-50/70 p-3 dark:border-stone-700 dark:bg-stone-950/30">
                             <summary className="cursor-pointer font-semibold text-stone-700 dark:text-stone-200">
-                              Admin note for RAG learning
+                              {copy.adminNoteSummary}
                             </summary>
                             <div className="mt-2 space-y-2">
                               <textarea
@@ -956,7 +1094,7 @@ export default function ChatAI() {
                                     [m.id]: value,
                                   }));
                                 }}
-                                placeholder="Admin only: add written feedback tied to this prompt and response."
+                                placeholder={copy.adminNotePlaceholder}
                                 rows={3}
                                 disabled={!isAuthenticated || isFeedbackPending}
                                 className="w-full rounded-xl border border-stone-200 bg-white/85 px-3 py-2 text-xs text-stone-900 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-300/35 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100"
@@ -975,7 +1113,7 @@ export default function ChatAI() {
                                   variant: "secondary",
                                 })}
                               >
-                                Submit admin note
+                                {copy.submitAdminNote}
                               </button>
                             </div>
                           </details>
@@ -993,7 +1131,7 @@ export default function ChatAI() {
                           {!isAuthenticated && isReady ? (
                             <AuthGateInlinePrompt
                               className="text-xs"
-                              message="Sign in to send learning feedback signals"
+                              message={copy.feedbackSignInInline}
                             />
                           ) : null}
                         </div>
@@ -1030,14 +1168,14 @@ export default function ChatAI() {
             className="bg-white/70 p-4 dark:bg-stone-950/40 md:p-6"
           >
             <div className="mb-3 space-y-3">
-              {chatAccessError ? (
+              {shenuteAccessError ? (
                 <AuthGateNotice align="left" size="compact">
-                  {chatAccessError}
+                  {shenuteAccessError}
                 </AuthGateNotice>
               ) : null}
               {error ? (
                 <StatusNotice tone="error" align="left">
-                  {getChatErrorMessage(error)}
+                  {getShenuteErrorMessage(error, copy)}
                 </StatusNotice>
               ) : null}
               {ocrError ? (
@@ -1089,7 +1227,7 @@ export default function ChatAI() {
                       variant: "primary",
                     })}
                   >
-                    Capture Image
+                    {copy.cameraCapture}
                   </button>
                   <button
                     type="button"
@@ -1099,7 +1237,7 @@ export default function ChatAI() {
                       variant: "secondary",
                     })}
                   >
-                    Close Camera
+                    {copy.cameraClose}
                   </button>
                 </div>
               </SurfacePanel>
@@ -1114,8 +1252,11 @@ export default function ChatAI() {
               >
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-xs font-semibold uppercase tracking-wide text-stone-600 dark:text-stone-300">
-                    Image attached (
-                    {selectedImageSource === "camera" ? "camera" : "upload"})
+                    {copy.imageAttached} (
+                    {selectedImageSource === "camera"
+                      ? copy.cameraSource
+                      : copy.uploadSource}
+                    )
                   </p>
                   <button
                     type="button"
@@ -1125,13 +1266,13 @@ export default function ChatAI() {
                       variant: "link",
                     })}
                   >
-                    Remove
+                    {copy.remove}
                   </button>
                 </div>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={selectedImagePreviewUrl}
-                  alt="Selected for OCR"
+                  alt={copy.selectedImageAlt}
                   className="max-h-48 w-auto rounded-2xl border border-stone-200 dark:border-stone-700"
                 />
               </SurfacePanel>
@@ -1143,13 +1284,13 @@ export default function ChatAI() {
                 onClick={() => {
                   fileInputRef.current?.click();
                 }}
-                disabled={isLoading || ocrPending || isChatAccessBlocked}
+                disabled={isLoading || ocrPending || isShenuteAccessBlocked}
                 className={buttonClassName({
                   size: "sm",
                   variant: "secondary",
                 })}
               >
-                Add Image
+                {copy.addImage}
               </button>
               <button
                 type="button"
@@ -1157,18 +1298,21 @@ export default function ChatAI() {
                   void openCamera();
                 }}
                 disabled={
-                  isLoading || ocrPending || cameraOpen || isChatAccessBlocked
+                  isLoading ||
+                  ocrPending ||
+                  cameraOpen ||
+                  isShenuteAccessBlocked
                 }
                 className={buttonClassName({
                   size: "sm",
                   variant: "secondary",
                 })}
               >
-                Use Camera
+                {copy.useCamera}
               </button>
               {ocrPending ? (
                 <Badge tone="accent" size="xs">
-                  Running OCR...
+                  {copy.runningOcr}
                 </Badge>
               ) : null}
             </div>
@@ -1181,27 +1325,27 @@ export default function ChatAI() {
             >
               <div className="flex items-center gap-2">
                 <input
-                  id="chat-message-input"
-                  name="chat_message"
+                  id="shenute-message-input"
+                  name="shenute_message"
                   className="min-w-0 flex-1 rounded-[1.25rem] border-0 bg-transparent px-4 py-3 font-coptic text-lg text-stone-900 outline-none ring-0 placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:text-stone-100 dark:placeholder:text-stone-500 md:text-xl"
                   value={inputValue}
                   onChange={(event) => {
                     setInputValue(event.target.value);
-                    if (chatAccessError) {
-                      setChatAccessError(null);
+                    if (shenuteAccessError) {
+                      setShenuteAccessError(null);
                     }
                   }}
-                  placeholder="Ask about a Coptic word, grammar rule, or attached image..."
-                  disabled={isLoading || ocrPending || isChatAccessBlocked}
+                  placeholder={copy.placeholder}
+                  disabled={isLoading || ocrPending || isShenuteAccessBlocked}
                 />
                 <button
                   type="submit"
-                  aria-label="Send message"
+                  aria-label={copy.sendMessage}
                   disabled={
                     (!inputValue.trim() && !selectedImage) ||
                     isLoading ||
                     ocrPending ||
-                    isChatAccessBlocked
+                    isShenuteAccessBlocked
                   }
                   className={buttonClassName({
                     size: "sm",

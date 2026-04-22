@@ -14,6 +14,7 @@ import {
   AdminWorkspaceQuickJump,
 } from "@/features/admin/components/AdminDashboardSections";
 import { AdminWorkspaceModeShell } from "@/features/admin/components/AdminWorkspaceModeShell";
+import { adminRouteCopy } from "@/features/admin/lib/adminRouteCopy";
 import {
   loadAdminCommunicationsDashboardData,
   loadAdminReviewDashboardData,
@@ -22,18 +23,22 @@ import {
 } from "@/features/admin/lib/dashboardData";
 import type { AdminWorkspaceMode } from "@/features/admin/lib/workspaceMode";
 import { requireAdminPageSession } from "@/lib/supabase/auth";
+import type { Language } from "@/types/i18n";
 
 import type { ReactNode } from "react";
 
 export async function AdminDashboardPage({
   initialMode = "review",
+  language,
   redirectTo = "/admin",
 }: {
   initialMode?: AdminWorkspaceMode;
+  language: Language;
   redirectTo?: string;
 }) {
   const { supabase } = await requireAdminPageSession(redirectTo);
   const workspaceOverview = await loadAdminWorkspaceOverview(supabase);
+  const copy = adminRouteCopy[language];
   const mode = initialMode;
   let modeContent: ReactNode;
 
@@ -45,9 +50,11 @@ export async function AdminDashboardPage({
         <AdminCommunicationsDesk
           audience={dashboardData.audience}
           contentReleases={dashboardData.contentReleases}
+          language={language}
           overview={workspaceOverview}
         />
         <AdminWorkspaceQuickJump
+          language={language}
           overview={workspaceOverview}
           mode="communications"
         />
@@ -55,10 +62,12 @@ export async function AdminDashboardPage({
         <div className="space-y-8">
           <AdminReleasesSection
             contentReleases={dashboardData.contentReleases}
+            language={language}
             showComposer={false}
           />
           <AdminAudienceSection
             audience={dashboardData.audience}
+            language={language}
             showSyncForm={false}
           />
         </div>
@@ -70,16 +79,22 @@ export async function AdminDashboardPage({
     modeContent = (
       <>
         <AdminSystemHealthSummary
+          language={language}
           overview={workspaceOverview}
           notifications={dashboardData.notifications}
         />
-        <AdminWorkspaceQuickJump overview={workspaceOverview} mode="system" />
+        <AdminWorkspaceQuickJump
+          language={language}
+          overview={workspaceOverview}
+          mode="system"
+        />
 
         <div className="space-y-8">
           <AdminNotificationsSection
+            language={language}
             notifications={dashboardData.notifications}
           />
-          <AdminRagKnowledgeSection />
+          <AdminRagKnowledgeSection language={language} />
         </div>
       </>
     );
@@ -88,16 +103,30 @@ export async function AdminDashboardPage({
 
     modeContent = (
       <>
-        <AdminReviewInboxSummary overview={workspaceOverview} />
-        <AdminWorkspaceQuickJump overview={workspaceOverview} mode="review" />
+        <AdminReviewInboxSummary
+          language={language}
+          overview={workspaceOverview}
+        />
+        <AdminWorkspaceQuickJump
+          language={language}
+          overview={workspaceOverview}
+          mode="review"
+        />
 
         <div className="space-y-8">
-          <AdminSubmissionsSection submissions={dashboardData.submissions} />
+          <AdminSubmissionsSection
+            language={language}
+            submissions={dashboardData.submissions}
+          />
           <AdminContactInboxSection
             contactMessages={dashboardData.contactMessages}
+            language={language}
           />
-          <AdminEntryReportsSection entryReports={dashboardData.entryReports} />
-          <AdminRagKnowledgeSection />
+          <AdminEntryReportsSection
+            entryReports={dashboardData.entryReports}
+            language={language}
+          />
+          <AdminRagKnowledgeSection language={language} />
         </div>
       </>
     );
@@ -114,8 +143,8 @@ export async function AdminDashboardPage({
       ]}
     >
       <PageHeader
-        title="Instructor Terminal"
-        description="Review submitted exercises, score translations, and send feedback."
+        title={copy.pageTitle}
+        description={copy.pageDescription}
         align="left"
         tone="analytics"
         size="compact"

@@ -1,3 +1,6 @@
+"use client";
+
+import { useLanguage } from "@/components/LanguageProvider";
 import { cx } from "@/lib/classes";
 
 import {
@@ -24,6 +27,8 @@ export function EntryReportStatusBadge({
   className,
   status,
 }: EntryReportStatusBadgeProps) {
+  const { language } = useLanguage();
+
   return (
     <span
       className={cx(
@@ -32,7 +37,7 @@ export function EntryReportStatusBadge({
         className,
       )}
     >
-      {formatEntryReportStatus(status)}
+      {formatEntryReportStatus(status, language)}
     </span>
   );
 }

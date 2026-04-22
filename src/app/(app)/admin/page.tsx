@@ -1,14 +1,20 @@
 import { AdminDashboardPage } from "@/features/admin/components/AdminDashboardPage";
+import { adminRouteCopy } from "@/features/admin/lib/adminRouteCopy";
 import { resolveAdminWorkspaceMode } from "@/features/admin/lib/workspaceMode";
 import { createNoIndexMetadata } from "@/lib/metadata";
+import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
 
 import type { Metadata } from "next";
 
-export const metadata: Metadata = createNoIndexMetadata({
-  title: "Instructor Workspace",
-  description:
-    "Private instructor workspace for reviewing grammar submissions.",
-});
+export async function generateMetadata(): Promise<Metadata> {
+  const language = await getPreferredLanguage();
+  const copy = adminRouteCopy[language];
+
+  return createNoIndexMetadata({
+    title: copy.metaTitle,
+    description: copy.metaDescription,
+  });
+}
 
 /**
  * Loads the private instructor workspace and seeds it with the requested view
@@ -19,11 +25,20 @@ export default async function AdminPage({
 }: {
   searchParams?: Promise<{ mode?: string | string[] }>;
 }) {
-  const resolvedSearchParams = await searchParams;
+  const [language, resolvedSearchParams] = await Promise.all([
+    getPreferredLanguage(),
+    searchParams ?? Promise.resolve(undefined),
+  ]);
   const modeValue = resolvedSearchParams?.mode;
   const initialMode = resolveAdminWorkspaceMode(
     Array.isArray(modeValue) ? modeValue[0] : modeValue,
   );
 
-  return <AdminDashboardPage initialMode={initialMode} redirectTo="/admin" />;
+  return (
+    <AdminDashboardPage
+      initialMode={initialMode}
+      language={language}
+      redirectTo="/admin"
+    />
+  );
 }

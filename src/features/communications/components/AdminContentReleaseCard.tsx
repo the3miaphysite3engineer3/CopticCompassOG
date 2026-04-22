@@ -1,6 +1,9 @@
+"use client";
+
 import { ChevronDown } from "lucide-react";
 
 import { Badge } from "@/components/Badge";
+import { useLanguage } from "@/components/LanguageProvider";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import {
   formatContentReleaseAudienceSegment,
@@ -9,6 +12,7 @@ import {
   getContentReleaseDeliverySummary,
   type AdminContentRelease,
 } from "@/features/communications/lib/releases";
+import type { Language } from "@/types/i18n";
 
 import { ContentReleaseReviewForm } from "./ContentReleaseReviewForm";
 import { ContentReleaseStatusBadge } from "./ContentReleaseStatusBadge";
@@ -16,18 +20,93 @@ import { DeleteContentReleaseForm } from "./DeleteContentReleaseForm";
 import { SendContentReleaseForm } from "./SendContentReleaseForm";
 import { SendContentReleasePreviewForm } from "./SendContentReleasePreviewForm";
 
+const adminContentReleaseCardCopy = {
+  en: {
+    broadcast: "Broadcast",
+    createdOn: "Created on",
+    deliveryCounts: "Delivery counts",
+    deliveryFinishedOn: "Delivery finished on",
+    deliveryLog: "Delivery log",
+    deliveryRequestedOn: "Delivery requested on",
+    deliveryStartedOn: "Delivery started on",
+    dutchCopy: "Dutch copy",
+    eligibleRecipients: "Eligible recipients",
+    englishCopy: "English copy",
+    failed: "failed",
+    hideDetails: "Hide details",
+    id: "id",
+    lesson: "Lesson",
+    noDutchBody: "Nog geen Nederlandse tekst opgeslagen.",
+    noEnglishBody: "No English body saved yet.",
+    notSentYet: "Not sent yet",
+    notSet: "Not set",
+    processedRecipients: "Processed recipients",
+    publication: "Publication",
+    recipients: "recipients",
+    remaining: "remaining",
+    sent: "Sent",
+    sentOn: "Sent on",
+    showDetails: "Show details",
+    skipped: "skipped",
+    snapshotItems: "Snapshot items",
+    snapshottedItems: "Snapshotted items",
+    started: "Started",
+    untitled: "Untitled release draft",
+    updated: "Updated",
+    updatedOn: "Updated on",
+  },
+  nl: {
+    broadcast: "Broadcast",
+    createdOn: "Aangemaakt op",
+    deliveryCounts: "Leveringsaantallen",
+    deliveryFinishedOn: "Levering afgerond op",
+    deliveryLog: "Leveringslog",
+    deliveryRequestedOn: "Levering aangevraagd op",
+    deliveryStartedOn: "Levering gestart op",
+    dutchCopy: "Nederlandse tekst",
+    eligibleRecipients: "Geschikte ontvangers",
+    englishCopy: "Engelse tekst",
+    failed: "mislukt",
+    hideDetails: "Details verbergen",
+    id: "id",
+    lesson: "Les",
+    noDutchBody: "Nog geen Nederlandse tekst opgeslagen.",
+    noEnglishBody: "Nog geen Engelse tekst opgeslagen.",
+    notSentYet: "Nog niet verzonden",
+    notSet: "Niet ingesteld",
+    processedRecipients: "Verwerkte ontvangers",
+    publication: "Publicatie",
+    recipients: "ontvangers",
+    remaining: "resterend",
+    sent: "Verzonden",
+    sentOn: "Verzonden op",
+    showDetails: "Details tonen",
+    skipped: "overgeslagen",
+    snapshotItems: "Snapshotitems",
+    snapshottedItems: "Items in snapshot",
+    started: "Gestart",
+    untitled: "Releaseconcept zonder titel",
+    updated: "Bijgewerkt",
+    updatedOn: "Bijgewerkt op",
+  },
+} as const;
+
 function formatContentReleaseTimestamp(
   timestamp: string | null,
+  language: Language,
   emptyLabel = "Not sent yet",
 ) {
   if (!timestamp) {
     return emptyLabel;
   }
 
-  return new Date(timestamp).toLocaleString("en-US", {
-    dateStyle: "medium",
-    timeStyle: "short",
-  });
+  return new Date(timestamp).toLocaleString(
+    language === "nl" ? "nl-BE" : "en-US",
+    {
+      dateStyle: "medium",
+      timeStyle: "short",
+    },
+  );
 }
 
 export function AdminContentReleaseCard({
@@ -35,6 +114,8 @@ export function AdminContentReleaseCard({
 }: {
   release: AdminContentRelease;
 }) {
+  const { language } = useLanguage();
+  const copy = adminContentReleaseCardCopy[language];
   const deliverySummary = getContentReleaseDeliverySummary(release);
   const shouldOpenDeliveryLog =
     release.status === "queued" ||
@@ -42,20 +123,26 @@ export function AdminContentReleaseCard({
     Boolean(release.last_delivery_error);
   let deliveryStatusLabel = (
     <span className="text-stone-500 dark:text-stone-400">
-      Created on {formatContentReleaseTimestamp(release.created_at)}
+      {copy.createdOn}{" "}
+      {formatContentReleaseTimestamp(
+        release.created_at,
+        language,
+        copy.notSentYet,
+      )}
     </span>
   );
 
   if (release.sent_at) {
     deliveryStatusLabel = (
       <span className="text-stone-500 dark:text-stone-400">
-        Sent on {formatContentReleaseTimestamp(release.sent_at)}
+        {copy.sentOn} {formatContentReleaseTimestamp(release.sent_at, language)}
       </span>
     );
   } else if (release.delivery_started_at) {
     deliveryStatusLabel = (
       <span className="text-stone-500 dark:text-stone-400">
-        Started {formatContentReleaseTimestamp(release.delivery_started_at)}
+        {copy.started}{" "}
+        {formatContentReleaseTimestamp(release.delivery_started_at, language)}
       </span>
     );
   }
@@ -72,32 +159,40 @@ export function AdminContentReleaseCard({
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <ContentReleaseStatusBadge status={release.status} />
             <Badge tone="surface" size="xs">
-              {formatContentReleaseType(release.release_type)}
+              {formatContentReleaseType(release.release_type, language)}
             </Badge>
             <Badge tone="neutral" size="xs">
-              {formatContentReleaseAudienceSegment(release.audience_segment)}
+              {formatContentReleaseAudienceSegment(
+                release.audience_segment,
+                language,
+              )}
             </Badge>
             <Badge tone="coptic" size="xs">
-              {formatContentReleaseLocaleMode(release.locale_mode)}
+              {formatContentReleaseLocaleMode(release.locale_mode, language)}
             </Badge>
           </div>
 
           <h2 className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
-            {release.subject_en ??
-              release.subject_nl ??
-              "Untitled release draft"}
+            {release.subject_en ?? release.subject_nl ?? copy.untitled}
           </h2>
 
           <div className="mt-4 flex flex-wrap items-center gap-2">
             <Badge tone="surface" size="xs">
-              Updated {formatContentReleaseTimestamp(release.updated_at)}
+              {copy.updated}{" "}
+              {formatContentReleaseTimestamp(release.updated_at, language)}
             </Badge>
             <Badge tone="surface" size="xs">
-              Snapshot items: {release.items.length}
+              {copy.snapshotItems}:{" "}
+              {release.items.length.toLocaleString(
+                language === "nl" ? "nl-BE" : "en-US",
+              )}
             </Badge>
             {typeof deliverySummary.eligibleRecipientCount === "number" ? (
               <Badge tone="surface" size="xs">
-                Eligible recipients: {deliverySummary.eligibleRecipientCount}
+                {copy.eligibleRecipients}:{" "}
+                {deliverySummary.eligibleRecipientCount.toLocaleString(
+                  language === "nl" ? "nl-BE" : "en-US",
+                )}
               </Badge>
             ) : null}
             {typeof deliverySummary.sentCount === "number" ? (
@@ -105,7 +200,10 @@ export function AdminContentReleaseCard({
                 tone={deliverySummary.failedCount ? "accent" : "coptic"}
                 size="xs"
               >
-                Sent: {deliverySummary.sentCount}
+                {copy.sent}:{" "}
+                {deliverySummary.sentCount.toLocaleString(
+                  language === "nl" ? "nl-BE" : "en-US",
+                )}
               </Badge>
             ) : null}
           </div>
@@ -117,57 +215,71 @@ export function AdminContentReleaseCard({
             >
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium text-stone-700 [&::-webkit-details-marker]:hidden dark:text-stone-200">
                 <div className="flex flex-wrap items-center gap-3">
-                  <span>Delivery log</span>
+                  <span>{copy.deliveryLog}</span>
                   {deliveryStatusLabel}
                 </div>
 
                 <div className="flex items-center gap-2 text-stone-500 dark:text-stone-400">
-                  <span className="group-open:hidden">Show details</span>
-                  <span className="hidden group-open:inline">Hide details</span>
+                  <span className="group-open:hidden">{copy.showDetails}</span>
+                  <span className="hidden group-open:inline">
+                    {copy.hideDetails}
+                  </span>
                   <ChevronDown className="h-5 w-5 transition-transform duration-200 group-open:rotate-180" />
                 </div>
               </summary>
 
               <div className="mt-4 space-y-2 text-sm text-stone-600 dark:text-stone-400">
                 <p>
-                  Created on {formatContentReleaseTimestamp(release.created_at)}
+                  {copy.createdOn}{" "}
+                  {formatContentReleaseTimestamp(release.created_at, language)}
                 </p>
                 <p>
-                  Updated on {formatContentReleaseTimestamp(release.updated_at)}
+                  {copy.updatedOn}{" "}
+                  {formatContentReleaseTimestamp(release.updated_at, language)}
                 </p>
                 {release.delivery_requested_at ? (
                   <p>
-                    Delivery requested on{" "}
+                    {copy.deliveryRequestedOn}{" "}
                     {formatContentReleaseTimestamp(
                       release.delivery_requested_at,
+                      language,
                     )}
                   </p>
                 ) : null}
                 {release.delivery_started_at ? (
                   <p>
-                    Delivery started on{" "}
-                    {formatContentReleaseTimestamp(release.delivery_started_at)}
+                    {copy.deliveryStartedOn}{" "}
+                    {formatContentReleaseTimestamp(
+                      release.delivery_started_at,
+                      language,
+                    )}
                   </p>
                 ) : null}
                 {release.delivery_finished_at ? (
                   <p>
-                    Delivery finished on{" "}
+                    {copy.deliveryFinishedOn}{" "}
                     {formatContentReleaseTimestamp(
                       release.delivery_finished_at,
+                      language,
                     )}
                   </p>
                 ) : null}
                 {release.sent_at ? (
                   <p>
-                    Sent on {formatContentReleaseTimestamp(release.sent_at)}
+                    {copy.sentOn}{" "}
+                    {formatContentReleaseTimestamp(release.sent_at, language)}
                   </p>
                 ) : null}
                 {typeof deliverySummary.processedRecipientCount === "number" ? (
                   <p>
-                    Processed recipients:{" "}
-                    {deliverySummary.processedRecipientCount}
+                    {copy.processedRecipients}:{" "}
+                    {deliverySummary.processedRecipientCount.toLocaleString(
+                      language === "nl" ? "nl-BE" : "en-US",
+                    )}
                     {typeof deliverySummary.remainingRecipientCount === "number"
-                      ? `, remaining ${deliverySummary.remainingRecipientCount}`
+                      ? `, ${copy.remaining} ${deliverySummary.remainingRecipientCount.toLocaleString(
+                          language === "nl" ? "nl-BE" : "en-US",
+                        )}`
                       : ""}
                   </p>
                 ) : null}
@@ -175,17 +287,29 @@ export function AdminContentReleaseCard({
                 typeof deliverySummary.skippedCount === "number" ||
                 typeof deliverySummary.failedCount === "number" ? (
                   <p>
-                    Delivery counts: sent {deliverySummary.sentCount ?? 0},
-                    skipped {deliverySummary.skippedCount ?? 0}, failed{" "}
-                    {deliverySummary.failedCount ?? 0}
+                    {copy.deliveryCounts}: {copy.sent.toLowerCase()}{" "}
+                    {(deliverySummary.sentCount ?? 0).toLocaleString(
+                      language === "nl" ? "nl-BE" : "en-US",
+                    )}
+                    , {copy.skipped}{" "}
+                    {(deliverySummary.skippedCount ?? 0).toLocaleString(
+                      language === "nl" ? "nl-BE" : "en-US",
+                    )}
+                    , {copy.failed}{" "}
+                    {(deliverySummary.failedCount ?? 0).toLocaleString(
+                      language === "nl" ? "nl-BE" : "en-US",
+                    )}
                   </p>
                 ) : null}
                 {deliverySummary.broadcasts?.length ? (
                   <div className="space-y-1">
                     {deliverySummary.broadcasts.map((broadcast) => (
                       <p key={broadcast.id}>
-                        Broadcast {broadcast.language.toUpperCase()}:{" "}
-                        {broadcast.recipientCount} recipients, id {broadcast.id}
+                        {copy.broadcast} {broadcast.language.toUpperCase()}:{" "}
+                        {broadcast.recipientCount.toLocaleString(
+                          language === "nl" ? "nl-BE" : "en-US",
+                        )}{" "}
+                        {copy.recipients}, {copy.id} {broadcast.id}
                       </p>
                     ))}
                   </div>
@@ -205,32 +329,32 @@ export function AdminContentReleaseCard({
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
         <div className="rounded-2xl border border-stone-100 bg-stone-50 p-5 dark:border-stone-800/50 dark:bg-stone-950">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-            English copy
+            {copy.englishCopy}
           </p>
           <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
-            {release.subject_en ?? "Not set"}
+            {release.subject_en ?? copy.notSet}
           </p>
           <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-stone-600 dark:text-stone-300">
-            {release.body_en ?? "No English body saved yet."}
+            {release.body_en ?? copy.noEnglishBody}
           </p>
         </div>
 
         <div className="rounded-2xl border border-stone-100 bg-stone-50 p-5 dark:border-stone-800/50 dark:bg-stone-950">
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-            Dutch copy
+            {copy.dutchCopy}
           </p>
           <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
-            {release.subject_nl ?? "Niet ingesteld"}
+            {release.subject_nl ?? copy.notSet}
           </p>
           <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-stone-600 dark:text-stone-300">
-            {release.body_nl ?? "Nog geen Nederlandse tekst opgeslagen."}
+            {release.body_nl ?? copy.noDutchBody}
           </p>
         </div>
       </div>
 
       <div className="mb-6 space-y-3">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-          Snapshotted items
+          {copy.snapshottedItems}
         </p>
         <div className="space-y-3">
           {release.items.map((item) => (
@@ -240,7 +364,7 @@ export function AdminContentReleaseCard({
             >
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone="surface" size="xs">
-                  {item.item_type === "lesson" ? "Lesson" : "Publication"}
+                  {item.item_type === "lesson" ? copy.lesson : copy.publication}
                 </Badge>
                 <Badge tone="neutral" size="xs">
                   {item.item_id}

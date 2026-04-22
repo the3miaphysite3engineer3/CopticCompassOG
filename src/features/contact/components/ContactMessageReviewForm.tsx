@@ -1,5 +1,8 @@
+"use client";
+
 import { updateContactMessageStatus } from "@/actions/admin";
 import { FormField } from "@/components/FormField";
+import { useLanguage } from "@/components/LanguageProvider";
 import {
   CONTACT_MESSAGE_STATUSES,
   formatContactMessageStatus,
@@ -11,10 +14,24 @@ type ContactMessageReviewFormProps = {
   status: ContactMessageStatus;
 };
 
+const contactMessageReviewFormCopy = {
+  en: {
+    label: "Inbox status",
+    save: "Save status",
+  },
+  nl: {
+    label: "Inboxstatus",
+    save: "Status opslaan",
+  },
+} as const;
+
 export function ContactMessageReviewForm({
   contactMessageId,
   status,
 }: ContactMessageReviewFormProps) {
+  const { language } = useLanguage();
+  const copy = contactMessageReviewFormCopy[language];
+
   return (
     <form
       action={updateContactMessageStatus}
@@ -24,7 +41,7 @@ export function ContactMessageReviewForm({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
         <FormField
           htmlFor={`contact-message-status-${contactMessageId}`}
-          label="Inbox status"
+          label={copy.label}
           labelTone="muted"
           className="min-w-[14rem] flex-1"
         >
@@ -36,14 +53,14 @@ export function ContactMessageReviewForm({
           >
             {CONTACT_MESSAGE_STATUSES.map((nextStatus) => (
               <option key={nextStatus} value={nextStatus}>
-                {formatContactMessageStatus(nextStatus)}
+                {formatContactMessageStatus(nextStatus, language)}
               </option>
             ))}
           </select>
         </FormField>
 
         <button type="submit" className="btn-primary px-5">
-          Save status
+          {copy.save}
         </button>
       </div>
     </form>

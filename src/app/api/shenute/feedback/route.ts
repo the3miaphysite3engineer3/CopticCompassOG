@@ -2,11 +2,11 @@ import { NextResponse } from "next/server";
 
 import { getProfileRole } from "@/features/profile/lib/server/queries";
 import {
-  ingestChatFeedbackLearningSignal,
-  type ChatFeedbackEmbeddingProvider,
-  type ChatFeedbackPageContext,
-  type ChatFeedbackSignal,
-} from "@/lib/rag/chatFeedbackIngestion";
+  ingestShenuteFeedbackLearningSignal,
+  type ShenuteFeedbackEmbeddingProvider,
+  type ShenuteFeedbackPageContext,
+  type ShenuteFeedbackSignal,
+} from "@/lib/rag/shenuteFeedbackIngestion";
 import { getAuthenticatedUser } from "@/lib/supabase/authQueries";
 import { hasSupabaseRuntimeEnv } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -21,7 +21,7 @@ export const runtime = "nodejs";
 type FeedbackRequestPayload = {
   assistantMessageId?: unknown;
   assistantResponse?: unknown;
-  chatId?: unknown;
+  shenuteSessionId?: unknown;
   feedbackText?: unknown;
   inferenceProvider?: unknown;
   pageContext?: unknown;
@@ -30,7 +30,7 @@ type FeedbackRequestPayload = {
   userMessageId?: unknown;
 };
 
-function toProvider(value: unknown): ChatFeedbackEmbeddingProvider {
+function toProvider(value: unknown): ShenuteFeedbackEmbeddingProvider {
   if (value === "gemini") {
     return "gemini";
   }
@@ -50,7 +50,7 @@ function toProvider(value: unknown): ChatFeedbackEmbeddingProvider {
   return "openrouter";
 }
 
-function toSignal(value: unknown): ChatFeedbackSignal | null {
+function toSignal(value: unknown): ShenuteFeedbackSignal | null {
   if (value === "admin_feedback") {
     return "admin_feedback";
   }
@@ -86,7 +86,7 @@ function toOptionalBoundedString(
   return normalized.slice(0, maxLength);
 }
 
-function toPageContext(value: unknown): ChatFeedbackPageContext | undefined {
+function toPageContext(value: unknown): ShenuteFeedbackPageContext | undefined {
   if (!value || typeof value !== "object") {
     return undefined;
   }
@@ -112,7 +112,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: "Chat feedback is unavailable right now.",
+          error: "Shenute feedback is unavailable right now.",
         },
         { status: 503 },
       );
@@ -193,7 +193,10 @@ export async function POST(request: Request) {
 
     const pageContext = toPageContext(body.pageContext);
     const inferenceProvider = toProvider(body.inferenceProvider);
-    const chatId = toOptionalBoundedString(body.chatId, 120);
+    const shenuteSessionId = toOptionalBoundedString(
+      body.shenuteSessionId,
+      120,
+    );
     const userMessageId = toOptionalBoundedString(body.userMessageId, 120);
     const assistantMessageId = toOptionalBoundedString(
       body.assistantMessageId,
@@ -205,7 +208,7 @@ export async function POST(request: Request) {
       .insert({
         assistant_message_id: assistantMessageId ?? null,
         assistant_response_text: assistantResponse,
-        chat_id: chatId ?? null,
+        chat_id: shenuteSessionId ?? null,
         feedback_text:
           signal === "admin_feedback" ? (feedbackText ?? null) : null,
         inference_provider: inferenceProvider,
@@ -221,7 +224,7 @@ export async function POST(request: Request) {
       });
 
     if (insertError) {
-      console.error("Failed to persist chat feedback event:", insertError);
+      console.error("Failed to persist Shenute feedback event:", insertError);
       return NextResponse.json(
         {
           success: false,
@@ -235,10 +238,10 @@ export async function POST(request: Request) {
     let ragWarning: string | undefined;
 
     try {
-      await ingestChatFeedbackLearningSignal({
+      await ingestShenuteFeedbackLearningSignal({
         assistantMessageId,
         assistantResponse,
-        chatId,
+        shenuteSessionId,
         feedbackText,
         inferenceProvider,
         pageContext,
@@ -254,7 +257,7 @@ export async function POST(request: Request) {
           ? ragIngestionError.message
           : "Unknown RAG ingestion error.";
       console.error(
-        "Failed to ingest chat feedback into RAG:",
+        "Failed to ingest Shenute feedback into RAG:",
         ragIngestionError,
       );
     }
@@ -265,7 +268,7 @@ export async function POST(request: Request) {
       success: true,
     });
   } catch (error) {
-    console.error("Chat feedback API failed:", error);
+    console.error("Shenute feedback API failed:", error);
 
     return NextResponse.json(
       {
@@ -273,7 +276,7 @@ export async function POST(request: Request) {
         error:
           error instanceof Error
             ? error.message
-            : "Unknown chat feedback error.",
+            : "Unknown Shenute feedback error.",
       },
       { status: 500 },
     );

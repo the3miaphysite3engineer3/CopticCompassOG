@@ -6,12 +6,12 @@ import localFont from "next/font/local";
 export const antinoou = localFont({
   src: [
     {
-      path: "../fonts/AntinoouFont-1.0.6/Antinoou.ttf",
+      path: "../fonts/AntinoouFont-1.0.6/antinoou-webfont.woff",
       weight: "400",
       style: "normal",
     },
     {
-      path: "../fonts/AntinoouFont-1.0.6/AntinoouItalic.ttf",
+      path: "../fonts/AntinoouFont-1.0.6/antinoouitalic-webfont.woff",
       weight: "400",
       style: "italic",
     },

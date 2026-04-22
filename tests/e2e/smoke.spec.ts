@@ -48,7 +48,7 @@ test("Dutch locale renders Dutch navigation", async ({ page }) => {
       .getByRole("link", { name: "Publicaties", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Koptisch Kompas" }),
+    page.getByRole("heading", { name: "Coptic Compass" }),
   ).toBeVisible();
 });
 
@@ -106,7 +106,7 @@ test("login page honors the Dutch language preference", async ({ page }) => {
 
   await expect(page.locator("html")).toHaveAttribute("lang", "nl");
   await expect(
-    page.getByRole("heading", { name: "Welkom bij Koptisch Kompas" }),
+    page.getByRole("heading", { name: "Welkom bij Coptic Compass" }),
   ).toBeVisible();
   await expect(
     page.getByRole("link", { name: "Wachtwoord vergeten?" }),

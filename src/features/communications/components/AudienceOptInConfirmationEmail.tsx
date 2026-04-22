@@ -32,15 +32,15 @@ const copy = {
     title: "Confirm your Coptic Compass updates",
   },
   nl: {
-    body: "Bevestig dat je updates van Coptic Compass wilt ontvangen over nieuwe lessen, boekreleases en belangrijke projectaankondigingen.",
+    body: "Bevestig dat u updates van Coptic Compass wilt ontvangen over nieuwe lessen, boekuitgaven en belangrijke projectaankondigingen.",
     cta: "E-mailupdates bevestigen",
-    fallback: "Werkt de knop niet, open dan deze link in je browser:",
+    fallback: "Werkt de knop niet, open dan deze link in uw browser:",
     greeting: "Dag",
     signature: "Coptic Compass",
-    subject: "Bevestig je Coptic Compass e-mailupdates",
+    subject: "Bevestig uw Coptic Compass e-mailupdates",
     thanks:
-      "Heb je dit niet aangevraagd, dan kun je deze e-mail gerust negeren.",
-    title: "Bevestig je updates van Coptic Compass",
+      "Hebt u dit niet aangevraagd, dan kunt u deze e-mail gerust negeren.",
+    title: "Bevestig uw updates van Coptic Compass",
   },
 } as const;
 

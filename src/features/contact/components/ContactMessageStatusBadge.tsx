@@ -1,4 +1,7 @@
+"use client";
+
 import { Badge } from "@/components/Badge";
+import { useLanguage } from "@/components/LanguageProvider";
 import {
   formatContactMessageStatus,
   type ContactMessageStatus,
@@ -21,9 +24,11 @@ const STATUS_TONES: Record<
 export function ContactMessageStatusBadge({
   status,
 }: ContactMessageStatusBadgeProps) {
+  const { language } = useLanguage();
+
   return (
     <Badge tone={STATUS_TONES[status]} size="xs">
-      {formatContactMessageStatus(status)}
+      {formatContactMessageStatus(status, language)}
     </Badge>
   );
 }

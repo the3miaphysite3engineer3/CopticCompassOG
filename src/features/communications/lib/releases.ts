@@ -127,7 +127,21 @@ export function isContentReleaseDeletableStatus(
  */
 export function formatContentReleaseType(
   releaseType: ContentReleaseRow["release_type"],
+  language: Language = "en",
 ) {
+  if (language === "nl") {
+    switch (releaseType) {
+      case "lesson":
+        return "Lesrelease";
+      case "publication":
+        return "Publicatierelease";
+      case "mixed":
+        return "Gemengde release";
+      default:
+        return releaseType;
+    }
+  }
+
   switch (releaseType) {
     case "lesson":
       return "Lesson release";
@@ -145,7 +159,27 @@ export function formatContentReleaseType(
  */
 export function formatContentReleaseStatus(
   status: ContentReleaseRow["status"],
+  language: Language = "en",
 ) {
+  if (language === "nl") {
+    switch (status) {
+      case "draft":
+        return "Concept";
+      case "approved":
+        return "Goedgekeurd";
+      case "queued":
+        return "In wachtrij";
+      case "sending":
+        return "Wordt verzonden";
+      case "sent":
+        return "Verzonden";
+      case "cancelled":
+        return "Geannuleerd";
+      default:
+        return status;
+    }
+  }
+
   switch (status) {
     case "draft":
       return "Draft";
@@ -169,7 +203,21 @@ export function formatContentReleaseStatus(
  */
 export function formatContentReleaseAudienceSegment(
   segment: ContentReleaseRow["audience_segment"],
+  language: Language = "en",
 ) {
+  if (language === "nl") {
+    switch (segment) {
+      case "lessons":
+        return "Abonnees op lessen";
+      case "books":
+        return "Abonnees op boeken";
+      case "general":
+        return "Algemene updates";
+      default:
+        return segment;
+    }
+  }
+
   switch (segment) {
     case "lessons":
       return "Lesson subscribers";
@@ -187,7 +235,21 @@ export function formatContentReleaseAudienceSegment(
  */
 export function formatContentReleaseLocaleMode(
   localeMode: ContentReleaseRow["locale_mode"],
+  language: Language = "en",
 ) {
+  if (language === "nl") {
+    switch (localeMode) {
+      case "localized":
+        return "Gelokaliseerd EN + NL";
+      case "en_only":
+        return "Alleen Engels";
+      case "nl_only":
+        return "Alleen Nederlands";
+      default:
+        return localeMode;
+    }
+  }
+
   switch (localeMode) {
     case "localized":
       return "Localized EN + NL";

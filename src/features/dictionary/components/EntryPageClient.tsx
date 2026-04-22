@@ -56,7 +56,6 @@ export default function EntryPageClient({
                 ? "Bekijk de grammaticahandleidingen waarin dit lemma expliciet voorkomt of verder wordt uitgelegd."
                 : "Explore the grammar lessons where this entry appears explicitly or is discussed in more detail."
             }
-            eyebrow={language === "nl" ? "Grammatica" : "Grammar"}
             language={language}
             lessons={relatedGrammarLessons}
             title={

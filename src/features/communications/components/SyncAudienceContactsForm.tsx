@@ -5,9 +5,23 @@ import { useActionState } from "react";
 import { syncAudienceContactsWithResend } from "@/actions/admin";
 import type { SyncAudienceContactsState } from "@/actions/admin/states";
 import { Button } from "@/components/Button";
+import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
 
+const syncAudienceContactsFormCopy = {
+  en: {
+    sync: "Sync audience to Resend",
+    syncing: "Syncing audience...",
+  },
+  nl: {
+    sync: "Publiek synchroniseren met Resend",
+    syncing: "Publiek wordt gesynchroniseerd...",
+  },
+} as const;
+
 export function SyncAudienceContactsForm() {
+  const { language } = useLanguage();
+  const copy = syncAudienceContactsFormCopy[language];
   const [state, formAction, isPending] = useActionState<
     SyncAudienceContactsState | null,
     FormData
@@ -16,7 +30,7 @@ export function SyncAudienceContactsForm() {
   return (
     <form action={formAction} className="space-y-4">
       <Button type="submit" variant="secondary" disabled={isPending}>
-        {isPending ? "Syncing audience..." : "Sync audience to Resend"}
+        {isPending ? copy.syncing : copy.sync}
       </Button>
 
       {state?.message ? (

@@ -1,5 +1,8 @@
+"use client";
+
 import { updateEntryReportStatus } from "@/actions/admin";
 import { FormField } from "@/components/FormField";
+import { useLanguage } from "@/components/LanguageProvider";
 
 import {
   ENTRY_REPORT_STATUSES,
@@ -12,10 +15,24 @@ type EntryReportReviewFormProps = {
   status: EntryReportStatus;
 };
 
+const entryReportReviewFormCopy = {
+  en: {
+    label: "Review status",
+    save: "Save status",
+  },
+  nl: {
+    label: "Beoordelingsstatus",
+    save: "Status opslaan",
+  },
+} as const;
+
 export function EntryReportReviewForm({
   reportId,
   status,
 }: EntryReportReviewFormProps) {
+  const { language } = useLanguage();
+  const copy = entryReportReviewFormCopy[language];
+
   return (
     <form
       action={updateEntryReportStatus}
@@ -25,7 +42,7 @@ export function EntryReportReviewForm({
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
         <FormField
           htmlFor={`entry-report-status-${reportId}`}
-          label="Review status"
+          label={copy.label}
           labelTone="muted"
           className="min-w-[14rem] flex-1"
         >
@@ -37,14 +54,14 @@ export function EntryReportReviewForm({
           >
             {ENTRY_REPORT_STATUSES.map((nextStatus) => (
               <option key={nextStatus} value={nextStatus}>
-                {formatEntryReportStatus(nextStatus)}
+                {formatEntryReportStatus(nextStatus, language)}
               </option>
             ))}
           </select>
         </FormField>
 
         <button type="submit" className="btn-primary px-5">
-          Save status
+          {copy.save}
         </button>
       </div>
     </form>

@@ -33,7 +33,7 @@ import { isPublicLocale } from "@/lib/locale";
 import { siteConfig } from "@/lib/site";
 
 const antinoouFontPromise = readFile(
-  join(process.cwd(), "src/fonts/AntinoouFont-1.0.6/Antinoou.ttf"),
+  join(process.cwd(), "src/fonts/AntinoouFont-1.0.6/antinoou-webfont.woff"),
 );
 
 /**

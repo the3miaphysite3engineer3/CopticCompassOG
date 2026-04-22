@@ -7,7 +7,7 @@ describe("requiresAuthSessionProxy", () => {
     expect(requiresAuthSessionProxy("/dashboard")).toBe(true);
     expect(requiresAuthSessionProxy("/admin")).toBe(true);
     expect(requiresAuthSessionProxy("/nl/dashboard")).toBe(true);
-    expect(requiresAuthSessionProxy("/en/dashboard/settings")).toBe(true);
+    expect(requiresAuthSessionProxy("/en/admin")).toBe(true);
   });
 
   it("matches the password update route", () => {
@@ -19,5 +19,8 @@ describe("requiresAuthSessionProxy", () => {
     expect(requiresAuthSessionProxy("/data/dictionary.json")).toBe(false);
     expect(requiresAuthSessionProxy("/en/dictionary")).toBe(false);
     expect(requiresAuthSessionProxy("/en/grammar/lesson-1")).toBe(false);
+    expect(requiresAuthSessionProxy("/admin/extra-text")).toBe(false);
+    expect(requiresAuthSessionProxy("/nl/admin/extra-text")).toBe(false);
+    expect(requiresAuthSessionProxy("/en/dashboard/settings")).toBe(false);
   });
 });

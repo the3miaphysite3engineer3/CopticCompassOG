@@ -29,7 +29,7 @@ export async function generateMetadata({
   return createLocalizedPageMetadata({
     title:
       resolvedLocale === "nl"
-        ? "Koptische Publicaties en Onderzoek"
+        ? "Koptische publicaties en onderzoek"
         : "Coptic Publications and Research",
     description: buildPublicationsDescription(resolvedLocale),
     path: "/publications",

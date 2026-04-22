@@ -31,26 +31,26 @@ export const homeMessages = defineMessages({
   nl: {
     "home.eyebrow":
       "Koptisch woordenboek, grammatica, publicaties en Shenute AI",
-    "home.title": "Koptisch Kompas",
+    "home.title": "Coptic Compass",
     "home.subtitle":
-      "Een digitaal thuis voor de studie van het Koptisch, met een doorzoekbaar woordenboek, gestructureerde grammaticalessen, publicaties en Shenute AI voor begeleide studie en manuscriptcontext.",
+      "Een digitale thuisbasis voor de studie van het Koptisch, met een doorzoekbaar woordenboek, gestructureerde grammaticalessen, publicaties en Shenute AI voor begeleide studie en manuscriptcontext.",
     "home.credit": "Gebouwd door Kopten voor Kopten",
     "home.publications": "Publicaties",
     "home.publications.desc":
       "Boeken, naslagwerken en onderzoeksmaterialen voor studenten en onderzoekers van het Koptisch.",
     "home.publications.cta": "Bekijk publicaties",
-    "home.comingSoon": "Binnenkort Beschikbaar",
+    "home.comingSoon": "Binnenkort beschikbaar",
     "home.app.title": "Coptic Learner",
     "home.app.desc":
-      "Leer Koptische grammatica en woordenschat onderweg met interactieve, Duolingo-achtige stapsgewijze lessen, intelligente zoekfuncties en native integratie voor iPhone en iPad.",
+      "Bestudeer Koptische grammatica en woordenschat onderweg met interactieve, Duolingo-achtige korte lessen, intelligente zoekfuncties en native integratie voor iPhone en iPad.",
     "home.app.focus": "Geplande onderdelen",
     "home.app.focusItem1": "Interactieve oefeningen met docentfeedback",
     "home.app.focusItem2": "Gestructureerde lesopbouw voor studenten",
     "home.app.focusItem3": "Onderzoeksgedreven studietools rond het Koptisch",
-    "home.copticDict": "Koptisch Woordenboek",
+    "home.copticDict": "Koptisch woordenboek",
     "home.copticDict.desc":
-      "Een bliksemsnel digitaal lexicon expliciet ontworpen voor zowel beginnende studenten als taalkundigen.",
-    "home.dictionary.cta": "Open woordenboek",
+      "Een snel digitaal lexicon dat expliciet is ontworpen voor zowel beginnende studenten als taalkundigen.",
+    "home.dictionary.cta": "Open het woordenboek",
     "home.grammar.cta": "Begin met studeren",
   },
 });

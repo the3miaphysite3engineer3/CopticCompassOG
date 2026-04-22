@@ -15,10 +15,26 @@ export const sharedMessages = defineMessages({
     "nav.grammar": "Grammar",
     "nav.developers": "Developers",
     "nav.contact": "Contact",
-    "nav.chat": "Shenute AI",
+    "nav.shenute": "Shenute AI",
     "nav.analytics": "Analytics Dashboard",
     "nav.login": "Sign In",
     "nav.dashboard": "Dashboard",
+
+    "notFound.title": "Page not found",
+    "notFound.description":
+      "This route does not exist, or the page may have moved.",
+    "notFound.primaryAction": "Go home",
+    "notFound.secondaryAction": "Open dictionary",
+    "notFound.helpTitle": "Useful routes",
+    "notFound.homeDescription": "Return to the main Coptic Compass workspace.",
+    "notFound.dictionaryDescription":
+      "Search Coptic entries, forms, and meanings.",
+    "notFound.grammarDescription":
+      "Continue with lessons, examples, and exercises.",
+    "notFound.publicationsDescription":
+      "Browse books, editions, and study material.",
+    "notFound.shenuteDescription":
+      "Ask Shenute AI for help with Coptic language questions.",
 
     "footer.rights": "All rights reserved.",
     "footer.credit": "is independently built and maintained.",
@@ -33,16 +49,33 @@ export const sharedMessages = defineMessages({
     "lang.switchToDutch": "Overschakelen naar het Nederlands",
     "lang.switchToEnglish": "Overschakelen naar het Engels",
 
-    "nav.home": "Thuis",
+    "nav.home": "Home",
     "nav.publications": "Publicaties",
     "nav.dictionary": "Woordenboek",
     "nav.grammar": "Grammatica",
     "nav.developers": "Ontwikkelaars",
     "nav.contact": "Contact",
-    "nav.chat": "Shenute AI",
+    "nav.shenute": "Shenute AI",
     "nav.analytics": "Analytics-dashboard",
     "nav.login": "Inloggen",
     "nav.dashboard": "Dashboard",
+
+    "notFound.title": "Pagina niet gevonden",
+    "notFound.description":
+      "Deze route bestaat niet, of de pagina is verplaatst.",
+    "notFound.primaryAction": "Ga naar de homepagina",
+    "notFound.secondaryAction": "Open het woordenboek",
+    "notFound.helpTitle": "Handige routes",
+    "notFound.homeDescription":
+      "Keer terug naar het startpunt van Coptic Compass.",
+    "notFound.dictionaryDescription":
+      "Zoek Koptische lemma's, vormen en betekenissen.",
+    "notFound.grammarDescription":
+      "Ga verder met lessen, voorbeelden en oefeningen.",
+    "notFound.publicationsDescription":
+      "Blader door boeken, edities en studiemateriaal.",
+    "notFound.shenuteDescription":
+      "Vraag Shenute AI om hulp bij Koptische taalvragen.",
 
     "footer.rights": "Alle rechten voorbehouden.",
     "footer.credit": "wordt onafhankelijk ontwikkeld en beheerd.",
@@ -50,6 +83,6 @@ export const sharedMessages = defineMessages({
     "footer.terms": "Gebruiksvoorwaarden",
     "footer.apiDocs": "API-docs",
     "footer.developers": "Ontwikkelaars",
-    "footer.contributors": "Contributors",
+    "footer.contributors": "Bijdragers",
   },
 });

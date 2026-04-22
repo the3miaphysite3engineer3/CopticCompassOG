@@ -6,6 +6,9 @@ const securityHeaders = buildSecurityHeaders({
 });
 
 const nextConfig: NextConfig = {
+  experimental: {
+    globalNotFound: true,
+  },
   async headers() {
     return [
       {

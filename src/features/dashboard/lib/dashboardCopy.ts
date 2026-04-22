@@ -159,21 +159,21 @@ const DASHBOARD_COPY = {
     metaTitle: "Leerdashboard",
     metaDescription: "Privéleeromgeving voor lessen, inzendingen en voortgang.",
     pageTitle: "Leerdashboard",
-    pageDescription: "Beheer je grammaticaoefeningen en bekijk feedback.",
+    pageDescription: "Beheer uw grammaticaoefeningen en bekijk feedback.",
     signOut: "Uitloggen",
     welcomeBack: "Welkom terug",
     fallbackStudentName: "Student",
     loggedInAs: "Ingelogd als",
     avatarAlt: "Avatar",
-    recentExercisesTitle: "Je recente oefeningen",
+    recentExercisesTitle: "Uw recente oefeningen",
     noExercisesTitle: "Nog geen oefeningen ingestuurd",
     noExercisesDescription:
-      "Ga naar de grammatica-sectie om je eerste les af te ronden.",
+      "Ga naar de grammatica-sectie om uw eerste les af te ronden.",
     reviewedLabel: "Nagekeken",
     grammar: {
       title: "Voortgang grammatica",
       description:
-        "Volg je lesvoortgang, opgeslagen lessen en persoonlijke notities doorheen de grammaticacursus.",
+        "Volg uw lesvoortgang, opgeslagen lessen en persoonlijke notities doorheen de grammaticacursus.",
       publishedLessons: "Gepubliceerde lessen",
       startedLessons: "Begonnen",
       completedLessons: "Voltooid",
@@ -188,7 +188,7 @@ const DASHBOARD_COPY = {
     dictionary: {
       title: "Opgeslagen woordenboeklemma's",
       description:
-        "Hou de lemma's die je tijdens het studeren of opzoeken bewaart snel binnen bereik.",
+        "Houd de lemma's die u tijdens het studeren of opzoeken bewaart snel binnen bereik.",
       totalSaved: "Opgeslagen lemma's",
       availableEntries: "Nu beschikbaar",
       missingEntries: "Gearchiveerd of gewijzigd",
@@ -200,53 +200,53 @@ const DASHBOARD_COPY = {
         "Dit lemma staat niet meer in de huidige woordenboekdataset, maar de bladwijzer blijft bewaard als referentie.",
       noSavedTitle: "Nog geen opgeslagen lemma's",
       noSavedDescription:
-        "Gebruik het hartje op een woordenboeklemma om het hier in je dashboard bij te houden.",
+        "Gebruik het hartje op een woordenboeklemma om het hier in uw dashboard bij te houden.",
     },
     account: {
       eyebrow: "Account",
       title: "Instellingen",
       privateBadge: "Privé",
       description:
-        "Beheer je profielgegevens, wachtwoordtoegang en accountaanvragen zonder de rest van je dashboard te overladen.",
+        "Beheer uw profielgegevens, wachtwoordtoegang en accountaanvragen zonder de rest van uw dashboard te overladen.",
       profileTitle: "Profielinstellingen",
       profileDescription:
-        "Werk je weergavenaam en avatar bij, terwijl je aanmeldadres zichtbaar blijft als referentie.",
+        "Werk uw weergavenaam en avatar bij, terwijl uw aanmeldadres zichtbaar blijft als referentie.",
       passwordTitle: "Wachtwoord bijwerken",
       passwordDescription:
-        "Wijzig hier je dashboardwachtwoord zonder de dashboardflow te verlaten.",
+        "Wijzig hier uw dashboardwachtwoord zonder de dashboardflow te verlaten.",
       passwordExternalDescription:
         "Dit account gebruikt {provider} om in te loggen, dus wachtwoordwijzigingen worden niet lokaal beheerd.",
       passwordAvailableBadge: "Beschikbaar",
       passwordExternalBadge: "Externe aanmelding",
       communicationTitle: "E-mailupdates",
       communicationDescription:
-        "Kies welke les-, publicatie- en projectaankondigingen je in je inbox wilt ontvangen.",
+        "Kies welke les-, publicatie- en projectaankondigingen u in uw inbox wilt ontvangen.",
       communicationBadge: "Opt-in",
       communicationLead:
         "Deze voorkeuren gelden alleen voor release- en aankondigingsmails. Account- en beoordelingsmails blijven hun eigen operationele weg volgen.",
       communicationEmailLabel: "Ontvangstadres",
       communicationLocaleLabel: "Taal van e-mails",
       communicationLocaleHint:
-        "Releaseaankondigingen kunnen gelokaliseerd zijn, dus kies de taal die je wilt ontvangen wanneer beide versies beschikbaar zijn.",
-      communicationLessonsLabel: "Nieuwe grammaticlessen",
+        "Releaseaankondigingen kunnen gelokaliseerd zijn, dus kies de taal die u wilt ontvangen wanneer beide versies beschikbaar zijn.",
+      communicationLessonsLabel: "Nieuwe grammaticalessen",
       communicationBooksLabel: "Boek- en publicatiereleases",
       communicationGeneralLabel: "Belangrijke projectupdates",
       communicationHint:
-        "Je kunt hier elk onderwerp pauzeren zonder verplichte accountmails zoals wachtwoordresets of feedbackmeldingen te beïnvloeden.",
+        "U kunt hier elk onderwerp pauzeren zonder verplichte accountmails zoals wachtwoordresets of feedbackmeldingen te beïnvloeden.",
       communicationSaveIdle: "Voorkeuren opslaan",
       communicationSavePending: "Bezig met opslaan...",
       deleteTitle: "Profiel verwijderen",
       deleteDescription:
-        "Bekijk eerst het permanente verwijderingspad voordat je je account en bijbehorende leerdata verwijdert.",
+        "Bekijk eerst het permanente verwijderingspad voordat u uw account en bijbehorende leerdata verwijdert.",
       deleteBadge: "Handmatige controle",
       passwordManagedElsewhere:
         "Dit account meldt zich aan met {provider}, dus wachtwoordwijzigingen worden hier niet beheerd.",
       newPasswordLabel: "Nieuw wachtwoord",
       newPasswordPlaceholder: "Moet minstens 8 tekens bevatten",
       confirmPasswordLabel: "Nieuw wachtwoord bevestigen",
-      confirmPasswordPlaceholder: "Herhaal je nieuwe wachtwoord",
+      confirmPasswordPlaceholder: "Herhaal uw nieuwe wachtwoord",
       passwordHint:
-        "Gebruik een wachtwoord dat je nergens anders hergebruikt. Door het hier bij te werken blijft je dashboardaanmelding actueel zonder deze pagina te verlaten.",
+        "Gebruik een wachtwoord dat u nergens anders hergebruikt. Door het hier bij te werken blijft uw dashboardaanmelding actueel zonder deze pagina te verlaten.",
       updatePasswordIdle: "Wachtwoord bijwerken",
       updatePasswordPending: "Bezig met bijwerken...",
       passwordUpdateSuccess: "Wachtwoord succesvol bijgewerkt.",
@@ -254,9 +254,9 @@ const DASHBOARD_COPY = {
       passwordMismatch: "Wachtwoorden komen niet overeen.",
       deleteNoticeTitle: "Permanente verwijdering",
       deleteNoticeBody:
-        "Een verwijderingsverzoek wist je profiel samen met bijbehorende dashboardgegevens zoals inzendingen, lesvoortgang, bladwijzers en notities.",
+        "Een verwijderingsverzoek wist uw profiel samen met bijbehorende dashboardgegevens zoals inzendingen, lesvoortgang, bladwijzers en notities.",
       deleteNoticeLead:
-        "Accountverwijdering wordt momenteel handmatig afgehandeld zodat we je profiel en gekoppelde leerdata veilig kunnen verwijderen.",
+        "Accountverwijdering wordt momenteel handmatig afgehandeld zodat we uw profiel en gekoppelde leerdata veilig kunnen verwijderen.",
       requestDeletion: "Verwijdering aanvragen",
       reviewPrivacy: "Privacybeleid bekijken",
     },
@@ -267,14 +267,14 @@ const DASHBOARD_COPY = {
       uploadIdle: "Afbeelding uploaden",
       uploadPending: "Bezig met uploaden...",
       fullNameLabel: "Volledige naam",
-      fullNamePlaceholder: "Je naam",
+      fullNamePlaceholder: "Uw naam",
       emailLabel: "E-mailadres",
       emailHint: "Het e-mailadres kan momenteel niet worden gewijzigd.",
       saveChanges: "Wijzigingen opslaan",
       compressingImage: "Afbeelding comprimeren...",
       uploadingImage: "Uploaden naar de server...",
       updatedSuccess: "Profiel succesvol bijgewerkt!",
-      selectImageError: "Je moet een afbeelding selecteren om te uploaden.",
+      selectImageError: "U moet een afbeelding selecteren om te uploaden.",
       uploadUnavailableError:
         "Databaseverbinding uitgeschakeld. Bestand uploaden is niet mogelijk.",
       uploadUnknownError: "Er is een onbekende uploadfout opgetreden",
@@ -286,19 +286,19 @@ const DASHBOARD_COPY = {
       awaitingReviewLabel: "Wacht op beoordeling",
       showDetails: "Antwoord en feedback tonen",
       hideDetails: "Antwoord en feedback verbergen",
-      responseLabel: "Jouw antwoord",
+      responseLabel: "Uw antwoord",
       waitingForReview:
         "Wacht op beoordeling door de docent. Kom later nog eens terug.",
     },
     loading: {
-      title: "Je dashboard wordt voorbereid",
+      title: "Uw dashboard wordt voorbereid",
       description:
-        "Je profiel, lesvoortgang en recente oefenfeedback worden geladen.",
+        "Uw profiel, lesvoortgang en recente oefenfeedback worden geladen.",
     },
     error: {
-      title: "Je dashboard kon niet worden geladen",
+      title: "Uw dashboard kon niet worden geladen",
       description:
-        "Er liep tijdelijk iets mis bij het laden van je privéleeromgeving.",
+        "Er liep tijdelijk iets mis bij het laden van uw privéleeromgeving.",
       details:
         "Voortgang, profiel- of inzendingsgegevens konden niet voor dit verzoek worden voorbereid. Probeer het opnieuw en ga, als het probleem blijft bestaan, terug naar het grammatica-overzicht om het opnieuw te proberen.",
       primaryLabel: "Open grammatica-overzicht",

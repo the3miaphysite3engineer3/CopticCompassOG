@@ -294,7 +294,7 @@ describe("contact action", () => {
     ).resolves.toEqual({
       success: true,
       message:
-        "Bericht succesvol verzonden. Controleer je inbox om e-mailupdates te bevestigen.",
+        "Bericht succesvol verzonden. Controleer uw inbox om e-mailupdates te bevestigen.",
     });
 
     expect(insertMock).toHaveBeenCalledWith({
@@ -341,7 +341,7 @@ describe("contact action", () => {
         payload: expect.objectContaining({
           email: "se***@example.com",
         }),
-        subject: "Bevestig je Coptic Compass e-mailupdates",
+        subject: "Bevestig uw Coptic Compass e-mailupdates",
         to: "sender@example.com",
         text: expect.stringContaining(
           "https://example.com/en/communications/confirm?token=test-token",

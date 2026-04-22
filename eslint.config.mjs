@@ -37,6 +37,24 @@ const eslintConfig = defineConfig([
       eqeqeq: ["error", "always"],
       "import/first": "error",
       "import/no-duplicates": "error",
+      "import/no-extraneous-dependencies": [
+        "error",
+        {
+          devDependencies: [
+            "**/*.test.{ts,tsx,mts}",
+            "**/*.test-helpers.{ts,tsx,mts}",
+          ],
+          optionalDependencies: false,
+          peerDependencies: false,
+        },
+      ],
+      "import/no-unresolved": [
+        "error",
+        {
+          caseSensitive: true,
+          ignore: ["^@/"],
+        },
+      ],
       "no-console": ["error", { allow: ["warn", "error"] }],
       "no-else-return": "error",
       "no-nested-ternary": "error",

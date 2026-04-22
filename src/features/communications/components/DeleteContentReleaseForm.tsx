@@ -6,11 +6,35 @@ import { startTransition, useActionState, useEffect } from "react";
 import { deleteContentReleaseDraft } from "@/actions/admin";
 import type { DeleteContentReleaseState } from "@/actions/admin/states";
 import { Button } from "@/components/Button";
+import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
 import {
   isContentReleaseDeletableStatus,
   type ContentReleaseRow,
 } from "@/features/communications/lib/releases";
+
+const deleteContentReleaseFormCopy = {
+  en: {
+    confirm:
+      "Delete this release draft and its snapshotted items permanently? Sent or in-flight releases cannot be removed this way.",
+    deleting: "Deleting draft...",
+    description:
+      "Use this for abandoned test drafts or cancelled announcements you do not want cluttering communications history.",
+    label: "Delete draft",
+    refreshing: "Refreshing...",
+    title: "Remove unsent draft",
+  },
+  nl: {
+    confirm:
+      "Dit releaseconcept en de snapshotitems definitief verwijderen? Verzonden of lopende releases kunnen niet op deze manier worden verwijderd.",
+    deleting: "Concept wordt verwijderd...",
+    description:
+      "Gebruik dit voor verlaten testconcepten of geannuleerde aankondigingen die u niet in de communicatiegeschiedenis wilt laten staan.",
+    label: "Concept verwijderen",
+    refreshing: "Vernieuwen...",
+    title: "Onverzonden concept verwijderen",
+  },
+} as const;
 
 export function DeleteContentReleaseForm({
   releaseId,
@@ -19,17 +43,19 @@ export function DeleteContentReleaseForm({
   releaseId: string;
   status: ContentReleaseRow["status"];
 }) {
+  const { language } = useLanguage();
+  const copy = deleteContentReleaseFormCopy[language];
   const router = useRouter();
   const [state, formAction, isPending] = useActionState<
     DeleteContentReleaseState | null,
     FormData
   >(deleteContentReleaseDraft, null);
-  let buttonLabel = "Delete draft";
+  let buttonLabel: string = copy.label;
 
   if (isPending) {
-    buttonLabel = "Deleting draft...";
+    buttonLabel = copy.deleting;
   } else if (state?.success) {
-    buttonLabel = "Refreshing...";
+    buttonLabel = copy.refreshing;
   }
 
   useEffect(() => {
@@ -51,11 +77,7 @@ export function DeleteContentReleaseForm({
       action={formAction}
       className="space-y-4 rounded-2xl border border-rose-200/80 bg-rose-50/70 p-5 dark:border-rose-900/40 dark:bg-rose-950/20"
       onSubmit={(event) => {
-        if (
-          !window.confirm(
-            "Delete this release draft and its snapshotted items permanently? Sent or in-flight releases cannot be removed this way.",
-          )
-        ) {
+        if (!window.confirm(copy.confirm)) {
           event.preventDefault();
         }
       }}
@@ -65,11 +87,10 @@ export function DeleteContentReleaseForm({
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
           <p className="text-sm font-semibold text-rose-900 dark:text-rose-100">
-            Remove unsent draft
+            {copy.title}
           </p>
           <p className="text-sm leading-6 text-rose-700 dark:text-rose-200">
-            Use this for abandoned test drafts or cancelled announcements you do
-            not want cluttering communications history.
+            {copy.description}
           </p>
         </div>
 

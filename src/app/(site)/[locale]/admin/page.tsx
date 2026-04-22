@@ -1,15 +1,24 @@
 import { AdminDashboardPage } from "@/features/admin/components/AdminDashboardPage";
+import { adminRouteCopy } from "@/features/admin/lib/adminRouteCopy";
 import { resolveAdminWorkspaceMode } from "@/features/admin/lib/workspaceMode";
 import { createNoIndexMetadata } from "@/lib/metadata";
 import { requirePublicLocale } from "@/lib/publicLocaleRouting";
 
 import type { Metadata } from "next";
 
-export const metadata: Metadata = createNoIndexMetadata({
-  title: "Instructor Workspace",
-  description:
-    "Private instructor workspace for reviewing grammar submissions.",
-});
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const locale = requirePublicLocale((await params).locale);
+  const copy = adminRouteCopy[locale];
+
+  return createNoIndexMetadata({
+    title: copy.metaTitle,
+    description: copy.metaDescription,
+  });
+}
 
 /**
  * Loads the localized instructor workspace and seeds it with the requested view
@@ -32,6 +41,7 @@ export default async function LocalizedAdminPage({
   return (
     <AdminDashboardPage
       initialMode={initialMode}
+      language={locale}
       redirectTo={`/${locale}/admin`}
     />
   );

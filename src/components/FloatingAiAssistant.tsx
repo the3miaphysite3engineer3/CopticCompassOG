@@ -14,7 +14,7 @@ import {
 } from "@/components/AuthGateNotice";
 import { useOptionalAuthGate } from "@/lib/supabase/useOptionalAuthGate";
 
-type ChatProvider = "gemini" | "hf" | "openrouter" | "thoth";
+type ShenuteProvider = "gemini" | "hf" | "openrouter" | "thoth";
 
 type TextMessagePart = {
   text: string;
@@ -28,8 +28,8 @@ type ChatMessageLike = {
   role: "assistant" | "system" | "user";
 };
 
-type ChatFeedbackSignal = "admin_feedback" | "dislike" | "like";
-type ChatReactionSignal = Extract<ChatFeedbackSignal, "dislike" | "like">;
+type ShenuteFeedbackSignal = "admin_feedback" | "dislike" | "like";
+type ShenuteReactionSignal = Extract<ShenuteFeedbackSignal, "dislike" | "like">;
 
 type FeedbackStateByMessage = Record<
   string,
@@ -90,7 +90,7 @@ function findPreviousUserMessage(
   return null;
 }
 
-function toChatProvider(value: string): ChatProvider {
+function toShenuteProvider(value: string): ShenuteProvider {
   if (value === "gemini") {
     return "gemini";
   }
@@ -154,7 +154,7 @@ export function FloatingAiAssistant() {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState("");
   const [inferenceProvider, setInferenceProvider] =
-    useState<ChatProvider>("thoth");
+    useState<ShenuteProvider>("thoth");
   const [ocrPending, setOcrPending] = useState(false);
   const [ocrError, setOcrError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -171,11 +171,11 @@ export function FloatingAiAssistant() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const captureCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
-  const chatSessionIdRef = useRef(crypto.randomUUID());
+  const shenuteSessionIdRef = useRef(crypto.randomUUID());
 
   const { isAuthenticated, isReady } = useOptionalAuthGate();
   const [selectedReactionByMessage, setSelectedReactionByMessage] = useState<
-    Record<string, ChatReactionSignal>
+    Record<string, ShenuteReactionSignal>
   >({});
   const [adminFeedbackDraftByMessage, setAdminFeedbackDraftByMessage] =
     useState<Record<string, string>>({});
@@ -187,7 +187,7 @@ export function FloatingAiAssistant() {
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
-        api: "/api/chat",
+        api: "/api/shenute",
       }),
     [],
   );
@@ -197,11 +197,11 @@ export function FloatingAiAssistant() {
   });
 
   const isLoading = status !== "ready";
-  const isChatAccessBlocked = isReady && !isAuthenticated;
+  const isShenuteAccessBlocked = isReady && !isAuthenticated;
   const typedMessages = messages as ChatMessageLike[];
   let conversationContent: ReactNode;
 
-  if (isChatAccessBlocked) {
+  if (isShenuteAccessBlocked) {
     conversationContent = (
       <div className="flex h-full items-center">
         <AuthGateNotice
@@ -519,7 +519,7 @@ export function FloatingAiAssistant() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (isChatAccessBlocked) {
+    if (isShenuteAccessBlocked) {
       return;
     }
 
@@ -588,7 +588,7 @@ export function FloatingAiAssistant() {
     assistantMessage: ChatMessageLike;
     feedbackText?: string;
     promptMessage: ChatMessageLike | null;
-    signal: ChatFeedbackSignal;
+    signal: ShenuteFeedbackSignal;
   }) {
     if (!isAuthenticated) {
       setFeedbackStateByMessage((current) => ({
@@ -626,7 +626,7 @@ export function FloatingAiAssistant() {
     }));
 
     try {
-      const response = await fetch("/api/chat/feedback", {
+      const response = await fetch("/api/shenute/feedback", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -634,7 +634,7 @@ export function FloatingAiAssistant() {
         body: JSON.stringify({
           assistantMessageId: options.assistantMessage.id,
           assistantResponse,
-          chatId: chatSessionIdRef.current,
+          shenuteSessionId: shenuteSessionIdRef.current,
           feedbackText: options.feedbackText,
           inferenceProvider,
           pageContext,
@@ -687,7 +687,7 @@ export function FloatingAiAssistant() {
   }
 
   async function handleReaction(
-    signal: ChatReactionSignal,
+    signal: ShenuteReactionSignal,
     assistantMessage: ChatMessageLike,
     promptMessage: ChatMessageLike | null,
   ) {
@@ -775,9 +775,9 @@ export function FloatingAiAssistant() {
                 className="compact-select-base min-h-0 rounded-md border-stone-300 bg-white py-0.5 text-[11px] dark:border-stone-600 dark:bg-stone-800"
                 value={inferenceProvider}
                 onChange={(event) => {
-                  setInferenceProvider(toChatProvider(event.target.value));
+                  setInferenceProvider(toShenuteProvider(event.target.value));
                 }}
-                disabled={isLoading || isChatAccessBlocked}
+                disabled={isLoading || isShenuteAccessBlocked}
               >
                 <option value="hf">Shenute AI Learner (HF)</option>
                 <option value="gemini">Shenute AI Learner (Gemini)</option>
@@ -905,7 +905,7 @@ export function FloatingAiAssistant() {
                 onClick={() => {
                   fileInputRef.current?.click();
                 }}
-                disabled={isLoading || ocrPending || isChatAccessBlocked}
+                disabled={isLoading || ocrPending || isShenuteAccessBlocked}
                 className="rounded-md border border-stone-300 bg-white px-2 py-1 text-xs font-semibold text-stone-700 disabled:opacity-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-200"
               >
                 Add Image
@@ -916,7 +916,10 @@ export function FloatingAiAssistant() {
                   void openCamera();
                 }}
                 disabled={
-                  isLoading || ocrPending || cameraOpen || isChatAccessBlocked
+                  isLoading ||
+                  ocrPending ||
+                  cameraOpen ||
+                  isShenuteAccessBlocked
                 }
                 className="rounded-md border border-stone-300 bg-white px-2 py-1 text-xs font-semibold text-stone-700 disabled:opacity-50 dark:border-stone-600 dark:bg-stone-800 dark:text-stone-200"
               >
@@ -937,7 +940,7 @@ export function FloatingAiAssistant() {
                 }}
                 placeholder="Ask about this page or attached image..."
                 className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-sky-500 focus:outline-none dark:border-stone-600 dark:bg-stone-800 dark:text-stone-100"
-                disabled={isLoading || ocrPending || isChatAccessBlocked}
+                disabled={isLoading || ocrPending || isShenuteAccessBlocked}
               />
               <button
                 type="submit"
@@ -945,7 +948,7 @@ export function FloatingAiAssistant() {
                   (!inputValue.trim() && !selectedImage) ||
                   isLoading ||
                   ocrPending ||
-                  isChatAccessBlocked
+                  isShenuteAccessBlocked
                 }
                 className="rounded-xl bg-sky-600 px-3 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
               >
@@ -964,7 +967,7 @@ export function FloatingAiAssistant() {
           }}
           className="rounded-full bg-sky-600 px-5 py-3 text-sm font-semibold text-white shadow-xl transition-colors hover:bg-sky-700"
         >
-          Chat with Shenute AI
+          Open Shenute AI
         </button>
       ) : null}
     </div>
