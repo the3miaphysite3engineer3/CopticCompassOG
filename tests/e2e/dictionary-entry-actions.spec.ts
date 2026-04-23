@@ -7,6 +7,29 @@ const HAS_E2E_AUTH = Boolean(E2E_TEST_USER_EMAIL && E2E_TEST_USER_PASSWORD);
 const LOCKED_ENTRY_PROMPT_PATTERN =
   /Sign in or sign up to save entries and report issues\.|Log in or sign up to save entries and report issues\.|Entry actions are unavailable right now\./;
 
+async function forceHoverMediaMismatch(page: Page) {
+  await page.addInitScript(() => {
+    const originalMatchMedia = window.matchMedia.bind(window);
+
+    window.matchMedia = (query: string) => {
+      if (query !== "(hover: hover) and (pointer: fine)") {
+        return originalMatchMedia(query);
+      }
+
+      return {
+        matches: false,
+        media: query,
+        onchange: null,
+        addEventListener: () => {},
+        addListener: () => {},
+        dispatchEvent: () => true,
+        removeEventListener: () => {},
+        removeListener: () => {},
+      } as MediaQueryList;
+    };
+  });
+}
+
 async function loginToEntryPage(page: Page) {
   await page.goto(`/login?redirect_to=${encodeURIComponent(ENTRY_PATH)}`);
   await page.getByLabel("Email").fill(E2E_TEST_USER_EMAIL!);
@@ -77,6 +100,25 @@ test("signed-out desktop users keep the locked action tooltip visible long enoug
     buttonBox!.y + buttonBox!.height / 2,
   );
   await page.waitForTimeout(600);
+  await expect(lockedPrompt).toBeVisible();
+  await expect(
+    lockedPrompt.getByRole("link", { name: "Sign In" }),
+  ).toBeVisible();
+});
+
+test("signed-out desktop users still reveal locked prompts when hover media detection is unavailable", async ({
+  page,
+}) => {
+  await forceHoverMediaMismatch(page);
+  await page.goto(ENTRY_PATH);
+
+  const saveButton = page.getByRole("button", { name: "Save entry" });
+  const lockedPrompt = page
+    .locator('[role="tooltip"]')
+    .filter({ hasText: LOCKED_ENTRY_PROMPT_PATTERN })
+    .first();
+
+  await saveButton.hover();
   await expect(lockedPrompt).toBeVisible();
   await expect(
     lockedPrompt.getByRole("link", { name: "Sign In" }),

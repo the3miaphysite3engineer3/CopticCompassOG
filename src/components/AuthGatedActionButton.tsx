@@ -104,8 +104,8 @@ export function AuthGatedActionButton({
 
   if (!isAuthenticated) {
     const tooltipVisible =
-      (canHoverLockedButton &&
-        (isHoveringLockedButton || isHoveringLockedTooltip)) ||
+      isHoveringLockedButton ||
+      isHoveringLockedTooltip ||
       isLockedMessageVisible;
     const clearHideTimer = () => {
       if (hideTimerRef.current) {
@@ -141,6 +141,10 @@ export function AuthGatedActionButton({
     };
 
     const showHoverLockedMessage = () => {
+      if (!canHoverLockedButton) {
+        setCanHoverLockedButton(true);
+      }
+
       clearHideTimer();
       setLockedOpen(true);
     };
@@ -190,16 +194,12 @@ export function AuthGatedActionButton({
             showLockedMessage();
           }}
           onMouseEnter={() => {
-            if (canHoverLockedButton) {
-              setIsHoveringLockedButton(true);
-              showHoverLockedMessage();
-            }
+            setIsHoveringLockedButton(true);
+            showHoverLockedMessage();
           }}
           onMouseLeave={() => {
-            if (canHoverLockedButton) {
-              setIsHoveringLockedButton(false);
-              scheduleHideLockedMessage();
-            }
+            setIsHoveringLockedButton(false);
+            scheduleHideLockedMessage();
           }}
         >
           {lockedContent ?? (
@@ -218,16 +218,12 @@ export function AuthGatedActionButton({
           id={tooltipId}
           isOpen={tooltipVisible}
           onMouseEnter={() => {
-            if (canHoverLockedButton) {
-              setIsHoveringLockedTooltip(true);
-              showHoverLockedMessage();
-            }
+            setIsHoveringLockedTooltip(true);
+            showHoverLockedMessage();
           }}
           onMouseLeave={() => {
-            if (canHoverLockedButton) {
-              setIsHoveringLockedTooltip(false);
-              scheduleHideLockedMessage();
-            }
+            setIsHoveringLockedTooltip(false);
+            scheduleHideLockedMessage();
           }}
         >
           <div className="space-y-3">
