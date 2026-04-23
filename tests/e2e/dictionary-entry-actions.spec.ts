@@ -84,6 +84,11 @@ test("signed-out desktop users keep the locked action tooltip visible long enoug
 }) => {
   await page.goto(ENTRY_PATH);
 
+  await page.getByRole("button", { name: /^Share$/ }).click();
+  await expect(
+    page.getByRole("heading", { name: "Share this entry" }),
+  ).toBeVisible();
+
   const saveButton = page.getByRole("button", { name: "Save entry" });
   const lockedPrompt = page
     .locator('[role="tooltip"]')
