@@ -2,6 +2,7 @@ import type {
   GrammarLessonBundle,
   GrammarLessonIndexItem,
 } from "@/content/grammar/schema";
+import { getPartOfSpeechLabel } from "@/features/dictionary/config";
 import {
   buildEntryDescription,
   toPlainText,
@@ -17,7 +18,7 @@ import {
   getPublicationPath,
   type Publication,
 } from "@/features/publications/lib/publications";
-import { DEFAULT_LANGUAGE } from "@/lib/i18n";
+import { DEFAULT_LANGUAGE, getTranslation } from "@/lib/i18n";
 import {
   getDictionaryPath,
   getEntryPath,
@@ -452,7 +453,9 @@ export function createDefinedTermStructuredData(
     {
       "@type": "PropertyValue",
       name: copy.definedTerm.partOfSpeech,
-      value: entry.pos,
+      value: getPartOfSpeechLabel(entry.pos, (key) =>
+        getTranslation(locale, key),
+      ),
     },
     entry.gender
       ? {

@@ -215,7 +215,7 @@ function matchesAnalyticsDrilldownEntry(
     }
 
     return (
-      entry.pos === "OTHER" || entry.pos === "INTERJ" || entry.pos === "UNKNOWN"
+      entry.pos === "OTHER" || entry.pos === "INJ" || entry.pos === "UNKNOWN"
     );
   }
 

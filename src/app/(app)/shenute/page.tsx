@@ -2,6 +2,13 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
+import {
+  BrainCircuit,
+  ChevronDown,
+  ExternalLink,
+  LibraryBig,
+  UserRound,
+} from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -105,6 +112,8 @@ const SHENUTE_COPY = {
     sendMessage: "Send message",
     selectedImageAlt: "Selected for OCR",
     submitAdminNote: "Submit admin note",
+    technicalSummary:
+      "Credits, base stack, and source materials behind the THOTH AI expert mode.",
     thothBio1:
       "Dr. So Miyagawa is an associate professor of linguistics and Egyptology at the University of Tsukuba, specializing in the Ancient Egyptian-Coptic language. Following doctoral research at the University of Gottingen's Seminar for Egyptology and Coptic Studies, his work integrates computational linguistic methods with traditional philological approaches.",
     thothBio2:
@@ -113,6 +122,7 @@ const SHENUTE_COPY = {
     title: "Shenute AI",
     uploadSource: "upload",
     useCamera: "Use Camera",
+    viewProjectSite: "Visit THOTH AI project site",
     welcomeDescription:
       "Start with a word, a grammar question, or an image attachment and Shenute AI will keep the conversation grounded in your Coptic study workflow.",
     welcomeTitle: "Welcome to Shenute AI",
@@ -178,6 +188,8 @@ const SHENUTE_COPY = {
     sendMessage: "Bericht verzenden",
     selectedImageAlt: "Geselecteerd voor OCR",
     submitAdminNote: "Beheerdersnotitie verzenden",
+    technicalSummary:
+      "Credits, basisstack en bronmateriaal achter de THOTH AI-expertmodus.",
     thothBio1:
       "Dr. So Miyagawa is hoofddocent taalkunde en egyptologie aan de University of Tsukuba en specialiseert zich in de Oudegyptisch-Koptische taal. Na promotieonderzoek aan het Seminar for Egyptology and Coptic Studies van de University of Gottingen combineert zijn werk computationele taalkundige methoden met traditionele filologische benaderingen.",
     thothBio2:
@@ -186,6 +198,7 @@ const SHENUTE_COPY = {
     title: "Shenute AI",
     uploadSource: "upload",
     useCamera: "Camera gebruiken",
+    viewProjectSite: "Bekijk de THOTH AI-projectsite",
     welcomeDescription:
       "Begin met een woord, een grammaticavraag of een afbeelding. Shenute AI houdt het gesprek verbonden met uw Koptische studiewerkstroom.",
     welcomeTitle: "Welkom bij Shenute AI",
@@ -783,8 +796,8 @@ export default function ShenuteAI() {
         ]}
       />
 
-      <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-        <div className="space-y-3">
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
+        <div className="max-w-3xl">
           <PageHeader
             title={copy.title}
             description={copy.intro}
@@ -796,90 +809,150 @@ export default function ShenuteAI() {
           />
         </div>
 
-        <label className="flex w-full max-w-xs flex-col gap-2 text-sm font-medium text-stone-600 dark:text-stone-300 sm:w-auto lg:items-end">
-          <span className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400">
-            {copy.aiMode}
-          </span>
-          <select
-            id="shenute-inference-provider"
-            name="shenute_inference_provider"
-            className="compact-select-base h-11 min-w-[15rem] max-w-full bg-white/85 text-sm dark:bg-stone-900"
-            value={inferenceProvider}
-            onChange={(event) => {
-              setInferenceProvider(toShenuteProvider(event.target.value));
-            }}
-            disabled={isLoading || isShenuteAccessBlocked}
-          >
-            <option value="thoth">{copy.providerThoth}</option>
-            <option value="gemini">{copy.providerGemini}</option>
-            <option value="openrouter">{copy.providerOpenRouter}</option>
-            <option value="hf">{copy.providerHf}</option>
-          </select>
-        </label>
-      </div>
-
-      <details className="mx-4 mb-4 rounded-md border border-slate-200 bg-white p-3 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
-        <summary className="cursor-pointer text-sm font-semibold text-slate-800 dark:text-slate-100">
-          {copy.creditsAndSpecs}
-        </summary>
-        <div className="mt-3 space-y-3 leading-relaxed">
-          <div>
-            <p className="font-semibold">{copy.credits}</p>
-            <p>Dr. So Miyagawa</p>
-            <p>{copy.thothRole}</p>
-            <p>University of Tsukuba</p>
-            <p>{copy.thothBio1}</p>
-            <p>{copy.thothBio2}</p>
-            <p>
-              {copy.contact}:{" "}
-              <a
-                className="underline"
-                href="mailto:miyagawa.so.kb@u.tsukuba.ac.jp"
+        <SurfacePanel
+          rounded="3xl"
+          shadow="soft"
+          variant="subtle"
+          className="self-start p-4 md:p-5"
+        >
+          <div className="space-y-4">
+            <label className="flex w-full flex-col gap-2 text-sm font-medium text-stone-600 dark:text-stone-300">
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400">
+                {copy.aiMode}
+              </span>
+              <select
+                id="shenute-inference-provider"
+                name="shenute_inference_provider"
+                className="compact-select-base h-11 w-full bg-white/85 text-sm dark:bg-stone-900"
+                value={inferenceProvider}
+                onChange={(event) => {
+                  setInferenceProvider(toShenuteProvider(event.target.value));
+                }}
+                disabled={isLoading || isShenuteAccessBlocked}
               >
-                miyagawa.so.kb@u.tsukuba.ac.jp
-              </a>
-            </p>
-          </div>
+                <option value="thoth">{copy.providerThoth}</option>
+                <option value="gemini">{copy.providerGemini}</option>
+                <option value="openrouter">{copy.providerOpenRouter}</option>
+                <option value="hf">{copy.providerHf}</option>
+              </select>
+            </label>
 
-          <div>
-            <p className="font-semibold">{copy.baseTechnology}</p>
-            <ul className="list-disc pl-4">
-              <li>{copy.platformLabel} Dify</li>
-              <li>
-                {copy.baseLlmLabel} {copy.baseLlmValue}
-              </li>
-              <li>
-                {copy.architectureLabel} {copy.architectureValue}
-              </li>
-              <li>{copy.nlpCapabilities}</li>
-            </ul>
-          </div>
+            <details className="group overflow-hidden rounded-[1.25rem] border border-stone-200/80 bg-white/55 dark:border-stone-800/80 dark:bg-stone-950/35">
+              <summary className="list-none cursor-pointer p-4 [&::-webkit-details-marker]:hidden">
+                <div className="flex items-start gap-3">
+                  <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-sky-700 shadow-sm dark:bg-sky-900/30 dark:text-sky-300">
+                    <BrainCircuit className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
+                      {copy.creditsAndSpecs}
+                    </h2>
+                    <p className="text-xs leading-5 text-stone-600 dark:text-stone-400">
+                      {copy.technicalSummary}
+                    </p>
+                  </div>
+                  <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-stone-200 bg-white/80 text-stone-500 shadow-sm transition-transform duration-200 group-open:rotate-180 dark:border-stone-800 dark:bg-stone-900/70 dark:text-stone-300">
+                    <ChevronDown className="h-4 w-4" />
+                  </div>
+                </div>
+              </summary>
 
-          <div>
-            <p className="font-semibold">{copy.knowledgeBase}</p>
-            <ul className="list-disc pl-4">
-              <li>Comprehensive Coptic Lexicon v1.2 (2020)</li>
-              <li>Burns, D., Feder, F., John, K., Kupreyev, M., et al.</li>
-              <li>Freie Universitat Berlin</li>
-              <li>A Concise Dictionary of Middle Egyptian (1962)</li>
-              <li>Raymond Oliver Faulkner</li>
-              <li>Griffith Institute, Oxford</li>
-              <li>{copy.customPrompts}</li>
-            </ul>
-          </div>
+              <div className="border-t border-stone-200/80 p-4 dark:border-stone-800/80">
+                <div className="space-y-4">
+                  <section className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
+                      <UserRound className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                      <span>{copy.credits}</span>
+                    </div>
+                    <div className="space-y-1.5 text-sm leading-6 text-stone-600 dark:text-stone-400">
+                      <p className="font-semibold text-stone-900 dark:text-stone-100">
+                        Dr. So Miyagawa
+                      </p>
+                      <p>{copy.thothRole}</p>
+                      <p>University of Tsukuba</p>
+                      <p>{copy.thothBio1}</p>
+                      <p>{copy.thothBio2}</p>
+                      <a
+                        className={buttonClassName({
+                          className: "h-auto px-0 py-0",
+                          size: "sm",
+                          variant: "link",
+                        })}
+                        href="mailto:miyagawa.so.kb@u.tsukuba.ac.jp"
+                      >
+                        <ExternalLink className="h-3.5 w-3.5" />
+                        {copy.contact}: miyagawa.so.kb@u.tsukuba.ac.jp
+                      </a>
+                    </div>
+                  </section>
 
-          <p>
-            <a
-              className="underline"
-              href="https://somiyagawa.github.io/THOTH.AI/"
-              rel="noreferrer"
-              target="_blank"
-            >
-              https://somiyagawa.github.io/THOTH.AI/
-            </a>
-          </p>
-        </div>
-      </details>
+                  <section className="space-y-2 border-t border-stone-200/80 pt-4 dark:border-stone-800/80">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
+                      <BrainCircuit className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                      <span>{copy.baseTechnology}</span>
+                    </div>
+                    <ul className="space-y-1.5 text-sm leading-6 text-stone-600 dark:text-stone-400">
+                      <li>
+                        <span className="font-medium text-stone-900 dark:text-stone-100">
+                          {copy.platformLabel}
+                        </span>{" "}
+                        Dify
+                      </li>
+                      <li>
+                        <span className="font-medium text-stone-900 dark:text-stone-100">
+                          {copy.baseLlmLabel}
+                        </span>{" "}
+                        {copy.baseLlmValue}
+                      </li>
+                      <li>
+                        <span className="font-medium text-stone-900 dark:text-stone-100">
+                          {copy.architectureLabel}
+                        </span>{" "}
+                        {copy.architectureValue}
+                      </li>
+                      <li>{copy.nlpCapabilities}</li>
+                    </ul>
+                  </section>
+
+                  <section className="space-y-2 border-t border-stone-200/80 pt-4 dark:border-stone-800/80">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
+                      <LibraryBig className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                      <span>{copy.knowledgeBase}</span>
+                    </div>
+                    <ul className="space-y-1.5 text-sm leading-6 text-stone-600 dark:text-stone-400">
+                      <li>Comprehensive Coptic Lexicon v1.2 (2020)</li>
+                      <li>
+                        Burns, D., Feder, F., John, K., Kupreyev, M., et al.
+                      </li>
+                      <li>Freie Universitat Berlin</li>
+                      <li>A Concise Dictionary of Middle Egyptian (1962)</li>
+                      <li>Raymond Oliver Faulkner</li>
+                      <li>Griffith Institute, Oxford</li>
+                      <li>{copy.customPrompts}</li>
+                    </ul>
+                  </section>
+
+                  <div className="border-t border-stone-200/80 pt-4 dark:border-stone-800/80">
+                    <a
+                      className={buttonClassName({
+                        className: "w-full justify-center",
+                        size: "sm",
+                        variant: "secondary",
+                      })}
+                      href="https://somiyagawa.github.io/THOTH.AI/"
+                      rel="noreferrer"
+                      target="_blank"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                      {copy.viewProjectSite}
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </details>
+          </div>
+        </SurfacePanel>
+      </div>
 
       <SurfacePanel
         rounded="4xl"

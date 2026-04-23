@@ -7,7 +7,10 @@ import {
   formatDashboardDate,
   getDashboardCopy,
 } from "@/features/dashboard/lib/dashboardCopy";
-import type { DialectFilter } from "@/features/dictionary/config";
+import {
+  getPartOfSpeechCode,
+  type DialectFilter,
+} from "@/features/dictionary/config";
 import type { EntryFavoriteWithEntry } from "@/features/dictionary/lib/entryActions";
 import { getPreferredEntryDisplaySpelling } from "@/features/dictionary/lib/entryDisplay";
 import { antinoou } from "@/lib/fonts";
@@ -106,7 +109,7 @@ export function DictionaryFavoritesOverview({
                       </Badge>
                       {entry ? (
                         <Badge tone="surface" size="xs">
-                          {entry.pos}
+                          {getPartOfSpeechCode(entry.pos)}
                         </Badge>
                       ) : null}
                     </div>

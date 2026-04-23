@@ -56,6 +56,33 @@ test("signed-out desktop users can hover locked dictionary entry actions to reve
   ).toHaveCount(1);
 });
 
+test("signed-out desktop users keep the locked action tooltip visible long enough to reach its login link", async ({
+  page,
+}) => {
+  await page.goto(ENTRY_PATH);
+
+  const saveButton = page.getByRole("button", { name: "Save entry" });
+  const lockedPrompt = page
+    .locator('[role="tooltip"]')
+    .filter({ hasText: LOCKED_ENTRY_PROMPT_PATTERN })
+    .first();
+  const buttonBox = await saveButton.boundingBox();
+
+  await saveButton.hover();
+  await expect(lockedPrompt).toBeVisible();
+  expect(buttonBox).not.toBeNull();
+
+  await page.mouse.move(
+    buttonBox!.x + buttonBox!.width + 80,
+    buttonBox!.y + buttonBox!.height / 2,
+  );
+  await page.waitForTimeout(600);
+  await expect(lockedPrompt).toBeVisible();
+  await expect(
+    lockedPrompt.getByRole("link", { name: "Sign In" }),
+  ).toBeVisible();
+});
+
 test.describe("signed-out mobile dictionary entry actions", () => {
   test.use({
     hasTouch: true,

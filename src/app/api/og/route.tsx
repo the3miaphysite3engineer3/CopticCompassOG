@@ -3,6 +3,7 @@ import { join } from "node:path";
 
 import { ImageResponse } from "next/og";
 
+import { getPartOfSpeechLabel } from "@/features/dictionary/config";
 import {
   getDictionaryEntryById,
   getDictionaryEntryRelations,
@@ -29,6 +30,7 @@ import {
   renderPublicationOpenGraphCard,
   renderSiteOpenGraphCard,
 } from "@/features/seo/lib/openGraphCards";
+import { getTranslation } from "@/lib/i18n";
 import { isPublicLocale } from "@/lib/locale";
 import { siteConfig } from "@/lib/site";
 
@@ -106,12 +108,15 @@ function renderEntryCard(id: string, locale: string) {
   const footerLabel = getOpenGraphSectionFooter("dictionary", language);
   const relatedLabel = language === "nl" ? "Verwante vormen" : "Related forms";
   const partOfSpeechLabel = language === "nl" ? "Woordsoort" : "Part of speech";
+  const partOfSpeech = getPartOfSpeechLabel(entry.pos, (key) =>
+    getTranslation(language, key),
+  );
 
   return renderEntryOpenGraphCard({
     footerLabel,
     gloss: preview.gloss,
     heading: preview.heading,
-    partOfSpeech: entry.pos,
+    partOfSpeech,
     partOfSpeechLabel,
     relatedForms: preview.relatedForms,
     relatedLabel,

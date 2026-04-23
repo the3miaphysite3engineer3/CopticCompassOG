@@ -1623,7 +1623,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                   paragraph(
                     copticSpan(text("ⲭ︦ⲉ︦")),
                     text(" = "),
-                    copticSpan(text("ⲭⲉⲣⲉ ⲛⲉ Ⲙⲁⲣⲓⲁ")),
+                    copticSpan(coptic("ⲭⲉⲣⲉ", "cd_6002"), text(" ⲛⲉ Ⲙⲁⲣⲓⲁ")),
                     text(" “Hail Mary”"),
                   ),
                 ],
@@ -1690,13 +1690,13 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                 cells: {
                   fullWord: [
                     paragraph(
-                      copticSpan(text("Ⲥⲱⲧⲏⲣ")),
+                      copticSpan(coptic("Ⲥⲱⲧⲏⲣ", "cd_5770")),
                       text(" "),
                       smallCaps("m"),
                     ),
                   ],
                   abbreviation: [paragraph(copticSpan(text("ⲥ̅ⲱ̅ⲣ̅, ⲥ̅ⲣ̅")))],
-                  meaning: [paragraph(text("“savior”"))],
+                  meaning: [paragraph(text("“saviour”"))],
                 },
               },
               {
@@ -1733,7 +1733,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               {
                 id: `${lessonId}.section.abbreviations.row.6`,
                 cells: {
-                  fullWord: [paragraph(copticSpan(text("Ⲭⲉⲣⲉ")))],
+                  fullWord: [paragraph(copticSpan(coptic("Ⲭⲉⲣⲉ", "cd_6002")))],
                   abbreviation: [paragraph(copticSpan(text("ⲭ̅ⲉ̅")))],
                   meaning: [paragraph(text("“hail / greetings”"))],
                 },
@@ -1847,7 +1847,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                   paragraph(
                     copticSpan(text("ⲭ︦ⲉ︦")),
                     text(" = "),
-                    copticSpan(text("ⲭⲉⲣⲉ ⲛⲉ Ⲙⲁⲣⲓⲁ")),
+                    copticSpan(coptic("ⲭⲉⲣⲉ", "cd_6002"), text(" ⲛⲉ Ⲙⲁⲣⲓⲁ")),
                     text(" “wees gegroet Maria”"),
                   ),
                 ],
@@ -1914,7 +1914,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
                 cells: {
                   fullWord: [
                     paragraph(
-                      copticSpan(text("Ⲥⲱⲧⲏⲣ")),
+                      copticSpan(coptic("Ⲥⲱⲧⲏⲣ", "cd_5770")),
                       text(" "),
                       smallCaps("m"),
                     ),
@@ -1957,7 +1957,7 @@ export const grammarLesson01Document: GrammarLessonDocument = {
               {
                 id: `${lessonId}.section.abbreviations.row.6.nl`,
                 cells: {
-                  fullWord: [paragraph(copticSpan(text("Ⲭⲉⲣⲉ")))],
+                  fullWord: [paragraph(copticSpan(coptic("Ⲭⲉⲣⲉ", "cd_6002")))],
                   abbreviation: [paragraph(copticSpan(text("ⲭ̅ⲉ̅")))],
                   meaning: [paragraph(text("“gegroet”"))],
                 },

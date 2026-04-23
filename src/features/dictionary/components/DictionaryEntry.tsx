@@ -5,7 +5,11 @@ import Link from "next/link";
 import { Badge } from "@/components/Badge";
 import { useLanguage } from "@/components/LanguageProvider";
 import { surfacePanelClassName } from "@/components/SurfacePanel";
-import { DEFAULT_DICTIONARY_DIALECT_FILTER } from "@/features/dictionary/config";
+import {
+  DEFAULT_DICTIONARY_DIALECT_FILTER,
+  getPartOfSpeechCode,
+  getPartOfSpeechLabel,
+} from "@/features/dictionary/config";
 import type {
   DialectFilter,
   DictionaryDialectCode,
@@ -80,6 +84,8 @@ export default function DictionaryEntryCard({
       <HighlightText text={headerSpelling} query={query} />
     </HeadingTag>
   );
+  const partOfSpeechLabel = getPartOfSpeechLabel(entry.pos, t);
+  const partOfSpeechCode = getPartOfSpeechCode(entry.pos);
 
   return (
     <article
@@ -113,7 +119,9 @@ export default function DictionaryEntryCard({
 
         <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
           <span className="inline-flex h-8 items-center px-3 bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full text-stone-600 dark:text-stone-300">
-            {entry.pos}
+            <span title={partOfSpeechLabel} aria-label={partOfSpeechLabel}>
+              {partOfSpeechCode}
+            </span>
           </span>
           {entry.gender && (
             <span

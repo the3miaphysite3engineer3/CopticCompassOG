@@ -1,4 +1,6 @@
+import { getPartOfSpeechLabel } from "@/features/dictionary/config";
 import type { LexicalEntry } from "@/features/dictionary/types";
+import { getTranslation } from "@/lib/i18n";
 import type { Language } from "@/types/i18n";
 
 const entryLeadIns = [
@@ -131,14 +133,17 @@ export function buildEntryDescription(
 ) {
   const headword = toPlainText(entry.headword);
   const firstMeaning = getEntrySummary(entry, locale);
+  const partOfSpeech = getPartOfSpeechLabel(entry.pos, (key) =>
+    getTranslation(locale, key),
+  );
 
   if (locale === "nl") {
     return firstMeaning
-      ? `${headword} (${entry.pos}) in het Koptische woordenboek. ${firstMeaning}.`
-      : `${headword} (${entry.pos}) in het Koptische woordenboek van Coptic Compass.`;
+      ? `${headword} (${partOfSpeech}) in het Koptische woordenboek. ${firstMeaning}.`
+      : `${headword} (${partOfSpeech}) in het Koptische woordenboek van Coptic Compass.`;
   }
 
   return firstMeaning
-    ? `${headword} (${entry.pos}) in the Coptic dictionary. ${firstMeaning}.`
-    : `${headword} (${entry.pos}) in the Coptic dictionary on Coptic Compass.`;
+    ? `${headword} (${partOfSpeech}) in the Coptic dictionary. ${firstMeaning}.`
+    : `${headword} (${partOfSpeech}) in the Coptic dictionary on Coptic Compass.`;
 }

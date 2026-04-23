@@ -28,13 +28,13 @@ const fallbackEntry: LexicalEntry = {
 describe("entry descriptions", () => {
   it("falls back to product-first wording in English", () => {
     expect(buildEntryDescription(fallbackEntry, "en")).toBe(
-      "ϭⲱⲓⲥ (N) in the Coptic dictionary on Coptic Compass.",
+      "ϭⲱⲓⲥ (Noun) in the Coptic dictionary on Coptic Compass.",
     );
   });
 
   it("falls back to product-first wording in Dutch", () => {
     expect(buildEntryDescription(fallbackEntry, "nl")).toBe(
-      "ϭⲱⲓⲥ (N) in het Koptische woordenboek van Coptic Compass.",
+      "ϭⲱⲓⲥ (Zelfstandig naamwoord) in het Koptische woordenboek van Coptic Compass.",
     );
   });
 });

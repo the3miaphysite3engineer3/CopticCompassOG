@@ -56,6 +56,17 @@ describe("dictionary dataset guardrails", () => {
     });
   });
 
+  it("tags ⲭⲉⲣⲉ as an interjection in the checked-in dictionary snapshot", () => {
+    const filePath = path.join(process.cwd(), "public/data/dictionary.json");
+    const dictionary = JSON.parse(
+      fs.readFileSync(filePath, "utf8"),
+    ) as LexicalEntry[];
+    const entry = dictionary.find((candidate) => candidate.id === "cd_6002");
+
+    expect(entry).toBeDefined();
+    expect(entry?.pos).toBe("INJ");
+  });
+
   it("keeps the expanded preposition set tagged as PREP", () => {
     const filePath = path.join(process.cwd(), "public/data/dictionary.json");
     const dictionary = JSON.parse(

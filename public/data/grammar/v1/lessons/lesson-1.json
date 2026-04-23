@@ -3268,7 +3268,12 @@
                           {
                             "type": "copticSpan",
                             "children": [
-                              { "type": "text", "text": "ⲭⲉⲣⲉ ⲛⲉ Ⲙⲁⲣⲓⲁ" }
+                              {
+                                "type": "coptic",
+                                "text": "ⲭⲉⲣⲉ",
+                                "dictionaryEntryId": "cd_6002"
+                              },
+                              { "type": "text", "text": " ⲛⲉ Ⲙⲁⲣⲓⲁ" }
                             ]
                           },
                           { "type": "text", "text": " “Hail Mary”" }
@@ -3437,7 +3442,13 @@
                           "content": [
                             {
                               "type": "copticSpan",
-                              "children": [{ "type": "text", "text": "Ⲥⲱⲧⲏⲣ" }]
+                              "children": [
+                                {
+                                  "type": "coptic",
+                                  "text": "Ⲥⲱⲧⲏⲣ",
+                                  "dictionaryEntryId": "cd_5770"
+                                }
+                              ]
                             },
                             { "type": "text", "text": " " },
                             {
@@ -3463,7 +3474,7 @@
                       "meaning": [
                         {
                           "type": "paragraph",
-                          "content": [{ "type": "text", "text": "“savior”" }]
+                          "content": [{ "type": "text", "text": "“saviour”" }]
                         }
                       ]
                     }
@@ -3567,7 +3578,13 @@
                           "content": [
                             {
                               "type": "copticSpan",
-                              "children": [{ "type": "text", "text": "Ⲭⲉⲣⲉ" }]
+                              "children": [
+                                {
+                                  "type": "coptic",
+                                  "text": "Ⲭⲉⲣⲉ",
+                                  "dictionaryEntryId": "cd_6002"
+                                }
+                              ]
                             }
                           ]
                         }
@@ -3903,7 +3920,12 @@
                           {
                             "type": "copticSpan",
                             "children": [
-                              { "type": "text", "text": "ⲭⲉⲣⲉ ⲛⲉ Ⲙⲁⲣⲓⲁ" }
+                              {
+                                "type": "coptic",
+                                "text": "ⲭⲉⲣⲉ",
+                                "dictionaryEntryId": "cd_6002"
+                              },
+                              { "type": "text", "text": " ⲛⲉ Ⲙⲁⲣⲓⲁ" }
                             ]
                           },
                           { "type": "text", "text": " “wees gegroet Maria”" }
@@ -4070,7 +4092,13 @@
                           "content": [
                             {
                               "type": "copticSpan",
-                              "children": [{ "type": "text", "text": "Ⲥⲱⲧⲏⲣ" }]
+                              "children": [
+                                {
+                                  "type": "coptic",
+                                  "text": "Ⲥⲱⲧⲏⲣ",
+                                  "dictionaryEntryId": "cd_5770"
+                                }
+                              ]
                             },
                             { "type": "text", "text": " " },
                             {
@@ -4200,7 +4228,13 @@
                           "content": [
                             {
                               "type": "copticSpan",
-                              "children": [{ "type": "text", "text": "Ⲭⲉⲣⲉ" }]
+                              "children": [
+                                {
+                                  "type": "coptic",
+                                  "text": "Ⲭⲉⲣⲉ",
+                                  "dictionaryEntryId": "cd_6002"
+                                }
+                              ]
                             }
                           ]
                         }

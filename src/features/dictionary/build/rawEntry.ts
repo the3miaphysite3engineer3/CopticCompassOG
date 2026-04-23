@@ -72,7 +72,7 @@ function classifyPOS(meaning: string): PartOfSpeech {
     normalizedMeaning.startsWith("interj") ||
     normalizedMeaning.startsWith("deprecatory interj")
   ) {
-    return "INTERJ";
+    return "INJ";
   }
 
   if (

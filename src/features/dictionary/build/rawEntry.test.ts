@@ -39,4 +39,16 @@ describe("dictionary raw entry parsing", () => {
       absolute: "ϣⲏⲣⲓ",
     });
   });
+
+  it("classifies interjections with the compact INJ code", () => {
+    const entry = buildLexicalEntryFromSourceRow(
+      {
+        word: "(B) ⲭⲉⲣⲉ",
+        meaning: "interj, greetings, hail",
+      },
+      "cd_test_interj",
+    );
+
+    expect(entry?.pos).toBe("INJ");
+  });
 });

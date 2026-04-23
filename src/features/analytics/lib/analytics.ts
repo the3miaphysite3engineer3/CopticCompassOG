@@ -46,7 +46,7 @@ function createAnalyticsSnapshot(
     ADV: 0,
     CONJ: 0,
     PREP: 0,
-    INTERJ: 0,
+    INJ: 0,
     OTHER: 0,
     UNKNOWN: 0,
   };
@@ -159,7 +159,7 @@ function createAnalyticsSnapshot(
       { name: "Prepositions", value: posCounts.PREP || 0 },
       {
         name: "Other",
-        value: (posCounts.OTHER || 0) + (posCounts.INTERJ || 0),
+        value: (posCounts.OTHER || 0) + (posCounts.INJ || 0),
       },
     ].filter((item) => item.value > 0),
     genderChartData: [

@@ -21,7 +21,7 @@ export const PARTS_OF_SPEECH = [
   "ADJ",
   "ADV",
   "CONJ",
-  "INTERJ",
+  "INJ",
   "OTHER",
   "PREP",
   "UNKNOWN",
@@ -47,6 +47,18 @@ type DialectOption = {
 type PartOfSpeechOption = {
   value: DictionaryPartOfSpeechFilter;
   labelKey: TranslationKey;
+};
+
+const PART_OF_SPEECH_LABEL_KEYS: Record<PartOfSpeech, TranslationKey> = {
+  V: "dict.verb",
+  N: "dict.noun",
+  ADJ: "dict.adj",
+  ADV: "dict.adv",
+  CONJ: "dict.conj",
+  INJ: "dict.inj",
+  OTHER: "dict.other",
+  PREP: "dict.prep",
+  UNKNOWN: "dict.unknown",
 };
 
 const DIALECT_LABEL_KEYS: Record<
@@ -120,6 +132,38 @@ export function getPartOfSpeechFilterLabel(
   );
 
   return option ? translate(option.labelKey) : partOfSpeech;
+}
+
+/**
+ * Normalizes imported and legacy part-of-speech codes into the compact set
+ * used by the current dictionary UI.
+ */
+export function normalizePartOfSpeech(value: string): PartOfSpeech {
+  if (value === "INTERJ") {
+    return "INJ";
+  }
+
+  return PARTS_OF_SPEECH.includes(value as PartOfSpeech)
+    ? (value as PartOfSpeech)
+    : "UNKNOWN";
+}
+
+/**
+ * Returns the stable short code shown in compact UI badges.
+ */
+export function getPartOfSpeechCode(value: string) {
+  return normalizePartOfSpeech(value);
+}
+
+/**
+ * Returns the localized part-of-speech label for entry metadata and assistive
+ * text without exposing raw internal codes.
+ */
+export function getPartOfSpeechLabel(
+  value: string,
+  translate: (key: TranslationKey) => string,
+) {
+  return translate(PART_OF_SPEECH_LABEL_KEYS[normalizePartOfSpeech(value)]);
 }
 
 function _isDictionaryDialectCode(

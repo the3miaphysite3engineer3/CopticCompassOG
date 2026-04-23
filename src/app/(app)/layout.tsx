@@ -46,7 +46,7 @@ export default async function AppLayout({
         <AppFrame initialLanguage={language} nonce={nonce}>
           {children}
         </AppFrame>
-        <ObservabilityScripts />
+        <ObservabilityScripts nonce={nonce} />
       </body>
     </html>
   );

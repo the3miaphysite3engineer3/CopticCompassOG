@@ -1,11 +1,10 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
-import dynamic from "next/dynamic";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState, type ComponentType } from "react";
 
 import {
   getContactPath,
@@ -22,24 +21,83 @@ import { useLanguage } from "./LanguageProvider";
 import { LanguageToggle } from "./LanguageToggle";
 import { ThemeToggle } from "./ThemeToggle";
 
-const NavbarAuthLink = dynamic(
-  () =>
-    import("./NavbarAuthLink").then((module) => ({
-      default: module.NavbarAuthLink,
-    })),
-  {
-    ssr: false,
-    loading: () => (
-      <Link
-        href="/login"
-        data-label="Sign In"
-        className="group inline-grid h-10 items-center justify-items-center rounded-full px-4 text-sm tracking-[0.02em] text-stone-600 transition-all duration-200 dark:text-stone-400"
-      >
-        <span className="col-start-1 row-start-1 font-medium">Sign In</span>
-      </Link>
-    ),
-  },
-);
+type NavbarAuthLinkProps = {
+  dashboardHref: string;
+  dashboardLabel: string;
+  loginHref: string;
+  loginLabel: string;
+  onNavigate?: () => void;
+  pathname: string;
+  variant: "desktop" | "mobile";
+};
+
+type NavbarAuthLinkComponent = ComponentType<NavbarAuthLinkProps>;
+
+function getFallbackAuthLinkClasses(
+  variant: NavbarAuthLinkProps["variant"],
+  isActive: boolean,
+) {
+  if (variant === "mobile") {
+    return {
+      labelClassName: `col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`,
+      linkClassName: `group grid justify-items-center rounded-xl px-4 py-3 text-center text-sm tracking-[0.02em] transition-colors before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] ${
+        isActive
+          ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
+          : "text-stone-600 hover:bg-stone-50 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-900/60 dark:hover:text-stone-200"
+      }`,
+    };
+  }
+
+  return {
+    labelClassName: `col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`,
+    linkClassName: `group inline-grid h-10 items-center justify-items-center rounded-full px-4 text-center text-sm tracking-[0.02em] transition-all duration-200 before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25 ${
+      isActive
+        ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
+        : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+    }`,
+  };
+}
+
+function LazyNavbarAuthLink(props: NavbarAuthLinkProps) {
+  const [AuthLink, setAuthLink] = useState<NavbarAuthLinkComponent | null>(
+    null,
+  );
+  const hrefPathname = props.loginHref.split("?")[0] ?? props.loginHref;
+  const isActive =
+    props.pathname === hrefPathname ||
+    props.pathname.startsWith(`${hrefPathname}/`);
+  const { labelClassName, linkClassName } = getFallbackAuthLinkClasses(
+    props.variant,
+    isActive,
+  );
+
+  const loadAuthLink = useCallback(() => {
+    if (AuthLink) {
+      return;
+    }
+
+    void import("./NavbarAuthLink").then((module) => {
+      setAuthLink(() => module.NavbarAuthLink);
+    });
+  }, [AuthLink]);
+
+  if (AuthLink) {
+    return <AuthLink {...props} />;
+  }
+
+  return (
+    <Link
+      href={props.loginHref}
+      onClick={props.onNavigate}
+      onFocus={loadAuthLink}
+      onMouseEnter={loadAuthLink}
+      data-label={props.loginLabel}
+      className={linkClassName}
+    >
+      <span className={labelClassName}>{props.loginLabel}</span>
+    </Link>
+  );
+}
 
 export function Navbar() {
   const pathname = usePathname() ?? "";
@@ -105,7 +163,7 @@ export function Navbar() {
                 </Link>
               );
             })}
-            <NavbarAuthLink
+            <LazyNavbarAuthLink
               dashboardHref={dashboardHref}
               dashboardLabel={t("nav.dashboard")}
               loginHref={loginHref}
@@ -164,7 +222,7 @@ export function Navbar() {
                 </Link>
               );
             })}
-            <NavbarAuthLink
+            <LazyNavbarAuthLink
               dashboardHref={dashboardHref}
               dashboardLabel={t("nav.dashboard")}
               loginHref={loginHref}

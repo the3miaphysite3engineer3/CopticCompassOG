@@ -3,7 +3,6 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-import { Badge } from "@/components/Badge";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { useLanguage } from "@/components/LanguageProvider";
 import { getDictionaryPath, getLocalizedHomePath } from "@/lib/locale";
@@ -25,7 +24,7 @@ export default function EntryPageHeader({ entryLabel }: EntryPageHeaderProps) {
         ]}
       />
 
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex flex-wrap items-center gap-4">
         <Link
           href={getDictionaryPath(language)}
           className="btn-secondary gap-2 px-4"
@@ -33,10 +32,6 @@ export default function EntryPageHeader({ entryLabel }: EntryPageHeaderProps) {
           <ArrowLeft className="h-4 w-4" />
           {t("entry.back")}
         </Link>
-
-        <Badge tone="accent" size="xs" caps>
-          {t("entry.badge")}
-        </Badge>
       </div>
     </div>
   );

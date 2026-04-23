@@ -32,6 +32,9 @@ type AuthGatedActionButtonProps = Omit<
   wrapperClassName?: string;
 };
 
+const LOCKED_TOOLTIP_GRACE_MS = 1600;
+const LOCKED_TOOLTIP_AUTO_HIDE_MS = 2400;
+
 export function AuthGatedActionButton({
   children,
   className,
@@ -56,6 +59,7 @@ export function AuthGatedActionButton({
       : false,
   );
   const [isHoveringLockedButton, setIsHoveringLockedButton] = useState(false);
+  const [isHoveringLockedTooltip, setIsHoveringLockedTooltip] = useState(false);
   const [uncontrolledLockedOpen, setUncontrolledLockedOpen] = useState(false);
   const pathname = usePathname();
   const { t } = useLanguage();
@@ -100,7 +104,8 @@ export function AuthGatedActionButton({
 
   if (!isAuthenticated) {
     const tooltipVisible =
-      (canHoverLockedButton && isHoveringLockedButton) ||
+      (canHoverLockedButton &&
+        (isHoveringLockedButton || isHoveringLockedTooltip)) ||
       isLockedMessageVisible;
     const clearHideTimer = () => {
       if (hideTimerRef.current) {
@@ -109,19 +114,35 @@ export function AuthGatedActionButton({
       }
     };
 
+    const scheduleHideLockedMessage = (delay = LOCKED_TOOLTIP_GRACE_MS) => {
+      clearHideTimer();
+
+      hideTimerRef.current = window.setTimeout(() => {
+        setIsHoveringLockedTooltip(false);
+        setLockedOpen(false);
+        hideTimerRef.current = null;
+      }, delay);
+    };
+
     const hideLockedMessage = () => {
       clearHideTimer();
+      setIsHoveringLockedTooltip(false);
       setLockedOpen(false);
     };
 
-    const showLockedMessage = () => {
+    const showLockedMessage = (autoHideMs = LOCKED_TOOLTIP_AUTO_HIDE_MS) => {
       setLockedOpen(true);
       clearHideTimer();
 
       hideTimerRef.current = window.setTimeout(() => {
         setLockedOpen(false);
         hideTimerRef.current = null;
-      }, 2400);
+      }, autoHideMs);
+    };
+
+    const showHoverLockedMessage = () => {
+      clearHideTimer();
+      setLockedOpen(true);
     };
 
     return (
@@ -171,11 +192,13 @@ export function AuthGatedActionButton({
           onMouseEnter={() => {
             if (canHoverLockedButton) {
               setIsHoveringLockedButton(true);
+              showHoverLockedMessage();
             }
           }}
           onMouseLeave={() => {
             if (canHoverLockedButton) {
               setIsHoveringLockedButton(false);
+              scheduleHideLockedMessage();
             }
           }}
         >
@@ -194,6 +217,18 @@ export function AuthGatedActionButton({
           )}
           id={tooltipId}
           isOpen={tooltipVisible}
+          onMouseEnter={() => {
+            if (canHoverLockedButton) {
+              setIsHoveringLockedTooltip(true);
+              showHoverLockedMessage();
+            }
+          }}
+          onMouseLeave={() => {
+            if (canHoverLockedButton) {
+              setIsHoveringLockedTooltip(false);
+              scheduleHideLockedMessage();
+            }
+          }}
         >
           <div className="space-y-3">
             <p>{lockedMessage}</p>

@@ -3,6 +3,7 @@ import path from "path";
 
 import { cache } from "react";
 
+import { normalizePartOfSpeech } from "@/features/dictionary/config";
 import {
   prepareDictionaryForSearch,
   searchPreparedDictionaryPage,
@@ -37,7 +38,12 @@ const readDictionary = cache((): LexicalEntry[] => {
   if (!fs.existsSync(filePath)) {
     return [];
   }
-  return JSON.parse(fs.readFileSync(filePath, "utf8")) as LexicalEntry[];
+  return (JSON.parse(fs.readFileSync(filePath, "utf8")) as LexicalEntry[]).map(
+    (entry) => ({
+      ...entry,
+      pos: normalizePartOfSpeech(entry.pos),
+    }),
+  );
 });
 
 /**

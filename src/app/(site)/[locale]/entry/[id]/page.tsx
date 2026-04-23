@@ -4,6 +4,7 @@ import { PageShell, pageShellAccents } from "@/components/PageShell";
 import StructuredData from "@/components/StructuredData";
 import EntryPageClient from "@/features/dictionary/components/EntryPageClient";
 import EntryPageHeader from "@/features/dictionary/components/EntryPageHeader";
+import { getPartOfSpeechLabel } from "@/features/dictionary/config";
 import {
   getDictionaryEntryById,
   getDictionaryEntryRelations,
@@ -57,10 +58,13 @@ export async function generateMetadata({
   }
 
   const headword = toPlainText(entry.headword);
+  const partOfSpeech = getPartOfSpeechLabel(entry.pos, (key) =>
+    getTranslation(locale, key),
+  );
   const title =
     locale === "nl"
-      ? `${headword} (${entry.pos}) - Koptisch woordenboek`
-      : `${headword} (${entry.pos}) - Coptic Dictionary`;
+      ? `${headword} (${partOfSpeech}) - Koptisch woordenboek`
+      : `${headword} (${partOfSpeech}) - Coptic Dictionary`;
   const description = buildEntryDescription(entry, locale);
   const path = getEntryPath(entry.id, locale);
   const imageUrl = buildEntryOpenGraphImageUrl(entry.id, locale);

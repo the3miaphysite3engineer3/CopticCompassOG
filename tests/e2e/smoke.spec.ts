@@ -52,6 +52,33 @@ test("Dutch locale renders Dutch navigation", async ({ page }) => {
   ).toBeVisible();
 });
 
+test("floating Shenute assistant opens on demand", async ({ page }) => {
+  await page.goto("/en");
+
+  await page.getByRole("button", { name: "Open Shenute AI" }).click();
+
+  await expect(page.getByText("Context-aware on this page")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Close" })).toBeVisible();
+  await expect(page.getByText("Sign in required")).toBeVisible();
+});
+
+test("floating Shenute assistant is hidden on the Shenute route", async ({
+  page,
+}) => {
+  await page.goto("/shenute");
+
+  await expect(
+    page.getByRole("heading", {
+      name: "Shenute AI",
+      exact: true,
+      level: 1,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Open Shenute AI" }),
+  ).toHaveCount(0);
+});
+
 test("legacy dictionary route redirects to the localized dictionary page", async ({
   page,
 }) => {
