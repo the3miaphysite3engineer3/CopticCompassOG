@@ -48,7 +48,7 @@ export async function DashboardPageContent({
         pageShellAccents.bottomRightEmeraldOrb,
       ]}
     >
-      <div className="mb-12 space-y-8">
+      <div className="mb-8 space-y-6 md:mb-12 md:space-y-8">
         <BreadcrumbTrail
           items={[
             {
@@ -66,7 +66,7 @@ export async function DashboardPageContent({
               description={copy.pageDescription}
               align="left"
               tone="brand"
-              size="compact"
+              size="workspace"
             />
           </div>
           <form action={logout}>

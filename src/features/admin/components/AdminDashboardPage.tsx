@@ -134,7 +134,7 @@ export async function AdminDashboardPage({
 
   return (
     <PageShell
-      className="min-h-screen px-6 py-16"
+      className="min-h-screen px-6 py-12 md:py-16"
       contentClassName="min-h-[80vh] animate-in fade-in slide-in-from-bottom-8 duration-700"
       width="standard"
       accents={[
@@ -147,8 +147,8 @@ export async function AdminDashboardPage({
         description={copy.pageDescription}
         align="left"
         tone="analytics"
-        size="compact"
-        className="mb-12"
+        size="workspace"
+        className="mb-8 md:mb-12"
       />
 
       <AdminWorkspaceModeShell mode={mode} overview={workspaceOverview}>

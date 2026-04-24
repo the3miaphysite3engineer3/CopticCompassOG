@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useState } from "react";
 
 import type { RagIngestionState } from "@/actions/admin/states";
-import { Badge } from "@/components/Badge";
 import { buttonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
@@ -566,9 +565,9 @@ export function AdminRagIngestionForm() {
         className="p-5"
       >
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <Badge tone="accent" size="xs" caps>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
             {copy.systemStatus}
-          </Badge>
+          </p>
           <button
             type="button"
             onClick={() => {
@@ -763,17 +762,9 @@ export function AdminRagIngestionForm() {
           shadow="soft"
           className="border-amber-300/80 bg-amber-50/80 p-4 text-xs text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
         >
-          <div className="mb-2 flex items-center gap-2">
-            <Badge
-              tone="surface"
-              size="xs"
-              caps
-              className="border-amber-300/80"
-            >
-              {copy.partialFailures}
-            </Badge>
-            <p className="font-semibold">{copy.failedJsonSources}</p>
-          </div>
+          <p className="mb-2 font-semibold">
+            {copy.partialFailures}: {copy.failedJsonSources}
+          </p>
           <ul className="mt-2 list-disc space-y-1 pl-5">
             {bulkJsonState.results
               .filter((result) => !result.success)
@@ -794,9 +785,9 @@ export function AdminRagIngestionForm() {
         className="p-5"
       >
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <Badge tone="surface" size="xs" caps>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
             {copy.logs}
-          </Badge>
+          </p>
           <p className="text-[11px] text-stone-500 dark:text-stone-400">
             {formatNumber(dashboardLogs.length, language)} {copy.entries}
           </p>
@@ -865,12 +856,7 @@ export function AdminRagIngestionForm() {
           shadow="soft"
           className="p-5 text-stone-700 dark:text-stone-200"
         >
-          <div className="mb-3 flex items-center gap-2">
-            <Badge tone="surface" size="xs" caps>
-              {copy.chunkProfile}
-            </Badge>
-            <p className="font-semibold">{copy.chunkDetails}</p>
-          </div>
+          <p className="mb-3 font-semibold">{copy.chunkDetails}</p>
           <dl className="grid gap-3 sm:grid-cols-2">
             <RagMetricCard label={copy.sourceTextChars}>
               {formatNumber(state.chunkStats.sourceTextChars, language)}

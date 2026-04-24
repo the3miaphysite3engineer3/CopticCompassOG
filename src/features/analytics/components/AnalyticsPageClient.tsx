@@ -67,18 +67,18 @@ function AnalyticsStatCard({
   accentClassName,
   title,
   value,
-  valueClassName = "text-5xl font-bold text-stone-800 dark:text-stone-200",
+  valueClassName = "text-3xl font-bold text-stone-800 dark:text-stone-200 md:text-4xl",
   onClick,
 }: AnalyticsStatCardProps) {
   const cardContent = (
     <>
       <div
         className={cx(
-          "absolute -right-4 -top-4 h-24 w-24 rounded-full blur-2xl",
+          "absolute inset-y-4 left-0 w-1 rounded-r-full",
           accentClassName,
         )}
       />
-      <h2 className="mb-1 text-sm font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">
+      <h2 className="mb-1 text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">
         {title}
       </h2>
       <p className={valueClassName}>{value}</p>
@@ -88,10 +88,10 @@ function AnalyticsStatCard({
   if (!onClick) {
     return (
       <SurfacePanel
-        rounded="3xl"
+        rounded="2xl"
         variant="subtle"
         shadow="soft"
-        className="relative overflow-hidden p-6"
+        className="relative overflow-hidden p-4 pl-5 md:p-5 md:pl-6"
       >
         {cardContent}
       </SurfacePanel>
@@ -103,11 +103,12 @@ function AnalyticsStatCard({
       type="button"
       className={surfacePanelClassName({
         className: cx(
-          "relative overflow-hidden p-6 text-left",
-          "cursor-pointer transition-transform hover:scale-[1.02] active:scale-[0.98]",
+          "relative overflow-hidden text-left",
+          "cursor-pointer transition hover:bg-white active:scale-[0.99] dark:hover:bg-stone-900/70",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40",
+          "p-4 pl-5 md:p-5 md:pl-6",
         ),
-        rounded: "3xl",
+        rounded: "2xl",
         shadow: "soft",
         variant: "subtle",
       })}
@@ -140,9 +141,9 @@ function AnalyticsChartsPlaceholder() {
 function AnalyticsChartSkeletonCard() {
   return (
     <SurfacePanel
-      rounded="3xl"
+      rounded="2xl"
       shadow="soft"
-      className="flex h-full flex-col p-6"
+      className="flex h-full flex-col p-5"
     >
       <div className="mb-6 h-8 w-48 rounded-full bg-stone-200/80 dark:bg-stone-800/80" />
       <div className="h-[300px] w-full rounded-2xl bg-stone-100/80 dark:bg-stone-900/50" />
@@ -157,10 +158,10 @@ function AnalyticsChartsCallout({
   title,
 }: AnalyticsChartsCalloutProps) {
   return (
-    <SurfacePanel rounded="3xl" shadow="soft" className="p-6">
+    <SurfacePanel rounded="2xl" shadow="soft" className="p-4 md:p-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-stone-800 dark:text-stone-200">
+          <h2 className="text-xl font-bold text-stone-800 dark:text-stone-200">
             {title}
           </h2>
           <p className="max-w-2xl text-sm leading-6 text-stone-600 dark:text-stone-400">
@@ -249,69 +250,12 @@ export default function AnalyticsPageClient({
   const [hasMoreSlideOverResults, setHasMoreSlideOverResults] = useState(false);
   const [isSlideOverLoading, setSlideOverLoading] = useState(false);
   const [isSlideOverLoadingMore, setSlideOverLoadingMore] = useState(false);
-  const [requiresChartInteraction, setRequiresChartInteraction] =
-    useState(false);
   const [shouldRenderCharts, setShouldRenderCharts] = useState(false);
   const activeDrilldownKeyRef = useRef("");
-  const chartsSectionRef = useRef<HTMLDivElement | null>(null);
 
   const { language, t } = useLanguage();
   const stats =
     snapshots[selectedDialect]?.[selectedEtymology] ?? snapshots.ALL.ALL;
-
-  useEffect(() => {
-    const mobileMediaQuery = window.matchMedia("(max-width: 767px)");
-
-    const syncChartLoadingMode = () => {
-      setRequiresChartInteraction(mobileMediaQuery.matches);
-    };
-
-    syncChartLoadingMode();
-    mobileMediaQuery.addEventListener("change", syncChartLoadingMode);
-
-    return () => {
-      mobileMediaQuery.removeEventListener("change", syncChartLoadingMode);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (requiresChartInteraction || shouldRenderCharts) {
-      return;
-    }
-
-    const chartsSection = chartsSectionRef.current;
-    if (!chartsSection) {
-      return;
-    }
-
-    if (typeof IntersectionObserver === "undefined") {
-      const timeoutId = window.setTimeout(() => {
-        setShouldRenderCharts(true);
-      }, 200);
-
-      return () => {
-        window.clearTimeout(timeoutId);
-      };
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries.some((entry) => entry.isIntersecting)) {
-          setShouldRenderCharts(true);
-          observer.disconnect();
-        }
-      },
-      {
-        rootMargin: "240px 0px",
-      },
-    );
-
-    observer.observe(chartsSection);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [requiresChartInteraction, shouldRenderCharts]);
 
   useEffect(() => {
     if (!slideOverFilter) {
@@ -484,36 +428,28 @@ export default function AnalyticsPageClient({
     );
   };
 
-  let chartsContent = <AnalyticsChartsPlaceholder />;
-
-  if (requiresChartInteraction) {
-    chartsContent = (
-      <AnalyticsChartsCallout
-        description={t("analytics.mobileChartsDescription" as TranslationKey)}
-        loadLabel={t("analytics.loadCharts" as TranslationKey)}
-        onLoadCharts={() => setShouldRenderCharts(true)}
-        title={t("analytics.visualBreakdowns" as TranslationKey)}
-      />
-    );
-  }
-
-  if (shouldRenderCharts) {
-    chartsContent = (
-      <AnalyticsChartsSection onChartClick={handleChartClick} stats={stats} />
-    );
-  }
+  const chartsContent = shouldRenderCharts ? (
+    <AnalyticsChartsSection onChartClick={handleChartClick} stats={stats} />
+  ) : (
+    <AnalyticsChartsCallout
+      description={t("analytics.mobileChartsDescription" as TranslationKey)}
+      loadLabel={t("analytics.loadCharts" as TranslationKey)}
+      onLoadCharts={() => setShouldRenderCharts(true)}
+      title={t("analytics.visualBreakdowns" as TranslationKey)}
+    />
+  );
 
   return (
     <PageShell
       className="min-h-screen flex flex-col items-center p-6 pb-20 md:p-10"
-      contentClassName="w-full pt-10"
+      contentClassName="w-full pt-8 md:pt-10"
       width="standard"
       accents={[
         pageShellAccents.heroEmeraldArc,
         pageShellAccents.topRightSkyOrbInset,
       ]}
     >
-      <div className="mb-10 space-y-8">
+      <div className="mb-8 space-y-6 md:mb-10 md:space-y-8">
         <BreadcrumbTrail
           items={[
             { label: t("nav.home"), href: getLocalizedHomePath(language) },
@@ -525,11 +461,11 @@ export default function AnalyticsPageClient({
         <PageHeader
           title={t("analytics.title")}
           align="left"
-          size="compact"
+          size="workspace"
           tone="analytics"
         />
 
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
           <div className="flex items-center gap-3">
             <Link
               href={getDictionaryPath(language)}
@@ -541,12 +477,8 @@ export default function AnalyticsPageClient({
             </Link>
           </div>
 
-          <div className="flex flex-col items-center gap-3 sm:flex-row">
-            <SurfacePanel
-              variant="subtle"
-              shadow="soft"
-              className="flex items-center space-x-3 rounded-2xl p-3 px-4 dark:border-stone-700"
-            >
+          <div className="flex flex-col gap-2 rounded-2xl border border-stone-200/80 bg-white/75 p-2 shadow-sm backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/60 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-2 px-2">
               <span className="inline-flex items-center whitespace-nowrap text-stone-500 dark:text-stone-400">
                 <Filter className="h-4 w-4" />
               </span>
@@ -566,13 +498,9 @@ export default function AnalyticsPageClient({
                   </option>
                 ))}
               </CompactSelect>
-            </SurfacePanel>
+            </div>
 
-            <SurfacePanel
-              variant="subtle"
-              shadow="soft"
-              className="flex items-center space-x-3 rounded-2xl p-3 px-4 dark:border-stone-700"
-            >
+            <div className="flex items-center gap-2 px-2">
               <CompactSelect
                 id="analytics-etymology-filter"
                 label={t("analytics.filterEtymology" as TranslationKey)}
@@ -593,12 +521,12 @@ export default function AnalyticsPageClient({
                   {t("analytics.filterEtymologyGr" as TranslationKey)}
                 </option>
               </CompactSelect>
-            </SurfacePanel>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6 mb-12">
+      <div className="mb-8 grid gap-4 md:grid-cols-3">
         <AnalyticsStatCard
           accentClassName="bg-[rgb(var(--accent)/0.12)]"
           title={t("analytics.totalRoots")}
@@ -609,19 +537,19 @@ export default function AnalyticsPageClient({
           accentClassName="bg-[rgb(var(--warning)/0.12)]"
           title={t("analytics.meaningUnknown")}
           value={stats.unknownMeaning.toLocaleString()}
-          valueClassName="text-4xl font-bold"
+          valueClassName="text-3xl font-bold text-stone-800 dark:text-stone-200"
           onClick={() => handleStatClick("unknown")}
         />
         <AnalyticsStatCard
           accentClassName="bg-[rgb(var(--danger)/0.12)]"
           title={t("analytics.meaningUncertain")}
           value={stats.uncertainMeaning.toLocaleString()}
-          valueClassName="text-4xl font-bold"
+          valueClassName="text-3xl font-bold text-stone-800 dark:text-stone-200"
           onClick={() => handleStatClick("uncertain")}
         />
       </div>
 
-      <div ref={chartsSectionRef}>{chartsContent}</div>
+      <div>{chartsContent}</div>
 
       <AnalyticsSlideOver
         isOpen={!!slideOverFilter}

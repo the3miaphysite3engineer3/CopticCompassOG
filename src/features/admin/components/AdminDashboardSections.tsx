@@ -1,4 +1,3 @@
-import { Badge } from "@/components/Badge";
 import { EmptyState } from "@/components/EmptyState";
 import { surfacePanelClassName } from "@/components/SurfacePanel";
 import {
@@ -24,6 +23,7 @@ import { AdminAudienceContactCard } from "@/features/communications/components/A
 import { CreateContentReleaseForm } from "@/features/communications/components/CreateContentReleaseForm";
 import { SyncAudienceContactsForm } from "@/features/communications/components/SyncAudienceContactsForm";
 import { AdminNotificationEventCard } from "@/features/notifications/components/AdminNotificationEventCard";
+import { cx } from "@/lib/classes";
 import type { Language } from "@/types/i18n";
 
 const adminDashboardSectionsCopy = {
@@ -557,30 +557,22 @@ export function AdminWorkspaceQuickJump({
   const modeDescription = copy.descriptions[mode];
 
   return (
-    <nav className="app-sticky-panel mb-8 rounded-[2rem] border border-stone-200/80 bg-white/85 p-4 shadow-lg backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/75 dark:shadow-black/20">
-      <div className="mb-3 flex flex-wrap items-center gap-2">
-        <Badge tone="flat" size="xs" caps>
-          {copy.badge}
-        </Badge>
-        <p className="text-sm text-stone-600 dark:text-stone-400">
-          {modeDescription}
-        </p>
-      </div>
+    <nav className="app-sticky-panel mb-6 rounded-3xl border border-stone-200/80 bg-white/85 p-3 shadow-md backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/75 dark:shadow-black/20">
+      <p className="mb-2 text-xs leading-5 text-stone-600 dark:text-stone-400">
+        {modeDescription}
+      </p>
 
-      <div className="flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2">
         {links.map((link) => (
           <a
             key={link.href}
             href={link.href}
-            className="rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50"
+            className="inline-flex items-center gap-2 rounded-2xl border border-stone-200/80 bg-stone-50/80 px-3 py-2 text-xs font-semibold text-stone-700 transition hover:border-sky-200 hover:bg-white hover:text-sky-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 dark:border-stone-800 dark:bg-stone-900/45 dark:text-stone-300 dark:hover:border-sky-900/50 dark:hover:bg-stone-900/70 dark:hover:text-sky-100"
           >
-            <Badge
-              tone={link.tone}
-              size="sm"
-              className="transition hover:-translate-y-0.5"
-            >
-              {link.label}: {formatAdminNumber(link.count, language)}
-            </Badge>
+            <span>{link.label}</span>
+            <span className="text-stone-500 dark:text-stone-400">
+              {formatAdminNumber(link.count, language)}
+            </span>
           </a>
         ))}
       </div>
@@ -625,19 +617,16 @@ export function AdminReviewInboxSummary({
   ] as const;
 
   return (
-    <section className="rounded-[2rem] border border-sky-200/70 bg-gradient-to-br from-sky-50 via-white to-emerald-50/60 p-6 shadow-lg shadow-sky-100/30 dark:border-sky-900/40 dark:from-sky-950/35 dark:via-stone-950 dark:to-emerald-950/20 dark:shadow-black/20">
+    <section className="rounded-3xl border border-stone-200/80 bg-white/80 p-5 shadow-md backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/70 dark:shadow-black/20">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
-          <Badge tone="accent" size="xs" caps>
-            {copy.badge}
-          </Badge>
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
+            <h2 className="text-xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
               {reviewQueueTotal > 0
                 ? `${formatAdminNumber(reviewQueueTotal, language)} ${copy.activeTitleSuffix}`
                 : copy.clearTitle}
             </h2>
-            <p className="max-w-3xl text-sm leading-7 text-stone-600 dark:text-stone-400">
+            <p className="max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
               {reviewQueueTotal > 0
                 ? copy.activeDescription
                 : copy.clearDescription}
@@ -645,27 +634,27 @@ export function AdminReviewInboxSummary({
           </div>
         </div>
 
-        <Badge tone={reviewQueueTotal > 0 ? "coptic" : "surface"} size="sm">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
           {copy.liveQueues}: {formatAdminNumber(reviewQueueTotal, language)}
-        </Badge>
+        </p>
       </div>
 
-      <div className="mt-6 grid gap-3 md:grid-cols-3">
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
         {queueLinks.map((queue) => (
           <a
             key={queue.href}
             href={queue.href}
-            className="rounded-[1.5rem] border border-white/80 bg-white/80 p-4 transition hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 dark:border-stone-800 dark:bg-stone-950/60 dark:hover:border-sky-900/50"
+            className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-3 transition hover:border-sky-200 hover:bg-white hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 dark:border-stone-800 dark:bg-stone-900/40 dark:hover:border-sky-900/50 dark:hover:bg-stone-900/70"
           >
             <div className="flex items-center justify-between gap-3">
               <span className="text-base font-semibold text-stone-900 dark:text-stone-100">
                 {queue.label}
               </span>
-              <Badge tone={queue.tone} size="xs">
+              <span className="text-sm font-semibold text-stone-500 dark:text-stone-400">
                 {formatAdminNumber(queue.count, language)}
-              </Badge>
+              </span>
             </div>
-            <p className="mt-3 text-sm leading-6 text-stone-600 dark:text-stone-400">
+            <p className="mt-2 text-xs leading-5 text-stone-600 dark:text-stone-400">
               {queue.note}
             </p>
           </a>
@@ -694,97 +683,91 @@ export function AdminCommunicationsDesk({
     audience.metrics.subscribedAudienceContactsCount;
 
   return (
-    <section className="rounded-[2rem] border border-emerald-200/70 bg-gradient-to-br from-emerald-50 via-white to-sky-50/50 p-6 shadow-lg shadow-emerald-100/30 dark:border-emerald-900/40 dark:from-emerald-950/25 dark:via-stone-950 dark:to-sky-950/20 dark:shadow-black/20">
+    <section className="rounded-3xl border border-stone-200/80 bg-white/80 p-5 shadow-md backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/70 dark:shadow-black/20">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
-          <Badge tone="coptic" size="xs" caps>
-            {copy.badge}
-          </Badge>
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
+            <h2 className="text-xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
               {copy.title}
             </h2>
-            <p className="max-w-3xl text-sm leading-7 text-stone-600 dark:text-stone-400">
+            <p className="max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
               {copy.description}
             </p>
           </div>
         </div>
 
-        <Badge
-          tone={overview.actionableReleaseCount > 0 ? "coptic" : "surface"}
-          size="sm"
-        >
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
           {copy.activeReleases}:{" "}
           {formatAdminNumber(overview.actionableReleaseCount, language)}
-        </Badge>
+        </p>
       </div>
 
-      <div className="mt-6 grid gap-3 md:grid-cols-4">
+      <div className="mt-4 grid gap-3 md:grid-cols-4">
         <div
           className={surfacePanelClassName({
-            rounded: "3xl",
+            rounded: "2xl",
             variant: "subtle",
-            className: "p-4",
+            className: "p-3",
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
             {copy.reachableAudienceLabel}
           </p>
-          <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
             {formatAdminNumber(reachableAudienceCount, language)}
           </p>
-          <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
             {copy.reachableAudienceDescription}
           </p>
         </div>
 
         <div
           className={surfacePanelClassName({
-            rounded: "3xl",
+            rounded: "2xl",
             variant: "subtle",
-            className: "p-4",
+            className: "p-3",
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
             {copy.syncHealthLabel}
           </p>
-          <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
             {formatAdminNumber(audience.metrics.resendSyncErrorCount, language)}
           </p>
-          <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
             {copy.syncHealthDescription}
           </p>
         </div>
 
         <div
           className={surfacePanelClassName({
-            rounded: "3xl",
+            rounded: "2xl",
             variant: "subtle",
-            className: "p-4",
+            className: "p-3",
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
             {copy.draftInputsLabel}
           </p>
-          <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
             {formatAdminNumber(totalCandidates, language)}
           </p>
-          <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
             {copy.draftInputsDescription}
           </p>
         </div>
 
         <div
           className={surfacePanelClassName({
-            rounded: "3xl",
+            rounded: "2xl",
             variant: "subtle",
-            className: "p-4",
+            className: "p-3",
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
             {copy.inQueueLabel}
           </p>
-          <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
             {formatAdminNumber(
               contentReleases.items.filter(
                 (release) =>
@@ -793,13 +776,13 @@ export function AdminCommunicationsDesk({
               language,
             )}
           </p>
-          <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
             {copy.inQueueDescription}
           </p>
         </div>
       </div>
 
-      <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">
+      <div className="mt-5 grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">
         <CreateContentReleaseForm
           lessonCandidates={contentReleases.lessonReleaseCandidates}
           publicationCandidates={contentReleases.publicationReleaseCandidates}
@@ -807,41 +790,41 @@ export function AdminCommunicationsDesk({
 
         <div
           className={surfacePanelClassName({
-            rounded: "3xl",
+            rounded: "2xl",
             variant: "elevated",
-            className: "p-6 md:p-7",
+            className: "p-5",
           })}
         >
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge tone="surface" size="xs">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
+            <span>
               {copy.synced}:{" "}
               {formatAdminNumber(
                 audience.metrics.resendSyncedAudienceCount,
                 language,
               )}
-            </Badge>
-            <Badge
-              tone={
-                audience.metrics.resendSyncErrorCount > 0 ? "accent" : "surface"
-              }
-              size="xs"
+            </span>
+            <span
+              className={cx(
+                audience.metrics.resendSyncErrorCount > 0 &&
+                  "text-rose-600 dark:text-rose-300",
+              )}
             >
               {copy.syncErrors}:{" "}
               {formatAdminNumber(
                 audience.metrics.resendSyncErrorCount,
                 language,
               )}
-            </Badge>
+            </span>
           </div>
 
-          <h3 className="mt-4 text-xl font-semibold text-stone-950 dark:text-stone-50">
+          <h3 className="mt-4 text-lg font-semibold text-stone-950 dark:text-stone-50">
             {copy.audienceSyncTitle}
           </h3>
-          <p className="mt-3 text-sm leading-7 text-stone-600 dark:text-stone-400">
+          <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
             {copy.audienceSyncDescription}
           </p>
 
-          <div className="mt-6 space-y-4">
+          <div className="mt-5 space-y-4">
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-4 dark:border-stone-800 dark:bg-stone-950/40">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
@@ -891,14 +874,11 @@ export function AdminSystemHealthSummary({
   ).length;
 
   return (
-    <section className="rounded-[2rem] border border-stone-200/80 bg-gradient-to-br from-stone-50 via-white to-sky-50/30 p-6 shadow-lg shadow-stone-200/40 dark:border-stone-800 dark:from-stone-950 dark:via-stone-950 dark:to-sky-950/10 dark:shadow-black/20">
+    <section className="rounded-3xl border border-stone-200/80 bg-white/80 p-5 shadow-md backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/70 dark:shadow-black/20">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
-          <Badge tone="surface" size="xs" caps>
-            {copy.badge}
-          </Badge>
           <div className="space-y-2">
-            <h2 className="text-2xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
+            <h2 className="text-xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
               {overview.failedNotificationCount > 0
                 ? `${formatAdminNumber(
                     overview.failedNotificationCount,
@@ -910,78 +890,81 @@ export function AdminSystemHealthSummary({
                   }`
                 : copy.steadyTitle}
             </h2>
-            <p className="max-w-3xl text-sm leading-7 text-stone-600 dark:text-stone-400">
+            <p className="max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
               {copy.description}
             </p>
           </div>
         </div>
 
-        <Badge
-          tone={overview.failedNotificationCount > 0 ? "accent" : "surface"}
-          size="sm"
+        <p
+          className={cx(
+            "text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400",
+            overview.failedNotificationCount > 0 &&
+              "text-rose-600 dark:text-rose-300",
+          )}
         >
           {copy.failedNotifications}:{" "}
           {formatAdminNumber(overview.failedNotificationCount, language)}
-        </Badge>
+        </p>
       </div>
 
-      <div className="mt-6 grid gap-3 md:grid-cols-3">
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
         <div
           className={surfacePanelClassName({
-            rounded: "3xl",
+            rounded: "2xl",
             variant: "subtle",
-            className: "p-4",
+            className: "p-3",
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
             {copy.failedLabel}
           </p>
-          <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
             {formatAdminNumber(
               notifications.metrics.failedNotificationCount,
               language,
             )}
           </p>
-          <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
             {copy.failedDescription}
           </p>
         </div>
 
         <div
           className={surfacePanelClassName({
-            rounded: "3xl",
+            rounded: "2xl",
             variant: "subtle",
-            className: "p-4",
+            className: "p-3",
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
             {copy.queuedLabel}
           </p>
-          <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
             {formatAdminNumber(queuedNotificationCount, language)}
           </p>
-          <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
             {copy.queuedDescription}
           </p>
         </div>
 
         <div
           className={surfacePanelClassName({
-            rounded: "3xl",
+            rounded: "2xl",
             variant: "subtle",
-            className: "p-4",
+            className: "p-3",
           })}
         >
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
             {copy.recentSentLabel}
           </p>
-          <p className="mt-3 text-2xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
             {formatAdminNumber(
               notifications.metrics.sentNotificationCount,
               language,
             )}
           </p>
-          <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
             {copy.recentSentDescription}
           </p>
         </div>
@@ -1011,22 +994,6 @@ export function AdminSubmissionsSection({
         language,
         total: submissions.items.length,
       })}
-      headerBadges={
-        <>
-          <Badge tone={pendingCount > 0 ? "accent" : "surface"} size="xs">
-            {copy.needsReview}: {formatAdminNumber(pendingCount, language)}
-          </Badge>
-          <Badge tone="surface" size="xs">
-            {copy.reviewed}:{" "}
-            {formatAdminNumber(
-              submissions.items.filter(
-                (submission) => submission.status === "reviewed",
-              ).length,
-              language,
-            )}
-          </Badge>
-        </>
-      }
       defaultOpen
     >
       {submissions.error ? (
@@ -1047,16 +1014,6 @@ export function AdminRagKnowledgeSection({ language }: { language: Language }) {
       title={copy.title}
       description={copy.description}
       summary={copy.summary}
-      headerBadges={
-        <>
-          <Badge tone="coptic" size="xs">
-            {copy.embeddings}: {copy.selectable}
-          </Badge>
-          <Badge tone="surface" size="xs">
-            {copy.destination}: coptic_documents
-          </Badge>
-        </>
-      }
       defaultOpen
     >
       <AdminRagIngestionForm />
@@ -1134,25 +1091,6 @@ export function AdminAudienceSection({
               language,
             )} ${copy.summaryTotal}`
       }
-      headerBadges={
-        <>
-          <Badge tone="surface" size="xs">
-            {copy.synced}:{" "}
-            {formatAdminNumber(metrics.resendSyncedAudienceCount, language)}
-          </Badge>
-          <Badge
-            tone={metrics.resendSyncErrorCount > 0 ? "accent" : "surface"}
-            size="xs"
-          >
-            {copy.syncErrors}:{" "}
-            {formatAdminNumber(metrics.resendSyncErrorCount, language)}
-          </Badge>
-          <Badge tone="coptic" size="xs">
-            {copy.lessons}:{" "}
-            {formatAdminNumber(metrics.lessonAudienceCount, language)}
-          </Badge>
-        </>
-      }
       defaultOpen={defaultOpen}
     >
       {audienceContent}
@@ -1171,9 +1109,6 @@ export function AdminReleasesSection({
 }) {
   const copy = adminDashboardSectionsCopy[language].releases;
   const actionableCount = countActionableContentReleases(contentReleases.items);
-  const queuedCount = contentReleases.items.filter(
-    (release) => release.status === "queued" || release.status === "sending",
-  ).length;
   const releasesContent = (() => {
     if (contentReleases.error) {
       return <AdminDatabaseErrorState message={copy.dbError} />;
@@ -1203,24 +1138,6 @@ export function AdminReleasesSection({
               contentReleases.items.length,
               language,
             )} ${copy.recentWindow}`
-      }
-      headerBadges={
-        <>
-          <Badge tone={actionableCount > 0 ? "coptic" : "surface"} size="xs">
-            {copy.readyOrLive}: {formatAdminNumber(actionableCount, language)}
-          </Badge>
-          <Badge tone="surface" size="xs">
-            {copy.inQueue}: {formatAdminNumber(queuedCount, language)}
-          </Badge>
-          <Badge tone="surface" size="xs">
-            {copy.candidates}:{" "}
-            {formatAdminNumber(
-              contentReleases.lessonReleaseCandidates.length +
-                contentReleases.publicationReleaseCandidates.length,
-              language,
-            )}
-          </Badge>
-        </>
       }
       defaultOpen={Boolean(contentReleases.error) || actionableCount > 0}
     >
@@ -1275,22 +1192,6 @@ export function AdminContactInboxSection({
         language,
         total: contactMessages.items.length,
       })}
-      headerBadges={
-        <>
-          <Badge tone={openMessageCount > 0 ? "accent" : "surface"} size="xs">
-            {copy.active}: {formatAdminNumber(openMessageCount, language)}
-          </Badge>
-          <Badge tone="surface" size="xs">
-            {copy.answered}:{" "}
-            {formatAdminNumber(
-              contactMessages.items.filter(
-                (message) => message.status === "answered",
-              ).length,
-              language,
-            )}
-          </Badge>
-        </>
-      }
       defaultOpen={Boolean(contactMessages.error) || openMessageCount > 0}
     >
       {contactMessagesContent}
@@ -1340,14 +1241,17 @@ export function AdminNotificationsSection({
     return (
       <div className="space-y-6">
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge
-              tone={attentionNotifications.length > 0 ? "accent" : "surface"}
-              size="xs"
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span
+              className={cx(
+                "text-xs font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400",
+                attentionNotifications.length > 0 &&
+                  "text-rose-600 dark:text-rose-300",
+              )}
             >
               {copy.attentionLabel}:{" "}
               {formatAdminNumber(attentionNotifications.length, language)}
-            </Badge>
+            </span>
             <p className="text-sm text-stone-600 dark:text-stone-400">
               {copy.attentionDescription}
             </p>
@@ -1379,11 +1283,11 @@ export function AdminNotificationsSection({
         </div>
 
         <div className="space-y-4">
-          <div className="flex flex-wrap items-center gap-2">
-            <Badge tone="surface" size="xs">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
               {copy.historyLabel}:{" "}
               {formatAdminNumber(historyNotifications.length, language)}
-            </Badge>
+            </span>
             <p className="text-sm text-stone-600 dark:text-stone-400">
               {copy.historyDescription}
             </p>
@@ -1429,21 +1333,6 @@ export function AdminNotificationsSection({
               metrics.sentNotificationCount,
               language,
             )} ${copy.sentInRecentLog}`
-      }
-      headerBadges={
-        <>
-          <Badge
-            tone={metrics.failedNotificationCount > 0 ? "accent" : "surface"}
-            size="xs"
-          >
-            {copy.failed}:{" "}
-            {formatAdminNumber(metrics.failedNotificationCount, language)}
-          </Badge>
-          <Badge tone="coptic" size="xs">
-            {copy.recentSent}:{" "}
-            {formatAdminNumber(metrics.sentNotificationCount, language)}
-          </Badge>
-        </>
       }
       defaultOpen={defaultOpen}
     >
@@ -1491,22 +1380,6 @@ export function AdminEntryReportsSection({
         language,
         total: entryReports.items.length,
       })}
-      headerBadges={
-        <>
-          <Badge tone={openReportCount > 0 ? "accent" : "surface"} size="xs">
-            {copy.open}: {formatAdminNumber(openReportCount, language)}
-          </Badge>
-          <Badge tone="surface" size="xs">
-            {copy.resolved}:{" "}
-            {formatAdminNumber(
-              entryReports.items.filter(
-                (item) => item.report.status === "resolved",
-              ).length,
-              language,
-            )}
-          </Badge>
-        </>
-      }
       defaultOpen={Boolean(entryReports.error) || openReportCount > 0}
     >
       {entryReportsContent}

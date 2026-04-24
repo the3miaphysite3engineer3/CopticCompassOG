@@ -21,7 +21,7 @@ export default function GrammarHubPageClient({
   return (
     <PageShell
       className="min-h-screen flex flex-col items-center p-6 md:p-10"
-      contentClassName="w-full space-y-12 pt-10"
+      contentClassName="w-full space-y-8 pt-8 md:space-y-12 md:pt-10"
       width="standard"
       accents={[
         pageShellAccents.topRightSkyOrb,
@@ -38,6 +38,7 @@ export default function GrammarHubPageClient({
       <PageHeader
         title={t("grammar.title")}
         description={t("grammar.subtitle")}
+        size="workspace"
         tone="sky"
       />
 

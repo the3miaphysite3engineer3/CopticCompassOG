@@ -312,8 +312,8 @@ export function GrammarLessonPageClient({
               title={`${t("nav.grammar")} - ${lesson.title[language]}`}
               description={lessonDescription}
               tone="sky"
-              size="compact"
-              className="mb-10"
+              size="workspace"
+              className="mb-6 md:mb-10"
             />
 
             {isStudyLayoutActive ? (

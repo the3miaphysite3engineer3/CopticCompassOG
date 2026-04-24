@@ -4,7 +4,7 @@ import { cx } from "@/lib/classes";
 import type { ReactNode } from "react";
 
 type PageHeaderTone = "default" | "brand" | "sky" | "analytics";
-type PageHeaderSize = "hero" | "page" | "compact";
+type PageHeaderSize = "hero" | "page" | "compact" | "workspace";
 type PageHeaderAlign = "center" | "left";
 type EyebrowVariant = "text" | "badge";
 
@@ -34,6 +34,14 @@ const TITLE_SIZE_CLASSES: Record<PageHeaderSize, string> = {
   hero: "text-5xl md:text-7xl",
   page: "text-4xl md:text-6xl",
   compact: "text-4xl md:text-5xl",
+  workspace: "text-3xl md:text-5xl",
+};
+
+const DESCRIPTION_SIZE_CLASSES: Record<PageHeaderSize, string> = {
+  hero: "text-lg md:text-xl",
+  page: "text-lg md:text-xl",
+  compact: "text-lg md:text-xl",
+  workspace: "text-base md:text-lg",
 };
 
 export function PageHeader({
@@ -95,7 +103,8 @@ export function PageHeader({
       {description && (
         <p
           className={cx(
-            "text-lg font-medium text-stone-500 dark:text-stone-400 md:text-xl",
+            "font-medium text-stone-500 dark:text-stone-400",
+            DESCRIPTION_SIZE_CLASSES[size],
             centered ? "mx-auto max-w-3xl" : "max-w-3xl",
             descriptionClassName,
           )}

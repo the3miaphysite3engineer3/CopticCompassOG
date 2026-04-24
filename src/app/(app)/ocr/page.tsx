@@ -128,7 +128,7 @@ export default function OCRPage() {
           title={copy.title}
           description={copy.description}
           align="left"
-          size="compact"
+          size="workspace"
           tone="sky"
         />
       </SurfacePanel>

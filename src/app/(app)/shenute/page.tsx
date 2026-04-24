@@ -782,7 +782,7 @@ export default function ShenuteAI() {
   return (
     <PageShell
       className="min-h-screen flex flex-col items-center p-6 pb-16 md:p-10"
-      contentClassName="mx-auto w-full max-w-5xl space-y-6 pt-10"
+      contentClassName="mx-auto w-full max-w-6xl space-y-6 pt-8 md:pt-10"
       width="standard"
       accents={[
         pageShellAccents.heroSkyArc,
@@ -796,54 +796,51 @@ export default function ShenuteAI() {
         ]}
       />
 
-      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
-        <div className="max-w-3xl">
-          <PageHeader
-            title={copy.title}
-            description={copy.intro}
-            align="left"
-            size="compact"
-            tone="sky"
-            titleClassName="pb-0"
-            descriptionClassName="text-base md:text-lg"
-          />
-        </div>
+      <PageHeader
+        title={copy.title}
+        description={copy.intro}
+        align="left"
+        size="workspace"
+        tone="sky"
+        titleClassName="pb-0"
+      />
 
-        <SurfacePanel
-          rounded="3xl"
-          shadow="soft"
-          variant="subtle"
-          className="self-start p-4 md:p-5"
-        >
-          <div className="space-y-4">
-            <label className="flex w-full flex-col gap-2 text-sm font-medium text-stone-600 dark:text-stone-300">
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400">
-                {copy.aiMode}
-              </span>
-              <select
-                id="shenute-inference-provider"
-                name="shenute_inference_provider"
-                className="compact-select-base h-11 w-full bg-white/85 text-sm dark:bg-stone-900"
-                value={inferenceProvider}
-                onChange={(event) => {
-                  setInferenceProvider(toShenuteProvider(event.target.value));
-                }}
-                disabled={isLoading || isShenuteAccessBlocked}
-              >
-                <option value="thoth">{copy.providerThoth}</option>
-                <option value="gemini">{copy.providerGemini}</option>
-                <option value="openrouter">{copy.providerOpenRouter}</option>
-                <option value="hf">{copy.providerHf}</option>
-              </select>
-            </label>
+      <SurfacePanel
+        rounded="3xl"
+        shadow="soft"
+        variant="subtle"
+        className="overflow-hidden"
+      >
+        <div className="grid divide-y divide-stone-200/80 dark:divide-stone-800/80 lg:grid-cols-[18rem_minmax(0,1fr)] lg:divide-x lg:divide-y-0">
+          <label className="flex min-w-0 flex-col gap-2 p-4 text-sm font-medium text-stone-600 dark:text-stone-300 md:p-5">
+            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400">
+              {copy.aiMode}
+            </span>
+            <select
+              id="shenute-inference-provider"
+              name="shenute_inference_provider"
+              className="compact-select-base h-11 w-full bg-white/85 text-sm dark:bg-stone-900"
+              value={inferenceProvider}
+              onChange={(event) => {
+                setInferenceProvider(toShenuteProvider(event.target.value));
+              }}
+              disabled={isLoading || isShenuteAccessBlocked}
+            >
+              <option value="thoth">{copy.providerThoth}</option>
+              <option value="gemini">{copy.providerGemini}</option>
+              <option value="openrouter">{copy.providerOpenRouter}</option>
+              <option value="hf">{copy.providerHf}</option>
+            </select>
+          </label>
 
-            <details className="group overflow-hidden rounded-[1.25rem] border border-stone-200/80 bg-white/55 dark:border-stone-800/80 dark:bg-stone-950/35">
-              <summary className="list-none cursor-pointer p-4 [&::-webkit-details-marker]:hidden">
-                <div className="flex items-start gap-3">
+          <details className="group min-w-0">
+            <summary className="list-none cursor-pointer p-4 md:p-5 [&::-webkit-details-marker]:hidden">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex min-w-0 items-start gap-3 sm:items-center">
                   <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-sky-700 shadow-sm dark:bg-sky-900/30 dark:text-sky-300">
                     <BrainCircuit className="h-4 w-4" />
                   </div>
-                  <div className="min-w-0 flex-1 space-y-1">
+                  <div className="min-w-0 space-y-1">
                     <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
                       {copy.creditsAndSpecs}
                     </h2>
@@ -851,108 +848,108 @@ export default function ShenuteAI() {
                       {copy.technicalSummary}
                     </p>
                   </div>
-                  <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-stone-200 bg-white/80 text-stone-500 shadow-sm transition-transform duration-200 group-open:rotate-180 dark:border-stone-800 dark:bg-stone-900/70 dark:text-stone-300">
-                    <ChevronDown className="h-4 w-4" />
-                  </div>
                 </div>
-              </summary>
-
-              <div className="border-t border-stone-200/80 p-4 dark:border-stone-800/80">
-                <div className="space-y-4">
-                  <section className="space-y-2">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
-                      <UserRound className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                      <span>{copy.credits}</span>
-                    </div>
-                    <div className="space-y-1.5 text-sm leading-6 text-stone-600 dark:text-stone-400">
-                      <p className="font-semibold text-stone-900 dark:text-stone-100">
-                        Dr. So Miyagawa
-                      </p>
-                      <p>{copy.thothRole}</p>
-                      <p>University of Tsukuba</p>
-                      <p>{copy.thothBio1}</p>
-                      <p>{copy.thothBio2}</p>
-                      <a
-                        className={buttonClassName({
-                          className: "h-auto px-0 py-0",
-                          size: "sm",
-                          variant: "link",
-                        })}
-                        href="mailto:miyagawa.so.kb@u.tsukuba.ac.jp"
-                      >
-                        <ExternalLink className="h-3.5 w-3.5" />
-                        {copy.contact}: miyagawa.so.kb@u.tsukuba.ac.jp
-                      </a>
-                    </div>
-                  </section>
-
-                  <section className="space-y-2 border-t border-stone-200/80 pt-4 dark:border-stone-800/80">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
-                      <BrainCircuit className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                      <span>{copy.baseTechnology}</span>
-                    </div>
-                    <ul className="space-y-1.5 text-sm leading-6 text-stone-600 dark:text-stone-400">
-                      <li>
-                        <span className="font-medium text-stone-900 dark:text-stone-100">
-                          {copy.platformLabel}
-                        </span>{" "}
-                        Dify
-                      </li>
-                      <li>
-                        <span className="font-medium text-stone-900 dark:text-stone-100">
-                          {copy.baseLlmLabel}
-                        </span>{" "}
-                        {copy.baseLlmValue}
-                      </li>
-                      <li>
-                        <span className="font-medium text-stone-900 dark:text-stone-100">
-                          {copy.architectureLabel}
-                        </span>{" "}
-                        {copy.architectureValue}
-                      </li>
-                      <li>{copy.nlpCapabilities}</li>
-                    </ul>
-                  </section>
-
-                  <section className="space-y-2 border-t border-stone-200/80 pt-4 dark:border-stone-800/80">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
-                      <LibraryBig className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                      <span>{copy.knowledgeBase}</span>
-                    </div>
-                    <ul className="space-y-1.5 text-sm leading-6 text-stone-600 dark:text-stone-400">
-                      <li>Comprehensive Coptic Lexicon v1.2 (2020)</li>
-                      <li>
-                        Burns, D., Feder, F., John, K., Kupreyev, M., et al.
-                      </li>
-                      <li>Freie Universitat Berlin</li>
-                      <li>A Concise Dictionary of Middle Egyptian (1962)</li>
-                      <li>Raymond Oliver Faulkner</li>
-                      <li>Griffith Institute, Oxford</li>
-                      <li>{copy.customPrompts}</li>
-                    </ul>
-                  </section>
-
-                  <div className="border-t border-stone-200/80 pt-4 dark:border-stone-800/80">
-                    <a
-                      className={buttonClassName({
-                        className: "w-full justify-center",
-                        size: "sm",
-                        variant: "secondary",
-                      })}
-                      href="https://somiyagawa.github.io/THOTH.AI/"
-                      rel="noreferrer"
-                      target="_blank"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                      {copy.viewProjectSite}
-                    </a>
-                  </div>
+                <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-stone-200 bg-white/80 text-stone-500 shadow-sm transition-transform duration-200 group-open:rotate-180 dark:border-stone-800 dark:bg-stone-900/70 dark:text-stone-300">
+                  <ChevronDown className="h-4 w-4" />
                 </div>
               </div>
-            </details>
-          </div>
-        </SurfacePanel>
-      </div>
+            </summary>
+
+            <div className="border-t border-stone-200/80 p-4 dark:border-stone-800/80 md:p-5">
+              <div className="grid gap-5 xl:grid-cols-3">
+                <section className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
+                    <UserRound className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                    <span>{copy.credits}</span>
+                  </div>
+                  <div className="space-y-1.5 text-sm leading-6 text-stone-600 dark:text-stone-400">
+                    <p className="font-semibold text-stone-900 dark:text-stone-100">
+                      Dr. So Miyagawa
+                    </p>
+                    <p>{copy.thothRole}</p>
+                    <p>University of Tsukuba</p>
+                    <p>{copy.thothBio1}</p>
+                    <p>{copy.thothBio2}</p>
+                    <a
+                      className={buttonClassName({
+                        className: "h-auto px-0 py-0",
+                        size: "sm",
+                        variant: "link",
+                      })}
+                      href="mailto:miyagawa.so.kb@u.tsukuba.ac.jp"
+                    >
+                      <ExternalLink className="h-3.5 w-3.5" />
+                      {copy.contact}: miyagawa.so.kb@u.tsukuba.ac.jp
+                    </a>
+                  </div>
+                </section>
+
+                <section className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
+                    <BrainCircuit className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                    <span>{copy.baseTechnology}</span>
+                  </div>
+                  <ul className="space-y-1.5 text-sm leading-6 text-stone-600 dark:text-stone-400">
+                    <li>
+                      <span className="font-medium text-stone-900 dark:text-stone-100">
+                        {copy.platformLabel}
+                      </span>{" "}
+                      Dify
+                    </li>
+                    <li>
+                      <span className="font-medium text-stone-900 dark:text-stone-100">
+                        {copy.baseLlmLabel}
+                      </span>{" "}
+                      {copy.baseLlmValue}
+                    </li>
+                    <li>
+                      <span className="font-medium text-stone-900 dark:text-stone-100">
+                        {copy.architectureLabel}
+                      </span>{" "}
+                      {copy.architectureValue}
+                    </li>
+                    <li>{copy.nlpCapabilities}</li>
+                  </ul>
+                </section>
+
+                <section className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
+                    <LibraryBig className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                    <span>{copy.knowledgeBase}</span>
+                  </div>
+                  <ul className="space-y-1.5 text-sm leading-6 text-stone-600 dark:text-stone-400">
+                    <li>Comprehensive Coptic Lexicon v1.2 (2020)</li>
+                    <li>
+                      Burns, D., Feder, F., John, K., Kupreyev, M., et al.
+                    </li>
+                    <li>Freie Universitat Berlin</li>
+                    <li>A Concise Dictionary of Middle Egyptian (1962)</li>
+                    <li>Raymond Oliver Faulkner</li>
+                    <li>Griffith Institute, Oxford</li>
+                    <li>{copy.customPrompts}</li>
+                  </ul>
+                </section>
+              </div>
+
+              <div className="mt-5 border-t border-stone-200/80 pt-4 dark:border-stone-800/80">
+                <a
+                  className={buttonClassName({
+                    className: "w-full justify-center sm:w-auto",
+                    size: "sm",
+                    variant: "secondary",
+                  })}
+                  href="https://somiyagawa.github.io/THOTH.AI/"
+                  rel="noreferrer"
+                  target="_blank"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  {copy.viewProjectSite}
+                </a>
+              </div>
+            </div>
+          </details>
+        </div>
+      </SurfacePanel>
 
       <SurfacePanel
         rounded="4xl"

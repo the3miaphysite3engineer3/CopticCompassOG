@@ -260,7 +260,7 @@ export default async function ApiDocsPage() {
         title={copy.title}
         description={copy.description}
         tone="sky"
-        size="compact"
+        size="workspace"
       />
 
       <section className="section-card space-y-5">

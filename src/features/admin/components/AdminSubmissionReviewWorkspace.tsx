@@ -31,7 +31,6 @@ const adminSubmissionReviewWorkspaceCopy = {
       "Keep the queue compact on the left, then review and score the selected submission in a focused panel without expanding every card inline.",
     needsReview: "Needs Review",
     open: "Open",
-    panelBadge: "Review Panel",
     panelDescription:
       "The queue stays compact on the left while the full submission and grading form stay focused here.",
     panelTitle: "Select a submission to review.",
@@ -52,7 +51,6 @@ const adminSubmissionReviewWorkspaceCopy = {
       "Houd de wachtrij compact links en beoordeel de geselecteerde inzending in een gefocust paneel zonder elke kaart inline uit te klappen.",
     needsReview: "Te beoordelen",
     open: "Open",
-    panelBadge: "Beoordelingspaneel",
     panelDescription:
       "De wachtrij blijft compact links, terwijl de volledige inzending en het beoordelingsformulier hier gefocust blijven.",
     panelTitle: "Selecteer een inzending om te beoordelen.",
@@ -199,9 +197,6 @@ function AdminSubmissionReviewPanel({
         })}
       >
         <div className="space-y-3">
-          <Badge tone="surface" size="xs" caps>
-            {copy.panelBadge}
-          </Badge>
           <p className="text-base font-semibold text-stone-900 dark:text-stone-100">
             {copy.panelTitle}
           </p>

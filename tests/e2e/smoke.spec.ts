@@ -88,9 +88,7 @@ test("legacy dictionary route redirects to the localized dictionary page", async
   await expect(
     page.getByRole("heading", { name: "Coptic Dictionary" }),
   ).toBeVisible();
-  await expect(
-    page.getByPlaceholder("Search in Coptic, English, or Greek..."),
-  ).toBeVisible();
+  await expect(page.getByPlaceholder("Coptic, English, Greek")).toBeVisible();
 });
 
 test("legacy grammar route redirects to the localized grammar page", async ({

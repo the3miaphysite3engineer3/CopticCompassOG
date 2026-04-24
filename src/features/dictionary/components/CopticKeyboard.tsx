@@ -1,6 +1,6 @@
-import { X } from "lucide-react";
-import React from "react";
+import { Delete, X } from "lucide-react";
 
+import { useLanguage } from "@/components/LanguageProvider";
 import { antinoou } from "@/lib/fonts";
 
 const COPTIC_LETTERS = [
@@ -65,87 +65,82 @@ export default function CopticKeyboard({
   isOpen,
   onClose,
 }: CopticKeyboardProps) {
+  const { t } = useLanguage();
+
   if (!isOpen) {
     return null;
   }
 
   return (
-    <div className="absolute top-[calc(100%+0.75rem)] right-0 z-[70] w-full md:w-[640px] bg-white/95 dark:bg-stone-900/92 backdrop-blur-xl border border-stone-200 dark:border-stone-700/80 rounded-3xl p-4 md:p-5 shadow-2xl">
-      <div className="flex justify-between items-center mb-4">
+    <div className="absolute right-0 top-[calc(100%+0.75rem)] z-[70] max-h-[70vh] w-full overflow-y-auto rounded-2xl border border-stone-200 bg-white/95 p-3 shadow-2xl backdrop-blur-xl dark:border-stone-700/80 dark:bg-stone-900/92 sm:rounded-3xl sm:p-4 md:w-[640px] md:p-5">
+      <div className="mb-3 flex items-start justify-between gap-3 sm:mb-4">
         <div>
           <h3 className="text-stone-600 dark:text-stone-300 font-semibold text-sm tracking-widest uppercase">
-            Virtual Keyboard
+            {t("dict.keyboardTitle")}
           </h3>
-          <p className="text-xs text-stone-400 dark:text-stone-500 mt-1">
-            Insert Coptic letters and diacritics directly into search.
+          <p className="mt-1 hidden text-xs text-stone-400 dark:text-stone-500 sm:block">
+            {t("dict.keyboardDescription")}
           </p>
         </div>
         <button
+          type="button"
           onClick={onClose}
+          aria-label={t("dict.keyboardClose")}
           className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-stone-500 hover:text-stone-700 dark:bg-stone-800/70 dark:text-stone-400 dark:hover:text-stone-200 transition-colors"
         >
           <X className="h-4 w-4" />
         </button>
       </div>
 
-      <div className="grid grid-cols-8 gap-2.5 mb-4">
+      <div className="mb-3 grid grid-cols-8 gap-1.5 sm:mb-4 sm:gap-2.5">
         {COPTIC_LETTERS.map((char) => (
           <button
+            type="button"
             key={char}
             onClick={() => onAppend(char)}
-            className="h-12 flex items-center justify-center font-coptic text-2xl text-stone-700 dark:text-stone-200 bg-stone-100/80 dark:bg-stone-800/80 hover:bg-sky-100 dark:hover:bg-sky-600/50 hover:text-sky-700 dark:hover:text-white rounded-xl border border-stone-200 dark:border-stone-700 transition-colors shadow-sm active:scale-95"
+            className="flex h-10 items-center justify-center rounded-lg border border-stone-200 bg-stone-100/80 font-coptic text-xl text-stone-700 shadow-sm transition-colors hover:bg-sky-100 hover:text-sky-700 active:scale-95 dark:border-stone-700 dark:bg-stone-800/80 dark:text-stone-200 dark:hover:bg-sky-600/50 dark:hover:text-white sm:h-12 sm:rounded-xl sm:text-2xl"
           >
             {char}
           </button>
         ))}
       </div>
 
-      <div className="flex gap-2.5 mb-2.5">
+      <div className="mb-2 flex gap-1.5 sm:mb-2.5 sm:gap-2.5">
         {DIACRITICS.map((d) => (
           <button
+            type="button"
             key={d.label}
             onClick={() => onAppend(d.char)}
-            className="flex-1 h-11 flex items-center justify-center text-lg text-stone-700 dark:text-stone-300 bg-emerald-50 dark:bg-emerald-950/40 hover:bg-emerald-100 dark:hover:bg-emerald-900/60 rounded-xl border border-emerald-200 dark:border-emerald-900/50 transition-colors active:scale-95"
-            title="Combine with previous letter"
+            className="flex h-10 flex-1 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-base text-stone-700 transition-colors hover:bg-emerald-100 active:scale-95 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-stone-300 dark:hover:bg-emerald-900/60 sm:h-11 sm:rounded-xl sm:text-lg"
+            title={t("dict.keyboardCombine")}
           >
             <span
-              className={`${antinoou.className} mr-2 inline-flex items-center text-xl leading-none opacity-60`}
+              className={`${antinoou.className} mr-1 inline-flex items-center text-lg leading-none opacity-60 sm:mr-2 sm:text-xl`}
             >
               {`◌${d.char}`}
             </span>
-            <span className="text-xs font-sans font-medium text-emerald-600 dark:text-emerald-500/80">
+            <span className="text-[11px] font-sans font-medium text-emerald-600 dark:text-emerald-500/80 sm:text-xs">
               {d.label.replace(d.char, "").trim()}
             </span>
           </button>
         ))}
 
         <button
+          type="button"
           onClick={onBackspace}
-          className="flex flex-col flex-1 h-11 items-center justify-center text-sm font-semibold text-rose-600 dark:text-rose-300 bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 rounded-xl border border-rose-200 dark:border-rose-900/50 transition-colors active:scale-95"
-          aria-label="Backspace"
+          className="flex h-10 flex-1 flex-col items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-100 active:scale-95 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/60 sm:h-11 sm:rounded-xl"
+          aria-label={t("dict.keyboardBackspace")}
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-5 w-5"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414 6.414a2 2 0 001.414.586H19a2 2 0 002-2V7a2 2 0 00-2-2h-8.172a2 2 0 00-1.414.586L3 12z"
-            />
-          </svg>
+          <Delete className="h-5 w-5" />
         </button>
       </div>
       <div className="flex">
         <button
+          type="button"
           onClick={() => onAppend(" ")}
-          className="w-full h-11 flex items-center justify-center font-semibold text-sm tracking-widest text-stone-600 dark:text-stone-400 bg-stone-200 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 rounded-xl border border-stone-300 dark:border-stone-700 transition-colors active:scale-95 uppercase"
+          className="flex h-10 w-full items-center justify-center rounded-lg border border-stone-300 bg-stone-200 text-sm font-semibold uppercase tracking-widest text-stone-600 transition-colors hover:bg-stone-300 active:scale-95 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-stone-700 sm:h-11 sm:rounded-xl"
         >
-          Space
+          {t("dict.keyboardSpace")}
         </button>
       </div>
     </div>

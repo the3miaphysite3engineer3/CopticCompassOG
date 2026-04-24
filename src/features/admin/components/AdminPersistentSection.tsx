@@ -2,7 +2,6 @@
 
 import { ChevronDown } from "lucide-react";
 
-import { Badge } from "@/components/Badge";
 import { useLanguage } from "@/components/LanguageProvider";
 import { surfacePanelClassName } from "@/components/SurfacePanel";
 import { usePersistentDisclosureState } from "@/features/admin/lib/uiState";
@@ -22,7 +21,6 @@ export function AdminPersistentSection({
   defaultOpen = false,
   children,
   description,
-  headerBadges,
   id,
   summary,
   title,
@@ -30,7 +28,6 @@ export function AdminPersistentSection({
   defaultOpen?: boolean;
   children: React.ReactNode;
   description: string;
-  headerBadges?: React.ReactNode;
   id: string;
   summary: string;
   title: string;
@@ -46,31 +43,27 @@ export function AdminPersistentSection({
     <details
       id={id}
       className={surfacePanelClassName({
-        rounded: "4xl",
+        rounded: "3xl",
         variant: "elevated",
         className: "group app-anchor-section overflow-hidden",
       })}
       open={isOpen}
       onToggle={(event) => setIsOpen(event.currentTarget.open)}
     >
-      <summary className="flex cursor-pointer list-none items-start justify-between gap-5 p-6 [&::-webkit-details-marker]:hidden md:p-8">
+      <summary className="flex cursor-pointer list-none items-start justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden md:p-6">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
+            <h2 className="text-xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
               {title}
             </h2>
-            <Badge tone="surface" size="xs">
+            <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
               {summary}
-            </Badge>
+            </span>
           </div>
 
-          <p className="mt-2 max-w-3xl text-stone-600 dark:text-stone-400">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
             {description}
           </p>
-
-          {headerBadges ? (
-            <div className="mt-4 flex flex-wrap gap-2">{headerBadges}</div>
-          ) : null}
         </div>
 
         <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-stone-500 dark:text-stone-400">
@@ -80,7 +73,7 @@ export function AdminPersistentSection({
         </div>
       </summary>
 
-      <div className="border-t border-stone-200/80 p-6 dark:border-stone-800 md:p-8">
+      <div className="border-t border-stone-200/80 p-5 dark:border-stone-800 md:p-6">
         {children}
       </div>
     </details>

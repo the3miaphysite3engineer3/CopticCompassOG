@@ -50,7 +50,7 @@ function DictionaryPageBody({ searchPath }: DictionaryPageBodyProps) {
   return (
     <PageShell
       className="min-h-screen flex flex-col items-center p-6 pb-20 md:p-10"
-      contentClassName="w-full pt-10"
+      contentClassName="w-full pt-8 md:pt-10"
       width="standard"
       accents={[
         pageShellAccents.heroSkyArc,
@@ -79,12 +79,12 @@ function DictionaryPageBody({ searchPath }: DictionaryPageBodyProps) {
       <PageHeader
         title={t("dict.title")}
         description={t("dict.subtitle")}
-        size="hero"
+        size="workspace"
         tone="brand"
-        className="mb-16"
+        className="mb-8 md:mb-12"
       />
 
-      <div className="relative app-sticky-panel isolate mb-12 flex flex-col gap-4">
+      <div className="app-sticky-panel relative isolate mb-8 flex flex-col gap-3 md:mb-12 md:gap-4">
         <DictionarySearchBar
           isKeyboardOpen={isKeyboardOpen}
           onAppend={handleKeyboardAppend}

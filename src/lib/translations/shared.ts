@@ -20,6 +20,9 @@ export const sharedMessages = defineMessages({
     "nav.login": "Sign In",
     "nav.dashboard": "Dashboard",
 
+    "shenute.launcher.open": "Open Shenute AI",
+    "shenute.launcher.loading": "Loading Shenute AI...",
+
     "notFound.title": "Page not found",
     "notFound.description":
       "This route does not exist, or the page may have moved.",
@@ -59,6 +62,9 @@ export const sharedMessages = defineMessages({
     "nav.analytics": "Analytics-dashboard",
     "nav.login": "Inloggen",
     "nav.dashboard": "Dashboard",
+
+    "shenute.launcher.open": "Shenute AI openen",
+    "shenute.launcher.loading": "Shenute AI laden...",
 
     "notFound.title": "Pagina niet gevonden",
     "notFound.description":

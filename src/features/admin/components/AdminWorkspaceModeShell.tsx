@@ -3,7 +3,6 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { startTransition, useEffect, type ReactNode } from "react";
 
-import { Badge } from "@/components/Badge";
 import { useLanguage } from "@/components/LanguageProvider";
 import type { AdminWorkspaceOverview } from "@/features/admin/lib/dashboardData";
 import { usePersistentEnumState } from "@/features/admin/lib/uiState";
@@ -16,7 +15,6 @@ import type { Language } from "@/types/i18n";
 
 const workspaceModeShellCopy = {
   en: {
-    badge: "Workspace Mode",
     description:
       "Switch between active review work, outbound communications, and system visibility without carrying the whole admin page with you.",
     labels: {
@@ -26,7 +24,6 @@ const workspaceModeShellCopy = {
     },
   },
   nl: {
-    badge: "Werkruimtemodus",
     description:
       "Schakel tussen actieve beoordelingen, uitgaande communicatie en systeemoverzicht zonder de hele adminpagina mee te nemen.",
     labels: {
@@ -38,7 +35,6 @@ const workspaceModeShellCopy = {
 } as const satisfies Record<
   Language,
   {
-    badge: string;
     description: string;
     labels: Record<AdminWorkspaceMode, string>;
   }
@@ -255,18 +251,13 @@ export function AdminWorkspaceModeShell({
   }
 
   return (
-    <div className="space-y-8">
-      <nav className="app-sticky-panel rounded-[2rem] border border-stone-200/80 bg-white/90 p-4 shadow-lg backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/80 dark:shadow-black/20">
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          <Badge tone="flat" size="xs" caps>
-            {copy.badge}
-          </Badge>
-          <p className="text-sm text-stone-600 dark:text-stone-400">
-            {copy.description}
-          </p>
-        </div>
+    <div className="space-y-6">
+      <nav className="app-sticky-panel rounded-3xl border border-stone-200/80 bg-white/90 p-3 shadow-md backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/80 dark:shadow-black/20">
+        <p className="mb-3 text-xs leading-5 text-stone-600 dark:text-stone-400">
+          {copy.description}
+        </p>
 
-        <div className="grid gap-3 md:grid-cols-3">
+        <div className="grid gap-2 md:grid-cols-3">
           {ADMIN_WORKSPACE_MODES.map((nextMode) => {
             const isActive = nextMode === mode;
             const summaryCount = getModeSummaryCount(nextMode, overview);
@@ -277,7 +268,7 @@ export function AdminWorkspaceModeShell({
                 type="button"
                 onClick={() => handleModeChange(nextMode)}
                 className={cx(
-                  "rounded-[1.5rem] border px-4 py-4 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50",
+                  "rounded-2xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50",
                   isActive
                     ? "border-sky-200 bg-sky-50/90 shadow-sm dark:border-sky-900/50 dark:bg-sky-950/40"
                     : "border-stone-200 bg-stone-50/70 hover:border-stone-300 hover:bg-white dark:border-stone-800 dark:bg-stone-900/40 dark:hover:border-stone-700 dark:hover:bg-stone-900/70",
@@ -286,7 +277,7 @@ export function AdminWorkspaceModeShell({
                 <div className="flex items-center justify-between gap-3">
                   <span
                     className={cx(
-                      "text-base font-semibold",
+                      "text-sm font-semibold",
                       isActive
                         ? "text-sky-900 dark:text-sky-100"
                         : "text-stone-900 dark:text-stone-100",
@@ -294,12 +285,19 @@ export function AdminWorkspaceModeShell({
                   >
                     {getModeLabel(nextMode, language)}
                   </span>
-                  <Badge tone={isActive ? "accent" : "surface"} size="xs">
+                  <span
+                    className={cx(
+                      "text-xs font-semibold",
+                      isActive
+                        ? "text-sky-700 dark:text-sky-200"
+                        : "text-stone-500 dark:text-stone-400",
+                    )}
+                  >
                     {summaryCount}
-                  </Badge>
+                  </span>
                 </div>
 
-                <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
+                <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
                   {getModeDescription(nextMode, overview, language)}
                 </p>
               </button>
