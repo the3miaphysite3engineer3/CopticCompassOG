@@ -1729,7 +1729,6 @@ async function runOcr(file: File): Promise<string> {
 }
 
 async function extractPdfText(file: File): Promise<string> {
-  // @ts-expect-error - dynamic import for node-only environment
   const { default: pdfParse } = await import("pdf-parse/lib/pdf-parse.js");
   const arrayBuffer = await file.arrayBuffer();
   const parsed = await pdfParse(Buffer.from(arrayBuffer));
