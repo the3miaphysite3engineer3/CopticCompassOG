@@ -7,6 +7,7 @@ import { buttonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
+import { readJsonResponse, summarizeResponseText } from "@/lib/response";
 import type { Language } from "@/types/i18n";
 
 import type { ReactNode } from "react";
@@ -356,17 +357,29 @@ export function AdminRagIngestionForm() {
         method: "GET",
         cache: "no-store",
       });
-      const payload = (await response.json()) as RagStatusResponse & {
-        error?: string;
-      };
+      const { data: payload, text } = await readJsonResponse<
+        RagStatusResponse & {
+          error?: string;
+        }
+      >(response);
 
-      if (!response.ok || !payload.success) {
+      if (!payload) {
         setRagStatus(null);
-        setRagStatusError(payload.error ?? copy.loadError);
+        setRagStatusError(summarizeResponseText(text, copy.loadError));
         return;
       }
 
-      setRagStatus(payload);
+      const payloadWithError = payload as RagStatusResponse & {
+        error?: string;
+      };
+
+      if (!response.ok || !payloadWithError.success) {
+        setRagStatus(null);
+        setRagStatusError(payloadWithError.error ?? copy.loadError);
+        return;
+      }
+
+      setRagStatus(payloadWithError);
     } catch (error) {
       setRagStatus(null);
       setRagStatusError(
@@ -419,8 +432,9 @@ export function AdminRagIngestionForm() {
               return [] as DashboardLogEntry[];
             }
 
-            const payload = (await response.json()) as LiveRagLogsResponse;
-            if (!payload.success || !payload.logs) {
+            const { data: payload } =
+              await readJsonResponse<LiveRagLogsResponse>(response);
+            if (!payload?.success || !payload.logs) {
               return [] as DashboardLogEntry[];
             }
 
@@ -465,7 +479,24 @@ export function AdminRagIngestionForm() {
         body: JSON.stringify({ embeddingProvider, ingestId }),
       });
 
-      const payload = (await response.json()) as BulkJsonIngestionResponse;
+      const { data: payload, text } =
+        await readJsonResponse<BulkJsonIngestionResponse>(response);
+
+      if (!payload) {
+        setBulkJsonState({
+          success: false,
+          chunksInserted: 0,
+          embeddingProvider,
+          filesDiscovered: 0,
+          filesFailed: 0,
+          filesSucceeded: 0,
+          ingestId,
+          message: copy.jsonError,
+          error: summarizeResponseText(text, copy.unknownRequestError),
+        });
+        return;
+      }
+
       setBulkJsonState(payload);
 
       if (response.ok && payload.success) {
@@ -479,7 +510,7 @@ export function AdminRagIngestionForm() {
         filesDiscovered: 0,
         filesFailed: 0,
         filesSucceeded: 0,
-        ingestId: crypto.randomUUID(),
+        ingestId,
         message: copy.jsonError,
         error:
           error instanceof Error ? error.message : copy.unknownRequestError,
@@ -516,7 +547,17 @@ export function AdminRagIngestionForm() {
         body: formData,
       });
 
-      const payload = (await response.json()) as RagIngestionState;
+      const { data: payload, text } =
+        await readJsonResponse<RagIngestionState>(response);
+
+      if (!payload) {
+        setState({
+          success: false,
+          error: summarizeResponseText(text, copy.unknownRequestError),
+          ingestId,
+        });
+        return;
+      }
 
       if (!response.ok) {
         setState({
