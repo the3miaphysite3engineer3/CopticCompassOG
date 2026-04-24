@@ -1,7 +1,5 @@
 import { embedMany, generateText } from "ai";
 import mammoth from "mammoth";
-import pdfParse from "pdf-parse/lib/pdf-parse.js";
-import { pdf } from "pdf-to-img";
 
 import {
   GEMINI_EMBEDDING_MODEL,
@@ -1731,6 +1729,8 @@ async function runOcr(file: File): Promise<string> {
 }
 
 async function extractPdfText(file: File): Promise<string> {
+  // @ts-expect-error - dynamic import for node-only environment
+  const { default: pdfParse } = await import("pdf-parse/lib/pdf-parse.js");
   const arrayBuffer = await file.arrayBuffer();
   const parsed = await pdfParse(Buffer.from(arrayBuffer));
   return (parsed.text ?? "").trim();
@@ -1867,6 +1867,7 @@ async function extractSourceText(
 }
 
 async function runOcrOnPdf(file: File): Promise<string> {
+  const { pdf } = await import("pdf-to-img");
   const arrayBuffer = await file.arrayBuffer();
   // Pass Buffer to pdf-to-img
   const document = await pdf(Buffer.from(arrayBuffer), { scale: 2.0 });
