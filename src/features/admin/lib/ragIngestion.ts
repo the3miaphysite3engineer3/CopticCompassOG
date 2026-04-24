@@ -1728,11 +1728,10 @@ async function runOcr(file: File): Promise<string> {
   );
 }
 
-async function extractPdfText(file: File): Promise<string> {
-  const { default: pdfParse } = await import("pdf-parse/lib/pdf-parse.js");
-  const arrayBuffer = await file.arrayBuffer();
-  const parsed = await pdfParse(Buffer.from(arrayBuffer));
-  return (parsed.text ?? "").trim();
+async function extractPdfText(_file: File): Promise<string> {
+  throw new Error(
+    "PDF processing is currently disabled due to dependency issues. Use JSON ingestion for now.",
+  );
 }
 
 async function extractDocxText(file: File): Promise<string> {
@@ -1865,35 +1864,10 @@ async function extractSourceText(
   }
 }
 
-async function runOcrOnPdf(file: File): Promise<string> {
-  const { pdf } = await import("pdf-to-img");
-  const arrayBuffer = await file.arrayBuffer();
-  // Pass Buffer to pdf-to-img
-  const document = await pdf(Buffer.from(arrayBuffer), { scale: 2.0 });
-
-  let fullOcrText = "";
-  let i = 0;
-  for await (const imageBuffer of document) {
-    try {
-      const imageFile = new File(
-        [imageBuffer as BlobPart],
-        `page-${i + 1}.png`,
-        {
-          type: "image/png",
-        },
-      );
-      const pageText = await runOcr(imageFile);
-      fullOcrText += `${pageText}\n\n`;
-    } catch (err) {
-      console.warn(
-        `[RAG Ingestion] OCR failed on PDF page ${i + 1}. Attempting to continue...`,
-        err,
-      );
-    }
-    i++;
-  }
-
-  return fullOcrText.trim();
+async function runOcrOnPdf(_file: File): Promise<string> {
+  throw new Error(
+    "PDF OCR is currently disabled due to dependency issues. Use JSON ingestion for now.",
+  );
 }
 
 async function generateEmbeddings(
