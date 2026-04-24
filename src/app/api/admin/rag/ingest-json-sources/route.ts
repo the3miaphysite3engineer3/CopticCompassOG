@@ -228,6 +228,9 @@ export async function POST(request: Request) {
           enableOcr: false,
           file,
           ingestId: `${ingestId}-${index + 1}`,
+          jsonChunkMode: "compact",
+          skipThothEnrichment: true,
+          skipThothProofcheck: true,
           sourceTitle: buildSourceTitle(sourcePath),
           userId: user.id,
         });

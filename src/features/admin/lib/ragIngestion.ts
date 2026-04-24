@@ -15,6 +15,11 @@ import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
 import { createThothChatCompletion } from "@/lib/thoth";
 import type { Json } from "@/types/supabase";
 
+import {
+  buildStructuredJsonChunks,
+  type StructuredJsonChunkMode,
+} from "./structuredJsonChunks";
+
 const CHUNK_SIZE = 1600;
 const CHUNK_OVERLAP = 200;
 const OCR_MIN_TEXT_LENGTH = 250;
@@ -161,6 +166,9 @@ type IngestRagFileOptions = {
   forceOcr?: boolean;
   file: File;
   ingestId?: string;
+  jsonChunkMode?: StructuredJsonChunkMode;
+  skipThothEnrichment?: boolean;
+  skipThothProofcheck?: boolean;
   sourceTitle: string;
   userId: string;
 };
@@ -809,8 +817,18 @@ async function proofcheckChunksWithThoth(options: {
   fileName: string;
   ingestId: string;
   logs: RagIngestionLogEntry[];
+  skipProofcheck?: boolean;
   userId: string;
 }) {
+  if (options.skipProofcheck) {
+    logIngestion(
+      options.ingestId,
+      "THOTH proofcheck skipped for this ingestion path.",
+      options.logs,
+    );
+    return options.chunks;
+  }
+
   if (!hasThothAvailable()) {
     if (RAG_THOTH_PROOFCHECK_REQUIRED) {
       throw new Error(
@@ -974,6 +992,8 @@ async function splitIntoChunks(
   fileName: string = "",
   options?: {
     ingestId?: string;
+    jsonChunkMode?: StructuredJsonChunkMode;
+    skipThothEnrichment?: boolean;
     userId?: string;
   },
   chunkSize = CHUNK_SIZE,
@@ -981,125 +1001,26 @@ async function splitIntoChunks(
 ): Promise<RagChunkWithMetadata[]> {
   const normalizedFileName = fileName.toLowerCase();
   const ingestId = options?.ingestId;
+  const jsonChunkMode = options?.jsonChunkMode ?? "default";
+  const skipThothEnrichment = options?.skipThothEnrichment ?? false;
   const userId = options?.userId;
 
   if (normalizedFileName.endsWith(".json")) {
-    try {
-      const parsed = JSON.parse(text);
-      if (Array.isArray(parsed)) {
-        const parsedChunks = parsed.map((entryRaw: unknown) => {
-          const entry = entryRaw as {
-            dialects?: unknown;
-            english_meanings?: unknown;
-            headword?: unknown;
-            pos?: unknown;
-          };
+    const structuredJsonChunks = buildStructuredJsonChunks(text, {
+      mode: jsonChunkMode,
+    });
 
-          // Dictionary format
-          if (
-            typeof entry.headword === "string" &&
-            typeof entry.pos === "string"
-          ) {
-            const dialects =
-              entry.dialects && typeof entry.dialects === "object"
-                ? (entry.dialects as Record<string, unknown>)
-                : {};
-
-            const copticDialects = Object.entries(dialects)
-              .map(([dialectName, dialectValue]) => {
-                if (!dialectValue || typeof dialectValue !== "object") {
-                  return "";
-                }
-
-                const absolute = (dialectValue as { absolute?: unknown })
-                  .absolute;
-                return typeof absolute === "string"
-                  ? `${dialectName}: ${absolute}`
-                  : "";
-              })
-              .filter((dialect) => dialect.length > 0)
-              .join(", ");
-
-            const meanings = Array.isArray(entry.english_meanings)
-              ? entry.english_meanings
-                  .filter((value): value is string => typeof value === "string")
-                  .join(", ")
-              : "";
-
-            return {
-              content: `Coptic Word Headword: ${entry.headword}. Part of Speech: ${entry.pos}. Dialects: ${copticDialects}. English Meanings: ${meanings}.`,
-              metadata: {
-                type: "vocabulary",
-                word: entry.headword,
-                translation: meanings,
-                partOfSpeech: entry.pos,
-              },
-            };
-          }
-
-          return {
-            content: JSON.stringify(entry),
-            metadata: { type: "json_data" },
-          };
-        });
-
-        return applyThothEnrichmentToChunks({
-          chunks: parsedChunks,
-          fileName,
-          ingestId,
-          userId,
-        });
-      } else if (parsed && parsed.data && Array.isArray(parsed.data)) {
-        // Grammar concepts format (e.g. grammar/v1/concepts.json)
-        const grammarChunks = parsed.data.map((itemRaw: unknown) => {
-          const item = itemRaw as {
-            definition?: unknown;
-            title?: unknown;
-          };
-
-          if (item.title && item.definition) {
-            const titleSource =
-              item.title && typeof item.title === "object"
-                ? (item.title as { en?: unknown }).en
-                : item.title;
-            const definitionSource =
-              item.definition && typeof item.definition === "object"
-                ? (item.definition as { en?: unknown }).en
-                : item.definition;
-
-            const title =
-              typeof titleSource === "string"
-                ? titleSource
-                : JSON.stringify(item.title);
-            const definition =
-              typeof definitionSource === "string"
-                ? definitionSource
-                : JSON.stringify(item.definition);
-
-            return {
-              content: `Grammar Concept: ${title}. Definition: ${definition}.`,
-              metadata: {
-                type: "grammar",
-                lesson: title,
-              },
-            };
-          }
-
-          return {
-            content: JSON.stringify(item),
-            metadata: { type: "json_data" },
-          };
-        });
-
-        return applyThothEnrichmentToChunks({
-          chunks: grammarChunks,
-          fileName,
-          ingestId,
-          userId,
-        });
+    if (structuredJsonChunks && structuredJsonChunks.length > 0) {
+      if (skipThothEnrichment) {
+        return structuredJsonChunks;
       }
-    } catch {
-      // Not an array of JSON objects or grammar JSON, fall through to text splitting
+
+      return applyThothEnrichmentToChunks({
+        chunks: structuredJsonChunks,
+        fileName,
+        ingestId,
+        userId,
+      });
     }
   }
 
@@ -1964,6 +1885,9 @@ export async function ingestRagFile({
   forceOcr = false,
   file,
   ingestId,
+  jsonChunkMode = "default",
+  skipThothEnrichment = false,
+  skipThothProofcheck = false,
   sourceTitle,
   userId,
 }: IngestRagFileOptions): Promise<RagIngestionResult> {
@@ -2095,6 +2019,8 @@ export async function ingestRagFile({
     const chunkStartMs = Date.now();
     const baseChunks = await splitIntoChunks(text, file.name, {
       ingestId: ingestionId,
+      jsonChunkMode,
+      skipThothEnrichment,
       userId,
     });
     const normalizedSourceTextChars = normalizeWhitespace(text).length;
@@ -2117,6 +2043,7 @@ export async function ingestRagFile({
       fileName: file.name,
       ingestId: ingestionId,
       logs,
+      skipProofcheck: skipThothProofcheck,
       userId,
     });
     logIngestion(
