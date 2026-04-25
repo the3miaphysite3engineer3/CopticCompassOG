@@ -11,6 +11,11 @@ import {
   searchCopticDocuments,
   searchVocabularyByKeywords,
 } from "@/actions/vectorSearch";
+import {
+  requestNMTTranslation,
+  resolveNMTTranslationRequest,
+  type NMTTranslationSuggestion,
+} from "@/lib/copticTranslator";
 import { getGeminiModel } from "@/lib/gemini";
 import { createHfChatCompletion, type HfChatMessage } from "@/lib/hf";
 import {
@@ -21,6 +26,11 @@ import { getAuthenticatedUser } from "@/lib/supabase/authQueries";
 import { hasSupabaseRuntimeEnv } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { createThothChatCompletion } from "@/lib/thoth";
+import {
+  recordDistillationExample,
+  formatNMTForDistillation,
+} from "@/lib/distillation";
+
 
 export const maxDuration = 30;
 export const runtime = "nodejs";
@@ -364,6 +374,35 @@ function toPageContext(value: unknown): PageContext {
   };
 }
 
+function buildNMTContextDoc(
+  suggestion: NMTTranslationSuggestion,
+): ContextDoc {
+  const confidenceLine = suggestion.confidenceLabel
+    ? `Model confidence: ${suggestion.confidenceLabel}`
+    : "Model confidence: unavailable";
+  const reliabilityLine =
+    suggestion.confidence !== null && suggestion.confidence < 0.8
+      ? "Reliability: tentative. Verify this suggestion against retrieved lexicon and grammar sources."
+      : "Reliability: retrieval hint only. Retrieved lexicon and grammar sources take precedence on conflict.";
+
+  return {
+    content: [
+      "NMT translation hint (secondary evidence for retrieval):",
+      `Direction: ${suggestion.direction}`,
+      `Dialect: ${suggestion.dialect}`,
+      `Input text: ${suggestion.textToTranslate}`,
+      `Suggested translation: ${suggestion.translatedText}`,
+      confidenceLine,
+      reliabilityLine,
+    ].join("\n"),
+    metadata: {
+      dialect: suggestion.dialect,
+      sourceName: suggestion.modelId,
+      type: "NMT_translation_hint",
+    },
+  };
+}
+
 export async function POST(req: Request) {
   try {
     if (!hasSupabaseRuntimeEnv()) {
@@ -420,14 +459,19 @@ export async function POST(req: Request) {
 
     const latestMessage = messages[messages.length - 1];
     const latestMessageText = extractMessageText(latestMessage);
+    let NMTSuggestion: NMTTranslationSuggestion | null = null;
 
     let contextText = "";
-    if (inferenceProvider !== "thoth" && latestMessageText) {
+    const shouldBuildRagContext = Boolean(latestMessageText);
+    if (shouldBuildRagContext && latestMessageText) {
       try {
         // Step 1: Translate the prompt into German (for the Lexicon), extract keywords, and analyze grammar
         let extractedKeywords: string[] = [];
         let extractedConcepts: string[] = [];
-        let translatedPrompt = latestMessageText;
+        let isolatedTargetText: string | null = null;
+        const retrievalPromptSegments = new Set<string>([latestMessageText]);
+
+
 
         try {
           const kwResponse = await generateText({
@@ -437,8 +481,19 @@ Our Coptic Lexicon is in German, and our general dictionary is in English.
 1. Translate the user's query into German.
 2. Extract ALL meaningful keywords (nouns, verbs, adjectives, adverbs) to maximize dictionary lookup hits. Include at least 5-15 keywords if the prompt allows, in BOTH English AND German.
 3. Analyze the grammatical structure of the user's query (e.g., tenses, moods, cases, clauses) and list 1-3 core English grammatical concepts required to build or understand this sentence.
+4. If the prompt contains a request to translate something (even if implicit like "Jesus Christ is risen"), isolate the FULL sentence or the complete meaningful phrase. Do NOT truncate it to fragments (e.g., if the user says "Hail to the Apostles of our Lord", do NOT just isolate "Jesus Christ"). Focus on the largest contiguous segment the user likely wants rendered. The segment should be a single independent clause or the largest natural unit of meaning.
 Respond ONLY with a valid JSON object matching this schema, no markdown blocks:
-{"germanTranslation": "...", "keywords": ["englishKw1", "germanKw1", "englishKw2", "germanKw2"], "grammaticalConcepts": ["past perfect", "definite article", "direct object"]}
+{
+  "germanTranslation": "...",
+  "keywords": ["englishKw1", "germanKw1", "englishKw2", "germanKw2"],
+  "grammaticalConcepts": ["past perfect", "definite article", "direct object"],
+  "translationTarget": {
+    "text": "the isolated FULL phrase or sentence to translate (do not truncate)",
+    "direction": "english-to-coptic" | "coptic-to-english",
+    "dialect": "Bohairic" | "Sahidic",
+    "expertTranslation": "your authoritative translation for this isolated string"
+  }
+}
 `,
           });
 
@@ -449,7 +504,7 @@ Respond ONLY with a valid JSON object matching this schema, no markdown blocks:
           const parsed = JSON.parse(rawResponse);
 
           if (parsed.germanTranslation) {
-            translatedPrompt = `${latestMessageText}\n${parsed.germanTranslation}`;
+            retrievalPromptSegments.add(parsed.germanTranslation);
             console.warn(
               `[RAG DEBUG] Translated prompt for vector search:`,
               parsed.germanTranslation,
@@ -468,18 +523,88 @@ Respond ONLY with a valid JSON object matching this schema, no markdown blocks:
               .filter(Boolean);
           }
 
+          // Step 1.5: If LLM extracted a translation target and we don't have a suggestion yet, call NMT now
+          if (
+            !NMTSuggestion &&
+            parsed.translationTarget?.text &&
+            parsed.translationTarget.direction
+          ) {
+            console.warn(
+              `[RAG DEBUG] LLM isolated translation target: "${parsed.translationTarget.text}" (${parsed.translationTarget.direction})`,
+            );
+            try {
+              NMTSuggestion = await requestNMTTranslation({
+                dialect: parsed.translationTarget.dialect ?? "Bohairic",
+                direction: parsed.translationTarget.direction,
+                originalPrompt: latestMessageText,
+                textToTranslate: parsed.translationTarget.text,
+              });
+
+              if (NMTSuggestion) {
+                console.warn(
+                  `[RAG DEBUG] NMT translation hint (LLM-triggered): "${parsed.translationTarget.text}" -> "${NMTSuggestion.translatedText}" (${NMTSuggestion.direction})`,
+                );
+                retrievalPromptSegments.add(NMTSuggestion.translatedText);
+                if (NMTSuggestion.textToTranslate) {
+                  retrievalPromptSegments.add(
+                    NMTSuggestion.textToTranslate,
+                  );
+                }
+              }
+            } catch (error) {
+              console.error("LLM-triggered NMT request failed:", error);
+            }
+          }
+
+          // Step 1.6: Record distillation example if we have an expert translation
+          if (
+            parsed.translationTarget?.text &&
+            parsed.translationTarget.expertTranslation
+          ) {
+            isolatedTargetText = parsed.translationTarget.text;
+            recordDistillationExample({
+              taskType: "translation",
+              prompt: parsed.translationTarget.text,
+              teacherAnswer: parsed.translationTarget.expertTranslation,
+              studentTarget: NMTSuggestion
+                ? formatNMTForDistillation(NMTSuggestion)
+                : undefined,
+              metadata: {
+                direction: parsed.translationTarget.direction,
+                dialect: parsed.translationTarget.dialect,
+                original_prompt: latestMessageText,
+              },
+            }).catch((err) =>
+              console.error("Distillation recording failed:", err),
+            );
+          }
+
           console.warn(`[RAG DEBUG] Extracted keywords:`, extractedKeywords);
           console.warn(`[RAG DEBUG] Extracted concepts:`, extractedConcepts);
         } catch (e) {
           console.error("Keyword/Translation extraction failed:", e);
         }
 
-        const contextChunks: ContextDoc[] = [];
+        const keywordCandidates = [
+          ...extractedKeywords,
+          ...(isolatedTargetText && isolatedTargetText.length <= 120
+            ? [isolatedTargetText]
+            : []),
+          ...(NMTSuggestion?.translatedText &&
+            NMTSuggestion.translatedText.length <= 120
+            ? [NMTSuggestion.translatedText]
+            : []),
+        ];
+        const dedupedKeywordCandidates = Array.from(new Set(keywordCandidates));
+        const contextChunks: ContextDoc[] = NMTSuggestion
+          ? [buildNMTContextDoc(NMTSuggestion)]
+          : [];
 
         // Step 2: Fetch by exact/partial string metadata match FIRST
-        if (extractedKeywords.length > 0) {
-          const keywordDocs =
-            await searchVocabularyByKeywords(extractedKeywords);
+        if (dedupedKeywordCandidates.length > 0) {
+          const keywordDocs = await searchVocabularyByKeywords(
+            dedupedKeywordCandidates,
+          );
           if (keywordDocs && keywordDocs.length > 0) {
             console.warn(
               `[RAG DEBUG] Found ${keywordDocs.length} dictionary entries via metadata/keyword match.`,
@@ -505,7 +630,8 @@ Respond ONLY with a valid JSON object matching this schema, no markdown blocks:
           }
         }
 
-        // Step 3: Run vector search as fallback/enrichment using BOTH English and German text
+        // Step 3: Run vector search as fallback/enrichment using the prompt, German hint, and NMT suggestion when available
+        const translatedPrompt = Array.from(retrievalPromptSegments).join("\n");
         const vectorDocs = await searchCopticDocuments(
           translatedPrompt,
           8, // Get top 8 most relevant chunks overall to leave room for dictionary/other context
@@ -569,6 +695,7 @@ You have access to the Comprehensive Coptic Lexicon via the provided context.
 
 CRITICAL INSTRUCTION: You must base your Coptic translations and vocabulary answers STRICTLY on the "Context relevant to the user's query" provided below. 
 If the context does not contain the specific Coptic words or grammar needed to accurately answer the user's request, you MUST admit that you do not know or that the words are not in your current database. DO NOT hallucinate, guess, or invent Coptic words, spellings, or transliterations.
+Treat any NMT translation hint as secondary evidence for lookup only; retrieved lexicon and grammar sources take precedence if they conflict.
 
   The user is currently viewing this page on the website:
   - Path: ${pageContext.path ?? "unknown"}
@@ -579,12 +706,13 @@ If the context does not contain the specific Coptic words or grammar needed to a
   ${pageContext.excerpt && pageContext.excerpt.length > 0 ? pageContext.excerpt : "No page excerpt provided."}
 
 Context relevant to the user's query:
-${contextText}
+${contextText || "No additional retrieval context was found."}
 `;
 
     const thothSystemPrompt = `You are "Shenute AI Expert" not "THOTH AI", the teacher model for Coptic language mastery (Sahidic/Bohairic dialects).
 You deliver authoritative answers for Coptic vocabulary, grammar, translation, and etymology.
 You are the expert teacher that the Shenute AI Learner is distilled from.
+Use retrieved lexicon and grammar context when it is available, and treat any NMT translation hint as supporting evidence rather than ground truth.
 
 The user is currently viewing this page on the website:
 - Path: ${pageContext.path ?? "unknown"}
@@ -593,6 +721,9 @@ The user is currently viewing this page on the website:
 
 Visible text excerpt from the opened page:
 ${pageContext.excerpt && pageContext.excerpt.length > 0 ? pageContext.excerpt : "No page excerpt provided."}
+
+Context relevant to the user's query:
+${contextText || "No additional retrieval context was found."}
 `;
 
     const systemPrompt =
@@ -624,20 +755,20 @@ ${pageContext.excerpt && pageContext.excerpt.length > 0 ? pageContext.excerpt : 
           ...(latestMessageText
             ? []
             : [
-                {
-                  role: "user" as const,
-                  content: "Please answer the latest user request.",
-                },
-              ]),
+              {
+                role: "user" as const,
+                content: "Please answer the latest user request.",
+              },
+            ]),
         ],
         { enableReasoning: true },
       );
 
       const openRouterMessage = completion?.choices?.[0]?.message as
         | {
-            content?: string | null;
-            reasoning_details?: unknown;
-          }
+          content?: string | null;
+          reasoning_details?: unknown;
+        }
         | undefined;
       const assistantText = openRouterMessage?.content;
 
@@ -665,7 +796,7 @@ ${pageContext.excerpt && pageContext.excerpt.length > 0 ? pageContext.excerpt : 
 
       const responseText =
         typeof completion.answer === "string" &&
-        completion.answer.trim().length > 0
+          completion.answer.trim().length > 0
           ? completion.answer
           : "I could not generate a response from Shenute AI Expert right now.";
 
@@ -679,11 +810,11 @@ ${pageContext.excerpt && pageContext.excerpt.length > 0 ? pageContext.excerpt : 
         ...(latestMessageText
           ? []
           : [
-              {
-                role: "user" as const,
-                content: "Please answer the latest user request.",
-              },
-            ]),
+            {
+              role: "user" as const,
+              content: "Please answer the latest user request.",
+            },
+          ]),
       ]);
 
       const assistantText = completion.choices[0]?.message?.content;
@@ -734,11 +865,11 @@ ${pageContext.excerpt && pageContext.excerpt.length > 0 ? pageContext.excerpt : 
               ...(latestMessageText
                 ? []
                 : [
-                    {
-                      role: "user" as const,
-                      content: "Please answer the latest user request.",
-                    },
-                  ]),
+                  {
+                    role: "user" as const,
+                    content: "Please answer the latest user request.",
+                  },
+                ]),
             ],
             { enableReasoning: true },
           );

@@ -90,6 +90,10 @@ function normalizeEmbeddingDimensions(
   ];
 }
 
+function sanitizeKeywordForIlike(keyword: string) {
+  return keyword.replace(/[^\p{L}\p{N}\s-]/gu, "").trim();
+}
+
 export async function searchCopticDocuments(
   query: string,
   matchCount: number = 5,
@@ -127,14 +131,18 @@ export async function searchVocabularyByKeywords(
     return [];
   }
 
+  const sanitizedKeywords = keywords
+    .map((keyword) => sanitizeKeywordForIlike(keyword))
+    .filter(Boolean);
+  if (sanitizedKeywords.length === 0) {
+    return [];
+  }
+
   const supabase = createServiceRoleClient();
 
-  // Create an ILIKE query for each keyword
-  const orFilters = keywords
-    .map((kw) => {
-      const cleanKw = kw.replace(/[^a-zA-ZäöüßÄÖÜ0-9]/g, "");
-      return `content.ilike.%${cleanKw}%`;
-    })
+  // Create an ILIKE query for each keyword.
+  const orFilters = sanitizedKeywords
+    .map((keyword) => `content.ilike.%${keyword}%`)
     .join(",");
 
   const { data, error } = await supabase
@@ -153,4 +161,50 @@ export async function searchVocabularyByKeywords(
   }
 
   return (data ?? []) as CopticDocumentMatch[];
+}
+
+/**
+ * Ingests a set of documents into the knowledge base, generating embeddings for them.
+ */
+export async function ingestCopticDocuments(
+  documents: { content: string; metadata: Record<string, unknown> }[],
+  provider: "hf" | "gemini" | "openrouter" = "hf",
+) {
+  if (documents.length === 0) {
+    return;
+  }
+
+  const values = documents.map((doc) => doc.content);
+  let rawEmbeddings: number[][] = [];
+
+  if (provider === "gemini") {
+    const { embeddings } = await embedMany({
+      model: getGeminiEmbeddingModel(),
+      values,
+      providerOptions: {
+        google: {
+          outputDimensionality: GEMINI_EMBEDDING_OUTPUT_DIMENSION,
+          taskType: "RETRIEVAL_DOCUMENT",
+        },
+      },
+    });
+    rawEmbeddings = embeddings;
+  } else if (provider === "openrouter") {
+    rawEmbeddings = await generateOpenRouterEmbeddings(values);
+  } else {
+    rawEmbeddings = await generateHFEmbeddings(values);
+  }
+
+  const supabase = createServiceRoleClient();
+  const records = documents.map((doc, i) => ({
+    content: doc.content,
+    metadata: doc.metadata,
+    embedding: `[${normalizeEmbeddingDimensions(rawEmbeddings[i], 768).join(",")}]`,
+  }));
+
+  const { error } = await supabase.from("coptic_documents").insert(records);
+
+  if (error) {
+    throw new Error(`Failed to ingest documents: ${error.message}`);
+  }
 }

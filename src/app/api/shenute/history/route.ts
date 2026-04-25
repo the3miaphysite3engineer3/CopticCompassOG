@@ -1,0 +1,252 @@
+import { NextResponse } from "next/server";
+
+import { getAuthenticatedUser } from "@/lib/supabase/authQueries";
+import { hasSupabaseRuntimeEnv } from "@/lib/supabase/config";
+import { isUuid } from "@/lib/validation";
+import { createClient } from "@/lib/supabase/server";
+
+type SavedChatMessage = {
+  id: string;
+  role: "user" | "assistant" | "system";
+  content: string;
+  parts?: Array<{ text: string; type: "text" }>;
+};
+
+type HistoryRequestPayload = {
+  sessionId?: unknown;
+  messages?: unknown;
+};
+
+function toOptionalUuidString(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+  return isUuid(normalized) ? normalized : undefined;
+}
+
+function toOptionalString(value: unknown): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+  return normalized.length > 0 ? normalized : undefined;
+}
+
+function parseMessages(value: unknown): SavedChatMessage[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .filter((item): item is Record<string, unknown> =>
+      typeof item === "object" && item !== null,
+    )
+    .map((item) => ({
+      id: toOptionalString(item.id) ?? "",
+      role:
+        item.role === "assistant" || item.role === "user" ||
+        item.role === "system"
+          ? item.role
+          : "user",
+      content: toOptionalString(item.content) ?? "",
+      parts: Array.isArray(item.parts)
+        ? item.parts
+            .filter(
+              (part): part is { text: string; type: "text" } =>
+                typeof part === "object" &&
+                part !== null &&
+                part.type === "text" &&
+                typeof part.text === "string",
+            )
+            .map((part) => ({ text: part.text, type: "text" }))
+        : undefined,
+    }))
+    .filter((message) => message.id && message.content);
+}
+
+export async function GET(request: Request) {
+  try {
+    if (!hasSupabaseRuntimeEnv()) {
+      return NextResponse.json(
+        { success: false, error: "Shenute history is unavailable right now." },
+        { status: 503 },
+      );
+    }
+
+    const url = new URL(request.url);
+    const requestedSessionId = toOptionalUuidString(
+      url.searchParams.get("sessionId"),
+    );
+
+    const supabase = await createClient();
+    const user = await getAuthenticatedUser(supabase);
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "Sign in required." },
+        { status: 401 },
+      );
+    }
+
+    const { data: sessions, error: sessionsError } = await supabase
+      .from("chat_sessions")
+      .select("id, title, updated_at")
+      .eq("user_id", user.id)
+      .order("updated_at", { ascending: false });
+
+    if (sessionsError) {
+      console.error("Failed to fetch Shenute history sessions:", sessionsError);
+      return NextResponse.json(
+        { success: false, error: "Could not load history." },
+        { status: 500 },
+      );
+    }
+
+    const sessionId = requestedSessionId &&
+      sessions?.some((session) => session.id === requestedSessionId)
+      ? requestedSessionId
+      : sessions && sessions.length > 0
+      ? sessions[0].id
+      : null;
+
+    if (!sessionId) {
+      return NextResponse.json({
+        success: true,
+        sessionId: null,
+        sessions: sessions ?? [],
+        messages: [],
+      });
+    }
+
+    const { data: messages, error: messagesError } = await supabase
+      .from("chat_messages")
+      .select("id, role, content, metadata")
+      .eq("session_id", sessionId)
+      .order("created_at", { ascending: true });
+
+    if (messagesError) {
+      console.error("Failed to fetch Shenute history messages:", messagesError);
+      return NextResponse.json(
+        { success: false, error: "Could not load history." },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      sessionId,
+      sessions: sessions ?? [],
+      messages: messages ?? [],
+    });
+  } catch (error) {
+    console.error("Shenute history GET failed:", error);
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : String(error) },
+      { status: 500 },
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    if (!hasSupabaseRuntimeEnv()) {
+      return NextResponse.json(
+        { success: false, error: "Shenute history is unavailable right now." },
+        { status: 503 },
+      );
+    }
+
+    const supabase = await createClient();
+    const user = await getAuthenticatedUser(supabase);
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "Sign in required." },
+        { status: 401 },
+      );
+    }
+
+    const body = (await request.json()) as HistoryRequestPayload;
+    const sessionId = toOptionalUuidString(body.sessionId) ?? crypto.randomUUID();
+    const messages = parseMessages(body.messages);
+
+    if (messages.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "No valid messages to save." },
+        { status: 400 },
+      );
+    }
+
+    const now = new Date().toISOString();
+    const { error: sessionError } = await supabase
+      .from("chat_sessions")
+      .upsert(
+        [
+          {
+            id: sessionId,
+            user_id: user.id,
+            title: "Shenute AI conversation",
+            metadata: { source: "shenute" },
+            updated_at: now,
+          },
+        ],
+        { onConflict: "id" },
+      );
+
+    if (sessionError) {
+      console.error("Failed to create or update Shenute session:", sessionError);
+      return NextResponse.json(
+        { success: false, error: "Could not save history." },
+        { status: 500 },
+      );
+    }
+
+    const { error: deleteError } = await supabase
+      .from("chat_messages")
+      .delete()
+      .eq("session_id", sessionId);
+
+    if (deleteError) {
+      console.error("Failed to clear existing Shenute history messages:", deleteError);
+      return NextResponse.json(
+        { success: false, error: "Could not save history." },
+        { status: 500 },
+      );
+    }
+
+    const rows = messages.map((message) => ({
+      id: crypto.randomUUID(),
+      session_id: sessionId,
+      role: message.role,
+      content: message.content,
+      metadata: {
+        client_message_id: message.id,
+        parts: message.parts ?? null,
+      },
+      created_at: now,
+    }));
+
+    const { error: messagesError } = await supabase
+      .from("chat_messages")
+      .insert(rows);
+
+    if (messagesError) {
+      console.error("Failed to upsert Shenute messages:", messagesError);
+      return NextResponse.json(
+        { success: false, error: "Could not save history." },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ success: true, sessionId });
+  } catch (error) {
+    console.error("Shenute history POST failed:", error);
+    return NextResponse.json(
+      { success: false, error: error instanceof Error ? error.message : String(error) },
+      { status: 500 },
+    );
+  }
+}

@@ -184,6 +184,76 @@ export type Database = {
           },
         ];
       };
+      chat_sessions: {
+        Row: {
+          created_at: string;
+          id: string;
+          metadata: Json;
+          title: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          title?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          title?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            columns: ["user_id"];
+            foreignKeyName: "chat_sessions_user_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+        ];
+      };
+      chat_messages: {
+        Row: {
+          content: string;
+          created_at: string;
+          id: string;
+          metadata: Json;
+          role: string;
+          session_id: string;
+        };
+        Insert: {
+          content: string;
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          role: string;
+          session_id: string;
+        };
+        Update: {
+          content?: string;
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          role?: string;
+          session_id?: string;
+        };
+        Relationships: [
+          {
+            columns: ["session_id"];
+            foreignKeyName: "chat_messages_session_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "chat_sessions";
+          },
+        ];
+      };
       coptic_documents: {
         Row: {
           content: string;

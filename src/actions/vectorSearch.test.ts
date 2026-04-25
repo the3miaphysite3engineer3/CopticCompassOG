@@ -2,8 +2,9 @@ import { describe, expect, it, vi } from "vitest";
 
 type VectorSearchModuleContext = {
   createServiceRoleClientMock: ReturnType<typeof vi.fn>;
-  rpcMock: ReturnType<typeof vi.fn>;
+  fromMock: ReturnType<typeof vi.fn>;
   searchCopticDocuments: typeof import("./vectorSearch").searchCopticDocuments;
+  searchVocabularyByKeywords: typeof import("./vectorSearch").searchVocabularyByKeywords;
 };
 
 async function loadVectorSearchModule(): Promise<VectorSearchModuleContext> {
@@ -26,7 +27,27 @@ async function loadVectorSearchModule(): Promise<VectorSearchModuleContext> {
     });
   });
 
+  const vocabularyLimitMock = vi.fn().mockResolvedValue({
+    data: [
+      { content: "Vocabulary chunk", metadata: { sourceName: "keyword" } },
+    ],
+    error: null,
+  });
+  const vocabularyInMock = vi.fn().mockReturnValue({
+    limit: vocabularyLimitMock,
+  });
+  const vocabularyOrMock = vi.fn().mockReturnValue({
+    in: vocabularyInMock,
+  });
+  const vocabularySelectMock = vi.fn().mockReturnValue({
+    or: vocabularyOrMock,
+  });
+  const fromMock = vi.fn().mockReturnValue({
+    select: vocabularySelectMock,
+  });
+
   const createServiceRoleClientMock = vi.fn().mockReturnValue({
+    from: fromMock,
     rest: {},
     rpc: rpcMock,
   });
@@ -48,14 +69,15 @@ async function loadVectorSearchModule(): Promise<VectorSearchModuleContext> {
 
   return {
     createServiceRoleClientMock,
-    rpcMock,
+    fromMock,
     searchCopticDocuments: vectorSearchModule.searchCopticDocuments,
+    searchVocabularyByKeywords: vectorSearchModule.searchVocabularyByKeywords,
   };
 }
 
 describe("searchCopticDocuments", () => {
   it("calls the RPC with the bound Supabase client context", async () => {
-    const { createServiceRoleClientMock, rpcMock, searchCopticDocuments } =
+    const { createServiceRoleClientMock, searchCopticDocuments } =
       await loadVectorSearchModule();
 
     await expect(searchCopticDocuments("father")).resolves.toEqual([
@@ -66,7 +88,10 @@ describe("searchCopticDocuments", () => {
     ]);
 
     expect(createServiceRoleClientMock).toHaveBeenCalledTimes(1);
-    expect(rpcMock).toHaveBeenCalledWith(
+    const client = createServiceRoleClientMock.mock.results[0]?.value as {
+      rpc: ReturnType<typeof vi.fn>;
+    };
+    expect(client.rpc).toHaveBeenCalledWith(
       "match_coptic_documents",
       expect.objectContaining({
         filter_metadata: {},
@@ -74,5 +99,46 @@ describe("searchCopticDocuments", () => {
         query_text: "father",
       }),
     );
+  });
+});
+
+describe("searchVocabularyByKeywords", () => {
+  it("keeps Coptic script while stripping punctuation from keyword lookups", async () => {
+    const { fromMock, searchVocabularyByKeywords } =
+      await loadVectorSearchModule();
+
+    await expect(
+      searchVocabularyByKeywords([
+        "Jesus Christ!!!",
+        "\u2c93\u2c8f\u2ca5??",
+        "%%%ignored%%%",
+      ]),
+    ).resolves.toEqual([
+      {
+        content: "Vocabulary chunk",
+        metadata: { sourceName: "keyword" },
+      },
+    ]);
+
+    const vocabularyQuery = fromMock.mock.results[0]?.value as {
+      select: ReturnType<typeof vi.fn>;
+    };
+    const selectResult = vocabularyQuery.select.mock.results[0]?.value as {
+      or: ReturnType<typeof vi.fn>;
+    };
+
+    expect(selectResult.or).toHaveBeenCalledWith(
+      "content.ilike.%Jesus Christ%,content.ilike.%\u2c93\u2c8f\u2ca5%,content.ilike.%ignored%",
+    );
+  });
+
+  it("returns early when every keyword sanitizes to empty", async () => {
+    const { fromMock, searchVocabularyByKeywords } =
+      await loadVectorSearchModule();
+
+    await expect(searchVocabularyByKeywords(["!!!", "%%%"])).resolves.toEqual(
+      [],
+    );
+    expect(fromMock).not.toHaveBeenCalled();
   });
 });

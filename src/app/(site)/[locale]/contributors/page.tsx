@@ -92,6 +92,28 @@ const contributorsCopy = {
         ],
       },
     ] satisfies readonly ContributorCard[],
+    researchCredits: {
+      title: "Research & NMT Credits",
+      description:
+        "Our Neural Machine Translation (NMT) for Coptic is made possible by the pioneering research and tools from the CopticTranslator project.",
+      items: [
+        {
+          label: "CopticTranslator.com",
+          href: "https://www.coptictranslator.com/",
+          description: "Primary platform for Coptic-English translation services.",
+        },
+        {
+          label: "NMT Paper (PDF)",
+          href: "https://www.coptictranslator.com/paper.pdf",
+          description: "Technical details of the underlying seq2seq architecture.",
+        },
+        {
+          label: "arXiv:2404.13813",
+          href: "https://arxiv.org/abs/2404.13813",
+          description: "Peer-reviewed research on Coptic NMT datasets and models.",
+        },
+      ],
+    },
   },
   nl: {
     seoTitle: "Bijdragers",
@@ -154,6 +176,29 @@ const contributorsCopy = {
         ],
       },
     ] satisfies readonly ContributorCard[],
+    researchCredits: {
+      title: "Onderzoek & NMT Credits",
+      description:
+        "Onze Neural Machine Translation (NMT) voor het Koptisch is mogelijk gemaakt door de baanbrekende onderzoeken en tools van het CopticTranslator-project.",
+      items: [
+        {
+          label: "CopticTranslator.com",
+          href: "https://www.coptictranslator.com/",
+          description: "Primair platform voor Koptisch-Engelse vertaaldiensten.",
+        },
+        {
+          label: "NMT Paper (PDF)",
+          href: "https://www.coptictranslator.com/paper.pdf",
+          description: "Technische details van de onderliggende seq2seq-architectuur.",
+        },
+        {
+          label: "arXiv:2404.13813",
+          href: "https://arxiv.org/abs/2404.13813",
+          description:
+            "Peer-reviewed onderzoek naar Koptische NMT-datasets en -modellen.",
+        },
+      ],
+    },
   },
 } as const;
 
@@ -292,6 +337,31 @@ export default async function ContributorsPage({
                 ))}
               </ul>
             </article>
+          ))}
+        </div>
+      <SurfacePanel rounded="3xl" variant="elevated" className="p-6 md:p-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          {copy.researchCredits.title}
+        </p>
+        <p className="mt-3 text-sm leading-7 text-stone-600 dark:text-stone-300 max-w-2xl">
+          {copy.researchCredits.description}
+        </p>
+
+        <div className="mt-6 space-y-4">
+          {copy.researchCredits.items.map((item) => (
+            <div key={item.href} className="group flex flex-col space-y-1">
+              <a
+                href={item.href}
+                target="_blank"
+                rel="noreferrer"
+                className="text-sm font-semibold text-sky-700 hover:text-sky-900 dark:text-sky-400 dark:hover:text-sky-200 transition-colors"
+              >
+                {item.label} →
+              </a>
+              <p className="text-xs text-stone-500 dark:text-stone-400 italic">
+                {item.description}
+              </p>
+            </div>
           ))}
         </div>
       </SurfacePanel>
