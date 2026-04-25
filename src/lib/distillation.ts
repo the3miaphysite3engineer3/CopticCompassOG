@@ -1,4 +1,5 @@
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
+
 import { type NMTTranslationSuggestion } from "./copticTranslator";
 
 export type DistillTaskType = "qa" | "rewrite" | "retrieval" | "contrastive" | "translation";

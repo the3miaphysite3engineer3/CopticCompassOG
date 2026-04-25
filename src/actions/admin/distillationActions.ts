@@ -1,14 +1,15 @@
 "use server";
 
 import { generateText } from "ai";
-import { getGeminiModel } from "@/lib/gemini";
-import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
+
+import { ingestCopticDocuments } from "@/actions/vectorSearch";
+import { requestNMTTranslation } from "@/lib/copticTranslator";
 import {
   recordDistillationExample,
   formatNMTForDistillation
 } from "@/lib/distillation";
-import { requestNMTTranslation } from "@/lib/copticTranslator";
-import { ingestCopticDocuments } from "@/actions/vectorSearch";
+import { getGeminiModel } from "@/lib/gemini";
+import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
 
 /**
  * Distills the NMT model using existing chunks from the knowledge base.

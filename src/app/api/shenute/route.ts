@@ -13,9 +13,12 @@ import {
 } from "@/actions/vectorSearch";
 import {
   requestNMTTranslation,
-  resolveNMTTranslationRequest,
   type NMTTranslationSuggestion,
 } from "@/lib/copticTranslator";
+import {
+  recordDistillationExample,
+  formatNMTForDistillation,
+} from "@/lib/distillation";
 import { getGeminiModel } from "@/lib/gemini";
 import { createHfChatCompletion, type HfChatMessage } from "@/lib/hf";
 import {
@@ -26,10 +29,6 @@ import { getAuthenticatedUser } from "@/lib/supabase/authQueries";
 import { hasSupabaseRuntimeEnv } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { createThothChatCompletion } from "@/lib/thoth";
-import {
-  recordDistillationExample,
-  formatNMTForDistillation,
-} from "@/lib/distillation";
 
 
 export const maxDuration = 30;

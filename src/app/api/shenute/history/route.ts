@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 
 import { getAuthenticatedUser } from "@/lib/supabase/authQueries";
 import { hasSupabaseRuntimeEnv } from "@/lib/supabase/config";
-import { isUuid } from "@/lib/validation";
 import { createClient } from "@/lib/supabase/server";
+import { isUuid } from "@/lib/validation";
 
 type SavedChatMessage = {
   id: string;
@@ -105,12 +105,12 @@ export async function GET(request: Request) {
       );
     }
 
-    const sessionId = requestedSessionId &&
-      sessions?.some((session) => session.id === requestedSessionId)
-      ? requestedSessionId
-      : sessions && sessions.length > 0
-      ? sessions[0].id
-      : null;
+    let sessionId: string | null = null;
+    if (requestedSessionId && sessions?.some((session) => session.id === requestedSessionId)) {
+      sessionId = requestedSessionId;
+    } else if (sessions && sessions.length > 0) {
+      sessionId = sessions[0].id;
+    }
 
     if (!sessionId) {
       return NextResponse.json({

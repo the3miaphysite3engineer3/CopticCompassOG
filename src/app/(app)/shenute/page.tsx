@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import {
   BrainCircuit,
   ChevronDown,
@@ -537,7 +537,7 @@ export default function ShenuteAI() {
           }
 
           if (Array.isArray(payload.messages)) {
-            setMessages(payload.messages as unknown as any);
+            setMessages(payload.messages as UIMessage[]);
           }
         }
       } catch {
@@ -626,7 +626,7 @@ export default function ShenuteAI() {
       }
 
       setSessions(Array.isArray(payload.sessions) ? payload.sessions : sessions);
-      setMessages(Array.isArray(payload.messages) ? (payload.messages as unknown as any) : []);
+      setMessages(Array.isArray(payload.messages) ? (payload.messages as UIMessage[]) : []);
       setActiveSessionId(payload.sessionId);
       shenuteSessionIdRef.current = payload.sessionId;
 

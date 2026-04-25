@@ -339,6 +339,7 @@ export default async function ContributorsPage({
             </article>
           ))}
         </div>
+      </SurfacePanel>
       <SurfacePanel rounded="3xl" variant="elevated" className="p-6 md:p-8">
         <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
           {copy.researchCredits.title}
