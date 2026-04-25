@@ -6,6 +6,7 @@ import { getGeminiEmbeddingModel } from "@/lib/gemini";
 import { generateHFEmbeddings } from "@/lib/hf";
 import { generateOpenRouterEmbeddings } from "@/lib/openrouter";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
+import type { Json } from "@/types/supabase";
 
 const GEMINI_EMBEDDING_OUTPUT_DIMENSION = Number(
   process.env.GEMINI_EMBEDDING_OUTPUT_DIMENSION ?? "3072",
@@ -29,6 +30,7 @@ type MatchDocumentsRpcResult = {
   error: { message: string } | null;
 };
 
+// Added : Promise<number[]>
 async function generateQueryEmbedding(
   provider: "hf" | "gemini" | "openrouter",
   query: string,
@@ -72,10 +74,11 @@ async function generateQueryEmbedding(
   return hfEmbedding;
 }
 
+// Added : number[]
 function normalizeEmbeddingDimensions(
   embedding: number[],
   targetDimensions = 768,
-) {
+): number[] {
   if (embedding.length === targetDimensions) {
     return embedding;
   }
@@ -90,7 +93,8 @@ function normalizeEmbeddingDimensions(
   ];
 }
 
-function sanitizeKeywordForIlike(keyword: string) {
+// Added : string
+function sanitizeKeywordForIlike(keyword: string): string {
   return keyword.replace(/[^\p{L}\p{N}\s-]/gu, "").trim();
 }
 
@@ -140,7 +144,6 @@ export async function searchVocabularyByKeywords(
 
   const supabase = createServiceRoleClient();
 
-  // Create an ILIKE query for each keyword.
   const orFilters = sanitizedKeywords
     .map((keyword) => `content.ilike.%${keyword}%`)
     .join(",");
@@ -163,13 +166,10 @@ export async function searchVocabularyByKeywords(
   return (data ?? []) as CopticDocumentMatch[];
 }
 
-/**
- * Ingests a set of documents into the knowledge base, generating embeddings for them.
- */
 export async function ingestCopticDocuments(
-  documents: { content: string; metadata: Record<string, unknown> }[],
+  documents: { content: string; metadata: Json }[],
   provider: "hf" | "gemini" | "openrouter" = "hf",
-) {
+): Promise<void> {
   if (documents.length === 0) {
     return;
   }
@@ -207,4 +207,5 @@ export async function ingestCopticDocuments(
   if (error) {
     throw new Error(`Failed to ingest documents: ${error.message}`);
   }
+  return;
 }
