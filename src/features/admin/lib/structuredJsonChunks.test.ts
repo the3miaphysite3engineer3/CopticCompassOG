@@ -9,24 +9,29 @@ describe("buildStructuredJsonChunks", () => {
         {
           dialects: {
             B: {
-              absolute: "ⲣⲱⲙⲓ",
+              absolute: "rome",
             },
           },
           english_meanings: ["man", "person"],
-          headword: "Ⲣⲱⲙⲓ",
+          headword: "rome",
           pos: "noun",
         },
         {
           dialects: {},
           english_meanings: ["woman"],
-          headword: "Ⲥ̀ϩⲓⲙⲓ",
+          headword: "shimi",
           pos: "noun",
         },
       ]),
     );
 
     expect(chunks).toHaveLength(2);
-    expect(chunks?.[0]?.metadata.word).toBe("Ⲣⲱⲙⲓ");
+    expect(chunks?.[0]?.metadata.word).toBe("rome");
+    expect(chunks?.[0]?.metadata.englishTranslation).toBe("man, person");
+    expect(chunks?.[0]?.metadata.englishTranslations).toEqual([
+      "man",
+      "person",
+    ]);
   });
 
   it("compacts dictionary entries for bulk ingestion", () => {
@@ -43,6 +48,7 @@ describe("buildStructuredJsonChunks", () => {
 
     expect(chunks).toHaveLength(2);
     expect(chunks?.[0]?.metadata.entryCount).toBe(12);
+    expect(chunks?.[0]?.metadata.englishTranslations).toContain("meaning-1");
     expect(chunks?.[1]?.metadata.entryCount).toBe(1);
   });
 
@@ -89,5 +95,26 @@ describe("buildStructuredJsonChunks", () => {
     expect(chunks?.[1]?.content).toContain(
       "A bare noun is a base form without a determiner.",
     );
+  });
+
+  it("stores english translation metadata for grammar examples", () => {
+    const chunks = buildStructuredJsonChunks(
+      JSON.stringify({
+        data: [
+          {
+            coptic: "sample coptic",
+            id: "grammar.example.test",
+            translation: {
+              en: "He is a father.",
+              nl: "Hij is een vader.",
+            },
+          },
+        ],
+      }),
+    );
+
+    expect(chunks).toHaveLength(1);
+    expect(chunks?.[0]?.metadata.englishTranslation).toBe("He is a father.");
+    expect(chunks?.[0]?.metadata.translation).toBe("He is a father.");
   });
 });

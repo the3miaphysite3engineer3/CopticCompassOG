@@ -101,7 +101,7 @@ export async function searchCopticDocuments(
   const queryEmbedding = normalizeEmbeddingDimensions(rawEmbedding, 768);
 
   const supabase = createServiceRoleClient();
-  const matchDocuments = supabase.rpc as unknown as (
+  const matchDocuments = supabase.rpc.bind(supabase) as unknown as (
     fn: "match_coptic_documents",
     args: MatchDocumentsRpcArgs,
   ) => Promise<MatchDocumentsRpcResult>;

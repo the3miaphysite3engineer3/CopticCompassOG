@@ -181,6 +181,8 @@ function formatDictionaryEntry(
     metadata: {
       type: "vocabulary",
       word: entry.headword,
+      englishTranslation: meanings.join(", "),
+      englishTranslations: meanings,
       translation: meanings.join(", "),
       partOfSpeech: entry.pos,
     },
@@ -209,6 +211,21 @@ function compactDictionaryChunks(chunks: StructuredJsonChunk[]) {
           : [],
       ),
     );
+    const englishTranslations = uniqueStrings(
+      currentBatch.flatMap((chunk) => {
+        if (Array.isArray(chunk.metadata.englishTranslations)) {
+          return chunk.metadata.englishTranslations.filter(
+            (value): value is string => typeof value === "string",
+          );
+        }
+
+        if (typeof chunk.metadata.englishTranslation === "string") {
+          return [chunk.metadata.englishTranslation];
+        }
+
+        return [];
+      }),
+    );
 
     compacted.push({
       content: [
@@ -219,6 +236,8 @@ function compactDictionaryChunks(chunks: StructuredJsonChunk[]) {
         batchMode: "compact",
         entryCount: currentBatch.length,
         headwords,
+        englishTranslation: englishTranslations.join(", "),
+        englishTranslations,
         partsOfSpeech,
         type: "vocabulary",
       },
@@ -297,6 +316,13 @@ function buildGenericRecordChunk(
   return {
     content: parts.join(" "),
     metadata: {
+      ...(translation
+        ? {
+            englishTranslation: translation,
+            englishTranslations: [translation],
+            translation,
+          }
+        : {}),
       title: title || null,
       type,
     },

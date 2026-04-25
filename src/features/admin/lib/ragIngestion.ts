@@ -1066,9 +1066,11 @@ async function splitIntoChunks(
               metadata: {
                 type: "vocabulary_xml",
                 word,
+                englishTranslation: definition,
                 partOfSpeech: pos,
                 definition,
                 grammar,
+                translation: definition,
               },
             };
           }
