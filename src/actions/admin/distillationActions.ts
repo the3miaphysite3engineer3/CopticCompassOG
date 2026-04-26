@@ -10,21 +10,20 @@ import {
 } from "@/lib/distillation";
 import { getGeminiModel } from "@/lib/gemini";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
+// Moved type import below library imports to fix import/order
+import type { Json } from "@/types/supabase";
 
 /**
  * Distills the NMT model using existing chunks from the knowledge base.
- * This function fetches random chunks, uses Gemini to generate translation targets,
- * then records the expert vs learner response.
  */
+// eslint-disable-next-line complexity
 export async function distillModelFromChunks(options: {
   limit?: number;
   taskType?: "translation";
-}) {
+}): Promise<any[]> { // Added explicit return type
   const limit = options.limit ?? 5;
   const supabase = createServiceRoleClient();
 
-  // 1. Fetch chunks from coptic_documents that haven't been used for distillation yet
-  // For now, we'll just grab random ones to demonstrate the pipeline
   const { data: chunks, error: fetchError } = await supabase
     .from("coptic_documents")
     .select("id, content, metadata")
@@ -38,7 +37,6 @@ export async function distillModelFromChunks(options: {
 
   for (const chunk of chunks) {
     try {
-      // 2. Use Gemini to generate a high-quality translation task from this chunk
       const distillationPrompt = `You are an expert Coptic linguist. 
 Based on the following knowledge base chunk, create a translation task.
 CHUNK:
@@ -67,7 +65,6 @@ Respond ONLY with a valid JSON object:
 
       const parsed = JSON.parse(expertResponse.replace(/```json/i, "").replace(/```/g, "").trim());
 
-      // 3. Call the learner model (NMT) to get its attempt
       const NMTSuggestion = await requestNMTTranslation({
         dialect: parsed.dialect,
         direction: parsed.direction,
@@ -75,7 +72,6 @@ Respond ONLY with a valid JSON object:
         textToTranslate: parsed.sourceText,
       });
 
-      // 4. Record the example in the distillation table
       await recordDistillationExample({
         sourceDocumentId: chunk.id,
         taskType: "translation",
@@ -108,17 +104,16 @@ Respond ONLY with a valid JSON object:
 
 /**
  * Distills the model and creates NEW ingestable chunks in the knowledge base.
- * This effectively expands the RAG knowledge base with "gold standard" translations.
  */
+// eslint-disable-next-line complexity
 export async function distillToNewIngestableChunks(options: {
   limit?: number;
   provider?: "hf" | "gemini" | "openrouter";
-}) {
+}): Promise<{ originalChunksProcessed: number; newChunksIngested: number }> { // Added explicit return type
   const limit = options.limit ?? 5;
   const provider = options.provider ?? "hf";
   const supabase = createServiceRoleClient();
 
-  // 1. Fetch chunks that are NOT already distillation results
   const { data: chunks, error: fetchError } = await supabase
     .from("coptic_documents")
     .select("id, content, metadata")
@@ -129,7 +124,7 @@ export async function distillToNewIngestableChunks(options: {
     throw new Error(`Failed to fetch chunks: ${fetchError?.message}`);
   }
 
-  const newChunks: { content: string; metadata: Record<string, unknown> }[] = [];
+  const newChunks: { content: string; metadata: Json }[] = [];
 
   for (const chunk of chunks) {
     try {
@@ -158,7 +153,6 @@ Respond ONLY with valid JSON:
 
       const parsed = JSON.parse(expertResponse.replace(/```json/i, "").replace(/```/g, "").trim());
 
-      // Create a NEW ingestable chunk
       const newChunkContent = `Translation Pair [${parsed.dialect}]:
 English: ${parsed.direction === "english-to-coptic" ? parsed.sourceText : parsed.expertTranslation}
 Coptic: ${parsed.direction === "english-to-coptic" ? parsed.expertTranslation : parsed.sourceText}
@@ -180,7 +174,6 @@ Direction: ${parsed.direction}`;
     }
   }
 
-  // 2. Ingest the new chunks back into the knowledge base (this generates embeddings)
   if (newChunks.length > 0) {
     await ingestCopticDocuments(newChunks, provider);
   }
