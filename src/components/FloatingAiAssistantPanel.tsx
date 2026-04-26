@@ -417,40 +417,38 @@ export function FloatingAiAssistantPanel({
               : "mr-8 rounded-2xl rounded-tl-sm border border-stone-200 bg-white px-3 py-2 text-sm text-stone-800 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
           }
         >
-          {Array.isArray(message.parts)
-            ? message.parts.filter(isTextMessagePart).map((part, partIndex) => {
-                if (message.role === "assistant") {
-                  return (
-                    <ReactMarkdown
-                      key={partIndex}
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        a: ({ ...props }) => (
-                          <a
-                            {...props}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-sky-700 underline dark:text-sky-300"
-                          />
-                        ),
-                        code: ({ className, children, ...props }) => (
-                          <code
-                            className={`rounded bg-stone-200/70 px-1 py-0.5 text-[0.95em] dark:bg-stone-800 ${className || ""}`}
-                            {...props}
-                          >
-                            {children}
-                          </code>
-                        ),
-                      }}
-                    >
-                      {part.text}
-                    </ReactMarkdown>
-                  );
-                }
+          {(() => {
+            const text = getMessageText(message);
+            if (!text) {
+              return null;
+            }
 
-                return <p key={partIndex}>{part.text}</p>;
-              })
-            : null}
+            return (
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  a: ({ ...props }) => (
+                    <a
+                      {...props}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sky-700 underline dark:text-sky-300"
+                    />
+                  ),
+                  code: ({ className, children, ...props }) => (
+                    <code
+                      className={`rounded bg-stone-200/70 px-1 py-0.5 text-[0.95em] dark:bg-stone-800 ${className || ""}`}
+                      {...props}
+                    >
+                      {children}
+                    </code>
+                  ),
+                }}
+              >
+                {text}
+              </ReactMarkdown>
+            );
+          })()}
 
           {message.role === "assistant" ? (
             <div className="mt-2 space-y-2 border-t border-stone-200 pt-2 text-[11px] dark:border-stone-700">

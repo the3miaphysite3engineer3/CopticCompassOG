@@ -1357,59 +1357,38 @@ export default function ShenuteAI() {
                         getMessageBubbleClassName(m.role),
                       )}
                     >
-                      {Array.isArray(m.parts) ? (
-                        m.parts
-                          .filter(isTextMessagePart)
-                          .map((part, partIndex: number) => {
-                            if (part.type !== "text") {
-                              return null;
-                            }
+                      {(() => {
+                        const text = getMessageText(m);
+                        if (!text) {
+                          return null;
+                        }
 
-                            if (m.role === "assistant") {
-                              return (
-                                <ReactMarkdown
-                                  key={partIndex}
-                                  remarkPlugins={[remarkGfm]}
-                                  components={{
-                                    a: ({ ...props }) => (
-                                      <a
-                                        {...props}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="underline"
-                                      />
-                                    ),
-                                    code: ({
-                                      className,
-                                      children,
-                                      ...props
-                                    }) => (
-                                      <code
-                                        className={`rounded bg-stone-200/70 px-1 py-0.5 text-[0.95em] dark:bg-stone-800 ${className || ""}`}
-                                        {...props}
-                                      >
-                                        {children}
-                                      </code>
-                                    ),
-                                  }}
+                        return (
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              a: ({ ...props }) => (
+                                <a
+                                  {...props}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="underline"
+                                />
+                              ),
+                              code: ({ className, children, ...props }) => (
+                                <code
+                                  className={`rounded bg-stone-200/70 px-1 py-0.5 text-[0.95em] dark:bg-stone-800 ${className || ""}`}
+                                  {...props}
                                 >
-                                  {part.text}
-                                </ReactMarkdown>
-                              );
-                            }
-
-                            return <p key={partIndex}>{part.text}</p>;
-                          })
-                      ) : (
-                        <p>
-                          {(() => {
-                            const candidate = m as { content?: unknown };
-                            return typeof candidate.content === "string"
-                              ? candidate.content
-                              : "";
-                          })()}
-                        </p>
-                      )}
+                                  {children}
+                                </code>
+                              ),
+                            }}
+                          >
+                            {text}
+                          </ReactMarkdown>
+                        );
+                      })()}
                       {m.role === "assistant" ? (
                         <div className="mt-3 space-y-2 border-t border-stone-200 pt-3 text-xs dark:border-stone-700">
                           <div className="flex flex-wrap items-center gap-2">
