@@ -30,7 +30,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createThothChatCompletion } from "@/lib/thoth";
 
 
-export const maxDuration = 30;
+export const maxDuration = 300;
 export const runtime = "nodejs";
 
 type InferenceProvider = "gemini" | "hf" | "openrouter" | "thoth";
