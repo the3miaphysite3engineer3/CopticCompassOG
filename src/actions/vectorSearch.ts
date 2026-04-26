@@ -6,6 +6,7 @@ import { getGeminiEmbeddingModel } from "@/lib/gemini";
 import { generateHFEmbeddings } from "@/lib/hf";
 import { generateOpenRouterEmbeddings } from "@/lib/openrouter";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
+import type { Json } from "@/types/supabase";
 
 const GEMINI_EMBEDDING_OUTPUT_DIMENSION = Number(
   process.env.GEMINI_EMBEDDING_OUTPUT_DIMENSION ?? "3072",
@@ -29,6 +30,7 @@ type MatchDocumentsRpcResult = {
   error: { message: string } | null;
 };
 
+// Added : Promise<number[]>
 async function generateQueryEmbedding(
   provider: "hf" | "gemini" | "openrouter",
   query: string,
@@ -72,10 +74,11 @@ async function generateQueryEmbedding(
   return hfEmbedding;
 }
 
+// Added : number[]
 function normalizeEmbeddingDimensions(
   embedding: number[],
   targetDimensions = 768,
-) {
+): number[] {
   if (embedding.length === targetDimensions) {
     return embedding;
   }
@@ -90,6 +93,11 @@ function normalizeEmbeddingDimensions(
   ];
 }
 
+// Added : string
+function sanitizeKeywordForIlike(keyword: string): string {
+  return keyword.replace(/[^\p{L}\p{N}\s-]/gu, "").trim();
+}
+
 export async function searchCopticDocuments(
   query: string,
   matchCount: number = 5,
@@ -101,7 +109,7 @@ export async function searchCopticDocuments(
   const queryEmbedding = normalizeEmbeddingDimensions(rawEmbedding, 768);
 
   const supabase = createServiceRoleClient();
-  const matchDocuments = supabase.rpc as unknown as (
+  const matchDocuments = supabase.rpc.bind(supabase) as unknown as (
     fn: "match_coptic_documents",
     args: MatchDocumentsRpcArgs,
   ) => Promise<MatchDocumentsRpcResult>;
@@ -127,14 +135,17 @@ export async function searchVocabularyByKeywords(
     return [];
   }
 
+  const sanitizedKeywords = keywords
+    .map((keyword) => sanitizeKeywordForIlike(keyword))
+    .filter(Boolean);
+  if (sanitizedKeywords.length === 0) {
+    return [];
+  }
+
   const supabase = createServiceRoleClient();
 
-  // Create an ILIKE query for each keyword
-  const orFilters = keywords
-    .map((kw) => {
-      const cleanKw = kw.replace(/[^a-zA-ZäöüßÄÖÜ0-9]/g, "");
-      return `content.ilike.%${cleanKw}%`;
-    })
+  const orFilters = sanitizedKeywords
+    .map((keyword) => `content.ilike.%${keyword}%`)
     .join(",");
 
   const { data, error } = await supabase
@@ -153,4 +164,48 @@ export async function searchVocabularyByKeywords(
   }
 
   return (data ?? []) as CopticDocumentMatch[];
+}
+
+export async function ingestCopticDocuments(
+  documents: { content: string; metadata: Json }[],
+  provider: "hf" | "gemini" | "openrouter" = "hf",
+): Promise<void> {
+  if (documents.length === 0) {
+    return;
+  }
+
+  const values = documents.map((doc) => doc.content);
+  let rawEmbeddings: number[][] = [];
+
+  if (provider === "gemini") {
+    const { embeddings } = await embedMany({
+      model: getGeminiEmbeddingModel(),
+      values,
+      providerOptions: {
+        google: {
+          outputDimensionality: GEMINI_EMBEDDING_OUTPUT_DIMENSION,
+          taskType: "RETRIEVAL_DOCUMENT",
+        },
+      },
+    });
+    rawEmbeddings = embeddings;
+  } else if (provider === "openrouter") {
+    rawEmbeddings = await generateOpenRouterEmbeddings(values);
+  } else {
+    rawEmbeddings = await generateHFEmbeddings(values);
+  }
+
+  const supabase = createServiceRoleClient();
+  const records = documents.map((doc, i) => ({
+    content: doc.content,
+    metadata: doc.metadata,
+    embedding: `[${normalizeEmbeddingDimensions(rawEmbeddings[i], 768).join(",")}]`,
+  }));
+
+  const { error } = await supabase.from("coptic_documents").insert(records);
+
+  if (error) {
+    throw new Error(`Failed to ingest documents: ${error.message}`);
+  }
+  return;
 }

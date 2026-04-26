@@ -1,3 +1,4 @@
+import crypto from "node:crypto";
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 
@@ -39,6 +40,7 @@ type JsonSourceIngestionRequest = {
 };
 
 const DATA_ROOT = path.join(process.cwd(), "public", "data");
+console.warn(`[RAG:JSON] DATA_ROOT is: ${DATA_ROOT}`);
 const DICTIONARY_JSON_PATH = path.join(DATA_ROOT, "dictionary.json");
 const GRAMMAR_JSON_CANDIDATE_DIRECTORIES = [
   path.join(DATA_ROOT, "grammar", "v1"),
@@ -74,24 +76,39 @@ async function collectJsonKnowledgeSourcePaths() {
 
   try {
     await readFile(DICTIONARY_JSON_PATH, "utf-8");
+    console.warn(`[RAG:JSON] Found dictionary file: ${DICTIONARY_JSON_PATH}`);
     sources.add(DICTIONARY_JSON_PATH);
-  } catch {
-    // Dictionary source is optional for bulk runs.
+  } catch (_e) {
+    console.warn(
+      `[RAG:JSON] Dictionary file NOT found: ${DICTIONARY_JSON_PATH}`,
+    );
   }
 
   for (const grammarDirectoryPath of GRAMMAR_JSON_CANDIDATE_DIRECTORIES) {
     try {
+      console.warn(
+        `[RAG:JSON] Checking grammar directory: ${grammarDirectoryPath}`,
+      );
       const grammarFiles =
         await collectJsonFilesRecursively(grammarDirectoryPath);
+      console.warn(
+        `[RAG:JSON] Found ${grammarFiles.length} files in ${grammarDirectoryPath}`,
+      );
       for (const grammarFile of grammarFiles) {
         sources.add(grammarFile);
       }
-    } catch {
-      // Candidate folder may not exist in all deployments.
+    } catch (_e) {
+      console.warn(
+        `[RAG:JSON] Error checking grammar directory ${grammarDirectoryPath}: ${_e}`,
+      );
     }
   }
 
-  return Array.from(sources).sort((left, right) => left.localeCompare(right));
+  const result = Array.from(sources).sort((left, right) =>
+    left.localeCompare(right),
+  );
+  console.warn(`[RAG:JSON] Final collected sources count: ${result.length}`);
+  return result;
 }
 
 function buildSourceTitle(sourcePath: string) {
@@ -115,7 +132,12 @@ function toProvider(value: unknown): "gemini" | "hf" | "openrouter" {
 }
 
 export async function POST(request: Request) {
-  let ingestId = crypto.randomUUID();
+  let ingestId = "initial";
+  try {
+    ingestId = crypto.randomUUID?.() || `local-${Date.now()}`;
+  } catch {
+    ingestId = `local-${Date.now()}`;
+  }
 
   try {
     if (!hasSupabaseRuntimeEnv()) {
@@ -165,7 +187,10 @@ export async function POST(request: Request) {
     const embeddingProvider = toProvider(requestBody.embeddingProvider);
 
     const sourcePaths = await collectJsonKnowledgeSourcePaths();
+    console.warn(`[RAG:JSON] Discovered ${sourcePaths.length} sources.`);
+
     if (sourcePaths.length === 0) {
+      console.warn(`[RAG:JSON] No sources found in DATA_ROOT: ${DATA_ROOT}`);
       return NextResponse.json(
         {
           success: false,
@@ -203,6 +228,9 @@ export async function POST(request: Request) {
           enableOcr: false,
           file,
           ingestId: `${ingestId}-${index + 1}`,
+          jsonChunkMode: "compact",
+          skipThothEnrichment: true,
+          skipThothProofcheck: true,
           sourceTitle: buildSourceTitle(sourcePath),
           userId: user.id,
         });

@@ -111,6 +111,9 @@ const floatingShenuteCopy = {
     signInTitle: "Sign in required",
     submitAdminNote: "Submit admin note",
     thinking: "Thinking...",
+    saveHistory: "Save chat history",
+    savedHistory: "Chat history saved.",
+    nmtCredit: "NMT powered by CopticTranslator.com / arXiv:2404.13813",
     writeAdminFeedback: "Write admin feedback before submitting.",
   },
   nl: {
@@ -164,6 +167,9 @@ const floatingShenuteCopy = {
     signInTitle: "Aanmelden vereist",
     submitAdminNote: "Adminnotitie versturen",
     thinking: "Denkt na...",
+    saveHistory: "Chatgeschiedenis opslaan",
+    savedHistory: "Chatgeschiedenis opgeslagen.",
+    nmtCredit: "NMT mogelijk gemaakt door CopticTranslator.com / arXiv:2404.13813",
     writeAdminFeedback: "Schrijf adminfeedback voordat u die verstuurt.",
   },
 } as const satisfies Record<Language, Record<string, string>>;
@@ -210,6 +216,32 @@ function findPreviousUserMessage(
   }
 
   return null;
+}
+
+function formatChatHistory(messages: ChatMessageLike[], pageContext: PageContextPayload, provider: ShenuteProvider) {
+  const lines: string[] = [];
+  lines.push("Shenute AI chat history");
+  lines.push(`Page: ${pageContext.title || pageContext.path || "unknown"}`);
+  lines.push(`URL: ${pageContext.url || "unknown"}`);
+  lines.push(`Provider: ${provider}`);
+  lines.push(`Saved: ${new Date().toISOString()}`);
+  lines.push("");
+
+  for (const message of messages) {
+    let role = "System";
+    if (message.role === "user") {
+      role = "User";
+    } else if (message.role === "assistant") {
+      role = "Assistant";
+    }
+
+    const text = getMessageText(message) || "[no text]";
+    lines.push(`${role}:`);
+    lines.push(text);
+    lines.push("");
+  }
+
+  return lines.join("\n");
 }
 
 function toShenuteProvider(value: string): ShenuteProvider {
@@ -317,6 +349,7 @@ export function FloatingAiAssistantPanel({
     useState<Record<string, string>>({});
   const [feedbackStateByMessage, setFeedbackStateByMessage] =
     useState<FeedbackStateByMessage>({});
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
   const pageContext = useMemo(() => buildPageContext(pathname), [pathname]);
 
@@ -384,40 +417,38 @@ export function FloatingAiAssistantPanel({
               : "mr-8 rounded-2xl rounded-tl-sm border border-stone-200 bg-white px-3 py-2 text-sm text-stone-800 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
           }
         >
-          {Array.isArray(message.parts)
-            ? message.parts.filter(isTextMessagePart).map((part, partIndex) => {
-                if (message.role === "assistant") {
-                  return (
-                    <ReactMarkdown
-                      key={partIndex}
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        a: ({ ...props }) => (
-                          <a
-                            {...props}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="text-sky-700 underline dark:text-sky-300"
-                          />
-                        ),
-                        code: ({ className, children, ...props }) => (
-                          <code
-                            className={`rounded bg-stone-200/70 px-1 py-0.5 text-[0.95em] dark:bg-stone-800 ${className || ""}`}
-                            {...props}
-                          >
-                            {children}
-                          </code>
-                        ),
-                      }}
-                    >
-                      {part.text}
-                    </ReactMarkdown>
-                  );
-                }
+          {(() => {
+            const text = getMessageText(message);
+            if (!text) {
+              return null;
+            }
 
-                return <p key={partIndex}>{part.text}</p>;
-              })
-            : null}
+            return (
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  a: ({ ...props }) => (
+                    <a
+                      {...props}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sky-700 underline dark:text-sky-300"
+                    />
+                  ),
+                  code: ({ className, children, ...props }) => (
+                    <code
+                      className={`rounded bg-stone-200/70 px-1 py-0.5 text-[0.95em] dark:bg-stone-800 ${className || ""}`}
+                      {...props}
+                    >
+                      {children}
+                    </code>
+                  ),
+                }}
+              >
+                {text}
+              </ReactMarkdown>
+            );
+          })()}
 
           {message.role === "assistant" ? (
             <div className="mt-2 space-y-2 border-t border-stone-200 pt-2 text-[11px] dark:border-stone-700">
@@ -534,6 +565,25 @@ export function FloatingAiAssistantPanel({
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
+  }
+
+  function handleSaveChatHistory() {
+    const historyText = formatChatHistory(typedMessages, pageContext, inferenceProvider);
+    const blob = new Blob([historyText], {
+      type: "text/plain;charset=utf-8",
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+
+    anchor.href = url;
+    anchor.download = `shenute-chat-history-${new Date()
+      .toISOString()
+      .replace(/[:.]/g, "-")}.txt`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+
+    setSaveStatus(copy.savedHistory);
+    window.setTimeout(() => setSaveStatus(null), 3000);
   }
 
   function setImageAttachment(file: File, source: "upload" | "camera") {
@@ -904,6 +954,24 @@ export function FloatingAiAssistantPanel({
                 <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
                   {copy.contextAware}
                 </p>
+                <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
+                  {copy.nmtCredit}
+                </p>
+              </div>
+              <div className="flex flex-col items-end gap-2">
+                <button
+                  type="button"
+                  onClick={handleSaveChatHistory}
+                  disabled={typedMessages.length === 0}
+                  className="inline-flex h-9 items-center justify-center rounded-xl border border-stone-200 bg-white/80 px-3 text-[11px] font-semibold text-stone-700 shadow-sm transition-colors hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/30 dark:border-stone-800 dark:bg-stone-900/70 dark:text-stone-200 dark:hover:bg-stone-800"
+                >
+                  {copy.saveHistory}
+                </button>
+                {saveStatus ? (
+                  <p className="text-[11px] text-emerald-700 dark:text-emerald-300">
+                    {saveStatus}
+                  </p>
+                ) : null}
               </div>
               <button
                 type="button"

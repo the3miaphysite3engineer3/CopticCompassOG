@@ -184,6 +184,76 @@ export type Database = {
           },
         ];
       };
+      chat_sessions: {
+        Row: {
+          created_at: string;
+          id: string;
+          metadata: Json;
+          title: string | null;
+          updated_at: string;
+          user_id: string;
+        };
+        Insert: {
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          title?: string | null;
+          updated_at?: string;
+          user_id: string;
+        };
+        Update: {
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          title?: string | null;
+          updated_at?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            columns: ["user_id"];
+            foreignKeyName: "chat_sessions_user_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "profiles";
+          },
+        ];
+      };
+      chat_messages: {
+        Row: {
+          content: string;
+          created_at: string;
+          id: string;
+          metadata: Json;
+          role: string;
+          session_id: string;
+        };
+        Insert: {
+          content: string;
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          role: string;
+          session_id: string;
+        };
+        Update: {
+          content?: string;
+          created_at?: string;
+          id?: string;
+          metadata?: Json;
+          role?: string;
+          session_id?: string;
+        };
+        Relationships: [
+          {
+            columns: ["session_id"];
+            foreignKeyName: "chat_messages_session_id_fkey";
+            isOneToOne: false;
+            referencedColumns: ["id"];
+            referencedRelation: "chat_sessions";
+          },
+        ];
+      };
       coptic_documents: {
         Row: {
           content: string;
@@ -202,6 +272,105 @@ export type Database = {
           embedding?: string | null;
           id?: number;
           metadata?: Json | null;
+        };
+        Relationships: [];
+      };
+      distill_runs: {
+        Row: {
+          id: string;
+          created_by: string | null;
+          status: string;
+          teacher_name: string;
+          learner_name: string;
+          source_filter: Json;
+          input_chunk_count: number;
+          generated_example_count: number;
+          approved_example_count: number;
+          metadata: Json;
+          error: string | null;
+          started_at: string | null;
+          finished_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          created_by?: string | null;
+          status?: string;
+          teacher_name?: string;
+          learner_name?: string;
+          source_filter?: Json;
+          input_chunk_count?: number;
+          generated_example_count?: number;
+          approved_example_count?: number;
+          metadata?: Json;
+          error?: string | null;
+          started_at?: string | null;
+          finished_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          created_by?: string | null;
+          status?: string;
+          teacher_name?: string;
+          learner_name?: string;
+          source_filter?: Json;
+          input_chunk_count?: number;
+          generated_example_count?: number;
+          approved_example_count?: number;
+          metadata?: Json;
+          error?: string | null;
+          started_at?: string | null;
+          finished_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      distill_examples: {
+        Row: {
+          id: number;
+          run_id: string;
+          source_document_id: number | null;
+          source_chunk_hash: string;
+          split: string;
+          task_type: string;
+          prompt: string;
+          teacher_answer: string;
+          student_target: Json;
+          quality_score: number | null;
+          approved: boolean;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: number;
+          run_id: string;
+          source_document_id?: number | null;
+          source_chunk_hash: string;
+          split?: string;
+          task_type: string;
+          prompt: string;
+          teacher_answer: string;
+          student_target?: Json;
+          quality_score?: number | null;
+          approved?: boolean;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          run_id?: string;
+          source_document_id?: number | null;
+          source_chunk_hash?: string;
+          split?: string;
+          task_type?: string;
+          prompt?: string;
+          teacher_answer?: string;
+          student_target?: Json;
+          quality_score?: number | null;
+          approved?: boolean;
+          metadata?: Json;
+          created_at?: string;
         };
         Relationships: [];
       };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport } from "ai";
+import { DefaultChatTransport, type UIMessage } from "ai";
 import {
   BrainCircuit,
   ChevronDown,
@@ -42,6 +42,12 @@ type ChatMessageLike = {
   id: string;
   parts?: unknown;
   role: "assistant" | "system" | "user";
+};
+
+type SavedChatSession = {
+  id: string;
+  title: string;
+  updated_at: string | null;
 };
 
 type ShenuteFeedbackSignal = "admin_feedback" | "dislike" | "like";
@@ -99,6 +105,16 @@ const SHENUTE_COPY = {
     noTextExtracted: "No text extracted from the selected image.",
     ocrFailed: "OCR failed for the selected image.",
     placeholder: "Ask about a Coptic word, grammar rule, or attached image...",
+    saveHistory: "Save chat history",
+    savedHistory: "Chat history downloaded.",
+    autosaveStatus: "Autosaved locally",
+    historySessions: "Saved sessions",
+    historySessionsDescription: "Switch between your saved Shenute conversations.",
+    loadSession: "Load",
+    currentSession: "Current",
+    loadingSession: "Loading session...",
+    sessionCount: "sessions",
+    sessionDateMissing: "No timestamp",
     platformLabel: "Platform:",
     providerGemini: "Learner (Gemini)",
     providerHf: "Learner (HF)",
@@ -175,6 +191,17 @@ const SHENUTE_COPY = {
     ocrFailed: "OCR is mislukt voor de geselecteerde afbeelding.",
     placeholder:
       "Vraag naar een Koptisch woord, een grammaticaregel of een toegevoegde afbeelding...",
+    saveHistory: "Chatgeschiedenis opslaan",
+    savedHistory: "Chatgeschiedenis online opgeslagen.",
+    autosaveStatus: "Automatisch online opgeslagen",
+    historySessions: "Opgeslagen sessies",
+    historySessionsDescription:
+      "Schakel tussen je opgeslagen Shenute-gesprekken.",
+    loadSession: "Laden",
+    currentSession: "Huidig",
+    loadingSession: "Sessieweergave laden...",
+    sessionCount: "sessies",
+    sessionDateMissing: "Geen tijdstempel",
     platformLabel: "Platform:",
     providerGemini: "Leerhulp (Gemini)",
     providerHf: "Leerhulp (HF)",
@@ -231,6 +258,61 @@ function getMessageText(message: ChatMessageLike) {
     .map((part) => part.text)
     .join("\n")
     .trim();
+}
+
+type SavedChatMessage = {
+  id: string;
+  role: ChatMessageLike["role"];
+  content: string;
+  parts?: Array<{ text: string; type: "text" }>;
+};
+
+function serializeChatMessage(message: ChatMessageLike): SavedChatMessage {
+  return {
+    id: message.id,
+    role: message.role,
+    content: getMessageText(message),
+    parts: Array.isArray(message.parts)
+      ? message.parts
+          .filter(isTextMessagePart)
+          .map((part) => ({ text: part.text, type: "text" }))
+      : undefined,
+  };
+}
+
+async function saveChatHistoryOnline(
+  messages: ChatMessageLike[],
+  sessionId: string,
+): Promise<{ success: boolean; sessionId?: string }> {
+  if (typeof window === "undefined") {
+    return { success: false };
+  }
+
+  try {
+    const response = await fetch("/api/shenute/history", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        sessionId,
+        messages: messages.map(serializeChatMessage),
+      }),
+    });
+
+    if (!response.ok) {
+      return { success: false };
+    }
+
+    const data = (await response.json()) as {
+      success: boolean;
+      sessionId?: string;
+    };
+
+    return data;
+  } catch {
+    return { success: false };
+  }
 }
 
 function findPreviousUserMessage(
@@ -404,13 +486,158 @@ export default function ShenuteAI() {
     [],
   );
 
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, setMessages, sendMessage, status, error } = useChat({
     transport,
   });
 
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+  const [autosaveStatus, setAutosaveStatus] = useState<string | null>(null);
+  const [sessionStatus, setSessionStatus] = useState<string | null>(null);
+  const [sessions, setSessions] = useState<SavedChatSession[]>([]);
+  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
+  const [sessionLoadingId, setSessionLoadingId] = useState<string | null>(null);
+  const [hasRestoredHistory, setHasRestoredHistory] = useState(false);
   const isLoading = status !== "ready";
   const isShenuteAccessBlocked = isReady && !isAuthenticated;
   const typedMessages = messages as ChatMessageLike[];
+
+  useEffect(() => {
+    if (hasRestoredHistory || !isReady) {
+      return;
+    }
+
+    if (!isAuthenticated) {
+      setHasRestoredHistory(true);
+      return;
+    }
+
+    const restoreHistory = async () => {
+      try {
+        const response = await fetch("/api/shenute/history");
+        if (!response.ok) {
+          setHasRestoredHistory(true);
+          return;
+        }
+
+        const payload = (await response.json()) as {
+          success: boolean;
+          sessionId?: string;
+          sessions?: Array<SavedChatSession>;
+          messages?: Array<ChatMessageLike>;
+        };
+
+        if (payload.success) {
+          if (Array.isArray(payload.sessions)) {
+            setSessions(payload.sessions);
+          }
+
+          if (payload.sessionId) {
+            shenuteSessionIdRef.current = payload.sessionId;
+            setActiveSessionId(payload.sessionId);
+          }
+
+          if (Array.isArray(payload.messages)) {
+            setMessages(payload.messages as UIMessage[]);
+          }
+        }
+      } catch {
+        // ignore restore failures
+      } finally {
+        setHasRestoredHistory(true);
+      }
+    };
+
+    void restoreHistory();
+  }, [hasRestoredHistory, isAuthenticated, isReady, setMessages]);
+
+  useEffect(() => {
+    if (
+      typedMessages.length === 0 ||
+      !isReady ||
+      !isAuthenticated ||
+      !hasRestoredHistory
+    ) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      void saveChatHistoryOnline(
+        typedMessages,
+        shenuteSessionIdRef.current,
+      ).then((result) => {
+        if (result.success) {
+          if (result.sessionId) {
+            shenuteSessionIdRef.current = result.sessionId;
+            setActiveSessionId(result.sessionId);
+          }
+          setAutosaveStatus(copy.autosaveStatus);
+        }
+      });
+    }, 1000);
+
+    const clearTimer = () => window.clearTimeout(timer);
+    return clearTimer;
+  }, [typedMessages, copy.autosaveStatus, hasRestoredHistory, isReady, isAuthenticated]);
+
+  function handleSaveHistory() {
+    void saveChatHistoryOnline(
+      typedMessages,
+      shenuteSessionIdRef.current,
+    ).then((result) => {
+      if (result.success) {
+        if (result.sessionId) {
+          shenuteSessionIdRef.current = result.sessionId;
+          setActiveSessionId(result.sessionId);
+        }
+        setSaveStatus(copy.savedHistory);
+        window.setTimeout(() => {
+          setSaveStatus(null);
+        }, 2500);
+      }
+    });
+  }
+
+  async function loadShenuteSession(sessionId: string) {
+    if (!sessionId || sessionId === activeSessionId) {
+      return { success: false };
+    }
+
+    setSessionLoadingId(sessionId);
+    setSessionStatus(copy.loadingSession);
+
+    try {
+      const response = await fetch(
+        `/api/shenute/history?sessionId=${encodeURIComponent(sessionId)}`,
+      );
+
+      if (!response.ok) {
+        return { success: false };
+      }
+
+      const payload = (await response.json()) as {
+        success: boolean;
+        sessionId?: string;
+        sessions?: Array<SavedChatSession>;
+        messages?: Array<ChatMessageLike>;
+      };
+
+      if (!payload.success || !payload.sessionId) {
+        return { success: false };
+      }
+
+      setSessions(Array.isArray(payload.sessions) ? payload.sessions : sessions);
+      setMessages(Array.isArray(payload.messages) ? (payload.messages as UIMessage[]) : []);
+      setActiveSessionId(payload.sessionId);
+      shenuteSessionIdRef.current = payload.sessionId;
+
+      return { success: true, sessionId: payload.sessionId };
+    } catch {
+      return { success: false };
+    } finally {
+      setSessionLoadingId(null);
+      setSessionStatus(null);
+    }
+  }
 
   function clearSelectedImage() {
     setSelectedImage(null);
@@ -983,6 +1210,67 @@ export default function ShenuteAI() {
               "pointer-events-none select-none blur-[6px] opacity-70",
           )}
         >
+          {sessions.length > 0 ? (
+            <div className="mb-4 rounded-3xl border border-stone-200 bg-white/80 p-4 shadow-sm dark:border-stone-700 dark:bg-stone-950/70">
+              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">
+                    {copy.historySessions}
+                  </p>
+                  <p className="text-sm text-stone-500 dark:text-stone-400">
+                    {copy.historySessionsDescription}
+                  </p>
+                  {sessionStatus ? (
+                    <p className="text-xs text-stone-500 dark:text-stone-400">
+                      {sessionStatus}
+                    </p>
+                  ) : null}
+                </div>
+                <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-stone-600 dark:bg-stone-900 dark:text-stone-300">
+                  {sessions.length} {copy.sessionCount}
+                </span>
+              </div>
+              <div className="grid gap-2 sm:grid-cols-2">
+                {sessions.map((session) => {
+                  const isActive = session.id === activeSessionId;
+
+                  return (
+                    <button
+                      key={session.id}
+                      type="button"
+                      onClick={() => void loadShenuteSession(session.id)}
+                      disabled={isActive}
+                      className={cx(
+                        "flex w-full flex-col gap-1 rounded-3xl border px-4 py-3 text-left text-sm transition",
+                        isActive
+                          ? "border-sky-500 bg-sky-50 text-sky-900 dark:border-sky-400 dark:bg-sky-950/70 dark:text-sky-100"
+                          : "border-stone-200 bg-white text-stone-900 hover:border-stone-400 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-950/70 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-900",
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <span className="font-semibold">
+                          {session.title || copy.historySessions}
+                        </span>
+                        <span className="text-xs text-stone-500 dark:text-stone-400">
+                          {isActive ? copy.currentSession : copy.loadSession}
+                        </span>
+                      </div>
+                      <p className="text-xs text-stone-500 dark:text-stone-400">
+                        {session.updated_at
+                          ? new Date(session.updated_at).toLocaleString()
+                          : copy.sessionDateMissing}
+                      </p>
+                      {sessionLoadingId === session.id ? (
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          {copy.loadingSession}
+                        </p>
+                      ) : null}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ) : null}
           {messages.length === 0 ? (
             <div className="flex flex-1 items-center justify-center p-8 md:p-12">
               <SurfacePanel
@@ -1007,6 +1295,27 @@ export default function ShenuteAI() {
               aria-live="polite"
               className="flex-1 space-y-5 overflow-y-auto border-b border-stone-200/80 bg-stone-50/60 p-4 dark:border-stone-800 dark:bg-stone-950/30 md:p-6"
             >
+              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-stone-200 bg-white/70 px-4 py-3 text-sm text-stone-600 shadow-sm dark:border-stone-700 dark:bg-stone-950/70 dark:text-stone-300 md:px-5">
+                <p>{autosaveStatus ?? copy.autosaveStatus}</p>
+                <div className="flex items-center gap-3">
+                  {saveStatus ? (
+                    <p className="text-xs text-emerald-700 dark:text-emerald-300">
+                      {saveStatus}
+                    </p>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={handleSaveHistory}
+                    disabled={typedMessages.length === 0}
+                    className={buttonClassName({
+                      size: "sm",
+                      variant: "secondary",
+                    })}
+                  >
+                    {copy.saveHistory}
+                  </button>
+                </div>
+              </div>
               {messages.map((m, index) => {
                 const assistantMessage = m as ChatMessageLike;
                 const promptMessage =
@@ -1048,59 +1357,38 @@ export default function ShenuteAI() {
                         getMessageBubbleClassName(m.role),
                       )}
                     >
-                      {Array.isArray(m.parts) ? (
-                        m.parts
-                          .filter(isTextMessagePart)
-                          .map((part, partIndex: number) => {
-                            if (part.type !== "text") {
-                              return null;
-                            }
+                      {(() => {
+                        const text = getMessageText(m);
+                        if (!text) {
+                          return null;
+                        }
 
-                            if (m.role === "assistant") {
-                              return (
-                                <ReactMarkdown
-                                  key={partIndex}
-                                  remarkPlugins={[remarkGfm]}
-                                  components={{
-                                    a: ({ ...props }) => (
-                                      <a
-                                        {...props}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="underline"
-                                      />
-                                    ),
-                                    code: ({
-                                      className,
-                                      children,
-                                      ...props
-                                    }) => (
-                                      <code
-                                        className={`rounded bg-stone-200/70 px-1 py-0.5 text-[0.95em] dark:bg-stone-800 ${className || ""}`}
-                                        {...props}
-                                      >
-                                        {children}
-                                      </code>
-                                    ),
-                                  }}
+                        return (
+                          <ReactMarkdown
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              a: ({ ...props }) => (
+                                <a
+                                  {...props}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="underline"
+                                />
+                              ),
+                              code: ({ className, children, ...props }) => (
+                                <code
+                                  className={`rounded bg-stone-200/70 px-1 py-0.5 text-[0.95em] dark:bg-stone-800 ${className || ""}`}
+                                  {...props}
                                 >
-                                  {part.text}
-                                </ReactMarkdown>
-                              );
-                            }
-
-                            return <p key={partIndex}>{part.text}</p>;
-                          })
-                      ) : (
-                        <p>
-                          {(() => {
-                            const candidate = m as { content?: unknown };
-                            return typeof candidate.content === "string"
-                              ? candidate.content
-                              : "";
-                          })()}
-                        </p>
-                      )}
+                                  {children}
+                                </code>
+                              ),
+                            }}
+                          >
+                            {text}
+                          </ReactMarkdown>
+                        );
+                      })()}
                       {m.role === "assistant" ? (
                         <div className="mt-3 space-y-2 border-t border-stone-200 pt-3 text-xs dark:border-stone-700">
                           <div className="flex flex-wrap items-center gap-2">
