@@ -43,6 +43,8 @@ export const dictionaryMessages = defineMessages({
     "dict.keyboardCombine": "Combine with previous letter",
     "dict.keyboardBackspace": "Backspace",
     "dict.keyboardSpace": "Space",
+    "dict.ttsDisclaimer":
+      "Pronunciations are computer-generated approximations based on Bohairic phonetics.",
 
     "dialect.ALL": "All dialects",
     "dialect.A": "Akhmimic",
@@ -199,6 +201,8 @@ export const dictionaryMessages = defineMessages({
     "dict.keyboardCombine": "Combineren met de vorige letter",
     "dict.keyboardBackspace": "Backspace",
     "dict.keyboardSpace": "Spatie",
+    "dict.ttsDisclaimer":
+      "Uitspraken zijn door een computer gegenereerde benaderingen op basis van de Bohairische fonetiek.",
 
     "dialect.ALL": "Alle dialecten",
     "dialect.A": "Achmimisch",

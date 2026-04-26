@@ -2,10 +2,8 @@ type GradioLikeClient = {
   predict(endpoint: string, payload: Record<string, unknown>): Promise<unknown>;
 };
 
-export type CopticDialect = "Bohairic" | "Sahidic";
-export type NMTTranslationDirection =
-  | "coptic-to-english"
-  | "english-to-coptic";
+type CopticDialect = "Bohairic" | "Sahidic";
+type NMTTranslationDirection = "coptic-to-english" | "english-to-coptic";
 
 export type NMTTranslationRequest = {
   dialect: CopticDialect;
@@ -353,15 +351,15 @@ export async function requestNMTTranslation(
   const payload =
     request.direction === "english-to-coptic"
       ? {
-        dialect: request.dialect,
-        english_text: request.textToTranslate,
-        show_confidence: true,
-      }
+          dialect: request.dialect,
+          english_text: request.textToTranslate,
+          show_confidence: true,
+        }
       : {
-        coptic_text: request.textToTranslate,
-        dialect: request.dialect,
-        show_confidence: true,
-      };
+          coptic_text: request.textToTranslate,
+          dialect: request.dialect,
+          show_confidence: true,
+        };
 
   const rawResponse = await withTimeout(
     client.predict(endpoint, payload),

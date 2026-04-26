@@ -1,11 +1,16 @@
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
-import type { Database, Json } from "@/types/supabase";
+import type { Json } from "@/types/supabase";
 
 import { type NMTTranslationSuggestion } from "./copticTranslator";
 
-export type DistillTaskType = "qa" | "rewrite" | "retrieval" | "contrastive" | "translation";
+type DistillTaskType =
+  | "qa"
+  | "rewrite"
+  | "retrieval"
+  | "contrastive"
+  | "translation";
 
-export type DistillExampleInput = {
+type DistillExampleInput = {
   runId?: string;
   sourceDocumentId?: number;
   sourceChunkHash?: string;
@@ -18,6 +23,43 @@ export type DistillExampleInput = {
 
 type JsonObject = { [key: string]: Json };
 
+async function getOrCreateDistillRunId(
+  runId?: string,
+): Promise<string | undefined> {
+  if (runId) {
+    return runId;
+  }
+
+  const supabase = createServiceRoleClient();
+  const { data: run, error: runError } = await supabase
+    .from("distill_runs")
+    .select("id")
+    .eq("metadata->>type", "online_distillation")
+    .eq("status", "running")
+    .limit(1)
+    .single();
+
+  if (runError || !run) {
+    const { data: newRun, error: createError } = await supabase
+      .from("distill_runs")
+      .insert({
+        teacher_name: "Shenute AI Expert (Gemini)",
+        learner_name: "Shenute AI Learner (NMT)",
+        status: "running",
+        metadata: { type: "online_distillation" },
+      })
+      .select("id")
+      .single();
+
+    if (createError) {
+      console.error("Failed to create online distillation run:", createError);
+      return undefined;
+    }
+    return newRun.id;
+  }
+  return run.id;
+}
+
 /**
  * Records a distillation example into Supabase.
  * This can be used for online distillation (capturing live expert/learner pairs)
@@ -27,42 +69,16 @@ export async function recordDistillationExample(input: DistillExampleInput) {
   const supabase = createServiceRoleClient();
 
   // If no runId is provided, we can either skip or use a default "online_distillation" run
-  let runId = input.runId;
+  const runId = await getOrCreateDistillRunId(input.runId);
   if (!runId) {
-    const { data: run, error: runError } = await supabase
-      .from("distill_runs")
-      .select("id")
-      .eq("metadata->>type", "online_distillation")
-      .eq("status", "running")
-      .limit(1)
-      .single();
-
-    if (runError || !run) {
-      // Create a default run if it doesn't exist
-      const { data: newRun, error: createError } = await supabase
-        .from("distill_runs")
-        .insert({
-          teacher_name: "Shenute AI Expert (Gemini)",
-          learner_name: "Shenute AI Learner (NMT)",
-          status: "running",
-          metadata: { type: "online_distillation" },
-        })
-        .select("id")
-        .single();
-
-      if (createError) {
-        console.error("Failed to create online distillation run:", createError);
-        return;
-      }
-      runId = newRun.id;
-    } else {
-      runId = run.id;
-    }
+    return;
   }
 
   const metadata: JsonObject = {
     recorded_at: new Date().toISOString(),
-    ...(typeof input.metadata === "object" && input.metadata !== null && !Array.isArray(input.metadata)
+    ...(typeof input.metadata === "object" &&
+    input.metadata !== null &&
+    !Array.isArray(input.metadata)
       ? input.metadata
       : {}),
   };
@@ -86,9 +102,7 @@ export async function recordDistillationExample(input: DistillExampleInput) {
 /**
  * Formats a NMT suggestion for distillation.
  */
-export function formatNMTForDistillation(
-  suggestion: NMTTranslationSuggestion,
-) {
+export function formatNMTForDistillation(suggestion: NMTTranslationSuggestion) {
   return {
     translatedText: suggestion.translatedText,
     confidence: suggestion.confidence,

@@ -100,17 +100,20 @@ const contributorsCopy = {
         {
           label: "CopticTranslator.com",
           href: "https://www.coptictranslator.com/",
-          description: "Primary platform for Coptic-English translation services.",
+          description:
+            "Primary platform for Coptic-English translation services.",
         },
         {
           label: "NMT Paper (PDF)",
           href: "https://www.coptictranslator.com/paper.pdf",
-          description: "Technical details of the underlying seq2seq architecture.",
+          description:
+            "Technical details of the underlying seq2seq architecture.",
         },
         {
           label: "arXiv:2404.13813",
           href: "https://arxiv.org/abs/2404.13813",
-          description: "Peer-reviewed research on Coptic NMT datasets and models.",
+          description:
+            "Peer-reviewed research on Coptic NMT datasets and models.",
         },
       ],
     },
@@ -184,12 +187,14 @@ const contributorsCopy = {
         {
           label: "CopticTranslator.com",
           href: "https://www.coptictranslator.com/",
-          description: "Primair platform voor Koptisch-Engelse vertaaldiensten.",
+          description:
+            "Primair platform voor Koptisch-Engelse vertaaldiensten.",
         },
         {
           label: "NMT Paper (PDF)",
           href: "https://www.coptictranslator.com/paper.pdf",
-          description: "Technische details van de onderliggende seq2seq-architectuur.",
+          description:
+            "Technische details van de onderliggende seq2seq-architectuur.",
         },
         {
           label: "arXiv:2404.13813",

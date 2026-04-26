@@ -271,7 +271,106 @@ function buildFeedbackDocumentRow(options: {
   };
 }
 
-// eslint-disable-next-line complexity, max-lines-per-function
+function buildPageContextMetadata(pageContext?: ShenuteFeedbackPageContext) {
+  const metadata: Record<string, string | null> = {
+    pageExcerpt: null,
+    pagePath: null,
+    pageTitle: null,
+    pageUrl: null,
+  };
+
+  if (!pageContext) {
+    return metadata;
+  }
+
+  if (pageContext.excerpt) {
+    metadata.pageExcerpt = pageContext.excerpt.slice(0, 1200);
+  }
+  if (pageContext.path) {
+    metadata.pagePath = pageContext.path.slice(0, 240);
+  }
+  if (pageContext.title) {
+    metadata.pageTitle = pageContext.title.slice(0, 320);
+  }
+  if (pageContext.url) {
+    metadata.pageUrl = pageContext.url.slice(0, 500);
+  }
+
+  return metadata;
+}
+
+function buildAdminFeedbackMetadata(options: {
+  signal: ShenuteFeedbackSignal;
+  feedbackTextOriginal?: string;
+  feedbackTextRefined?: string;
+  isThothRefined: boolean;
+}) {
+  if (options.signal !== "admin_feedback") {
+    return {
+      adminFeedbackOriginal: null,
+      adminFeedbackRefined: null,
+      adminFeedbackRefinementProvider: null,
+      feedbackText: null,
+    };
+  }
+
+  return {
+    adminFeedbackOriginal: options.feedbackTextOriginal ?? null,
+    adminFeedbackRefined: options.feedbackTextRefined ?? null,
+    adminFeedbackRefinementProvider: options.isThothRefined ? "thoth" : null,
+    feedbackText: options.feedbackTextRefined ?? null,
+  };
+}
+
+function buildFeedbackMetadata(options: {
+  assistantMessageId?: string;
+  feedbackTextOriginal?: string;
+  feedbackTextRefined?: string;
+  isThothRefined: boolean;
+  shenuteSessionId?: string;
+  uploadedAt: string;
+  embeddingDimensions: number;
+  embeddingModel: string;
+  inferenceProvider: ShenuteFeedbackEmbeddingProvider;
+  pageContext?: ShenuteFeedbackPageContext;
+  prompt: string;
+  assistantResponse: string;
+  signal: ShenuteFeedbackSignal;
+  sourceEmbeddingDimensions: number;
+  userId: string;
+  userMessageId?: string;
+}): Json {
+  const metadata: Record<string, unknown> = {
+    assistantMessageId: options.assistantMessageId ?? null,
+    shenuteSessionId: options.shenuteSessionId ?? null,
+    createdAt: options.uploadedAt,
+    embeddingDimensions: options.embeddingDimensions,
+    embeddingModel: options.embeddingModel,
+    inferenceProvider: options.inferenceProvider,
+    isAdminFeedback: options.signal === "admin_feedback",
+    signal: options.signal,
+    sourceEmbeddingDimensions: options.sourceEmbeddingDimensions,
+    sourceName: "shenute_feedback_signal",
+    sourceType: "shenute_feedback_signal",
+    uploadedAt: options.uploadedAt,
+    uploadedBy: options.userId,
+    userMessageId: options.userMessageId ?? null,
+    promptPreview: normalizeWhitespace(options.prompt).slice(0, 240),
+    responsePreview: normalizeWhitespace(options.assistantResponse).slice(
+      0,
+      240,
+    ),
+    ...buildPageContextMetadata(options.pageContext),
+    ...buildAdminFeedbackMetadata({
+      signal: options.signal,
+      feedbackTextOriginal: options.feedbackTextOriginal,
+      feedbackTextRefined: options.feedbackTextRefined,
+      isThothRefined: options.isThothRefined,
+    }),
+  };
+
+  return metadata as unknown as Json;
+}
 export async function ingestShenuteFeedbackLearningSignal(
   options: IngestShenuteFeedbackSignalOptions,
 ) {
@@ -300,44 +399,24 @@ export async function ingestShenuteFeedbackLearningSignal(
 
   const targetEmbedding = normalizeEmbeddingDimensions(embedding);
 
-  const metadata: Json = {
-    assistantMessageId: options.assistantMessageId ?? null,
-    adminFeedbackOriginal:
-      options.signal === "admin_feedback"
-        ? (options.feedbackText ?? null)
-        : null,
-    adminFeedbackRefined:
-      options.signal === "admin_feedback"
-        ? (feedbackTextForLearning ?? null)
-        : null,
-    adminFeedbackRefinementProvider: thothRefinedFeedbackText ? "thoth" : null,
-    shenuteSessionId: options.shenuteSessionId ?? null,
-    createdAt: uploadedAt,
+  const metadata = buildFeedbackMetadata({
+    assistantMessageId: options.assistantMessageId,
+    feedbackTextOriginal: options.feedbackText,
+    feedbackTextRefined: feedbackTextForLearning,
+    isThothRefined: Boolean(thothRefinedFeedbackText),
+    shenuteSessionId: options.shenuteSessionId,
+    uploadedAt,
     embeddingDimensions: targetEmbedding.length,
     embeddingModel: model,
-    feedbackText:
-      options.signal === "admin_feedback"
-        ? (feedbackTextForLearning ?? null)
-        : null,
     inferenceProvider: options.inferenceProvider,
-    isAdminFeedback: options.signal === "admin_feedback",
-    pageExcerpt: options.pageContext?.excerpt?.slice(0, 1200) ?? null,
-    pagePath: options.pageContext?.path?.slice(0, 240) ?? null,
-    pageTitle: options.pageContext?.title?.slice(0, 320) ?? null,
-    pageUrl: options.pageContext?.url?.slice(0, 500) ?? null,
-    promptPreview: normalizeWhitespace(options.prompt).slice(0, 240),
-    responsePreview: normalizeWhitespace(options.assistantResponse).slice(
-      0,
-      240,
-    ),
+    pageContext: options.pageContext,
+    prompt: options.prompt,
+    assistantResponse: options.assistantResponse,
     signal: options.signal,
     sourceEmbeddingDimensions: embedding.length,
-    sourceName: "shenute_feedback_signal",
-    sourceType: "shenute_feedback_signal",
-    uploadedAt,
-    uploadedBy: options.userId,
-    userMessageId: options.userMessageId ?? null,
-  };
+    userId: options.userId,
+    userMessageId: options.userMessageId,
+  });
 
   const row = buildFeedbackDocumentRow({
     assistantMessageId: options.assistantMessageId,

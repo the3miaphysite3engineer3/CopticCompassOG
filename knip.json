@@ -2,6 +2,7 @@
   "$schema": "https://unpkg.com/knip@5/schema-json",
   "entry": [
     "src/app/**/{page,layout,loading,not-found,error,route}.ts?(x)",
+    "src/actions/**/*.ts",
     "supabase/functions/**/index.ts",
     "scripts/**/*.mts"
   ],

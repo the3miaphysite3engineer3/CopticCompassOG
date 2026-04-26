@@ -1,4 +1,5 @@
-/* eslint-disable @next/next/no-img-element */
+import Image from "next/image";
+
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { antinoou } from "@/lib/fonts";
 import type { Language } from "@/types/i18n";
@@ -40,9 +41,12 @@ export function DashboardWelcomePanel({
         </p>
       </div>
       {profile.avatar_url ? (
-        <img
+        <Image
+          unoptimized
           src={profile.avatar_url}
           alt={copy.avatarAlt}
+          width={64}
+          height={64}
           className="hidden h-16 w-16 rounded-full border-2 border-white object-cover shadow-sm md:block"
         />
       ) : null}

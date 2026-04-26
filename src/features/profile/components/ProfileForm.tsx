@@ -1,7 +1,7 @@
-/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import imageCompression from "browser-image-compression";
+import Image from "next/image";
 import { useState } from "react";
 
 import { updateProfile } from "@/actions/profile";
@@ -144,9 +144,12 @@ export function ProfileForm({
       <div className="flex flex-col items-center gap-4">
         <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-stone-100 shadow-sm dark:border-stone-700 dark:bg-stone-800">
           {avatarUrl ? (
-            <img
+            <Image
+              unoptimized
               src={avatarUrl}
               alt={copy.profile.avatarAlt}
+              width={128}
+              height={128}
               className="h-full w-full object-cover"
             />
           ) : (

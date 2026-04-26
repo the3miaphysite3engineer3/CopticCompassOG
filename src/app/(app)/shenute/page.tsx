@@ -9,6 +9,7 @@ import {
   LibraryBig,
   UserRound,
 } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -109,7 +110,8 @@ const SHENUTE_COPY = {
     savedHistory: "Chat history downloaded.",
     autosaveStatus: "Autosaved locally",
     historySessions: "Saved sessions",
-    historySessionsDescription: "Switch between your saved Shenute conversations.",
+    historySessionsDescription:
+      "Switch between your saved Shenute conversations.",
     loadSession: "Load",
     currentSession: "Current",
     loadingSession: "Loading session...",
@@ -577,24 +579,29 @@ export default function ShenuteAI() {
 
     const clearTimer = () => window.clearTimeout(timer);
     return clearTimer;
-  }, [typedMessages, copy.autosaveStatus, hasRestoredHistory, isReady, isAuthenticated]);
+  }, [
+    typedMessages,
+    copy.autosaveStatus,
+    hasRestoredHistory,
+    isReady,
+    isAuthenticated,
+  ]);
 
   function handleSaveHistory() {
-    void saveChatHistoryOnline(
-      typedMessages,
-      shenuteSessionIdRef.current,
-    ).then((result) => {
-      if (result.success) {
-        if (result.sessionId) {
-          shenuteSessionIdRef.current = result.sessionId;
-          setActiveSessionId(result.sessionId);
+    void saveChatHistoryOnline(typedMessages, shenuteSessionIdRef.current).then(
+      (result) => {
+        if (result.success) {
+          if (result.sessionId) {
+            shenuteSessionIdRef.current = result.sessionId;
+            setActiveSessionId(result.sessionId);
+          }
+          setSaveStatus(copy.savedHistory);
+          window.setTimeout(() => {
+            setSaveStatus(null);
+          }, 2500);
         }
-        setSaveStatus(copy.savedHistory);
-        window.setTimeout(() => {
-          setSaveStatus(null);
-        }, 2500);
-      }
-    });
+      },
+    );
   }
 
   async function loadShenuteSession(sessionId: string) {
@@ -625,8 +632,14 @@ export default function ShenuteAI() {
         return { success: false };
       }
 
-      setSessions(Array.isArray(payload.sessions) ? payload.sessions : sessions);
-      setMessages(Array.isArray(payload.messages) ? (payload.messages as UIMessage[]) : []);
+      setSessions(
+        Array.isArray(payload.sessions) ? payload.sessions : sessions,
+      );
+      setMessages(
+        Array.isArray(payload.messages)
+          ? (payload.messages as UIMessage[])
+          : [],
+      );
       setActiveSessionId(payload.sessionId);
       shenuteSessionIdRef.current = payload.sessionId;
 
@@ -1627,11 +1640,13 @@ export default function ShenuteAI() {
                     {copy.remove}
                   </button>
                 </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
+                  unoptimized
                   src={selectedImagePreviewUrl}
                   alt={copy.selectedImageAlt}
-                  className="max-h-48 w-auto rounded-2xl border border-stone-200 dark:border-stone-700"
+                  width={384}
+                  height={192}
+                  className="max-h-48 w-auto object-contain rounded-2xl border border-stone-200 dark:border-stone-700"
                 />
               </SurfacePanel>
             ) : null}

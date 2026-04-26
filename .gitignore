@@ -1,6 +1,6 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
-# dependencies
+# Dependencies
 /node_modules
 /.pnp
 .pnp.*
@@ -10,40 +10,33 @@
 !.yarn/releases
 !.yarn/versions
 
-# testing
+# Next.js
+/.next/
+/out/
+
+# Production
+/build
+
+# Testing
 /coverage
 /playwright-report
 /test-results
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# misc
-.DS_Store
-*.pem
-
-# debug
-*.log
-
-# env files (.env.example is an exception with dummy placeholder values)
+# Environment (`.env.example` is safe — contains only placeholder values)
 .env*
 !.env.example
 
-# vercel
+# Vercel
 .vercel
 
-# supabase cli
+# Supabase CLI
 supabase/.temp/
 
-# typescript
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
 
-# temp/scratch scripts and outputs
+# Temp/scratch scripts and outputs
 /scratch/
 /tmp/distill/
 knip.txt
@@ -51,17 +44,9 @@ knip.out.json
 lint.json
 fix_*.mjs
 fix_*.js
+TODO.md
 
-# IDE / Editor
-.vscode/
-.idea/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Operating System Files
+# Operating System files
 .DS_Store
 .DS_Store?
 ._*
@@ -70,16 +55,32 @@ fix_*.js
 ehthumbs.db
 Thumbs.db
 
-# Tooling Caches & Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+# Debug logs and tooling caches
+*.log
+*.pem
 .eslintcache
 .stylelintcache
 .prettiercache
 .husky/_
 
-# Build Artifact backups
+# Build artifact backups
 *.bak
 *.tmp
+
+# AI/IDE/Editor workspaces
+.vscode/
+.idea/
+.codex
+.cursor/
+.idx/
+.cody/
+.zed/
+.cline/
+.windsurfrules
+.gemini/
+.antigravity/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

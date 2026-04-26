@@ -29,7 +29,6 @@ import { hasSupabaseRuntimeEnv } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { createThothChatCompletion } from "@/lib/thoth";
 
-
 export const maxDuration = 300;
 export const runtime = "nodejs";
 
@@ -226,8 +225,12 @@ function toGeminiMessages(messages: UIMessage[]) {
       return undefined;
     })
     .filter(
-      (message): message is { role: "system" | "user" | "assistant"; content: string } =>
-        typeof message !== "undefined",
+      (
+        message,
+      ): message is {
+        role: "system" | "user" | "assistant";
+        content: string;
+      } => typeof message !== "undefined",
     );
 }
 
@@ -396,9 +399,7 @@ function toPageContext(value: unknown): PageContext {
   };
 }
 
-function buildNMTContextDoc(
-  suggestion: NMTTranslationSuggestion,
-): ContextDoc {
+function buildNMTContextDoc(suggestion: NMTTranslationSuggestion): ContextDoc {
   const confidenceLine = suggestion.confidenceLabel
     ? `Model confidence: ${suggestion.confidenceLabel}`
     : "Model confidence: unavailable";
@@ -493,8 +494,6 @@ export async function POST(req: Request) {
         let isolatedTargetText: string | null = null;
         const retrievalPromptSegments = new Set<string>([latestMessageText]);
 
-
-
         try {
           const kwResponse = await generateText({
             model: getGeminiModel(),
@@ -568,9 +567,7 @@ Respond ONLY with a valid JSON object matching this schema, no markdown blocks:
                 );
                 retrievalPromptSegments.add(NMTSuggestion.translatedText);
                 if (NMTSuggestion.textToTranslate) {
-                  retrievalPromptSegments.add(
-                    NMTSuggestion.textToTranslate,
-                  );
+                  retrievalPromptSegments.add(NMTSuggestion.textToTranslate);
                 }
               }
             } catch (error) {
@@ -613,7 +610,7 @@ Respond ONLY with a valid JSON object matching this schema, no markdown blocks:
             ? [isolatedTargetText]
             : []),
           ...(NMTSuggestion?.translatedText &&
-            NMTSuggestion.translatedText.length <= 120
+          NMTSuggestion.translatedText.length <= 120
             ? [NMTSuggestion.translatedText]
             : []),
         ];
@@ -777,20 +774,20 @@ ${contextText || "No additional retrieval context was found."}
           ...(latestMessageText
             ? []
             : [
-              {
-                role: "user" as const,
-                content: "Please answer the latest user request.",
-              },
-            ]),
+                {
+                  role: "user" as const,
+                  content: "Please answer the latest user request.",
+                },
+              ]),
         ],
         { enableReasoning: true },
       );
 
       const openRouterMessage = completion?.choices?.[0]?.message as
         | {
-          content?: string | null;
-          reasoning_details?: unknown;
-        }
+            content?: string | null;
+            reasoning_details?: unknown;
+          }
         | undefined;
       const assistantText = openRouterMessage?.content;
 
@@ -818,7 +815,7 @@ ${contextText || "No additional retrieval context was found."}
 
       const responseText =
         typeof completion.answer === "string" &&
-          completion.answer.trim().length > 0
+        completion.answer.trim().length > 0
           ? completion.answer
           : "I could not generate a response from Shenute AI Expert right now.";
 
@@ -832,11 +829,11 @@ ${contextText || "No additional retrieval context was found."}
         ...(latestMessageText
           ? []
           : [
-            {
-              role: "user" as const,
-              content: "Please answer the latest user request.",
-            },
-          ]),
+              {
+                role: "user" as const,
+                content: "Please answer the latest user request.",
+              },
+            ]),
       ]);
 
       const assistantText = completion.choices[0]?.message?.content;
@@ -887,11 +884,11 @@ ${contextText || "No additional retrieval context was found."}
               ...(latestMessageText
                 ? []
                 : [
-                  {
-                    role: "user" as const,
-                    content: "Please answer the latest user request.",
-                  },
-                ]),
+                    {
+                      role: "user" as const,
+                      content: "Please answer the latest user request.",
+                    },
+                  ]),
             ],
             { enableReasoning: true },
           );

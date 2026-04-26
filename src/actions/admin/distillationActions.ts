@@ -6,42 +6,47 @@ import { ingestCopticDocuments } from "@/actions/vectorSearch";
 import { requestNMTTranslation } from "@/lib/copticTranslator";
 import {
   recordDistillationExample,
-  formatNMTForDistillation
+  formatNMTForDistillation,
 } from "@/lib/distillation";
 import { getGeminiModel } from "@/lib/gemini";
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
-// Moved type import below library imports to fix import/order
 import type { Json } from "@/types/supabase";
 
-/**
- * Distills the NMT model using existing chunks from the knowledge base.
- */
-// eslint-disable-next-line complexity
-export async function distillModelFromChunks(options: {
-  limit?: number;
-  taskType?: "translation";
-}): Promise<any[]> { // Added explicit return type
-  const limit = options.limit ?? 5;
-  const supabase = createServiceRoleClient();
+export interface DistilledChunkResult {
+  chunkId: string;
+  source: string;
+  expert: string;
+  learner: string;
+  confidence?: string;
+}
 
-  const { data: chunks, error: fetchError } = await supabase
-    .from("coptic_documents")
-    .select("id, content, metadata")
-    .limit(limit);
+async function generateTranslationTaskFromChunk(
+  chunkContent: string,
+  isPairExtraction = false,
+) {
+  const distillationPrompt = isPairExtraction
+    ? `Based on the following Coptic/English chunk, create a high-quality, standalone translation pair.
+CHUNK:
+"""
+${chunkContent}
+"""
 
-  if (fetchError || !chunks) {
-    throw new Error(`Failed to fetch chunks for distillation: ${fetchError?.message}`);
-  }
+TASK:
+Isolate one clear sentence. Provide its English text, its Coptic translation, direction, and dialect.
 
-  const results = [];
- 
-  for (const chunk of chunks) {
-    try {
-      const distillationPrompt = `You are an expert Coptic linguist. 
+Respond ONLY with valid JSON:
+{
+  "sourceText": "...",
+  "expertTranslation": "...",
+  "direction": "...",
+  "dialect": "..."
+}
+`
+    : `You are an expert Coptic linguist. 
 Based on the following knowledge base chunk, create a translation task.
 CHUNK:
 """
-${chunk.content}
+${chunkContent}
 """
 
 TASK:
@@ -58,58 +63,130 @@ Respond ONLY with a valid JSON object:
 }
 `;
 
-      const { text: expertResponse } = await generateText({
-        model: getGeminiModel(),
-        prompt: distillationPrompt,
-      });
+  const { text: expertResponse } = await generateText({
+    model: getGeminiModel(),
+    prompt: distillationPrompt,
+  });
 
-      const parsed = JSON.parse(expertResponse.replace(/```json/i, "").replace(/```/g, "").trim());
+  return JSON.parse(
+    expertResponse
+      .replace(/```json/i, "")
+      .replace(/```/g, "")
+      .trim(),
+  );
+}
 
-      const NMTSuggestion = await requestNMTTranslation({
-        dialect: parsed.dialect,
+async function processChunkForModelDistillation(
+  chunk: { id: number; content: string },
+  results: DistilledChunkResult[],
+) {
+  try {
+    const parsed = await generateTranslationTaskFromChunk(chunk.content);
+
+    const NMTSuggestion = await requestNMTTranslation({
+      dialect: parsed.dialect,
+      direction: parsed.direction,
+      originalPrompt: `Distillation task: ${parsed.sourceText}`,
+      textToTranslate: parsed.sourceText,
+    });
+
+    await recordDistillationExample({
+      sourceDocumentId: chunk.id,
+      taskType: "translation",
+      prompt: parsed.sourceText,
+      teacherAnswer: parsed.expertTranslation,
+      studentTarget: NMTSuggestion
+        ? formatNMTForDistillation(NMTSuggestion)
+        : undefined,
+      metadata: {
+        distillation_type: "batch_chunk",
+        chunk_id: chunk.id,
         direction: parsed.direction,
-        originalPrompt: `Distillation task: ${parsed.sourceText}`,
-        textToTranslate: parsed.sourceText,
-      });
+        dialect: parsed.dialect,
+      },
+    });
 
-      await recordDistillationExample({
-        sourceDocumentId: chunk.id,
-        taskType: "translation",
-        prompt: parsed.sourceText,
-        teacherAnswer: parsed.expertTranslation,
-        studentTarget: NMTSuggestion ? formatNMTForDistillation(NMTSuggestion) : undefined,
-        metadata: {
-          distillation_type: "batch_chunk",
-          chunk_id: chunk.id,
-          direction: parsed.direction,
-          dialect: parsed.dialect
-        }
-      });
+    results.push({
+      chunkId: String(chunk.id),
+      source: parsed.sourceText,
+      expert: parsed.expertTranslation,
+      learner: NMTSuggestion?.translatedText ?? "failed",
+      confidence: NMTSuggestion?.confidenceLabel ?? undefined,
+    });
+  } catch (err) {
+    console.error(`Distillation failed for chunk ${chunk.id}:`, err);
+  }
+}
 
-      results.push({
-        chunkId: chunk.id,
-        source: parsed.sourceText,
-        expert: parsed.expertTranslation,
-        learner: NMTSuggestion?.translatedText ?? "failed",
-        confidence: NMTSuggestion?.confidenceLabel
-      });
+/**
+ * Distills the NMT model using existing chunks from the knowledge base.
+ */
+export async function distillModelFromChunks(options: {
+  limit?: number;
+  taskType?: "translation";
+}): Promise<DistilledChunkResult[]> {
+  // Added explicit return type
+  const limit = options.limit ?? 5;
+  const supabase = createServiceRoleClient();
 
-    } catch (err) {
-      console.error(`Distillation failed for chunk ${chunk.id}:`, err);
-    }
+  const { data: chunks, error: fetchError } = await supabase
+    .from("coptic_documents")
+    .select("id, content, metadata")
+    .limit(limit);
+
+  if (fetchError || !chunks) {
+    throw new Error(
+      `Failed to fetch chunks for distillation: ${fetchError?.message}`,
+    );
+  }
+
+  const results: DistilledChunkResult[] = [];
+
+  for (const chunk of chunks) {
+    await processChunkForModelDistillation(
+      { id: Number(chunk.id), content: chunk.content },
+      results,
+    );
   }
 
   return results;
 }
 
+async function processChunkForNewIngestable(
+  chunk: { id: number; content: string },
+  newChunks: { content: string; metadata: Json }[],
+) {
+  try {
+    const parsed = await generateTranslationTaskFromChunk(chunk.content, true);
+
+    const newChunkContent = `Translation Pair [${parsed.dialect}]:
+English: ${parsed.direction === "english-to-coptic" ? parsed.sourceText : parsed.expertTranslation}
+Coptic: ${parsed.direction === "english-to-coptic" ? parsed.expertTranslation : parsed.sourceText}
+Direction: ${parsed.direction}`;
+
+    newChunks.push({
+      content: newChunkContent,
+      metadata: {
+        type: "translation_distillation_chunk",
+        source_chunk_id: chunk.id,
+        dialect: parsed.dialect,
+        direction: parsed.direction,
+        distilled_at: new Date().toISOString(),
+      },
+    });
+  } catch (err) {
+    console.error(`Distillation failed for chunk ${chunk.id}:`, err);
+  }
+}
+
 /**
  * Distills the model and creates NEW ingestable chunks in the knowledge base.
  */
-// eslint-disable-next-line complexity
 export async function distillToNewIngestableChunks(options: {
   limit?: number;
   provider?: "hf" | "gemini" | "openrouter";
-}): Promise<{ originalChunksProcessed: number; newChunksIngested: number }> { // Added explicit return type
+}): Promise<{ originalChunksProcessed: number; newChunksIngested: number }> {
+  // Added explicit return type
   const limit = options.limit ?? 5;
   const provider = options.provider ?? "hf";
   const supabase = createServiceRoleClient();
@@ -127,51 +204,10 @@ export async function distillToNewIngestableChunks(options: {
   const newChunks: { content: string; metadata: Json }[] = [];
 
   for (const chunk of chunks) {
-    try {
-      const distillationPrompt = `Based on the following Coptic/English chunk, create a high-quality, standalone translation pair.
-CHUNK:
-"""
-${chunk.content}
-"""
-
-TASK:
-Isolate one clear sentence. Provide its English text, its Coptic translation, direction, and dialect.
-
-Respond ONLY with valid JSON:
-{
-  "sourceText": "...",
-  "expertTranslation": "...",
-  "direction": "...",
-  "dialect": "..."
-}
-`;
-
-      const { text: expertResponse } = await generateText({
-        model: getGeminiModel(),
-        prompt: distillationPrompt,
-      });
-
-      const parsed = JSON.parse(expertResponse.replace(/```json/i, "").replace(/```/g, "").trim());
-
-      const newChunkContent = `Translation Pair [${parsed.dialect}]:
-English: ${parsed.direction === "english-to-coptic" ? parsed.sourceText : parsed.expertTranslation}
-Coptic: ${parsed.direction === "english-to-coptic" ? parsed.expertTranslation : parsed.sourceText}
-Direction: ${parsed.direction}`;
-
-      newChunks.push({
-        content: newChunkContent,
-        metadata: {
-          type: "translation_distillation_chunk",
-          source_chunk_id: chunk.id,
-          dialect: parsed.dialect,
-          direction: parsed.direction,
-          distilled_at: new Date().toISOString()
-        }
-      });
-
-    } catch (err) {
-      console.error(`Distillation failed for chunk ${chunk.id}:`, err);
-    }
+    await processChunkForNewIngestable(
+      { id: Number(chunk.id), content: chunk.content },
+      newChunks,
+    );
   }
 
   if (newChunks.length > 0) {
@@ -180,6 +216,6 @@ Direction: ${parsed.direction}`;
 
   return {
     originalChunksProcessed: chunks.length,
-    newChunksIngested: newChunks.length
+    newChunksIngested: newChunks.length,
   };
 }

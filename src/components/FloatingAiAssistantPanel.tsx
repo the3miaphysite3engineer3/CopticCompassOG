@@ -14,6 +14,7 @@ import {
   ThumbsUp,
   X,
 } from "lucide-react";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
@@ -169,7 +170,8 @@ const floatingShenuteCopy = {
     thinking: "Denkt na...",
     saveHistory: "Chatgeschiedenis opslaan",
     savedHistory: "Chatgeschiedenis opgeslagen.",
-    nmtCredit: "NMT mogelijk gemaakt door CopticTranslator.com / arXiv:2404.13813",
+    nmtCredit:
+      "NMT mogelijk gemaakt door CopticTranslator.com / arXiv:2404.13813",
     writeAdminFeedback: "Schrijf adminfeedback voordat u die verstuurt.",
   },
 } as const satisfies Record<Language, Record<string, string>>;
@@ -218,7 +220,11 @@ function findPreviousUserMessage(
   return null;
 }
 
-function formatChatHistory(messages: ChatMessageLike[], pageContext: PageContextPayload, provider: ShenuteProvider) {
+function formatChatHistory(
+  messages: ChatMessageLike[],
+  pageContext: PageContextPayload,
+  provider: ShenuteProvider,
+) {
   const lines: string[] = [];
   lines.push("Shenute AI chat history");
   lines.push(`Page: ${pageContext.title || pageContext.path || "unknown"}`);
@@ -568,7 +574,11 @@ export function FloatingAiAssistantPanel({
   }
 
   function handleSaveChatHistory() {
-    const historyText = formatChatHistory(typedMessages, pageContext, inferenceProvider);
+    const historyText = formatChatHistory(
+      typedMessages,
+      pageContext,
+      inferenceProvider,
+    );
     const blob = new Blob([historyText], {
       type: "text/plain;charset=utf-8",
     });
@@ -1125,11 +1135,13 @@ export function FloatingAiAssistantPanel({
                     {copy.removeImage}
                   </button>
                 </div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
+                  unoptimized
                   src={selectedImagePreviewUrl}
                   alt={copy.selectedForOcrAlt}
-                  className="max-h-28 w-auto rounded-xl border border-stone-200 dark:border-stone-700"
+                  width={200}
+                  height={112}
+                  className="max-h-28 w-auto object-contain rounded-xl border border-stone-200 dark:border-stone-700"
                 />
               </div>
             ) : null}

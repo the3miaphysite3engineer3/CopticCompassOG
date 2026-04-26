@@ -1,4 +1,4 @@
-export type StructuredJsonChunk = {
+type StructuredJsonChunk = {
   content: string;
   metadata: Record<string, unknown>;
 };

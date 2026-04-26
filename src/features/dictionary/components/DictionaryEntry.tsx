@@ -25,6 +25,7 @@ import { getEntryPath } from "@/lib/locale";
 
 import DialectSiglum from "./DialectSiglum";
 import HighlightText from "./HighlightText";
+import { SpeakButton } from "./SpeakButton";
 
 import type { ReactNode } from "react";
 
@@ -103,18 +104,21 @@ export default function DictionaryEntryCard({
       <div className="pointer-events-none absolute top-0 right-0 h-32 w-32 bg-sky-500/10 dark:bg-sky-500/10 rounded-full blur-3xl opacity-70" />
 
       <div className="relative flex flex-col sm:flex-row justify-between items-start gap-4 mb-5">
-        <div>
-          {linkHeadword ? (
-            <Link
-              href={getEntryPath(entry.id, language)}
-              prefetch={false}
-              className="inline-block"
-            >
-              {headingContent}
-            </Link>
-          ) : (
-            headingContent
-          )}
+        <div className="flex items-center gap-3">
+          <div>
+            {linkHeadword ? (
+              <Link
+                href={getEntryPath(entry.id, language)}
+                prefetch={false}
+                className="inline-block"
+              >
+                {headingContent}
+              </Link>
+            ) : (
+              headingContent
+            )}
+          </div>
+          <SpeakButton copticText={headerSpelling} className="mt-1 sm:mt-1.5" />
         </div>
 
         <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">

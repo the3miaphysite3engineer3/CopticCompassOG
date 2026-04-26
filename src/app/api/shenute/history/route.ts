@@ -36,11 +36,7 @@ function toOptionalString(value: unknown): string | undefined {
 }
 
 function isSavedChatRole(value: unknown): value is SavedChatMessage["role"] {
-  return (
-    value === "assistant" ||
-    value === "user" ||
-    value === "system"
-  );
+  return value === "assistant" || value === "user" || value === "system";
 }
 
 function parseMessages(value: unknown): SavedChatMessage[] {
@@ -49,11 +45,14 @@ function parseMessages(value: unknown): SavedChatMessage[] {
   }
 
   return value
-    .filter((item): item is Record<string, unknown> =>
-      typeof item === "object" && item !== null,
+    .filter(
+      (item): item is Record<string, unknown> =>
+        typeof item === "object" && item !== null,
     )
     .map((item) => {
-      const role: SavedChatMessage["role"] = isSavedChatRole(item.role) ? item.role : "user";
+      const role: SavedChatMessage["role"] = isSavedChatRole(item.role)
+        ? item.role
+        : "user";
 
       return {
         id: toOptionalString(item.id) ?? "",
@@ -114,7 +113,10 @@ export async function GET(request: Request) {
     }
 
     let sessionId: string | null = null;
-    if (requestedSessionId && sessions?.some((session) => session.id === requestedSessionId)) {
+    if (
+      requestedSessionId &&
+      sessions?.some((session) => session.id === requestedSessionId)
+    ) {
       sessionId = requestedSessionId;
     } else if (sessions && sessions.length > 0) {
       sessionId = sessions[0].id;
@@ -152,7 +154,10 @@ export async function GET(request: Request) {
   } catch (error) {
     console.error("Shenute history GET failed:", error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : String(error) },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 },
     );
   }
@@ -178,7 +183,8 @@ export async function POST(request: Request) {
     }
 
     const body = (await request.json()) as HistoryRequestPayload;
-    const sessionId = toOptionalUuidString(body.sessionId) ?? crypto.randomUUID();
+    const sessionId =
+      toOptionalUuidString(body.sessionId) ?? crypto.randomUUID();
     const messages = parseMessages(body.messages);
 
     if (messages.length === 0) {
@@ -189,23 +195,24 @@ export async function POST(request: Request) {
     }
 
     const now = new Date().toISOString();
-    const { error: sessionError } = await supabase
-      .from("chat_sessions")
-      .upsert(
-        [
-          {
-            id: sessionId,
-            user_id: user.id,
-            title: "Shenute AI conversation",
-            metadata: { source: "shenute" },
-            updated_at: now,
-          },
-        ],
-        { onConflict: "id" },
-      );
+    const { error: sessionError } = await supabase.from("chat_sessions").upsert(
+      [
+        {
+          id: sessionId,
+          user_id: user.id,
+          title: "Shenute AI conversation",
+          metadata: { source: "shenute" },
+          updated_at: now,
+        },
+      ],
+      { onConflict: "id" },
+    );
 
     if (sessionError) {
-      console.error("Failed to create or update Shenute session:", sessionError);
+      console.error(
+        "Failed to create or update Shenute session:",
+        sessionError,
+      );
       return NextResponse.json(
         { success: false, error: "Could not save history." },
         { status: 500 },
@@ -218,7 +225,10 @@ export async function POST(request: Request) {
       .eq("session_id", sessionId);
 
     if (deleteError) {
-      console.error("Failed to clear existing Shenute history messages:", deleteError);
+      console.error(
+        "Failed to clear existing Shenute history messages:",
+        deleteError,
+      );
       return NextResponse.json(
         { success: false, error: "Could not save history." },
         { status: 500 },
@@ -253,7 +263,10 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Shenute history POST failed:", error);
     return NextResponse.json(
-      { success: false, error: error instanceof Error ? error.message : String(error) },
+      {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 },
     );
   }
