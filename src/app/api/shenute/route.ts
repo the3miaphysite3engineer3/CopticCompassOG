@@ -1,5 +1,4 @@
 import {
-  convertToModelMessages,
   createUIMessageStream,
   createUIMessageStreamResponse,
   streamText,
@@ -206,6 +205,30 @@ function toOpenAiMessages(messages: UIMessage[]): HfChatMessage[] {
   }
 
   return openAiMessages;
+}
+
+function toGeminiMessages(messages: UIMessage[]) {
+  return messages
+    .map((message) => {
+      const content = extractMessageText(message).trim();
+      if (!content) {
+        return undefined;
+      }
+
+      if (
+        message.role === "system" ||
+        message.role === "user" ||
+        message.role === "assistant"
+      ) {
+        return { role: message.role, content };
+      }
+
+      return undefined;
+    })
+    .filter(
+      (message): message is { role: "system" | "user" | "assistant"; content: string } =>
+        typeof message !== "undefined",
+    );
 }
 
 function getMessageReasoningDetails(message: UIMessage): unknown {
@@ -732,7 +755,7 @@ ${contextText || "No additional retrieval context was found."}
       const result = streamText({
         model: getGeminiModel(),
         system: systemPrompt,
-        messages: await convertToModelMessages(messages),
+        messages: toGeminiMessages(messages),
       });
 
       return result.toUIMessageStreamResponse({
@@ -835,7 +858,7 @@ ${contextText || "No additional retrieval context was found."}
           const fallbackResult = streamText({
             model: getGeminiModel(),
             system: systemPrompt,
-            messages: await convertToModelMessages(messages),
+            messages: toGeminiMessages(messages),
           });
 
           return fallbackResult.toUIMessageStreamResponse({
