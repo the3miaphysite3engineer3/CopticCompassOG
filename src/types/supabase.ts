@@ -275,6 +275,105 @@ export type Database = {
         };
         Relationships: [];
       };
+      distill_runs: {
+        Row: {
+          id: string;
+          created_by: string | null;
+          status: string;
+          teacher_name: string;
+          learner_name: string;
+          source_filter: Json;
+          input_chunk_count: number;
+          generated_example_count: number;
+          approved_example_count: number;
+          metadata: Json;
+          error: string | null;
+          started_at: string | null;
+          finished_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          created_by?: string | null;
+          status?: string;
+          teacher_name?: string;
+          learner_name?: string;
+          source_filter?: Json;
+          input_chunk_count?: number;
+          generated_example_count?: number;
+          approved_example_count?: number;
+          metadata?: Json;
+          error?: string | null;
+          started_at?: string | null;
+          finished_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          created_by?: string | null;
+          status?: string;
+          teacher_name?: string;
+          learner_name?: string;
+          source_filter?: Json;
+          input_chunk_count?: number;
+          generated_example_count?: number;
+          approved_example_count?: number;
+          metadata?: Json;
+          error?: string | null;
+          started_at?: string | null;
+          finished_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      distill_examples: {
+        Row: {
+          id: number;
+          run_id: string;
+          source_document_id: number | null;
+          source_chunk_hash: string;
+          split: string;
+          task_type: string;
+          prompt: string;
+          teacher_answer: string;
+          student_target: Json;
+          quality_score: number | null;
+          approved: boolean;
+          metadata: Json;
+          created_at: string;
+        };
+        Insert: {
+          id?: number;
+          run_id: string;
+          source_document_id?: number | null;
+          source_chunk_hash: string;
+          split?: string;
+          task_type: string;
+          prompt: string;
+          teacher_answer: string;
+          student_target?: Json;
+          quality_score?: number | null;
+          approved?: boolean;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Update: {
+          id?: number;
+          run_id?: string;
+          source_document_id?: number | null;
+          source_chunk_hash?: string;
+          split?: string;
+          task_type?: string;
+          prompt?: string;
+          teacher_answer?: string;
+          student_target?: Json;
+          quality_score?: number | null;
+          approved?: boolean;
+          metadata?: Json;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       notification_events: {
         Row: {
           aggregate_id: string;

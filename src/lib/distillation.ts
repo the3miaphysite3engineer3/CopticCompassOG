@@ -1,4 +1,5 @@
 import { createServiceRoleClient } from "@/lib/supabase/serviceRole";
+import type { Database, Json } from "@/types/supabase";
 
 import { type NMTTranslationSuggestion } from "./copticTranslator";
 
@@ -11,9 +12,11 @@ export type DistillExampleInput = {
   taskType: DistillTaskType;
   prompt: string;
   teacherAnswer: string;
-  studentTarget?: Record<string, unknown>;
-  metadata?: Record<string, unknown>;
+  studentTarget?: Json;
+  metadata?: Json;
 };
+
+type JsonObject = { [key: string]: Json };
 
 /**
  * Records a distillation example into Supabase.
@@ -57,6 +60,13 @@ export async function recordDistillationExample(input: DistillExampleInput) {
     }
   }
 
+  const metadata: JsonObject = {
+    recorded_at: new Date().toISOString(),
+    ...(typeof input.metadata === "object" && input.metadata !== null && !Array.isArray(input.metadata)
+      ? input.metadata
+      : {}),
+  };
+
   const { error } = await supabase.from("distill_examples").insert({
     run_id: runId,
     source_document_id: input.sourceDocumentId,
@@ -64,11 +74,8 @@ export async function recordDistillationExample(input: DistillExampleInput) {
     task_type: input.taskType,
     prompt: input.prompt,
     teacher_answer: input.teacherAnswer,
-    student_target: input.studentTarget ?? {},
-    metadata: {
-      ...input.metadata,
-      recorded_at: new Date().toISOString(),
-    },
+    student_target: (input.studentTarget ?? {}) as Json,
+    metadata,
   });
 
   if (error) {

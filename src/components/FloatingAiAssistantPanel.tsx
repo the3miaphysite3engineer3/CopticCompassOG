@@ -218,7 +218,7 @@ function findPreviousUserMessage(
   return null;
 }
 
-function formatChatHistory(messages: ChatMessageLike[], pageContext: PageContext, provider: ShenuteProvider) {
+function formatChatHistory(messages: ChatMessageLike[], pageContext: PageContextPayload, provider: ShenuteProvider) {
   const lines: string[] = [];
   lines.push("Shenute AI chat history");
   lines.push(`Page: ${pageContext.title || pageContext.path || "unknown"}`);

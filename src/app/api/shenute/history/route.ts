@@ -35,6 +35,14 @@ function toOptionalString(value: unknown): string | undefined {
   return normalized.length > 0 ? normalized : undefined;
 }
 
+function isSavedChatRole(value: unknown): value is SavedChatMessage["role"] {
+  return (
+    value === "assistant" ||
+    value === "user" ||
+    value === "system"
+  );
+}
+
 function parseMessages(value: unknown): SavedChatMessage[] {
   if (!Array.isArray(value)) {
     return [];
@@ -44,26 +52,26 @@ function parseMessages(value: unknown): SavedChatMessage[] {
     .filter((item): item is Record<string, unknown> =>
       typeof item === "object" && item !== null,
     )
-    .map((item) => ({
-      id: toOptionalString(item.id) ?? "",
-      role:
-        item.role === "assistant" || item.role === "user" ||
-        item.role === "system"
-          ? item.role
-          : "user",
-      content: toOptionalString(item.content) ?? "",
-      parts: Array.isArray(item.parts)
-        ? item.parts
-            .filter(
-              (part): part is { text: string; type: "text" } =>
-                typeof part === "object" &&
-                part !== null &&
-                part.type === "text" &&
-                typeof part.text === "string",
-            )
-            .map((part) => ({ text: part.text, type: "text" }))
-        : undefined,
-    }))
+    .map((item) => {
+      const role: SavedChatMessage["role"] = isSavedChatRole(item.role) ? item.role : "user";
+
+      return {
+        id: toOptionalString(item.id) ?? "",
+        role,
+        content: toOptionalString(item.content) ?? "",
+        parts: Array.isArray(item.parts)
+          ? item.parts
+              .filter(
+                (part): part is { text: string; type: "text" } =>
+                  typeof part === "object" &&
+                  part !== null &&
+                  part.type === "text" &&
+                  typeof part.text === "string",
+              )
+              .map((part) => ({ text: part.text, type: "text" as const }))
+          : undefined,
+      };
+    })
     .filter((message) => message.id && message.content);
 }
 
