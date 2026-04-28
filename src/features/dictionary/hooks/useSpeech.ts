@@ -1,6 +1,40 @@
-import { useState, useCallback } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 import { bohairicToPhonetic } from "@/features/dictionary/lib/bohairicPhonetics";
+
+type ActiveSpeechListener = (speechId: string | null) => void;
+
+let activeSpeechId: string | null = null;
+const activeSpeechListeners = new Set<ActiveSpeechListener>();
+
+function publishActiveSpeechId(speechId: string | null) {
+  activeSpeechId = speechId;
+  activeSpeechListeners.forEach((listener) => listener(speechId));
+}
+
+function clearActiveSpeechId(speechId: string) {
+  if (activeSpeechId === speechId) {
+    publishActiveSpeechId(null);
+  }
+}
+
+function isSpeechSynthesisSupported() {
+  return (
+    typeof window !== "undefined" &&
+    "speechSynthesis" in window &&
+    "SpeechSynthesisUtterance" in window
+  );
+}
+
+function subscribeToSpeechSupport() {
+  return () => {};
+}
 
 interface UseSpeechReturn {
   speak: (copticText: string) => void;
@@ -10,55 +44,81 @@ interface UseSpeechReturn {
 }
 
 /**
- * Hook for pronouncing Bohairic Coptic text via the browser Web Speech API.
- * Transliterates Bohairic Coptic script to phonetic Latin before speaking.
+ * Exposes a shared Web Speech controller for Bohairic dictionary
+ * pronunciations.
  */
 export function useSpeech(): UseSpeechReturn {
-  const [isSpeaking, setIsSpeaking] = useState(false);
+  const speechId = useId();
+  const [activeId, setActiveId] = useState<string | null>(activeSpeechId);
+  const isSupported = useSyncExternalStore(
+    subscribeToSpeechSupport,
+    isSpeechSynthesisSupported,
+    () => false,
+  );
 
-  // Check for browser support once — avoid SSR issues with typeof window
-  const isSupported =
-    typeof window !== "undefined" && "speechSynthesis" in window;
+  useEffect(() => {
+    const handleActiveSpeechChange = (nextSpeechId: string | null) => {
+      setActiveId(nextSpeechId);
+    };
+
+    activeSpeechListeners.add(handleActiveSpeechChange);
+    handleActiveSpeechChange(activeSpeechId);
+
+    return () => {
+      activeSpeechListeners.delete(handleActiveSpeechChange);
+    };
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (activeSpeechId === speechId && isSpeechSynthesisSupported()) {
+        window.speechSynthesis.cancel();
+        clearActiveSpeechId(speechId);
+      }
+    };
+  }, [speechId]);
 
   const speak = useCallback(
     (copticText: string) => {
-      if (!isSupported || !copticText.trim()) {
+      if (!isSpeechSynthesisSupported() || !copticText.trim()) {
         return;
       }
 
       try {
         const phonetic = bohairicToPhonetic(copticText);
-        const utterance = new SpeechSynthesisUtterance(phonetic);
+        if (!phonetic) {
+          return;
+        }
 
-        // en-US is the most reliably available voice across browsers
+        const utterance = new window.SpeechSynthesisUtterance(phonetic);
+
         utterance.lang = "en-US";
-        // Slightly slower than default for clarity
         utterance.rate = 0.85;
-        // Moderate pitch — avoids robotic extremes
         utterance.pitch = 1.0;
 
-        utterance.onstart = () => setIsSpeaking(true);
-        utterance.onend = () => setIsSpeaking(false);
-        utterance.onerror = () => setIsSpeaking(false);
+        utterance.onstart = () => publishActiveSpeechId(speechId);
+        utterance.onend = () => clearActiveSpeechId(speechId);
+        utterance.onerror = () => clearActiveSpeechId(speechId);
 
-        // Cancel any currently playing speech before starting new
+        publishActiveSpeechId(null);
         window.speechSynthesis.cancel();
+        publishActiveSpeechId(speechId);
         window.speechSynthesis.speak(utterance);
       } catch (error) {
         console.warn("[useSpeech] Speech synthesis failed:", error);
-        setIsSpeaking(false);
+        clearActiveSpeechId(speechId);
       }
     },
-    [isSupported],
+    [speechId],
   );
 
   const stop = useCallback(() => {
-    if (!isSupported) {
+    if (!isSpeechSynthesisSupported()) {
       return;
     }
     window.speechSynthesis.cancel();
-    setIsSpeaking(false);
-  }, [isSupported]);
+    clearActiveSpeechId(speechId);
+  }, [speechId]);
 
-  return { speak, stop, isSpeaking, isSupported };
+  return { speak, stop, isSpeaking: activeId === speechId, isSupported };
 }

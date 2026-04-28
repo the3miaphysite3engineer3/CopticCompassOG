@@ -100,6 +100,7 @@ export function AnalyticsChartsSection({
           isThemeReady={isThemeReady}
           tooltipContentStyle={colors.tooltipContentStyle}
           tooltipItemStyle={colors.tooltipItemStyle}
+          tooltipLabelStyle={colors.tooltipLabelStyle}
           onSliceClick={(data) => onChartClick(data, "pos")}
         />
 
@@ -131,6 +132,7 @@ export function AnalyticsChartsSection({
           isThemeReady={isThemeReady}
           tooltipContentStyle={colors.tooltipContentStyle}
           tooltipItemStyle={colors.tooltipItemStyle}
+          tooltipLabelStyle={colors.tooltipLabelStyle}
           onSliceClick={(data) => onChartClick(data, "gender")}
         />
       </div>
@@ -144,6 +146,7 @@ export function AnalyticsChartsSection({
           isThemeReady={isThemeReady}
           tooltipContentStyle={colors.tooltipContentStyle}
           tooltipItemStyle={colors.tooltipItemStyle}
+          tooltipLabelStyle={colors.tooltipLabelStyle}
           onSliceClick={(data) => onChartClick(data, "etymology")}
         />
 
@@ -155,6 +158,7 @@ export function AnalyticsChartsSection({
           isThemeReady={isThemeReady}
           tooltipContentStyle={colors.tooltipContentStyle}
           tooltipItemStyle={colors.tooltipItemStyle}
+          tooltipLabelStyle={colors.tooltipLabelStyle}
           onSliceClick={(data) => onChartClick(data, "derivation")}
         />
       </div>
@@ -168,6 +172,7 @@ export function AnalyticsChartsSection({
           isThemeReady={isThemeReady}
           tooltipContentStyle={colors.tooltipContentStyle}
           tooltipItemStyle={colors.tooltipItemStyle}
+          tooltipLabelStyle={colors.tooltipLabelStyle}
           onSliceClick={(data) => onChartClick(data, "verb")}
         />
 
@@ -179,6 +184,7 @@ export function AnalyticsChartsSection({
           isThemeReady={isThemeReady}
           tooltipContentStyle={colors.tooltipContentStyle}
           tooltipItemStyle={colors.tooltipItemStyle}
+          tooltipLabelStyle={colors.tooltipLabelStyle}
           onSliceClick={(data) => onChartClick(data, "relations")}
         />
       </div>

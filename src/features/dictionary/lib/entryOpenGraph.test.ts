@@ -74,4 +74,31 @@ describe("entry Open Graph helpers", () => {
     expect(preview.relatedForms).toEqual(["ⲥⲁϫ", "ⲥⲁϫⲉ"]);
     expect(preview.strapline).toBe("Coptic Dictionary");
   });
+
+  it("includes the primary construct participle in preview headings", () => {
+    const entry = createEntry({
+      id: "cd_130",
+      headword: "ϫⲓ",
+      dialects: {
+        B: {
+          absolute: "ϭⲓ",
+          nominal: "ϭⲓ-",
+          pronominal: "ϭⲓⲧ=",
+          stative: "ϭⲏⲟⲩ†",
+          constructParticiples: ["ϭⲁⲓ~"],
+          variants: {
+            constructParticiples: ["ϭⲁⲩ~"],
+          },
+        },
+      },
+      english_meanings: ["pc taker"],
+    });
+
+    const preview = buildEntryOpenGraphPreview({
+      entry,
+      language: "en",
+    });
+
+    expect(preview.heading).toBe("ϭⲓ ϭⲓ-/ϭⲓⲧ= ϭⲏⲟⲩ† ϭⲁⲓ~");
+  });
 });

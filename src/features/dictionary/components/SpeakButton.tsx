@@ -4,33 +4,36 @@ import { useRef, useState } from "react";
 
 import { FloatingTooltip } from "@/components/FloatingTooltip";
 import { useLanguage } from "@/components/LanguageProvider";
+import {
+  microTooltipBubbleClassName,
+  tooltipArrowClassName,
+} from "@/components/MicroTooltip";
 import { useSpeech } from "@/features/dictionary/hooks/useSpeech";
 import { cx } from "@/lib/classes";
 
 interface SpeakButtonProps {
-  /** The Coptic text to be spoken */
   copticText: string;
-  /** Optional CSS class for custom styling */
   className?: string;
 }
 
 /**
- * A button that speaks a Coptic word using phonetic TTS.
- * Renders nothing if the browser doesn't support Web Speech API.
+ * Renders a compact pronunciation control when browser speech synthesis is
+ * available.
  */
 export function SpeakButton({ copticText, className }: SpeakButtonProps) {
   const { speak, stop, isSpeaking, isSupported } = useSpeech();
   const { t } = useLanguage();
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [isHovered, setIsHovered] = useState(false);
+  const hearLabel = t("dict.ttsHear");
+  const stopLabel = t("dict.ttsStop");
 
-  // Silently hide on unsupported browsers or empty text
   if (!isSupported || !copticText?.trim()) {
     return null;
   }
 
   const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevents navigating if inside a link wrapper
+    e.preventDefault();
     e.stopPropagation();
     setIsHovered(false);
     if (isSpeaking) {
@@ -49,12 +52,8 @@ export function SpeakButton({ copticText, className }: SpeakButtonProps) {
         onMouseLeave={() => setIsHovered(false)}
         onFocus={() => setIsHovered(true)}
         onBlur={() => setIsHovered(false)}
-        title={isSpeaking ? "Stop pronunciation" : "Hear pronunciation"}
-        aria-label={
-          isSpeaking
-            ? "Stop pronunciation"
-            : `Hear pronunciation of ${copticText}`
-        }
+        title={isSpeaking ? stopLabel : hearLabel}
+        aria-label={isSpeaking ? stopLabel : `${hearLabel}: ${copticText}`}
         aria-pressed={isSpeaking}
         className={cx(
           "inline-flex shrink-0 items-center justify-center rounded-lg p-1.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500",
@@ -65,7 +64,6 @@ export function SpeakButton({ copticText, className }: SpeakButtonProps) {
         )}
       >
         {isSpeaking ? (
-          // Stop icon
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"
@@ -77,7 +75,6 @@ export function SpeakButton({ copticText, className }: SpeakButtonProps) {
             <rect x="6" y="6" width="12" height="12" rx="2" />
           </svg>
         ) : (
-          // Speaker icon
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="18"
@@ -99,9 +96,9 @@ export function SpeakButton({ copticText, className }: SpeakButtonProps) {
       <FloatingTooltip
         anchorRef={buttonRef}
         isOpen={isHovered && !isSpeaking}
-        className="max-w-[200px] text-center text-xs text-stone-100 bg-stone-900 px-3 py-2 rounded-lg shadow-lg dark:bg-stone-800 dark:text-stone-300 border border-stone-800 dark:border-stone-700 font-medium"
+        className={cx("max-w-[200px]", microTooltipBubbleClassName)}
         withArrow
-        arrowClassName="bg-stone-900 dark:bg-stone-800 border-b border-r border-stone-800 dark:border-stone-700"
+        arrowClassName={tooltipArrowClassName}
       >
         {t("dict.ttsDisclaimer")}
       </FloatingTooltip>

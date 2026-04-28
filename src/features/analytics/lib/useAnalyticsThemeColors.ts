@@ -1,5 +1,11 @@
 import { useTheme } from "next-themes";
 
+import {
+  chartTooltipContentBaseStyle,
+  chartTooltipItemBaseStyle,
+  chartTooltipLabelBaseStyle,
+} from "@/components/MicroTooltip";
+
 import type { CSSProperties } from "react";
 
 const COLOR_FALLBACKS = {
@@ -90,12 +96,17 @@ export function useAnalyticsThemeColors() {
       ],
     },
     tooltipContentStyle: {
+      ...chartTooltipContentBaseStyle,
       backgroundColor: surface,
       borderColor: line,
-      borderRadius: "12px",
       color: ink,
     } satisfies CSSProperties,
     tooltipItemStyle: {
+      ...chartTooltipItemBaseStyle,
+      color: ink,
+    } satisfies CSSProperties,
+    tooltipLabelStyle: {
+      ...chartTooltipLabelBaseStyle,
       color: ink,
     } satisfies CSSProperties,
     warning,

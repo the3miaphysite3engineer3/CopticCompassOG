@@ -3,33 +3,72 @@ import {
   type DialectFilter,
   type DictionaryDialectCode,
 } from "@/features/dictionary/config";
-import type { DictionaryClientEntry } from "@/features/dictionary/types";
+import type {
+  DialectFormVariants,
+  DictionaryClientEntry,
+} from "@/features/dictionary/types";
 
 type DialectEntryTuple = [
   DictionaryDialectCode,
   NonNullable<DictionaryClientEntry["dialects"][DictionaryDialectCode]>,
 ];
+type DialectVariantState = keyof DialectFormVariants;
+type DialectVariantRow = {
+  forms: string[];
+  state: DialectVariantState;
+};
+
+const DIALECT_VARIANT_STATE_ORDER: readonly DialectVariantState[] = [
+  "absolute",
+  "nominal",
+  "pronominal",
+  "stative",
+  "constructParticiples",
+] as const;
+
+function formatBoundForms(nominal: string, pronominal: string) {
+  if (!nominal) {
+    return pronominal;
+  }
+
+  if (!pronominal) {
+    return nominal;
+  }
+
+  const nominalStem = nominal.endsWith("-") ? nominal.slice(0, -1) : "";
+  const pronominalStem = pronominal.endsWith("=")
+    ? pronominal.slice(0, -1)
+    : "";
+
+  if (nominalStem && nominalStem === pronominalStem) {
+    return `${nominalStem}-/=`;
+  }
+
+  return `${nominal}/${pronominal}`;
+}
 
 /**
  * Joins the available dialect forms into the compact display string used across
- * search results and entry headers.
+ * search results and entry headers. Variants stay out of this string so the
+ * displayed form remains the standard student-facing spelling.
  */
 export function formatDialectForms(
   forms: DialectEntryTuple[1],
   headwordFallback: string,
 ) {
   const parts: string[] = [];
-  const hasBoundOrStative = Boolean(
-    forms.nominal || forms.pronominal || forms.stative,
+  const primaryConstructParticiple = forms.constructParticiples?.[0] ?? "";
+  const hasDerivedForm = Boolean(
+    forms.nominal ||
+    forms.pronominal ||
+    forms.stative ||
+    primaryConstructParticiple,
   );
   let absoluteWithVariants = "";
 
   if (forms.absolute) {
-    absoluteWithVariants = [
-      forms.absolute,
-      ...(forms.absoluteVariants ?? []),
-    ].join(", ");
-  } else if (!hasBoundOrStative) {
+    absoluteWithVariants = forms.absolute;
+  } else if (!hasDerivedForm) {
     absoluteWithVariants = headwordFallback;
   }
 
@@ -37,22 +76,37 @@ export function formatDialectForms(
     parts.push(absoluteWithVariants);
   }
 
-  const bound: string[] = [];
-  if (forms.nominal) {
-    bound.push(forms.nominal);
-  }
-  if (forms.pronominal) {
-    bound.push(forms.pronominal);
-  }
+  const bound = formatBoundForms(forms.nominal, forms.pronominal);
 
-  if (bound.length > 0) {
-    parts.push(bound.join("/"));
+  if (bound) {
+    parts.push(bound);
   }
   if (forms.stative) {
     parts.push(forms.stative);
   }
+  if (primaryConstructParticiple) {
+    parts.push(primaryConstructParticiple);
+  }
 
   return parts.join(" ").trim();
+}
+
+/**
+ * Returns dialect-specific variants in a stable grammatical-state order for
+ * the dedicated variants section.
+ */
+export function getDialectVariantRows(
+  forms: DialectEntryTuple[1] | undefined,
+): DialectVariantRow[] {
+  if (!forms?.variants) {
+    return [];
+  }
+
+  return DIALECT_VARIANT_STATE_ORDER.flatMap((state) => {
+    const stateForms = forms.variants?.[state]?.filter(Boolean) ?? [];
+
+    return stateForms.length > 0 ? [{ state, forms: stateForms }] : [];
+  });
 }
 
 /**

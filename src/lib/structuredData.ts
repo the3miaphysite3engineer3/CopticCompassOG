@@ -7,7 +7,11 @@ import {
   buildEntryDescription,
   toPlainText,
 } from "@/features/dictionary/lib/entryText";
-import type { LexicalEntry } from "@/features/dictionary/types";
+import type {
+  DialectForms,
+  DialectFormVariants,
+  LexicalEntry,
+} from "@/features/dictionary/types";
 import {
   buildGrammarLessonSeoDescription,
   buildGrammarLessonSeoTitle,
@@ -34,6 +38,15 @@ type BreadcrumbStructuredDataItem = {
   name: string;
   path: string;
 };
+type DialectVariantState = keyof DialectFormVariants;
+
+const STRUCTURED_DATA_VARIANT_STATES: readonly DialectVariantState[] = [
+  "absolute",
+  "nominal",
+  "pronominal",
+  "stative",
+  "constructParticiples",
+];
 
 const STRUCTURED_DATA_COPY = {
   en: {
@@ -428,6 +441,27 @@ export function createGrammarLessonStructuredData(
  * Builds the defined-term structured data for a dictionary entry, collapsing
  * dialect spellings into alternate labels for the same lexical concept.
  */
+function collectDialectVariantAlternateNames(forms: DialectForms) {
+  if (!forms.variants) {
+    return [];
+  }
+
+  return STRUCTURED_DATA_VARIANT_STATES.flatMap(
+    (state) => forms.variants?.[state] ?? [],
+  );
+}
+
+function collectDialectAlternateNames(forms: DialectForms) {
+  return [
+    forms.absolute,
+    forms.nominal,
+    forms.pronominal,
+    forms.stative,
+    ...(forms.constructParticiples ?? []),
+    ...collectDialectVariantAlternateNames(forms),
+  ];
+}
+
 export function createDefinedTermStructuredData(
   entry: LexicalEntry,
   locale: Language = DEFAULT_LANGUAGE,
@@ -438,13 +472,7 @@ export function createDefinedTermStructuredData(
   const alternateNames = Array.from(
     new Set(
       Object.values(entry.dialects)
-        .flatMap((forms) => [
-          forms.absolute,
-          ...(forms.absoluteVariants ?? []),
-          forms.nominal,
-          forms.pronominal,
-          forms.stative,
-        ])
+        .flatMap((forms) => collectDialectAlternateNames(forms))
         .map((form) => toPlainText(form))
         .filter(Boolean),
     ),

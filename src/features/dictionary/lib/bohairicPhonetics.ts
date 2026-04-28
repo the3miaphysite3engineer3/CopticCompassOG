@@ -1,40 +1,28 @@
-// Bohairic Coptic advanced phonetic mapping
-// Generates English **pseudo-phonetics** tuned for the Web Speech API (en-US).
-
 const FRONT_VOWELS = ["ⲉ", "ⲏ", "ⲓ", "ⲩ"];
 const VELAR_CONSONANTS = ["ⲅ", "ⲕ", "ⲝ", "ⲭ"];
 const BOHAIRIC_VOWELS = ["ⲁ", "ⲉ", "ⲏ", "ⲓ", "ⲟ", "ⲩ", "ⲱ"];
+const COPTIC_PRONUNCIATION_MARKS = /[\p{M}\u02cb\u0060]/gu;
 
 /**
- * Converts a Bohairic Coptic string to a phonetic English approximation.
- * Follows Greco-Bohairic conventions and outputs a string optimized for
- * an English (en-US) text-to-speech engine.
- *
- * @param text - A string containing Bohairic Coptic Unicode characters
- * @returns A phonetic English string suitable for TTS input
+ * Converts Bohairic Coptic text into an English pseudo-phonetic string for
+ * browser speech synthesis.
  */
 export function bohairicToPhonetic(text: string): string {
   if (!text) {
     return "";
   }
 
-  // Normalize to lowercase for easier rule matching
-  let normalized = text.toLowerCase();
+  let normalized = text.normalize("NFD").toLowerCase();
 
-  // Strip notational characters and symbols that TTS shouldn't pronounce
-  // Includes: =, †, *, ~, [, ], (, ), and ⳪
   normalized = normalized.replace(/[=†*~\[\]()⳪]/g, "");
 
-  // Replace slashes and hyphens with spaces to preserve word boundaries
-  normalized = normalized.replace(/[\/\-]/g, " ");
+  /**
+   * Jinkim and other combining marks are treated as stylistic signs in the
+   * pronunciation mode and should not produce extra sounds.
+   */
+  normalized = normalized.replace(COPTIC_PRONUNCIATION_MARKS, "");
 
-  // Clean up jinkims: move combining jinkims before the character they modify
-  normalized = normalized.replace(
-    /([^\u0300\u032E\u02CB̀\s])[\u0300\u032E\u02CB̀]/g,
-    "`$1",
-  );
-  // Standardize all standalone and combining jinkims to backtick
-  normalized = normalized.replace(/[\u0300\u032E\u02CB̀]/g, "`");
+  normalized = normalized.replace(/[\/\-]/g, " ");
 
   let result = "";
   let i = 0;
@@ -68,16 +56,6 @@ export function bohairicToPhonetic(text: string): string {
       continue;
     }
 
-    // Jinkim
-    if (char === "`") {
-      // If the next char is a vowel, it acts as a glottal stop.
-      // If a consonant, it adds an "eh" sound before it.
-      const nextIsVowel = nextChar && BOHAIRIC_VOWELS.includes(nextChar);
-      result += nextIsVowel ? "-" : "eh-";
-      i++;
-      continue;
-    }
-
     switch (char) {
       case "ⲁ":
         result += "ah";
@@ -104,7 +82,7 @@ export function bohairicToPhonetic(text: string): string {
       case "ⲉ":
         if (nextChar === "ⲓ") {
           result += "ee";
-          i++; // Skip the yota
+          i++;
         } else {
           result += "eh";
         }
@@ -161,7 +139,7 @@ export function bohairicToPhonetic(text: string): string {
         break;
       case "ⲩ":
         result += "ee";
-        break; // Only reached if not part of digraphs
+        break;
       case "ⲫ":
         result += "f";
         break;
@@ -184,7 +162,6 @@ export function bohairicToPhonetic(text: string): string {
       case "ϥ":
         result += "f";
         break;
-      case "ϧ":
       case "ⳳ":
         result += "kh";
         break;
@@ -201,14 +178,13 @@ export function bohairicToPhonetic(text: string): string {
         result += "tee";
         break;
       default:
-        result += char; // Passthrough spaces, punctuation
+        result += char;
     }
     i++;
   }
 
-  // Final cleanup for English TTS pacing
-  // Insert hyphen between consecutive vowel sounds to prevent merging (like eeohm -> ee-ohm)
   result = result.replace(/(ee)(o|a|e|u)/gi, "$1-$2");
+  result = result.replace(/\s+/g, " ").trim();
 
   return result;
 }

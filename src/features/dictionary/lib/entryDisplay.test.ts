@@ -4,6 +4,7 @@ import type { LexicalEntry } from "@/features/dictionary/types";
 
 import {
   formatDialectForms,
+  getDialectVariantRows,
   getPreferredEntryDialectKey,
   getPreferredEntryDisplaySpelling,
 } from "./entryDisplay";
@@ -37,10 +38,12 @@ describe("dictionary entry display helpers", () => {
       dialects: {
         B: {
           absolute: "ϭⲁϫⲓ",
-          absoluteVariants: ["ϫⲁϫⲓ"],
           nominal: "ϭⲁϫ",
           pronominal: "",
           stative: "",
+          variants: {
+            absolute: ["ϫⲁϫⲓ"],
+          },
         },
         S: {
           absolute: "ⲥⲁϫⲓ",
@@ -52,7 +55,7 @@ describe("dictionary entry display helpers", () => {
     });
 
     expect(getPreferredEntryDialectKey(entry)).toBe("B");
-    expect(getPreferredEntryDisplaySpelling(entry)).toBe("ϭⲁϫⲓ, ϫⲁϫⲓ ϭⲁϫ");
+    expect(getPreferredEntryDisplaySpelling(entry)).toBe("ϭⲁϫⲓ ϭⲁϫ");
   });
 
   it("falls back to Sahidic when Bohairic is unavailable", () => {
@@ -113,6 +116,151 @@ describe("dictionary entry display helpers", () => {
       "ⲛⲉⲙ-/ⲛⲉⲙⲁ=",
     );
     expect(getPreferredEntryDisplaySpelling(entry)).toBe("ⲛⲉⲙ-/ⲛⲉⲙⲁ=");
+  });
+
+  it("shows the primary construct participle after verbal forms", () => {
+    const entry = createEntry({
+      id: "cd_130",
+      headword: "ϫⲓ",
+      dialects: {
+        B: {
+          absolute: "ϭⲓ",
+          nominal: "ϭⲓ-",
+          pronominal: "ϭⲓⲧ=",
+          stative: "ϭⲏⲟⲩ†",
+          constructParticiples: ["ϭⲁⲓ~"],
+          variants: {
+            constructParticiples: ["ϭⲁⲩ~"],
+          },
+        },
+      },
+    });
+
+    expect(formatDialectForms(entry.dialects.B!, entry.headword)).toBe(
+      "ϭⲓ ϭⲓ-/ϭⲓⲧ= ϭⲏⲟⲩ† ϭⲁⲓ~",
+    );
+    expect(getPreferredEntryDisplaySpelling(entry)).toBe(
+      "ϭⲓ ϭⲓ-/ϭⲓⲧ= ϭⲏⲟⲩ† ϭⲁⲓ~",
+    );
+  });
+
+  it("collapses matching nominal and pronominal bound stems", () => {
+    const entry = createEntry({
+      id: "cd_bound_same",
+      headword: "ⲙⲟϩ",
+      dialects: {
+        B: {
+          absolute: "ⲙⲟϩ",
+          nominal: "ⲙⲁϩ-",
+          pronominal: "ⲙⲁϩ=",
+          stative: "ⲙⲉϩ†",
+        },
+      },
+    });
+
+    expect(formatDialectForms(entry.dialects.B!, entry.headword)).toBe(
+      "ⲙⲟϩ ⲙⲁϩ-/= ⲙⲉϩ†",
+    );
+  });
+
+  it("keeps different nominal and pronominal bound stems separate", () => {
+    const entry = createEntry({
+      id: "cd_bound_different",
+      headword: "ⲙⲛ-",
+      dialects: {
+        B: {
+          absolute: "",
+          nominal: "ⲛⲉⲙ-",
+          pronominal: "ⲛⲉⲙⲁ=",
+          stative: "",
+        },
+      },
+    });
+
+    expect(formatDialectForms(entry.dialects.B!, entry.headword)).toBe(
+      "ⲛⲉⲙ-/ⲛⲉⲙⲁ=",
+    );
+  });
+
+  it("returns secondary construct participles for the variants section", () => {
+    const entry = createEntry({
+      id: "cd_130",
+      headword: "ϫⲓ",
+      dialects: {
+        B: {
+          absolute: "ϭⲓ",
+          nominal: "ϭⲓ-",
+          pronominal: "ϭⲓⲧ=",
+          stative: "ϭⲏⲟⲩ†",
+          constructParticiples: ["ϭⲁⲓ~"],
+          variants: {
+            constructParticiples: ["ϭⲁⲩ~"],
+          },
+        },
+      },
+    });
+
+    expect(getDialectVariantRows(entry.dialects.B)).toEqual([
+      {
+        forms: ["ϭⲁⲩ~"],
+        state: "constructParticiples",
+      },
+    ]);
+  });
+
+  it("returns no variant rows without secondary forms", () => {
+    const entry = createEntry({
+      id: "cd_121",
+      headword: "ϣⲱⲧ",
+      dialects: {
+        B: {
+          absolute: "ϣⲱⲧ",
+          nominal: "ϣⲉⲧ-",
+          pronominal: "ϣⲁⲧ=",
+          stative: "ϣⲁⲧ†",
+          constructParticiples: ["ϣⲁⲧ~"],
+        },
+      },
+    });
+
+    expect(getDialectVariantRows(entry.dialects.B)).toEqual([]);
+    expect(getDialectVariantRows(undefined)).toEqual([]);
+  });
+
+  it("orders dialect variants by grammatical state", () => {
+    const entry = createEntry({
+      id: "cd_variant",
+      headword: "ⲕⲱ",
+      dialects: {
+        S: {
+          absolute: "ⲕⲱ",
+          nominal: "ⲕⲁ-",
+          pronominal: "ⲕⲁ=",
+          stative: "ⲕⲏ†",
+          constructParticiples: ["ⲕⲁ~"],
+          variants: {
+            constructParticiples: ["ⲕⲉ~"],
+            absolute: ["ⲕⲉ"],
+            pronominal: ["ⲕⲉ="],
+          },
+        },
+      },
+    });
+
+    expect(getDialectVariantRows(entry.dialects.S)).toEqual([
+      {
+        forms: ["ⲕⲉ"],
+        state: "absolute",
+      },
+      {
+        forms: ["ⲕⲉ="],
+        state: "pronominal",
+      },
+      {
+        forms: ["ⲕⲉ~"],
+        state: "constructParticiples",
+      },
+    ]);
   });
 
   it("shows the Bohairic between entry as nominal plus pronominal bound forms", () => {

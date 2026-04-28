@@ -1,15 +1,15 @@
 const COPTIC_COMBINING_MARKS_REGEX =
   /[\u0300-\u036f\uFE20-\uFE2F\u0483-\u0489]/g;
-const COPTIC_KHEI_EQUIVALENT_REGEX = /[ϧⳳ]/g;
-const COPTIC_KHEI_REGEX_FRAGMENT = "[ϦϧⳲⳳ]";
+const COPTIC_ALTERNATE_KHEI_REGEX = /[\u03e6\u03e7]/g;
+const COPTIC_KHEI_REGEX_FRAGMENT = "[\\u03e6\\u03e7Ⳳⳳ]";
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 /**
- * Normalizes Coptic text for search so diacritic and legacy/modern character
- * variants resolve to the same canonical form.
+ * Normalizes Coptic text for search so diacritic and khei glyph variants
+ * resolve to the same canonical form.
  */
 export function normalizeCopticSearchText(text: string): string {
   if (!text) {
@@ -20,7 +20,7 @@ export function normalizeCopticSearchText(text: string): string {
     .normalize("NFD")
     .replace(COPTIC_COMBINING_MARKS_REGEX, "")
     .toLowerCase()
-    .replace(COPTIC_KHEI_EQUIVALENT_REGEX, "ⳳ")
+    .replace(COPTIC_ALTERNATE_KHEI_REGEX, "ⳳ")
     .trim();
 }
 

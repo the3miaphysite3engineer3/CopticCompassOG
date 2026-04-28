@@ -19,10 +19,7 @@ type EntryRelationsPanelProps = {
 };
 
 function getDisplayHeadword(entry: LexicalEntry) {
-  const bohairicAbsolute = entry.dialects.B?.absolute ?? entry.headword;
-  const bohairicVariants = entry.dialects.B?.absoluteVariants ?? [];
-
-  return [bohairicAbsolute, ...bohairicVariants].join(", ");
+  return entry.dialects.B?.absolute || entry.headword;
 }
 
 function getRelationLabel(

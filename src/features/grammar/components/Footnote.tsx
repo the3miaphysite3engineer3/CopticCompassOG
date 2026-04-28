@@ -3,6 +3,10 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 
 import { FloatingTooltip } from "@/components/FloatingTooltip";
+import {
+  richTooltipBubbleClassName,
+  tooltipArrowClassName,
+} from "@/components/MicroTooltip";
 import { cx } from "@/lib/classes";
 
 import { useGrammarLessonRenderContext } from "./GrammarLessonRenderContext";
@@ -134,12 +138,13 @@ export function Footnote({ number, content, align = "center" }: FootnoteProps) {
       <FloatingTooltip
         align={align}
         anchorRef={anchorRef}
-        arrowClassName="bg-black"
+        arrowClassName={tooltipArrowClassName}
         className={cx(
-          "max-w-[min(18rem,calc(100vw-1.5rem))] rounded-xl bg-black px-3 py-2.5 text-left text-xs leading-relaxed text-white shadow-2xl",
-          "[&_p]:text-white [&_li]:text-white [&_strong]:text-white [&_em]:text-white [&_.small-caps]:text-white",
-          "[&_a]:text-sky-200 [&_a]:decoration-sky-400 [&_a:hover]:text-sky-100",
-          "[&_.font-coptic]:text-emerald-300 [&_sup]:text-white",
+          richTooltipBubbleClassName,
+          "[&_p]:text-stone-700 dark:[&_p]:text-stone-200 [&_li]:text-stone-700 dark:[&_li]:text-stone-200",
+          "[&_strong]:text-stone-950 dark:[&_strong]:text-stone-50 [&_em]:text-stone-800 dark:[&_em]:text-stone-100 [&_.small-caps]:text-stone-800 dark:[&_.small-caps]:text-stone-100",
+          "[&_a]:text-sky-700 [&_a]:decoration-sky-400 [&_a:hover]:text-sky-600 dark:[&_a]:text-sky-300 dark:[&_a:hover]:text-sky-200",
+          "[&_.font-coptic]:text-emerald-700 dark:[&_.font-coptic]:text-emerald-300 [&_sup]:text-current",
         )}
         id={tooltipId}
         isOpen={isOpen}

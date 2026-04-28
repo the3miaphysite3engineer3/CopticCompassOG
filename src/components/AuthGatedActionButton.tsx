@@ -14,6 +14,10 @@ import {
 
 import { FloatingTooltip } from "@/components/FloatingTooltip";
 import { useLanguage } from "@/components/LanguageProvider";
+import {
+  interactiveTooltipBubbleClassName,
+  tooltipArrowClassName,
+} from "@/components/MicroTooltip";
 import { cx } from "@/lib/classes";
 import { getLoginPath } from "@/lib/supabase/config";
 
@@ -211,10 +215,8 @@ export function AuthGatedActionButton({
         </button>
         <FloatingTooltip
           anchorRef={buttonRef}
-          className={cx(
-            "w-64 max-w-[calc(100vw-2rem)] rounded-2xl border border-stone-700 bg-stone-900/95 px-3 py-3 text-center text-xs leading-5 text-white shadow-lg",
-            tooltipClassName,
-          )}
+          className={cx(interactiveTooltipBubbleClassName, tooltipClassName)}
+          arrowClassName={tooltipArrowClassName}
           id={tooltipId}
           isOpen={tooltipVisible}
           onMouseEnter={() => {
@@ -225,12 +227,13 @@ export function AuthGatedActionButton({
             setIsHoveringLockedTooltip(false);
             scheduleHideLockedMessage();
           }}
+          withArrow
         >
           <div className="space-y-3">
             <p>{lockedMessage}</p>
             <Link
               href={loginHref}
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-white px-3 text-xs font-semibold text-stone-900 transition-colors hover:bg-stone-100"
+              className="inline-flex h-9 items-center justify-center rounded-lg bg-stone-900 px-3 text-xs font-semibold text-white transition-colors hover:bg-stone-700 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white"
             >
               {t("nav.login")}
             </Link>

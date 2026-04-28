@@ -24,6 +24,7 @@ type AnalyticsPieChartCardProps = {
   title: ReactNode;
   tooltipContentStyle: CSSProperties;
   tooltipItemStyle: CSSProperties;
+  tooltipLabelStyle: CSSProperties;
 };
 
 export function AnalyticsPieChartCard({
@@ -36,6 +37,7 @@ export function AnalyticsPieChartCard({
   title,
   tooltipContentStyle,
   tooltipItemStyle,
+  tooltipLabelStyle,
 }: AnalyticsPieChartCardProps) {
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const [chartSize, setChartSize] = useState({ height: 0, width: 0 });
@@ -89,6 +91,7 @@ export function AnalyticsPieChartCard({
                 fontFamily: `${antinoou.style.fontFamily}, serif`,
               }}
               itemStyle={tooltipItemStyle}
+              labelStyle={tooltipLabelStyle}
             />
             <Legend wrapperStyle={CHART_LEGEND_STYLE} />
             <Pie

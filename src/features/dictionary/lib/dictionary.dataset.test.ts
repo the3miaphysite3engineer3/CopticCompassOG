@@ -3,7 +3,7 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import type { LexicalEntry } from "@/features/dictionary/types";
+import type { DialectForms, LexicalEntry } from "@/features/dictionary/types";
 
 function hasUppercaseCopticCharacter(value: string) {
   for (const character of value) {
@@ -21,14 +21,227 @@ function hasUppercaseCopticCharacter(value: string) {
   return false;
 }
 
+function collectDictionaryStrings(value: unknown, results: string[] = []) {
+  if (typeof value === "string") {
+    results.push(value);
+    return results;
+  }
+
+  if (Array.isArray(value)) {
+    value.forEach((item) => collectDictionaryStrings(item, results));
+    return results;
+  }
+
+  if (value && typeof value === "object") {
+    Object.values(value).forEach((item) =>
+      collectDictionaryStrings(item, results),
+    );
+  }
+
+  return results;
+}
+
+function collectConstructParticiples(forms: DialectForms | undefined) {
+  return [
+    ...(forms?.constructParticiples ?? []),
+    ...(forms?.variants?.constructParticiples ?? []),
+  ];
+}
+
+function collectMeaningGlosses(entry: LexicalEntry) {
+  return [
+    ...(entry.english_meanings ?? []),
+    ...(entry.dutch_meanings ?? []),
+    entry.raw?.meaning ?? "",
+    ...(entry.bohairicParadigmData?.englishMeanings ?? []),
+    ...(entry.bohairicParadigmData?.dutchMeanings ?? []),
+  ];
+}
+
 describe("dictionary dataset guardrails", () => {
   it("keeps modern lowercase Coptic spellings in the checked-in dictionary snapshot", () => {
     const filePath = path.join(process.cwd(), "public/data/dictionary.json");
     const dictionaryJson = fs.readFileSync(filePath, "utf8");
 
-    expect(dictionaryJson).not.toMatch(/[Ϧϧ]/u);
+    expect(dictionaryJson).not.toMatch(/"absoluteVariants"/);
+    expect(dictionaryJson).not.toMatch(/[\u03e6\u03e7]/u);
     expect(dictionaryJson).toMatch(/[Ⳳⳳ]/u);
     expect(hasUppercaseCopticCharacter(dictionaryJson)).toBe(false);
+  });
+
+  it("keeps remaining construct participle gloss labels normalized as pc", () => {
+    const filePath = path.join(process.cwd(), "public/data/dictionary.json");
+    const dictionary = JSON.parse(fs.readFileSync(filePath, "utf8")) as unknown;
+    const dictionaryStrings = collectDictionaryStrings(dictionary);
+
+    expect(dictionaryStrings.some((value) => /\bpc\b/u.test(value))).toBe(true);
+    expect(
+      dictionaryStrings.filter((value) =>
+        /\bp\s+c\b\.?|\bp\s*\.\s*c\b\.?|\bpc\./iu.test(value),
+      ),
+    ).toEqual([]);
+  });
+
+  it("stores construct participles as tilde-marked forms outside nominal state", () => {
+    const filePath = path.join(process.cwd(), "public/data/dictionary.json");
+    const dictionary = JSON.parse(
+      fs.readFileSync(filePath, "utf8"),
+    ) as LexicalEntry[];
+    const invalidConstructParticiples: Array<{
+      dialect: string;
+      form: string;
+      id: string;
+    }> = [];
+    const secondaryCanonicalConstructParticiples: Array<{
+      dialect: string;
+      forms: string[];
+      id: string;
+    }> = [];
+    const nominalConstructParticiples: Array<{
+      dialect: string;
+      form: string;
+      id: string;
+    }> = [];
+
+    for (const entry of dictionary) {
+      for (const [dialect, forms] of Object.entries(entry.dialects)) {
+        if (/^pc\b/iu.test(forms.nominal)) {
+          nominalConstructParticiples.push({
+            dialect,
+            form: forms.nominal,
+            id: entry.id,
+          });
+        }
+
+        if ((forms.constructParticiples?.length ?? 0) > 1) {
+          secondaryCanonicalConstructParticiples.push({
+            dialect,
+            forms: forms.constructParticiples ?? [],
+            id: entry.id,
+          });
+        }
+
+        for (const form of collectConstructParticiples(forms)) {
+          if (!form.endsWith("~") || /\s/.test(form)) {
+            invalidConstructParticiples.push({
+              dialect,
+              form,
+              id: entry.id,
+            });
+          }
+        }
+      }
+    }
+
+    expect(nominalConstructParticiples).toEqual([]);
+    expect(secondaryCanonicalConstructParticiples).toEqual([]);
+    expect(invalidConstructParticiples).toEqual([]);
+    expect(
+      dictionary.find((entry) => entry.id === "cd_130")?.dialects.B,
+    ).toMatchObject({
+      constructParticiples: ["ϭⲁⲓ~"],
+      nominal: "ϭⲓ-",
+      pronominal: "ϭⲓⲧ=",
+      stative: "ϭⲏⲟⲩ†",
+      variants: {
+        constructParticiples: ["ϭⲁⲩ~"],
+      },
+    });
+  });
+
+  it("preserves source accents on Sahidic and Bohairic construct participles", () => {
+    const filePath = path.join(process.cwd(), "public/data/dictionary.json");
+    const dictionary = JSON.parse(
+      fs.readFileSync(filePath, "utf8"),
+    ) as LexicalEntry[];
+
+    expect(
+      dictionary.find((entry) => entry.id === "cd_130")?.dialects.S
+        ?.constructParticiples,
+    ).toContain("ϫⲁⲓ̈~");
+    expect(
+      dictionary.find((entry) => entry.id === "cd_452")?.dialects.B
+        ?.constructParticiples,
+    ).toContain("ⲁ̀ϣ~");
+    expect(
+      dictionary.find((entry) => entry.id === "cd_2598")?.dialects.B
+        ?.constructParticiples,
+    ).toContain("ϭⲁⲧⲡ̄~");
+  });
+
+  it("includes source-supplied construct participles that were missing locally", () => {
+    const filePath = path.join(process.cwd(), "public/data/dictionary.json");
+    const dictionary = JSON.parse(
+      fs.readFileSync(filePath, "utf8"),
+    ) as LexicalEntry[];
+
+    expect(
+      collectConstructParticiples(
+        dictionary.find((entry) => entry.id === "cd_23")?.dialects.S,
+      ),
+    ).toContain("ⲣⲁ~");
+    expect(
+      collectConstructParticiples(
+        dictionary.find((entry) => entry.id === "cd_138")?.dialects.B,
+      ),
+    ).toContain("ⲭⲁ~");
+    expect(
+      collectConstructParticiples(
+        dictionary.find((entry) => entry.id === "cd_46")?.dialects.S,
+      ),
+    ).toContain("ϣⲛ̄~");
+  });
+
+  it("keeps construct participle glosses readable in English and Dutch", () => {
+    const filePath = path.join(process.cwd(), "public/data/dictionary.json");
+    const dictionary = JSON.parse(
+      fs.readFileSync(filePath, "utf8"),
+    ) as LexicalEntry[];
+
+    expect(
+      dictionary.find((entry) => entry.id === "cd_133")?.english_meanings,
+    ).toContain("pc ABFLOS carrier");
+    expect(
+      dictionary.find((entry) => entry.id === "cd_276")?.dutch_meanings,
+    ).toContain("pc L onderzoeker, toetser");
+    expect(
+      dictionary.find((entry) => entry.id === "cd_2807")?.dutch_meanings,
+    ).toContain("pc (?) kaal aan de voorkant van het hoofd");
+  });
+
+  it("compacts comma-separated dialect sigla lists in meaning glosses", () => {
+    const filePath = path.join(process.cwd(), "public/data/dictionary.json");
+    const dictionary = JSON.parse(
+      fs.readFileSync(filePath, "utf8"),
+    ) as LexicalEntry[];
+    const commaSeparatedDialectSigla =
+      /\b(?:Fb|Sa|Sf|Sl|sA|NH|A|B|F|L|O|S)(?:\s*,\s*(?:Fb|Sa|Sf|Sl|sA|NH|A|B|F|L|O|S))+\b/u;
+
+    expect(
+      dictionary
+        .flatMap((entry) => collectMeaningGlosses(entry))
+        .filter((value) => commaSeparatedDialectSigla.test(value)),
+    ).toEqual([]);
+  });
+
+  it("omits grammar label punctuation and trailing dialect sigla commas in meaning glosses", () => {
+    const filePath = path.join(process.cwd(), "public/data/dictionary.json");
+    const dictionary = JSON.parse(
+      fs.readFileSync(filePath, "utf8"),
+    ) as LexicalEntry[];
+    const grammarLabelPunctuation =
+      /\b(?:pc|impers vb|imperative|adjective|auxil|intr|qual|conj|prep|advb|adj|adv|tr|refl|suff|pref|vb|nn|pron|art|int\.?)(?:\s*\([^)]*\))?[:,][ \t]*/iu;
+    const trailingDialectSiglaComma = /\b(?:Fb|Sa|Sf|Sl|A|B|F|L|O|S)+,[ \t]+/u;
+
+    expect(
+      dictionary
+        .flatMap((entry) => collectMeaningGlosses(entry))
+        .filter(
+          (value) =>
+            grammarLabelPunctuation.test(value) ||
+            trailingDialectSiglaComma.test(value),
+        ),
+    ).toEqual([]);
   });
 
   it("stores the ϩⲛ-/ⳳⲉⲛ- preposition entry as bound-only nominal and pronominal forms", () => {

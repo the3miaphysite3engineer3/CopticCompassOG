@@ -112,4 +112,35 @@ describe("entry share helpers", () => {
       "https://kyrilloswannes.com/nl/entry/cd_200",
     );
   });
+
+  it("includes the primary construct participle in share headings", () => {
+    const entry = createEntry({
+      id: "cd_130",
+      headword: "ϫⲓ",
+      dialects: {
+        B: {
+          absolute: "ϭⲓ",
+          nominal: "ϭⲓ-",
+          pronominal: "ϭⲓⲧ=",
+          stative: "ϭⲏⲟⲩ†",
+          constructParticiples: ["ϭⲁⲓ~"],
+          variants: {
+            constructParticiples: ["ϭⲁⲩ~"],
+          },
+        },
+      },
+      english_meanings: ["pc taker"],
+    });
+
+    const payload = buildEntrySharePayload({
+      entry,
+      language: "en",
+      url: "https://kyrilloswannes.com/en/entry/cd_130",
+    });
+
+    expect(payload.title).toBe("ϭⲓ ϭⲓ-/ϭⲓⲧ= ϭⲏⲟⲩ† ϭⲁⲓ~ | Coptic Dictionary");
+    expect(payload.text).toContain(
+      "Coptic dictionary entry: ϭⲓ ϭⲓ-/ϭⲓⲧ= ϭⲏⲟⲩ† ϭⲁⲓ~",
+    );
+  });
 });

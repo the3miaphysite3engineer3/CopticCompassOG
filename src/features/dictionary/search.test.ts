@@ -14,10 +14,12 @@ const lordEntry: DictionaryClientEntry = {
   dialects: {
     B: {
       absolute: "ϭⲱⲓⲥ",
-      absoluteVariants: ["⳪"],
       nominal: "",
       pronominal: "",
       stative: "",
+      variants: {
+        absolute: ["⳪"],
+      },
     },
   },
   pos: "N",
@@ -94,6 +96,48 @@ const runEntry: DictionaryClientEntry = {
   greek_equivalents: [],
 };
 
+const takeEntry: DictionaryClientEntry = {
+  id: "cd_130",
+  headword: "ϫⲓ",
+  dialects: {
+    B: {
+      absolute: "ϭⲓ",
+      nominal: "ϭⲓ-",
+      pronominal: "ϭⲓⲧ=",
+      stative: "ϭⲏⲟⲩ†",
+      constructParticiples: ["ϭⲁⲓ~"],
+      variants: {
+        constructParticiples: ["ϭⲁⲩ~"],
+      },
+    },
+  },
+  pos: "V",
+  gender: "",
+  english_meanings: ["take"],
+  greek_equivalents: [],
+};
+
+const accentedParticipleEntry: DictionaryClientEntry = {
+  id: "cd_130",
+  headword: "ϫⲓ",
+  dialects: {
+    S: {
+      absolute: "ϫⲓ",
+      nominal: "ϫⲓ-",
+      pronominal: "ϫⲓⲧ=",
+      stative: "ϫⲏⲩ†",
+      constructParticiples: ["ϫⲁⲓ̈~"],
+      variants: {
+        constructParticiples: ["ϫⲁⲩ~"],
+      },
+    },
+  },
+  pos: "V",
+  gender: "",
+  english_meanings: ["take"],
+  greek_equivalents: [],
+};
+
 describe("dictionary search", () => {
   it("indexes absolute Bohairic variants alongside the main spelling", () => {
     const preparedDictionary = prepareDictionaryForSearch([lordEntry]);
@@ -110,13 +154,13 @@ describe("dictionary search", () => {
     ).toEqual(["cd_17"]);
   });
 
-  it("treats legacy and modern khei variants as the same search character", () => {
+  it("matches khei variants as the same search character", () => {
     const preparedDictionary = prepareDictionaryForSearch([elderEntry]);
 
     expect(
-      searchPreparedDictionary("ϧⲉⲗⲗⲱ", preparedDictionary, [elderEntry]).map(
-        (entry) => entry.id,
-      ),
+      searchPreparedDictionary("\u03e7ⲉⲗⲗⲱ", preparedDictionary, [
+        elderEntry,
+      ]).map((entry) => entry.id),
     ).toEqual(["cd_63a"]);
     expect(
       searchPreparedDictionary("ⳳⲉⲗⲗⲱ", preparedDictionary, [elderEntry]).map(
@@ -124,9 +168,9 @@ describe("dictionary search", () => {
       ),
     ).toEqual(["cd_63a"]);
     expect(
-      searchPreparedDictionary("ϦⲈⲖⲖⲰ", preparedDictionary, [elderEntry]).map(
-        (entry) => entry.id,
-      ),
+      searchPreparedDictionary("\u03e6ⲈⲖⲖⲰ", preparedDictionary, [
+        elderEntry,
+      ]).map((entry) => entry.id),
     ).toEqual(["cd_63a"]);
     expect(
       searchPreparedDictionary("ⳲⲈⲖⲖⲰ", preparedDictionary, [elderEntry]).map(
@@ -166,6 +210,43 @@ describe("dictionary search", () => {
         prepositionEntry,
       ]).map((entry) => entry.id),
     ).toEqual(["cd_946"]);
+  });
+
+  it("indexes primary and variant construct participles", () => {
+    const preparedDictionary = prepareDictionaryForSearch([takeEntry]);
+
+    expect(
+      searchPreparedDictionary("ϭⲁⲓ", preparedDictionary, [takeEntry]).map(
+        (entry) => entry.id,
+      ),
+    ).toEqual(["cd_130"]);
+    expect(
+      searchPreparedDictionary("ϭⲁⲓ~", preparedDictionary, [takeEntry]).map(
+        (entry) => entry.id,
+      ),
+    ).toEqual(["cd_130"]);
+    expect(
+      searchPreparedDictionary("ϭⲁⲩ", preparedDictionary, [takeEntry]).map(
+        (entry) => entry.id,
+      ),
+    ).toEqual(["cd_130"]);
+  });
+
+  it("matches accented construct participles with unaccented queries", () => {
+    const preparedDictionary = prepareDictionaryForSearch([
+      accentedParticipleEntry,
+    ]);
+
+    expect(
+      searchPreparedDictionary("ϫⲁⲓ", preparedDictionary, [
+        accentedParticipleEntry,
+      ]).map((entry) => entry.id),
+    ).toEqual(["cd_130"]);
+    expect(
+      searchPreparedDictionary("ϫⲁⲓ̈~", preparedDictionary, [
+        accentedParticipleEntry,
+      ]).map((entry) => entry.id),
+    ).toEqual(["cd_130"]);
   });
 
   it("pages filtered results without building the full matched list", () => {

@@ -13,12 +13,21 @@ export type LexicalRelationType =
   | "derived-subentry"
   | "paradigm-member";
 
+export interface DialectFormVariants {
+  absolute?: string[];
+  constructParticiples?: string[];
+  nominal?: string[];
+  pronominal?: string[];
+  stative?: string[];
+}
+
 export interface DialectForms {
   absolute: string;
-  absoluteVariants?: string[];
+  constructParticiples?: string[];
   nominal: string;
   pronominal: string;
   stative: string;
+  variants?: DialectFormVariants;
 }
 
 export type DictionaryDialectFormsMap = Partial<

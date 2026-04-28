@@ -6,20 +6,20 @@ import {
 } from "./copticSearch";
 
 describe("coptic search helpers", () => {
-  it("folds legacy and modern khei variants to the same canonical search form", () => {
-    expect(normalizeCopticSearchText("ϧⲉⲛ")).toBe("ⳳⲉⲛ");
+  it("normalizes khei variants to the same canonical search form", () => {
     expect(normalizeCopticSearchText("ⳳⲉⲛ")).toBe("ⳳⲉⲛ");
-    expect(normalizeCopticSearchText("  ϦⲈⲚ  ")).toBe("ⳳⲉⲛ");
     expect(normalizeCopticSearchText("  ⳲⲈⲚ  ")).toBe("ⳳⲉⲛ");
+    expect(normalizeCopticSearchText("\u03e7ⲉⲛ")).toBe("ⳳⲉⲛ");
+    expect(normalizeCopticSearchText("  \u03e6ⲈⲚ  ")).toBe("ⳳⲉⲛ");
   });
 
-  it("builds a regex that matches old and new rendered glyph variants", () => {
+  it("builds a regex that matches rendered khei variants", () => {
     const regex = buildCopticSearchRegex("ⳲⲈⲚ");
 
-    expect(regex?.test("ϦⲈⲚ")).toBe(true);
-    expect(regex?.test("ϧⲉⲛ")).toBe(true);
     expect(regex?.test("ⳲⲈⲚ")).toBe(true);
     expect(regex?.test("ⳳⲉⲛ")).toBe(true);
+    expect(regex?.test("\u03e6ⲈⲚ")).toBe(true);
+    expect(regex?.test("\u03e7ⲉⲛ")).toBe(true);
   });
 
   it("ignores jinkim while matching Bohairic spellings", () => {

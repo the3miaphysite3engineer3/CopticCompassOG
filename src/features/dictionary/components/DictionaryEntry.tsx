@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { Badge } from "@/components/Badge";
 import { useLanguage } from "@/components/LanguageProvider";
+import { MicroTooltip } from "@/components/MicroTooltip";
 import { surfacePanelClassName } from "@/components/SurfacePanel";
 import {
   DEFAULT_DICTIONARY_DIALECT_FILTER,
@@ -16,6 +17,7 @@ import type {
 } from "@/features/dictionary/config";
 import {
   formatDialectForms,
+  getDialectVariantRows,
   getPreferredEntryDialectKey,
 } from "@/features/dictionary/lib/entryDisplay";
 import type { DictionaryClientEntry } from "@/features/dictionary/types";
@@ -27,6 +29,10 @@ import DialectSiglum from "./DialectSiglum";
 import HighlightText from "./HighlightText";
 import { SpeakButton } from "./SpeakButton";
 
+import type {
+  FormSymbolTooltips,
+  GrammarAbbreviationTooltips,
+} from "./HighlightText";
 import type { ReactNode } from "react";
 
 type DictionaryEntryCardProps = {
@@ -42,6 +48,90 @@ type DialectEntryTuple = [
   DictionaryDialectCode,
   NonNullable<DictionaryClientEntry["dialects"][DictionaryDialectCode]>,
 ];
+
+function getFormSymbolTooltips(
+  t: ReturnType<typeof useLanguage>["t"],
+): FormSymbolTooltips {
+  return {
+    "-": t("entry.symbol.nominal"),
+    "=": t("entry.symbol.pronominal"),
+    "†": t("entry.symbol.stative"),
+    "~": t("entry.symbol.constructParticiple"),
+  };
+}
+
+function getGrammarAbbreviationTooltips(
+  t: ReturnType<typeof useLanguage>["t"],
+): GrammarAbbreviationTooltips {
+  return {
+    acc: t("entry.abbreviation.acc"),
+    adj: t("entry.abbreviation.adj"),
+    adv: t("entry.abbreviation.adv"),
+    advb: t("entry.abbreviation.advb"),
+    art: t("entry.abbreviation.art"),
+    auxil: t("entry.abbreviation.auxil"),
+    c: t("entry.abbreviation.c"),
+    caus: t("entry.abbreviation.caus"),
+    conj: t("entry.abbreviation.conj"),
+    constr: t("entry.abbreviation.constr"),
+    dat: t("entry.abbreviation.dat"),
+    def: t("entry.abbreviation.def"),
+    esp: t("entry.abbreviation.esp"),
+    ethical: t("entry.abbreviation.ethical"),
+    ethic: t("entry.abbreviation.ethical"),
+    gen: t("entry.abbreviation.gen"),
+    gk: t("entry.abbreviation.gk"),
+    impers: t("entry.abbreviation.impers"),
+    "impers vb": t("entry.abbreviation.impersVerb"),
+    indef: t("entry.abbreviation.indef"),
+    int: t("entry.abbreviation.int"),
+    interrog: t("entry.abbreviation.interrog"),
+    intr: t("entry.abbreviation.intr"),
+    kwal: t("entry.abbreviation.qual"),
+    lit: t("entry.abbreviation.lit"),
+    neg: t("entry.abbreviation.neg"),
+    nn: t("entry.abbreviation.nn"),
+    nom: t("entry.abbreviation.nom"),
+    obj: t("entry.abbreviation.obj"),
+    pc: t("entry.abbreviation.pc"),
+    pl: t("entry.abbreviation.pl"),
+    poss: t("entry.abbreviation.poss"),
+    pref: t("entry.abbreviation.pref"),
+    prep: t("entry.abbreviation.prep"),
+    prob: t("entry.abbreviation.prob"),
+    pron: t("entry.abbreviation.pron"),
+    pronom: t("entry.abbreviation.pronom"),
+    qual: t("entry.abbreviation.qual"),
+    rare: t("entry.abbreviation.rare"),
+    refl: t("entry.abbreviation.refl"),
+    rel: t("entry.abbreviation.rel"),
+    sg: t("entry.abbreviation.sg"),
+    sim: t("entry.abbreviation.sim"),
+    subj: t("entry.abbreviation.subj"),
+    suff: t("entry.abbreviation.suff"),
+    tr: t("entry.abbreviation.tr"),
+    vbal: t("entry.abbreviation.vbal"),
+    vb: t("entry.abbreviation.vb"),
+  };
+}
+
+function MetadataTooltip({
+  children,
+  label,
+}: {
+  children: ReactNode;
+  label: string;
+}) {
+  return (
+    <MicroTooltip
+      alignItems="center"
+      className="leading-none whitespace-nowrap"
+      label={label}
+    >
+      {children}
+    </MicroTooltip>
+  );
+}
 
 export default function DictionaryEntryCard({
   actions,
@@ -68,6 +158,7 @@ export default function DictionaryEntryCard({
     headerSpelling = formatDialectForms(primaryForms, entry.headword);
   }
 
+  const canSpeakPrimarySpelling = primaryDialectKey === "B";
   const remainingDialects = Object.entries(entry.dialects).filter(
     (dialectEntry): dialectEntry is DialectEntryTuple =>
       dialectEntry[0] !== primaryDialectKey && Boolean(dialectEntry[1]),
@@ -80,13 +171,56 @@ export default function DictionaryEntryCard({
       ? "hover:text-sky-500 dark:hover:text-sky-300 cursor-pointer"
       : ""
   }`;
+  const formSymbolTooltips = getFormSymbolTooltips(t);
+  const grammarAbbreviationTooltips = getGrammarAbbreviationTooltips(t);
   const headingContent = (
     <HeadingTag className={headingClassName}>
-      <HighlightText text={headerSpelling} query={query} />
+      <HighlightText
+        text={headerSpelling}
+        query={query}
+        symbolTooltips={formSymbolTooltips}
+      />
     </HeadingTag>
   );
   const partOfSpeechLabel = getPartOfSpeechLabel(entry.pos, t);
   const partOfSpeechCode = getPartOfSpeechCode(entry.pos);
+  const meanings =
+    language === "nl" && entry.dutch_meanings
+      ? entry.dutch_meanings
+      : entry.english_meanings;
+  const variantRows =
+    primaryDialectKey && primaryForms
+      ? getDialectVariantRows(primaryForms).map((row) => ({
+          dialect: primaryDialectKey,
+          ...row,
+        }))
+      : [];
+  const compactBadgeClassName = "h-8 min-h-8 min-w-8 justify-center px-3";
+  const metadataBadges = (
+    <>
+      <Badge tone="neutral" size="sm" className={compactBadgeClassName}>
+        <MetadataTooltip label={partOfSpeechLabel}>
+          {partOfSpeechCode}
+        </MetadataTooltip>
+      </Badge>
+      {entry.gender && (
+        <span
+          className={`inline-flex h-8 items-center rounded-full border px-3 ${
+            entry.gender === "F"
+              ? "border-pink-200 bg-pink-50 text-pink-600 dark:border-pink-900/50 dark:bg-pink-950/40 dark:text-pink-300"
+              : "border-sky-200 bg-sky-50 text-sky-600 dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-300"
+          }`}
+        >
+          {t("entry.gender")}: {entry.gender}
+        </span>
+      )}
+      {primaryDialectKey && (
+        <Badge tone="neutral" size="sm" className={compactBadgeClassName}>
+          <DialectSiglum siglum={primaryDialectKey} />
+        </Badge>
+      )}
+    </>
+  );
 
   return (
     <article
@@ -103,14 +237,14 @@ export default function DictionaryEntryCard({
     >
       <div className="pointer-events-none absolute top-0 right-0 h-32 w-32 bg-sky-500/10 dark:bg-sky-500/10 rounded-full blur-3xl opacity-70" />
 
-      <div className="relative flex flex-col sm:flex-row justify-between items-start gap-4 mb-5">
-        <div className="flex items-center gap-3">
-          <div>
+      {isDetailView ? (
+        <div className="relative mb-5 flex min-w-0 flex-col gap-4">
+          <div className="min-w-0">
             {linkHeadword ? (
               <Link
                 href={getEntryPath(entry.id, language)}
                 prefetch={false}
-                className="inline-block"
+                className="inline-block max-w-full break-words [overflow-wrap:anywhere]"
               >
                 {headingContent}
               </Link>
@@ -118,33 +252,45 @@ export default function DictionaryEntryCard({
               headingContent
             )}
           </div>
-          <SpeakButton copticText={headerSpelling} className="mt-1 sm:mt-1.5" />
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+            {canSpeakPrimarySpelling && (
+              <SpeakButton
+                copticText={headerSpelling}
+                className="h-8 w-8 rounded-full border border-stone-200 bg-stone-50 text-stone-500 hover:border-stone-300 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300 dark:hover:border-stone-600"
+              />
+            )}
+            {metadataBadges}
+          </div>
         </div>
+      ) : (
+        <div className="relative mb-5 flex flex-col items-start justify-between gap-4 sm:flex-row">
+          <div className="flex min-w-0 items-start gap-3">
+            <div className="min-w-0">
+              {linkHeadword ? (
+                <Link
+                  href={getEntryPath(entry.id, language)}
+                  prefetch={false}
+                  className="inline-block max-w-full break-words [overflow-wrap:anywhere]"
+                >
+                  {headingContent}
+                </Link>
+              ) : (
+                headingContent
+              )}
+            </div>
+            {canSpeakPrimarySpelling && (
+              <SpeakButton
+                copticText={headerSpelling}
+                className="mt-1 shrink-0 sm:mt-1.5"
+              />
+            )}
+          </div>
 
-        <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
-          <span className="inline-flex h-8 items-center px-3 bg-stone-100 dark:bg-stone-800 border border-stone-200 dark:border-stone-700 rounded-full text-stone-600 dark:text-stone-300">
-            <span title={partOfSpeechLabel} aria-label={partOfSpeechLabel}>
-              {partOfSpeechCode}
-            </span>
-          </span>
-          {entry.gender && (
-            <span
-              className={`inline-flex h-8 items-center px-3 rounded-full border ${
-                entry.gender === "F"
-                  ? "bg-pink-50 dark:bg-pink-950/40 border-pink-200 dark:border-pink-900/50 text-pink-600 dark:text-pink-300"
-                  : "bg-sky-50 dark:bg-sky-950/40 border-sky-200 dark:border-sky-900/50 text-sky-600 dark:text-sky-300"
-              }`}
-            >
-              {t("entry.gender")}: {entry.gender}
-            </span>
-          )}
-          {primaryDialectKey && (
-            <Badge tone="coptic" size="sm" className="h-8 min-h-8">
-              <DialectSiglum siglum={primaryDialectKey} />
-            </Badge>
-          )}
+          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+            {metadataBadges}
+          </div>
         </div>
-      </div>
+      )}
 
       <div className="h-px w-full bg-gradient-to-r from-stone-200 dark:from-stone-800 via-stone-300 dark:via-stone-700 to-stone-200 dark:to-stone-800 mb-6" />
 
@@ -157,19 +303,45 @@ export default function DictionaryEntryCard({
             isDetailView ? "text-lg md:text-xl" : "text-lg"
           }`}
         >
-          {(language === "nl" && entry.dutch_meanings
-            ? entry.dutch_meanings
-            : entry.english_meanings
-          ).map((meaning, idx) => (
+          {meanings.map((meaning, idx) => (
             <li key={idx} className="leading-relaxed pl-1">
               <HighlightText
                 text={meaning}
                 query={query}
                 emphasizeLeadingLabel
+                grammarAbbreviationTooltips={grammarAbbreviationTooltips}
               />
             </li>
           ))}
         </ul>
+        {variantRows.length > 0 && (
+          <div className="mt-5 flex flex-col gap-3">
+            <span className="text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 font-semibold">
+              {t("entry.variants")}
+            </span>
+            <div className="flex flex-wrap gap-2.5">
+              {variantRows.map(({ dialect, forms, state }, index) => (
+                <span
+                  key={`${dialect}-${state}-${index}`}
+                  className="inline-flex max-w-full items-start gap-2 rounded-xl border border-stone-200 bg-stone-50/90 px-3 py-2 text-sm text-stone-700 dark:border-stone-800/60 dark:bg-stone-950/50 dark:text-stone-300"
+                >
+                  <span className="inline-flex min-h-6 shrink-0 items-center rounded-md bg-stone-200 px-2 text-[10px] font-bold text-stone-700 dark:bg-stone-700 dark:text-stone-200">
+                    <DialectSiglum siglum={dialect} />
+                  </span>
+                  <span
+                    className={`${antinoou.className} min-w-0 break-words text-base leading-snug [overflow-wrap:anywhere]`}
+                  >
+                    <HighlightText
+                      text={forms.join(", ")}
+                      query={query}
+                      symbolTooltips={formSymbolTooltips}
+                    />
+                  </span>
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
         {entry.greek_equivalents.length > 0 && (
           <div className="mt-5 flex flex-col gap-3">
             <span className="text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 font-semibold">
@@ -207,15 +379,21 @@ export default function DictionaryEntryCard({
               return (
                 <div
                   key={index}
-                  className="flex items-center space-x-3 bg-stone-50/90 dark:bg-stone-950/50 px-3 py-2.5 rounded-xl border border-stone-200 dark:border-stone-800/60"
+                  className="flex min-w-0 max-w-full basis-full items-start gap-3 rounded-xl border border-stone-200 bg-stone-50/90 px-3 py-2.5 dark:border-stone-800/60 dark:bg-stone-950/50 sm:basis-auto"
                 >
-                  <span className="inline-flex min-h-7 items-center text-[10px] bg-stone-200 dark:bg-stone-700 text-stone-700 dark:text-stone-200 px-2.5 py-2 rounded-md font-bold">
+                  <span className="inline-flex min-h-7 shrink-0 items-center rounded-md bg-stone-200 px-2.5 py-2 text-[10px] font-bold text-stone-700 dark:bg-stone-700 dark:text-stone-200">
                     <DialectSiglum siglum={dialect} />
                   </span>
-                  <span
-                    className={`${antinoou.className} text-stone-800 dark:text-stone-300 text-lg`}
-                  >
-                    <HighlightText text={spelling} query={query} />
+                  <span className="min-w-0">
+                    <span
+                      className={`${antinoou.className} block break-words text-lg leading-snug text-stone-800 [overflow-wrap:anywhere] dark:text-stone-300`}
+                    >
+                      <HighlightText
+                        text={spelling}
+                        query={query}
+                        symbolTooltips={formSymbolTooltips}
+                      />
+                    </span>
                   </span>
                 </div>
               );

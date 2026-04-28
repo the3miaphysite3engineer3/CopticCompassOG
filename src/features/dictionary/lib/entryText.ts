@@ -46,8 +46,7 @@ const entryLeadIns = [
   "rare",
   "constr",
   "vbal",
-  "p.c.",
-  "p c",
+  "pc",
   "m",
   "f",
 ] as const;

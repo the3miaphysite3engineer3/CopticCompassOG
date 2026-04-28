@@ -1,19 +1,26 @@
 import React from "react";
 
+import { MicroTooltip } from "@/components/MicroTooltip";
 import { buildCopticSearchRegex } from "@/lib/copticSearch";
 import { antinoou } from "@/lib/fonts";
 
 import type { ReactNode } from "react";
 
+type FormSymbol = "-" | "=" | "†" | "~";
+export type FormSymbolTooltips = Partial<Record<FormSymbol, string>>;
+export type GrammarAbbreviationTooltips = Partial<Record<string, string>>;
+
 const COPTIC_LEGACY_CHAR_CLASS = "\\u03E2-\\u03EF";
 const COPTIC_CHAR_CLASS = `${COPTIC_LEGACY_CHAR_CLASS}\\u2C80-\\u2CFF`;
 const COPTIC_COMBINING_CLASS = "\\u0300-\\u036f\\uFE20-\\uFE2F\\u0483-\\u0489";
+const FORM_SYMBOL_PATTERN = /([-=\u2020~])/;
+const GRAMMAR_ABBREVIATION_CLASS_NAME = "small-caps whitespace-nowrap";
 /**
- * These fragments capture the shorthand that appears in imported glosses so we
- * can emphasize it without forcing the source data into a stricter schema.
+ * These fragments capture normalized shorthand in imported glosses so we can
+ * emphasize recurring grammar labels consistently.
  */
 const LEADING_LABEL_FRAGMENTS = [
-  "p\\.c\\.",
+  "pc",
   "impers vb",
   "bijvoeglijk naamwoord",
   "voegwoord",
@@ -37,13 +44,12 @@ const LEADING_LABEL_FRAGMENTS = [
   "pron",
   "art",
   "int\\.?",
-  "pc",
 ];
 const INLINE_ABBREVIATION_FRAGMENTS = [
   "\\bbijvoeglijk naamwoord\\b",
   "\\bkwaliteit\\b",
   "\\bvoegwoord\\b",
-  "p\\.c\\.",
+  "\\bpc\\b",
   "\\bimpers\\b",
   "\\bimperative\\b",
   "\\bauxil\\b",
@@ -90,7 +96,6 @@ const INLINE_ABBREVIATION_FRAGMENTS = [
   "\\btr\\b",
   "\\bnn\\b",
   "\\bvb\\b",
-  "\\bpc\\b",
   "\\bint\\.(?=$|[^A-Za-z0-9_])",
   "\\bint\\b",
 ];
@@ -102,21 +107,133 @@ const INLINE_ABBREVIATION_PATTERN = new RegExp(
   `(${INLINE_ABBREVIATION_FRAGMENTS.join("|")})`,
   "i",
 );
+const GRAMMAR_ABBREVIATION_PUNCTUATION_PATTERN = new RegExp(
+  `\\b(${LEADING_LABEL_FRAGMENTS.join("|")})(?: ?\\([^)]*\\))?[:,]([ \\t]*)`,
+  "gi",
+);
+const DIALECT_SIGLA_TRAILING_COMMA_PATTERN =
+  /\b((?:Fb|Sa|Sf|Sl|A|B|F|L|O|S)+),([ \t]+)/g;
 const COPTIC_RUN_REGEX = new RegExp(
   `([${COPTIC_CHAR_CLASS}](?:[${COPTIC_CHAR_CLASS}${COPTIC_COMBINING_CLASS}]*)?)`,
   "g",
 );
 
+function normalizeMeaningDisplayPunctuation(value: string) {
+  return value
+    .replace(
+      GRAMMAR_ABBREVIATION_PUNCTUATION_PATTERN,
+      (
+        match,
+        _label: string,
+        _spacing: string,
+        offset: number,
+        fullValue: string,
+      ) => {
+        const nextCharacter = fullValue[offset + match.length];
+        const separator =
+          nextCharacter && nextCharacter !== "\r" && nextCharacter !== "\n"
+            ? " "
+            : "";
+
+        return `${match.replace(/[:,][ \t]*$/, "")}${separator}`;
+      },
+    )
+    .replace(DIALECT_SIGLA_TRAILING_COMMA_PATTERN, "$1 ");
+}
+
+function FormSymbolTooltip({
+  label,
+  symbol,
+}: {
+  label: string;
+  symbol: FormSymbol;
+}) {
+  const symbolContent =
+    symbol === "†" ? (
+      <sup className="align-super text-[0.65em] leading-none text-current">
+        †
+      </sup>
+    ) : (
+      symbol
+    );
+
+  return <MicroTooltip label={label}>{symbolContent}</MicroTooltip>;
+}
+
+function GrammarAbbreviationTooltip({
+  children,
+  className,
+  label,
+}: {
+  children: ReactNode;
+  className?: string;
+  label: string;
+}) {
+  return (
+    <MicroTooltip label={label} className={className}>
+      {children}
+    </MicroTooltip>
+  );
+}
+
+function normalizeGrammarAbbreviationKey(value: string) {
+  return value.toLowerCase().replace(/\.$/, "").replace(/\s+/g, " ").trim();
+}
+
 function renderWithSuperscript(
   text: string,
   keyPrefix: string,
   className?: string,
+  symbolTooltips?: FormSymbolTooltips,
+  grammarTooltipLabel?: string,
 ): ReactNode[] {
-  const parts = text.split("†");
+  const parts = text.split(FORM_SYMBOL_PATTERN);
   const result: ReactNode[] = [];
 
   parts.forEach((part, i) => {
+    if (!part) {
+      return;
+    }
+
+    if (FORM_SYMBOL_PATTERN.test(part)) {
+      const symbol = part as FormSymbol;
+      const label = symbolTooltips?.[symbol];
+      let symbolContent: ReactNode = symbol;
+
+      if (label) {
+        symbolContent = <FormSymbolTooltip label={label} symbol={symbol} />;
+      } else if (symbol === "†") {
+        symbolContent = (
+          <sup className="align-super text-[0.65em] leading-none text-current">
+            †
+          </sup>
+        );
+      }
+
+      result.push(
+        <React.Fragment key={`${keyPrefix}-symbol-${i}`}>
+          {symbolContent}
+        </React.Fragment>,
+      );
+
+      return;
+    }
+
     if (part) {
+      if (grammarTooltipLabel) {
+        result.push(
+          <GrammarAbbreviationTooltip
+            key={`${keyPrefix}-text-${i}`}
+            className={className}
+            label={grammarTooltipLabel}
+          >
+            {part}
+          </GrammarAbbreviationTooltip>,
+        );
+
+        return;
+      }
+
       result.push(
         className ? (
           <span key={`${keyPrefix}-text-${i}`} className={className}>
@@ -125,14 +242,6 @@ function renderWithSuperscript(
         ) : (
           <React.Fragment key={`${keyPrefix}-text-${i}`}>{part}</React.Fragment>
         ),
-      );
-    }
-
-    if (i < parts.length - 1) {
-      result.push(
-        <sup key={`${keyPrefix}-dagger-${i}`} className="opacity-75">
-          †
-        </sup>,
       );
     }
   });
@@ -144,9 +253,11 @@ function renderPlainTypography(
   text: string,
   keyPrefix: string,
   emphasizeAbbreviations: boolean,
+  symbolTooltips?: FormSymbolTooltips,
+  grammarAbbreviationTooltips?: GrammarAbbreviationTooltips,
 ): ReactNode[] {
   if (!emphasizeAbbreviations) {
-    return renderWithSuperscript(text, keyPrefix);
+    return renderWithSuperscript(text, keyPrefix, undefined, symbolTooltips);
   }
 
   const parts = text.split(INLINE_ABBREVIATION_PATTERN);
@@ -157,8 +268,21 @@ function renderPlainTypography(
       return;
     }
 
-    const className = i % 2 === 1 ? "font-bold" : undefined;
-    result.push(...renderWithSuperscript(part, `${keyPrefix}-${i}`, className));
+    const className = i % 2 === 1 ? GRAMMAR_ABBREVIATION_CLASS_NAME : undefined;
+    const grammarTooltipLabel =
+      i % 2 === 1
+        ? grammarAbbreviationTooltips?.[normalizeGrammarAbbreviationKey(part)]
+        : undefined;
+
+    result.push(
+      ...renderWithSuperscript(
+        part,
+        `${keyPrefix}-${i}`,
+        className,
+        symbolTooltips,
+        grammarTooltipLabel,
+      ),
+    );
   });
 
   return result;
@@ -168,6 +292,8 @@ function renderWithCopticTypography(
   text: string,
   keyPrefix: string,
   emphasizeAbbreviations: boolean,
+  symbolTooltips?: FormSymbolTooltips,
+  grammarAbbreviationTooltips?: GrammarAbbreviationTooltips,
 ): ReactNode[] {
   const parts = text.split(COPTIC_RUN_REGEX);
   const result: ReactNode[] = [];
@@ -179,7 +305,12 @@ function renderWithCopticTypography(
 
     if (i % 2 === 1) {
       result.push(
-        ...renderWithSuperscript(part, `${keyPrefix}-${i}`, antinoou.className),
+        ...renderWithSuperscript(
+          part,
+          `${keyPrefix}-${i}`,
+          antinoou.className,
+          symbolTooltips,
+        ),
       );
     } else {
       result.push(
@@ -187,6 +318,8 @@ function renderWithCopticTypography(
           part,
           `${keyPrefix}-${i}`,
           emphasizeAbbreviations,
+          symbolTooltips,
+          grammarAbbreviationTooltips,
         ),
       );
     }
@@ -201,11 +334,19 @@ function renderSearchableText(
   keyPrefix: string,
   className = "",
   emphasizeAbbreviations = false,
+  symbolTooltips?: FormSymbolTooltips,
+  grammarAbbreviationTooltips?: GrammarAbbreviationTooltips,
 ): ReactNode {
   if (!query) {
     return (
       <span className={className}>
-        {renderWithCopticTypography(text, keyPrefix, emphasizeAbbreviations)}
+        {renderWithCopticTypography(
+          text,
+          keyPrefix,
+          emphasizeAbbreviations,
+          symbolTooltips,
+          grammarAbbreviationTooltips,
+        )}
       </span>
     );
   }
@@ -214,7 +355,13 @@ function renderSearchableText(
   if (!regex) {
     return (
       <span className={className}>
-        {renderWithCopticTypography(text, keyPrefix, emphasizeAbbreviations)}
+        {renderWithCopticTypography(
+          text,
+          keyPrefix,
+          emphasizeAbbreviations,
+          symbolTooltips,
+          grammarAbbreviationTooltips,
+        )}
       </span>
     );
   }
@@ -233,6 +380,8 @@ function renderSearchableText(
               part,
               `highlight-${i}`,
               emphasizeAbbreviations,
+              symbolTooltips,
+              grammarAbbreviationTooltips,
             )}
           </mark>
         ) : (
@@ -241,6 +390,8 @@ function renderSearchableText(
               part,
               `plain-${i}`,
               emphasizeAbbreviations,
+              symbolTooltips,
+              grammarAbbreviationTooltips,
             )}
           </span>
         ),
@@ -275,13 +426,19 @@ export default function HighlightText({
   query,
   className = "",
   emphasizeLeadingLabel = false,
+  grammarAbbreviationTooltips,
+  symbolTooltips,
 }: {
   text: string;
   query: string;
   className?: string;
   emphasizeLeadingLabel?: boolean;
+  grammarAbbreviationTooltips?: GrammarAbbreviationTooltips;
+  symbolTooltips?: FormSymbolTooltips;
 }) {
-  const safeText = text.replace(/<[^>]+>/g, "");
+  const safeText = normalizeMeaningDisplayPunctuation(
+    text.replace(/<[^>]+>/g, ""),
+  );
   const labelSplit = emphasizeLeadingLabel ? splitLeadingLabel(safeText) : null;
 
   if (!labelSplit) {
@@ -291,13 +448,31 @@ export default function HighlightText({
       "plain",
       className,
       emphasizeLeadingLabel,
+      symbolTooltips,
+      grammarAbbreviationTooltips,
     );
   }
 
   return (
     <span className={className}>
-      {renderSearchableText(labelSplit.label, query, "label", "font-bold")}
-      {renderSearchableText(labelSplit.rest, query, "rest", "", true)}
+      {renderSearchableText(
+        labelSplit.label,
+        query,
+        "label",
+        "",
+        true,
+        symbolTooltips,
+        grammarAbbreviationTooltips,
+      )}
+      {renderSearchableText(
+        labelSplit.rest,
+        query,
+        "rest",
+        "",
+        true,
+        symbolTooltips,
+        grammarAbbreviationTooltips,
+      )}
     </span>
   );
 }

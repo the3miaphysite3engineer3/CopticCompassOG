@@ -52,10 +52,15 @@ export function prepareDictionaryForSearch(
     const dialectForms = Object.values(entry.dialects)
       .flatMap((forms) => [
         forms.absolute,
-        ...(forms.absoluteVariants ?? []),
         forms.nominal,
         forms.pronominal,
         forms.stative,
+        ...(forms.constructParticiples ?? []),
+        ...(forms.variants?.absolute ?? []),
+        ...(forms.variants?.nominal ?? []),
+        ...(forms.variants?.pronominal ?? []),
+        ...(forms.variants?.stative ?? []),
+        ...(forms.variants?.constructParticiples ?? []),
       ])
       .filter(Boolean)
       .join(" ");

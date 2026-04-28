@@ -9,7 +9,6 @@ const fallbackEntry: LexicalEntry = {
   dialects: {
     B: {
       absolute: "ϭⲱⲓⲥ",
-      absoluteVariants: [],
       nominal: "",
       pronominal: "",
       stative: "",

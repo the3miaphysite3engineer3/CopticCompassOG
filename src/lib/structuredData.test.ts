@@ -14,10 +14,12 @@ const lordEntry: LexicalEntry = {
   dialects: {
     B: {
       absolute: "ϭⲱⲓⲥ",
-      absoluteVariants: ["⳪"],
       nominal: "",
       pronominal: "",
       stative: "",
+      variants: {
+        absolute: ["⳪"],
+      },
     },
   },
   pos: "N",

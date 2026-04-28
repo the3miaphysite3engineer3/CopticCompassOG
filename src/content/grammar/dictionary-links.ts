@@ -53,10 +53,15 @@ function collectBohairicForms(entry: LexicalEntry): string[] {
 
   return [
     bohairicForms.absolute,
-    ...(bohairicForms.absoluteVariants ?? []),
     bohairicForms.nominal,
     bohairicForms.pronominal,
     bohairicForms.stative,
+    ...(bohairicForms.constructParticiples ?? []),
+    ...(bohairicForms.variants?.absolute ?? []),
+    ...(bohairicForms.variants?.nominal ?? []),
+    ...(bohairicForms.variants?.pronominal ?? []),
+    ...(bohairicForms.variants?.stative ?? []),
+    ...(bohairicForms.variants?.constructParticiples ?? []),
   ]
     .flatMap((form) => form?.split(",") ?? [])
     .map((form) => form.trim())
