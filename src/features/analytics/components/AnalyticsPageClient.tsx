@@ -441,15 +441,15 @@ export default function AnalyticsPageClient({
 
   return (
     <PageShell
-      className="min-h-screen flex flex-col items-center p-6 pb-20 md:p-10"
-      contentClassName="w-full pt-8 md:pt-10"
+      className="app-page-shell"
+      contentClassName="app-page-content"
       width="standard"
       accents={[
         pageShellAccents.heroEmeraldArc,
         pageShellAccents.topRightSkyOrbInset,
       ]}
     >
-      <div className="mb-8 space-y-6 md:mb-10 md:space-y-8">
+      <div className="app-page-heading">
         <BreadcrumbTrail
           items={[
             { label: t("nav.home"), href: getLocalizedHomePath(language) },

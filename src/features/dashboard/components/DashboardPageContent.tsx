@@ -40,15 +40,15 @@ export async function DashboardPageContent({
 
   return (
     <PageShell
-      className="min-h-screen flex flex-col items-center p-6 md:p-10"
-      contentClassName="min-h-[80vh] w-full pt-10"
+      className="app-page-shell"
+      contentClassName="min-h-[80vh] w-full pt-8 md:pt-10"
       width="standard"
       accents={[
         pageShellAccents.topLeftSkyOrb,
         pageShellAccents.bottomRightEmeraldOrb,
       ]}
     >
-      <div className="mb-8 space-y-6 md:mb-12 md:space-y-8">
+      <div className="app-page-heading">
         <BreadcrumbTrail
           items={[
             {

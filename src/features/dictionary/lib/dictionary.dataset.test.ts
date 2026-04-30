@@ -49,12 +49,16 @@ function collectConstructParticiples(forms: DialectForms | undefined) {
 }
 
 function collectMeaningGlosses(entry: LexicalEntry) {
+  const paradigmData = entry.bohairicParadigmData as {
+    englishMeanings?: string[];
+    dutchMeanings?: string[];
+  };
   return [
     ...(entry.english_meanings ?? []),
     ...(entry.dutch_meanings ?? []),
     entry.raw?.meaning ?? "",
-    ...(entry.bohairicParadigmData?.englishMeanings ?? []),
-    ...(entry.bohairicParadigmData?.dutchMeanings ?? []),
+    ...(paradigmData?.englishMeanings ?? []),
+    ...(paradigmData?.dutchMeanings ?? []),
   ];
 }
 

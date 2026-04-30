@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 import { Badge } from "@/components/Badge";
 import { EmptyState } from "@/components/EmptyState";
@@ -45,6 +45,14 @@ export function DictionaryResultsSection({
   const { t } = useLanguage();
   const observerTarget = useRef<HTMLDivElement>(null);
   const loadMoreRequestedRef = useRef(false);
+  const requestMoreResults = useCallback(() => {
+    if (!onLoadMore || loadingMore || loadMoreRequestedRef.current) {
+      return;
+    }
+
+    loadMoreRequestedRef.current = true;
+    onLoadMore();
+  }, [loadingMore, onLoadMore]);
 
   useEffect(() => {
     if (!loadingMore) {
@@ -76,8 +84,7 @@ export function DictionaryResultsSection({
           return;
         }
 
-        loadMoreRequestedRef.current = true;
-        onLoadMore();
+        requestMoreResults();
       },
       { threshold: 0.1, root: rootTarget },
     );
@@ -89,6 +96,7 @@ export function DictionaryResultsSection({
     hasMoreResults,
     loadingMore,
     onLoadMore,
+    requestMoreResults,
     scrollContainerId,
   ]);
 
@@ -155,9 +163,22 @@ export function DictionaryResultsSection({
       {hasMoreResults && (
         <div
           ref={observerTarget}
-          className="mt-10 flex h-20 w-full items-center justify-center"
+          className="mt-10 flex min-h-20 w-full items-center justify-center"
         >
-          <div className="h-8 w-8 animate-spin rounded-full border-4 border-stone-700 border-t-sky-500"></div>
+          <button
+            type="button"
+            onClick={requestMoreResults}
+            disabled={loadingMore || !onLoadMore}
+            className="btn-secondary gap-2 px-5 disabled:translate-y-0 disabled:shadow-sm"
+          >
+            {loadingMore ? (
+              <span
+                className="h-4 w-4 animate-spin rounded-full border-2 border-stone-400 border-t-sky-500"
+                aria-hidden="true"
+              />
+            ) : null}
+            {loadingMore ? t("dict.loadingMore") : t("dict.loadMore")}
+          </button>
         </div>
       )}
     </>

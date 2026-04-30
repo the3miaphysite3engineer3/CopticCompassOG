@@ -1,0 +1,249 @@
+"use client";
+
+import Link from "next/link";
+
+import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { useLanguage } from "@/components/LanguageProvider";
+import { PageHeader } from "@/components/PageHeader";
+import { PageShell, pageShellAccents } from "@/components/PageShell";
+import { SurfacePanel } from "@/components/SurfacePanel";
+import { SwaggerDocsClient } from "@/features/grammar/components/SwaggerDocsClient";
+import {
+  getDevelopersPath,
+  getGrammarPath,
+  getLocalizedHomePath,
+} from "@/lib/locale";
+
+const SHENUTE_API_EXAMPLES = {
+  en: `const response = await fetch("https://www.copticcompass.com/api/shenute", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    inferenceProvider: "thoth",
+    messages: [
+      {
+        id: "u1",
+        role: "user",
+        parts: [{ type: "text", text: "Explain this Coptic phrase." }],
+      },
+    ],
+  }),
+});
+
+const result = await response.text();`,
+  nl: `const response = await fetch("https://www.copticcompass.com/api/shenute", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    inferenceProvider: "thoth",
+    messages: [
+      {
+        id: "u1",
+        role: "user",
+        parts: [{ type: "text", text: "Leg deze Koptische zin uit." }],
+      },
+    ],
+  }),
+});
+
+const result = await response.text();`,
+};
+
+const OCR_INTEGRATION_EXAMPLES = {
+  en: `# .env.local
+OCR_SERVICE_URL=https://your-ocr-service/upload
+# Optional when your backend expects a specific multipart field:
+OCR_UPLOAD_FIELD=file
+
+curl -X POST "https://www.copticcompass.com/api/ocr?lang=cop" \\
+  -F "file=@/path/to/coptic-image.jpg"
+
+# Proxy flow
+# 1) Client sends multipart/form-data to /api/ocr
+# 2) Coptic Compass forwards to OCR_SERVICE_URL
+# 3) Upstream OCR response is returned to the client`,
+  nl: `# .env.local
+OCR_SERVICE_URL=https://your-ocr-service/upload
+# Optioneel wanneer uw backend een specifieke multipart-veldnaam verwacht:
+OCR_UPLOAD_FIELD=file
+
+curl -X POST "https://www.copticcompass.com/api/ocr?lang=cop" \\
+  -F "file=@/path/to/coptic-image.jpg"
+
+# Proxyflow
+# 1) Client stuurt multipart/form-data naar /api/ocr
+# 2) Coptic Compass stuurt door naar OCR_SERVICE_URL
+# 3) De upstream OCR-response wordt teruggegeven aan de client`,
+};
+
+function ApiDocsOverview() {
+  const { t } = useLanguage();
+  return (
+    <p className="text-sm leading-7 text-stone-600 dark:text-stone-300">
+      {t("apiDocs.overviewStart")} <code>/api/v1/grammar</code>{" "}
+      {t("apiDocs.overviewOpenApi")} <code>/api/openapi.json</code>{" "}
+      {t("apiDocs.overviewDataset")} <code>/api/shenute</code>,{" "}
+      {t("apiDocs.overviewProvider")} <code>openrouter</code>{" "}
+      {t("apiDocs.overviewEnd")} <code>/api/ocr</code>{" "}
+      {t("apiDocs.overviewInstead")}
+    </p>
+  );
+}
+
+function ShenuteApiDescription() {
+  const { t } = useLanguage();
+  return (
+    <p className="text-sm leading-7 text-stone-600 dark:text-stone-300">
+      {t("apiDocs.shenuteDescriptionStart")} <code>POST /api/shenute</code>{" "}
+      {t("apiDocs.shenuteDescriptionWith")}{" "}
+      {t("apiDocs.shenuteDescriptionProviders")} <code>openrouter</code>,{" "}
+      <code>gemini</code>, {t("apiDocs.shenuteDescriptionJoin")} <code>hf</code>
+      . {t("apiDocs.shenuteDescriptionFallback")}
+    </p>
+  );
+}
+
+function OcrApiDescription() {
+  const { t } = useLanguage();
+  return (
+    <p className="text-sm leading-7 text-stone-600 dark:text-stone-300">
+      {t("apiDocs.shenuteDescriptionStart")} <code>POST /api/ocr</code>{" "}
+      {t("apiDocs.ocrDescriptionForward")} <code>OCR_SERVICE_URL</code>,{" "}
+      {t("apiDocs.ocrDescriptionReturn")} <code>?lang=cop</code>{" "}
+      {t("apiDocs.ocrDescriptionAfterLang")} <code>OCR_UPLOAD_FIELD</code>{" "}
+      {t("apiDocs.ocrDescriptionEnd")}
+    </p>
+  );
+}
+
+export function ApiDocsPageClient() {
+  const { t, language } = useLanguage();
+
+  const highlights = [
+    t("apiDocs.highlight.0"),
+    t("apiDocs.highlight.1"),
+    t("apiDocs.highlight.2"),
+    t("apiDocs.highlight.3"),
+    t("apiDocs.highlight.4"),
+    t("apiDocs.highlight.5"),
+    t("apiDocs.highlight.6"),
+  ];
+
+  return (
+    <PageShell
+      className="app-page-shell"
+      contentClassName="app-page-stack"
+      width="standard"
+      accents={[
+        pageShellAccents.heroSkyArc,
+        pageShellAccents.topRightEmeraldOrbInset,
+      ]}
+    >
+      <BreadcrumbTrail
+        items={[
+          {
+            label: t("nav.home"),
+            href: getLocalizedHomePath(language),
+          },
+          {
+            label: t("nav.developers"),
+            href: getDevelopersPath(language),
+          },
+          { label: t("apiDocs.breadcrumbLabel") },
+        ]}
+      />
+
+      <PageHeader
+        title={t("apiDocs.title")}
+        description={t("apiDocs.description")}
+        tone="sky"
+        size="workspace"
+      />
+
+      <SurfacePanel
+        as="section"
+        rounded="3xl"
+        variant="elevated"
+        className="space-y-5 p-6 md:p-8"
+      >
+        <div className="flex flex-wrap gap-3">
+          <Link href={getDevelopersPath(language)} className="btn-secondary">
+            {t("apiDocs.developerGuideLabel")}
+          </Link>
+          <Link href="/api/openapi.json" className="btn-secondary">
+            {t("apiDocs.openApiLabel")}
+          </Link>
+          <Link href="/api/v1/grammar" className="btn-secondary">
+            {t("apiDocs.apiIndexLabel")}
+          </Link>
+          <Link href="/api/shenute" className="btn-secondary">
+            {t("apiDocs.shenuteEndpointLabel")}
+          </Link>
+          <Link href="/api/ocr" className="btn-secondary">
+            {t("apiDocs.ocrProxyLabel")}
+          </Link>
+          <Link href="/shenute" className="btn-secondary">
+            {t("apiDocs.shenuteUiLabel")}
+          </Link>
+          <Link href={getGrammarPath(language)} className="btn-secondary">
+            {t("apiDocs.grammarHubLabel")}
+          </Link>
+        </div>
+
+        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {highlights.map((highlight) => (
+            <div
+              key={highlight}
+              className="rounded-2xl border border-stone-200/80 bg-stone-50/80 px-4 py-3 text-center text-sm font-medium leading-6 text-stone-700 dark:border-stone-800/80 dark:bg-stone-950/50 dark:text-stone-200"
+            >
+              {highlight}
+            </div>
+          ))}
+        </div>
+
+        <ApiDocsOverview />
+      </SurfacePanel>
+
+      <section className="grid gap-6 xl:grid-cols-2">
+        <SurfacePanel
+          as="article"
+          rounded="3xl"
+          variant="elevated"
+          className="space-y-4 p-6 md:p-8"
+        >
+          <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
+            {t("apiDocs.shenuteTitle")}
+          </h2>
+          <ShenuteApiDescription />
+          <pre className="overflow-x-auto rounded-2xl border border-stone-200/80 bg-stone-950 px-4 py-4 text-sm leading-6 text-stone-100 dark:border-stone-800/80">
+            <code>{SHENUTE_API_EXAMPLES[language]}</code>
+          </pre>
+        </SurfacePanel>
+
+        <SurfacePanel
+          as="article"
+          rounded="3xl"
+          variant="elevated"
+          className="space-y-4 p-6 md:p-8"
+        >
+          <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
+            {t("apiDocs.ocrTitle")}
+          </h2>
+          <OcrApiDescription />
+          <pre className="overflow-x-auto rounded-2xl border border-stone-200/80 bg-stone-950 px-4 py-4 text-sm leading-6 text-stone-100 dark:border-stone-800/80">
+            <code>{OCR_INTEGRATION_EXAMPLES[language]}</code>
+          </pre>
+        </SurfacePanel>
+      </section>
+
+      <SurfacePanel
+        as="section"
+        rounded="3xl"
+        variant="elevated"
+        className="overflow-hidden p-2 md:p-4"
+      >
+        <SwaggerDocsClient specUrl="/api/openapi.json" />
+      </SurfacePanel>
+    </PageShell>
+  );
+}

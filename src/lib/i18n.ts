@@ -1,4 +1,7 @@
+import { apiDocsMessages } from "@/lib/translations/apiDocs";
 import { contactMessages } from "@/lib/translations/contact";
+import { contributorsMessages } from "@/lib/translations/contributors";
+import { developersMessages } from "@/lib/translations/developers";
 import { dictionaryMessages } from "@/lib/translations/dictionary";
 import { grammarMessages } from "@/lib/translations/grammar";
 import { homeMessages } from "@/lib/translations/home";
@@ -17,6 +20,9 @@ const en = {
   ...grammarMessages.en,
   ...contactMessages.en,
   ...loginMessages.en,
+  ...developersMessages.en,
+  ...contributorsMessages.en,
+  ...apiDocsMessages.en,
 } as const;
 
 export type TranslationKey = keyof typeof en;
@@ -30,6 +36,9 @@ const nl = {
   ...grammarMessages.nl,
   ...contactMessages.nl,
   ...loginMessages.nl,
+  ...developersMessages.nl,
+  ...contributorsMessages.nl,
+  ...apiDocsMessages.nl,
 } satisfies TranslationDictionary;
 
 const translations = {

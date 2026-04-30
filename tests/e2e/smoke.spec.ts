@@ -57,7 +57,7 @@ test("floating Shenute assistant opens on demand", async ({ page }) => {
 
   await page.getByRole("button", { name: "Open Shenute AI" }).click();
 
-  await expect(page.getByText("Context-aware on this page")).toBeVisible();
+  await expect(page.getByText("Page context on")).toBeVisible();
   await expect(page.getByRole("button", { name: "Close" })).toBeVisible();
   await expect(page.getByText("Sign in required")).toBeVisible();
 });

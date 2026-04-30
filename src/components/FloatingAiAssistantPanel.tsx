@@ -4,7 +4,7 @@ import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import {
   Camera,
-  ExternalLink,
+  Download,
   ImagePlus,
   LoaderCircle,
   MessageCircle,
@@ -63,6 +63,8 @@ type PageContextPayload = {
   url: string;
 };
 
+const SITE_TITLE_SUFFIX_PATTERN = /\s+\|\s+Coptic Compass$/;
+
 const floatingShenuteCopy = {
   en: {
     addImage: "Add image",
@@ -77,8 +79,8 @@ const floatingShenuteCopy = {
     capture: "Capture",
     captureFailed: "Could not capture image from camera.",
     close: "Close",
-    contextAware: "Context-aware on this page",
-    details: "Project site",
+    contextAware: "Page context on",
+    contextLabel: "Context",
     dislike: "Dislike",
     emptyPrompt:
       "Ask anything about this page, Coptic grammar, vocabulary, or translation.",
@@ -93,7 +95,7 @@ const floatingShenuteCopy = {
     ocrFailed: "OCR failed for the selected image.",
     ocrPending: "OCR...",
     promptResolveFailed: "Could not resolve prompt/response for this feedback.",
-    provider: "Provider",
+    provider: "Model",
     providerGemini: "Learner (Gemini)",
     providerHf: "Learner (HF)",
     providerOpenRouter: "Learner (OpenRouter)",
@@ -112,9 +114,8 @@ const floatingShenuteCopy = {
     signInTitle: "Sign in required",
     submitAdminNote: "Submit admin note",
     thinking: "Thinking...",
-    saveHistory: "Save chat history",
-    savedHistory: "Chat history saved.",
-    nmtCredit: "NMT powered by CopticTranslator.com / arXiv:2404.13813",
+    saveHistory: "Download chat",
+    savedHistory: "Chat downloaded.",
     writeAdminFeedback: "Write admin feedback before submitting.",
   },
   nl: {
@@ -131,8 +132,8 @@ const floatingShenuteCopy = {
     capture: "Vastleggen",
     captureFailed: "Afbeelding kon niet uit de camera worden vastgelegd.",
     close: "Sluiten",
-    contextAware: "Contextbewust op deze pagina",
-    details: "Projectsite",
+    contextAware: "Pagina-context aan",
+    contextLabel: "Context",
     dislike: "Niet goed",
     emptyPrompt:
       "Stel een vraag over deze pagina, Koptische grammatica, woordenschat of vertaling.",
@@ -149,7 +150,7 @@ const floatingShenuteCopy = {
     ocrPending: "OCR...",
     promptResolveFailed:
       "Prompt en antwoord konden niet aan deze feedback worden gekoppeld.",
-    provider: "Provider",
+    provider: "Model",
     providerGemini: "Leerling (Gemini)",
     providerHf: "Leerling (HF)",
     providerOpenRouter: "Leerling (OpenRouter)",
@@ -168,10 +169,8 @@ const floatingShenuteCopy = {
     signInTitle: "Aanmelden vereist",
     submitAdminNote: "Adminnotitie versturen",
     thinking: "Denkt na...",
-    saveHistory: "Chatgeschiedenis opslaan",
-    savedHistory: "Chatgeschiedenis opgeslagen.",
-    nmtCredit:
-      "NMT mogelijk gemaakt door CopticTranslator.com / arXiv:2404.13813",
+    saveHistory: "Chat downloaden",
+    savedHistory: "Chat gedownload.",
     writeAdminFeedback: "Schrijf adminfeedback voordat u die verstuurt.",
   },
 } as const satisfies Record<Language, Record<string, string>>;
@@ -358,6 +357,13 @@ export function FloatingAiAssistantPanel({
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
   const pageContext = useMemo(() => buildPageContext(pathname), [pathname]);
+  const pageContextLabel = useMemo(() => {
+    const title = pageContext.title
+      .replace(SITE_TITLE_SUFFIX_PATTERN, "")
+      .trim();
+
+    return title || pageContext.path || "/";
+  }, [pageContext.path, pageContext.title]);
 
   const transport = useMemo(
     () =>
@@ -374,6 +380,8 @@ export function FloatingAiAssistantPanel({
   const isLoading = status !== "ready";
   const isShenuteAccessBlocked = isReady && !isAuthenticated;
   const typedMessages = messages as ChatMessageLike[];
+  const iconButtonClassName =
+    "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-stone-200 bg-white/85 text-stone-600 shadow-sm transition-colors hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/30 dark:border-stone-800 dark:bg-stone-900/70 dark:text-stone-300 dark:hover:bg-stone-800";
   const floatingContainerClassName = cx(
     "fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-4 z-50 sm:bottom-5 sm:right-5",
     !isOpen && isDenseStudyRoute(pathname) && "hidden sm:block",
@@ -950,69 +958,67 @@ export function FloatingAiAssistantPanel({
     <div className={floatingContainerClassName}>
       {isOpen ? (
         <section className="flex h-[560px] max-h-[calc(100vh-7rem)] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-stone-200 bg-white/95 shadow-2xl shadow-stone-950/10 backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/95 dark:shadow-black/30 sm:w-[400px]">
-          <header className="border-b border-stone-200 bg-gradient-to-br from-sky-50 via-white to-emerald-50/60 px-4 py-3 dark:border-stone-800 dark:from-sky-950/30 dark:via-stone-950 dark:to-emerald-950/20">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex h-8 w-8 items-center justify-center rounded-2xl bg-sky-100 text-sky-700 shadow-sm dark:bg-sky-900/30 dark:text-sky-300">
-                    <span className="font-coptic leading-none">Ϣ</span>
-                  </span>
-                  <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">
+          <header className="border-b border-stone-200 bg-white/95 px-4 py-3 dark:border-stone-800 dark:bg-stone-950/95">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-sky-700 shadow-sm dark:bg-sky-900/30 dark:text-sky-300">
+                  <span className="font-coptic leading-none">Ϣ</span>
+                </span>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-semibold text-stone-900 dark:text-stone-100">
                     Shenute AI
                   </p>
+                  <p className="truncate text-xs text-stone-500 dark:text-stone-400">
+                    {copy.contextAware}
+                  </p>
                 </div>
-                <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
-                  {copy.contextAware}
-                </p>
-                <p className="mt-1 text-xs text-stone-500 dark:text-stone-400">
-                  {copy.nmtCredit}
-                </p>
               </div>
-              <div className="flex flex-col items-end gap-2">
+              <div className="flex shrink-0 items-center gap-1.5">
+                {saveStatus ? (
+                  <span className="hidden max-w-24 truncate text-[11px] font-medium text-emerald-700 dark:text-emerald-300 sm:inline">
+                    {saveStatus}
+                  </span>
+                ) : null}
                 <button
                   type="button"
+                  aria-label={copy.saveHistory}
+                  title={copy.saveHistory}
                   onClick={handleSaveChatHistory}
                   disabled={typedMessages.length === 0}
-                  className="inline-flex h-9 items-center justify-center rounded-xl border border-stone-200 bg-white/80 px-3 text-[11px] font-semibold text-stone-700 shadow-sm transition-colors hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/30 dark:border-stone-800 dark:bg-stone-900/70 dark:text-stone-200 dark:hover:bg-stone-800"
+                  className={iconButtonClassName}
                 >
-                  {copy.saveHistory}
+                  <Download className="h-4 w-4" />
                 </button>
-                {saveStatus ? (
-                  <p className="text-[11px] text-emerald-700 dark:text-emerald-300">
-                    {saveStatus}
-                  </p>
-                ) : null}
+                <button
+                  type="button"
+                  aria-label={copy.close}
+                  title={copy.close}
+                  onClick={() => {
+                    setIsOpen(false);
+                  }}
+                  className={iconButtonClassName}
+                >
+                  <X className="h-4 w-4" />
+                </button>
               </div>
-              <button
-                type="button"
-                aria-label={copy.close}
-                title={copy.close}
-                onClick={() => {
-                  setIsOpen(false);
-                }}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-stone-200 bg-white/80 text-stone-600 shadow-sm transition-colors hover:bg-stone-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/30 dark:border-stone-800 dark:bg-stone-900/70 dark:text-stone-300 dark:hover:bg-stone-800"
-              >
-                <X className="h-4 w-4" />
-              </button>
             </div>
           </header>
 
           <div className="border-b border-stone-200 px-4 py-3 dark:border-stone-800">
-            <div className="mb-3 flex items-start justify-between gap-3">
-              <div className="min-w-0 space-y-1">
-                <p className="truncate text-[11px] font-medium text-stone-500 dark:text-stone-400">
-                  {pageContext.path || "/"}
-                </p>
-              </div>
-              <a
-                className="inline-flex shrink-0 items-center gap-1 rounded-lg px-2 py-1 text-[11px] font-semibold text-sky-700 transition-colors hover:bg-sky-50 dark:text-sky-300 dark:hover:bg-sky-950/30"
-                href="https://somiyagawa.github.io/THOTH.AI/"
-                rel="noreferrer"
-                target="_blank"
+            <div className="mb-3 flex min-w-0 items-center gap-2 rounded-2xl border border-stone-200/80 bg-stone-50/80 px-3 py-2 dark:border-stone-800 dark:bg-stone-900/50">
+              <ScanText
+                className="h-3.5 w-3.5 shrink-0 text-sky-600 dark:text-sky-300"
+                aria-hidden="true"
+              />
+              <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+                {copy.contextLabel}
+              </span>
+              <span
+                className="min-w-0 truncate text-xs font-medium text-stone-700 dark:text-stone-200"
+                title={pageContextLabel}
               >
-                <ExternalLink className="h-3.5 w-3.5" />
-                {copy.details}
-              </a>
+                {pageContextLabel}
+              </span>
             </div>
 
             <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">

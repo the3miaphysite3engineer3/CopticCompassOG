@@ -44,8 +44,8 @@ export function RouteErrorState({
 }: RouteErrorStateProps) {
   return (
     <PageShell
-      className="min-h-screen px-6 py-14 md:px-10"
-      contentClassName={cx("mx-auto max-w-4xl space-y-8", panelClassName)}
+      className="app-form-shell"
+      contentClassName={cx("mx-auto max-w-4xl space-y-8 pt-8", panelClassName)}
       accents={accents}
     >
       <PageHeader

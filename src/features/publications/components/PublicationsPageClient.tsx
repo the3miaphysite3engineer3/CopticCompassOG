@@ -1,14 +1,17 @@
 "use client";
 
-import { ArrowRight, ArrowUpRight } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useMemo, useState } from "react";
 
+import { Badge } from "@/components/Badge";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { EmptyState } from "@/components/EmptyState";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
-import { surfacePanelClassName } from "@/components/SurfacePanel";
+import { SurfacePanel, surfacePanelClassName } from "@/components/SurfacePanel";
 import {
   getPublicationPath,
   publications,
@@ -16,14 +19,24 @@ import {
 import type {
   LanguageBadge,
   Publication,
+  PublicationStatus,
 } from "@/features/publications/lib/publications";
 import { getLocalizedHomePath } from "@/lib/locale";
 
-const LANG_COLORS: Record<LanguageBadge, string> = {
-  COP: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-400 border-amber-200 dark:border-amber-800",
-  NL: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400 border-blue-200 dark:border-blue-800",
-  EN: "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-400 border-sky-200 dark:border-sky-800",
-};
+type PublicationLanguageFilter = "ALL" | LanguageBadge;
+type PublicationStatusFilter = "ALL" | PublicationStatus;
+
+const languageFilterOptions: PublicationLanguageFilter[] = [
+  "ALL",
+  "COP",
+  "NL",
+  "EN",
+];
+const statusFilterOptions: PublicationStatusFilter[] = [
+  "ALL",
+  "published",
+  "forthcoming",
+];
 
 function TileInner({
   pub,
@@ -38,12 +51,6 @@ function TileInner({
 }) {
   return (
     <>
-      <span
-        className={`absolute top-3 right-3 z-20 text-[10px] font-bold tracking-widest px-2 py-0.5 rounded-full border ${LANG_COLORS[pub.lang]}`}
-      >
-        {pub.lang}
-      </span>
-
       {pub.status === "published" && (
         <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       )}
@@ -139,11 +146,55 @@ function PublicationTile({
 
 export default function PublicationsPageClient() {
   const { language, t } = useLanguage();
+  const [query, setQuery] = useState("");
+  const [selectedLanguage, setSelectedLanguage] =
+    useState<PublicationLanguageFilter>("ALL");
+  const [selectedStatus, setSelectedStatus] =
+    useState<PublicationStatusFilter>("ALL");
+  const normalizedQuery = query.trim().toLocaleLowerCase();
+  const hasActiveFilters =
+    normalizedQuery.length > 0 ||
+    selectedLanguage !== "ALL" ||
+    selectedStatus !== "ALL";
+  const filteredPublications = useMemo(
+    () =>
+      publications.filter((publication) => {
+        if (
+          selectedLanguage !== "ALL" &&
+          publication.lang !== selectedLanguage
+        ) {
+          return false;
+        }
+
+        if (selectedStatus !== "ALL" && publication.status !== selectedStatus) {
+          return false;
+        }
+
+        if (normalizedQuery.length === 0) {
+          return true;
+        }
+
+        const searchableText = [
+          publication.title,
+          publication.subtitle,
+          publication.lang,
+          publication.status,
+          publication.schemaType,
+          publication.summary[language],
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLocaleLowerCase();
+
+        return searchableText.includes(normalizedQuery);
+      }),
+    [language, normalizedQuery, selectedLanguage, selectedStatus],
+  );
 
   return (
     <PageShell
-      className="min-h-screen flex flex-col items-center p-6 md:p-10"
-      contentClassName="w-full space-y-12 pt-10"
+      className="app-page-shell"
+      contentClassName="app-page-stack"
       width="standard"
       accents={[
         pageShellAccents.topRightEmeraldOrb,
@@ -162,8 +213,105 @@ export default function PublicationsPageClient() {
         description={t("home.publications.desc")}
       />
 
+      <SurfacePanel
+        rounded="3xl"
+        shadow="soft"
+        variant="subtle"
+        className="space-y-4 p-4 md:p-5"
+      >
+        <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-end">
+          <label className="block space-y-2">
+            <span className="text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">
+              {t("publications.filters")}
+            </span>
+            <span className="relative block">
+              <Search
+                className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400 dark:text-stone-500"
+                aria-hidden="true"
+              />
+              <input
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder={t("publications.searchPlaceholder")}
+                className="input-base h-11 rounded-xl pl-10 text-sm"
+              />
+            </span>
+          </label>
+
+          <label className="block space-y-2">
+            <span className="text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">
+              {t("publications.status")}
+            </span>
+            <select
+              value={selectedStatus}
+              onChange={(event) =>
+                setSelectedStatus(event.target.value as PublicationStatusFilter)
+              }
+              className="compact-select-base min-w-44"
+            >
+              {statusFilterOptions.map((status) => (
+                <option key={status} value={status}>
+                  {status === "ALL"
+                    ? t("publications.status.all")
+                    : t(`publications.status.${status}`)}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          <label className="block space-y-2">
+            <span className="text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">
+              {t("publications.language")}
+            </span>
+            <select
+              value={selectedLanguage}
+              onChange={(event) =>
+                setSelectedLanguage(
+                  event.target.value as PublicationLanguageFilter,
+                )
+              }
+              className="compact-select-base min-w-40"
+            >
+              {languageFilterOptions.map((languageOption) => (
+                <option key={languageOption} value={languageOption}>
+                  {languageOption === "ALL"
+                    ? t("publications.language.all")
+                    : languageOption}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-stone-200/80 pt-4 dark:border-stone-800">
+          <Badge tone="surface" size="sm">
+            {filteredPublications.length}{" "}
+            {t(
+              filteredPublications.length === 1
+                ? "publications.item"
+                : "publications.items",
+            )}
+          </Badge>
+
+          {hasActiveFilters ? (
+            <button
+              type="button"
+              onClick={() => {
+                setQuery("");
+                setSelectedLanguage("ALL");
+                setSelectedStatus("ALL");
+              }}
+              className="btn-ghost h-9 px-3 text-xs uppercase tracking-widest"
+            >
+              {t("publications.clearFilters")}
+            </button>
+          ) : null}
+        </div>
+      </SurfacePanel>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-5xl mx-auto w-full">
-        {publications.map((pub, i) => (
+        {filteredPublications.map((pub, i) => (
           <PublicationTile
             key={pub.id}
             pub={pub}
@@ -173,6 +321,13 @@ export default function PublicationsPageClient() {
           />
         ))}
       </div>
+
+      {filteredPublications.length === 0 ? (
+        <EmptyState
+          title={t("publications.noResults")}
+          description={t("publications.noResultsDesc")}
+        />
+      ) : null}
     </PageShell>
   );
 }

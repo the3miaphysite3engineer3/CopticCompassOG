@@ -56,10 +56,6 @@ export function RelatedGrammarLessonsPanel({
               className="flex h-full flex-col justify-between p-5 transition-colors hover:border-sky-300 dark:hover:border-sky-700"
             >
               <div className="space-y-3">
-                <span className="inline-flex w-fit rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300">
-                  {language === "nl" ? "Les" : "Lesson"}{" "}
-                  {String(lesson.number).padStart(2, "0")}
-                </span>
                 <div>
                   <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100">
                     {lesson.title[language]}

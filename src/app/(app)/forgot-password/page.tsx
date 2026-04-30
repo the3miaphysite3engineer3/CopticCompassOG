@@ -54,7 +54,7 @@ export default async function ForgotPasswordPage({
 
   return (
     <PageShell
-      className="min-h-screen px-6 py-16 md:px-10"
+      className="app-form-shell"
       contentClassName="pt-8"
       width="narrow"
       accents={[

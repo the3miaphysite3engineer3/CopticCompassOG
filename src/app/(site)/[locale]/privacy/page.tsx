@@ -1,5 +1,5 @@
 import StructuredData from "@/components/StructuredData";
-import { LegalDocumentPage } from "@/features/legal/components/LegalDocumentPage";
+import { LegalDocumentPageClient } from "@/features/legal/components/LegalDocumentPageClient";
 import { getPrivacyDocument } from "@/features/legal/lib/legalDocuments";
 import { getTranslation } from "@/lib/i18n";
 import { getLocalizedHomePath, getPrivacyPath } from "@/lib/locale";
@@ -52,8 +52,8 @@ export default async function LocalizedPrivacyPage({
           },
         ])}
       />
-      <LegalDocumentPage
-        {...document}
+      <LegalDocumentPageClient
+        document={document}
         breadcrumbItems={[
           {
             label: getTranslation(resolvedLocale, "nav.home"),

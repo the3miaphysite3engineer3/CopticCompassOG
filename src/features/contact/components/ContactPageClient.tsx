@@ -25,15 +25,15 @@ export default function ContactPageClient() {
 
   return (
     <PageShell
-      className="min-h-screen flex flex-col items-center p-6 md:p-10"
-      contentClassName="w-full pt-10"
+      className="app-page-shell"
+      contentClassName="app-page-content"
       width="standard"
       accents={[
         pageShellAccents.topLeftSkyOrb,
         pageShellAccents.bottomRightEmeraldOrb,
       ]}
     >
-      <div className="mb-12 space-y-8">
+      <div className="app-page-heading">
         <BreadcrumbTrail
           items={[
             { label: t("nav.home"), href: getLocalizedHomePath(language) },

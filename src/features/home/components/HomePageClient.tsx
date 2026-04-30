@@ -168,6 +168,7 @@ export default function HomePageClient() {
             sizes="(max-width: 768px) 192px, 256px"
             className="object-contain drop-shadow-2xl dark:drop-shadow-[0_20px_20px_rgba(255,255,255,0.05)]"
             priority
+            loading="eager"
           />
         </div>
         <PageHeader

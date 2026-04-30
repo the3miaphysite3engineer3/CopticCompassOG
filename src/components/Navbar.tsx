@@ -129,6 +129,7 @@ export function Navbar() {
                 alt={`${brandLabel} logo`}
                 fill
                 sizes="40px"
+                loading="eager"
                 className="object-contain drop-shadow"
               />
             </div>

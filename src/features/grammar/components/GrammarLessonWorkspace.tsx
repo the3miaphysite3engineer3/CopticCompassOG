@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ChevronDown,
   PanelLeftClose,
   PanelLeftOpen,
   PanelRightClose,
@@ -59,6 +60,7 @@ type ReadingWorkspaceProps = {
     title: string;
   }>;
   lessonOutlineTitle: string;
+  lessonToolsTitle: string;
 };
 
 function getStudyWorkspaceGridClass({
@@ -157,6 +159,54 @@ function CollapsedRailCard({
         </span>
       </button>
     </SurfacePanel>
+  );
+}
+
+function MobileLessonTools({
+  activeSectionId,
+  conceptSummary,
+  hasSemanticSidebar,
+  learnerPanel,
+  lessonOutlineEyebrow,
+  lessonOutlineSections,
+  lessonOutlineTitle,
+  lessonToolsTitle,
+}: ReadingWorkspaceProps) {
+  return (
+    <details className="group mb-6 overflow-hidden rounded-2xl border border-stone-200/90 bg-white/70 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/40 xl:hidden">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 [&::-webkit-details-marker]:hidden">
+        <div className="min-w-0">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+            {lessonOutlineEyebrow}
+          </p>
+          <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">
+            {lessonToolsTitle}
+          </h2>
+        </div>
+        <div className="flex items-center gap-3">
+          <span className="text-[11px] font-semibold tracking-[0.12em] text-stone-400 dark:text-stone-500">
+            {String(lessonOutlineSections.length).padStart(2, "0")}
+          </span>
+          <ChevronDown className="h-5 w-5 shrink-0 text-stone-400 transition-transform duration-200 group-open:rotate-180 dark:text-stone-500" />
+        </div>
+      </summary>
+
+      <div className="space-y-4 border-t border-stone-200/80 p-4 dark:border-stone-800/80">
+        <GrammarLessonOutline
+          activeSectionId={activeSectionId}
+          eyebrow={lessonOutlineEyebrow}
+          title={lessonOutlineTitle}
+          sections={lessonOutlineSections}
+        />
+
+        {hasSemanticSidebar ? (
+          <div className="space-y-4">
+            {learnerPanel}
+            {conceptSummary}
+          </div>
+        ) : null}
+      </div>
+    </details>
   );
 }
 
@@ -282,6 +332,7 @@ export function GrammarLessonReadingWorkspace({
   lessonOutlineEyebrow,
   lessonOutlineSections,
   lessonOutlineTitle,
+  lessonToolsTitle,
 }: ReadingWorkspaceProps) {
   return (
     <div>
@@ -291,26 +342,56 @@ export function GrammarLessonReadingWorkspace({
         className="p-4 transition-colors duration-300 sm:p-5 md:p-10"
       >
         {hasSemanticSidebar ? (
-          <div className="mb-8 grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(19rem,1fr)]">
+          <>
+            <MobileLessonTools
+              activeSectionId={activeSectionId}
+              conceptSummary={conceptSummary}
+              hasSemanticSidebar={hasSemanticSidebar}
+              learnerPanel={learnerPanel}
+              lessonBottomNavigation={lessonBottomNavigation}
+              lessonDocument={lessonDocument}
+              lessonNotes={lessonNotes}
+              lessonOutlineEyebrow={lessonOutlineEyebrow}
+              lessonOutlineSections={lessonOutlineSections}
+              lessonOutlineTitle={lessonOutlineTitle}
+              lessonToolsTitle={lessonToolsTitle}
+            />
+            <div className="mb-8 hidden gap-6 xl:grid xl:grid-cols-[minmax(0,1.5fr)_minmax(19rem,1fr)]">
+              <GrammarLessonOutline
+                activeSectionId={activeSectionId}
+                eyebrow={lessonOutlineEyebrow}
+                title={lessonOutlineTitle}
+                sections={lessonOutlineSections}
+              />
+              <div className="space-y-4">
+                {learnerPanel}
+                {conceptSummary}
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            <MobileLessonTools
+              activeSectionId={activeSectionId}
+              conceptSummary={conceptSummary}
+              hasSemanticSidebar={hasSemanticSidebar}
+              learnerPanel={learnerPanel}
+              lessonBottomNavigation={lessonBottomNavigation}
+              lessonDocument={lessonDocument}
+              lessonNotes={lessonNotes}
+              lessonOutlineEyebrow={lessonOutlineEyebrow}
+              lessonOutlineSections={lessonOutlineSections}
+              lessonOutlineTitle={lessonOutlineTitle}
+              lessonToolsTitle={lessonToolsTitle}
+            />
             <GrammarLessonOutline
               activeSectionId={activeSectionId}
+              className="mb-8 hidden xl:block"
               eyebrow={lessonOutlineEyebrow}
               title={lessonOutlineTitle}
               sections={lessonOutlineSections}
             />
-            <div className="space-y-4">
-              {learnerPanel}
-              {conceptSummary}
-            </div>
-          </div>
-        ) : (
-          <GrammarLessonOutline
-            activeSectionId={activeSectionId}
-            className="mb-8"
-            eyebrow={lessonOutlineEyebrow}
-            title={lessonOutlineTitle}
-            sections={lessonOutlineSections}
-          />
+          </>
         )}
 
         {lessonDocument}

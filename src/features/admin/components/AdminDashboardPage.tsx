@@ -134,7 +134,7 @@ export async function AdminDashboardPage({
 
   return (
     <PageShell
-      className="min-h-screen px-6 py-12 md:py-16"
+      className="app-page-shell"
       contentClassName="min-h-[80vh] animate-in fade-in slide-in-from-bottom-8 duration-700"
       width="standard"
       accents={[

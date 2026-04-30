@@ -5,13 +5,22 @@ import { defineMessages } from "@/lib/translations/defineMessages";
  */
 export const publicationsMessages = defineMessages({
   en: {
-    "publications.badge": "Publication",
     "publications.back": "Back to Publications",
     "publications.status": "Status",
+    "publications.status.all": "All statuses",
     "publications.status.published": "Published",
     "publications.status.forthcoming": "Forthcoming",
     "publications.language": "Language",
+    "publications.language.all": "All languages",
     "publications.format": "Format",
+    "publications.filters": "Browse publications",
+    "publications.searchPlaceholder": "Search by title, summary, or language",
+    "publications.clearFilters": "Clear filters",
+    "publications.item": "publication",
+    "publications.items": "publications",
+    "publications.noResults": "No publications match these filters.",
+    "publications.noResultsDesc":
+      "Try another search term, status, or language.",
     "publications.viewDetails": "View details",
     "publications.externalLink": "View external listing",
     "publications.noExternalLink":
@@ -22,13 +31,22 @@ export const publicationsMessages = defineMessages({
     "publications.coverPlaceholder": "Preview coming soon",
   },
   nl: {
-    "publications.badge": "Publicatie",
     "publications.back": "Terug naar publicaties",
     "publications.status": "Status",
+    "publications.status.all": "Alle statussen",
     "publications.status.published": "Gepubliceerd",
     "publications.status.forthcoming": "Te verschijnen",
     "publications.language": "Taal",
+    "publications.language.all": "Alle talen",
     "publications.format": "Type",
+    "publications.filters": "Publicaties verkennen",
+    "publications.searchPlaceholder": "Zoek op titel, samenvatting of taal",
+    "publications.clearFilters": "Filters wissen",
+    "publications.item": "publicatie",
+    "publications.items": "publicaties",
+    "publications.noResults": "Geen publicaties passen bij deze filters.",
+    "publications.noResultsDesc":
+      "Probeer een andere zoekterm, status of taal.",
     "publications.viewDetails": "Bekijk details",
     "publications.externalLink": "Bekijk externe vermelding",
     "publications.noExternalLink":

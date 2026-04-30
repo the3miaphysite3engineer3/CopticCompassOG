@@ -76,6 +76,7 @@ export function GrammarLessonPageClient({
     language === "en" ? "Lesson map" : "Lesoverzicht";
   const lessonOutlineTitle =
     language === "en" ? "On this page" : "Op deze pagina";
+  const lessonToolsTitle = language === "en" ? "Lesson tools" : "Leshulp";
   const lessonAbbreviationAppendixTitle =
     language === "en"
       ? "Abbreviations and symbols used in this lesson"
@@ -244,8 +245,8 @@ export function GrammarLessonPageClient({
 
   return (
     <PageShell
-      className="min-h-screen overflow-visible px-6 pb-12 pt-6 md:px-10 md:pb-16 md:pt-10"
-      contentClassName="w-full space-y-0 pt-10"
+      className="app-page-shell"
+      contentClassName="w-full space-y-0 pt-8 md:pt-10"
       width="standard"
       accents={[
         pageShellAccents.topRightSkyOrb,
@@ -354,6 +355,7 @@ export function GrammarLessonPageClient({
                 lessonOutlineEyebrow={lessonOutlineEyebrow}
                 lessonOutlineSections={lessonOutlineSections}
                 lessonOutlineTitle={lessonOutlineTitle}
+                lessonToolsTitle={lessonToolsTitle}
               />
             </div>
           </div>

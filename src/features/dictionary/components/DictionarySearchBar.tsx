@@ -35,7 +35,7 @@ export function DictionarySearchBar({
   const { t } = useLanguage();
 
   return (
-    <div className="relative z-30 rounded-2xl border border-stone-200 bg-white/80 shadow-xl backdrop-blur-xl dark:border-stone-700/80 dark:bg-stone-900/80 dark:shadow-2xl sm:rounded-[1.75rem]">
+    <div className="group relative z-30 rounded-2xl border border-stone-200 bg-white/80 shadow-xl backdrop-blur-xl dark:border-stone-700/80 dark:bg-stone-900/80 dark:shadow-2xl sm:rounded-[1.75rem]">
       <div className="relative flex items-center">
         <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-stone-500 transition-colors group-focus-within:text-sky-400 sm:left-6">
           <Search className="h-5 w-5 sm:h-6 sm:w-6" />

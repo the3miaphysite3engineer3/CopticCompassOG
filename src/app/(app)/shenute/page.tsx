@@ -2,14 +2,9 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import {
-  BrainCircuit,
-  ChevronDown,
-  ExternalLink,
-  LibraryBig,
-  UserRound,
-} from "lucide-react";
+import { ArrowRight, BookOpenCheck } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -28,7 +23,7 @@ import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { cx } from "@/lib/classes";
-import { getLocalizedHomePath } from "@/lib/locale";
+import { getContributorsPath, getLocalizedHomePath } from "@/lib/locale";
 import { useOptionalAuthGate } from "@/lib/supabase/useOptionalAuthGate";
 
 type ShenuteProvider = "gemini" | "hf" | "openrouter" | "thoth";
@@ -70,11 +65,6 @@ const SHENUTE_COPY = {
       "Admin only: add written feedback tied to this prompt and response.",
     adminNoteSummary: "Admin note for RAG learning",
     aiMode: "AI mode",
-    architectureLabel: "Architecture:",
-    architectureValue: "RAG (Retrieval Augmented Generation)",
-    baseTechnology: "Base Technology",
-    baseLlmLabel: "Base LLM:",
-    baseLlmValue: "Claude 4.5 Sonnet (upgraded from 3.5)",
     cameraCapture: "Capture Image",
     cameraClose: "Close Camera",
     cameraFrameFailed: "Could not capture camera frame.",
@@ -83,10 +73,9 @@ const SHENUTE_COPY = {
     cameraNotSupported: "Camera is not supported on this device/browser.",
     cameraStillLoading: "Camera feed is not ready yet. Try again.",
     cameraSource: "camera",
-    contact: "Contact",
-    credits: "Credits",
-    creditsAndSpecs: "THOTH AI Credits and Technical Specifications",
-    customPrompts: "Custom instruction prompts (500 plus lines)",
+    creditsLinkDescription:
+      "Credits, technical notes, and research acknowledgements now live on the Contributors page.",
+    creditsLinkTitle: "Credits and technical notes",
     dislike: "Dislike",
     feedbackPromptMissing:
       "Could not resolve prompt/response for this feedback.",
@@ -100,9 +89,7 @@ const SHENUTE_COPY = {
     imageOcrContext: "[Image OCR Context]",
     intro:
       "Ask about Coptic vocabulary, grammar, translation, and manuscript context without leaving the shared app workspace.",
-    knowledgeBase: "Knowledge Base",
     like: "Like",
-    nlpCapabilities: "Natural Language Processing and OCR capabilities",
     noTextExtracted: "No text extracted from the selected image.",
     ocrFailed: "OCR failed for the selected image.",
     placeholder: "Ask about a Coptic word, grammar rule, or attached image...",
@@ -117,7 +104,6 @@ const SHENUTE_COPY = {
     loadingSession: "Loading session...",
     sessionCount: "sessions",
     sessionDateMissing: "No timestamp",
-    platformLabel: "Platform:",
     providerGemini: "Learner (Gemini)",
     providerHf: "Learner (HF)",
     providerOpenRouter: "Learner (OpenRouter)",
@@ -130,17 +116,11 @@ const SHENUTE_COPY = {
     sendMessage: "Send message",
     selectedImageAlt: "Selected for OCR",
     submitAdminNote: "Submit admin note",
-    technicalSummary:
-      "Credits, base stack, and source materials behind the THOTH AI expert mode.",
-    thothBio1:
-      "Dr. So Miyagawa is an associate professor of linguistics and Egyptology at the University of Tsukuba, specializing in the Ancient Egyptian-Coptic language. Following doctoral research at the University of Gottingen's Seminar for Egyptology and Coptic Studies, his work integrates computational linguistic methods with traditional philological approaches.",
-    thothBio2:
-      "His research focuses on ancient and medieval Nile Valley languages, including Ancient Egyptian-Coptic, Old Nubian, Greek, Arabic, and Meroitic, as well as endangered languages in and around the Japanese Archipelago.",
-    thothRole: "Associate Professor of Linguistics and Egyptology",
     title: "Shenute AI",
     uploadSource: "upload",
     useCamera: "Use Camera",
-    viewProjectSite: "Visit THOTH AI project site",
+    viewNmtCredits: "View NMT credits",
+    viewShenuteCredits: "View Shenute credits",
     welcomeDescription:
       "Start with a word, a grammar question, or an image attachment and Shenute AI will keep the conversation grounded in your Coptic study workflow.",
     welcomeTitle: "Welcome to Shenute AI",
@@ -153,11 +133,6 @@ const SHENUTE_COPY = {
       "Alleen voor beheerders: voeg feedback toe bij deze prompt en dit antwoord.",
     adminNoteSummary: "Beheerdersnotitie voor RAG-learning",
     aiMode: "AI-modus",
-    architectureLabel: "Architectuur:",
-    architectureValue: "RAG (Retrieval Augmented Generation)",
-    baseTechnology: "Basistechnologie",
-    baseLlmLabel: "Basis-LLM:",
-    baseLlmValue: "Claude 4.5 Sonnet (upgrade vanaf 3.5)",
     cameraCapture: "Afbeelding vastleggen",
     cameraClose: "Camera sluiten",
     cameraFrameFailed: "Het camerabeeld kon niet worden vastgelegd.",
@@ -168,10 +143,9 @@ const SHENUTE_COPY = {
       "De camera wordt niet ondersteund op dit apparaat of in deze browser.",
     cameraStillLoading: "De camerafeed is nog niet klaar. Probeer het opnieuw.",
     cameraSource: "camera",
-    contact: "Contact",
-    credits: "Credits",
-    creditsAndSpecs: "THOTH AI-credits en technische specificaties",
-    customPrompts: "Aangepaste instructieprompts (meer dan 500 regels)",
+    creditsLinkDescription:
+      "Credits, technische notities en onderzoeksvermeldingen staan nu op de bijdragerspagina.",
+    creditsLinkTitle: "Credits en technische notities",
     dislike: "Niet nuttig",
     feedbackPromptMissing:
       "De prompt en het antwoord voor deze feedback konden niet worden bepaald.",
@@ -185,9 +159,7 @@ const SHENUTE_COPY = {
     imageOcrContext: "[Image OCR Context]",
     intro:
       "Stel vragen over Koptische woordenschat, grammatica, vertaling en manuscriptcontext zonder de gedeelde werkruimte te verlaten.",
-    knowledgeBase: "Kennisbank",
     like: "Nuttig",
-    nlpCapabilities: "Mogelijkheden voor natuurlijke-taalverwerking en OCR",
     noTextExtracted:
       "Er is geen tekst uit de geselecteerde afbeelding gehaald.",
     ocrFailed: "OCR is mislukt voor de geselecteerde afbeelding.",
@@ -204,7 +176,6 @@ const SHENUTE_COPY = {
     loadingSession: "Sessieweergave laden...",
     sessionCount: "sessies",
     sessionDateMissing: "Geen tijdstempel",
-    platformLabel: "Platform:",
     providerGemini: "Leerhulp (Gemini)",
     providerHf: "Leerhulp (HF)",
     providerOpenRouter: "Leerhulp (OpenRouter)",
@@ -217,17 +188,11 @@ const SHENUTE_COPY = {
     sendMessage: "Bericht verzenden",
     selectedImageAlt: "Geselecteerd voor OCR",
     submitAdminNote: "Beheerdersnotitie verzenden",
-    technicalSummary:
-      "Credits, basisstack en bronmateriaal achter de THOTH AI-expertmodus.",
-    thothBio1:
-      "Dr. So Miyagawa is hoofddocent taalkunde en egyptologie aan de University of Tsukuba en specialiseert zich in de Oudegyptisch-Koptische taal. Na promotieonderzoek aan het Seminar for Egyptology and Coptic Studies van de University of Gottingen combineert zijn werk computationele taalkundige methoden met traditionele filologische benaderingen.",
-    thothBio2:
-      "Zijn onderzoek richt zich op oude en middeleeuwse talen van de Nijlvallei, waaronder Oudegyptisch-Koptisch, Oudnubisch, Grieks, Arabisch en Meroitisch, naast bedreigde talen in en rond de Japanse archipel.",
-    thothRole: "Hoofddocent taalkunde en egyptologie",
     title: "Shenute AI",
     uploadSource: "upload",
     useCamera: "Camera gebruiken",
-    viewProjectSite: "Bekijk de THOTH AI-projectsite",
+    viewNmtCredits: "Bekijk NMT-credits",
+    viewShenuteCredits: "Bekijk Shenute-credits",
     welcomeDescription:
       "Begin met een woord, een grammaticavraag of een afbeelding. Shenute AI houdt het gesprek verbonden met uw Koptische studiewerkstroom.",
     welcomeTitle: "Welkom bij Shenute AI",
@@ -469,6 +434,7 @@ export default function ShenuteAI() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const captureCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const shenuteSessionIdRef = useRef(crypto.randomUUID());
 
   const { isAuthenticated, isReady } = useOptionalAuthGate();
@@ -502,6 +468,21 @@ export default function ShenuteAI() {
   const isLoading = status !== "ready";
   const isShenuteAccessBlocked = isReady && !isAuthenticated;
   const typedMessages = messages as ChatMessageLike[];
+
+  useEffect(() => {
+    if (typedMessages.length === 0) {
+      return;
+    }
+
+    const frame = window.requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({
+        block: "end",
+        behavior: "smooth",
+      });
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [isLoading, typedMessages.length]);
 
   useEffect(() => {
     if (hasRestoredHistory || !isReady) {
@@ -863,6 +844,21 @@ export default function ShenuteAI() {
     clearSelectedImage();
   };
 
+  function handlePromptKeyDown(
+    event: React.KeyboardEvent<HTMLTextAreaElement>,
+  ) {
+    if (
+      event.key !== "Enter" ||
+      event.shiftKey ||
+      event.nativeEvent.isComposing
+    ) {
+      return;
+    }
+
+    event.preventDefault();
+    event.currentTarget.form?.requestSubmit();
+  }
+
   async function submitFeedbackSignal(options: {
     assistantMessage: ChatMessageLike;
     feedbackText?: string;
@@ -1021,9 +1017,9 @@ export default function ShenuteAI() {
 
   return (
     <PageShell
-      className="min-h-screen flex flex-col items-center p-6 pb-16 md:p-10"
-      contentClassName="mx-auto w-full max-w-6xl space-y-6 pt-8 md:pt-10"
-      width="standard"
+      className="app-page-shell"
+      contentClassName="w-full space-y-6 pt-8 md:pt-10"
+      width="wide"
       accents={[
         pageShellAccents.heroSkyArc,
         pageShellAccents.topRightEmeraldOrbInset,
@@ -1073,121 +1069,48 @@ export default function ShenuteAI() {
             </select>
           </label>
 
-          <details className="group min-w-0">
-            <summary className="list-none cursor-pointer p-4 md:p-5 [&::-webkit-details-marker]:hidden">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex min-w-0 items-start gap-3 sm:items-center">
-                  <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-sky-700 shadow-sm dark:bg-sky-900/30 dark:text-sky-300">
-                    <BrainCircuit className="h-4 w-4" />
-                  </div>
-                  <div className="min-w-0 space-y-1">
-                    <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
-                      {copy.creditsAndSpecs}
-                    </h2>
-                    <p className="text-xs leading-5 text-stone-600 dark:text-stone-400">
-                      {copy.technicalSummary}
-                    </p>
-                  </div>
+          <div className="min-w-0 p-4 md:p-5">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-sky-700 shadow-sm dark:bg-sky-900/30 dark:text-sky-300">
+                  <BookOpenCheck className="h-4 w-4" />
                 </div>
-                <div className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl border border-stone-200 bg-white/80 text-stone-500 shadow-sm transition-transform duration-200 group-open:rotate-180 dark:border-stone-800 dark:bg-stone-900/70 dark:text-stone-300">
-                  <ChevronDown className="h-4 w-4" />
+                <div className="min-w-0 space-y-1">
+                  <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
+                    {copy.creditsLinkTitle}
+                  </h2>
+                  <p className="max-w-2xl text-xs leading-5 text-stone-600 dark:text-stone-400">
+                    {copy.creditsLinkDescription}
+                  </p>
                 </div>
               </div>
-            </summary>
 
-            <div className="border-t border-stone-200/80 p-4 dark:border-stone-800/80 md:p-5">
-              <div className="grid gap-5 xl:grid-cols-3">
-                <section className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
-                    <UserRound className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                    <span>{copy.credits}</span>
-                  </div>
-                  <div className="space-y-1.5 text-sm leading-6 text-stone-600 dark:text-stone-400">
-                    <p className="font-semibold text-stone-900 dark:text-stone-100">
-                      Dr. So Miyagawa
-                    </p>
-                    <p>{copy.thothRole}</p>
-                    <p>University of Tsukuba</p>
-                    <p>{copy.thothBio1}</p>
-                    <p>{copy.thothBio2}</p>
-                    <a
-                      className={buttonClassName({
-                        className: "h-auto px-0 py-0",
-                        size: "sm",
-                        variant: "link",
-                      })}
-                      href="mailto:miyagawa.so.kb@u.tsukuba.ac.jp"
-                    >
-                      <ExternalLink className="h-3.5 w-3.5" />
-                      {copy.contact}: miyagawa.so.kb@u.tsukuba.ac.jp
-                    </a>
-                  </div>
-                </section>
-
-                <section className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
-                    <BrainCircuit className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                    <span>{copy.baseTechnology}</span>
-                  </div>
-                  <ul className="space-y-1.5 text-sm leading-6 text-stone-600 dark:text-stone-400">
-                    <li>
-                      <span className="font-medium text-stone-900 dark:text-stone-100">
-                        {copy.platformLabel}
-                      </span>{" "}
-                      Dify
-                    </li>
-                    <li>
-                      <span className="font-medium text-stone-900 dark:text-stone-100">
-                        {copy.baseLlmLabel}
-                      </span>{" "}
-                      {copy.baseLlmValue}
-                    </li>
-                    <li>
-                      <span className="font-medium text-stone-900 dark:text-stone-100">
-                        {copy.architectureLabel}
-                      </span>{" "}
-                      {copy.architectureValue}
-                    </li>
-                    <li>{copy.nlpCapabilities}</li>
-                  </ul>
-                </section>
-
-                <section className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
-                    <LibraryBig className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                    <span>{copy.knowledgeBase}</span>
-                  </div>
-                  <ul className="space-y-1.5 text-sm leading-6 text-stone-600 dark:text-stone-400">
-                    <li>Comprehensive Coptic Lexicon v1.2 (2020)</li>
-                    <li>
-                      Burns, D., Feder, F., John, K., Kupreyev, M., et al.
-                    </li>
-                    <li>Freie Universitat Berlin</li>
-                    <li>A Concise Dictionary of Middle Egyptian (1962)</li>
-                    <li>Raymond Oliver Faulkner</li>
-                    <li>Griffith Institute, Oxford</li>
-                    <li>{copy.customPrompts}</li>
-                  </ul>
-                </section>
-              </div>
-
-              <div className="mt-5 border-t border-stone-200/80 pt-4 dark:border-stone-800/80">
-                <a
+              <div className="flex shrink-0 flex-wrap gap-2">
+                <Link
+                  href={`${getContributorsPath(language)}#shenute-ai-credits`}
                   className={buttonClassName({
-                    className: "w-full justify-center sm:w-auto",
+                    className: "h-9 px-3 text-xs",
                     size: "sm",
                     variant: "secondary",
                   })}
-                  href="https://somiyagawa.github.io/THOTH.AI/"
-                  rel="noreferrer"
-                  target="_blank"
                 >
-                  <ExternalLink className="h-4 w-4" />
-                  {copy.viewProjectSite}
-                </a>
+                  {copy.viewShenuteCredits}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
+                <Link
+                  href={`${getContributorsPath(language)}#research-nmt-credits`}
+                  className={buttonClassName({
+                    className: "h-9 px-3 text-xs",
+                    size: "sm",
+                    variant: "secondary",
+                  })}
+                >
+                  {copy.viewNmtCredits}
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </Link>
               </div>
             </div>
-          </details>
+          </div>
         </div>
       </SurfacePanel>
 
@@ -1531,6 +1454,7 @@ export default function ShenuteAI() {
                   </div>
                 </div>
               ) : null}
+              <div ref={messagesEndRef} aria-hidden="true" />
             </div>
           )}
 
@@ -1696,11 +1620,13 @@ export default function ShenuteAI() {
               shadow="soft"
               className="p-2"
             >
-              <div className="flex items-center gap-2">
-                <input
+              <div className="flex items-end gap-2">
+                <textarea
                   id="shenute-message-input"
                   name="shenute_message"
-                  className="min-w-0 flex-1 rounded-[1.25rem] border-0 bg-transparent px-4 py-3 font-coptic text-lg text-stone-900 outline-none ring-0 placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:text-stone-100 dark:placeholder:text-stone-500 md:text-xl"
+                  rows={1}
+                  enterKeyHint="send"
+                  className="max-h-40 min-h-12 min-w-0 flex-1 resize-y rounded-[1.25rem] border-0 bg-transparent px-4 py-3 font-coptic text-lg leading-7 text-stone-900 outline-none ring-0 placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:text-stone-100 dark:placeholder:text-stone-500 md:text-xl"
                   value={inputValue}
                   onChange={(event) => {
                     setInputValue(event.target.value);
@@ -1708,6 +1634,7 @@ export default function ShenuteAI() {
                       setShenuteAccessError(null);
                     }
                   }}
+                  onKeyDown={handlePromptKeyDown}
                   placeholder={copy.placeholder}
                   disabled={isLoading || ocrPending || isShenuteAccessBlocked}
                 />

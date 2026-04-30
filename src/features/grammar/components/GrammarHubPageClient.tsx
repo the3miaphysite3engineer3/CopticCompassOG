@@ -20,8 +20,8 @@ export default function GrammarHubPageClient({
 
   return (
     <PageShell
-      className="min-h-screen flex flex-col items-center p-6 md:p-10"
-      contentClassName="w-full space-y-8 pt-8 md:space-y-12 md:pt-10"
+      className="app-page-shell"
+      contentClassName="app-page-stack"
       width="standard"
       accents={[
         pageShellAccents.topRightSkyOrb,

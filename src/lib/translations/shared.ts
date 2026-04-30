@@ -9,6 +9,8 @@ export const sharedMessages = defineMessages({
     "lang.switchToDutch": "Switch to Dutch",
     "lang.switchToEnglish": "Switch to English",
 
+    "shared.contents": "Contents",
+
     "nav.home": "Home",
     "nav.publications": "Publications",
     "nav.dictionary": "Dictionary",
@@ -51,6 +53,8 @@ export const sharedMessages = defineMessages({
     "lang.toggle": "Taal wisselen",
     "lang.switchToDutch": "Overschakelen naar het Nederlands",
     "lang.switchToEnglish": "Overschakelen naar het Engels",
+
+    "shared.contents": "Inhoud",
 
     "nav.home": "Home",
     "nav.publications": "Publicaties",

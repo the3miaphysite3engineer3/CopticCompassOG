@@ -17,21 +17,23 @@ import {
 import { cx } from "@/lib/classes";
 
 type DictionaryFiltersProps = {
+  exactMatch: boolean;
+  onClearFilters?: () => void;
   selectedDialect: DialectFilter;
   selectedPartOfSpeech: DictionaryPartOfSpeechFilter;
+  setExactMatch: (value: boolean) => void;
   setSelectedDialect: (value: DialectFilter) => void;
   setSelectedPartOfSpeech: (value: DictionaryPartOfSpeechFilter) => void;
-  exactMatch: boolean;
-  setExactMatch: (value: boolean) => void;
 };
 
 export function DictionaryFilters({
+  exactMatch,
+  onClearFilters,
   selectedDialect,
   selectedPartOfSpeech,
+  setExactMatch,
   setSelectedDialect,
   setSelectedPartOfSpeech,
-  exactMatch,
-  setExactMatch,
 }: DictionaryFiltersProps) {
   const { t } = useLanguage();
   const [isExpandedOnMobile, setIsExpandedOnMobile] = useState(false);
@@ -85,6 +87,14 @@ export function DictionaryFilters({
         <div className="hidden items-center gap-2 text-stone-500 dark:text-stone-400 sm:flex">
           <SlidersHorizontal className="h-4 w-4" />
           <FormLabel tone="muted">{t("dict.filters")}</FormLabel>
+          {activeFilterCount > 0 ? (
+            <span
+              className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-sky-600 px-1.5 text-xs font-semibold text-white dark:bg-sky-500"
+              aria-label={`${t("dict.activeFilters")}: ${activeFilterCount}`}
+            >
+              {activeFilterCount}
+            </span>
+          ) : null}
         </div>
 
         <div className="hidden h-6 w-px bg-stone-300 dark:bg-stone-700 md:block" />
@@ -134,6 +144,16 @@ export function DictionaryFilters({
           onChange={(event) => setExactMatch(event.target.checked)}
           wrapperClassName="rounded-lg p-2 hover:bg-stone-100 dark:hover:bg-stone-800 sm:-m-2"
         />
+
+        {activeFilterCount > 0 && onClearFilters ? (
+          <button
+            type="button"
+            onClick={onClearFilters}
+            className="btn-ghost h-9 justify-start px-3 text-xs uppercase tracking-widest sm:justify-center"
+          >
+            {t("dict.clearFilters")}
+          </button>
+        ) : null}
       </div>
     </div>
   );

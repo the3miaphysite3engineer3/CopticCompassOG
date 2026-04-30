@@ -18,12 +18,6 @@ import {
 } from "@/features/publications/lib/publications";
 import { getLocalizedHomePath, getPublicationsPath } from "@/lib/locale";
 
-const LANGUAGE_BADGE_CLASS_NAMES: Record<Publication["lang"], string> = {
-  COP: "border-amber-200 bg-amber-100 text-amber-700 dark:border-amber-800 dark:bg-amber-900/40 dark:text-amber-400",
-  NL: "border-blue-200 bg-blue-100 text-blue-700 dark:border-blue-800 dark:bg-blue-900/40 dark:text-blue-400",
-  EN: "border-sky-200 bg-sky-100 text-sky-700 dark:border-sky-800 dark:bg-sky-900/40 dark:text-sky-400",
-};
-
 function getFormatLabel(
   publication: Publication,
   language: ReturnType<typeof useLanguage>["language"],
@@ -58,8 +52,8 @@ export default function PublicationDetailPageClient({
 
   return (
     <PageShell
-      className="min-h-screen flex flex-col items-center p-6 md:p-10"
-      contentClassName="w-full space-y-10 pt-10"
+      className="app-page-shell"
+      contentClassName="app-page-stack"
       width="standard"
       accents={[
         pageShellAccents.topRightEmeraldOrb,
@@ -95,6 +89,7 @@ export default function PublicationDetailPageClient({
                 src={publication.image}
                 alt={publication.title}
                 fill
+                sizes="(min-width: 1024px) 352px, calc(100vw - 6rem)"
                 className="object-cover object-top"
                 priority
               />
@@ -114,26 +109,6 @@ export default function PublicationDetailPageClient({
         </SurfacePanel>
 
         <div className="space-y-6">
-          <div className="flex flex-wrap gap-2">
-            <Badge tone="accent" size="xs" caps>
-              {t("publications.badge")}
-            </Badge>
-            <span
-              className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold tracking-widest ${LANGUAGE_BADGE_CLASS_NAMES[publication.lang]}`}
-            >
-              {publication.lang}
-            </span>
-            <Badge tone="surface" size="xs">
-              {getFormatLabel(publication, language)}
-            </Badge>
-            <Badge
-              tone={publication.status === "published" ? "coptic" : "neutral"}
-              size="xs"
-            >
-              {statusLabel}
-            </Badge>
-          </div>
-
           <div className="space-y-4">
             <PageHeader
               align="left"

@@ -108,8 +108,8 @@ export default function OCRPage() {
 
   return (
     <PageShell
-      className="min-h-screen flex flex-col items-center p-6 pb-16 md:p-10"
-      contentClassName="mx-auto w-full max-w-4xl space-y-8 pt-10"
+      className="app-page-shell"
+      contentClassName="mx-auto w-full max-w-4xl space-y-8 pt-8 md:pt-10"
       width="standard"
       accents={[
         pageShellAccents.heroSkyArc,

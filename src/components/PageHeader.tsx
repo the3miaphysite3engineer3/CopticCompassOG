@@ -32,15 +32,15 @@ const TITLE_TONE_CLASSES: Record<PageHeaderTone, string> = {
 
 const TITLE_SIZE_CLASSES: Record<PageHeaderSize, string> = {
   hero: "text-5xl md:text-7xl",
-  page: "text-4xl md:text-6xl",
-  compact: "text-4xl md:text-5xl",
-  workspace: "text-3xl md:text-5xl",
+  page: "text-4xl md:text-5xl",
+  compact: "text-3xl md:text-4xl",
+  workspace: "text-3xl md:text-4xl",
 };
 
 const DESCRIPTION_SIZE_CLASSES: Record<PageHeaderSize, string> = {
   hero: "text-lg md:text-xl",
   page: "text-lg md:text-xl",
-  compact: "text-lg md:text-xl",
+  compact: "text-base md:text-lg",
   workspace: "text-base md:text-lg",
 };
 

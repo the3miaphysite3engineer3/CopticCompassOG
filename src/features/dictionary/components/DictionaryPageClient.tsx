@@ -49,15 +49,15 @@ function DictionaryPageBody({ searchPath }: DictionaryPageBodyProps) {
 
   return (
     <PageShell
-      className="min-h-screen flex flex-col items-center p-6 pb-20 md:p-10"
-      contentClassName="w-full pt-8 md:pt-10"
+      className="app-page-shell"
+      contentClassName="app-page-content"
       width="standard"
       accents={[
         pageShellAccents.heroSkyArc,
         pageShellAccents.topRightEmeraldOrbInset,
       ]}
     >
-      <div className="mb-5 space-y-4">
+      <div className="mb-8 space-y-4 md:mb-10">
         <BreadcrumbTrail
           items={[
             { label: t("nav.home"), href: getLocalizedHomePath(language) },
@@ -98,12 +98,17 @@ function DictionaryPageBody({ searchPath }: DictionaryPageBodyProps) {
         />
 
         <DictionaryFilters
+          exactMatch={exactMatch}
+          onClearFilters={() => {
+            setSelectedDialect("ALL");
+            setSelectedPartOfSpeech("ALL");
+            setExactMatch(false);
+          }}
           selectedDialect={selectedDialect}
           selectedPartOfSpeech={selectedPartOfSpeech}
+          setExactMatch={setExactMatch}
           setSelectedDialect={setSelectedDialect}
           setSelectedPartOfSpeech={setSelectedPartOfSpeech}
-          exactMatch={exactMatch}
-          setExactMatch={setExactMatch}
         />
       </div>
 

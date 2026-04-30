@@ -22,40 +22,37 @@ export function Footer() {
       <div className="site-container flex flex-col items-center justify-between gap-4 py-8 md:flex-row">
         <div className="flex flex-col items-center gap-2 md:items-start">
           <p className="text-center text-sm leading-6 text-muted md:text-left">
-            &copy; {currentYear} Kyrillos Wannes. {t("footer.rights")}
+            &copy; {currentYear} Coptic Compass. {t("footer.rights")}
           </p>
           <p className="text-center text-sm leading-6 text-muted/80 md:text-left">
             {brandLabel} {t("footer.credit")}
           </p>
-          <div className="flex items-center gap-4 text-xs text-muted/70">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-muted/70 md:justify-start">
             <Link
               href={getPrivacyPath(language)}
-              className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+              className="transition-colors hover:text-ink"
             >
               {t("footer.privacy")}
             </Link>
             <Link
               href={getTermsPath(language)}
-              className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+              className="transition-colors hover:text-ink"
             >
               {t("footer.terms")}
             </Link>
             <Link
               href={getDevelopersPath(language)}
-              className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+              className="transition-colors hover:text-ink"
             >
               {t("footer.developers")}
             </Link>
             <Link
               href={getContributorsPath(language)}
-              className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
+              className="transition-colors hover:text-ink"
             >
               {t("footer.contributors")}
             </Link>
-            <Link
-              href="/api-docs"
-              className="hover:text-stone-900 dark:hover:text-stone-100 transition-colors"
-            >
+            <Link href="/api-docs" className="transition-colors hover:text-ink">
               {t("footer.apiDocs")}
             </Link>
           </div>
