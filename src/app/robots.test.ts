@@ -9,8 +9,8 @@ describe("robots route", () => {
         userAgent: "*",
         allow: "/",
       },
-      sitemap: "https://kyrilloswannes.com/sitemap.xml",
-      host: "https://kyrilloswannes.com",
+      sitemap: "https://www.copticcompass.com/sitemap.xml",
+      host: "https://www.copticcompass.com",
     });
   });
 });

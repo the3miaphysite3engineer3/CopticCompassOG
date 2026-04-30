@@ -102,7 +102,7 @@ describe("opt-in request helpers", () => {
     const { buildAudienceOptInConfirmationUrl } = await loadOptInModule();
 
     expect(buildAudienceOptInConfirmationUrl("nl", "abc123")).toBe(
-      "https://kyrilloswannes.com/nl/communications/confirm?token=abc123",
+      "https://www.copticcompass.com/nl/communications/confirm?token=abc123",
     );
   });
 

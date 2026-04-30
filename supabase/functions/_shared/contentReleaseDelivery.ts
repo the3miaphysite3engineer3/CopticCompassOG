@@ -51,7 +51,7 @@ const MAIL_BRAND = {
   brandName: "Coptic Compass",
   descriptorEn: "Coptic dictionary, grammar, and publications.",
   descriptorNl: "Koptisch woordenboek, grammatica en publicaties.",
-  liveUrl: "https://kyrilloswannes.com",
+  liveUrl: "https://www.copticcompass.com",
 } as const;
 
 function asObject(value: unknown): Record<string, unknown> | null {

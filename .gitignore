@@ -38,7 +38,7 @@ next-env.d.ts
 
 # Temp/scratch scripts and outputs
 /scratch/
-/tmp/distill/
+/tmp/
 knip.txt
 knip.out.json
 lint.json
@@ -61,6 +61,9 @@ Thumbs.db
 .eslintcache
 .stylelintcache
 .prettiercache
+.turbo/
+.blob-report/
+blob-report/
 .husky/_
 
 # Build artifact backups

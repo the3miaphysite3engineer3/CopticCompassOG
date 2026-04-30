@@ -127,7 +127,7 @@ const developerCopy = {
     ],
     breadcrumbLabel: "Developers",
     code: `const response = await fetch(
-  "https://kyrilloswannes.com/api/v1/grammar/lessons",
+  "https://www.copticcompass.com/api/v1/grammar/lessons",
 );
 
 const payload = await response.json();
@@ -135,7 +135,7 @@ const lessonTitles = payload.data.map((lesson) => lesson.title.en);`,
     shenuteExampleTitle: "Shenute AI request example",
     shenuteExampleCaption:
       "A minimal POST request to /api/shenute using OpenRouter as provider.",
-    shenuteCode: `const response = await fetch("https://kyrilloswannes.com/api/shenute", {
+    shenuteCode: `const response = await fetch("https://www.copticcompass.com/api/shenute", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -159,7 +159,7 @@ OCR_SERVICE_URL=https://your-ocr-service/upload
 # Optional for strict OCR backends:
 OCR_UPLOAD_FIELD=file
 
-curl -X POST "https://kyrilloswannes.com/api/ocr?lang=cop" \
+curl -X POST "https://www.copticcompass.com/api/ocr?lang=cop" \
   -F "file=@/path/to/coptic-image.jpg"
 
 # Proxy OCR flow
@@ -277,7 +277,7 @@ curl -X POST "https://kyrilloswannes.com/api/ocr?lang=cop" \
     ],
     breadcrumbLabel: "Ontwikkelaars",
     code: `const response = await fetch(
-  "https://kyrilloswannes.com/api/v1/grammar/lessons",
+  "https://www.copticcompass.com/api/v1/grammar/lessons",
 );
 
 const payload = await response.json();
@@ -285,7 +285,7 @@ const lessonTitles = payload.data.map((lesson) => lesson.title.en);`,
     shenuteExampleTitle: "Voorbeeld Shenute AI-request",
     shenuteExampleCaption:
       "Een minimale POST-request naar /api/shenute met OpenRouter als provider.",
-    shenuteCode: `const response = await fetch("https://kyrilloswannes.com/api/shenute", {
+    shenuteCode: `const response = await fetch("https://www.copticcompass.com/api/shenute", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -309,7 +309,7 @@ OCR_SERVICE_URL=https://your-ocr-service/upload
 # Optioneel voor strikte OCR-backends:
 OCR_UPLOAD_FIELD=file
 
-curl -X POST "https://kyrilloswannes.com/api/ocr?lang=cop" \
+curl -X POST "https://www.copticcompass.com/api/ocr?lang=cop" \
   -F "file=@/pad/naar/koptische-afbeelding.jpg"
 
 # OCR-proxyflow

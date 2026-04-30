@@ -26,7 +26,7 @@ async function loadCallbackRoute(options?: {
   }));
   vi.doMock("@/lib/site", () => ({
     getSiteUrl: () =>
-      new URL(options?.siteUrl ?? "https://www.kyrilloswannes.com"),
+      new URL(options?.siteUrl ?? "https://www.copticcompass.com"),
   }));
 
   const mod = await import("./route");
@@ -48,13 +48,13 @@ describe("auth callback route", () => {
 
     const response = await GET(
       new Request(
-        "https://www.kyrilloswannes.com/auth/callback?code=test-code&next=/update-password",
+        "https://www.copticcompass.com/auth/callback?code=test-code&next=/update-password",
       ),
     );
 
     expect(exchangeCodeForSessionMock).toHaveBeenCalledWith("test-code");
     expect(response.headers.get("location")).toBe(
-      "https://www.kyrilloswannes.com/update-password",
+      "https://www.copticcompass.com/update-password",
     );
   });
 
@@ -63,12 +63,12 @@ describe("auth callback route", () => {
 
     const response = await GET(
       new Request(
-        "https://www.kyrilloswannes.com/auth/callback?code=test-code&next=https://www.kyrilloswannes.com/dashboard?tab=profile",
+        "https://www.copticcompass.com/auth/callback?code=test-code&next=https://www.copticcompass.com/dashboard?tab=profile",
       ),
     );
 
     expect(response.headers.get("location")).toBe(
-      "https://www.kyrilloswannes.com/dashboard?tab=profile",
+      "https://www.copticcompass.com/dashboard?tab=profile",
     );
   });
 
@@ -77,18 +77,18 @@ describe("auth callback route", () => {
 
     const response = await GET(
       new Request(
-        "https://www.kyrilloswannes.com/auth/callback?code=test-code&next=https://www.kyrilloswannes.com.evil.example/steal",
+        "https://www.copticcompass.com/auth/callback?code=test-code&next=https://www.copticcompass.com.evil.example/steal",
       ),
     );
 
     expect(response.headers.get("location")).toBe(
-      "https://www.kyrilloswannes.com/dashboard",
+      "https://www.copticcompass.com/dashboard",
     );
   });
 
   it("uses the configured site URL instead of the incoming request origin", async () => {
     const { GET } = await loadCallbackRoute({
-      siteUrl: "https://www.kyrilloswannes.com",
+      siteUrl: "https://www.copticcompass.com",
     });
 
     const response = await GET(
@@ -98,7 +98,7 @@ describe("auth callback route", () => {
     );
 
     expect(response.headers.get("location")).toBe(
-      "https://www.kyrilloswannes.com/dashboard",
+      "https://www.copticcompass.com/dashboard",
     );
   });
 });

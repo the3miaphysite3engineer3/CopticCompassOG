@@ -18,10 +18,10 @@ describe("sitemap route", () => {
   it("publishes a sitemap index that points to content and dictionary shards", () => {
     const urls = getPublicSitemapIndexEntries().map((entry) => entry.url);
 
-    expect(urls).toContain("https://kyrilloswannes.com/sitemaps/content");
+    expect(urls).toContain("https://www.copticcompass.com/sitemaps/content");
     expect(
       urls.some((url) =>
-        url.startsWith("https://kyrilloswannes.com/sitemaps/entries"),
+        url.startsWith("https://www.copticcompass.com/sitemaps/entries"),
       ),
     ).toBe(true);
   });
@@ -31,15 +31,15 @@ describe("sitemap route", () => {
 
     expect(urls).toEqual(
       expect.arrayContaining([
-        "https://kyrilloswannes.com/en",
-        "https://kyrilloswannes.com/nl",
-        "https://kyrilloswannes.com/en/dictionary",
-        "https://kyrilloswannes.com/nl/grammar",
-        "https://kyrilloswannes.com/en/developers",
-        "https://kyrilloswannes.com/en/contributors",
-        "https://kyrilloswannes.com/nl/analytics",
-        "https://kyrilloswannes.com/en/contact",
-        "https://kyrilloswannes.com/api-docs",
+        "https://www.copticcompass.com/en",
+        "https://www.copticcompass.com/nl",
+        "https://www.copticcompass.com/en/dictionary",
+        "https://www.copticcompass.com/nl/grammar",
+        "https://www.copticcompass.com/en/developers",
+        "https://www.copticcompass.com/en/contributors",
+        "https://www.copticcompass.com/nl/analytics",
+        "https://www.copticcompass.com/en/contact",
+        "https://www.copticcompass.com/api-docs",
       ]),
     );
   });
@@ -49,9 +49,9 @@ describe("sitemap route", () => {
       shard.entries.map((entry) => entry.url),
     );
 
-    expect(urls).not.toContain("https://kyrilloswannes.com/en/dashboard");
-    expect(urls).not.toContain("https://kyrilloswannes.com/nl/admin");
-    expect(urls).not.toContain("https://kyrilloswannes.com/login");
+    expect(urls).not.toContain("https://www.copticcompass.com/en/dashboard");
+    expect(urls).not.toContain("https://www.copticcompass.com/nl/admin");
+    expect(urls).not.toContain("https://www.copticcompass.com/login");
   });
 
   it("keeps each sitemap shard within the shard-size budget", () => {

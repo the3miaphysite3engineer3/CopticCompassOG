@@ -116,7 +116,7 @@ const API_DOCS_COPY = {
 } as const;
 
 const SHENUTE_API_EXAMPLES = {
-  en: `const response = await fetch("https://kyrilloswannes.com/api/shenute", {
+  en: `const response = await fetch("https://www.copticcompass.com/api/shenute", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -132,7 +132,7 @@ const SHENUTE_API_EXAMPLES = {
 });
 
 const result = await response.text();`,
-  nl: `const response = await fetch("https://kyrilloswannes.com/api/shenute", {
+  nl: `const response = await fetch("https://www.copticcompass.com/api/shenute", {
   method: "POST",
   headers: { "Content-Type": "application/json" },
   body: JSON.stringify({
@@ -156,7 +156,7 @@ OCR_SERVICE_URL=https://your-ocr-service/upload
 # Optional when your backend expects a specific multipart field:
 OCR_UPLOAD_FIELD=file
 
-curl -X POST "https://kyrilloswannes.com/api/ocr?lang=cop" \\
+curl -X POST "https://www.copticcompass.com/api/ocr?lang=cop" \\
   -F "file=@/path/to/coptic-image.jpg"
 
 # Proxy flow
@@ -168,7 +168,7 @@ OCR_SERVICE_URL=https://your-ocr-service/upload
 # Optioneel wanneer uw backend een specifieke multipart-veldnaam verwacht:
 OCR_UPLOAD_FIELD=file
 
-curl -X POST "https://kyrilloswannes.com/api/ocr?lang=cop" \\
+curl -X POST "https://www.copticcompass.com/api/ocr?lang=cop" \\
   -F "file=@/path/to/coptic-image.jpg"
 
 # Proxyflow

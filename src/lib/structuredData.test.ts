@@ -40,14 +40,14 @@ describe("structured dictionary data", () => {
       "@type": "WebSite",
       name: "Coptic Compass",
       alternateName: "Coptic Dictionary, Grammar, Publications, and Shenute AI",
-      url: "https://kyrilloswannes.com/nl",
+      url: "https://www.copticcompass.com/nl",
       inLanguage: ["en", "nl", "cop"],
       potentialAction: {
         "@type": "SearchAction",
         target: {
           "@type": "EntryPoint",
           urlTemplate:
-            "https://kyrilloswannes.com/nl/dictionary?q={search_term_string}",
+            "https://www.copticcompass.com/nl/dictionary?q={search_term_string}",
         },
       },
     });
@@ -59,14 +59,14 @@ describe("structured dictionary data", () => {
     expect(data).toHaveLength(2);
     expect(data[0]).toMatchObject({
       "@type": "CollectionPage",
-      url: "https://kyrilloswannes.com/en/dictionary",
+      url: "https://www.copticcompass.com/en/dictionary",
       mainEntity: {
-        "@id": "https://kyrilloswannes.com/en/dictionary#defined-term-set",
+        "@id": "https://www.copticcompass.com/en/dictionary#defined-term-set",
       },
     });
     expect(data[1]).toMatchObject({
       "@type": "DefinedTermSet",
-      url: "https://kyrilloswannes.com/en/dictionary",
+      url: "https://www.copticcompass.com/en/dictionary",
       description:
         "A digital Coptic dictionary from Coptic Compass with English and Greek glosses, dialect forms, and grammatical annotations.",
       inLanguage: ["cop", "en", "nl", "el"],

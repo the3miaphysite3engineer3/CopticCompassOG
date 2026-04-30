@@ -63,7 +63,7 @@ describe("entry share helpers", () => {
       language: "en",
       parentEntry,
       relatedEntries,
-      url: "https://kyrilloswannes.com/en/entry/cd_173",
+      url: "https://www.copticcompass.com/en/entry/cd_173",
     });
 
     expect(payload.title).toBe("ϭⲁϫⲓ ϭⲁϫ | Coptic Dictionary");
@@ -72,7 +72,7 @@ describe("entry share helpers", () => {
     expect(payload.text).toContain("Related forms: ⲥⲁϫ • ⲥⲁϫⲉ");
     expect(payload.text).not.toContain("ⲥⲁϫⲟ");
     expect(payload.copyText).toContain(
-      "https://kyrilloswannes.com/en/entry/cd_173",
+      "https://www.copticcompass.com/en/entry/cd_173",
     );
   });
 
@@ -101,7 +101,7 @@ describe("entry share helpers", () => {
       entry,
       language: "nl",
       relatedEntries: [relatedEntry],
-      url: "https://kyrilloswannes.com/nl/entry/cd_200",
+      url: "https://www.copticcompass.com/nl/entry/cd_200",
     });
 
     expect(payload.title).toBe("ⲣⲱⲙⲉ | Koptisch woordenboek");
@@ -109,7 +109,7 @@ describe("entry share helpers", () => {
     expect(payload.text).toContain("mens.");
     expect(payload.text).toContain("Verwante vormen: ⲣⲱⲙⲓ");
     expect(payload.copyText).toContain(
-      "https://kyrilloswannes.com/nl/entry/cd_200",
+      "https://www.copticcompass.com/nl/entry/cd_200",
     );
   });
 
@@ -135,7 +135,7 @@ describe("entry share helpers", () => {
     const payload = buildEntrySharePayload({
       entry,
       language: "en",
-      url: "https://kyrilloswannes.com/en/entry/cd_130",
+      url: "https://www.copticcompass.com/en/entry/cd_130",
     });
 
     expect(payload.title).toBe("ϭⲓ ϭⲓ-/ϭⲓⲧ= ϭⲏⲟⲩ† ϭⲁⲓ~ | Coptic Dictionary");

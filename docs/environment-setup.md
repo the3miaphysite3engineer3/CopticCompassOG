@@ -44,6 +44,8 @@ The complete placeholder set lives in `.env.example`. The list below highlights 
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 
+In production, set `NEXT_PUBLIC_SITE_URL` and `SITE_URL` to `https://www.copticcompass.com` so auth callbacks, metadata, sitemaps, structured data, and generated share links use the canonical domain.
+
 ### Shenute AI / LLM Routing
 
 - `OPENROUTER_API_KEY`
@@ -63,6 +65,8 @@ The complete placeholder set lives in `.env.example`. The list below highlights 
 - `THOTH_BASE_URL`
 - `THOTH_RESPONSE_MODE`
 - `THOTH_CHAT_TIMEOUT_MS`
+
+In production, set `OPENROUTER_HTTP_REFERER` to `https://www.copticcompass.com` and keep `OPENROUTER_APP_TITLE` as `Coptic Compass`.
 
 ### OCR
 

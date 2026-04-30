@@ -56,7 +56,7 @@ function getPassword(formData: FormData) {
  * any trailing slash before it is embedded into provider URLs.
  */
 function getTrustedAuthBaseUrl() {
-  const baseUrl = getSiteUrl()?.toString() ?? "https://kyrilloswannes.com";
+  const baseUrl = getSiteUrl()?.toString() ?? "https://www.copticcompass.com";
   return baseUrl.endsWith("/") ? baseUrl.slice(0, -1) : baseUrl;
 }
 

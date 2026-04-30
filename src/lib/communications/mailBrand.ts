@@ -9,7 +9,7 @@ export const mailBrand = {
   descriptor: "Coptic Dictionary, Grammar, Publications, and Shenute AI",
   fromDisplayName: "Coptic Compass",
   founderLine: "by Kyrillos Wannes",
-  liveUrl: "https://kyrilloswannes.com",
+  liveUrl: "https://www.copticcompass.com",
 } as const;
 
 /**

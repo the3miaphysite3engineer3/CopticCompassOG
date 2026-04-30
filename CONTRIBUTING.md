@@ -81,7 +81,9 @@ If you change release delivery, audience sync, notification emails, or Supabase 
 
 ## Security Policy
 
-Report security issues privately to `kyrilloswannes@gmail.com`, via the contact page, or by opening an issue if the report is not sensitive.
+Report security issues privately through the Coptic Compass contact page:
+https://www.copticcompass.com/contact. If the report is not sensitive, opening
+an issue is also fine.
 
 Do not commit real Supabase credentials to the repository. Public anon configuration belongs in environment variables and deployment settings, while service-role or other secret keys must never be committed.
 

@@ -46,7 +46,7 @@ export const siteConfig = {
     "Coptic Compass | Coptic Dictionary, Grammar, Publications, and Shenute AI",
   shortDescription: "A digital home for Coptic study and Shenute AI.",
   description: buildSiteDescription(dictionaryEntryCount),
-  liveUrl: "https://kyrilloswannes.com",
+  liveUrl: "https://www.copticcompass.com",
   repoUrl: "https://github.com/KyroHub/CopticCompass",
   cloneUrl: "https://github.com/KyroHub/CopticCompass.git",
   author: siteAuthor,

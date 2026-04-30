@@ -76,7 +76,7 @@ const contributorsCopy = {
           "Builds and maintains Coptic Compass, including the dictionary, grammar platform, and Shenute AI integrations.",
         contacts: [
           {
-            href: "https://kyrilloswannes.com",
+            href: "https://www.copticcompass.com",
             label: "Website",
             external: true,
           },
@@ -163,7 +163,7 @@ const contributorsCopy = {
           "Bouwt en onderhoudt Coptic Compass, inclusief het woordenboek, het grammaticaplatform en Shenute AI-integraties.",
         contacts: [
           {
-            href: "https://kyrilloswannes.com",
+            href: "https://www.copticcompass.com",
             label: "Website",
             external: true,
           },

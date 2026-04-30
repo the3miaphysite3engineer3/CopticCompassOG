@@ -6,7 +6,7 @@
   <p>Dictionary · Grammar · AI Assistant · Public API</p>
 
   <div>
-    <a href="https://kyrilloswannes.com"><img src="https://img.shields.io/badge/Live_Site-kyrilloswannes.com-0ea5e9?style=flat-square" alt="Live Site"></a>
+    <a href="https://www.copticcompass.com"><img src="https://img.shields.io/badge/Live_Site-www.copticcompass.com-0ea5e9?style=flat-square" alt="Live Site"></a>
     <a href="https://github.com/KyroHub/CopticCompass/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-black?style=flat-square" alt="License"></a>
     <a href="https://github.com/KyroHub/CopticCompass/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome"></a>
   </div>
