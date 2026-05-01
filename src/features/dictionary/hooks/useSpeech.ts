@@ -6,7 +6,10 @@ import {
   useSyncExternalStore,
 } from "react";
 
+import { getPremiumAudio } from "@/actions/tts";
+import { useTtsSettings } from "@/features/dictionary/hooks/useTtsSettings";
 import { bohairicToPhonetic } from "@/features/dictionary/lib/bohairicPhonetics";
+import { copticToIPA, VOICES } from "@/features/dictionary/lib/copticTts";
 
 type ActiveSpeechListener = (speechId: string | null) => void;
 
@@ -38,9 +41,12 @@ function subscribeToSpeechSupport() {
 
 interface UseSpeechReturn {
   speak: (copticText: string) => void;
+  speakPremium: (copticText: string) => Promise<void>;
+  speakAuto: (copticText: string) => void;
   stop: () => void;
   isSpeaking: boolean;
   isSupported: boolean;
+  isPremiumLoading: boolean;
 }
 
 /**
@@ -50,6 +56,12 @@ interface UseSpeechReturn {
 export function useSpeech(): UseSpeechReturn {
   const speechId = useId();
   const [activeId, setActiveId] = useState<string | null>(activeSpeechId);
+  const [isPremiumLoading, setIsPremiumLoading] = useState(false);
+  const [premiumAudio, setPremiumAudio] = useState<HTMLAudioElement | null>(
+    null,
+  );
+  const { settings } = useTtsSettings();
+
   const isSupported = useSyncExternalStore(
     subscribeToSpeechSupport,
     isSpeechSynthesisSupported,
@@ -112,13 +124,82 @@ export function useSpeech(): UseSpeechReturn {
     [speechId],
   );
 
-  const stop = useCallback(() => {
-    if (!isSpeechSynthesisSupported()) {
-      return;
-    }
-    window.speechSynthesis.cancel();
-    clearActiveSpeechId(speechId);
-  }, [speechId]);
+  const speakPremium = useCallback(
+    async (copticText: string) => {
+      if (!copticText.trim()) {
+        return;
+      }
 
-  return { speak, stop, isSpeaking: activeId === speechId, isSupported };
+      try {
+        setIsPremiumLoading(true);
+        publishActiveSpeechId(null);
+        window.speechSynthesis.cancel();
+        if (premiumAudio) {
+          premiumAudio.pause();
+          setPremiumAudio(null);
+        }
+
+        const voice = VOICES[settings.voice];
+        const ipa = copticToIPA(copticText, voice.dialect);
+        const { base64Audio, mimeType } = await getPremiumAudio(ipa, voice.id);
+
+        const audio = new Audio(`data:${mimeType};base64,${base64Audio}`);
+        setPremiumAudio(audio);
+
+        audio.onplay = () => publishActiveSpeechId(speechId);
+        audio.onended = () => {
+          clearActiveSpeechId(speechId);
+          setPremiumAudio(null);
+        };
+        audio.onerror = () => {
+          clearActiveSpeechId(speechId);
+          setPremiumAudio(null);
+        };
+
+        await audio.play();
+      } catch (error) {
+        console.warn("[useSpeech] Premium speech synthesis failed:", error);
+        clearActiveSpeechId(speechId);
+        throw error;
+      } finally {
+        setIsPremiumLoading(false);
+      }
+    },
+    [speechId, premiumAudio, settings.voice],
+  );
+
+  const speakAuto = useCallback(
+    (copticText: string) => {
+      if (settings.mode === "premium") {
+        speakPremium(copticText).catch(() => {
+          // Fallback to standard if premium fails
+          speak(copticText);
+        });
+      } else {
+        speak(copticText);
+      }
+    },
+    [settings.mode, speakPremium, speak],
+  );
+
+  const stop = useCallback(() => {
+    if (isSpeechSynthesisSupported()) {
+      window.speechSynthesis.cancel();
+    }
+    if (premiumAudio) {
+      premiumAudio.pause();
+      setPremiumAudio(null);
+    }
+    clearActiveSpeechId(speechId);
+  }, [speechId, premiumAudio]);
+
+  return {
+    speak,
+    speakPremium,
+    speakAuto,
+    stop,
+    isSpeaking: activeId === speechId,
+    isSupported,
+    isPremiumLoading,
+  };
 }
