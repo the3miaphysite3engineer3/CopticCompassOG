@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, SlidersHorizontal } from "lucide-react";
+import { ChevronDown, SlidersHorizontal, Volume2 } from "lucide-react";
 import { useState } from "react";
 
 import { CheckboxField } from "@/components/CheckboxField";
@@ -14,6 +14,11 @@ import {
   type DialectFilter,
   type DictionaryPartOfSpeechFilter,
 } from "@/features/dictionary/config";
+import {
+  type TtsMode,
+  useTtsSettings,
+} from "@/features/dictionary/hooks/useTtsSettings";
+import { type VoiceKey, VOICES } from "@/features/dictionary/lib/copticTts";
 import { cx } from "@/lib/classes";
 
 type DictionaryFiltersProps = {
@@ -26,6 +31,11 @@ type DictionaryFiltersProps = {
   setSelectedPartOfSpeech: (value: DictionaryPartOfSpeechFilter) => void;
 };
 
+const voiceEntries = Object.entries(VOICES) as [
+  VoiceKey,
+  (typeof VOICES)[VoiceKey],
+][];
+
 export function DictionaryFilters({
   exactMatch,
   onClearFilters,
@@ -37,6 +47,8 @@ export function DictionaryFilters({
 }: DictionaryFiltersProps) {
   const { t } = useLanguage();
   const [isExpandedOnMobile, setIsExpandedOnMobile] = useState(false);
+  const { settings, updateSettings, isLoaded } = useTtsSettings();
+
   const activeFilterCount = [
     selectedPartOfSpeech !== "ALL",
     selectedDialect !== "ALL",
@@ -153,6 +165,61 @@ export function DictionaryFilters({
           >
             {t("dict.clearFilters")}
           </button>
+        ) : null}
+
+        {/* ── TTS Settings (Bohairic only) ────────────────── */}
+
+        {selectedDialect === "ALL" || selectedDialect === "B" ? (
+          <>
+            <div className="h-px w-full bg-stone-200 dark:bg-stone-800 sm:hidden" />
+            <div className="hidden h-6 w-px bg-stone-300 dark:bg-stone-700 sm:block" />
+
+            <div className="flex items-center gap-2 text-stone-500 dark:text-stone-400">
+              <Volume2 className="h-4 w-4" />
+              <FormLabel tone="muted">{t("dict.ttsMode")}</FormLabel>
+            </div>
+
+            {isLoaded ? (
+              <>
+                <CompactSelect
+                  label=""
+                  value={settings.mode}
+                  wrapperClassName="w-full justify-between sm:w-auto"
+                  className="min-w-0 flex-1 sm:min-w-40"
+                  onChange={(event) =>
+                    updateSettings({ mode: event.target.value as TtsMode })
+                  }
+                >
+                  <option value="standard">{t("dict.ttsModeStandard")}</option>
+                  <option value="premium">{t("dict.ttsModePremium")}</option>
+                </CompactSelect>
+
+                {settings.mode === "premium" ? (
+                  <>
+                    <div className="hidden h-6 w-px bg-stone-300 dark:bg-stone-700 sm:block" />
+
+                    <CompactSelect
+                      label={t("dict.ttsVoice")}
+                      value={settings.voice}
+                      wrapperClassName="w-full justify-between sm:w-auto"
+                      className="min-w-0 flex-1 sm:min-w-48"
+                      onChange={(event) =>
+                        updateSettings({
+                          voice: event.target.value as VoiceKey,
+                        })
+                      }
+                    >
+                      {voiceEntries.map(([key, voice]) => (
+                        <option key={key} value={key}>
+                          {voice.label}
+                        </option>
+                      ))}
+                    </CompactSelect>
+                  </>
+                ) : null}
+              </>
+            ) : null}
+          </>
         ) : null}
       </div>
     </div>

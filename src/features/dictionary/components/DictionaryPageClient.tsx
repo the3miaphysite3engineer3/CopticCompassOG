@@ -14,7 +14,6 @@ import { getAnalyticsPath, getLocalizedHomePath } from "@/lib/locale";
 import { DictionaryFilters } from "./DictionaryFilters";
 import { DictionaryResultsSection } from "./DictionaryResultsSection";
 import { DictionarySearchBar } from "./DictionarySearchBar";
-import { TtsSettingsMenu } from "./TtsSettingsMenu";
 
 type DictionaryPageBodyProps = {
   searchPath: string;
@@ -67,7 +66,6 @@ function DictionaryPageBody({ searchPath }: DictionaryPageBodyProps) {
         />
 
         <div className="flex items-center justify-end gap-3">
-          <TtsSettingsMenu />
           <Link
             href={getAnalyticsPath(language)}
             className={buttonClassName({ variant: "secondary" })}

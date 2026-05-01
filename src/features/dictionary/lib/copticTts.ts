@@ -1,8 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable curly */
-/* eslint-disable prefer-const */
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 /**
  * copticTts.ts
  * Converts Coptic Unicode text → IPA
@@ -13,7 +8,7 @@
 // § 1  CHARACTER MAPS
 // ═══════════════════════════════════════════════════════════════════════
 
-export const VOWELS: Record<string, string> = {
+const VOWELS: Record<string, string> = {
   "\u2c81": "Alfa", // ⲁ
   "\u2c89": "Ei", // ⲉ
   "\u2c8f": "Ita", // ⲏ
@@ -22,11 +17,10 @@ export const VOWELS: Record<string, string> = {
   "\u2cb1": "Omega", // ⲱ
 };
 
-export const CONSONANTS: Record<string, string> = {
+const CONSONANTS: Record<string, string> = {
   "\u2c83": "Vita", // ⲃ
-  "\u2c85": "Ghamma", // ⲅ
+  "\u2c85": "Gamma", // ⲅ
   "\u2c87": "Delta", // ⲇ
-  "\u2c8b": "Soo", // ⲋ
   "\u2c8d": "Zita", // ⲍ
   "\u2c91": "Thita", // ⲑ
   "\u2c95": "Kapa", // ⲕ
@@ -38,7 +32,7 @@ export const CONSONANTS: Record<string, string> = {
   "\u2ca3": "Ro", // ⲣ
   "\u2ca5": "Ceema", // ⲥ
   "\u2ca7": "Tav", // ⲧ
-  "\u2ca9": "Epsilon", // ⲩ
+  "\u2ca9": "Upsilon", // ⲩ
   "\u2cab": "Fi", // ⲫ
   "\u2cad": "Ki", // ⲭ
   "\u2caf": "Epsi", // ⲯ
@@ -51,28 +45,28 @@ export const CONSONANTS: Record<string, string> = {
   "\u03ef": "Ti", // ϯ
 };
 
-const GINKIM: Record<string, string> = {
-  "\u0300": "GinkimStart", // combining grave accent ̀
-  "\u0307": "GinkimMiddle", // combining dot above  ̇
+const JINKIM: Record<string, string> = {
+  "\u0300": "JinkimStart", // combining grave accent ̀
+  "\u0307": "JinkimMiddle", // combining dot above  ̇
 };
 
 const CHAR_MAP: Record<string, string> = {
   ...VOWELS,
   ...CONSONANTS,
-  ...GINKIM,
+  ...JINKIM,
 };
 
 // ═══════════════════════════════════════════════════════════════════════
 // § 2  ENUMS
 // ═══════════════════════════════════════════════════════════════════════
 
-export enum Etymology {
-  Coptic = 0,
+enum Etymology {
+  Egyptian = 0,
   Greek = 1,
 }
-export enum Dialect {
-  Arabic = 0,
-  Greek = 1,
+export enum Pronunciation {
+  Shenutean = 0,
+  Cyrillic = 1,
 }
 
 // ═══════════════════════════════════════════════════════════════════════
@@ -81,24 +75,42 @@ export enum Dialect {
 
 const vowelKeys = Object.keys(VOWELS);
 const consKeys = Object.keys(CONSONANTS);
-const ginkKeys = Object.keys(GINKIM);
+const jinkKeys = Object.keys(JINKIM);
 
-const Fe = () => new RegExp(vowelKeys.join("|"), "i");
-const ut = () => new RegExp(`${consKeys.join("|")}$`, "i");
-const Xe = (excludes: string[]) => {
+// ─── Regex factories ─────────────────────────────────────────────────
+
+/** Matches any Coptic vowel character. */
+const matchVowel = () => new RegExp(vowelKeys.join("|"), "i");
+
+/** Matches a trailing consonant at the end of a string. */
+const matchTrailingConsonant = () => new RegExp(`${consKeys.join("|")}$`, "i");
+
+/** Matches a consonant–vowel–consonant cluster, excluding specific vowels. */
+const matchConsonantVowelCluster = (excludes: string[]) => {
   const cons = `(${consKeys.join("|")})`;
   const vow = vowelKeys.filter((v) => !excludes.includes(v)).join("|");
   return new RegExp(`${cons}(${vow})${cons}{0,2}$`, "i");
 };
-const st = () => new RegExp(ginkKeys.join("|"), "i");
-const Ct = () =>
+
+/** Matches any jinkim diacritical mark. */
+const matchJinkim = () => new RegExp(jinkKeys.join("|"), "i");
+
+/** Matches front vowels: ⲉ, ⲏ, ⲓ, ⲩ. */
+const matchFrontVowel = () =>
   new RegExp(["\u2c89", "\u2c8f", "\u2c93", "\u2ca9"].join("|"), "i");
-const Tt = () => new RegExp(["\u2c81", "\u2cb1"].join("|"), "i");
-const ae = () => new RegExp(consKeys.join("|"), "i");
-const De = () =>
+
+/** Matches open vowels: ⲁ, ⲱ. */
+const matchOpenVowel = () => new RegExp(["\u2c81", "\u2cb1"].join("|"), "i");
+
+/** Matches any Coptic consonant character. */
+const matchConsonant = () => new RegExp(consKeys.join("|"), "i");
+
+/** Matches velar consonants: ⲅ, ⲕ, ⲝ, ⲭ. */
+const matchVelar = () =>
   new RegExp(["\u2c85", "\u2c95", "\u2c9d", "\u2cad"].join("|"), "i");
 
-// Spacer / tokeniser
+// ─── Tokeniser ───────────────────────────────────────────────────────
+
 const SPACER_RE = /\s|\.|\r|\n|:/;
 const COPTIC_RE = new RegExp(`[${Object.keys(CHAR_MAP).join("")}]+`, "i");
 const OTHER_RE = new RegExp(`[^${Object.keys(CHAR_MAP).join("")}]+`, "i");
@@ -108,11 +120,11 @@ const TOKEN_RE = new RegExp(
 );
 
 // ═══════════════════════════════════════════════════════════════════════
-// § 4  GINKIM RULES
+// § 4  JINKIM RULES
 // ═══════════════════════════════════════════════════════════════════════
 
-// Bohairic ginkim (used with Greek/Aria voices)
-const ginkimBt = {
+/** Cyrillic jinkim IPA rule — renders jinkim as a stress marker ‖. */
+const CYRILLIC_JINKIM = {
   default: "\u2016\u2016",
   afterAndBefore: [
     {
@@ -122,13 +134,13 @@ const ginkimBt = {
     },
   ],
   after: [
-    [ae(), () => "\u2016e"],
+    [matchConsonant(), () => "\u2016e"],
     [new RegExp("\u2c93", "i"), () => ""],
   ] as [RegExp, () => string][],
 };
 
-// Sahidic ginkim (used with Arabic voices)
-const ginkimZe = {
+/** Shenutean jinkim IPA rule — renders jinkim as a glottal stop ʔ. */
+const SHENUTEAN_JINKIM = {
   default: "\u0294",
   afterAndBefore: [
     {
@@ -138,7 +150,7 @@ const ginkimZe = {
     },
   ],
   after: [
-    [ae(), () => "\u0294e"],
+    [matchConsonant(), () => "\u0294e"],
     [new RegExp("\u2c93", "i"), () => ""],
   ] as [RegExp, () => string][],
 };
@@ -167,39 +179,43 @@ interface Rule {
   general?: Evaluator[];
 }
 
-const Bt: Record<string, Rule | any> = {
+interface TrieNode {
+  [key: string]: TrieNode | null;
+}
+
+const CYRILLIC_RULES: Record<string, Rule> = {
   Alfa: {
     default: "\u0259",
     after: [
-      [ut(), () => "\u0259\u0259"],
-      [Xe(["\u2c81", "\u2c89"]), () => "\u0259\u0259"],
+      [matchTrailingConsonant(), () => "\u0259\u0259"],
+      [matchConsonantVowelCluster(["\u2c81", "\u2c89"]), () => "\u0259\u0259"],
     ],
     before: [
       [new RegExp("\u2c9f|\u2ca9"), () => "a"],
       [new RegExp("\u03ef"), () => "\u02cc\u0250"],
     ],
   },
-  Vita: { default: "b", after: [[Fe(), () => "v"]] },
-  Ghamma: {
+  Vita: { default: "b", after: [[matchVowel(), () => "v"]] },
+  Gamma: {
     default: "\u0263",
     after: [
-      [Ct(), () => "\u0261"],
-      [De(), () => "n"],
+      [matchFrontVowel(), () => "\u0261"],
+      [matchVelar(), () => "n"],
     ],
   },
   Delta: {
     default: "\xf0",
-    general: [(ctx: any, y: any, p: any) => !!p && "d"],
+    general: [(_ctx: ContextArgs, _value: string, pos: number) => !!pos && "d"],
   },
   Ei: {
     default: "e",
     after: [
-      [ut(), () => "\u025b\u0258"],
-      [Xe(["\u2c89", "\u2c81"]), () => "\u025b\u0258"],
+      [matchTrailingConsonant(), () => "\u025b\u0258"],
+      [matchConsonantVowelCluster(["\u2c89", "\u2c81"]), () => "\u025b\u0258"],
       [/\s+|$/i, () => "\u025b\u0258"],
     ],
   },
-  Soo: { default: "s\u0289\u02d0\u0289\u02d0" },
+
   Zita: { default: "z" },
   Ita: { default: "i\u02d0j" },
   Thita: {
@@ -208,7 +224,7 @@ const Bt: Record<string, Rule | any> = {
   },
   Yota: {
     default: "\u026a",
-    after: [[new RegExp(`(${st().source})\u2c81$`), () => "e\u026a"]],
+    after: [[new RegExp(`(${matchJinkim().source})\u2c81$`), () => "e\u026a"]],
   },
   Kapa: { default: "k" },
   Lola: { default: "l" },
@@ -219,7 +235,7 @@ const Bt: Record<string, Rule | any> = {
     default: "\u2016o",
     after: [[new RegExp("\u2ca9"), () => "u"]],
     before: [
-      [ae(), () => "o"],
+      [matchConsonant(), () => "o"],
       [new RegExp("\u2c93|\u2c8f"), () => "o"],
     ],
   },
@@ -228,24 +244,24 @@ const Bt: Record<string, Rule | any> = {
   Ceema: {
     default: "s",
     after: [
-      [Tt(), () => "s\u02e4"],
+      [matchOpenVowel(), () => "s\u02e4"],
       [
         new RegExp("\u2c99"),
-        (ctx: any) => ctx.etymology === Etymology.Greek && "z",
+        (ctx: ContextArgs) => ctx.etymology === Etymology.Greek && "z",
       ],
     ],
   },
   Tav: {
     default: "t",
     after: [
-      [Tt(), () => "t\u02e4"],
+      [matchOpenVowel(), () => "t\u02e4"],
       [
         new RegExp("\u2c99"),
-        (ctx: any) => ctx.etymology === Etymology.Greek && "z",
+        (ctx: ContextArgs) => ctx.etymology === Etymology.Greek && "z",
       ],
     ],
   },
-  Epsilon: {
+  Upsilon: {
     default: "i",
     before: [
       [new RegExp("\u2c9f"), () => "uu\u02d0"],
@@ -256,59 +272,68 @@ const Bt: Record<string, Rule | any> = {
   Ki: {
     default: "k",
     after: [
-      [Ct(), (ctx: any) => ctx.etymology === Etymology.Greek && "\u0283"],
+      [
+        matchFrontVowel(),
+        (ctx: ContextArgs) => ctx.etymology === Etymology.Greek && "\u0283",
+      ],
     ],
-    general: [(ctx: any) => ctx.etymology === Etymology.Greek && "x"],
+    general: [(ctx: ContextArgs) => ctx.etymology === Etymology.Greek && "x"],
   },
   Epsi: { default: "ps" },
   Omega: {
     default: "o\u02d0\u028a",
-    before: [[st(), () => "o\u02d0\u028a \u02d0|"]],
+    before: [[matchJinkim(), () => "o\u02d0\u028a \u02d0|"]],
   },
   Shai: { default: "\xe7" },
   Fai: { default: "f" },
   Khai: { default: "x" },
   Hoori: { default: "h" },
-  Janja: { default: "g", after: [[Ct(), () => "\u029d"]] },
+  Janja: { default: "g", after: [[matchFrontVowel(), () => "\u029d"]] },
   Cheema: { default: "t\xe7" },
   Ti: { default: "ti" },
-  GinkimStart: ginkimBt,
-  GinkimMiddle: ginkimBt,
+  JinkimStart: CYRILLIC_JINKIM,
+  JinkimMiddle: CYRILLIC_JINKIM,
 };
 
-const Ze: Record<string, Rule | any> = {
+const SHENUTEAN_RULES: Record<string, Rule> = {
   Alfa: {
     default: "a",
     after: [
-      [ut(), () => "a\u02d0a\u02d0"],
-      [Xe(["\u2c81", "\u2c89"]), () => "a\u02d0a\u02d0"],
+      [matchTrailingConsonant(), () => "a\u02d0a\u02d0"],
+      [
+        matchConsonantVowelCluster(["\u2c81", "\u2c89"]),
+        () => "a\u02d0a\u02d0",
+      ],
     ],
     before: [
       [new RegExp("\u2c9f|\u2ca9"), () => "a\u02d0a\u02d0"],
       [new RegExp("\u03ef"), () => " \u0294a"],
     ],
   },
-  Vita: { default: "b", after: [[Fe(), () => "f\u02c8"]] },
-  Ghamma: {
+  Vita: { default: "b", after: [[matchVowel(), () => "f\u02c8"]] },
+  Gamma: {
     default: "\u0263",
     after: [
-      [Ct(), () => "\u0261"],
-      [De(), () => "n"],
+      [matchFrontVowel(), () => "\u0261"],
+      [matchVelar(), () => "n"],
     ],
   },
   Delta: {
     default: "\xf0",
-    general: [(ctx: any, y: any, p: any) => !!p && "d"],
+    general: [(_ctx: ContextArgs, _value: string, pos: number) => !!pos && "d"],
   },
   Ei: {
     default: "i",
     after: [
-      [ut(), () => "i\u02d0"],
-      [Xe(["\u2c89", "\u2c81"]), () => "i\u02d0i\u02d0"],
+      [matchTrailingConsonant(), () => "i\u02d0"],
+      [
+        matchConsonantVowelCluster(["\u2c89", "\u2c81"]),
+        () => "i\u02d0i\u02d0",
+      ],
       [/\s+|$/i, () => "i\u02d0i\u02d0"],
     ],
   },
-  Soo: { default: "s\u0289\u02d0\u0289\u02d0" },
+
   Zita: { default: "z" },
   Ita: { default: "j" },
   Thita: {
@@ -317,7 +342,7 @@ const Ze: Record<string, Rule | any> = {
   },
   Yota: {
     default: "i\u02d0",
-    after: [[new RegExp(`(${st().source})\u2c81$`), () => "j"]],
+    after: [[new RegExp(`(${matchJinkim().source})\u2c81$`), () => "j"]],
   },
   Kapa: { default: "k" },
   Lola: { default: "l" },
@@ -327,7 +352,7 @@ const Ze: Record<string, Rule | any> = {
   Omicron: {
     default: "u",
     before: [
-      [ae(), () => "u\u02d0"],
+      [matchConsonant(), () => "u\u02d0"],
       [new RegExp("\u2c93|\u2c8f"), () => "u"],
     ],
   },
@@ -338,32 +363,32 @@ const Ze: Record<string, Rule | any> = {
     after: [
       [
         new RegExp("\u2c99"),
-        (ctx: any) => ctx.etymology === Etymology.Greek && "z",
+        (ctx: ContextArgs) => ctx.etymology === Etymology.Greek && "z",
       ],
     ],
   },
   Tav: {
     default: "t\u02c8",
     after: [
-      [Tt(), () => "t\u02e4"],
+      [matchOpenVowel(), () => "t\u02e4"],
       [
         new RegExp("\u2c99"),
-        (ctx: any) => ctx.etymology === Etymology.Greek && "z",
+        (ctx: ContextArgs) => ctx.etymology === Etymology.Greek && "z",
       ],
     ],
   },
-  Epsilon: {
+  Upsilon: {
     default: "i",
     afterAndBefore: [
       {
-        after: Fe(),
+        after: matchVowel(),
         before: new RegExp("\u2c9f"),
         evaluator: () => "\u02d0uu\u02d0\u203f",
       },
     ],
     before: [
       [new RegExp("\u2c9f"), () => "\u02d0u"],
-      [new RegExp(`(${st().source})\u2c9f`), () => "\u02d0u"],
+      [new RegExp(`(${matchJinkim().source})\u2c9f`), () => "\u02d0u"],
       [new RegExp("\u2c89|\u2c81"), () => "f\u02c8"],
     ],
   },
@@ -371,9 +396,12 @@ const Ze: Record<string, Rule | any> = {
   Ki: {
     default: "k",
     after: [
-      [Ct(), (ctx: any) => ctx.etymology === Etymology.Greek && "\u0283"],
+      [
+        matchFrontVowel(),
+        (ctx: ContextArgs) => ctx.etymology === Etymology.Greek && "\u0283",
+      ],
     ],
-    general: [(ctx: any) => ctx.etymology === Etymology.Greek && "x"],
+    general: [(ctx: ContextArgs) => ctx.etymology === Etymology.Greek && "x"],
   },
   Epsi: { default: "ps" },
   Omega: {
@@ -390,69 +418,87 @@ const Ze: Record<string, Rule | any> = {
   Janja: { default: "g" },
   Cheema: { default: "t\u0283" },
   Ti: { default: "ti\u02d0" },
-  GinkimStart: ginkimZe,
-  GinkimMiddle: ginkimZe,
+  JinkimStart: SHENUTEAN_JINKIM,
+  JinkimMiddle: SHENUTEAN_JINKIM,
 };
 
 // ═══════════════════════════════════════════════════════════════════════
 // § 6  PREFIX TRIE
 // ═══════════════════════════════════════════════════════════════════════
 
-function trieInsert(word: string, node: any) {
+function _trieInsert(word: string, node: TrieNode | null): void {
   let len = word.length;
-  if (!len) return;
+  if (!len) {
+    return;
+  }
   while (len--) {
     const chunk = word.substr(0, len + 1);
-    if (node !== null && node.hasOwnProperty(chunk)) {
-      if (node[chunk] === null) node[chunk] = { "": null };
-      trieInsert(word.substr(len + 1), node[chunk]);
+    if (node !== null && Object.prototype.hasOwnProperty.call(node, chunk)) {
+      if (node[chunk] === null) {
+        node[chunk] = { "": null };
+      }
+      _trieInsert(word.substr(len + 1), node[chunk]);
       return;
     }
   }
-  if (node === null) throw new Error("Unexpected trie error.");
+  if (node === null) {
+    throw new Error("Unexpected trie error.");
+  }
   const keys = Object.keys(node);
-  let found = false;
-  len = word.length;
-  found = keys.some((k) => {
+  const found = keys.some((k) => {
     let q = 0;
-    while (q < len && k[q] === word[q]) q++;
+    while (q < len && k[q] === word[q]) {
+      q++;
+    }
     const prefix = q < len && q > 1 ? k.substr(0, q) : "";
-    if (!prefix) return false;
+    if (!prefix) {
+      return false;
+    }
     node[prefix] = {};
-    trieInsert(k.substr(q), node[prefix]);
-    node[prefix][k.substr(q)] = node[k];
-    trieInsert(word.substr(q), node[prefix]);
+    _trieInsert(k.substr(q), node[prefix]);
+    (node[prefix] as Record<string, TrieNode | null>)[k.substr(q)] =
+      node[k] ?? null;
+    _trieInsert(word.substr(q), node[prefix]);
     delete node[k];
     return true;
   });
-  if (!found) node[word] = null;
+  if (!found) {
+    node[word] = null;
+  }
 }
 
-function trieSearch(word: string, node: any) {
+function trieSearch(word: string, root: TrieNode | null) {
   const lower = word.toLocaleLowerCase();
   const len = lower.length;
-  let matched = "",
-    pos = 0;
+  let matched = "";
+  let pos = 0;
+  let node = root;
   while (node !== null && pos < len) {
     let chunk = "";
-    while (!node.hasOwnProperty(chunk) && pos < len) chunk += lower[pos++];
+    while (!Object.prototype.hasOwnProperty.call(node, chunk) && pos < len) {
+      chunk += lower[pos++];
+    }
     if (chunk === "" && Object.keys(node).length > 1) {
-      let tmp = chunk,
-        tmpPos = pos;
-      while (!node.hasOwnProperty(tmp) && tmpPos < len) tmp += lower[tmpPos++];
-      if (node.hasOwnProperty(tmp)) {
+      let tmp = chunk;
+      let tmpPos = pos;
+      while (!Object.prototype.hasOwnProperty.call(node, tmp) && tmpPos < len) {
+        tmp += lower[tmpPos++];
+      }
+      if (Object.prototype.hasOwnProperty.call(node, tmp)) {
         chunk = tmp;
         pos = tmpPos;
       }
     }
-    if (!node.hasOwnProperty(chunk)) break;
+    if (!Object.prototype.hasOwnProperty.call(node, chunk)) {
+      break;
+    }
     matched += chunk;
     node = node[chunk] === null ? null : node[chunk];
   }
   return { prefix: matched, isProper: node === null };
 }
 
-const PREFIX_TRIE_DATA: any = {
+const PREFIX_TRIE_DATA: TrieNode = {
   "\u03e3\u2c81": {
     "": null,
     "\u2c99": null,
@@ -679,15 +725,28 @@ const rt = {
 // § 7  WORD DIVIDER
 // ═══════════════════════════════════════════════════════════════════════
 
-const _St = ae().source;
-const _Et = `(${_St}|\u2c9f\u2ca9|\u2c93)(${Fe().source}|\u2c9f\u2ca9)`;
-const _Jt = `${_Et}(${_St})+`;
-const _Rn =
-  /(\u2c81\u2c89|\u2c81\u2c8f|\u2c81\u2c9f|\u2c81\u2cb1|\u2c89\u2c81|\u2c89\u2c9f|\u2c89\u2cb1|\u2c89\u2c8f|\u2c8f\u2c81|\u2c8f\u2c89|\u2c8f\u2c9f|\u2c8f\u2cb1|\u2cb1\u2c9f|\u2cb1\u2c89|\u2cb1\u2c81|\u2cb1\u2c8f|\u2c9f\u2cb1|\u2c9f\u2c9f|\u2c9f\u2c89|\u2c9f\u2c8f|\u2c9f\u2c81)/i;
-const _Pt = /(\u2c9f\u2ca9\u2cb1)|(\u2c9f\u2ca9\u2c9f(?!\u03e9))/i;
+/** Regex source matching any consonant (used to build syllable patterns). */
+const _consonantSrc = matchConsonant().source;
 
+/** Open syllable: consonant + vowel (CV). */
+const _openSyllableSrc = `(${_consonantSrc}|\u2c9f\u2ca9|\u2c93)(${matchVowel().source}|\u2c9f\u2ca9)`;
+
+/** Closed syllable: consonant + vowel + consonant(s) (CVC+). */
+const _closedSyllableSrc = `${_openSyllableSrc}(${_consonantSrc})+`;
+
+/** Matches Coptic diphthong (two-vowel) sequences for syllable splitting. */
+const DIPHTHONG_RE =
+  /(\u2c81\u2c89|\u2c81\u2c8f|\u2c81\u2c9f|\u2c81\u2cb1|\u2c89\u2c81|\u2c89\u2c9f|\u2c89\u2cb1|\u2c89\u2c8f|\u2c8f\u2c81|\u2c8f\u2c89|\u2c8f\u2c9f|\u2c8f\u2cb1|\u2cb1\u2c9f|\u2cb1\u2c89|\u2cb1\u2c81|\u2cb1\u2c8f|\u2c9f\u2cb1|\u2c9f\u2c9f|\u2c9f\u2c89|\u2c9f\u2c8f|\u2c9f\u2c81)/i;
+
+/** Matches Coptic triphthong (three-vowel) sequences for syllable splitting. */
+const TRIPHTHONG_RE = /(\u2c9f\u2ca9\u2cb1)|(\u2c9f\u2ca9\u2c9f(?!\u03e9))/i;
+
+/**
+ * Splits Coptic text into syllable chunks using prefix detection,
+ * diphthong/triphthong boundaries, and open/closed syllable patterns.
+ */
 class WordDivider {
-  ginkimSyllableExpr: RegExp;
+  jinkimSyllableExpr: RegExp;
   openSyllableExpr: RegExp;
   closedSyllableExpr: RegExp;
   closedSyllableExprFull: RegExp;
@@ -695,14 +754,14 @@ class WordDivider {
   knownSyllableExpr: RegExp;
 
   constructor() {
-    this.ginkimSyllableExpr = new RegExp(
-      `.(${st().source})|^(${st().source}).`,
+    this.jinkimSyllableExpr = new RegExp(
+      `.(${matchJinkim().source})|^(${matchJinkim().source}).`,
       "i",
     );
-    this.openSyllableExpr = new RegExp(_Et, "i");
-    this.closedSyllableExpr = new RegExp(_Jt, "i");
-    this.closedSyllableExprFull = new RegExp(`^${_Jt}$`, "i");
-    this.openSyllableExprFull = new RegExp(`^${_Et}$`, "i");
+    this.openSyllableExpr = new RegExp(_openSyllableSrc, "i");
+    this.closedSyllableExpr = new RegExp(_closedSyllableSrc, "i");
+    this.closedSyllableExprFull = new RegExp(`^${_closedSyllableSrc}$`, "i");
+    this.openSyllableExprFull = new RegExp(`^${_openSyllableSrc}$`, "i");
     this.knownSyllableExpr = new RegExp("(\u03ef)", "i");
   }
 
@@ -710,7 +769,9 @@ class WordDivider {
     const result: string[] = [];
     let tail: string;
     word = word.replace(SPACER_RE, "").trim();
-    if (word.length <= 2) return [word];
+    if (word.length <= 2) {
+      return [word];
+    }
 
     if (checkSplits) {
       const { prefixes, rest } = this._prefixPass(word);
@@ -765,9 +826,9 @@ class WordDivider {
   }
 
   _prefixPass(word: string) {
-    let p = rt.prefix(word),
-      prefixes: string[] = [],
-      rest = word.slice(0);
+    let p = rt.prefix(word);
+    const prefixes: string[] = [];
+    let rest = word.slice(0);
     while (
       p.isProper &&
       !("\u2c9f\u2ca9" === p.prefix && rest.length - 2 <= 2) &&
@@ -781,18 +842,21 @@ class WordDivider {
   }
 
   _splitPass(word: string) {
-    const m = word.match(this.ginkimSyllableExpr);
+    const m = word.match(this.jinkimSyllableExpr);
     if (m) {
       const chunk = m[0];
       return m.index
         ? [word.slice(0, m.index), chunk, word.slice(m.index + chunk.length)]
         : [chunk, word.slice(chunk.length)];
     }
-    const mRn = word.match(_Rn);
-    const mPt = word.match(_Pt);
+    const mRn = word.match(DIPHTHONG_RE);
+    const mPt = word.match(TRIPHTHONG_RE);
     let cut = 0;
-    if (mPt) cut = (mPt.index || 0) + 2;
-    else if (mRn) cut = (mRn.index || 0) + 1;
+    if (mPt) {
+      cut = (mPt.index || 0) + 2;
+    } else if (mRn) {
+      cut = (mRn.index || 0) + 1;
+    }
     return cut ? [word.slice(0, cut), word.slice(cut)] : [word];
   }
 }
@@ -801,8 +865,13 @@ class WordDivider {
 // § 8  MAPPER
 // ═══════════════════════════════════════════════════════════════════════
 
+/**
+ * Core IPA mapper: tokenises Coptic text, applies pronunciation rules
+ * character-by-character, and evaluates contextual conditions (after/before/
+ * afterAndBefore/general) to produce an IPA string.
+ */
 class Mapper {
-  rules: Record<string, Rule>;
+  readonly rules: Record<string, Rule>;
   divider: WordDivider;
 
   constructor(accentRuleSet: Record<string, Rule>, wordDivider: WordDivider) {
@@ -814,19 +883,21 @@ class Mapper {
     if (typeof input === "string") {
       return [...input.matchAll(TOKEN_RE)]
         .map((m) => {
-          const { word, spacer } = (m as any).groups;
-          return word
-            ? this.map({ value: word, wordType: "word" })
-            : spacer || "";
+          const groups = m.groups as Record<string, string | undefined>;
+          return groups?.word
+            ? this.map({ value: groups.word, wordType: "word" })
+            : groups?.spacer || "";
         })
         .join("");
     }
 
-    if (input.wordType === "spacer") return input.value;
+    if (input.wordType === "spacer") {
+      return input.value;
+    }
 
-    // Ginkim reordering
+    // Jinkim reordering
     const reordered = input.value.replace(
-      new RegExp(`(.)(${st().source})`, "g"),
+      new RegExp(`(.)(${matchJinkim().source})`, "g"),
       "$2$1",
     );
     const token = { ...input, value: reordered };
@@ -835,7 +906,7 @@ class Mapper {
       ? this.divider.divide(token.value)
       : [token.value];
     const ctx: ContextArgs = {
-      etymology: Etymology.Coptic,
+      etymology: Etymology.Egyptian,
       gender: 0,
       isName: false,
     };
@@ -876,50 +947,73 @@ class Mapper {
     ctxArgs: [ContextArgs, string, number],
   ): string {
     const defaultVal = rule?.default ?? "\u2193";
-    if (!(rule?.after || rule?.before || rule?.afterAndBefore || rule?.general))
+    if (
+      !(rule?.after || rule?.before || rule?.afterAndBefore || rule?.general)
+    ) {
       return defaultVal;
+    }
 
     const entries = Object.entries(rule).filter(([k]) =>
       ["after", "before", "general", "afterAndBefore"].includes(k),
     );
 
     for (const [kind, conditions] of entries) {
-      let matched = false,
-        result: string | false = "\u2193";
-      for (const cond of conditions as any) {
+      let matched = false;
+      let result: string | false = "\u2193";
+      for (const cond of (conditions ?? []) as
+        | NonNullable<Rule["after"]>
+        | NonNullable<Rule["afterAndBefore"]>
+        | Evaluator[]) {
         switch (kind) {
           case "after": {
-            const [pattern, evaluator] = cond;
+            const [pattern, evaluator] = cond as [RegExp | string, Evaluator];
             matched = this._test(pattern, nextChars, "after");
-            if (matched) result = evaluator(...ctxArgs);
+            if (matched) {
+              result = evaluator(...ctxArgs);
+            }
             break;
           }
           case "before": {
-            const [pattern, evaluator] = cond;
+            const [pattern, evaluator] = cond as [RegExp | string, Evaluator];
             matched = this._test(pattern, prevChars, "before");
-            if (matched) result = evaluator(...ctxArgs);
+            if (matched) {
+              result = evaluator(...ctxArgs);
+            }
             break;
           }
           case "afterAndBefore": {
+            const abCond = cond as {
+              after: RegExp;
+              before: RegExp;
+              evaluator: Evaluator;
+            };
             matched =
-              this._test(cond.after, nextChars, "after") &&
-              this._test(cond.before, prevChars, "before");
-            if (matched) result = cond.evaluator(...ctxArgs);
+              this._test(abCond.after, nextChars, "after") &&
+              this._test(abCond.before, prevChars, "before");
+            if (matched) {
+              result = abCond.evaluator(...ctxArgs);
+            }
             break;
           }
           case "general": {
-            result = cond(...ctxArgs);
+            result = (cond as Evaluator)(...ctxArgs);
             matched = !!result;
             break;
           }
         }
-        if (matched && result !== false) return result;
+        if (matched && result !== false) {
+          return result;
+        }
       }
     }
     return defaultVal;
   }
 
-  _test(pattern: any, haystack: string, direction: "after" | "before") {
+  _test(
+    pattern: RegExp | string,
+    haystack: string,
+    direction: "after" | "before",
+  ): boolean {
     if (pattern instanceof RegExp) {
       const src = pattern.source;
       const re =
@@ -932,61 +1026,63 @@ class Mapper {
             );
       return re.test(haystack);
     }
-    if (typeof pattern?.match === "function") return !!pattern.match(haystack);
+    if (typeof pattern === "string") {
+      return haystack.includes(pattern);
+    }
     return false;
   }
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// § 9  DIALECT MAPPER
+// § 9  PRONUNCIATION MAPPER
 // ═══════════════════════════════════════════════════════════════════════
 
 const divider = new WordDivider();
 const mappers = {
-  [Dialect.Arabic]: new Mapper(Ze as any, divider),
-  [Dialect.Greek]: new Mapper(Bt as any, divider),
+  [Pronunciation.Shenutean]: new Mapper(SHENUTEAN_RULES, divider),
+  [Pronunciation.Cyrillic]: new Mapper(CYRILLIC_RULES, divider),
 };
 
 export const VOICES = {
   shakir: {
     id: "ar-EG-ShakirNeural",
-    dialect: Dialect.Arabic,
-    label: "Shakir (Arabic Male)",
+    pronunciation: Pronunciation.Shenutean,
+    label: "Shakir (Shenutean Male)",
   },
   salma: {
     id: "ar-EG-SalmaNeural",
-    dialect: Dialect.Arabic,
-    label: "Salma (Arabic Female)",
+    pronunciation: Pronunciation.Shenutean,
+    label: "Salma (Shenutean Female)",
   },
   jenny: {
     id: "en-US-JennyMultilingualV2Neural",
-    dialect: Dialect.Arabic,
-    label: "Jenny (English Multilingual)",
+    pronunciation: Pronunciation.Shenutean,
+    label: "Jenny (Shenutean Multilingual)",
   },
   ryan: {
     id: "en-US-RyanMultilingualNeural",
-    dialect: Dialect.Arabic,
-    label: "Ryan (English Multilingual)",
+    pronunciation: Pronunciation.Shenutean,
+    label: "Ryan (Shenutean Multilingual)",
   },
   nestoras: {
     id: "el-GR-NestorasNeural",
-    dialect: Dialect.Greek,
-    label: "Nestoras (Greek Male)",
+    pronunciation: Pronunciation.Cyrillic,
+    label: "Nestoras (Cyrillic Male)",
   },
   stefanos: {
     id: "el-GR-Stefanos",
-    dialect: Dialect.Greek,
-    label: "Stefanos (Greek Male)",
+    pronunciation: Pronunciation.Cyrillic,
+    label: "Stefanos (Cyrillic Male)",
   },
   athina: {
     id: "el-GR-AthinaNeural",
-    dialect: Dialect.Greek,
-    label: "Athina (Greek Female)",
+    pronunciation: Pronunciation.Cyrillic,
+    label: "Athina (Cyrillic Female)",
   },
   aria: {
     id: "en-US-AriaNeural",
-    dialect: Dialect.Greek,
-    label: "Aria (English)",
+    pronunciation: Pronunciation.Cyrillic,
+    label: "Aria (Cyrillic English)",
   },
 };
 
@@ -995,12 +1091,12 @@ export type VoiceKey = keyof typeof VOICES;
 /**
  * Convert Coptic Unicode text to an IPA string.
  * @param {string} copticText
- * @param {Dialect} dialect
+ * @param {Pronunciation} pronunciation
  * @returns {string} IPA phonetic string
  */
 export function copticToIPA(
   copticText: string,
-  dialect: Dialect = Dialect.Arabic,
+  pronunciation: Pronunciation = Pronunciation.Shenutean,
 ): string {
-  return mappers[dialect].map(copticText);
+  return mappers[pronunciation].map(copticText);
 }

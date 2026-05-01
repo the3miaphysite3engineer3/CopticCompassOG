@@ -32,7 +32,7 @@ describe("securityHeaders", () => {
     expect(getDirectiveValue(policy, "frame-src")).toBe("'none'");
     expect(getDirectiveValue(policy, "child-src")).toBe("'none'");
     expect(getDirectiveValue(policy, "script-src-attr")).toBe("'none'");
-    expect(getDirectiveValue(policy, "media-src")).toBe("'self'");
+    expect(getDirectiveValue(policy, "media-src")).toBe("'self' data:");
     expect(getDirectiveValue(policy, "connect-src")).toBe(
       "'self' https://project.supabase.co",
     );

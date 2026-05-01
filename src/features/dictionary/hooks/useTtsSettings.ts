@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 import type { VoiceKey } from "@/features/dictionary/lib/copticTts";
 
@@ -16,39 +16,65 @@ const DEFAULT_SETTINGS: TtsSettings = {
   voice: "salma",
 };
 
-export function useTtsSettings() {
-  const [settings, setSettings] = useState<TtsSettings>(DEFAULT_SETTINGS);
-  const [isLoaded, setIsLoaded] = useState(false);
+let listeners: Array<() => void> = [];
+let cachedSettings: TtsSettings | undefined;
 
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setSettings(JSON.parse(stored));
-      }
-    } catch (e) {
-      console.warn("[useTtsSettings] Failed to parse stored settings", e);
-    } finally {
-      setIsLoaded(true);
+function readSettings(): TtsSettings {
+  if (cachedSettings) {
+    return cachedSettings;
+  }
+
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      cachedSettings = JSON.parse(stored) as TtsSettings;
+      return cachedSettings;
     }
-  }, []);
+  } catch (e) {
+    console.warn("[useTtsSettings] Failed to parse stored settings", e);
+  }
 
-  const updateSettings = (newSettings: Partial<TtsSettings>) => {
-    setSettings((prev) => {
-      const updated = { ...prev, ...newSettings };
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      } catch (e) {
-        console.warn("[useTtsSettings] Failed to save settings", e);
-      }
-      return updated;
-    });
+  cachedSettings = DEFAULT_SETTINGS;
+  return cachedSettings;
+}
+
+function subscribe(listener: () => void) {
+  listeners = [...listeners, listener];
+  return () => {
+    listeners = listeners.filter((l) => l !== listener);
   };
+}
+
+function getSnapshot(): TtsSettings {
+  return readSettings();
+}
+
+function getServerSnapshot(): TtsSettings {
+  return DEFAULT_SETTINGS;
+}
+
+export function useTtsSettings() {
+  const settings = useSyncExternalStore(
+    subscribe,
+    getSnapshot,
+    getServerSnapshot,
+  );
+
+  const updateSettings = useCallback((newSettings: Partial<TtsSettings>) => {
+    const current = readSettings();
+    const updated = { ...current, ...newSettings };
+    cachedSettings = updated;
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    } catch (e) {
+      console.warn("[useTtsSettings] Failed to save settings", e);
+    }
+    listeners.forEach((l) => l());
+  }, []);
 
   return {
     settings,
     updateSettings,
-    isLoaded,
+    isLoaded: true,
   };
 }

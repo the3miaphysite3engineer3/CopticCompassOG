@@ -140,7 +140,7 @@ export function useSpeech(): UseSpeechReturn {
         }
 
         const voice = VOICES[settings.voice];
-        const ipa = copticToIPA(copticText, voice.dialect);
+        const ipa = copticToIPA(copticText, voice.pronunciation);
         const { base64Audio, mimeType } = await getPremiumAudio(ipa, voice.id);
 
         const audio = new Audio(`data:${mimeType};base64,${base64Audio}`);

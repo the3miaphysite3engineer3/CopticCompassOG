@@ -49,6 +49,10 @@ export const dictionaryMessages = defineMessages({
     "dict.ttsHear": "Hear pronunciation",
     "dict.ttsStop": "Stop pronunciation",
     "dict.ttsDisclaimer": "Computer-generated pronunciation.",
+    "dict.ttsVoice": "Voice:",
+    "dict.ttsMode": "TTS Mode:",
+    "dict.ttsModeStandard": "Standard (Browser)",
+    "dict.ttsModePremium": "Premium (AI)",
 
     "dialect.ALL": "All dialects",
     "dialect.A": "Akhmimic",
@@ -267,6 +271,10 @@ export const dictionaryMessages = defineMessages({
     "dict.ttsHear": "Uitspraak beluisteren",
     "dict.ttsStop": "Uitspraak stoppen",
     "dict.ttsDisclaimer": "Door de computer gegenereerde uitspraak.",
+    "dict.ttsVoice": "Stem:",
+    "dict.ttsMode": "TTS-modus:",
+    "dict.ttsModeStandard": "Standaard (browser)",
+    "dict.ttsModePremium": "Premium (AI)",
 
     "dialect.ALL": "Alle dialecten",
     "dialect.A": "Achmimisch",
