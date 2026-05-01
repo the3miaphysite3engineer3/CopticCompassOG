@@ -122,11 +122,15 @@ export function useDictionarySearch({
     hasDeepLinkedQueryRef.current = initialQuery.length > 0;
 
     if (initialQuery.length > 0) {
-      setQuery(initialQuery);
-      setSelectedDialectState("ALL");
+      queueMicrotask(() => {
+        setQuery(initialQuery);
+        setSelectedDialectState("ALL");
+      });
     }
 
-    setInitialSearchStateReady(true);
+    queueMicrotask(() => {
+      setInitialSearchStateReady(true);
+    });
   }, []);
 
   useEffect(() => {
@@ -143,7 +147,9 @@ export function useDictionarySearch({
         return;
       }
 
-      setPreferenceUserId(nextUserId);
+      queueMicrotask(() => {
+        setPreferenceUserId(nextUserId);
+      });
 
       if (!nextUserId || hasDeepLinkedQueryRef.current) {
         return;
@@ -161,7 +167,9 @@ export function useDictionarySearch({
 
       const preferredDialect = data?.preferred_dictionary_dialect;
       if (preferredDialect && isDialectFilter(preferredDialect)) {
-        setSelectedDialectState(preferredDialect);
+        queueMicrotask(() => {
+          setSelectedDialectState(preferredDialect);
+        });
       }
     }
 
@@ -220,8 +228,10 @@ export function useDictionarySearch({
     const controller = new AbortController();
     const requestKey = resultsKey;
     activeSearchKeyRef.current = requestKey;
-    setLoading(true);
-    setLoadingMore(false);
+    queueMicrotask(() => {
+      setLoading(true);
+      setLoadingMore(false);
+    });
 
     async function loadFirstPage() {
       try {
@@ -249,10 +259,12 @@ export function useDictionarySearch({
           return;
         }
 
-        setDictionaryLength(page.totalEntries);
-        setFilteredResults(page.entries);
-        setHasMoreResults(page.hasMore);
-        setTotalMatches(page.totalMatches);
+        queueMicrotask(() => {
+          setDictionaryLength(page.totalEntries);
+          setFilteredResults(page.entries);
+          setHasMoreResults(page.hasMore);
+          setTotalMatches(page.totalMatches);
+        });
       } catch (error) {
         if (controller.signal.aborted) {
           return;
@@ -263,10 +275,12 @@ export function useDictionarySearch({
           return;
         }
 
-        setDictionaryLength(0);
-        setFilteredResults([]);
-        setHasMoreResults(false);
-        setTotalMatches(0);
+        queueMicrotask(() => {
+          setDictionaryLength(0);
+          setFilteredResults([]);
+          setHasMoreResults(false);
+          setTotalMatches(0);
+        });
       } finally {
         if (
           controller.signal.aborted ||
@@ -275,7 +289,9 @@ export function useDictionarySearch({
           return;
         }
 
-        setLoading(false);
+        queueMicrotask(() => {
+          setLoading(false);
+        });
       }
     }
 
@@ -300,7 +316,9 @@ export function useDictionarySearch({
     }
 
     const requestKey = resultsKey;
-    setLoadingMore(true);
+    queueMicrotask(() => {
+      setLoadingMore(true);
+    });
 
     async function loadNextPage() {
       try {
@@ -324,19 +342,23 @@ export function useDictionarySearch({
           return;
         }
 
-        setDictionaryLength(page.totalEntries);
-        setFilteredResults((previousResults) =>
-          activeSearchKeyRef.current === requestKey
-            ? [...previousResults, ...page.entries]
-            : previousResults,
-        );
-        setHasMoreResults(page.hasMore);
-        setTotalMatches(page.totalMatches);
+        queueMicrotask(() => {
+          setDictionaryLength(page.totalEntries);
+          setFilteredResults((previousResults) =>
+            activeSearchKeyRef.current === requestKey
+              ? [...previousResults, ...page.entries]
+              : previousResults,
+          );
+          setHasMoreResults(page.hasMore);
+          setTotalMatches(page.totalMatches);
+        });
       } catch (error) {
         console.warn("Dictionary results could not be extended.", error);
       } finally {
         if (activeSearchKeyRef.current === requestKey) {
-          setLoadingMore(false);
+          queueMicrotask(() => {
+            setLoadingMore(false);
+          });
         }
       }
     }
@@ -406,7 +428,9 @@ export function useDictionarySearch({
 
   const setSelectedDialect = useCallback(
     (value: DialectFilter) => {
-      setSelectedDialectState(value);
+      queueMicrotask(() => {
+        setSelectedDialectState(value);
+      });
 
       if (!preferenceUserId) {
         return;

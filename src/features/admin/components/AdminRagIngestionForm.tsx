@@ -391,7 +391,9 @@ export function AdminRagIngestionForm() {
   }, [copy.loadError]);
 
   useEffect(() => {
-    void loadRagStatus();
+    queueMicrotask(() => {
+      void loadRagStatus();
+    });
   }, [loadRagStatus]);
 
   useEffect(() => {
@@ -406,7 +408,9 @@ export function AdminRagIngestionForm() {
     }
 
     if (targets.length === 0) {
-      setLiveLogs([]);
+      queueMicrotask(() => {
+        setLiveLogs([]);
+      });
       return;
     }
 
@@ -443,11 +447,15 @@ export function AdminRagIngestionForm() {
         );
 
         if (!cancelled) {
-          setLiveLogs(responses.flat());
+          queueMicrotask(() => {
+            setLiveLogs(responses.flat());
+          });
         }
       } catch {
         if (!cancelled) {
-          setLiveLogs([]);
+          queueMicrotask(() => {
+            setLiveLogs([]);
+          });
         }
       }
     }

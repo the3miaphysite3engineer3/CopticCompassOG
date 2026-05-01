@@ -260,12 +260,14 @@ export default function AnalyticsPageClient({
   useEffect(() => {
     if (!slideOverFilter) {
       activeDrilldownKeyRef.current = "";
-      setSlideOverResults([]);
-      setSlideOverDictionaryLength(0);
-      setSlideOverTotalMatches(0);
-      setHasMoreSlideOverResults(false);
-      setSlideOverLoading(false);
-      setSlideOverLoadingMore(false);
+      queueMicrotask(() => {
+        setSlideOverResults([]);
+        setSlideOverDictionaryLength(0);
+        setSlideOverTotalMatches(0);
+        setHasMoreSlideOverResults(false);
+        setSlideOverLoading(false);
+        setSlideOverLoadingMore(false);
+      });
       return;
     }
 
@@ -277,8 +279,10 @@ export default function AnalyticsPageClient({
       selectedEtymology,
     });
     activeDrilldownKeyRef.current = requestKey;
-    setSlideOverLoading(true);
-    setSlideOverLoadingMore(false);
+    queueMicrotask(() => {
+      setSlideOverLoading(true);
+      setSlideOverLoadingMore(false);
+    });
 
     async function loadDrilldownPage() {
       try {
