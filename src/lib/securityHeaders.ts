@@ -132,7 +132,7 @@ function buildContentSecurityPolicyDirectives(options: {
     "font-src 'self' data:",
     buildImageSourceDirective(options.supabaseOrigin),
     buildConnectSourceDirective(options),
-    "media-src 'self'",
+    "media-src 'self' data:",
     "worker-src 'self' blob:",
     "manifest-src 'self'",
     options.isProduction ? "upgrade-insecure-requests" : null,

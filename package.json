@@ -29,6 +29,7 @@
   "scripts": {
     "dev": "next dev --webpack",
     "dev:turbo": "next dev --turbo",
+    "dev:poll": "WATCHPACK_POLLING=true next dev --webpack",
     "prebuild": "npm run data:grammar:export",
     "build": "next build --webpack",
     "start": "next start",
