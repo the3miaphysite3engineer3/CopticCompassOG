@@ -251,7 +251,7 @@ export function useSpeech(): UseSpeechReturn {
 
           if (token.type === "coptic") {
             const voice = VOICES[settings.voice];
-            const ipa = copticToIPA(token.text, voice.dialect);
+            const ipa = copticToIPA(token.text, voice.pronunciation);
             const { base64Audio, mimeType } = await getPremiumAudio(
               ipa,
               voice.id,

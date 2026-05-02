@@ -12,6 +12,16 @@ type SavedChatMessage = {
   parts?: Array<{ text: string; type: "text" }>;
 };
 
+type SavedChatRow = {
+  client_message_id: string | null;
+  content: string;
+  id: string;
+  metadata: {
+    parts?: SavedChatMessage["parts"] | null;
+  } | null;
+  role: SavedChatMessage["role"];
+};
+
 type HistoryRequestPayload = {
   sessionId?: unknown;
   messages?: unknown;
@@ -145,10 +155,16 @@ export async function GET(request: Request) {
       );
     }
 
-    const sanitizedMessages = messages?.map((m) => ({
-      ...m,
-      id: m.client_message_id ?? m.id,
-    }));
+    const sanitizedMessages: SavedChatMessage[] = (messages ?? [])
+      .map((message) => message as SavedChatRow)
+      .map((message) => ({
+        id: message.client_message_id ?? message.id,
+        role: message.role,
+        content: message.content,
+        parts: Array.isArray(message.metadata?.parts)
+          ? message.metadata.parts
+          : undefined,
+      }));
 
     return NextResponse.json({
       success: true,
