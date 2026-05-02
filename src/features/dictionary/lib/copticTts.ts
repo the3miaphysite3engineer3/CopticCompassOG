@@ -50,7 +50,7 @@ const JINKIM: Record<string, string> = {
   "\u0307": "JinkimMiddle", // combining dot above  ̇
 };
 
-export const CHAR_MAP: Record<string, string> = {
+const CHAR_MAP: Record<string, string> = {
   ...VOWELS,
   ...CONSONANTS,
   ...JINKIM,
