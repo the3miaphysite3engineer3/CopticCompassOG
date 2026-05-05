@@ -68,8 +68,11 @@ export const dictionaryMessages = defineMessages({
 
     "entry.back": "Back to Dictionary Search",
     "entry.gender": "Gender",
+    "entry.gender.masculine": "Masculine",
+    "entry.gender.feminine": "Feminine",
     "entry.translation": "Translation",
     "entry.variants": "Variants",
+    "entry.constructParticipleCompounds": "Derived words",
     "entry.variant.absolute": "Absolute",
     "entry.variant.nominal": "Nominal",
     "entry.variant.pronominal": "Pronominal",
@@ -290,8 +293,11 @@ export const dictionaryMessages = defineMessages({
 
     "entry.back": "Terug naar woordenboek",
     "entry.gender": "Geslacht",
+    "entry.gender.masculine": "Mannelijk",
+    "entry.gender.feminine": "Vrouwelijk",
     "entry.translation": "Vertaling",
     "entry.variants": "Varianten",
+    "entry.constructParticipleCompounds": "Afgeleide woorden",
     "entry.variant.absolute": "Absoluut",
     "entry.variant.nominal": "Nominaal",
     "entry.variant.pronominal": "Pronominaal",

@@ -1,6 +1,5 @@
 import {
   DEFAULT_DICTIONARY_DIALECT_FILTER,
-  type DialectFilter,
   type DictionaryDialectCode,
 } from "@/features/dictionary/config";
 import type {
@@ -12,6 +11,7 @@ type DialectEntryTuple = [
   DictionaryDialectCode,
   NonNullable<DictionaryClientEntry["dialects"][DictionaryDialectCode]>,
 ];
+type EntryDialectSelection = "ALL" | DictionaryDialectCode;
 type DialectVariantState = keyof DialectFormVariants;
 type DialectVariantRow = {
   forms: string[];
@@ -116,7 +116,7 @@ export function getDialectVariantRows(
  */
 export function getPreferredEntryDialectKey(
   entry: DictionaryClientEntry,
-  selectedDialect: DialectFilter = DEFAULT_DICTIONARY_DIALECT_FILTER,
+  selectedDialect: EntryDialectSelection = DEFAULT_DICTIONARY_DIALECT_FILTER,
 ) {
   const dialectKeys = Object.keys(entry.dialects) as DictionaryDialectCode[];
   let primaryDialectKey: DictionaryDialectCode | undefined = "S";
@@ -136,7 +136,7 @@ export function getPreferredEntryDialectKey(
  */
 export function getPreferredEntryDisplaySpelling(
   entry: DictionaryClientEntry,
-  selectedDialect: DialectFilter = DEFAULT_DICTIONARY_DIALECT_FILTER,
+  selectedDialect: EntryDialectSelection = DEFAULT_DICTIONARY_DIALECT_FILTER,
 ) {
   const primaryDialectKey = getPreferredEntryDialectKey(entry, selectedDialect);
   const primaryForms = primaryDialectKey

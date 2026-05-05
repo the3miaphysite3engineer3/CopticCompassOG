@@ -78,13 +78,6 @@ const DIALECT_LABEL_KEYS: Record<
   Sf: "dialect.Sf",
 };
 
-const DIALECT_KEYS_WITH_SUFFIX = new Set<DictionaryDialectCode>([
-  "Fb",
-  "Sl",
-  "Sa",
-  "Sf",
-]);
-
 export const DEFAULT_DICTIONARY_DIALECT_FILTER: DialectFilter = "B";
 export const DEFAULT_PART_OF_SPEECH_FILTER: DictionaryPartOfSpeechFilter =
   "ALL";
@@ -166,12 +159,6 @@ export function getPartOfSpeechLabel(
   return translate(PART_OF_SPEECH_LABEL_KEYS[normalizePartOfSpeech(value)]);
 }
 
-function _isDictionaryDialectCode(
-  value: string,
-): value is DictionaryDialectCode {
-  return DICTIONARY_DIALECT_CODES.includes(value as DictionaryDialectCode);
-}
-
 export function isDialectFilter(value: string): value is DialectFilter {
   return ANALYTICS_DIALECTS.includes(value as DialectFilter);
 }
@@ -186,30 +173,4 @@ export function isDictionaryPartOfSpeechFilter(
   return dictionaryPartOfSpeechFilterOptions.some(
     (option) => option.value === value,
   );
-}
-
-/**
- * Normalizes legacy dialect sigla from imported source files into the stable
- * codes used by the typed dictionary UI and analytics layers.
- */
-export function normalizeDialectKey(dialectKey: string): string {
-  const trimmedKey = dialectKey.trim();
-
-  if (trimmedKey === "sA") {
-    return "L";
-  }
-
-  if (trimmedKey === "NH") {
-    return "Sl";
-  }
-
-  if (trimmedKey === "La") {
-    return "Sl";
-  }
-
-  if (DIALECT_KEYS_WITH_SUFFIX.has(trimmedKey as DictionaryDialectCode)) {
-    return trimmedKey;
-  }
-
-  return trimmedKey.toUpperCase();
 }

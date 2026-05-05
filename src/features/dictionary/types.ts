@@ -21,8 +21,21 @@ export interface DialectFormVariants {
   stative?: string[];
 }
 
+/**
+ * A derived lexical compound built from a dialect-specific construct
+ * participle. These are not variants of the base form.
+ */
+export interface ConstructParticipleCompound {
+  form: string;
+  sourceConstructParticiple?: string;
+  gender?: LexicalGender;
+  english_meanings: string[];
+  dutch_meanings?: string[];
+}
+
 export interface DialectForms {
   absolute: string;
+  constructParticipleCompounds?: ConstructParticipleCompound[];
   constructParticiples?: string[];
   nominal: string;
   pronominal: string;

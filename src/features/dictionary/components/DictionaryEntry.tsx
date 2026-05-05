@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 import { Badge } from "@/components/Badge";
 import { useLanguage } from "@/components/LanguageProvider";
@@ -20,7 +21,10 @@ import {
   getDialectVariantRows,
   getPreferredEntryDialectKey,
 } from "@/features/dictionary/lib/entryDisplay";
-import type { DictionaryClientEntry } from "@/features/dictionary/types";
+import type {
+  ConstructParticipleCompound,
+  DictionaryClientEntry,
+} from "@/features/dictionary/types";
 import { cx } from "@/lib/classes";
 import { antinoou } from "@/lib/fonts";
 import { getEntryPath } from "@/lib/locale";
@@ -33,7 +37,6 @@ import type {
   FormSymbolTooltips,
   GrammarAbbreviationTooltips,
 } from "./HighlightText";
-import type { ReactNode } from "react";
 
 type DictionaryEntryCardProps = {
   entry: DictionaryClientEntry;
@@ -48,6 +51,7 @@ type DialectEntryTuple = [
   DictionaryDialectCode,
   NonNullable<DictionaryClientEntry["dialects"][DictionaryDialectCode]>,
 ];
+type EntryDialectSelection = "ALL" | DictionaryDialectCode;
 
 function getFormSymbolTooltips(
   t: ReturnType<typeof useLanguage>["t"],
@@ -133,6 +137,40 @@ function MetadataTooltip({
   );
 }
 
+function getCompoundMeanings(
+  compound: ConstructParticipleCompound,
+  language: ReturnType<typeof useLanguage>["language"],
+) {
+  return language === "nl" && compound.dutch_meanings
+    ? compound.dutch_meanings
+    : compound.english_meanings;
+}
+
+function getCompoundGenderMarkers(
+  gender: ConstructParticipleCompound["gender"],
+  language: ReturnType<typeof useLanguage>["language"],
+  t: ReturnType<typeof useLanguage>["t"],
+) {
+  if (!gender) {
+    return [];
+  }
+
+  const feminineCode = language === "nl" ? "V" : "F";
+  const markers =
+    gender === "BOTH"
+      ? [
+          { code: "M", label: t("entry.gender.masculine") },
+          { code: feminineCode, label: t("entry.gender.feminine") },
+        ]
+      : [
+          gender === "M"
+            ? { code: "M", label: t("entry.gender.masculine") }
+            : { code: feminineCode, label: t("entry.gender.feminine") },
+        ];
+
+  return markers;
+}
+
 export default function DictionaryEntryCard({
   actions,
   entry,
@@ -142,8 +180,15 @@ export default function DictionaryEntryCard({
   linkHeadword = true,
 }: DictionaryEntryCardProps) {
   const { language, t } = useLanguage();
+  const articleRef = useRef<HTMLElement>(null);
+  const [viewDialect, setViewDialect] =
+    useState<EntryDialectSelection>(selectedDialect);
   const isDetailView = headingLevel === "h1";
-  const primaryDialectKey = getPreferredEntryDialectKey(entry, selectedDialect);
+  const primaryDialectKey = getPreferredEntryDialectKey(entry, viewDialect);
+
+  useEffect(() => {
+    setViewDialect(selectedDialect);
+  }, [selectedDialect]);
 
   let headerSpelling = entry.headword;
   const primaryForms = primaryDialectKey
@@ -195,7 +240,19 @@ export default function DictionaryEntryCard({
           ...row,
         }))
       : [];
+  const constructParticipleCompounds =
+    primaryForms?.constructParticipleCompounds ?? [];
   const compactBadgeClassName = "h-8 min-h-8 min-w-8 justify-center px-3";
+  const handleDialectViewChange = (dialect: DictionaryDialectCode) => {
+    setViewDialect(dialect);
+
+    if (isDetailView) {
+      articleRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
   const metadataBadges = (
     <>
       <Badge tone="neutral" size="sm" className={compactBadgeClassName}>
@@ -224,6 +281,7 @@ export default function DictionaryEntryCard({
 
   return (
     <article
+      ref={articleRef}
       className={surfacePanelClassName({
         rounded: "3xl",
         interactive: linkHeadword,
@@ -342,6 +400,67 @@ export default function DictionaryEntryCard({
             </div>
           </div>
         )}
+        {constructParticipleCompounds.length > 0 && (
+          <div className="mt-5 flex flex-col gap-3">
+            <span className="text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 font-semibold">
+              {t("entry.constructParticipleCompounds")}
+            </span>
+            <div className="grid gap-2.5">
+              {constructParticipleCompounds.map((compound, index) => {
+                const compoundMeanings = getCompoundMeanings(
+                  compound,
+                  language,
+                );
+                const genderMarkers = getCompoundGenderMarkers(
+                  compound.gender,
+                  language,
+                  t,
+                );
+
+                return (
+                  <div
+                    key={`${compound.form}-${index}`}
+                    className="grid gap-1.5 border-l-2 border-sky-200 pl-3 dark:border-sky-900/70"
+                  >
+                    <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
+                      <span
+                        className={`${antinoou.className} min-w-0 break-words text-lg leading-snug text-stone-800 [overflow-wrap:anywhere] dark:text-stone-200`}
+                      >
+                        <HighlightText
+                          text={compound.form}
+                          query={query}
+                          symbolTooltips={formSymbolTooltips}
+                        />
+                      </span>
+                      {genderMarkers.length > 0 && (
+                        <span className="inline-flex items-baseline gap-1 text-sm leading-none text-stone-500 dark:text-stone-400">
+                          {genderMarkers.map((marker) => (
+                            <MicroTooltip
+                              key={marker.code}
+                              label={marker.label}
+                              className="small-caps whitespace-nowrap"
+                            >
+                              {marker.code}
+                            </MicroTooltip>
+                          ))}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm leading-relaxed text-stone-600 dark:text-stone-400">
+                      <HighlightText
+                        text={compoundMeanings.join("; ")}
+                        query={query}
+                        grammarAbbreviationTooltips={
+                          grammarAbbreviationTooltips
+                        }
+                      />
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
         {entry.greek_equivalents.length > 0 && (
           <div className="mt-5 flex flex-col gap-3">
             <span className="text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 font-semibold">
@@ -373,16 +492,19 @@ export default function DictionaryEntryCard({
             {t("entry.dialectForms")}
           </h4>
           <div className="flex flex-wrap gap-3">
-            {remainingDialects.map(([dialect, forms], index) => {
+            {remainingDialects.map(([dialect, forms]) => {
               const spelling = formatDialectForms(forms, entry.headword);
 
               return (
-                <div
-                  key={index}
-                  className="flex min-w-0 max-w-full basis-full items-start gap-3 rounded-xl border border-stone-200 bg-stone-50/90 px-3 py-2.5 dark:border-stone-800/60 dark:bg-stone-950/50 sm:basis-auto"
+                <button
+                  key={dialect}
+                  type="button"
+                  onClick={() => handleDialectViewChange(dialect)}
+                  aria-label={`${t("entry.dialectForms")}: ${dialect} ${spelling}`}
+                  className="flex min-w-0 max-w-full basis-full items-start gap-3 rounded-xl border border-stone-200 bg-stone-50/90 px-3 py-2.5 text-left transition hover:border-sky-300 hover:bg-sky-50/80 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none dark:border-stone-800/60 dark:bg-stone-950/50 dark:hover:border-sky-700 dark:hover:bg-sky-950/30 dark:focus-visible:ring-offset-stone-950 sm:basis-auto"
                 >
                   <span className="inline-flex min-h-7 shrink-0 items-center rounded-md bg-stone-200 px-2.5 py-2 text-[10px] font-bold text-stone-700 dark:bg-stone-700 dark:text-stone-200">
-                    <DialectSiglum siglum={dialect} />
+                    <DialectSiglum focusableTooltip={false} siglum={dialect} />
                   </span>
                   <span className="min-w-0">
                     <span
@@ -395,7 +517,7 @@ export default function DictionaryEntryCard({
                       />
                     </span>
                   </span>
-                </div>
+                </button>
               );
             })}
           </div>

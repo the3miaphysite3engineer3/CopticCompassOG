@@ -49,6 +49,9 @@ export function prepareDictionaryForSearch(
   dictionary: readonly DictionaryClientEntry[],
 ): PreparedLexicalEntry[] {
   return dictionary.map((entry, index) => {
+    const constructParticipleCompounds = Object.values(entry.dialects).flatMap(
+      (forms) => forms.constructParticipleCompounds ?? [],
+    );
     const dialectForms = Object.values(entry.dialects)
       .flatMap((forms) => [
         forms.absolute,
@@ -56,6 +59,10 @@ export function prepareDictionaryForSearch(
         forms.pronominal,
         forms.stative,
         ...(forms.constructParticiples ?? []),
+        ...(forms.constructParticipleCompounds ?? []).flatMap((compound) => [
+          compound.form,
+          compound.sourceConstructParticiple ?? "",
+        ]),
         ...(forms.variants?.absolute ?? []),
         ...(forms.variants?.nominal ?? []),
         ...(forms.variants?.pronominal ?? []),
@@ -66,8 +73,22 @@ export function prepareDictionaryForSearch(
       .join(" ");
 
     return {
-      englishSearchText: entry.english_meanings.join(" ").toLowerCase(),
-      dutchSearchText: (entry.dutch_meanings || []).join(" ").toLowerCase(),
+      englishSearchText: [
+        ...entry.english_meanings,
+        ...constructParticipleCompounds.flatMap(
+          (compound) => compound.english_meanings,
+        ),
+      ]
+        .join(" ")
+        .toLowerCase(),
+      dutchSearchText: [
+        ...(entry.dutch_meanings || []),
+        ...constructParticipleCompounds.flatMap(
+          (compound) => compound.dutch_meanings ?? [],
+        ),
+      ]
+        .join(" ")
+        .toLowerCase(),
       greekSearchText: entry.greek_equivalents.join(" ").toLowerCase(),
       index,
       normalizedHeadword: normalizeCopticSearchText(entry.headword),

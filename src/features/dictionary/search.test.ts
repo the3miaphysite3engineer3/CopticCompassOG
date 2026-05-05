@@ -106,6 +106,15 @@ const takeEntry: DictionaryClientEntry = {
       pronominal: "ϭⲓⲧ=",
       stative: "ϭⲏⲟⲩ†",
       constructParticiples: ["ϭⲁⲓ~"],
+      constructParticipleCompounds: [
+        {
+          form: "ϭⲁⲩⲙⲱⲓⲧ",
+          sourceConstructParticiple: "ϭⲁⲩ~",
+          gender: "BOTH",
+          english_meanings: ["guide, leader"],
+          dutch_meanings: ["gids, leider"],
+        },
+      ],
       variants: {
         constructParticiples: ["ϭⲁⲩ~"],
       },
@@ -227,6 +236,26 @@ describe("dictionary search", () => {
     ).toEqual(["cd_130"]);
     expect(
       searchPreparedDictionary("ϭⲁⲩ", preparedDictionary, [takeEntry]).map(
+        (entry) => entry.id,
+      ),
+    ).toEqual(["cd_130"]);
+  });
+
+  it("indexes construct participle compound forms and meanings", () => {
+    const preparedDictionary = prepareDictionaryForSearch([takeEntry]);
+
+    expect(
+      searchPreparedDictionary("ϭⲁⲩⲙⲱⲓⲧ", preparedDictionary, [takeEntry]).map(
+        (entry) => entry.id,
+      ),
+    ).toEqual(["cd_130"]);
+    expect(
+      searchPreparedDictionary("leader", preparedDictionary, [takeEntry]).map(
+        (entry) => entry.id,
+      ),
+    ).toEqual(["cd_130"]);
+    expect(
+      searchPreparedDictionary("leider", preparedDictionary, [takeEntry]).map(
         (entry) => entry.id,
       ),
     ).toEqual(["cd_130"]);

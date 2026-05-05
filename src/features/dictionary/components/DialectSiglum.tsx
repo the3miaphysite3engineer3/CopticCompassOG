@@ -5,10 +5,14 @@ import { MicroTooltip } from "@/components/MicroTooltip";
 import { getDialectLabelKey } from "@/features/dictionary/config";
 
 type DialectSiglumProps = {
+  focusableTooltip?: boolean;
   siglum?: string;
 };
 
-export default function DialectSiglum({ siglum }: DialectSiglumProps) {
+export default function DialectSiglum({
+  focusableTooltip = true,
+  siglum,
+}: DialectSiglumProps) {
   const { t } = useLanguage();
 
   if (!siglum) {
@@ -22,7 +26,12 @@ export default function DialectSiglum({ siglum }: DialectSiglumProps) {
 
   if (siglum.length === 2 && /^[A-Z][abfl]$/.test(siglum)) {
     return (
-      <MicroTooltip alignItems="center" className={className} label={tooltip}>
+      <MicroTooltip
+        alignItems="center"
+        className={className}
+        focusable={focusableTooltip}
+        label={tooltip}
+      >
         {siglum[0]}
         <sup className="ml-0.5 align-super text-[0.7em] italic font-normal">
           {siglum[1]}
@@ -32,7 +41,12 @@ export default function DialectSiglum({ siglum }: DialectSiglumProps) {
   }
 
   return (
-    <MicroTooltip alignItems="center" className={className} label={tooltip}>
+    <MicroTooltip
+      alignItems="center"
+      className={className}
+      focusable={focusableTooltip}
+      label={tooltip}
+    >
       {siglum}
     </MicroTooltip>
   );

@@ -3,7 +3,11 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import type { DialectForms, LexicalEntry } from "@/features/dictionary/types";
+import type {
+  ConstructParticipleCompound,
+  DialectForms,
+  LexicalEntry,
+} from "@/features/dictionary/types";
 
 function hasUppercaseCopticCharacter(value: string) {
   for (const character of value) {
@@ -46,6 +50,31 @@ function collectConstructParticiples(forms: DialectForms | undefined) {
     ...(forms?.constructParticiples ?? []),
     ...(forms?.variants?.constructParticiples ?? []),
   ];
+}
+
+function isNonEmptyStringArray(value: unknown): value is string[] {
+  return (
+    Array.isArray(value) &&
+    value.length > 0 &&
+    value.every((item) => typeof item === "string" && item.trim().length > 0)
+  );
+}
+
+function validateConstructParticipleCompound(
+  compound: ConstructParticipleCompound,
+) {
+  return (
+    typeof compound.form === "string" &&
+    compound.form.trim().length > 0 &&
+    !compound.form.endsWith("~") &&
+    (compound.sourceConstructParticiple === undefined ||
+      compound.sourceConstructParticiple.endsWith("~")) &&
+    (compound.gender === undefined ||
+      ["", "BOTH", "F", "M"].includes(compound.gender)) &&
+    isNonEmptyStringArray(compound.english_meanings) &&
+    (compound.dutch_meanings === undefined ||
+      isNonEmptyStringArray(compound.dutch_meanings))
+  );
 }
 
 function collectMeaningGlosses(entry: LexicalEntry) {
@@ -153,64 +182,36 @@ describe("dictionary dataset guardrails", () => {
     });
   });
 
-  it("preserves source accents on Sahidic and Bohairic construct participles", () => {
+  it("validates construct participle compound records when present", () => {
     const filePath = path.join(process.cwd(), "public/data/dictionary.json");
     const dictionary = JSON.parse(
       fs.readFileSync(filePath, "utf8"),
     ) as LexicalEntry[];
+    const malformedCompounds: Array<{
+      dialect: string;
+      form: string;
+      id: string;
+    }> = [];
+    let compoundCount = 0;
 
-    expect(
-      dictionary.find((entry) => entry.id === "cd_130")?.dialects.S
-        ?.constructParticiples,
-    ).toContain("ϫⲁⲓ̈~");
-    expect(
-      dictionary.find((entry) => entry.id === "cd_452")?.dialects.B
-        ?.constructParticiples,
-    ).toContain("ⲁ̀ϣ~");
-    expect(
-      dictionary.find((entry) => entry.id === "cd_2598")?.dialects.B
-        ?.constructParticiples,
-    ).toContain("ϭⲁⲧⲡ̄~");
-  });
+    for (const entry of dictionary) {
+      for (const [dialect, forms] of Object.entries(entry.dialects)) {
+        for (const compound of forms.constructParticipleCompounds ?? []) {
+          compoundCount += 1;
 
-  it("includes source-supplied construct participles that were missing locally", () => {
-    const filePath = path.join(process.cwd(), "public/data/dictionary.json");
-    const dictionary = JSON.parse(
-      fs.readFileSync(filePath, "utf8"),
-    ) as LexicalEntry[];
+          if (!validateConstructParticipleCompound(compound)) {
+            malformedCompounds.push({
+              dialect,
+              form: compound.form,
+              id: entry.id,
+            });
+          }
+        }
+      }
+    }
 
-    expect(
-      collectConstructParticiples(
-        dictionary.find((entry) => entry.id === "cd_23")?.dialects.S,
-      ),
-    ).toContain("ⲣⲁ~");
-    expect(
-      collectConstructParticiples(
-        dictionary.find((entry) => entry.id === "cd_138")?.dialects.B,
-      ),
-    ).toContain("ⲭⲁ~");
-    expect(
-      collectConstructParticiples(
-        dictionary.find((entry) => entry.id === "cd_46")?.dialects.S,
-      ),
-    ).toContain("ϣⲛ̄~");
-  });
-
-  it("keeps construct participle glosses readable in English and Dutch", () => {
-    const filePath = path.join(process.cwd(), "public/data/dictionary.json");
-    const dictionary = JSON.parse(
-      fs.readFileSync(filePath, "utf8"),
-    ) as LexicalEntry[];
-
-    expect(
-      dictionary.find((entry) => entry.id === "cd_133")?.english_meanings,
-    ).toContain("pc ABFLOS carrier");
-    expect(
-      dictionary.find((entry) => entry.id === "cd_276")?.dutch_meanings,
-    ).toContain("pc L onderzoeker, toetser");
-    expect(
-      dictionary.find((entry) => entry.id === "cd_2807")?.dutch_meanings,
-    ).toContain("pc (?) kaal aan de voorkant van het hoofd");
+    expect(malformedCompounds).toEqual([]);
+    expect(compoundCount).toBeGreaterThanOrEqual(260);
   });
 
   it("compacts comma-separated dialect sigla lists in meaning glosses", () => {

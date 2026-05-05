@@ -7,6 +7,7 @@ type MicroTooltipProps = {
   bubbleClassName?: string;
   children: ReactNode;
   className?: string;
+  focusable?: boolean;
   label: string;
 };
 
@@ -52,6 +53,7 @@ export function MicroTooltip({
   bubbleClassName,
   children,
   className,
+  focusable = true,
   label,
 }: MicroTooltipProps) {
   return (
@@ -62,7 +64,7 @@ export function MicroTooltip({
         alignItems === "center" ? "items-center" : "items-baseline",
         className,
       )}
-      tabIndex={0}
+      tabIndex={focusable ? 0 : undefined}
     >
       {children}
       <span
