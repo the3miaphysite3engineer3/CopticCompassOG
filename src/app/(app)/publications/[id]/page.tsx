@@ -1,6 +1,6 @@
 import { getPublicationPath } from "@/features/publications/lib/publications";
 import { createNoIndexMetadata } from "@/lib/metadata";
-import { redirectToPreferredLocaleWithParams } from "@/lib/publicLocaleRouting";
+import { redirectToPreferredLocaleWithParams } from "@/lib/publicLocaleRedirects";
 
 import type { Metadata } from "next";
 

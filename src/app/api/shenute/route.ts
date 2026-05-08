@@ -24,6 +24,11 @@ import {
   createOpenRouterChatCompletion,
   type OpenRouterChatMessage,
 } from "@/lib/openrouter";
+import {
+  consumeRateLimit,
+  getUserRateLimitIdentifier,
+  hasAvailableRateLimitProtection,
+} from "@/lib/rateLimit";
 import { getAuthenticatedUser } from "@/lib/supabase/authQueries";
 import { hasSupabaseRuntimeEnv } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -44,6 +49,9 @@ type GlobalWithOpenRouterReasoningStore = typeof globalThis & {
 };
 
 const OPENROUTER_REASONING_TTL_MS = 4 * 60 * 60 * 1000;
+const SHENUTE_CHAT_RATE_LIMIT = 20;
+const SHENUTE_CHAT_RATE_LIMIT_WINDOW_MS = 60 * 60 * 1000;
+const SHENUTE_MAX_REQUEST_BYTES = 200 * 1024;
 
 function getOpenRouterReasoningStore() {
   const globalWithStore = globalThis as GlobalWithOpenRouterReasoningStore;
@@ -362,6 +370,70 @@ function createStaticAssistantStream(responseText: string) {
   return createUIMessageStreamResponse({ stream });
 }
 
+function createJsonErrorResponse(
+  error: string,
+  status: number,
+  headers?: HeadersInit,
+) {
+  return new Response(JSON.stringify({ error }), {
+    status,
+    headers: {
+      "Cache-Control": "no-store",
+      "Content-Type": "application/json",
+      ...headers,
+    },
+  });
+}
+
+async function getShenuteRateLimitResponse(userId: string) {
+  if (!hasAvailableRateLimitProtection()) {
+    return createJsonErrorResponse("Shenute AI is unavailable right now.", 503);
+  }
+
+  try {
+    const result = await consumeRateLimit({
+      identifier: getUserRateLimitIdentifier(userId),
+      limit: SHENUTE_CHAT_RATE_LIMIT,
+      namespace: "shenute:chat",
+      windowMs: SHENUTE_CHAT_RATE_LIMIT_WINDOW_MS,
+    });
+
+    if (result.ok) {
+      return null;
+    }
+
+    return createJsonErrorResponse(
+      "Too many Shenute AI requests. Please wait a bit before trying again.",
+      429,
+      {
+        "Retry-After": Math.max(
+          1,
+          Math.ceil(result.retryAfterMs / 1000),
+        ).toString(),
+      },
+    );
+  } catch (error) {
+    console.error("Shenute rate-limit check failed:", error);
+    return createJsonErrorResponse("Shenute AI is unavailable right now.", 503);
+  }
+}
+
+function getShenutePayloadSizeResponse(headers: Headers) {
+  const contentLength = Number.parseInt(
+    headers.get("content-length") ?? "",
+    10,
+  );
+
+  if (
+    !Number.isFinite(contentLength) ||
+    contentLength <= SHENUTE_MAX_REQUEST_BYTES
+  ) {
+    return null;
+  }
+
+  return createJsonErrorResponse("Shenute AI request is too large.", 413);
+}
+
 function toPageContext(value: unknown): PageContext {
   if (!value || typeof value !== "object") {
     return {};
@@ -428,6 +500,11 @@ function buildNMTContextDoc(suggestion: NMTTranslationSuggestion): ContextDoc {
 
 export async function POST(req: Request) {
   try {
+    const payloadSizeResponse = getShenutePayloadSizeResponse(req.headers);
+    if (payloadSizeResponse) {
+      return payloadSizeResponse;
+    }
+
     if (!hasSupabaseRuntimeEnv()) {
       return new Response(
         JSON.stringify({
@@ -444,13 +521,17 @@ export async function POST(req: Request) {
     const authenticatedUser = await getAuthenticatedUser(supabase);
 
     if (!authenticatedUser) {
-      return new Response(
-        JSON.stringify({ error: "Sign in required to use Shenute AI." }),
-        {
-          status: 401,
-          headers: { "Content-Type": "application/json" },
-        },
+      return createJsonErrorResponse(
+        "Sign in required to use Shenute AI.",
+        401,
       );
+    }
+
+    const rateLimitResponse = await getShenuteRateLimitResponse(
+      authenticatedUser.id,
+    );
+    if (rateLimitResponse) {
+      return rateLimitResponse;
     }
 
     const payload: {
@@ -462,10 +543,7 @@ export async function POST(req: Request) {
     const { messages } = payload;
 
     if (!Array.isArray(messages) || messages.length === 0) {
-      return new Response(JSON.stringify({ error: "No messages provided." }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return createJsonErrorResponse("No messages provided.", 400);
     }
 
     const queryProvider = toOptionalInferenceProvider(

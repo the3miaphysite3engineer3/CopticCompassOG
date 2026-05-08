@@ -57,14 +57,14 @@ export function CheckboxField({
       <span className="min-w-0 flex-1">
         <span
           className={cx(
-            "block text-sm font-medium leading-6 text-stone-700 dark:text-stone-200",
+            "block text-sm font-medium leading-6 text-ink",
             labelClassName,
           )}
         >
           {label}
         </span>
         {description ? (
-          <span className="mt-1 block text-sm leading-6 text-stone-500 dark:text-stone-400">
+          <span className="mt-1 block text-sm leading-6 text-muted">
             {description}
           </span>
         ) : null}

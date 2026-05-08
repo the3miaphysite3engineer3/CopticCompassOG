@@ -687,7 +687,7 @@ export function AdminRagIngestionForm() {
               type="file"
               accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown,text/csv,application/json,text/xml,text/html,image/*,.pdf,.docx,.txt,.md,.markdown,.csv,.tsv,.json,.xml,.html,.htm,.yaml,.yml"
               required
-              className="input-base h-auto py-2 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-sky-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-sky-800 dark:file:bg-sky-900/40 dark:file:text-sky-200"
+              className="input-base h-auto py-2 text-sm file:mr-4 file:rounded-xl file:border-0 file:bg-sky-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-sky-800 dark:file:bg-sky-900/40 dark:file:text-sky-200"
             />
           </label>
         </div>

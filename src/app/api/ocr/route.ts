@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
 
+import {
+  consumeOcrRateLimit,
+  getOcrContentLengthFailure,
+  getOcrUploadSizeFailure,
+  getRetryAfterSeconds,
+} from "@/lib/server/ocrProtection";
+
 export const runtime = "nodejs";
 
 const OCR_UPLOAD_FIELD_FALLBACKS = [
@@ -90,6 +97,32 @@ function getFirstFileEntry(formData: FormData) {
   return null;
 }
 
+function ocrProtectionResponse(failure: {
+  message: string;
+  retryAfterMs?: number;
+  status: 413 | 429 | 503;
+}) {
+  const headers = new Headers({
+    "Cache-Control": "no-store",
+  });
+  const retryAfter = getRetryAfterSeconds(failure.retryAfterMs);
+
+  if (retryAfter) {
+    headers.set("Retry-After", retryAfter);
+  }
+
+  return NextResponse.json(
+    {
+      success: false,
+      error: failure.message,
+    },
+    {
+      status: failure.status,
+      headers,
+    },
+  );
+}
+
 export async function POST(request: Request) {
   const ocrServiceUrl = process.env.OCR_SERVICE_URL;
   if (!ocrServiceUrl) {
@@ -100,6 +133,16 @@ export async function POST(request: Request) {
       },
       { status: 503 },
     );
+  }
+
+  const contentLengthFailure = getOcrContentLengthFailure(request.headers);
+  if (contentLengthFailure) {
+    return ocrProtectionResponse(contentLengthFailure);
+  }
+
+  const rateLimitFailure = await consumeOcrRateLimit();
+  if (rateLimitFailure) {
+    return ocrProtectionResponse(rateLimitFailure);
   }
 
   let formData: FormData;
@@ -124,6 +167,11 @@ export async function POST(request: Request) {
       },
       { status: 400 },
     );
+  }
+
+  const uploadSizeFailure = getOcrUploadSizeFailure(fileEntry.file.size);
+  if (uploadSizeFailure) {
+    return ocrProtectionResponse(uploadSizeFailure);
   }
 
   const targetUrl = buildTargetUrl(request.url, ocrServiceUrl, formData);

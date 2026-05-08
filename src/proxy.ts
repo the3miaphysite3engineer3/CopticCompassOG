@@ -29,14 +29,22 @@ export async function proxy(request: NextRequest) {
 }
 
 /**
- * Limits the proxy to routed document requests while skipping static assets and
- * prefetch traffic.
+ * Limits the proxy to requests that need request-bound work. Localized public
+ * pages get a static CSP from next.config.ts, while localized private pages
+ * still pass through the proxy for auth session refresh.
  */
 export const config = {
   matcher: [
     {
       source:
-        "/((?!api|_next/static|_next/image|favicon.ico|apple-touch-icon.png|apple-touch-icon-precomposed.png|manifest.json|robots.txt|sitemap.xml).*)",
+        "/((?!api|_next/static|_next/image|favicon.ico|apple-touch-icon.png|apple-touch-icon-precomposed.png|manifest.json|robots.txt|sitemap.xml|en(?:/|$)|nl(?:/|$)).*)",
+      missing: [
+        { type: "header", key: "next-router-prefetch" },
+        { type: "header", key: "purpose", value: "prefetch" },
+      ],
+    },
+    {
+      source: "/:locale(en|nl)/:section(admin|dashboard)/:path*",
       missing: [
         { type: "header", key: "next-router-prefetch" },
         { type: "header", key: "purpose", value: "prefetch" },

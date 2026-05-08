@@ -3,7 +3,7 @@ import { cx } from "@/lib/classes";
 
 import type { ReactNode } from "react";
 
-type PageHeaderTone = "default" | "brand" | "sky" | "analytics";
+export type PageHeaderTone = "default" | "brand" | "sky" | "analytics";
 type PageHeaderSize = "hero" | "page" | "compact" | "workspace";
 type PageHeaderAlign = "center" | "left";
 type EyebrowVariant = "text" | "badge";

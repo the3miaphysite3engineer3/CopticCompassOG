@@ -1,6 +1,6 @@
 import { getGrammarLessonPath } from "@/features/grammar/lib/grammarPaths";
 import { createNoIndexMetadata } from "@/lib/metadata";
-import { redirectToPreferredLocaleWithParams } from "@/lib/publicLocaleRouting";
+import { redirectToPreferredLocaleWithParams } from "@/lib/publicLocaleRedirects";
 
 import type { Metadata } from "next";
 

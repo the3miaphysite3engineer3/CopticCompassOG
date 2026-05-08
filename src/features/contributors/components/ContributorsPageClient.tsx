@@ -8,9 +8,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { AppPageIntro } from "@/components/AppPageIntro";
 import { useLanguage } from "@/components/LanguageProvider";
-import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { getContactPath, getLocalizedHomePath } from "@/lib/locale";
@@ -248,98 +247,53 @@ export function ContributorsPageClient() {
   return (
     <PageShell
       className="app-page-shell"
-      contentClassName="app-page-stack"
+      contentClassName="app-page-content"
       width="standard"
       accents={[
         pageShellAccents.heroSkyArc,
         pageShellAccents.topRightEmeraldOrbInset,
       ]}
     >
-      <BreadcrumbTrail
-        items={[
+      <AppPageIntro
+        align="center"
+        breadcrumbs={[
           {
             label: t("nav.home"),
             href: getLocalizedHomePath(language),
           },
           { label: t("contributors.breadcrumbLabel") },
         ]}
-      />
-
-      <PageHeader
         title={t("contributors.title")}
         description={t("contributors.subtitle")}
         tone="sky"
-        size="workspace"
       />
 
-      <SurfacePanel
-        rounded="3xl"
-        variant="elevated"
-        className="mb-6 p-6 md:p-8"
-      >
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-          {language === "nl" ? "Oprichter" : "Founder"}
-        </p>
+      <div className="space-y-8 md:space-y-9">
+        <SurfacePanel rounded="3xl" variant="elevated" className="p-6 md:p-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+            {language === "nl" ? "Oprichter" : "Founder"}
+          </p>
 
-        <div className="mt-5">
-          <article className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-5 dark:border-stone-800/80 dark:bg-stone-950/50">
-            <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
-              {founder.name}
-            </h2>
-            <p className="mt-1 text-sm font-medium text-sky-700 dark:text-sky-300">
-              {founder.role}
-            </p>
-            <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-600 dark:text-stone-300">
-              {founder.description}
-            </p>
-
-            {founder.contacts.length > 0 ? (
-              <>
-                <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
-                  {t("contributors.contactsHeading")}
-                </p>
-                <ul className="mt-2 space-y-2 text-sm text-stone-700 dark:text-stone-200">
-                  {founder.contacts.map((contact) => (
-                    <li key={`${founder.name}-${contact.href}`}>
-                      {renderContributorContact(contact)}
-                    </li>
-                  ))}
-                </ul>
-              </>
-            ) : null}
-          </article>
-        </div>
-      </SurfacePanel>
-
-      <SurfacePanel rounded="3xl" variant="elevated" className="p-6 md:p-8">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-          {t("contributors.sectionTitle")}
-        </p>
-
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
-          {contributors.map((contributor) => (
-            <article
-              key={contributor.name}
-              className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-5 dark:border-stone-800/80 dark:bg-stone-950/50"
-            >
+          <div className="mt-5">
+            <article className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-5 dark:border-stone-800/80 dark:bg-stone-950/50">
               <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
-                {contributor.name}
+                {founder.name}
               </h2>
               <p className="mt-1 text-sm font-medium text-sky-700 dark:text-sky-300">
-                {contributor.role}
+                {founder.role}
               </p>
-              <p className="mt-3 text-sm leading-7 text-stone-600 dark:text-stone-300">
-                {contributor.description}
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-600 dark:text-stone-300">
+                {founder.description}
               </p>
 
-              {contributor.contacts.length > 0 ? (
+              {founder.contacts.length > 0 ? (
                 <>
                   <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
                     {t("contributors.contactsHeading")}
                   </p>
                   <ul className="mt-2 space-y-2 text-sm text-stone-700 dark:text-stone-200">
-                    {contributor.contacts.map((contact) => (
-                      <li key={`${contributor.name}-${contact.href}`}>
+                    {founder.contacts.map((contact) => (
+                      <li key={`${founder.name}-${contact.href}`}>
                         {renderContributorContact(contact)}
                       </li>
                     ))}
@@ -347,96 +301,136 @@ export function ContributorsPageClient() {
                 </>
               ) : null}
             </article>
-          ))}
-        </div>
-      </SurfacePanel>
+          </div>
+        </SurfacePanel>
 
-      <SurfacePanel
-        as="section"
-        id="shenute-ai-credits"
-        rounded="3xl"
-        variant="elevated"
-        className="scroll-mt-28 p-6 md:p-8"
-      >
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-          {shenuteCredits.title}
-        </p>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600 dark:text-stone-300">
-          {shenuteCredits.description}
-        </p>
+        <SurfacePanel rounded="3xl" variant="elevated" className="p-6 md:p-8">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+            {t("contributors.sectionTitle")}
+          </p>
 
-        <div className="mt-6 grid gap-4 lg:grid-cols-3">
-          {shenuteCredits.sections.map((section, index) => {
-            const Icon = shenuteCreditSectionIcons[index] ?? BrainCircuit;
-
-            return (
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            {contributors.map((contributor) => (
               <article
-                key={section.title}
+                key={contributor.name}
                 className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-5 dark:border-stone-800/80 dark:bg-stone-950/50"
               >
-                <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
-                  <Icon className="h-4 w-4 text-sky-600 dark:text-sky-400" />
-                  <h2>{section.title}</h2>
-                </div>
-                <ul className="space-y-2 text-sm leading-6 text-stone-600 dark:text-stone-300">
-                  {section.items.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
+                <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
+                  {contributor.name}
+                </h2>
+                <p className="mt-1 text-sm font-medium text-sky-700 dark:text-sky-300">
+                  {contributor.role}
+                </p>
+                <p className="mt-3 text-sm leading-7 text-stone-600 dark:text-stone-300">
+                  {contributor.description}
+                </p>
 
-                {section.links ? (
-                  <div className="mt-4 space-y-2 text-sm">
-                    {section.links.map((link) => (
-                      <div key={link.href}>{renderCreditLink(link)}</div>
-                    ))}
-                  </div>
+                {contributor.contacts.length > 0 ? (
+                  <>
+                    <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
+                      {t("contributors.contactsHeading")}
+                    </p>
+                    <ul className="mt-2 space-y-2 text-sm text-stone-700 dark:text-stone-200">
+                      {contributor.contacts.map((contact) => (
+                        <li key={`${contributor.name}-${contact.href}`}>
+                          {renderContributorContact(contact)}
+                        </li>
+                      ))}
+                    </ul>
+                  </>
                 ) : null}
               </article>
-            );
-          })}
-        </div>
-
-        <div className="mt-6 border-t border-stone-200/80 pt-4 dark:border-stone-800/80">
-          <div className="flex flex-wrap gap-3">
-            {shenuteCredits.links.map((link) => (
-              <div key={link.href}>{renderCreditLink(link)}</div>
             ))}
           </div>
-        </div>
-      </SurfacePanel>
+        </SurfacePanel>
 
-      <SurfacePanel
-        as="section"
-        id="research-nmt-credits"
-        rounded="3xl"
-        variant="elevated"
-        className="scroll-mt-28 p-6 md:p-8"
-      >
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
-          {researchCredits.title}
-        </p>
-        <p className="mt-3 text-sm leading-7 text-stone-600 dark:text-stone-300 max-w-2xl">
-          {researchCredits.description}
-        </p>
+        <SurfacePanel
+          as="section"
+          id="shenute-ai-credits"
+          rounded="3xl"
+          variant="elevated"
+          className="scroll-mt-28 p-6 md:p-8"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+            {shenuteCredits.title}
+          </p>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600 dark:text-stone-300">
+            {shenuteCredits.description}
+          </p>
 
-        <div className="mt-6 space-y-4">
-          {researchCredits.items.map((item) => (
-            <div key={item.href} className="group flex flex-col space-y-1">
-              <a
-                href={item.href}
-                target="_blank"
-                rel="noreferrer"
-                className="text-sm font-semibold text-sky-700 hover:text-sky-900 dark:text-sky-400 dark:hover:text-sky-200 transition-colors"
-              >
-                {item.label} →
-              </a>
-              <p className="text-xs text-stone-500 dark:text-stone-400 italic">
-                {item.description}
-              </p>
+          <div className="mt-6 grid gap-4 lg:grid-cols-3">
+            {shenuteCredits.sections.map((section, index) => {
+              const Icon = shenuteCreditSectionIcons[index] ?? BrainCircuit;
+
+              return (
+                <article
+                  key={section.title}
+                  className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-5 dark:border-stone-800/80 dark:bg-stone-950/50"
+                >
+                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
+                    <Icon className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                    <h2>{section.title}</h2>
+                  </div>
+                  <ul className="space-y-2 text-sm leading-6 text-stone-600 dark:text-stone-300">
+                    {section.items.map((item) => (
+                      <li key={item}>{item}</li>
+                    ))}
+                  </ul>
+
+                  {section.links ? (
+                    <div className="mt-4 space-y-2 text-sm">
+                      {section.links.map((link) => (
+                        <div key={link.href}>{renderCreditLink(link)}</div>
+                      ))}
+                    </div>
+                  ) : null}
+                </article>
+              );
+            })}
+          </div>
+
+          <div className="mt-6 border-t border-stone-200/80 pt-4 dark:border-stone-800/80">
+            <div className="flex flex-wrap gap-3">
+              {shenuteCredits.links.map((link) => (
+                <div key={link.href}>{renderCreditLink(link)}</div>
+              ))}
             </div>
-          ))}
-        </div>
-      </SurfacePanel>
+          </div>
+        </SurfacePanel>
+
+        <SurfacePanel
+          as="section"
+          id="research-nmt-credits"
+          rounded="3xl"
+          variant="elevated"
+          className="scroll-mt-28 p-6 md:p-8"
+        >
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+            {researchCredits.title}
+          </p>
+          <p className="mt-3 text-sm leading-7 text-stone-600 dark:text-stone-300 max-w-2xl">
+            {researchCredits.description}
+          </p>
+
+          <div className="mt-6 space-y-4">
+            {researchCredits.items.map((item) => (
+              <div key={item.href} className="group flex flex-col space-y-1">
+                <a
+                  href={item.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm font-semibold text-sky-700 hover:text-sky-900 dark:text-sky-400 dark:hover:text-sky-200 transition-colors"
+                >
+                  {item.label} →
+                </a>
+                <p className="text-xs text-stone-500 dark:text-stone-400 italic">
+                  {item.description}
+                </p>
+              </div>
+            ))}
+          </div>
+        </SurfacePanel>
+      </div>
     </PageShell>
   );
 }

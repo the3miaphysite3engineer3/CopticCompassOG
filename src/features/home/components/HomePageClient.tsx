@@ -190,10 +190,8 @@ export default function HomePageClient() {
         ))}
       </section>
 
-      <section className="mt-16 sm:mt-24 w-full bg-gradient-to-r from-stone-900 to-stone-800 dark:from-stone-950 dark:to-stone-900 rounded-3xl p-8 md:p-12 shadow-2xl relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-8 border border-stone-800">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-sky-500/16 rounded-full blur-[90px] pointer-events-none" />
-
-        <div className="text-center md:text-left z-10 flex-1">
+      <section className="relative mt-16 flex w-full flex-col items-center justify-between gap-8 overflow-hidden rounded-3xl border border-stone-800 bg-gradient-to-r from-stone-900 to-stone-800 p-8 shadow-panel dark:from-stone-950 dark:to-stone-900 md:flex-row md:p-12 sm:mt-24">
+        <div className="z-10 flex-1 text-center md:text-left">
           <span className="inline-block px-3 py-1 bg-sky-500/15 border border-sky-400/25 text-sky-300 text-xs font-semibold uppercase tracking-widest rounded-full mb-4">
             {t("home.comingSoon")}
           </span>

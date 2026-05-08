@@ -59,7 +59,7 @@ export function SendContentReleasePreviewForm({
             id={`content-release-preview-locale-${releaseId}`}
             name="preview_locale"
             defaultValue="en"
-            className="select-base h-11 rounded-xl text-sm"
+            className="select-base h-11 text-sm"
           >
             <option value="en">{copy.englishPreview}</option>
             <option value="nl">{copy.dutchPreview}</option>

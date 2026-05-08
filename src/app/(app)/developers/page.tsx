@@ -1,6 +1,6 @@
 import { getDevelopersPath } from "@/lib/locale";
 import { createNoIndexMetadata } from "@/lib/metadata";
-import { redirectToPreferredLocale } from "@/lib/publicLocaleRouting";
+import { redirectToPreferredLocale } from "@/lib/publicLocaleRedirects";
 
 import type { Metadata } from "next";
 

@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 
-import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { AppPageIntro } from "@/components/AppPageIntro";
 import { useLanguage } from "@/components/LanguageProvider";
-import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { SwaggerDocsClient } from "@/features/api-docs/components/SwaggerDocsClient";
@@ -91,10 +90,17 @@ curl -X POST "https://www.copticcompass.com/api/ocr?lang=cop" \\
 # 3) De upstream OCR-response wordt teruggegeven aan de client`,
 };
 
+const BODY_TEXT_CLASS = "text-sm leading-7 text-muted";
+const API_HIGHLIGHT_CLASS =
+  "rounded-2xl border border-line/80 bg-elevated/65 px-4 py-3 text-center text-sm font-medium leading-6 text-ink";
+const API_CARD_TITLE_CLASS = "text-xl font-semibold text-ink";
+const CODE_BLOCK_CLASS =
+  "overflow-x-auto rounded-2xl border border-line/70 bg-stone-950 px-4 py-4 text-sm leading-6 text-stone-100";
+
 function ApiDocsOverview() {
   const { t } = useLanguage();
   return (
-    <p className="text-sm leading-7 text-stone-600 dark:text-stone-300">
+    <p className={BODY_TEXT_CLASS}>
       {t("apiDocs.overviewStart")} <code>/api/openapi.json</code>{" "}
       {t("apiDocs.overviewOpenApi")} <code>/api/v1/grammar</code>,{" "}
       {t("apiDocs.overviewDictionary")} <code>/api/v1/dictionary/search</code>,{" "}
@@ -107,7 +113,7 @@ function ApiDocsOverview() {
 function DictionaryApiDescription() {
   const { t } = useLanguage();
   return (
-    <p className="text-sm leading-7 text-stone-600 dark:text-stone-300">
+    <p className={BODY_TEXT_CLASS}>
       {t("apiDocs.dictionaryDescriptionStart")}{" "}
       <code>GET /api/v1/dictionary/search</code>{" "}
       {t("apiDocs.dictionaryDescriptionFilters")} <code>q</code>,{" "}
@@ -122,7 +128,7 @@ function DictionaryApiDescription() {
 function ShenuteApiDescription() {
   const { t } = useLanguage();
   return (
-    <p className="text-sm leading-7 text-stone-600 dark:text-stone-300">
+    <p className={BODY_TEXT_CLASS}>
       {t("apiDocs.shenuteDescriptionStart")} <code>POST /api/shenute</code>{" "}
       {t("apiDocs.shenuteDescriptionWith")}{" "}
       {t("apiDocs.shenuteDescriptionProviders")} <code>thoth</code>,{" "}
@@ -136,7 +142,7 @@ function ShenuteApiDescription() {
 function OcrApiDescription() {
   const { t } = useLanguage();
   return (
-    <p className="text-sm leading-7 text-stone-600 dark:text-stone-300">
+    <p className={BODY_TEXT_CLASS}>
       {t("apiDocs.shenuteDescriptionStart")} <code>POST /api/ocr</code>{" "}
       {t("apiDocs.ocrDescriptionForward")} <code>OCR_SERVICE_URL</code>,{" "}
       {t("apiDocs.ocrDescriptionReturn")} <code>?lang=cop</code>{" "}
@@ -162,15 +168,16 @@ export function ApiDocsPageClient() {
   return (
     <PageShell
       className="app-page-shell"
-      contentClassName="app-page-stack"
+      contentClassName="app-page-content"
       width="standard"
       accents={[
         pageShellAccents.heroSkyArc,
         pageShellAccents.topRightEmeraldOrbInset,
       ]}
     >
-      <BreadcrumbTrail
-        items={[
+      <AppPageIntro
+        align="center"
+        breadcrumbs={[
           {
             label: t("nav.home"),
             href: getLocalizedHomePath(language),
@@ -181,117 +188,110 @@ export function ApiDocsPageClient() {
           },
           { label: t("apiDocs.breadcrumbLabel") },
         ]}
-      />
-
-      <PageHeader
         title={t("apiDocs.title")}
         description={t("apiDocs.description")}
         tone="sky"
-        size="workspace"
       />
 
-      <SurfacePanel
-        as="section"
-        rounded="3xl"
-        variant="elevated"
-        className="space-y-5 p-6 md:p-8"
-      >
-        <div className="flex flex-wrap gap-3">
-          <Link href={getDevelopersPath(language)} className="btn-secondary">
-            {t("apiDocs.developerGuideLabel")}
-          </Link>
-          <Link href="/api/openapi.json" className="btn-secondary">
-            {t("apiDocs.openApiLabel")}
-          </Link>
-          <Link href="/api/v1/grammar" className="btn-secondary">
-            {t("apiDocs.apiIndexLabel")}
-          </Link>
-          <Link href="/api/v1/dictionary/search" className="btn-secondary">
-            {t("apiDocs.dictionarySearchLabel")}
-          </Link>
-          <Link href="/api/shenute" className="btn-secondary">
-            {t("apiDocs.shenuteEndpointLabel")}
-          </Link>
-          <Link href="/api/ocr" className="btn-secondary">
-            {t("apiDocs.ocrProxyLabel")}
-          </Link>
-          <Link href="/shenute" className="btn-secondary">
-            {t("apiDocs.shenuteUiLabel")}
-          </Link>
-          <Link href={getGrammarPath(language)} className="btn-secondary">
-            {t("apiDocs.grammarHubLabel")}
-          </Link>
-        </div>
-
-        <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-          {highlights.map((highlight) => (
-            <div
-              key={highlight}
-              className="rounded-2xl border border-stone-200/80 bg-stone-50/80 px-4 py-3 text-center text-sm font-medium leading-6 text-stone-700 dark:border-stone-800/80 dark:bg-stone-950/50 dark:text-stone-200"
-            >
-              {highlight}
-            </div>
-          ))}
-        </div>
-
-        <ApiDocsOverview />
-      </SurfacePanel>
-
-      <section className="grid gap-6 xl:grid-cols-3">
+      <div className="space-y-8 md:space-y-9">
         <SurfacePanel
-          as="article"
+          as="section"
           rounded="3xl"
           variant="elevated"
-          className="space-y-4 p-6 md:p-8"
+          className="space-y-5 p-6 md:p-8"
         >
-          <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
-            {t("apiDocs.dictionaryTitle")}
-          </h2>
-          <DictionaryApiDescription />
-          <pre className="overflow-x-auto rounded-2xl border border-stone-200/80 bg-stone-950 px-4 py-4 text-sm leading-6 text-stone-100 dark:border-stone-800/80">
-            <code>{DICTIONARY_API_EXAMPLES[language]}</code>
-          </pre>
+          <div className="flex flex-wrap gap-3">
+            <Link href={getDevelopersPath(language)} className="btn-secondary">
+              {t("apiDocs.developerGuideLabel")}
+            </Link>
+            <Link href="/api/openapi.json" className="btn-secondary">
+              {t("apiDocs.openApiLabel")}
+            </Link>
+            <Link href="/api/v1/grammar" className="btn-secondary">
+              {t("apiDocs.apiIndexLabel")}
+            </Link>
+            <Link href="/api/v1/dictionary/search" className="btn-secondary">
+              {t("apiDocs.dictionarySearchLabel")}
+            </Link>
+            <Link href="/api/shenute" className="btn-secondary">
+              {t("apiDocs.shenuteEndpointLabel")}
+            </Link>
+            <Link href="/api/ocr" className="btn-secondary">
+              {t("apiDocs.ocrProxyLabel")}
+            </Link>
+            <Link href="/shenute" className="btn-secondary">
+              {t("apiDocs.shenuteUiLabel")}
+            </Link>
+            <Link href={getGrammarPath(language)} className="btn-secondary">
+              {t("apiDocs.grammarHubLabel")}
+            </Link>
+          </div>
+
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {highlights.map((highlight) => (
+              <div key={highlight} className={API_HIGHLIGHT_CLASS}>
+                {highlight}
+              </div>
+            ))}
+          </div>
+
+          <ApiDocsOverview />
         </SurfacePanel>
+
+        <section className="grid gap-6 xl:grid-cols-3">
+          <SurfacePanel
+            as="article"
+            rounded="3xl"
+            variant="elevated"
+            className="space-y-4 p-6 md:p-8"
+          >
+            <h2 className={API_CARD_TITLE_CLASS}>
+              {t("apiDocs.dictionaryTitle")}
+            </h2>
+            <DictionaryApiDescription />
+            <pre className={CODE_BLOCK_CLASS}>
+              <code>{DICTIONARY_API_EXAMPLES[language]}</code>
+            </pre>
+          </SurfacePanel>
+
+          <SurfacePanel
+            as="article"
+            rounded="3xl"
+            variant="elevated"
+            className="space-y-4 p-6 md:p-8"
+          >
+            <h2 className={API_CARD_TITLE_CLASS}>
+              {t("apiDocs.shenuteTitle")}
+            </h2>
+            <ShenuteApiDescription />
+            <pre className={CODE_BLOCK_CLASS}>
+              <code>{SHENUTE_API_EXAMPLES[language]}</code>
+            </pre>
+          </SurfacePanel>
+
+          <SurfacePanel
+            as="article"
+            rounded="3xl"
+            variant="elevated"
+            className="space-y-4 p-6 md:p-8"
+          >
+            <h2 className={API_CARD_TITLE_CLASS}>{t("apiDocs.ocrTitle")}</h2>
+            <OcrApiDescription />
+            <pre className={CODE_BLOCK_CLASS}>
+              <code>{OCR_INTEGRATION_EXAMPLES[language]}</code>
+            </pre>
+          </SurfacePanel>
+        </section>
 
         <SurfacePanel
-          as="article"
+          as="section"
           rounded="3xl"
           variant="elevated"
-          className="space-y-4 p-6 md:p-8"
+          className="overflow-hidden p-2 md:p-4"
         >
-          <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
-            {t("apiDocs.shenuteTitle")}
-          </h2>
-          <ShenuteApiDescription />
-          <pre className="overflow-x-auto rounded-2xl border border-stone-200/80 bg-stone-950 px-4 py-4 text-sm leading-6 text-stone-100 dark:border-stone-800/80">
-            <code>{SHENUTE_API_EXAMPLES[language]}</code>
-          </pre>
+          <SwaggerDocsClient specUrl="/api/openapi.json" />
         </SurfacePanel>
-
-        <SurfacePanel
-          as="article"
-          rounded="3xl"
-          variant="elevated"
-          className="space-y-4 p-6 md:p-8"
-        >
-          <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
-            {t("apiDocs.ocrTitle")}
-          </h2>
-          <OcrApiDescription />
-          <pre className="overflow-x-auto rounded-2xl border border-stone-200/80 bg-stone-950 px-4 py-4 text-sm leading-6 text-stone-100 dark:border-stone-800/80">
-            <code>{OCR_INTEGRATION_EXAMPLES[language]}</code>
-          </pre>
-        </SurfacePanel>
-      </section>
-
-      <SurfacePanel
-        as="section"
-        rounded="3xl"
-        variant="elevated"
-        className="overflow-hidden p-2 md:p-4"
-      >
-        <SwaggerDocsClient specUrl="/api/openapi.json" />
-      </SurfacePanel>
+      </div>
     </PageShell>
   );
 }

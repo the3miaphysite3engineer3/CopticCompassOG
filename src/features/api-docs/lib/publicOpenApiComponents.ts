@@ -1,3 +1,5 @@
+import { MAX_DICTIONARY_SEARCH_QUERY_LENGTH } from "@/features/dictionary/search";
+
 import {
   createLocalizedStringSchema,
   createVersionedEnvelopeSchema,
@@ -59,6 +61,7 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
           "Search query matched against Coptic headwords, dialect forms, plural forms, English, Dutch, and Greek text.",
         schema: {
           type: "string",
+          maxLength: MAX_DICTIONARY_SEARCH_QUERY_LENGTH,
         },
         example: "ⲙⲟⲓ",
       },
@@ -69,6 +72,7 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
         description: "Alias for `q`.",
         schema: {
           type: "string",
+          maxLength: MAX_DICTIONARY_SEARCH_QUERY_LENGTH,
         },
       },
       DictionaryDialectFilter: {

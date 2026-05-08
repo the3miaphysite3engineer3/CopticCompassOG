@@ -19,9 +19,9 @@ const BUTTON_BASE_CLASS =
   "inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-55";
 
 const BUTTON_SIZE_CLASSES: Record<ButtonSize, string> = {
-  sm: "h-10 rounded-lg px-3 text-sm",
-  md: "h-11 rounded-xl px-4 text-sm",
-  lg: "h-12 rounded-xl px-5 text-sm",
+  sm: "h-10 rounded-xl px-3 text-sm",
+  md: "h-11 rounded-2xl px-4 text-sm",
+  lg: "h-12 rounded-2xl px-5 text-sm",
 };
 
 const LINK_SIZE_CLASSES: Record<ButtonSize, string> = {
@@ -32,13 +32,13 @@ const LINK_SIZE_CLASSES: Record<ButtonSize, string> = {
 
 const BUTTON_VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
-    "bg-sky-600 text-white shadow-sm hover:-translate-y-px hover:bg-sky-500 hover:shadow-md focus-visible:ring-sky-500/35 dark:bg-sky-500 dark:hover:bg-sky-400",
+    "bg-sky-600 text-white shadow-sm hover:-translate-y-px hover:bg-sky-500 hover:shadow-soft focus-visible:ring-accent/35 dark:bg-sky-500 dark:hover:bg-sky-400",
   secondary:
-    "border border-stone-200 bg-white/70 text-stone-700 shadow-sm backdrop-blur-md hover:-translate-y-px hover:bg-white hover:shadow-md focus-visible:ring-sky-500/25 dark:border-stone-800 dark:bg-stone-900/50 dark:text-stone-300 dark:hover:bg-stone-800/70",
+    "border border-line/80 bg-surface/75 text-ink shadow-sm backdrop-blur-md hover:-translate-y-px hover:bg-surface hover:shadow-soft focus-visible:ring-accent/25",
   ghost:
-    "text-stone-600 hover:-translate-y-px hover:bg-stone-100 hover:text-stone-900 focus-visible:ring-sky-500/25 dark:text-stone-400 dark:hover:bg-stone-800 dark:hover:text-stone-200",
+    "text-muted hover:-translate-y-px hover:bg-elevated hover:text-ink focus-visible:ring-accent/25",
   social:
-    "border border-stone-200 bg-white text-stone-700 shadow-sm hover:-translate-y-px hover:bg-stone-50 hover:shadow-md focus-visible:ring-sky-500/25 dark:border-stone-800 dark:bg-stone-900 dark:text-stone-300 dark:hover:bg-stone-800",
+    "border border-line/80 bg-surface text-ink shadow-sm hover:-translate-y-px hover:bg-elevated hover:shadow-soft focus-visible:ring-accent/25",
   link: "text-sky-600 hover:text-sky-700 hover:underline focus-visible:ring-sky-500/25 dark:text-sky-400 dark:hover:text-sky-300",
 };
 

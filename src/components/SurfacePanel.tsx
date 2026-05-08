@@ -4,7 +4,7 @@ import type { HTMLAttributes } from "react";
 
 type SurfacePanelVariant = "default" | "subtle" | "elevated";
 type SurfacePanelShadow = "soft" | "panel" | "float";
-type SurfacePanelRounded = "2xl" | "3xl" | "4xl";
+type SurfacePanelRounded = "2xl" | "3xl";
 type SurfacePanelTag = "article" | "div" | "section";
 
 type SurfacePanelClassNameOptions = {
@@ -16,21 +16,20 @@ type SurfacePanelClassNameOptions = {
 };
 
 const VARIANT_CLASSES: Record<SurfacePanelVariant, string> = {
-  default: "bg-white/70 dark:bg-stone-900/50",
-  subtle: "bg-white/60 dark:bg-stone-900/60",
-  elevated: "bg-white/75 dark:bg-stone-900/55",
+  default: "bg-surface/75",
+  subtle: "bg-surface/60",
+  elevated: "bg-surface/90",
 };
 
 const SHADOW_CLASSES: Record<SurfacePanelShadow, string> = {
-  soft: "shadow-sm dark:shadow-lg",
-  panel: "shadow-md dark:shadow-xl dark:shadow-black/20",
-  float: "shadow-lg dark:shadow-2xl dark:shadow-black/25",
+  soft: "shadow-soft",
+  panel: "shadow-panel",
+  float: "shadow-lg shadow-stone-950/10 dark:shadow-black/25",
 };
 
 const ROUNDED_CLASSES: Record<SurfacePanelRounded, string> = {
   "2xl": "rounded-2xl",
   "3xl": "rounded-3xl",
-  "4xl": "rounded-[2rem]",
 };
 
 export function surfacePanelClassName({
@@ -41,12 +40,12 @@ export function surfacePanelClassName({
   variant = "default",
 }: SurfacePanelClassNameOptions = {}) {
   return cx(
-    "border border-stone-200 backdrop-blur-md dark:border-stone-800",
+    "border border-line/80 backdrop-blur-md",
     VARIANT_CLASSES[variant],
     SHADOW_CLASSES[shadow],
     ROUNDED_CLASSES[rounded],
     interactive &&
-      "transition-all duration-300 hover:-translate-y-1 hover:bg-white dark:hover:bg-stone-800/55",
+      "transition-all duration-300 hover:-translate-y-1 hover:border-accent/25 hover:bg-surface/95",
     className,
   );
 }

@@ -5,6 +5,7 @@ import {
 import { getDictionarySearchPage } from "@/features/dictionary/lib/dictionary";
 import {
   DEFAULT_DICTIONARY_SEARCH_PAGE_SIZE,
+  MAX_DICTIONARY_SEARCH_QUERY_LENGTH,
   MAX_DICTIONARY_SEARCH_PAGE_SIZE,
 } from "@/features/dictionary/search";
 import {
@@ -26,6 +27,16 @@ export function GET(request: NextRequest) {
   const offset = searchParams.get("offset");
   const partOfSpeech = searchParams.get("partOfSpeech");
   const query = searchParams.get("q") ?? searchParams.get("query") ?? "";
+  const trimmedQuery = query.trim();
+
+  if (trimmedQuery.length > MAX_DICTIONARY_SEARCH_QUERY_LENGTH) {
+    return publicApiJsonResponse(
+      {
+        error: `Search query is too long. Maximum length is ${MAX_DICTIONARY_SEARCH_QUERY_LENGTH} characters.`,
+      },
+      { status: 400 },
+    );
+  }
 
   if (dialect && !isDialectFilter(dialect)) {
     return publicApiJsonResponse(
@@ -79,7 +90,7 @@ export function GET(request: NextRequest) {
       exactMatch: exact === "true",
       limit: Math.min(validatedLimit, MAX_DICTIONARY_SEARCH_PAGE_SIZE),
       offset: validatedOffset,
-      query,
+      query: trimmedQuery,
       selectedDialect: validatedDialect,
       selectedPartOfSpeech: validatedPartOfSpeech,
     }),

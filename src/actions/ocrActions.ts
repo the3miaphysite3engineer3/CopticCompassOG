@@ -1,5 +1,10 @@
 "use server";
 
+import {
+  consumeOcrRateLimit,
+  getOcrUploadSizeFailure,
+} from "@/lib/server/ocrProtection";
+
 const OCR_UPLOAD_FIELD_FALLBACKS = [
   "file",
   "image",
@@ -189,6 +194,16 @@ async function attemptOcrUpload(options: {
 
 export async function processOCRImage(formData: FormData): Promise<string> {
   const file = getUploadedOcrFile(formData);
+  const uploadSizeFailure = getOcrUploadSizeFailure(file.size);
+  if (uploadSizeFailure) {
+    throw new Error(uploadSizeFailure.message);
+  }
+
+  const rateLimitFailure = await consumeOcrRateLimit();
+  if (rateLimitFailure) {
+    throw new Error(rateLimitFailure.message);
+  }
+
   const targetUrl = createOcrTargetUrl();
   const uploadFieldCandidates = getOcrUploadFieldCandidates();
   let lastFailureMessage = "OCR request failed.";

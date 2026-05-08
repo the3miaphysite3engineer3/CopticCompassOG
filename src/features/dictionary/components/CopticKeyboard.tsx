@@ -72,7 +72,7 @@ export default function CopticKeyboard({
   }
 
   return (
-    <div className="absolute right-0 top-[calc(100%+0.75rem)] z-[70] max-h-[70vh] w-full overflow-y-auto rounded-2xl border border-stone-200 bg-white/95 p-3 shadow-2xl backdrop-blur-xl dark:border-stone-700/80 dark:bg-stone-900/92 sm:rounded-3xl sm:p-4 md:w-[640px] md:p-5">
+    <div className="absolute right-0 top-[calc(100%+0.75rem)] z-[70] max-h-[70vh] w-full overflow-y-auto rounded-2xl border border-line/80 bg-surface/95 p-3 shadow-panel backdrop-blur-xl sm:rounded-3xl sm:p-4 md:w-[640px] md:p-5">
       <div className="mb-3 flex items-start justify-between gap-3 sm:mb-4">
         <div>
           <h3 className="text-stone-600 dark:text-stone-300 font-semibold text-sm tracking-widest uppercase">

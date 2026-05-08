@@ -3,7 +3,7 @@ import { cx } from "@/lib/classes";
 import type { ReactNode } from "react";
 
 type PageAccent = string;
-export type PageShellWidth = "narrow" | "standard" | "wide";
+export type PageShellWidth = "narrow" | "standard";
 
 type PageShellProps = {
   children: ReactNode;
@@ -18,35 +18,34 @@ const ACCENT_BASE_CLASS =
 
 export const pageShellAccents = {
   heroSkyArc:
-    "top-0 left-0 h-[520px] w-full rounded-b-full bg-sky-500/10 blur-[120px] dark:bg-sky-900/10",
+    "top-0 left-0 h-56 w-full border-b border-accent/10 bg-accent-soft/45 dark:bg-accent-soft/20",
   heroEmeraldArc:
-    "top-0 left-0 h-[500px] w-full rounded-b-full bg-emerald-500/10 blur-[120px] dark:bg-emerald-900/10",
+    "top-0 left-0 h-56 w-full border-b border-coptic/10 bg-coptic-soft/35 dark:bg-coptic-soft/15",
   topLeftSkyOrb:
-    "top-0 left-0 h-[420px] w-[420px] rounded-full bg-sky-500/10 blur-[120px] dark:bg-sky-900/10",
+    "top-0 left-0 h-72 w-1/2 max-w-3xl bg-accent-soft/30 dark:bg-accent-soft/15",
   topLeftSkyOrbInset:
-    "top-20 left-[-5%] h-[420px] w-[420px] rounded-full bg-sky-500/10 blur-[110px] dark:bg-sky-900/10",
+    "top-16 left-0 h-64 w-1/2 max-w-3xl bg-accent-soft/25 dark:bg-accent-soft/10",
   topRightSkyOrb:
-    "top-0 right-0 h-[500px] w-[500px] rounded-full bg-sky-500/10 blur-[120px] dark:bg-sky-900/10",
+    "top-0 right-0 h-72 w-1/2 max-w-3xl bg-accent-soft/30 dark:bg-accent-soft/15",
   topRightSkyOrbInset:
-    "top-20 right-[-10%] h-[420px] w-[420px] rounded-full bg-sky-500/10 blur-[100px] dark:bg-sky-900/10",
+    "top-16 right-0 h-64 w-1/2 max-w-3xl bg-accent-soft/25 dark:bg-accent-soft/10",
   topRightEmeraldOrb:
-    "top-0 right-0 h-[500px] w-[500px] rounded-full bg-emerald-500/10 blur-[120px] dark:bg-emerald-900/10",
+    "top-0 right-0 h-72 w-1/2 max-w-3xl bg-coptic-soft/30 dark:bg-coptic-soft/15",
   topRightEmeraldOrbInset:
-    "top-20 right-[-10%] h-[500px] w-[500px] rounded-full bg-emerald-500/10 blur-[100px] dark:bg-emerald-900/10",
+    "top-16 right-0 h-64 w-1/2 max-w-3xl bg-coptic-soft/25 dark:bg-coptic-soft/10",
   topRightEmeraldOrbOffset:
-    "top-28 right-[-10%] h-[440px] w-[440px] rounded-full bg-emerald-500/10 blur-[100px] dark:bg-emerald-900/10",
+    "top-24 right-0 h-56 w-1/2 max-w-3xl bg-coptic-soft/25 dark:bg-coptic-soft/10",
   bottomLeftEmeraldOrb:
-    "bottom-0 left-0 h-[420px] w-[420px] rounded-full bg-emerald-500/10 blur-[110px] dark:bg-emerald-900/10",
+    "bottom-0 left-0 h-72 w-1/2 max-w-3xl bg-coptic-soft/25 dark:bg-coptic-soft/10",
   bottomLeftEmeraldOrbSoft:
-    "bottom-0 left-0 h-[420px] w-[420px] rounded-full bg-emerald-500/10 blur-[120px] dark:bg-emerald-900/10",
+    "bottom-0 left-0 h-72 w-1/2 max-w-3xl bg-coptic-soft/20 dark:bg-coptic-soft/10",
   bottomRightEmeraldOrb:
-    "bottom-0 right-0 h-[420px] w-[420px] rounded-full bg-emerald-500/10 blur-[120px] dark:bg-emerald-900/10",
+    "bottom-0 right-0 h-72 w-1/2 max-w-3xl bg-coptic-soft/25 dark:bg-coptic-soft/10",
 } as const;
 
 const WIDTH_CLASSES: Record<PageShellWidth, string> = {
   narrow: "page-content-narrow",
   standard: "page-content-standard",
-  wide: "page-content-wide",
 };
 
 export function PageShell({

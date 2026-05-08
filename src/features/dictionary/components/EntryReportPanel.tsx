@@ -83,7 +83,7 @@ export function EntryReportPanel({
               name="reason"
               defaultValue=""
               required
-              className="select-base h-11 rounded-xl text-sm"
+              className="select-base h-11 text-sm"
             >
               <option value="" disabled>
                 {t("entry.actions.reasonPlaceholder")}

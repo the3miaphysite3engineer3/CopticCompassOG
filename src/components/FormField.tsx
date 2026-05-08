@@ -26,9 +26,8 @@ type FormHintProps = {
 };
 
 const LABEL_TONE_CLASSES: Record<FormLabelTone, string> = {
-  default: "block text-sm font-semibold text-stone-700 dark:text-stone-300",
-  muted:
-    "text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400",
+  default: "block text-sm font-semibold text-ink",
+  muted: "text-xs font-semibold uppercase tracking-widest text-muted",
 };
 
 export function FormLabel({

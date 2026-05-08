@@ -1,8 +1,7 @@
 import { redirect } from "next/navigation";
 
 import { logout } from "@/actions/auth";
-import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
-import { PageHeader } from "@/components/PageHeader";
+import { AppPageIntro } from "@/components/AppPageIntro";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { DashboardRecentExercisesSection } from "@/features/dashboard/components/DashboardRecentExercisesSection";
 import { DashboardWelcomePanel } from "@/features/dashboard/components/DashboardWelcomePanel";
@@ -41,40 +40,30 @@ export async function DashboardPageContent({
   return (
     <PageShell
       className="app-page-shell"
-      contentClassName="min-h-[80vh] w-full pt-8 md:pt-10"
+      contentClassName="app-page-content min-h-[80vh]"
       width="standard"
       accents={[
         pageShellAccents.topLeftSkyOrb,
         pageShellAccents.bottomRightEmeraldOrb,
       ]}
     >
-      <div className="app-page-heading">
-        <BreadcrumbTrail
-          items={[
-            {
-              label: getTranslation(locale, "nav.home"),
-              href: getLocalizedHomePath(locale),
-            },
-            { label: getTranslation(locale, "nav.dashboard") },
-          ]}
-        />
-
-        <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-          <div>
-            <PageHeader
-              title={copy.pageTitle}
-              description={copy.pageDescription}
-              align="left"
-              tone="brand"
-              size="workspace"
-            />
-          </div>
+      <AppPageIntro
+        actions={
           <form action={logout}>
             <input type="hidden" name="redirectTo" value={dashboardPath} />
             <button className="btn-secondary px-6">{copy.signOut}</button>
           </form>
-        </div>
-      </div>
+        }
+        breadcrumbs={[
+          {
+            label: getTranslation(locale, "nav.home"),
+            href: getLocalizedHomePath(locale),
+          },
+          { label: getTranslation(locale, "nav.dashboard") },
+        ]}
+        description={copy.pageDescription}
+        title={copy.pageTitle}
+      />
 
       <div className="flex flex-col gap-12">
         <DashboardWelcomePanel

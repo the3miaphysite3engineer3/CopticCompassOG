@@ -5,11 +5,10 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
-import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { AppPageIntro } from "@/components/AppPageIntro";
 import { buttonClassName } from "@/components/Button";
 import { CompactSelect } from "@/components/CompactSelect";
 import { useLanguage } from "@/components/LanguageProvider";
-import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SurfacePanel, surfacePanelClassName } from "@/components/SurfacePanel";
 import {
@@ -453,24 +452,15 @@ export default function AnalyticsPageClient({
         pageShellAccents.topRightSkyOrbInset,
       ]}
     >
-      <div className="app-page-heading">
-        <BreadcrumbTrail
-          items={[
-            { label: t("nav.home"), href: getLocalizedHomePath(language) },
-            { label: t("nav.dictionary"), href: getDictionaryPath(language) },
-            { label: t("nav.analytics") },
-          ]}
-        />
-
-        <PageHeader
-          title={t("analytics.title")}
-          align="left"
-          size="workspace"
-          tone="analytics"
-        />
-
-        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-          <div className="flex items-center gap-3">
+      <AppPageIntro
+        align="left"
+        breadcrumbs={[
+          { label: t("nav.home"), href: getLocalizedHomePath(language) },
+          { label: t("nav.dictionary"), href: getDictionaryPath(language) },
+          { label: t("nav.analytics") },
+        ]}
+        actions={
+          <>
             <Link
               href={getDictionaryPath(language)}
               prefetch={false}
@@ -479,56 +469,59 @@ export default function AnalyticsPageClient({
               <ArrowLeft className="h-4 w-4" />
               {t("analytics.back")}
             </Link>
-          </div>
 
-          <div className="flex flex-col gap-2 rounded-2xl border border-stone-200/80 bg-white/75 p-2 shadow-sm backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/60 sm:flex-row sm:items-center">
-            <div className="flex items-center gap-2 px-2">
-              <span className="inline-flex items-center whitespace-nowrap text-stone-500 dark:text-stone-400">
-                <Filter className="h-4 w-4" />
-              </span>
-              <CompactSelect
-                id="analytics-dialect-filter"
-                label={t("analytics.filter")}
-                name="dialect"
-                value={selectedDialect}
-                onChange={(e) =>
-                  setSelectedDialect(e.target.value as AnalyticsDialect)
-                }
-                className="text-stone-700 dark:text-stone-200"
-              >
-                {dialectFilterOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {getDialectFilterOptionLabel(option.value, t)}
+            <div className="flex w-full flex-col gap-2 rounded-2xl border border-stone-200/80 bg-white/75 p-2 shadow-sm backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/60 sm:w-auto sm:flex-row sm:items-center">
+              <div className="flex items-center gap-2 px-2">
+                <span className="inline-flex items-center whitespace-nowrap text-stone-500 dark:text-stone-400">
+                  <Filter className="h-4 w-4" />
+                </span>
+                <CompactSelect
+                  id="analytics-dialect-filter"
+                  label={t("analytics.filter")}
+                  name="dialect"
+                  value={selectedDialect}
+                  onChange={(e) =>
+                    setSelectedDialect(e.target.value as AnalyticsDialect)
+                  }
+                  className="text-stone-700 dark:text-stone-200"
+                >
+                  {dialectFilterOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {getDialectFilterOptionLabel(option.value, t)}
+                    </option>
+                  ))}
+                </CompactSelect>
+              </div>
+
+              <div className="flex items-center gap-2 px-2">
+                <CompactSelect
+                  id="analytics-etymology-filter"
+                  label={t("analytics.filterEtymology" as TranslationKey)}
+                  name="etymology"
+                  value={selectedEtymology}
+                  onChange={(e) =>
+                    setSelectedEtymology(e.target.value as EtymologyFilter)
+                  }
+                  className="text-stone-700 dark:text-stone-200"
+                >
+                  <option value="ALL">
+                    {t("analytics.filterEtymologyAll" as TranslationKey)}
                   </option>
-                ))}
-              </CompactSelect>
+                  <option value="Egy">
+                    {t("analytics.filterEtymologyEgy" as TranslationKey)}
+                  </option>
+                  <option value="Gr">
+                    {t("analytics.filterEtymologyGr" as TranslationKey)}
+                  </option>
+                </CompactSelect>
+              </div>
             </div>
-
-            <div className="flex items-center gap-2 px-2">
-              <CompactSelect
-                id="analytics-etymology-filter"
-                label={t("analytics.filterEtymology" as TranslationKey)}
-                name="etymology"
-                value={selectedEtymology}
-                onChange={(e) =>
-                  setSelectedEtymology(e.target.value as EtymologyFilter)
-                }
-                className="text-stone-700 dark:text-stone-200"
-              >
-                <option value="ALL">
-                  {t("analytics.filterEtymologyAll" as TranslationKey)}
-                </option>
-                <option value="Egy">
-                  {t("analytics.filterEtymologyEgy" as TranslationKey)}
-                </option>
-                <option value="Gr">
-                  {t("analytics.filterEtymologyGr" as TranslationKey)}
-                </option>
-              </CompactSelect>
-            </div>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+        actionsPlacement="below"
+        title={t("analytics.title")}
+        tone="analytics"
+      />
 
       <div className="mb-8 grid gap-4 md:grid-cols-3">
         <AnalyticsStatCard

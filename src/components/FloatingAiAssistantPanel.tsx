@@ -8,6 +8,7 @@ import {
   ImagePlus,
   LoaderCircle,
   MessageCircle,
+  Minus,
   ScanText,
   SendHorizontal,
   ThumbsDown,
@@ -25,6 +26,7 @@ import {
   AuthGateInlinePrompt,
   AuthGateNotice,
 } from "@/components/AuthGateNotice";
+import { Badge } from "@/components/Badge";
 import { buttonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
 import { cx } from "@/lib/classes";
@@ -70,7 +72,7 @@ const floatingShenuteCopy = {
     addImage: "Add image",
     adminNotePlaceholder:
       "Admin only: add written feedback tied to this prompt/response.",
-    adminNoteTitle: "Admin note for RAG learning",
+    adminNoteTitle: "Admin learning note",
     camera: "Camera",
     cameraAccessFailed: "Could not access camera.",
     cameraFeedNotReady: "Camera feed is not ready yet. Try again.",
@@ -80,8 +82,7 @@ const floatingShenuteCopy = {
     captureFailed: "Could not capture image from camera.",
     close: "Close",
     contextAware: "Page context on",
-    contextLabel: "Context",
-    dislike: "Dislike",
+    dislike: "Not helpful",
     emptyPrompt:
       "Ask anything about this page, Coptic grammar, vocabulary, or translation.",
     feedbackFailed: "Could not save feedback.",
@@ -89,17 +90,18 @@ const floatingShenuteCopy = {
     imageContext: "Image OCR Context",
     imageFromCamera: "camera",
     imageFromUpload: "upload",
-    inputPlaceholder: "Ask about this page or attached image...",
-    like: "Like",
+    inputPlaceholder: "Ask Shenute...",
+    like: "Helpful",
+    minimize: "Minimize",
     noTextExtracted: "No text extracted from the selected image.",
     ocrFailed: "OCR failed for the selected image.",
     ocrPending: "OCR...",
     promptResolveFailed: "Could not resolve prompt/response for this feedback.",
-    provider: "Model",
-    providerGemini: "Learner (Gemini)",
-    providerHf: "Learner (HF)",
-    providerOpenRouter: "Learner (OpenRouter)",
-    providerThoth: "Expert (THOTH AI)",
+    provider: "Style",
+    providerGemini: "Fast answer",
+    providerHf: "Experimental",
+    providerOpenRouter: "Reasoned answer",
+    providerThoth: "Best answer",
     ragWarning: "RAG ingest warning:",
     removeImage: "Remove",
     requestFailed: "Request failed.",
@@ -114,15 +116,15 @@ const floatingShenuteCopy = {
     signInTitle: "Sign in required",
     submitAdminNote: "Submit admin note",
     thinking: "Thinking...",
-    saveHistory: "Download chat",
-    savedHistory: "Chat downloaded.",
+    saveHistory: "Download transcript",
+    savedHistory: "Transcript downloaded.",
     writeAdminFeedback: "Write admin feedback before submitting.",
   },
   nl: {
     addImage: "Afbeelding",
     adminNotePlaceholder:
       "Alleen admin: voeg feedback toe bij deze prompt en dit antwoord.",
-    adminNoteTitle: "Adminnotitie voor RAG-leren",
+    adminNoteTitle: "Leer-notitie voor beheerder",
     camera: "Camera",
     cameraAccessFailed: "Geen toegang tot de camera.",
     cameraFeedNotReady: "De camerafeed is nog niet klaar. Probeer opnieuw.",
@@ -133,8 +135,7 @@ const floatingShenuteCopy = {
     captureFailed: "Afbeelding kon niet uit de camera worden vastgelegd.",
     close: "Sluiten",
     contextAware: "Pagina-context aan",
-    contextLabel: "Context",
-    dislike: "Niet goed",
+    dislike: "Niet behulpzaam",
     emptyPrompt:
       "Stel een vraag over deze pagina, Koptische grammatica, woordenschat of vertaling.",
     feedbackFailed: "Feedback kon niet worden opgeslagen.",
@@ -142,19 +143,20 @@ const floatingShenuteCopy = {
     imageContext: "OCR-context van afbeelding",
     imageFromCamera: "camera",
     imageFromUpload: "upload",
-    inputPlaceholder: "Vraag over deze pagina of afbeelding...",
-    like: "Goed",
+    inputPlaceholder: "Vraag Shenute...",
+    like: "Behulpzaam",
+    minimize: "Minimaliseren",
     noTextExtracted:
       "Er is geen tekst uit de geselecteerde afbeelding gehaald.",
     ocrFailed: "OCR is mislukt voor de geselecteerde afbeelding.",
     ocrPending: "OCR...",
     promptResolveFailed:
       "Prompt en antwoord konden niet aan deze feedback worden gekoppeld.",
-    provider: "Model",
-    providerGemini: "Leerling (Gemini)",
-    providerHf: "Leerling (HF)",
-    providerOpenRouter: "Leerling (OpenRouter)",
-    providerThoth: "Expert (THOTH AI)",
+    provider: "Stijl",
+    providerGemini: "Snel antwoord",
+    providerHf: "Experimenteel",
+    providerOpenRouter: "Uitgewerkt antwoord",
+    providerThoth: "Beste antwoord",
     ragWarning: "RAG-invoerwaarschuwing:",
     removeImage: "Verwijderen",
     requestFailed: "Verzoek mislukt.",
@@ -169,8 +171,8 @@ const floatingShenuteCopy = {
     signInTitle: "Aanmelden vereist",
     submitAdminNote: "Adminnotitie versturen",
     thinking: "Denkt na...",
-    saveHistory: "Chat downloaden",
-    savedHistory: "Chat gedownload.",
+    saveHistory: "Transcript downloaden",
+    savedHistory: "Transcript gedownload.",
     writeAdminFeedback: "Schrijf adminfeedback voordat u die verstuurt.",
   },
 } as const satisfies Record<Language, Record<string, string>>;
@@ -281,7 +283,7 @@ function getFeedbackStatusClass(status: "error" | "pending" | "success") {
   }
 
   if (status === "pending") {
-    return "text-stone-500 dark:text-stone-300";
+    return "text-muted";
   }
 
   return "text-emerald-700 dark:text-emerald-300";
@@ -380,8 +382,10 @@ export function FloatingAiAssistantPanel({
   const isLoading = status !== "ready";
   const isShenuteAccessBlocked = isReady && !isAuthenticated;
   const typedMessages = messages as ChatMessageLike[];
+  const isAttachmentMenuDisabled =
+    isLoading || ocrPending || isShenuteAccessBlocked;
   const iconButtonClassName =
-    "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-stone-200 bg-white/85 text-stone-600 shadow-sm transition-colors hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/30 dark:border-stone-800 dark:bg-stone-900/70 dark:text-stone-300 dark:hover:bg-stone-800";
+    "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line/80 bg-surface/80 text-muted shadow-sm transition-colors hover:bg-elevated hover:text-ink disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30";
   const floatingContainerClassName = cx(
     "fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-4 z-50 sm:bottom-5 sm:right-5",
     !isOpen && isDenseStudyRoute(pathname) && "hidden sm:block",
@@ -403,8 +407,8 @@ export function FloatingAiAssistantPanel({
     );
   } else if (messages.length === 0) {
     conversationContent = (
-      <div className="rounded-2xl border border-dashed border-sky-200 bg-sky-50/60 px-3 py-4 text-sm leading-6 text-stone-600 dark:border-sky-900/50 dark:bg-sky-950/20 dark:text-stone-300">
-        <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-white text-sky-700 shadow-sm dark:bg-stone-900 dark:text-sky-300">
+      <div className="rounded-2xl border border-dashed border-accent/20 bg-accent-soft/55 px-3 py-4 text-sm leading-6 text-muted dark:bg-accent-soft/25">
+        <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-surface text-sky-700 shadow-sm dark:text-sky-300">
           <span className="font-coptic leading-none">Ϣ</span>
         </div>
         <p>{copy.emptyPrompt}</p>
@@ -427,8 +431,8 @@ export function FloatingAiAssistantPanel({
           key={message.id}
           className={
             message.role === "user"
-              ? "ml-8 rounded-2xl rounded-tr-sm bg-sky-600 px-3 py-2 text-sm text-white"
-              : "mr-8 rounded-2xl rounded-tl-sm border border-stone-200 bg-white px-3 py-2 text-sm text-stone-800 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+              ? "ml-8 rounded-2xl rounded-br-sm bg-sky-600 px-3.5 py-2.5 font-coptic text-[0.98rem] leading-6 text-white shadow-sm dark:bg-sky-500"
+              : "mr-5 rounded-2xl rounded-bl-sm border border-line/80 bg-surface/95 px-3.5 py-2.5 font-coptic text-[0.98rem] leading-6 text-ink shadow-sm ring-1 ring-line/60"
           }
         >
           {(() => {
@@ -446,12 +450,23 @@ export function FloatingAiAssistantPanel({
                       {...props}
                       target="_blank"
                       rel="noreferrer"
-                      className="text-sky-700 underline dark:text-sky-300"
+                      className={cx(
+                        "underline underline-offset-4",
+                        message.role === "user"
+                          ? "decoration-white/60 hover:decoration-white"
+                          : "decoration-stone-400 hover:decoration-sky-500",
+                      )}
                     />
                   ),
                   code: ({ className, children, ...props }) => (
                     <code
-                      className={`rounded bg-stone-200/70 px-1 py-0.5 text-[0.95em] dark:bg-stone-800 ${className || ""}`}
+                      className={cx(
+                        "rounded px-1 py-0.5 text-[0.95em]",
+                        message.role === "user"
+                          ? "bg-white/15 text-white"
+                          : "bg-elevated text-ink",
+                        className,
+                      )}
                       {...props}
                     >
                       {children}
@@ -465,11 +480,12 @@ export function FloatingAiAssistantPanel({
           })()}
 
           {message.role === "assistant" ? (
-            <div className="mt-2 space-y-2 border-t border-stone-200 pt-2 text-[11px] dark:border-stone-700">
+            <div className="mt-2 space-y-2 border-t border-line/80 pt-2 text-[11px]">
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   aria-label={copy.like}
+                  title={copy.like}
                   onClick={() => {
                     void handleReaction(
                       "like",
@@ -478,11 +494,15 @@ export function FloatingAiAssistantPanel({
                     );
                   }}
                   disabled={!isAuthenticated || isFeedbackPending}
-                  className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${
-                    selectedReaction === "like"
-                      ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
-                      : "border-stone-300 text-stone-700 hover:bg-stone-100 dark:border-stone-600 dark:text-stone-200 dark:hover:bg-stone-800"
-                  }`}
+                  className={buttonClassName({
+                    size: "sm",
+                    variant: "secondary",
+                    className: cx(
+                      "h-8 gap-1.5 px-2 text-xs",
+                      selectedReaction === "like" &&
+                        "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+                    ),
+                  })}
                 >
                   <ThumbsUp className="h-3.5 w-3.5" aria-hidden="true" />
                   {copy.like}
@@ -490,6 +510,7 @@ export function FloatingAiAssistantPanel({
                 <button
                   type="button"
                   aria-label={copy.dislike}
+                  title={copy.dislike}
                   onClick={() => {
                     void handleReaction(
                       "dislike",
@@ -498,19 +519,23 @@ export function FloatingAiAssistantPanel({
                     );
                   }}
                   disabled={!isAuthenticated || isFeedbackPending}
-                  className={`inline-flex items-center gap-1.5 rounded-lg border px-2 py-1 font-semibold disabled:cursor-not-allowed disabled:opacity-60 ${
-                    selectedReaction === "dislike"
-                      ? "border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300"
-                      : "border-stone-300 text-stone-700 hover:bg-stone-100 dark:border-stone-600 dark:text-stone-200 dark:hover:bg-stone-800"
-                  }`}
+                  className={buttonClassName({
+                    size: "sm",
+                    variant: "secondary",
+                    className: cx(
+                      "h-8 gap-1.5 px-2 text-xs",
+                      selectedReaction === "dislike" &&
+                        "border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300",
+                    ),
+                  })}
                 >
                   <ThumbsDown className="h-3.5 w-3.5" aria-hidden="true" />
                   {copy.dislike}
                 </button>
               </div>
 
-              <details className="rounded border border-stone-200 p-2 dark:border-stone-700">
-                <summary className="cursor-pointer font-semibold text-stone-700 dark:text-stone-200">
+              <details className="rounded-2xl border border-line/80 bg-elevated/60 p-2">
+                <summary className="cursor-pointer font-semibold text-ink">
                   {copy.adminNoteTitle}
                 </summary>
                 <div className="mt-2 space-y-2">
@@ -526,7 +551,7 @@ export function FloatingAiAssistantPanel({
                     placeholder={copy.adminNotePlaceholder}
                     rows={3}
                     disabled={!isAuthenticated || isFeedbackPending}
-                    className="w-full rounded border border-stone-300 bg-white px-2 py-1 text-[11px] text-stone-900 dark:border-stone-600 dark:bg-stone-950 dark:text-stone-100"
+                    className="w-full rounded-xl border border-line bg-surface px-2 py-1 text-[11px] text-ink focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-300/35"
                   />
                   <button
                     type="button"
@@ -537,7 +562,11 @@ export function FloatingAiAssistantPanel({
                       );
                     }}
                     disabled={!isAuthenticated || isFeedbackPending}
-                    className="rounded bg-stone-900 px-2 py-1 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60 dark:bg-stone-100 dark:text-stone-900"
+                    className={buttonClassName({
+                      size: "sm",
+                      variant: "secondary",
+                      className: "h-8 px-2 text-xs",
+                    })}
                   >
                     {copy.submitAdminNote}
                   </button>
@@ -957,19 +986,23 @@ export function FloatingAiAssistantPanel({
   return (
     <div className={floatingContainerClassName}>
       {isOpen ? (
-        <section className="flex h-[560px] max-h-[calc(100vh-7rem)] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-stone-200 bg-white/95 shadow-2xl shadow-stone-950/10 backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/95 dark:shadow-black/30 sm:w-[400px]">
-          <header className="border-b border-stone-200 bg-white/95 px-4 py-3 dark:border-stone-800 dark:bg-stone-950/95">
+        <section className="flex h-[560px] max-h-[calc(100dvh-7rem)] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-line/80 bg-surface/95 shadow-panel backdrop-blur-xl sm:w-[400px]">
+          <header className="border-b border-line/80 bg-surface/90 px-4 py-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
                 <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-sky-700 shadow-sm dark:bg-sky-900/30 dark:text-sky-300">
                   <span className="font-coptic leading-none">Ϣ</span>
                 </span>
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-semibold text-stone-900 dark:text-stone-100">
+                  <p className="truncate text-sm font-semibold text-ink">
                     Shenute AI
                   </p>
-                  <p className="truncate text-xs text-stone-500 dark:text-stone-400">
-                    {copy.contextAware}
+                  <p
+                    className="flex min-w-0 items-center gap-1 text-xs text-muted"
+                    title={`${copy.contextAware}: ${pageContextLabel}`}
+                  >
+                    <span className="shrink-0">{copy.contextAware}:</span>
+                    <span className="min-w-0 truncate">{pageContextLabel}</span>
                   </p>
                 </div>
               </div>
@@ -991,40 +1024,24 @@ export function FloatingAiAssistantPanel({
                 </button>
                 <button
                   type="button"
-                  aria-label={copy.close}
-                  title={copy.close}
+                  aria-label={copy.minimize}
+                  title={copy.minimize}
                   onClick={() => {
                     setIsOpen(false);
                   }}
                   className={iconButtonClassName}
                 >
-                  <X className="h-4 w-4" />
+                  <Minus className="h-4 w-4" />
                 </button>
               </div>
             </div>
           </header>
 
-          <div className="border-b border-stone-200 px-4 py-3 dark:border-stone-800">
-            <div className="mb-3 flex min-w-0 items-center gap-2 rounded-2xl border border-stone-200/80 bg-stone-50/80 px-3 py-2 dark:border-stone-800 dark:bg-stone-900/50">
-              <ScanText
-                className="h-3.5 w-3.5 shrink-0 text-sky-600 dark:text-sky-300"
-                aria-hidden="true"
-              />
-              <span className="shrink-0 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
-                {copy.contextLabel}
-              </span>
-              <span
-                className="min-w-0 truncate text-xs font-medium text-stone-700 dark:text-stone-200"
-                title={pageContextLabel}
-              >
-                {pageContextLabel}
-              </span>
-            </div>
-
-            <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
+          <div className="border-b border-line/80 px-4 py-2.5">
+            <label className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted">
               <span className="shrink-0">{copy.provider}</span>
               <select
-                className="compact-select-base min-h-9 flex-1 rounded-xl border-stone-300 bg-white/85 py-1 text-xs normal-case tracking-normal dark:border-stone-700 dark:bg-stone-900"
+                className="compact-select-base min-h-9 flex-1 py-1 text-xs normal-case tracking-normal"
                 value={inferenceProvider}
                 onChange={(event) => {
                   setInferenceProvider(toShenuteProvider(event.target.value));
@@ -1039,11 +1056,11 @@ export function FloatingAiAssistantPanel({
             </label>
           </div>
 
-          <div className="flex-1 space-y-3 overflow-y-auto bg-stone-50/70 p-3 dark:bg-stone-950/40">
+          <div className="flex-1 space-y-3 overflow-y-auto bg-elevated/45 p-3">
             {conversationContent}
 
             {isLoading ? (
-              <div className="mr-8 inline-flex items-center gap-2 rounded-2xl rounded-tl-sm border border-stone-200 bg-white px-3 py-2 text-sm text-stone-500 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300">
+              <div className="mr-8 inline-flex items-center gap-2 rounded-2xl rounded-bl-sm border border-line/80 bg-surface/95 px-3 py-2 text-sm text-muted shadow-sm">
                 <LoaderCircle className="h-4 w-4 animate-spin" />
                 {copy.thinking}
               </div>
@@ -1052,7 +1069,7 @@ export function FloatingAiAssistantPanel({
 
           <form
             onSubmit={handleSubmit}
-            className="border-t border-stone-200 bg-white p-3 dark:border-stone-800 dark:bg-stone-950"
+            className="border-t border-line/80 bg-surface/90 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur-xl"
           >
             {error ? (
               <p className="mb-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700 dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-300">
@@ -1084,13 +1101,13 @@ export function FloatingAiAssistantPanel({
             />
 
             {cameraOpen ? (
-              <div className="mb-2 rounded-2xl border border-stone-200 bg-stone-50 p-2 dark:border-stone-800 dark:bg-stone-900/60">
+              <div className="mb-2 rounded-2xl border border-line/80 bg-elevated/65 p-2">
                 <video
                   ref={videoRef}
                   autoPlay
                   playsInline
                   muted
-                  className="mb-2 w-full rounded-xl border border-stone-200 dark:border-stone-700"
+                  className="mb-2 w-full rounded-xl border border-line/80"
                 />
                 <canvas ref={captureCanvasRef} className="hidden" />
                 <div className="flex gap-2">
@@ -1124,86 +1141,127 @@ export function FloatingAiAssistantPanel({
             ) : null}
 
             {selectedImagePreviewUrl ? (
-              <div className="mb-2 rounded-2xl border border-stone-200 bg-stone-50 p-2 dark:border-stone-800 dark:bg-stone-900/60">
-                <div className="mb-1 flex items-center justify-between gap-2">
-                  <p className="min-w-0 truncate text-[11px] text-stone-600 dark:text-stone-300">
-                    {copy.imageAttached} (
-                    {selectedImageSource === "camera"
-                      ? copy.imageFromCamera
-                      : copy.imageFromUpload}
-                    )
-                  </p>
-                  <button
-                    type="button"
-                    onClick={clearSelectedImage}
-                    className="text-[11px] font-semibold text-red-600 hover:text-red-700"
-                  >
-                    {copy.removeImage}
-                  </button>
-                </div>
+              <div className="mb-2 flex items-center gap-3 rounded-2xl border border-line/80 bg-elevated/65 p-2">
                 <Image
                   unoptimized
                   src={selectedImagePreviewUrl}
                   alt={copy.selectedForOcrAlt}
-                  width={200}
-                  height={112}
-                  className="max-h-28 w-auto object-contain rounded-xl border border-stone-200 dark:border-stone-700"
+                  width={72}
+                  height={72}
+                  className="h-14 w-14 shrink-0 rounded-xl border border-line/80 bg-surface object-contain"
                 />
+                <div className="min-w-0 flex-1">
+                  <div className="mb-1 flex min-w-0 flex-wrap items-center gap-2">
+                    <span className="truncate text-[11px] font-semibold text-ink">
+                      {copy.imageAttached}
+                    </span>
+                    <Badge tone="accent" size="xs">
+                      {selectedImageSource === "camera"
+                        ? copy.imageFromCamera
+                        : copy.imageFromUpload}
+                    </Badge>
+                    {ocrPending ? (
+                      <Badge tone="neutral" size="xs">
+                        {copy.ocrPending}
+                      </Badge>
+                    ) : null}
+                  </div>
+                  <p className="truncate text-[11px] text-muted">
+                    {selectedImage?.name}
+                  </p>
+                </div>
+                <div className="shrink-0">
+                  <button
+                    type="button"
+                    aria-label={copy.removeImage}
+                    title={copy.removeImage}
+                    onClick={clearSelectedImage}
+                    className={buttonClassName({
+                      size: "sm",
+                      variant: "secondary",
+                      className:
+                        "h-8 w-8 border-rose-200 px-0 text-rose-700 hover:bg-rose-50 dark:border-rose-900/60 dark:text-rose-300 dark:hover:bg-rose-950/30",
+                    })}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
               </div>
             ) : null}
 
-            <div className="mb-2 flex items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  fileInputRef.current?.click();
-                }}
-                disabled={isLoading || ocrPending || isShenuteAccessBlocked}
-                className={buttonClassName({
-                  size: "sm",
-                  variant: "secondary",
-                  className: "h-9 text-xs",
-                })}
-              >
-                <ImagePlus className="h-3.5 w-3.5" />
-                {copy.addImage}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  void openCamera();
-                }}
-                disabled={
-                  isLoading ||
-                  ocrPending ||
-                  cameraOpen ||
-                  isShenuteAccessBlocked
-                }
-                className={buttonClassName({
-                  size: "sm",
-                  variant: "secondary",
-                  className: "h-9 text-xs",
-                })}
-              >
-                <Camera className="h-3.5 w-3.5" />
-                {copy.camera}
-              </button>
-              {ocrPending ? (
-                <p className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-700 dark:text-emerald-400">
-                  <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
-                  {copy.ocrPending}
-                </p>
-              ) : null}
-            </div>
-
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2 rounded-2xl border border-line/80 bg-surface/95 p-2 shadow-soft">
+              <details className="group relative shrink-0">
+                <summary
+                  aria-disabled={isAttachmentMenuDisabled}
+                  aria-label={`${copy.addImage} / ${copy.camera}`}
+                  onClick={(event) => {
+                    if (isAttachmentMenuDisabled) {
+                      event.preventDefault();
+                    }
+                  }}
+                  tabIndex={isAttachmentMenuDisabled ? -1 : 0}
+                  title={`${copy.addImage} / ${copy.camera}`}
+                  className={cx(
+                    buttonClassName({
+                      size: "sm",
+                      variant: "secondary",
+                      className:
+                        "h-10 w-10 cursor-pointer list-none rounded-xl px-0 [&::-webkit-details-marker]:hidden",
+                    }),
+                    isAttachmentMenuDisabled &&
+                      "pointer-events-none opacity-55",
+                  )}
+                >
+                  <ImagePlus className="h-4 w-4" />
+                </summary>
+                <div className="absolute bottom-full left-0 z-30 mb-2 w-52 rounded-2xl border border-line/80 bg-surface p-2 shadow-panel">
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.currentTarget
+                        .closest("details")
+                        ?.removeAttribute("open");
+                      fileInputRef.current?.click();
+                    }}
+                    disabled={isAttachmentMenuDisabled}
+                    className={buttonClassName({
+                      fullWidth: true,
+                      size: "sm",
+                      variant: "secondary",
+                      className: "h-9 justify-start gap-2 px-3 text-xs",
+                    })}
+                  >
+                    <ImagePlus className="h-3.5 w-3.5" />
+                    {copy.addImage}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(event) => {
+                      event.currentTarget
+                        .closest("details")
+                        ?.removeAttribute("open");
+                      void openCamera();
+                    }}
+                    disabled={isAttachmentMenuDisabled || cameraOpen}
+                    className={buttonClassName({
+                      fullWidth: true,
+                      size: "sm",
+                      variant: "secondary",
+                      className: "mt-2 h-9 justify-start gap-2 px-3 text-xs",
+                    })}
+                  >
+                    <Camera className="h-3.5 w-3.5" />
+                    {copy.camera}
+                  </button>
+                </div>
+              </details>
               <input
                 value={inputValue}
                 onChange={(event) => {
                   setInputValue(event.target.value);
                 }}
                 placeholder={copy.inputPlaceholder}
-                className="w-full rounded-xl border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/25 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100"
+                className="min-h-10 min-w-0 flex-1 rounded-xl border-0 bg-transparent px-2 text-sm text-ink outline-none placeholder:text-muted/70 focus:outline-none focus:ring-0"
                 disabled={isLoading || ocrPending || isShenuteAccessBlocked}
               />
               <button
@@ -1219,7 +1277,8 @@ export function FloatingAiAssistantPanel({
                 className={buttonClassName({
                   size: "sm",
                   variant: "primary",
-                  className: "h-10 w-10 shrink-0 rounded-xl px-0",
+                  className:
+                    "h-10 w-10 shrink-0 rounded-xl px-0 disabled:hover:bg-sky-500 dark:disabled:hover:bg-sky-400",
                 })}
               >
                 <SendHorizontal className="h-4 w-4" />
@@ -1237,7 +1296,7 @@ export function FloatingAiAssistantPanel({
           onClick={() => {
             setIsOpen(true);
           }}
-          className="inline-flex h-12 w-12 items-center justify-center gap-2 rounded-full bg-sky-600 text-white shadow-xl shadow-sky-950/15 transition-colors hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 dark:bg-sky-500 dark:hover:bg-sky-400 sm:h-auto sm:w-auto sm:px-5 sm:py-3 sm:text-sm sm:font-semibold"
+          className="inline-flex h-12 w-12 items-center justify-center gap-2 rounded-2xl bg-sky-600 text-white shadow-panel transition-colors hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 dark:bg-sky-500 dark:hover:bg-sky-400 sm:h-auto sm:w-auto sm:px-5 sm:py-3 sm:text-sm sm:font-semibold"
         >
           <MessageCircle className="h-5 w-5" aria-hidden="true" />
           <span className="sr-only sm:not-sr-only">

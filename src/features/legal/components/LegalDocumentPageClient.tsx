@@ -1,11 +1,8 @@
 "use client";
 
-import {
-  BreadcrumbTrail,
-  type BreadcrumbTrailItem,
-} from "@/components/BreadcrumbTrail";
+import { AppPageIntro } from "@/components/AppPageIntro";
+import { type BreadcrumbTrailItem } from "@/components/BreadcrumbTrail";
 import { useLanguage } from "@/components/LanguageProvider";
-import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import type { LegalDocument } from "@/features/legal/lib/legalDocuments";
@@ -23,20 +20,18 @@ export function LegalDocumentPageClient({
   return (
     <PageShell
       className="app-page-shell"
-      contentClassName="app-page-stack"
+      contentClassName="app-page-content"
       width="standard"
       accents={[
         pageShellAccents.heroSkyArc,
         pageShellAccents.topRightEmeraldOrbInset,
       ]}
     >
-      {breadcrumbItems ? <BreadcrumbTrail items={breadcrumbItems} /> : null}
-
-      <PageHeader
+      <AppPageIntro
+        align="left"
+        breadcrumbs={breadcrumbItems}
         title={title}
         description={description}
-        align="left"
-        size="workspace"
         tone="sky"
       />
 

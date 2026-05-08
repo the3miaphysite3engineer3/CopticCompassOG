@@ -35,7 +35,7 @@ export function DictionarySearchBar({
   const { t } = useLanguage();
 
   return (
-    <div className="group relative z-30 rounded-2xl border border-stone-200 bg-white/80 shadow-xl backdrop-blur-xl dark:border-stone-700/80 dark:bg-stone-900/80 dark:shadow-2xl sm:rounded-[1.75rem]">
+    <div className="group relative z-30 rounded-2xl border border-line/80 bg-surface/80 shadow-panel backdrop-blur-xl sm:rounded-3xl">
       <div className="relative flex items-center">
         <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-stone-500 transition-colors group-focus-within:text-sky-400 sm:left-6">
           <Search className="h-5 w-5 sm:h-6 sm:w-6" />
@@ -82,7 +82,7 @@ export function DictionarySearchBar({
               event.currentTarget.selectionEnd,
             )
           }
-          className={`${antinoou.className} w-full rounded-2xl bg-transparent p-4 pl-12 pr-24 text-base text-stone-900 transition-all focus:outline-none focus:ring-2 focus:ring-sky-500/50 placeholder:font-sans placeholder:text-stone-400 dark:text-stone-100 dark:placeholder:text-stone-500 sm:rounded-[1.75rem] sm:p-6 sm:pl-16 sm:pr-28 sm:text-lg md:text-2xl`}
+          className={`${antinoou.className} w-full rounded-2xl bg-transparent p-4 pl-12 pr-24 text-base text-stone-900 transition-all focus:outline-none focus:ring-2 focus:ring-sky-500/50 placeholder:font-sans placeholder:text-stone-400 dark:text-stone-100 dark:placeholder:text-stone-500 sm:rounded-3xl sm:p-6 sm:pl-16 sm:pr-28 sm:text-lg md:text-2xl`}
         />
 
         <div className="absolute inset-y-0 right-3 flex items-center gap-1.5 sm:right-4 sm:gap-2">

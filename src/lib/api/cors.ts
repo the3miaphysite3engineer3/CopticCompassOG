@@ -7,6 +7,9 @@ const PUBLIC_API_CORS_HEADERS = {
   "Access-Control-Max-Age": "86400",
 } as const;
 
+const PUBLIC_API_CACHE_CONTROL =
+  "public, max-age=300, s-maxage=86400, stale-while-revalidate=604800";
+
 /**
  * Applies the shared public-API CORS headers to a response without
  * overwriting any route-specific values that were already set.
@@ -26,7 +29,13 @@ function withPublicApiCors(response: NextResponse) {
  * policy applied.
  */
 export function publicApiJsonResponse(body: unknown, init?: ResponseInit) {
-  return withPublicApiCors(NextResponse.json(body, init));
+  const response = NextResponse.json(body, init);
+
+  if (response.status === 200 && !response.headers.has("Cache-Control")) {
+    response.headers.set("Cache-Control", PUBLIC_API_CACHE_CONTROL);
+  }
+
+  return withPublicApiCors(response);
 }
 
 /**

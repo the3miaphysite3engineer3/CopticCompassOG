@@ -1,8 +1,7 @@
 "use client";
 
-import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { AppPageIntro } from "@/components/AppPageIntro";
 import { useLanguage } from "@/components/LanguageProvider";
-import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import type { GrammarLessonIndexItem } from "@/content/grammar/schema";
 import { getLocalizedHomePath } from "@/lib/locale";
@@ -21,25 +20,21 @@ export default function GrammarHubPageClient({
   return (
     <PageShell
       className="app-page-shell"
-      contentClassName="app-page-stack"
+      contentClassName="app-page-content"
       width="standard"
       accents={[
         pageShellAccents.topRightSkyOrb,
         pageShellAccents.bottomLeftEmeraldOrb,
       ]}
     >
-      <BreadcrumbTrail
-        items={[
+      <AppPageIntro
+        align="center"
+        breadcrumbs={[
           { label: t("nav.home"), href: getLocalizedHomePath(language) },
           { label: t("nav.grammar") },
         ]}
-      />
-
-      <PageHeader
-        title={t("grammar.title")}
         description={t("grammar.subtitle")}
-        size="workspace"
-        tone="sky"
+        title={t("grammar.title")}
       />
 
       <div className="grid grid-cols-1 gap-6 mx-auto max-w-5xl w-full md:grid-cols-2 lg:grid-cols-3">

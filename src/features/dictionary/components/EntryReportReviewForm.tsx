@@ -50,7 +50,7 @@ export function EntryReportReviewForm({
             id={`entry-report-status-${reportId}`}
             name="status"
             defaultValue={status}
-            className="select-base h-11 rounded-xl text-sm"
+            className="select-base h-11 text-sm"
           >
             {ENTRY_REPORT_STATUSES.map((nextStatus) => (
               <option key={nextStatus} value={nextStatus}>

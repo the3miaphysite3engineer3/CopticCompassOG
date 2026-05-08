@@ -1,3 +1,6 @@
+import fs from "node:fs";
+import path from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -16,5 +19,15 @@ describe("publicLocaleRouting", () => {
     expect(resolvePublicLocale("nl")).toBe("nl");
     expect(requirePublicLocale("en")).toBe("en");
     expect(requirePublicLocale("nl")).toBe("nl");
+  });
+
+  it("stays free of request-bound language resolution", () => {
+    const source = fs.readFileSync(
+      path.join(process.cwd(), "src/lib/publicLocaleRouting.ts"),
+      "utf8",
+    );
+
+    expect(source).not.toContain("next/headers");
+    expect(source).not.toContain("getPreferredLanguage");
   });
 });

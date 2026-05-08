@@ -336,7 +336,7 @@ export function AdminSubmissionReviewWorkspace({
 
   return (
     <div className="space-y-5">
-      <div className="rounded-[1.5rem] border border-stone-200/80 bg-stone-50/80 p-4 text-sm leading-6 text-stone-600 dark:border-stone-800 dark:bg-stone-950/40 dark:text-stone-400">
+      <div className="rounded-3xl border border-line/80 bg-elevated/70 p-4 text-sm leading-6 text-muted">
         {copy.intro}
       </div>
 

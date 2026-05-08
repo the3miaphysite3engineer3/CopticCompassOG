@@ -28,7 +28,7 @@ export function GrammarLessonCard({
 }: GrammarLessonCardProps) {
   const isAvailable = lesson.status === "published";
   const sharedClassName =
-    "group relative min-h-[20rem] overflow-hidden rounded-3xl border p-8 shadow-md backdrop-blur-md transition-all duration-300 md:p-9 flex flex-col justify-between";
+    "group relative min-h-[20rem] overflow-hidden rounded-3xl border p-8 shadow-panel backdrop-blur-md transition-all duration-300 md:p-9 flex flex-col justify-between";
 
   const content = (
     <>
@@ -99,7 +99,7 @@ export function GrammarLessonCard({
       <div
         className={cx(
           sharedClassName,
-          "cursor-not-allowed border-stone-200 bg-stone-50/60 opacity-90 dark:border-stone-800 dark:bg-stone-900/30 dark:shadow-black/20",
+          "cursor-not-allowed border-line/80 bg-surface/60 opacity-90",
         )}
       >
         {content}
@@ -112,7 +112,7 @@ export function GrammarLessonCard({
       href={getGrammarLessonPath(lesson.slug, language)}
       className={cx(
         sharedClassName,
-        "cursor-pointer border-stone-200 bg-white/70 hover:-translate-y-1 hover:border-sky-300 hover:shadow-sky-500/10 dark:border-stone-800 dark:bg-stone-900/50 dark:shadow-xl dark:shadow-black/20 dark:hover:border-sky-700",
+        "cursor-pointer border-line/80 bg-surface/75 hover:-translate-y-1 hover:border-accent/25 hover:bg-surface/95 hover:shadow-sky-500/10",
       )}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />

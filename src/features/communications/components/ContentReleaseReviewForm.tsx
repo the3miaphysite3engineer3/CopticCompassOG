@@ -56,7 +56,7 @@ export function ContentReleaseReviewForm({
             id={`content-release-status-${releaseId}`}
             name="status"
             defaultValue={editableStatus}
-            className="select-base h-11 rounded-xl text-sm"
+            className="select-base h-11 text-sm"
           >
             {CONTENT_RELEASE_EDITABLE_STATUSES.map((nextStatus) => (
               <option key={nextStatus} value={nextStatus}>

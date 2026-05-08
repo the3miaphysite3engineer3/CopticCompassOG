@@ -2,29 +2,55 @@
 
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
-import { ArrowRight, BookOpenCheck, Square, Volume2 } from "lucide-react";
+import {
+  ArrowDownToLine,
+  ArrowRight,
+  BookOpenCheck,
+  Brain,
+  Camera,
+  Clock3,
+  Copy,
+  CornerDownRight,
+  FlaskConical,
+  ImagePlus,
+  MessageSquarePlus,
+  MoreHorizontal,
+  RotateCcw,
+  Save,
+  SendHorizontal,
+  SlidersHorizontal,
+  Sparkles,
+  Square,
+  ThumbsDown,
+  ThumbsUp,
+  Trash2,
+  UserRound,
+  Volume2,
+  XCircle,
+  Zap,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
 import { processOCRImage } from "@/actions/ocrActions";
+import { AppPageIntro } from "@/components/AppPageIntro";
 import {
   AuthGateInlinePrompt,
   AuthGateNotice,
 } from "@/components/AuthGateNotice";
 import { Badge } from "@/components/Badge";
-import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
 import { buttonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
-import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { useSpeech } from "@/features/dictionary/hooks/useSpeech";
 import { cx } from "@/lib/classes";
 import { getContributorsPath, getLocalizedHomePath } from "@/lib/locale";
+import { createClient } from "@/lib/supabase/client";
 import { useOptionalAuthGate } from "@/lib/supabase/useOptionalAuthGate";
 
 type ShenuteProvider = "gemini" | "hf" | "openrouter" | "thoth";
@@ -58,14 +84,30 @@ type FeedbackStateByMessage = Record<
   }
 >;
 
+type MessageActionStateByMessage = Record<
+  string,
+  {
+    message: string;
+    status: "error" | "success";
+  }
+>;
+
 const SHENUTE_COPY = {
   en: {
     accessRequired: "Please sign in to access Shenute AI.",
     addImage: "Add Image",
     adminNotePlaceholder:
-      "Admin only: add written feedback tied to this prompt and response.",
-    adminNoteSummary: "Admin note for RAG learning",
-    aiMode: "AI mode",
+      "Admin only: add corrected guidance tied to this prompt and response.",
+    adminNoteSummary: "Admin learning note",
+    aiMode: "Answer style",
+    aiModeDescription: "Choose how Shenute should balance depth and speed.",
+    answerStyleControls: "Change answer style",
+    assistantLabel: "Shenute",
+    attachmentHelp:
+      "Shenute will read this image with OCR when you send your message.",
+    attachmentName: "File",
+    attachmentReady: "Image ready for OCR",
+    attachmentSize: "Size",
     cameraCapture: "Capture Image",
     cameraClose: "Close Camera",
     cameraFrameFailed: "Could not capture camera frame.",
@@ -74,58 +116,94 @@ const SHENUTE_COPY = {
     cameraNotSupported: "Camera is not supported on this device/browser.",
     cameraStillLoading: "Camera feed is not ready yet. Try again.",
     cameraSource: "camera",
+    cancelResponse: "Stop response",
+    chatActions: "Chat actions",
+    closeAnswerStyleControls: "Close answer style controls",
+    copiedResponse: "Copied.",
+    copyResponse: "Copy",
+    copyResponseFailed: "Could not copy response.",
     creditsLinkDescription:
       "Credits, technical notes, and research acknowledgements now live on the Contributors page.",
     creditsLinkTitle: "Credits and technical notes",
-    dislike: "Dislike",
+    creditsShort: "Credits",
+    dislike: "Not helpful",
     feedbackPromptMissing:
       "Could not resolve prompt/response for this feedback.",
-    feedbackSaved: "Saved.",
-    feedbackSavedWithRag: "Saved and added to RAG learning.",
+    feedbackSaved: "Thanks for the feedback.",
+    feedbackSavedWithRag: "Thanks, this helps improve Shenute.",
     feedbackSaveFailed: "Could not save feedback.",
     feedbackSaving: "Saving feedback...",
-    feedbackSignIn: "Sign in to send feedback signals.",
-    feedbackSignInInline: "Sign in to send learning feedback signals",
+    feedbackSignIn: "Sign in to send feedback.",
+    feedbackSignInInline: "Sign in to mark responses helpful.",
     imageAttached: "Image attached",
     imageOcrContext: "[Image OCR Context]",
     intro:
       "Ask about Coptic vocabulary, grammar, translation, and manuscript context without leaving the shared app workspace.",
-    like: "Like",
+    jumpToLatest: "Latest",
+    like: "Helpful",
     noTextExtracted: "No text extracted from the selected image.",
     ocrFailed: "OCR failed for the selected image.",
     placeholder: "Ask about a Coptic word, grammar rule, or attached image...",
-    saveHistory: "Save chat history",
-    savedHistory: "Chat history downloaded.",
-    autosaveStatus: "Autosaved locally",
+    saveHistory: "Save now",
+    saveHistorySaved: "Saved",
+    savingHistory: "Saving...",
+    savedHistory: "Conversation saved.",
+    saveHistoryFailed: "Could not save this conversation.",
+    autosaveHint: "Conversations save automatically to your account.",
+    autosaveStatus: "Saved to your account.",
+    unsavedChanges: "Unsaved changes. Saving automatically...",
     historySessions: "Saved sessions",
-    historySessionsDescription:
-      "Switch between your saved Shenute conversations.",
+    clearConversation: "Delete conversation",
+    clearConversationConfirm:
+      "Delete this Shenute conversation? Saved copies will be removed from your account.",
+    clearConversationFailed: "Could not delete this conversation.",
+    clearingConversation: "Deleting conversation...",
+    conversationCleared: "Conversation deleted.",
+    continuePrompt: "Please continue your previous response.",
+    continueResponse: "Continue answer",
+    newConversation: "Start new chat",
+    newConversationStarted: "New chat started.",
+    thinking: "Thinking",
     loadSession: "Load",
     currentSession: "Current",
     loadingSession: "Loading session...",
     sessionCount: "sessions",
     sessionDateMissing: "No timestamp",
-    providerGemini: "Learner (Gemini)",
-    providerHf: "Learner (HF)",
-    providerOpenRouter: "Learner (OpenRouter)",
-    providerThoth: "Expert (THOTH AI)",
-    ragWarning: "Saved. RAG ingest warning:",
+    sessionUnsavedBadge: "Unsaved",
+    providerGemini: "Fast answer",
+    providerGeminiDescription:
+      "Quicker help for direct grammar or vocabulary questions.",
+    providerHf: "Experimental",
+    providerHfDescription: "A lighter experimental pass for comparison.",
+    providerOpenRouter: "Reasoned answer",
+    providerOpenRouterDescription:
+      "More step-by-step structure for harder questions.",
+    providerThoth: "Best answer",
+    providerThothDescription: "The strongest default for Coptic-focused study.",
+    ragWarning: "Saved, but the learning sync warned:",
     rateLimit: "Rate limit reached. Please try again later.",
+    regenerateResponse: "Regenerate",
     remove: "Remove",
     requestFailed: "AI request failed.",
     runningOcr: "Running OCR...",
     sendMessage: "Send message",
     selectedImageAlt: "Selected for OCR",
-    submitAdminNote: "Submit admin note",
+    submitAdminNote: "Send admin note",
+    starterPromptsTitle: "Try asking Shenute",
+    starterPromptGrammar: "Explain how the Bohairic definite article works.",
+    starterPromptImage: "Help me read a Coptic manuscript image.",
+    starterPromptTranslate:
+      "Translate “Jesus Christ is risen” into Bohairic Coptic.",
     title: "Shenute AI",
     uploadSource: "upload",
     useCamera: "Use Camera",
+    userLabel: "You",
     viewNmtCredits: "View NMT credits",
     viewShenuteCredits: "View Shenute credits",
     welcomeDescription:
       "Start with a word, a grammar question, or an image attachment and Shenute AI will keep the conversation grounded in your Coptic study workflow.",
     welcomeTitle: "Welcome to Shenute AI",
-    writeAdminFeedback: "Write admin feedback before submitting.",
+    writeAdminFeedback: "Write admin feedback before sending.",
     play: "Speak",
     stop: "Stop",
   },
@@ -133,9 +211,17 @@ const SHENUTE_COPY = {
     accessRequired: "Meld u aan om Shenute AI te gebruiken.",
     addImage: "Afbeelding toevoegen",
     adminNotePlaceholder:
-      "Alleen voor beheerders: voeg feedback toe bij deze prompt en dit antwoord.",
-    adminNoteSummary: "Beheerdersnotitie voor RAG-learning",
-    aiMode: "AI-modus",
+      "Alleen voor beheerders: voeg gecorrigeerde uitleg toe bij deze prompt en dit antwoord.",
+    adminNoteSummary: "Leer-notitie voor beheerder",
+    aiMode: "Antwoordstijl",
+    aiModeDescription: "Kies hoe Shenute diepgang en snelheid moet afwegen.",
+    answerStyleControls: "Antwoordstijl wijzigen",
+    assistantLabel: "Shenute",
+    attachmentHelp:
+      "Shenute leest deze afbeelding met OCR wanneer u uw bericht verzendt.",
+    attachmentName: "Bestand",
+    attachmentReady: "Afbeelding klaar voor OCR",
+    attachmentSize: "Grootte",
     cameraCapture: "Afbeelding vastleggen",
     cameraClose: "Camera sluiten",
     cameraFrameFailed: "Het camerabeeld kon niet worden vastgelegd.",
@@ -146,66 +232,106 @@ const SHENUTE_COPY = {
       "De camera wordt niet ondersteund op dit apparaat of in deze browser.",
     cameraStillLoading: "De camerafeed is nog niet klaar. Probeer het opnieuw.",
     cameraSource: "camera",
+    cancelResponse: "Antwoord stoppen",
+    chatActions: "Chatopties",
+    closeAnswerStyleControls: "Antwoordstijl sluiten",
+    copiedResponse: "Gekopieerd.",
+    copyResponse: "Kopiëren",
+    copyResponseFailed: "Kopiëren is mislukt.",
     creditsLinkDescription:
       "Credits, technische notities en onderzoeksvermeldingen staan nu op de bijdragerspagina.",
     creditsLinkTitle: "Credits en technische notities",
-    dislike: "Niet nuttig",
+    creditsShort: "Credits",
+    dislike: "Niet behulpzaam",
     feedbackPromptMissing:
       "De prompt en het antwoord voor deze feedback konden niet worden bepaald.",
-    feedbackSaved: "Opgeslagen.",
-    feedbackSavedWithRag: "Opgeslagen en toegevoegd aan RAG-learning.",
+    feedbackSaved: "Bedankt voor uw feedback.",
+    feedbackSavedWithRag: "Bedankt, dit helpt Shenute te verbeteren.",
     feedbackSaveFailed: "Feedback kon niet worden opgeslagen.",
     feedbackSaving: "Feedback opslaan...",
-    feedbackSignIn: "Meld u aan om feedbacksignalen te verzenden.",
-    feedbackSignInInline: "Meld u aan om leerfeedback te verzenden",
+    feedbackSignIn: "Meld u aan om feedback te verzenden.",
+    feedbackSignInInline: "Meld u aan om antwoorden als behulpzaam te markeren",
     imageAttached: "Afbeelding toegevoegd",
     imageOcrContext: "[Image OCR Context]",
     intro:
       "Stel vragen over Koptische woordenschat, grammatica, vertaling en manuscriptcontext zonder de gedeelde werkruimte te verlaten.",
-    like: "Nuttig",
+    jumpToLatest: "Nieuwste",
+    like: "Behulpzaam",
     noTextExtracted:
       "Er is geen tekst uit de geselecteerde afbeelding gehaald.",
     ocrFailed: "OCR is mislukt voor de geselecteerde afbeelding.",
     placeholder:
       "Vraag naar een Koptisch woord, een grammaticaregel of een toegevoegde afbeelding...",
-    saveHistory: "Chatgeschiedenis opslaan",
-    savedHistory: "Chatgeschiedenis online opgeslagen.",
-    autosaveStatus: "Automatisch online opgeslagen",
+    saveHistory: "Nu opslaan",
+    saveHistorySaved: "Opgeslagen",
+    savingHistory: "Opslaan...",
+    savedHistory: "Gesprek opgeslagen.",
+    saveHistoryFailed: "Dit gesprek kon niet worden opgeslagen.",
+    autosaveHint: "Gesprekken worden automatisch in uw account opgeslagen.",
+    autosaveStatus: "Opgeslagen in uw account.",
+    unsavedChanges: "Niet-opgeslagen wijzigingen. Automatisch opslaan...",
     historySessions: "Opgeslagen sessies",
-    historySessionsDescription:
-      "Schakel tussen je opgeslagen Shenute-gesprekken.",
+    clearConversation: "Gesprek verwijderen",
+    clearConversationConfirm:
+      "Dit Shenute-gesprek verwijderen? Opgeslagen kopieën worden uit uw account verwijderd.",
+    clearConversationFailed: "Dit gesprek kon niet worden verwijderd.",
+    clearingConversation: "Gesprek verwijderen...",
+    conversationCleared: "Gesprek verwijderd.",
+    continuePrompt: "Ga verder met uw vorige antwoord.",
+    continueResponse: "Antwoord vervolgen",
+    newConversation: "Nieuwe chat starten",
+    newConversationStarted: "Nieuwe chat gestart.",
+    thinking: "Denkt na",
     loadSession: "Laden",
     currentSession: "Huidig",
     loadingSession: "Sessieweergave laden...",
     sessionCount: "sessies",
     sessionDateMissing: "Geen tijdstempel",
-    providerGemini: "Leerhulp (Gemini)",
-    providerHf: "Leerhulp (HF)",
-    providerOpenRouter: "Leerhulp (OpenRouter)",
-    providerThoth: "Expert (THOTH AI)",
-    ragWarning: "Opgeslagen. RAG-ingest-waarschuwing:",
+    sessionUnsavedBadge: "Niet opgeslagen",
+    providerGemini: "Snel antwoord",
+    providerGeminiDescription:
+      "Snellere hulp bij directe grammatica- of woordenschatvragen.",
+    providerHf: "Experimenteel",
+    providerHfDescription: "Een lichtere experimentele vergelijking.",
+    providerOpenRouter: "Uitgewerkt antwoord",
+    providerOpenRouterDescription:
+      "Meer stapsgewijze structuur voor moeilijkere vragen.",
+    providerThoth: "Beste antwoord",
+    providerThothDescription:
+      "De sterkste standaard voor Koptisch gerichte studie.",
+    ragWarning: "Opgeslagen, maar de leersynchronisatie waarschuwde:",
     rateLimit: "De limiet is bereikt. Probeer het later opnieuw.",
+    regenerateResponse: "Opnieuw genereren",
     remove: "Verwijderen",
     requestFailed: "AI-verzoek mislukt.",
     runningOcr: "OCR uitvoeren...",
     sendMessage: "Bericht verzenden",
     selectedImageAlt: "Geselecteerd voor OCR",
-    submitAdminNote: "Beheerdersnotitie verzenden",
+    submitAdminNote: "Beheerdersnotitie sturen",
+    starterPromptsTitle: "Probeer Shenute",
+    starterPromptGrammar: "Leg uit hoe het Bohairische bepaald lidwoord werkt.",
+    starterPromptImage: "Help me een Koptische manuscriptfoto te lezen.",
+    starterPromptTranslate:
+      "Vertaal “Jezus Christus is opgestaan” naar Bohairisch-Koptisch.",
     title: "Shenute AI",
     uploadSource: "upload",
     useCamera: "Camera gebruiken",
+    userLabel: "U",
     viewNmtCredits: "Bekijk NMT-credits",
     viewShenuteCredits: "Bekijk Shenute-credits",
     welcomeDescription:
       "Begin met een woord, een grammaticavraag of een afbeelding. Shenute AI houdt het gesprek verbonden met uw Koptische studiewerkstroom.",
     welcomeTitle: "Welkom bij Shenute AI",
-    writeAdminFeedback: "Schrijf beheerdersfeedback voordat u die verzendt.",
+    writeAdminFeedback: "Schrijf beheerdersfeedback voordat u die verstuurt.",
     play: "Spreken",
     stop: "Stop",
   },
 } as const;
 
 type ShenuteCopy = (typeof SHENUTE_COPY)[keyof typeof SHENUTE_COPY];
+type ShenuteLanguage = keyof typeof SHENUTE_COPY;
+
+const MESSAGE_ACTION_BUTTON_CLASS = "h-8 shrink-0 gap-1.5 px-2 text-xs";
 
 function isTextMessagePart(part: unknown): part is TextMessagePart {
   if (!part || typeof part !== "object") {
@@ -232,6 +358,79 @@ function getMessageText(message: ChatMessageLike) {
     .trim();
 }
 
+function formatElapsedTime(totalSeconds: number) {
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+}
+
+function formatFileSize(bytes: number, language: ShenuteLanguage) {
+  if (!Number.isFinite(bytes) || bytes <= 0) {
+    return "0 KB";
+  }
+
+  const isMegabyte = bytes >= 1024 * 1024;
+  const value = isMegabyte ? bytes / (1024 * 1024) : bytes / 1024;
+  const formattedValue = new Intl.NumberFormat(
+    language === "nl" ? "nl-NL" : "en-US",
+    {
+      maximumFractionDigits: value >= 10 ? 0 : 1,
+    },
+  ).format(value);
+
+  return `${formattedValue} ${isMegabyte ? "MB" : "KB"}`;
+}
+
+function formatSessionTimestamp(
+  updatedAt: string | null,
+  language: ShenuteLanguage,
+  fallback: string,
+) {
+  if (!updatedAt) {
+    return fallback;
+  }
+
+  const date = new Date(updatedAt);
+  if (Number.isNaN(date.getTime())) {
+    return fallback;
+  }
+
+  return new Intl.DateTimeFormat(language === "nl" ? "nl-NL" : "en-US", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(date);
+}
+
+function normalizeChatMessages<T extends ChatMessageLike>(
+  messages: readonly T[],
+) {
+  const messageIndexesById = new Map<string, number>();
+  const normalizedMessages: T[] = [];
+
+  messages.forEach((message, index) => {
+    const id = message.id.trim();
+    const normalizedMessage =
+      id.length > 0 ? message : ({ ...message, id: `message-${index}` } as T);
+    const normalizedId = normalizedMessage.id;
+    const existingIndex = messageIndexesById.get(normalizedId);
+
+    if (typeof existingIndex === "number") {
+      normalizedMessages[existingIndex] = normalizedMessage;
+      return;
+    }
+
+    messageIndexesById.set(normalizedId, normalizedMessages.length);
+    normalizedMessages.push(normalizedMessage);
+  });
+
+  return normalizedMessages;
+}
+
+function getChatMessagesSignature(messages: readonly ChatMessageLike[]) {
+  return JSON.stringify(messages.map(serializeChatMessage));
+}
+
 type SavedChatMessage = {
   id: string;
   role: ChatMessageLike["role"];
@@ -255,7 +454,11 @@ function serializeChatMessage(message: ChatMessageLike): SavedChatMessage {
 async function saveChatHistoryOnline(
   messages: ChatMessageLike[],
   sessionId: string,
-): Promise<{ success: boolean; sessionId?: string }> {
+): Promise<{
+  success: boolean;
+  sessionId?: string;
+  sessions?: Array<SavedChatSession>;
+}> {
   if (typeof window === "undefined") {
     return { success: false };
   }
@@ -279,6 +482,7 @@ async function saveChatHistoryOnline(
     const data = (await response.json()) as {
       success: boolean;
       sessionId?: string;
+      sessions?: Array<SavedChatSession>;
     };
 
     return data;
@@ -304,26 +508,6 @@ function findPreviousUserMessage(
   }
 
   return null;
-}
-
-function toShenuteProvider(value: string): ShenuteProvider {
-  if (value === "gemini") {
-    return "gemini";
-  }
-
-  if (value === "hf") {
-    return "hf";
-  }
-
-  if (value === "openrouter") {
-    return "openrouter";
-  }
-
-  if (value === "thoth") {
-    return "thoth";
-  }
-
-  return "thoth";
 }
 
 function getErrorStatusCode(error: unknown): number | undefined {
@@ -385,18 +569,18 @@ function getFeedbackStatusClass(status: "error" | "pending" | "success") {
 
 function getMessageAvatarClassName(role: ChatMessageLike["role"]) {
   if (role === "user") {
-    return "bg-sky-600 text-white dark:bg-sky-500";
+    return "bg-sky-600 text-white ring-2 ring-sky-100 dark:bg-sky-500 dark:ring-sky-950/70";
   }
 
-  return "bg-emerald-600 text-white dark:bg-emerald-500";
+  return "bg-emerald-600 text-white ring-2 ring-emerald-100 dark:bg-emerald-500 dark:ring-emerald-950/70";
 }
 
 function getMessageBubbleClassName(role: ChatMessageLike["role"]) {
   if (role === "user") {
-    return "bg-sky-600 text-white shadow-md dark:bg-sky-500 rounded-tr-sm";
+    return "rounded-br-sm bg-sky-600 text-white shadow-sm dark:bg-sky-500";
   }
 
-  return "rounded-tl-sm border border-stone-200 bg-white/90 text-stone-800 shadow-sm dark:border-stone-700 dark:bg-stone-900/80 dark:text-stone-200";
+  return "rounded-bl-sm border border-stone-200 bg-white/95 text-stone-800 shadow-sm ring-1 ring-white/70 dark:border-stone-700 dark:bg-stone-900/85 dark:text-stone-200 dark:ring-stone-800/50";
 }
 
 function getReactionButtonClassName(
@@ -412,6 +596,22 @@ function getReactionButtonClassName(
   }
 
   return "border-stone-300 text-stone-700 hover:bg-stone-100 dark:border-stone-600 dark:text-stone-200 dark:hover:bg-stone-800";
+}
+
+function getProviderLabel(provider: ShenuteProvider, copy: ShenuteCopy) {
+  if (provider === "gemini") {
+    return copy.providerGemini;
+  }
+
+  if (provider === "hf") {
+    return copy.providerHf;
+  }
+
+  if (provider === "openrouter") {
+    return copy.providerOpenRouter;
+  }
+
+  return copy.providerThoth;
 }
 
 export default function ShenuteAI() {
@@ -434,15 +634,18 @@ export default function ShenuteAI() {
   >(null);
   const [cameraOpen, setCameraOpen] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [isAnswerStylePanelOpen, setIsAnswerStylePanelOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const messageInputRef = useRef<HTMLTextAreaElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const captureCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const cameraStreamRef = useRef<MediaStream | null>(null);
+  const transcriptScrollRef = useRef<HTMLDivElement | null>(null);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const shenuteSessionIdRef = useRef(crypto.randomUUID());
 
-  const { isAuthenticated, isReady } = useOptionalAuthGate();
+  const { isAuthenticated, isReady, user } = useOptionalAuthGate();
   const [selectedReactionByMessage, setSelectedReactionByMessage] = useState<
     Record<string, ShenuteReactionSignal>
   >({});
@@ -450,7 +653,11 @@ export default function ShenuteAI() {
     useState<Record<string, string>>({});
   const [feedbackStateByMessage, setFeedbackStateByMessage] =
     useState<FeedbackStateByMessage>({});
+  const [messageActionStateByMessage, setMessageActionStateByMessage] =
+    useState<MessageActionStateByMessage>({});
+  const [canSubmitAdminFeedback, setCanSubmitAdminFeedback] = useState(false);
   const isSavingRef = useRef(false);
+  const lastSavedMessageSignatureRef = useRef(getChatMessagesSignature([]));
 
   const transport = useMemo(
     () =>
@@ -460,37 +667,300 @@ export default function ShenuteAI() {
     [],
   );
 
-  const { messages, setMessages, sendMessage, status, error } = useChat({
+  const {
+    messages,
+    setMessages,
+    sendMessage,
+    regenerate,
+    stop: stopChatResponse,
+    status,
+    error,
+  } = useChat({
     transport,
   });
 
-  const { speakMixed, stop, isSpeaking, isPremiumLoading } = useSpeech();
+  const {
+    speakMixed,
+    stop: stopSpeech,
+    isSpeaking,
+    isPremiumLoading,
+  } = useSpeech();
 
-  const [saveStatus, setSaveStatus] = useState<string | null>(null);
   const [autosaveStatus, setAutosaveStatus] = useState<string | null>(null);
+  const [isHistorySaving, setIsHistorySaving] = useState(false);
   const [sessionStatus, setSessionStatus] = useState<string | null>(null);
   const [sessions, setSessions] = useState<SavedChatSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
   const [sessionLoadingId, setSessionLoadingId] = useState<string | null>(null);
   const [hasRestoredHistory, setHasRestoredHistory] = useState(false);
+  const [historyActionStatus, setHistoryActionStatus] = useState<string | null>(
+    null,
+  );
+  const [thinkingElapsedSeconds, setThinkingElapsedSeconds] = useState(0);
+  const [isTranscriptAtBottom, setIsTranscriptAtBottom] = useState(true);
   const isLoading = status !== "ready";
   const isShenuteAccessBlocked = isReady && !isAuthenticated;
-  const typedMessages = messages as ChatMessageLike[];
+  const typedMessages = useMemo(
+    () => normalizeChatMessages(messages as ChatMessageLike[]),
+    [messages],
+  );
+  const currentMessageSignature = useMemo(
+    () => getChatMessagesSignature(typedMessages),
+    [typedMessages],
+  );
+  const hasUnsavedConversationChanges =
+    typedMessages.length > 0 &&
+    currentMessageSignature !== lastSavedMessageSignatureRef.current;
+  const hasConversationDraft =
+    inputValue.trim().length > 0 || Boolean(selectedImage);
+  const selectedImageSizeLabel = selectedImage
+    ? formatFileSize(selectedImage.size, language)
+    : null;
+  const isAttachmentMenuDisabled =
+    isLoading || ocrPending || isShenuteAccessBlocked;
+  const canStartNewConversation =
+    Boolean(activeSessionId) ||
+    typedMessages.length > 0 ||
+    hasConversationDraft;
+  const starterPrompts = useMemo(
+    () => [
+      {
+        icon: Sparkles,
+        prompt: copy.starterPromptTranslate,
+      },
+      {
+        icon: BookOpenCheck,
+        prompt: copy.starterPromptGrammar,
+      },
+      {
+        icon: ImagePlus,
+        prompt: copy.starterPromptImage,
+      },
+    ],
+    [
+      copy.starterPromptGrammar,
+      copy.starterPromptImage,
+      copy.starterPromptTranslate,
+    ],
+  );
+  const providerOptions = useMemo(
+    () => [
+      {
+        description: copy.providerThothDescription,
+        icon: Sparkles,
+        label: copy.providerThoth,
+        value: "thoth" as const,
+      },
+      {
+        description: copy.providerGeminiDescription,
+        icon: Zap,
+        label: copy.providerGemini,
+        value: "gemini" as const,
+      },
+      {
+        description: copy.providerOpenRouterDescription,
+        icon: Brain,
+        label: copy.providerOpenRouter,
+        value: "openrouter" as const,
+      },
+      {
+        description: copy.providerHfDescription,
+        icon: FlaskConical,
+        label: copy.providerHf,
+        value: "hf" as const,
+      },
+    ],
+    [
+      copy.providerGemini,
+      copy.providerGeminiDescription,
+      copy.providerHf,
+      copy.providerHfDescription,
+      copy.providerOpenRouter,
+      copy.providerOpenRouterDescription,
+      copy.providerThoth,
+      copy.providerThothDescription,
+    ],
+  );
+  const selectedProviderOption =
+    providerOptions.find((option) => option.value === inferenceProvider) ??
+    providerOptions[0]!;
+  const sessionCountLabel = `${sessions.length} ${copy.sessionCount}`;
+  let saveButtonLabel: string = copy.saveHistorySaved;
+  if (isHistorySaving) {
+    saveButtonLabel = copy.savingHistory;
+  } else if (hasUnsavedConversationChanges || typedMessages.length === 0) {
+    saveButtonLabel = copy.saveHistory;
+  }
+
+  let historyStatusMessage: string = autosaveStatus ?? copy.autosaveStatus;
+  if (historyActionStatus) {
+    historyStatusMessage = historyActionStatus;
+  } else if (typedMessages.length === 0) {
+    historyStatusMessage = copy.autosaveHint;
+  } else if (isHistorySaving) {
+    historyStatusMessage = copy.savingHistory;
+  } else if (hasUnsavedConversationChanges) {
+    historyStatusMessage = copy.unsavedChanges;
+  }
+  let historyStatusDotClassName = "bg-stone-300 dark:bg-stone-600";
+  if (isHistorySaving || hasUnsavedConversationChanges) {
+    historyStatusDotClassName = "bg-amber-400";
+  } else if (typedMessages.length > 0) {
+    historyStatusDotClassName = "bg-emerald-500";
+  }
+
+  const updateTranscriptScrollState = useCallback(() => {
+    const transcript = transcriptScrollRef.current;
+    if (!transcript) {
+      setIsTranscriptAtBottom(true);
+      return;
+    }
+
+    const distanceFromBottom =
+      transcript.scrollHeight - transcript.scrollTop - transcript.clientHeight;
+    const nextIsAtBottom = distanceFromBottom < 96;
+    setIsTranscriptAtBottom((current) =>
+      current === nextIsAtBottom ? current : nextIsAtBottom,
+    );
+  }, []);
+
+  const scrollTranscriptToBottom = useCallback(
+    (behavior: ScrollBehavior = "smooth") => {
+      const transcript = transcriptScrollRef.current;
+      if (transcript) {
+        transcript.scrollTo({
+          top: transcript.scrollHeight,
+          behavior,
+        });
+      } else {
+        messagesEndRef.current?.scrollIntoView({
+          block: "end",
+          behavior,
+        });
+      }
+
+      setIsTranscriptAtBottom(true);
+    },
+    [],
+  );
+
+  useEffect(() => {
+    if (typedMessages.length === messages.length) {
+      return;
+    }
+
+    setMessages(typedMessages as UIMessage[]);
+  }, [messages.length, setMessages, typedMessages]);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setThinkingElapsedSeconds(0);
+      return;
+    }
+
+    const startedAt = Date.now();
+    setThinkingElapsedSeconds(0);
+    const timer = window.setInterval(() => {
+      setThinkingElapsedSeconds(
+        Math.max(0, Math.floor((Date.now() - startedAt) / 1000)),
+      );
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [isLoading]);
+
+  useEffect(() => {
+    if (!isAnswerStylePanelOpen) {
+      return;
+    }
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsAnswerStylePanelOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isAnswerStylePanelOpen]);
+
+  useEffect(() => {
+    if (isShenuteAccessBlocked) {
+      setIsAnswerStylePanelOpen(false);
+    }
+  }, [isShenuteAccessBlocked]);
+
+  useEffect(() => {
+    const textarea = messageInputRef.current;
+    if (!textarea) {
+      return;
+    }
+
+    textarea.style.height = "auto";
+    textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
+  }, [inputValue]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !user?.id) {
+      setCanSubmitAdminFeedback(false);
+      return;
+    }
+
+    const supabase = createClient();
+    if (!supabase) {
+      setCanSubmitAdminFeedback(false);
+      return;
+    }
+
+    let isMounted = true;
+    const loadAdminFeedbackAccess = async () => {
+      try {
+        const { data } = await supabase
+          .from("profiles")
+          .select("role")
+          .eq("id", user.id)
+          .maybeSingle();
+
+        if (!isMounted) {
+          return;
+        }
+
+        setCanSubmitAdminFeedback(data?.role === "admin");
+      } catch {
+        if (isMounted) {
+          setCanSubmitAdminFeedback(false);
+        }
+      }
+    };
+
+    void loadAdminFeedbackAccess();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isAuthenticated, user?.id]);
 
   useEffect(() => {
     if (typedMessages.length === 0) {
+      setIsTranscriptAtBottom(true);
+      return;
+    }
+
+    if (!isTranscriptAtBottom) {
       return;
     }
 
     const frame = window.requestAnimationFrame(() => {
-      messagesEndRef.current?.scrollIntoView({
-        block: "end",
-        behavior: "smooth",
-      });
+      scrollTranscriptToBottom("smooth");
     });
 
     return () => window.cancelAnimationFrame(frame);
-  }, [isLoading, typedMessages.length]);
+  }, [
+    isLoading,
+    isTranscriptAtBottom,
+    scrollTranscriptToBottom,
+    typedMessages.length,
+  ]);
 
   useEffect(() => {
     if (hasRestoredHistory || !isReady || !isAuthenticated) {
@@ -523,7 +993,16 @@ export default function ShenuteAI() {
           }
 
           if (Array.isArray(payload.messages)) {
-            setMessages(payload.messages as UIMessage[]);
+            const restoredMessages = normalizeChatMessages(payload.messages);
+            lastSavedMessageSignatureRef.current =
+              getChatMessagesSignature(restoredMessages);
+            setMessages(restoredMessages as UIMessage[]);
+            setIsTranscriptAtBottom(true);
+            window.requestAnimationFrame(() => {
+              scrollTranscriptToBottom("auto");
+            });
+          } else {
+            lastSavedMessageSignatureRef.current = getChatMessagesSignature([]);
           }
         }
       } catch {
@@ -534,14 +1013,22 @@ export default function ShenuteAI() {
     };
 
     void restoreHistory();
-  }, [hasRestoredHistory, isAuthenticated, isReady, setMessages]);
+  }, [
+    hasRestoredHistory,
+    isAuthenticated,
+    isReady,
+    scrollTranscriptToBottom,
+    setMessages,
+  ]);
 
   useEffect(() => {
     if (
       typedMessages.length === 0 ||
       !isReady ||
       !isAuthenticated ||
-      !hasRestoredHistory
+      !hasRestoredHistory ||
+      isLoading ||
+      !hasUnsavedConversationChanges
     ) {
       return;
     }
@@ -551,17 +1038,25 @@ export default function ShenuteAI() {
         return;
       }
 
+      const messagesToSave = typedMessages;
+      const savedSignature = currentMessageSignature;
       isSavingRef.current = true;
+      setIsHistorySaving(true);
       void saveChatHistoryOnline(
-        typedMessages,
+        messagesToSave,
         shenuteSessionIdRef.current,
       ).then((result) => {
         isSavingRef.current = false;
+        setIsHistorySaving(false);
         if (result.success) {
           if (result.sessionId) {
             shenuteSessionIdRef.current = result.sessionId;
             setActiveSessionId(result.sessionId);
           }
+          if (Array.isArray(result.sessions)) {
+            setSessions(result.sessions);
+          }
+          lastSavedMessageSignatureRef.current = savedSignature;
           setAutosaveStatus(copy.autosaveStatus);
         }
       });
@@ -571,27 +1066,47 @@ export default function ShenuteAI() {
     return clearTimer;
   }, [
     typedMessages,
+    currentMessageSignature,
     copy.autosaveStatus,
+    hasUnsavedConversationChanges,
     hasRestoredHistory,
+    isLoading,
     isReady,
     isAuthenticated,
   ]);
 
   function handleSaveHistory() {
-    void saveChatHistoryOnline(typedMessages, shenuteSessionIdRef.current).then(
-      (result) => {
-        if (result.success) {
-          if (result.sessionId) {
-            shenuteSessionIdRef.current = result.sessionId;
-            setActiveSessionId(result.sessionId);
-          }
-          setSaveStatus(copy.savedHistory);
-          window.setTimeout(() => {
-            setSaveStatus(null);
-          }, 2500);
-        }
-      },
-    );
+    if (isHistorySaving || !hasUnsavedConversationChanges) {
+      return;
+    }
+
+    const messagesToSave = typedMessages;
+    const savedSignature = currentMessageSignature;
+    setIsHistorySaving(true);
+    isSavingRef.current = true;
+
+    void saveChatHistoryOnline(
+      messagesToSave,
+      shenuteSessionIdRef.current,
+    ).then((result) => {
+      isSavingRef.current = false;
+      setIsHistorySaving(false);
+      if (!result.success) {
+        setTemporaryHistoryActionStatus(copy.saveHistoryFailed);
+        return;
+      }
+
+      if (result.sessionId) {
+        shenuteSessionIdRef.current = result.sessionId;
+        setActiveSessionId(result.sessionId);
+      }
+      if (Array.isArray(result.sessions)) {
+        setSessions(result.sessions);
+      }
+      lastSavedMessageSignatureRef.current = savedSignature;
+      setAutosaveStatus(copy.autosaveStatus);
+      setTemporaryHistoryActionStatus(copy.savedHistory);
+    });
   }
 
   async function loadShenuteSession(sessionId: string) {
@@ -625,13 +1140,18 @@ export default function ShenuteAI() {
       setSessions(
         Array.isArray(payload.sessions) ? payload.sessions : sessions,
       );
-      setMessages(
-        Array.isArray(payload.messages)
-          ? (payload.messages as UIMessage[])
-          : [],
-      );
+      const loadedMessages = Array.isArray(payload.messages)
+        ? normalizeChatMessages(payload.messages)
+        : [];
+      lastSavedMessageSignatureRef.current =
+        getChatMessagesSignature(loadedMessages);
+      setMessages(loadedMessages as UIMessage[]);
       setActiveSessionId(payload.sessionId);
       shenuteSessionIdRef.current = payload.sessionId;
+      setIsTranscriptAtBottom(true);
+      window.requestAnimationFrame(() => {
+        scrollTranscriptToBottom("auto");
+      });
 
       return { success: true, sessionId: payload.sessionId };
     } catch {
@@ -658,6 +1178,118 @@ export default function ShenuteAI() {
 
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
+    }
+  }
+
+  function setTemporaryHistoryActionStatus(message: string) {
+    setHistoryActionStatus(message);
+    window.setTimeout(() => {
+      setHistoryActionStatus((current) =>
+        current === message ? null : current,
+      );
+    }, 3000);
+  }
+
+  function resetConversationWorkspace() {
+    stopSpeech();
+    stopCamera();
+    clearSelectedImage();
+    setInputValue("");
+    setOcrError(null);
+    setCameraError(null);
+    setShenuteAccessError(null);
+    setSelectedReactionByMessage({});
+    setAdminFeedbackDraftByMessage({});
+    setFeedbackStateByMessage({});
+    setMessageActionStateByMessage({});
+    setAutosaveStatus(null);
+    setSessionStatus(null);
+    setSessionLoadingId(null);
+    setIsTranscriptAtBottom(true);
+  }
+
+  async function startNewConversation() {
+    if (isLoading || isHistorySaving || !canStartNewConversation) {
+      return;
+    }
+
+    if (
+      typedMessages.length > 0 &&
+      isAuthenticated &&
+      hasUnsavedConversationChanges
+    ) {
+      setIsHistorySaving(true);
+      isSavingRef.current = true;
+      const result = await saveChatHistoryOnline(
+        typedMessages,
+        shenuteSessionIdRef.current,
+      );
+      isSavingRef.current = false;
+      setIsHistorySaving(false);
+
+      if (!result.success) {
+        setTemporaryHistoryActionStatus(copy.saveHistoryFailed);
+        return;
+      }
+
+      if (Array.isArray(result.sessions)) {
+        setSessions(result.sessions);
+      }
+    }
+
+    resetConversationWorkspace();
+    setMessages([]);
+    lastSavedMessageSignatureRef.current = getChatMessagesSignature([]);
+    setActiveSessionId(null);
+    shenuteSessionIdRef.current = crypto.randomUUID();
+    setTemporaryHistoryActionStatus(copy.newConversationStarted);
+  }
+
+  async function clearCurrentConversation() {
+    if (isLoading) {
+      return;
+    }
+
+    if (!activeSessionId && typedMessages.length === 0) {
+      await startNewConversation();
+      return;
+    }
+
+    if (!window.confirm(copy.clearConversationConfirm)) {
+      return;
+    }
+
+    const sessionIdToClear = activeSessionId;
+    setSessionStatus(copy.clearingConversation);
+
+    try {
+      if (sessionIdToClear && isAuthenticated) {
+        const response = await fetch(
+          `/api/shenute/history?sessionId=${encodeURIComponent(
+            sessionIdToClear,
+          )}`,
+          { method: "DELETE" },
+        );
+
+        if (!response.ok) {
+          throw new Error(copy.clearConversationFailed);
+        }
+      }
+
+      resetConversationWorkspace();
+      setMessages([]);
+      lastSavedMessageSignatureRef.current = getChatMessagesSignature([]);
+      setActiveSessionId(null);
+      if (sessionIdToClear) {
+        setSessions((current) =>
+          current.filter((session) => session.id !== sessionIdToClear),
+        );
+      }
+      shenuteSessionIdRef.current = crypto.randomUUID();
+      setTemporaryHistoryActionStatus(copy.conversationCleared);
+    } catch {
+      setSessionStatus(null);
+      setTemporaryHistoryActionStatus(copy.clearConversationFailed);
     }
   }
 
@@ -841,6 +1473,7 @@ export default function ShenuteAI() {
       return;
     }
 
+    setIsTranscriptAtBottom(true);
     sendMessage(
       { text: composedPrompt },
       {
@@ -851,6 +1484,9 @@ export default function ShenuteAI() {
     );
     setInputValue("");
     clearSelectedImage();
+    window.requestAnimationFrame(() => {
+      scrollTranscriptToBottom("smooth");
+    });
   };
 
   function handlePromptKeyDown(
@@ -866,6 +1502,101 @@ export default function ShenuteAI() {
 
     event.preventDefault();
     event.currentTarget.form?.requestSubmit();
+  }
+
+  function setTemporaryMessageActionState(
+    messageId: string,
+    message: string,
+    status: "error" | "success",
+  ) {
+    setMessageActionStateByMessage((current) => ({
+      ...current,
+      [messageId]: { message, status },
+    }));
+    window.setTimeout(() => {
+      setMessageActionStateByMessage((current) => {
+        if (current[messageId]?.message !== message) {
+          return current;
+        }
+
+        const next = { ...current };
+        delete next[messageId];
+        return next;
+      });
+    }, 2500);
+  }
+
+  async function handleCopyMessage(message: ChatMessageLike) {
+    const text = getMessageText(message);
+    if (!text) {
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setTemporaryMessageActionState(
+        message.id,
+        copy.copiedResponse,
+        "success",
+      );
+    } catch {
+      setTemporaryMessageActionState(
+        message.id,
+        copy.copyResponseFailed,
+        "error",
+      );
+    }
+  }
+
+  function handleRegenerateMessage(message: ChatMessageLike) {
+    if (isLoading || message.role !== "assistant") {
+      return;
+    }
+
+    setIsTranscriptAtBottom(true);
+    void regenerate({
+      messageId: message.id,
+      body: {
+        inferenceProvider,
+      },
+    });
+    window.requestAnimationFrame(() => {
+      scrollTranscriptToBottom("smooth");
+    });
+  }
+
+  function handleContinueConversation() {
+    if (isLoading || isShenuteAccessBlocked) {
+      return;
+    }
+
+    setIsTranscriptAtBottom(true);
+    sendMessage(
+      { text: copy.continuePrompt },
+      {
+        body: {
+          inferenceProvider,
+        },
+      },
+    );
+    window.requestAnimationFrame(() => {
+      scrollTranscriptToBottom("smooth");
+    });
+  }
+
+  function handleStarterPrompt(prompt: string) {
+    setInputValue(prompt);
+    if (shenuteAccessError) {
+      setShenuteAccessError(null);
+    }
+    window.requestAnimationFrame(() => {
+      messageInputRef.current?.focus();
+    });
+  }
+
+  function scrollToLatestMessage() {
+    scrollTranscriptToBottom("smooth");
+    messageInputRef.current?.focus({ preventScroll: true });
   }
 
   async function submitFeedbackSignal(options: {
@@ -1027,105 +1758,26 @@ export default function ShenuteAI() {
   return (
     <PageShell
       className="app-page-shell"
-      contentClassName="w-full space-y-6 pt-8 md:pt-10"
-      width="wide"
+      contentClassName="app-page-content space-y-3"
+      width="standard"
       accents={[
         pageShellAccents.heroSkyArc,
         pageShellAccents.topRightEmeraldOrbInset,
       ]}
     >
-      <BreadcrumbTrail
-        items={[
+      <AppPageIntro
+        breadcrumbs={[
           { label: t("nav.home"), href: getLocalizedHomePath(language) },
           { label: t("nav.shenute") },
         ]}
-      />
-
-      <PageHeader
-        title={copy.title}
         description={copy.intro}
-        align="left"
-        size="workspace"
-        tone="sky"
-        titleClassName="pb-0"
+        spacing="compact"
+        title={copy.title}
       />
 
       <SurfacePanel
         rounded="3xl"
-        shadow="soft"
-        variant="subtle"
-        className="overflow-hidden"
-      >
-        <div className="grid divide-y divide-stone-200/80 dark:divide-stone-800/80 lg:grid-cols-[18rem_minmax(0,1fr)] lg:divide-x lg:divide-y-0">
-          <label className="flex min-w-0 flex-col gap-2 p-4 text-sm font-medium text-stone-600 dark:text-stone-300 md:p-5">
-            <span className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500 dark:text-stone-400">
-              {copy.aiMode}
-            </span>
-            <select
-              id="shenute-inference-provider"
-              name="shenute_inference_provider"
-              className="compact-select-base h-11 w-full bg-white/85 text-sm dark:bg-stone-900"
-              value={inferenceProvider}
-              onChange={(event) => {
-                setInferenceProvider(toShenuteProvider(event.target.value));
-              }}
-              disabled={isLoading || isShenuteAccessBlocked}
-            >
-              <option value="thoth">{copy.providerThoth}</option>
-              <option value="gemini">{copy.providerGemini}</option>
-              <option value="openrouter">{copy.providerOpenRouter}</option>
-              <option value="hf">{copy.providerHf}</option>
-            </select>
-          </label>
-
-          <div className="min-w-0 p-4 md:p-5">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex min-w-0 items-start gap-3">
-                <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-sky-700 shadow-sm dark:bg-sky-900/30 dark:text-sky-300">
-                  <BookOpenCheck className="h-4 w-4" />
-                </div>
-                <div className="min-w-0 space-y-1">
-                  <h2 className="text-sm font-semibold text-stone-900 dark:text-stone-100">
-                    {copy.creditsLinkTitle}
-                  </h2>
-                  <p className="max-w-2xl text-xs leading-5 text-stone-600 dark:text-stone-400">
-                    {copy.creditsLinkDescription}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex shrink-0 flex-wrap gap-2">
-                <Link
-                  href={`${getContributorsPath(language)}#shenute-ai-credits`}
-                  className={buttonClassName({
-                    className: "h-9 px-3 text-xs",
-                    size: "sm",
-                    variant: "secondary",
-                  })}
-                >
-                  {copy.viewShenuteCredits}
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-                <Link
-                  href={`${getContributorsPath(language)}#research-nmt-credits`}
-                  className={buttonClassName({
-                    className: "h-9 px-3 text-xs",
-                    size: "sm",
-                    variant: "secondary",
-                  })}
-                >
-                  {copy.viewNmtCredits}
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </SurfacePanel>
-
-      <SurfacePanel
-        rounded="4xl"
-        shadow="float"
+        shadow="panel"
         className="relative overflow-hidden"
       >
         {isShenuteAccessBlocked ? (
@@ -1150,146 +1802,319 @@ export default function ShenuteAI() {
 
         <div
           className={cx(
-            "flex min-h-[72vh] flex-col transition-all duration-300",
+            "flex h-[calc(100dvh-18rem)] min-h-[24rem] flex-col transition-all duration-300 md:h-[calc(100dvh-16rem)] md:min-h-[28rem] lg:h-[calc(100dvh-17rem)] lg:min-h-[24rem]",
             isShenuteAccessBlocked &&
               "pointer-events-none select-none blur-[6px] opacity-70",
           )}
         >
           {sessions.length > 0 ? (
-            <div className="mb-4 rounded-3xl border border-stone-200 bg-white/80 p-4 shadow-sm dark:border-stone-700 dark:bg-stone-950/70">
-              <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-stone-900 dark:text-stone-100">
+            <details className="border-b border-stone-200/80 bg-white/65 px-4 py-2 dark:border-stone-800 dark:bg-stone-950/35 md:px-5">
+              <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 text-sm [&::-webkit-details-marker]:hidden">
+                <div className="flex min-w-0 items-center gap-2">
+                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-stone-500 dark:bg-stone-900 dark:text-stone-300">
+                    <Clock3 className="h-3.5 w-3.5" />
+                  </span>
+                  <p className="truncate text-sm font-semibold text-stone-900 dark:text-stone-100">
                     {copy.historySessions}
                   </p>
-                  <p className="text-sm text-stone-500 dark:text-stone-400">
-                    {copy.historySessionsDescription}
-                  </p>
+                </div>
+                <div className="flex min-w-0 items-center gap-2">
                   {sessionStatus ? (
-                    <p className="text-xs text-stone-500 dark:text-stone-400">
+                    <span className="hidden truncate text-xs text-stone-500 dark:text-stone-400 sm:inline">
                       {sessionStatus}
-                    </p>
+                    </span>
                   ) : null}
+                  <span className="inline-flex h-7 shrink-0 items-center rounded-full bg-stone-100 px-3 text-xs font-semibold uppercase tracking-wide text-stone-600 dark:bg-stone-900 dark:text-stone-300">
+                    {sessionCountLabel}
+                  </span>
                 </div>
-                <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-stone-600 dark:bg-stone-900 dark:text-stone-300">
-                  {sessions.length} {copy.sessionCount}
-                </span>
-              </div>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {sessions.map((session) => {
-                  const isActive = session.id === activeSessionId;
+              </summary>
+              <div className="mt-2 rounded-2xl border border-stone-200 bg-white/80 p-3 shadow-sm dark:border-stone-700 dark:bg-stone-950/70">
+                <div
+                  aria-label={copy.historySessions}
+                  className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch]"
+                >
+                  {sessions.map((session) => {
+                    const isActive = session.id === activeSessionId;
+                    const formattedSessionDate = formatSessionTimestamp(
+                      session.updated_at,
+                      language,
+                      copy.sessionDateMissing,
+                    );
 
-                  return (
-                    <button
-                      key={session.id}
-                      type="button"
-                      onClick={() => void loadShenuteSession(session.id)}
-                      disabled={isActive}
-                      className={cx(
-                        "flex w-full flex-col gap-1 rounded-3xl border px-4 py-3 text-left text-sm transition",
-                        isActive
-                          ? "border-sky-500 bg-sky-50 text-sky-900 dark:border-sky-400 dark:bg-sky-950/70 dark:text-sky-100"
-                          : "border-stone-200 bg-white text-stone-900 hover:border-stone-400 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-950/70 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-900",
-                      )}
-                    >
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="font-semibold">
-                          {session.title || copy.historySessions}
-                        </span>
-                        <span className="text-xs text-stone-500 dark:text-stone-400">
-                          {isActive ? copy.currentSession : copy.loadSession}
-                        </span>
-                      </div>
-                      <p className="text-xs text-stone-500 dark:text-stone-400">
-                        {session.updated_at
-                          ? new Date(session.updated_at).toLocaleString()
-                          : copy.sessionDateMissing}
-                      </p>
-                      {sessionLoadingId === session.id ? (
-                        <p className="text-xs text-slate-500 dark:text-slate-400">
-                          {copy.loadingSession}
-                        </p>
-                      ) : null}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          ) : null}
-          {messages.length === 0 ? (
-            <div className="flex flex-1 items-center justify-center p-8 md:p-12">
-              <SurfacePanel
-                rounded="4xl"
-                variant="subtle"
-                shadow="soft"
-                className="max-w-xl p-8 text-center"
-              >
-                <div className="mx-auto mb-5 inline-flex h-16 w-16 items-center justify-center rounded-3xl bg-sky-100 text-3xl text-sky-700 shadow-sm dark:bg-sky-900/30 dark:text-sky-300">
-                  <span className="font-coptic leading-none">Ϣ</span>
+                    return (
+                      <button
+                        key={session.id}
+                        type="button"
+                        onClick={() => void loadShenuteSession(session.id)}
+                        disabled={isActive}
+                        className={cx(
+                          "flex w-64 shrink-0 snap-start flex-col gap-1 rounded-2xl border px-3 py-2.5 text-left text-sm transition sm:w-72",
+                          isActive
+                            ? "border-sky-500 bg-sky-50 text-sky-900 dark:border-sky-400 dark:bg-sky-950/70 dark:text-sky-100"
+                            : "border-stone-200 bg-white text-stone-900 hover:border-stone-400 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-950/70 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-900",
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <span className="min-w-0 truncate font-semibold">
+                            {session.title || copy.historySessions}
+                          </span>
+                          <span
+                            className={cx(
+                              "shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold",
+                              isActive
+                                ? "bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300"
+                                : "bg-stone-100 text-stone-500 dark:bg-stone-900 dark:text-stone-400",
+                            )}
+                          >
+                            {isActive ? copy.currentSession : copy.loadSession}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
+                          <Clock3 className="h-3 w-3" />
+                          <span>{formattedSessionDate}</span>
+                          {isActive && hasUnsavedConversationChanges ? (
+                            <span className="rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+                              {copy.sessionUnsavedBadge}
+                            </span>
+                          ) : null}
+                        </div>
+                        {sessionLoadingId === session.id ? (
+                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                            {copy.loadingSession}
+                          </p>
+                        ) : null}
+                      </button>
+                    );
+                  })}
                 </div>
-                <h2 className="mb-3 text-2xl font-semibold text-stone-900 dark:text-stone-100">
-                  {copy.welcomeTitle}
-                </h2>
-                <p className="text-stone-600 dark:text-stone-400">
-                  {copy.welcomeDescription}
-                </p>
-              </SurfacePanel>
+              </div>
+            </details>
+          ) : null}
+          <div className="grid gap-2 border-b border-stone-200/80 bg-white/70 px-4 py-2 text-sm text-stone-600 dark:border-stone-800 dark:bg-stone-950/40 dark:text-stone-300 md:px-5 sm:flex sm:items-center sm:justify-between">
+            <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
+              <span
+                aria-hidden="true"
+                className={cx(
+                  "h-2 w-2 shrink-0 rounded-full",
+                  historyStatusDotClassName,
+                )}
+              />
+              <p className="min-w-0 truncate text-xs sm:text-sm">
+                {historyStatusMessage}
+              </p>
+              <span className="inline-flex max-w-full items-center rounded-full bg-stone-100 px-2 py-0.5 text-xs font-semibold text-stone-600 dark:bg-stone-900 dark:text-stone-300">
+                <span className="truncate">
+                  {copy.aiMode}: {selectedProviderOption.label}
+                </span>
+              </span>
             </div>
-          ) : (
-            <div
-              aria-live="polite"
-              className="flex-1 space-y-5 overflow-y-auto border-b border-stone-200/80 bg-stone-50/60 p-4 dark:border-stone-800 dark:bg-stone-950/30 md:p-6"
-            >
-              <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-stone-200 bg-white/70 px-4 py-3 text-sm text-stone-600 shadow-sm dark:border-stone-700 dark:bg-stone-950/70 dark:text-stone-300 md:px-5">
-                <p>{autosaveStatus ?? copy.autosaveStatus}</p>
-                <div className="flex items-center gap-3">
-                  {saveStatus ? (
-                    <p className="text-xs text-emerald-700 dark:text-emerald-300">
-                      {saveStatus}
-                    </p>
-                  ) : null}
+            <div className="flex max-w-full flex-wrap items-center gap-2">
+              {typedMessages.length > 0 && !isTranscriptAtBottom ? (
+                <button
+                  type="button"
+                  aria-label={copy.jumpToLatest}
+                  title={copy.jumpToLatest}
+                  onClick={scrollToLatestMessage}
+                  className={buttonClassName({
+                    size: "sm",
+                    variant: "secondary",
+                    className: "h-9 w-9 shrink-0 px-0 shadow-sm",
+                  })}
+                >
+                  <ArrowDownToLine className="h-3.5 w-3.5" />
+                </button>
+              ) : null}
+              <button
+                type="button"
+                aria-controls="shenute-answer-style-panel"
+                aria-expanded={isAnswerStylePanelOpen}
+                aria-haspopup="dialog"
+                aria-label={copy.answerStyleControls}
+                title={copy.answerStyleControls}
+                onClick={() => setIsAnswerStylePanelOpen((current) => !current)}
+                className={buttonClassName({
+                  size: "sm",
+                  variant: "secondary",
+                  className: cx(
+                    "h-9 w-9 shrink-0 px-0",
+                    isAnswerStylePanelOpen &&
+                      "border-sky-300 text-sky-700 dark:border-sky-500/70 dark:text-sky-300",
+                  ),
+                })}
+              >
+                <SlidersHorizontal className="h-3.5 w-3.5" />
+              </button>
+              <button
+                type="button"
+                aria-label={copy.newConversation}
+                title={copy.newConversation}
+                onClick={() => void startNewConversation()}
+                disabled={
+                  isLoading || isHistorySaving || !canStartNewConversation
+                }
+                className={buttonClassName({
+                  size: "sm",
+                  variant: "secondary",
+                  className: "h-9 w-9 shrink-0 px-0",
+                })}
+              >
+                <MessageSquarePlus className="h-3.5 w-3.5" />
+              </button>
+              <details className="group relative shrink-0">
+                <summary
+                  aria-label={copy.chatActions}
+                  title={copy.chatActions}
+                  className={buttonClassName({
+                    size: "sm",
+                    variant: "secondary",
+                    className:
+                      "h-9 w-9 cursor-pointer list-none px-0 [&::-webkit-details-marker]:hidden",
+                  })}
+                >
+                  <MoreHorizontal className="h-3.5 w-3.5" />
+                </summary>
+                <div className="absolute right-0 top-full z-30 mt-2 w-64 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl dark:border-stone-700 dark:bg-stone-950">
                   <button
                     type="button"
                     onClick={handleSaveHistory}
-                    disabled={typedMessages.length === 0}
+                    disabled={
+                      typedMessages.length === 0 ||
+                      isLoading ||
+                      isHistorySaving ||
+                      !hasUnsavedConversationChanges
+                    }
                     className={buttonClassName({
+                      fullWidth: true,
+                      size: "sm",
+                      variant: "secondary",
+                      className: "h-9 justify-start gap-2 px-3 text-xs",
+                    })}
+                  >
+                    <Save className="h-3.5 w-3.5" />
+                    {saveButtonLabel}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void clearCurrentConversation()}
+                    disabled={
+                      isLoading ||
+                      isHistorySaving ||
+                      (!activeSessionId && typedMessages.length === 0)
+                    }
+                    className={buttonClassName({
+                      fullWidth: true,
+                      size: "sm",
+                      variant: "secondary",
+                      className:
+                        "mt-2 h-9 justify-start gap-2 border-rose-200 px-3 text-xs text-rose-700 hover:bg-rose-50 dark:border-rose-900/60 dark:text-rose-300 dark:hover:bg-rose-950/30",
+                    })}
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    {copy.clearConversation}
+                  </button>
+                  <Link
+                    href={`${getContributorsPath(language)}#shenute-ai-credits`}
+                    className={buttonClassName({
+                      fullWidth: true,
+                      className: "mt-2 h-9 justify-start gap-2 px-3 text-xs",
                       size: "sm",
                       variant: "secondary",
                     })}
                   >
-                    {copy.saveHistory}
-                  </button>
+                    <BookOpenCheck className="h-3.5 w-3.5" />
+                    {copy.creditsShort}
+                    <ArrowRight className="ml-auto h-3.5 w-3.5" />
+                  </Link>
+                </div>
+              </details>
+            </div>
+          </div>
+          {typedMessages.length === 0 ? (
+            <div className="min-h-0 flex-1 overflow-y-auto border-b border-stone-200/80 bg-stone-50/60 p-4 dark:border-stone-800 dark:bg-stone-950/30 md:p-5">
+              <div className="mx-auto flex w-full max-w-5xl flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-2xl text-sky-700 shadow-sm dark:bg-sky-900/30 dark:text-sky-300">
+                    <span className="font-coptic leading-none">Ϣ</span>
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="truncate text-base font-semibold leading-6 text-stone-900 dark:text-stone-100 md:text-lg">
+                      {copy.welcomeTitle}
+                    </h2>
+                    <p className="hidden max-w-2xl truncate text-sm text-stone-600 dark:text-stone-400 lg:block">
+                      {copy.welcomeDescription}
+                    </p>
+                  </div>
+                </div>
+                <div>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+                    {copy.starterPromptsTitle}
+                  </p>
+                  <div className="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
+                    {starterPrompts.map((starterPrompt) => {
+                      const Icon = starterPrompt.icon;
+
+                      return (
+                        <button
+                          key={starterPrompt.prompt}
+                          type="button"
+                          onClick={() => {
+                            handleStarterPrompt(starterPrompt.prompt);
+                          }}
+                          disabled={isLoading || isShenuteAccessBlocked}
+                          className="group flex min-h-14 w-72 shrink-0 snap-start items-start gap-3 rounded-2xl border border-stone-200 bg-white/85 px-3 py-3 text-left text-sm font-medium leading-5 text-stone-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-stone-700 dark:bg-stone-950/60 dark:text-stone-200 dark:hover:border-sky-700 dark:hover:bg-sky-950/30 dark:hover:text-sky-100 md:w-auto"
+                        >
+                          <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-stone-500 transition group-hover:bg-sky-100 group-hover:text-sky-700 dark:bg-stone-800 dark:text-stone-300 dark:group-hover:bg-sky-950/60 dark:group-hover:text-sky-300">
+                            <Icon className="h-3.5 w-3.5" />
+                          </span>
+                          <span className="min-w-0">
+                            {starterPrompt.prompt}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
-              {messages.map((m, index) => {
+            </div>
+          ) : (
+            <div
+              ref={transcriptScrollRef}
+              aria-live="polite"
+              onScroll={updateTranscriptScrollState}
+              className="min-h-0 flex-1 overscroll-contain scroll-pb-6 space-y-5 overflow-y-auto border-b border-stone-200/80 bg-stone-50/60 p-4 dark:border-stone-800 dark:bg-stone-950/30 md:p-6"
+            >
+              {typedMessages.map((m, index) => {
                 const assistantMessage = m as ChatMessageLike;
                 const promptMessage =
                   m.role === "assistant"
                     ? findPreviousUserMessage(typedMessages, index)
                     : null;
                 const feedbackState = feedbackStateByMessage[m.id];
+                const messageActionState = messageActionStateByMessage[m.id];
                 const selectedReaction = selectedReactionByMessage[m.id];
                 const adminDraft = adminFeedbackDraftByMessage[m.id] ?? "";
                 const isFeedbackPending = feedbackState?.status === "pending";
+                const isLatestAssistantMessage =
+                  m.role === "assistant" && index === typedMessages.length - 1;
 
                 return (
                   <div
                     key={m.id}
                     className={cx(
-                      "flex max-w-[85%] gap-3",
-                      m.role === "user"
-                        ? "ml-auto flex-row-reverse"
-                        : "mr-auto",
+                      "group flex w-full gap-2 sm:gap-3",
+                      m.role === "user" ? "justify-end" : "justify-start",
                     )}
                   >
                     <div
                       className={cx(
-                        "mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold shadow-sm",
+                        "mt-6 hidden h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold shadow-sm sm:flex",
                         getMessageAvatarClassName(m.role),
+                        m.role === "user" && "order-2",
                       )}
                     >
                       {m.role === "user" ? (
-                        "U"
+                        <UserRound className="h-4 w-4" />
                       ) : (
                         <span className="font-coptic text-base leading-none">
                           Ϣ
@@ -1298,187 +2123,333 @@ export default function ShenuteAI() {
                     </div>
                     <div
                       className={cx(
-                        "rounded-2xl px-4 py-3 font-coptic text-lg leading-relaxed md:text-xl",
-                        getMessageBubbleClassName(m.role),
+                        "min-w-0",
+                        m.role === "user"
+                          ? "flex max-w-[88%] flex-col items-end sm:max-w-[70%]"
+                          : "flex max-w-full flex-1 flex-col items-start sm:max-w-[52rem]",
                       )}
                     >
-                      {(() => {
-                        const text = getMessageText(m);
-                        if (!text) {
-                          return null;
-                        }
+                      <div
+                        className={cx(
+                          "mb-1 flex flex-wrap items-center gap-2 px-1 text-xs font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400",
+                          m.role === "user" && "justify-end text-right",
+                        )}
+                      >
+                        <span>
+                          {m.role === "user"
+                            ? copy.userLabel
+                            : copy.assistantLabel}
+                        </span>
+                        {isLatestAssistantMessage ? (
+                          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[0.65rem] tracking-normal text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                            {getProviderLabel(inferenceProvider, copy)}
+                          </span>
+                        ) : null}
+                      </div>
+                      <div
+                        className={cx(
+                          "max-w-full rounded-2xl px-4 py-3",
+                          m.role === "assistant" && "w-full sm:px-5 sm:py-4",
+                          getMessageBubbleClassName(m.role),
+                        )}
+                      >
+                        {(() => {
+                          const text = getMessageText(m);
+                          if (!text) {
+                            return null;
+                          }
 
-                        return (
-                          <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            components={{
-                              a: ({ ...props }) => (
-                                <a
-                                  {...props}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="underline"
-                                />
-                              ),
-                              code: ({ className, children, ...props }) => (
-                                <code
-                                  className={`rounded bg-stone-200/70 px-1 py-0.5 text-[0.95em] dark:bg-stone-800 ${className || ""}`}
-                                  {...props}
-                                >
-                                  {children}
-                                </code>
-                              ),
-                            }}
-                          >
-                            {text}
-                          </ReactMarkdown>
-                        );
-                      })()}
-                      {m.role === "assistant" ? (
-                        <div className="mt-3 space-y-2 border-t border-stone-200 pt-3 text-xs dark:border-stone-700">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (isSpeaking) {
-                                  stop();
-                                } else {
-                                  const text = getMessageText(m);
-                                  if (text) {
-                                    void speakMixed(text);
-                                  }
-                                }
-                              }}
-                              disabled={isPremiumLoading}
-                              className={buttonClassName({
-                                size: "sm",
-                                variant: "secondary",
-                                className: cx(
-                                  "gap-2",
-                                  isSpeaking &&
-                                    "border-sky-500 text-sky-600 dark:border-sky-400 dark:text-sky-300",
-                                ),
-                              })}
-                            >
-                              {isSpeaking ? (
-                                <Square className="h-3.5 w-3.5 fill-current" />
-                              ) : (
-                                <Volume2 className="h-3.5 w-3.5" />
+                          return (
+                            <div
+                              className={cx(
+                                "font-coptic text-[1.05rem] leading-7 md:text-lg md:leading-8",
+                                m.role === "user"
+                                  ? "text-white"
+                                  : "text-stone-800 dark:text-stone-200",
                               )}
-                              {isSpeaking ? copy.stop : copy.play}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                void handleReaction(
-                                  "like",
-                                  assistantMessage,
-                                  promptMessage,
-                                );
-                              }}
-                              disabled={!isAuthenticated || isFeedbackPending}
-                              aria-pressed={selectedReaction === "like"}
-                              className={buttonClassName({
-                                size: "sm",
-                                variant: "secondary",
-                                className: getReactionButtonClassName(
-                                  selectedReaction === "like",
-                                  "positive",
-                                ),
-                              })}
                             >
-                              {copy.like}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                void handleReaction(
-                                  "dislike",
-                                  assistantMessage,
-                                  promptMessage,
-                                );
-                              }}
-                              disabled={!isAuthenticated || isFeedbackPending}
-                              aria-pressed={selectedReaction === "dislike"}
-                              className={buttonClassName({
-                                size: "sm",
-                                variant: "secondary",
-                                className: getReactionButtonClassName(
-                                  selectedReaction === "dislike",
-                                  "negative",
-                                ),
-                              })}
-                            >
-                              {copy.dislike}
-                            </button>
-                          </div>
-
-                          <details className="rounded-2xl border border-stone-200 bg-stone-50/70 p-3 dark:border-stone-700 dark:bg-stone-950/30">
-                            <summary className="cursor-pointer font-semibold text-stone-700 dark:text-stone-200">
-                              {copy.adminNoteSummary}
-                            </summary>
-                            <div className="mt-2 space-y-2">
-                              <textarea
-                                value={adminDraft}
-                                onChange={(event) => {
-                                  const value = event.target.value;
-                                  setAdminFeedbackDraftByMessage((current) => ({
-                                    ...current,
-                                    [m.id]: value,
-                                  }));
+                              <ReactMarkdown
+                                remarkPlugins={[remarkGfm]}
+                                components={{
+                                  a: ({ ...props }) => (
+                                    <a
+                                      {...props}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      className={cx(
+                                        "underline underline-offset-4",
+                                        m.role === "user"
+                                          ? "decoration-white/60 hover:decoration-white"
+                                          : "decoration-stone-400 hover:decoration-sky-500",
+                                      )}
+                                    />
+                                  ),
+                                  blockquote: ({ ...props }) => (
+                                    <blockquote
+                                      {...props}
+                                      className={cx(
+                                        "my-3 border-l-2 pl-3",
+                                        m.role === "user"
+                                          ? "border-white/45 text-white/85"
+                                          : "border-stone-300 text-stone-600 dark:border-stone-600 dark:text-stone-300",
+                                      )}
+                                    />
+                                  ),
+                                  code: ({ className, children, ...props }) => (
+                                    <code
+                                      className={cx(
+                                        "rounded px-1 py-0.5 text-[0.95em]",
+                                        m.role === "user"
+                                          ? "bg-white/15 text-white"
+                                          : "bg-stone-200/70 dark:bg-stone-800",
+                                        className,
+                                      )}
+                                      {...props}
+                                    >
+                                      {children}
+                                    </code>
+                                  ),
+                                  li: ({ ...props }) => (
+                                    <li {...props} className="pl-1" />
+                                  ),
+                                  ol: ({ ...props }) => (
+                                    <ol
+                                      {...props}
+                                      className="my-3 list-decimal space-y-1 pl-6"
+                                    />
+                                  ),
+                                  p: ({ ...props }) => (
+                                    <p {...props} className="mb-3 last:mb-0" />
+                                  ),
+                                  ul: ({ ...props }) => (
+                                    <ul
+                                      {...props}
+                                      className="my-3 list-disc space-y-1 pl-6"
+                                    />
+                                  ),
                                 }}
-                                placeholder={copy.adminNotePlaceholder}
-                                rows={3}
-                                disabled={!isAuthenticated || isFeedbackPending}
-                                className="w-full rounded-xl border border-stone-200 bg-white/85 px-3 py-2 text-xs text-stone-900 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-300/35 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100"
-                              />
+                              >
+                                {text}
+                              </ReactMarkdown>
+                            </div>
+                          );
+                        })()}
+                        {m.role === "assistant" ? (
+                          <div className="mt-3 space-y-2 border-t border-stone-200/80 pt-3 text-xs dark:border-stone-700">
+                            <div className="flex max-w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] sm:flex-wrap sm:overflow-visible sm:pb-0">
                               <button
                                 type="button"
                                 onClick={() => {
-                                  void handleAdminFeedbackSubmit(
+                                  void handleCopyMessage(assistantMessage);
+                                }}
+                                className={buttonClassName({
+                                  size: "sm",
+                                  variant: "secondary",
+                                  className: MESSAGE_ACTION_BUTTON_CLASS,
+                                })}
+                              >
+                                <Copy className="h-3.5 w-3.5" />
+                                {copy.copyResponse}
+                              </button>
+                              {isLatestAssistantMessage ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      handleRegenerateMessage(assistantMessage);
+                                    }}
+                                    disabled={isLoading}
+                                    className={buttonClassName({
+                                      size: "sm",
+                                      variant: "secondary",
+                                      className: MESSAGE_ACTION_BUTTON_CLASS,
+                                    })}
+                                  >
+                                    <RotateCcw className="h-3.5 w-3.5" />
+                                    {copy.regenerateResponse}
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={handleContinueConversation}
+                                    disabled={
+                                      isLoading || isShenuteAccessBlocked
+                                    }
+                                    className={buttonClassName({
+                                      size: "sm",
+                                      variant: "secondary",
+                                      className: MESSAGE_ACTION_BUTTON_CLASS,
+                                    })}
+                                  >
+                                    <CornerDownRight className="h-3.5 w-3.5" />
+                                    {copy.continueResponse}
+                                  </button>
+                                </>
+                              ) : null}
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (isSpeaking) {
+                                    stopSpeech();
+                                  } else {
+                                    const text = getMessageText(m);
+                                    if (text) {
+                                      void speakMixed(text);
+                                    }
+                                  }
+                                }}
+                                disabled={isPremiumLoading}
+                                className={buttonClassName({
+                                  size: "sm",
+                                  variant: "secondary",
+                                  className: cx(
+                                    MESSAGE_ACTION_BUTTON_CLASS,
+                                    isSpeaking &&
+                                      "border-sky-500 text-sky-600 dark:border-sky-400 dark:text-sky-300",
+                                  ),
+                                })}
+                              >
+                                {isSpeaking ? (
+                                  <Square className="h-3.5 w-3.5 fill-current" />
+                                ) : (
+                                  <Volume2 className="h-3.5 w-3.5" />
+                                )}
+                                {isSpeaking ? copy.stop : copy.play}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  void handleReaction(
+                                    "like",
                                     assistantMessage,
                                     promptMessage,
                                   );
                                 }}
                                 disabled={!isAuthenticated || isFeedbackPending}
+                                aria-pressed={selectedReaction === "like"}
                                 className={buttonClassName({
                                   size: "sm",
                                   variant: "secondary",
+                                  className: cx(
+                                    MESSAGE_ACTION_BUTTON_CLASS,
+                                    getReactionButtonClassName(
+                                      selectedReaction === "like",
+                                      "positive",
+                                    ),
+                                  ),
                                 })}
                               >
-                                {copy.submitAdminNote}
+                                <ThumbsUp className="h-3.5 w-3.5" />
+                                {copy.like}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  void handleReaction(
+                                    "dislike",
+                                    assistantMessage,
+                                    promptMessage,
+                                  );
+                                }}
+                                disabled={!isAuthenticated || isFeedbackPending}
+                                aria-pressed={selectedReaction === "dislike"}
+                                className={buttonClassName({
+                                  size: "sm",
+                                  variant: "secondary",
+                                  className: cx(
+                                    MESSAGE_ACTION_BUTTON_CLASS,
+                                    getReactionButtonClassName(
+                                      selectedReaction === "dislike",
+                                      "negative",
+                                    ),
+                                  ),
+                                })}
+                              >
+                                <ThumbsDown className="h-3.5 w-3.5" />
+                                {copy.dislike}
                               </button>
                             </div>
-                          </details>
 
-                          {feedbackState ? (
-                            <p
-                              className={getFeedbackStatusClass(
-                                feedbackState.status,
-                              )}
-                            >
-                              {feedbackState.message}
-                            </p>
-                          ) : null}
+                            {messageActionState ? (
+                              <p
+                                className={getFeedbackStatusClass(
+                                  messageActionState.status,
+                                )}
+                              >
+                                {messageActionState.message}
+                              </p>
+                            ) : null}
 
-                          {!isAuthenticated && isReady ? (
-                            <AuthGateInlinePrompt
-                              className="text-xs"
-                              message={copy.feedbackSignInInline}
-                            />
-                          ) : null}
-                        </div>
-                      ) : null}
+                            {canSubmitAdminFeedback ? (
+                              <details className="rounded-2xl border border-stone-200 bg-stone-50/70 p-3 dark:border-stone-700 dark:bg-stone-950/30">
+                                <summary className="cursor-pointer font-semibold text-stone-700 dark:text-stone-200">
+                                  {copy.adminNoteSummary}
+                                </summary>
+                                <div className="mt-2 space-y-2">
+                                  <textarea
+                                    value={adminDraft}
+                                    onChange={(event) => {
+                                      const value = event.target.value;
+                                      setAdminFeedbackDraftByMessage(
+                                        (current) => ({
+                                          ...current,
+                                          [m.id]: value,
+                                        }),
+                                      );
+                                    }}
+                                    placeholder={copy.adminNotePlaceholder}
+                                    rows={3}
+                                    disabled={isFeedbackPending}
+                                    className="w-full rounded-xl border border-stone-200 bg-white/85 px-3 py-2 text-xs text-stone-900 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-300/35 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      void handleAdminFeedbackSubmit(
+                                        assistantMessage,
+                                        promptMessage,
+                                      );
+                                    }}
+                                    disabled={isFeedbackPending}
+                                    className={buttonClassName({
+                                      size: "sm",
+                                      variant: "secondary",
+                                    })}
+                                  >
+                                    {copy.submitAdminNote}
+                                  </button>
+                                </div>
+                              </details>
+                            ) : null}
+
+                            {feedbackState ? (
+                              <p
+                                className={getFeedbackStatusClass(
+                                  feedbackState.status,
+                                )}
+                              >
+                                {feedbackState.message}
+                              </p>
+                            ) : null}
+
+                            {!isAuthenticated && isReady ? (
+                              <AuthGateInlinePrompt
+                                className="text-xs"
+                                message={copy.feedbackSignInInline}
+                              />
+                            ) : null}
+                          </div>
+                        ) : null}
+                      </div>
                     </div>
                   </div>
                 );
               })}
 
               {isLoading ? (
-                <div className="mr-auto flex max-w-[85%] items-center gap-3">
+                <div className="mr-auto flex w-full max-w-[52rem] gap-2 sm:gap-3">
                   <div
                     className={cx(
-                      "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold shadow-sm",
+                      "mt-6 hidden h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-bold shadow-sm sm:flex",
                       getMessageAvatarClassName("assistant"),
                     )}
                   >
@@ -1486,10 +2457,36 @@ export default function ShenuteAI() {
                       Ϣ
                     </span>
                   </div>
-                  <div className="flex items-center gap-1 rounded-2xl rounded-tl-sm border border-stone-200 bg-white/90 p-4 shadow-sm dark:border-stone-700 dark:bg-stone-900/80">
-                    <div className="h-2 w-2 animate-bounce rounded-full bg-stone-400 delay-100" />
-                    <div className="h-2 w-2 animate-bounce rounded-full bg-stone-400 delay-200" />
-                    <div className="h-2 w-2 animate-bounce rounded-full bg-stone-400 delay-300" />
+                  <div className="min-w-0">
+                    <p className="mb-1 px-1 text-xs font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+                      {copy.assistantLabel}
+                    </p>
+                    <div className="flex flex-wrap items-center gap-3 rounded-2xl rounded-bl-sm border border-stone-200 bg-white/95 px-4 py-3 shadow-sm ring-1 ring-white/70 dark:border-stone-700 dark:bg-stone-900/85 dark:ring-stone-800/50">
+                      <span className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+                        {copy.thinking}{" "}
+                        {formatElapsedTime(thinkingElapsedSeconds)}
+                      </span>
+                      <span
+                        aria-hidden="true"
+                        className="flex items-center gap-1"
+                      >
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-stone-400 delay-100" />
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-stone-400 delay-200" />
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-stone-400 delay-300" />
+                      </span>
+                      <button
+                        type="button"
+                        onClick={stopChatResponse}
+                        className={buttonClassName({
+                          size: "sm",
+                          variant: "secondary",
+                          className: "h-8 gap-2 px-2 text-xs",
+                        })}
+                      >
+                        <XCircle className="h-3.5 w-3.5" />
+                        {copy.cancelResponse}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ) : null}
@@ -1499,30 +2496,32 @@ export default function ShenuteAI() {
 
           <form
             onSubmit={handleFormSubmit}
-            className="bg-white/70 p-4 dark:bg-stone-950/40 md:p-6"
+            className="sticky bottom-0 z-20 border-t border-stone-200/80 bg-white/90 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-18px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/90 dark:shadow-[0_-18px_30px_rgba(0,0,0,0.35)] md:p-4 md:pb-4"
           >
-            <div className="mb-3 space-y-3">
-              {shenuteAccessError ? (
-                <AuthGateNotice align="left" size="compact">
-                  {shenuteAccessError}
-                </AuthGateNotice>
-              ) : null}
-              {error ? (
-                <StatusNotice tone="error" align="left">
-                  {getShenuteErrorMessage(error, copy)}
-                </StatusNotice>
-              ) : null}
-              {ocrError ? (
-                <StatusNotice tone="error" align="left">
-                  {ocrError}
-                </StatusNotice>
-              ) : null}
-              {cameraError ? (
-                <StatusNotice tone="info" align="left">
-                  {cameraError}
-                </StatusNotice>
-              ) : null}
-            </div>
+            {shenuteAccessError || error || ocrError || cameraError ? (
+              <div className="mb-3 space-y-3">
+                {shenuteAccessError ? (
+                  <AuthGateNotice align="left" size="compact">
+                    {shenuteAccessError}
+                  </AuthGateNotice>
+                ) : null}
+                {error ? (
+                  <StatusNotice tone="error" align="left">
+                    {getShenuteErrorMessage(error, copy)}
+                  </StatusNotice>
+                ) : null}
+                {ocrError ? (
+                  <StatusNotice tone="error" align="left">
+                    {ocrError}
+                  </StatusNotice>
+                ) : null}
+                {cameraError ? (
+                  <StatusNotice tone="info" align="left">
+                    {cameraError}
+                  </StatusNotice>
+                ) : null}
+              </div>
+            ) : null}
 
             <input
               ref={fileInputRef}
@@ -1559,8 +2558,10 @@ export default function ShenuteAI() {
                     className={buttonClassName({
                       size: "sm",
                       variant: "primary",
+                      className: "gap-2",
                     })}
                   >
+                    <Camera className="h-3.5 w-3.5" />
                     {copy.cameraCapture}
                   </button>
                   <button
@@ -1569,89 +2570,15 @@ export default function ShenuteAI() {
                     className={buttonClassName({
                       size: "sm",
                       variant: "secondary",
+                      className: "gap-2",
                     })}
                   >
+                    <XCircle className="h-3.5 w-3.5" />
                     {copy.cameraClose}
                   </button>
                 </div>
               </SurfacePanel>
             ) : null}
-
-            {selectedImagePreviewUrl ? (
-              <SurfacePanel
-                rounded="3xl"
-                variant="subtle"
-                shadow="soft"
-                className="mb-3 p-4"
-              >
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-stone-600 dark:text-stone-300">
-                    {copy.imageAttached} (
-                    {selectedImageSource === "camera"
-                      ? copy.cameraSource
-                      : copy.uploadSource}
-                    )
-                  </p>
-                  <button
-                    type="button"
-                    onClick={clearSelectedImage}
-                    className={buttonClassName({
-                      size: "sm",
-                      variant: "link",
-                    })}
-                  >
-                    {copy.remove}
-                  </button>
-                </div>
-                <Image
-                  unoptimized
-                  src={selectedImagePreviewUrl}
-                  alt={copy.selectedImageAlt}
-                  width={384}
-                  height={192}
-                  className="max-h-48 w-auto object-contain rounded-2xl border border-stone-200 dark:border-stone-700"
-                />
-              </SurfacePanel>
-            ) : null}
-
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  fileInputRef.current?.click();
-                }}
-                disabled={isLoading || ocrPending || isShenuteAccessBlocked}
-                className={buttonClassName({
-                  size: "sm",
-                  variant: "secondary",
-                })}
-              >
-                {copy.addImage}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  void openCamera();
-                }}
-                disabled={
-                  isLoading ||
-                  ocrPending ||
-                  cameraOpen ||
-                  isShenuteAccessBlocked
-                }
-                className={buttonClassName({
-                  size: "sm",
-                  variant: "secondary",
-                })}
-              >
-                {copy.useCamera}
-              </button>
-              {ocrPending ? (
-                <Badge tone="accent" size="xs">
-                  {copy.runningOcr}
-                </Badge>
-              ) : null}
-            </div>
 
             <SurfacePanel
               rounded="3xl"
@@ -1659,13 +2586,124 @@ export default function ShenuteAI() {
               shadow="soft"
               className="p-2"
             >
+              {selectedImagePreviewUrl ? (
+                <div className="mb-2 flex items-center gap-3 rounded-2xl border border-stone-200 bg-white/85 p-2 shadow-sm dark:border-stone-700 dark:bg-stone-950/60">
+                  <Image
+                    unoptimized
+                    src={selectedImagePreviewUrl}
+                    alt={copy.selectedImageAlt}
+                    width={72}
+                    height={72}
+                    className="h-14 w-14 shrink-0 rounded-xl border border-stone-200 bg-stone-50 object-contain dark:border-stone-700 dark:bg-stone-900"
+                  />
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex flex-wrap items-center gap-2">
+                      <span className="text-xs font-semibold text-stone-900 dark:text-stone-100">
+                        {copy.attachmentReady}
+                      </span>
+                      <Badge tone="accent" size="xs">
+                        {selectedImageSource === "camera"
+                          ? copy.cameraSource
+                          : copy.uploadSource}
+                      </Badge>
+                      {ocrPending ? (
+                        <Badge tone="neutral" size="xs">
+                          {copy.runningOcr}
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <p className="truncate text-xs text-stone-600 dark:text-stone-400">
+                      {selectedImage?.name ?? copy.imageAttached}
+                    </p>
+                    {selectedImageSizeLabel ? (
+                      <p className="text-xs text-stone-500 dark:text-stone-500">
+                        {selectedImageSizeLabel}
+                      </p>
+                    ) : null}
+                  </div>
+                  <button
+                    type="button"
+                    aria-label={copy.remove}
+                    title={copy.remove}
+                    onClick={clearSelectedImage}
+                    className={buttonClassName({
+                      size: "sm",
+                      variant: "secondary",
+                      className:
+                        "h-8 w-8 shrink-0 border-rose-200 px-0 text-rose-700 hover:bg-rose-50 dark:border-rose-900/60 dark:text-rose-300 dark:hover:bg-rose-950/30",
+                    })}
+                  >
+                    <XCircle className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              ) : null}
               <div className="flex items-end gap-2">
+                <details className="group relative shrink-0">
+                  <summary
+                    aria-disabled={isAttachmentMenuDisabled}
+                    aria-label={`${copy.addImage} / ${copy.useCamera}`}
+                    title={`${copy.addImage} / ${copy.useCamera}`}
+                    className={cx(
+                      buttonClassName({
+                        size: "sm",
+                        variant: "secondary",
+                        className:
+                          "h-12 w-12 cursor-pointer list-none rounded-2xl px-0 [&::-webkit-details-marker]:hidden",
+                      }),
+                      isAttachmentMenuDisabled &&
+                        "pointer-events-none opacity-55",
+                    )}
+                  >
+                    <ImagePlus className="h-4 w-4" />
+                  </summary>
+                  <div className="absolute bottom-full left-0 z-30 mb-2 w-52 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl dark:border-stone-700 dark:bg-stone-950">
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.currentTarget
+                          .closest("details")
+                          ?.removeAttribute("open");
+                        fileInputRef.current?.click();
+                      }}
+                      disabled={isAttachmentMenuDisabled}
+                      className={buttonClassName({
+                        fullWidth: true,
+                        size: "sm",
+                        variant: "secondary",
+                        className: "h-9 justify-start gap-2 px-3 text-xs",
+                      })}
+                    >
+                      <ImagePlus className="h-3.5 w-3.5" />
+                      {copy.addImage}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(event) => {
+                        event.currentTarget
+                          .closest("details")
+                          ?.removeAttribute("open");
+                        void openCamera();
+                      }}
+                      disabled={isAttachmentMenuDisabled || cameraOpen}
+                      className={buttonClassName({
+                        fullWidth: true,
+                        size: "sm",
+                        variant: "secondary",
+                        className: "mt-2 h-9 justify-start gap-2 px-3 text-xs",
+                      })}
+                    >
+                      <Camera className="h-3.5 w-3.5" />
+                      {copy.useCamera}
+                    </button>
+                  </div>
+                </details>
                 <textarea
+                  ref={messageInputRef}
                   id="shenute-message-input"
                   name="shenute_message"
                   rows={1}
                   enterKeyHint="send"
-                  className="max-h-40 min-h-12 min-w-0 flex-1 resize-y rounded-[1.25rem] border-0 bg-transparent px-4 py-3 font-coptic text-lg leading-7 text-stone-900 outline-none ring-0 placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:text-stone-100 dark:placeholder:text-stone-500 md:text-xl"
+                  className="max-h-40 min-h-12 min-w-0 flex-1 resize-none overflow-y-auto rounded-2xl border-0 bg-transparent px-4 py-3 font-coptic text-lg leading-7 text-stone-900 outline-none ring-0 placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:text-stone-100 dark:placeholder:text-stone-500 md:text-xl"
                   value={inputValue}
                   onChange={(event) => {
                     setInputValue(event.target.value);
@@ -1690,23 +2728,95 @@ export default function ShenuteAI() {
                     size: "sm",
                     variant: "primary",
                     className:
-                      "h-10 w-10 shrink-0 rounded-xl px-0 disabled:hover:bg-sky-500 dark:disabled:hover:bg-sky-400",
+                      "h-12 w-12 shrink-0 rounded-2xl px-0 disabled:hover:bg-sky-500 dark:disabled:hover:bg-sky-400",
                   })}
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="currentColor"
-                    className="h-5 w-5"
-                  >
-                    <path d="M3.478 2.404a.75.75 0 0 0-.926.941l2.432 7.905H13.5a.75.75 0 0 1 0 1.5H4.984l-2.432 7.905a.75.75 0 0 0 .926.94 60.519 60.519 0 0 0 18.445-8.986.75.75 0 0 0 0-1.218A60.517 60.517 0 0 0 3.478 2.404Z" />
-                  </svg>
+                  <SendHorizontal className="h-5 w-5" />
                 </button>
               </div>
             </SurfacePanel>
           </form>
         </div>
       </SurfacePanel>
+
+      {isAnswerStylePanelOpen ? (
+        <>
+          <button
+            type="button"
+            aria-label={copy.closeAnswerStyleControls}
+            tabIndex={-1}
+            className="fixed inset-0 z-[60] cursor-default bg-transparent"
+            onClick={() => setIsAnswerStylePanelOpen(false)}
+          />
+          <div
+            id="shenute-answer-style-panel"
+            role="dialog"
+            aria-labelledby="shenute-answer-style-label"
+            className="fixed left-1/2 top-[calc(var(--app-sticky-offset)_+_0.75rem)] z-[70] max-h-[calc(100dvh_-_var(--app-sticky-offset)_-_1.5rem)] w-[min(28rem,calc(100vw_-_2rem))] -translate-x-1/2 overflow-y-auto rounded-2xl border border-stone-200 bg-white p-3 shadow-2xl shadow-stone-950/20 dark:border-stone-700 dark:bg-stone-950 dark:shadow-black/40"
+          >
+            <p
+              id="shenute-answer-style-label"
+              className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400"
+            >
+              {copy.aiMode}
+            </p>
+            <p className="mt-1 text-xs leading-5 text-stone-500 dark:text-stone-400">
+              {copy.aiModeDescription}
+            </p>
+            <div
+              role="radiogroup"
+              aria-labelledby="shenute-answer-style-label"
+              className="mt-3 grid gap-2 sm:grid-cols-2"
+            >
+              {providerOptions.map((option) => {
+                const Icon = option.icon;
+                const isActive = option.value === inferenceProvider;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    role="radio"
+                    aria-checked={isActive}
+                    aria-label={`${option.label}. ${option.description}`}
+                    onClick={() => {
+                      setInferenceProvider(option.value);
+                      setIsAnswerStylePanelOpen(false);
+                    }}
+                    disabled={isLoading || isShenuteAccessBlocked}
+                    className={cx(
+                      "flex min-h-11 items-center gap-2 rounded-2xl border px-3 py-2 text-left transition disabled:cursor-not-allowed disabled:opacity-60",
+                      isActive
+                        ? "border-sky-400 bg-sky-50 text-sky-950 shadow-sm dark:border-sky-500/70 dark:bg-sky-950/40 dark:text-sky-100"
+                        : "border-stone-200 bg-white/80 text-stone-700 hover:border-stone-300 hover:bg-white dark:border-stone-700 dark:bg-stone-950/60 dark:text-stone-200 dark:hover:border-stone-600 dark:hover:bg-stone-900",
+                    )}
+                  >
+                    <span
+                      className={cx(
+                        "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl",
+                        isActive
+                          ? "bg-sky-600 text-white dark:bg-sky-400 dark:text-sky-950"
+                          : "bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-300",
+                      )}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </span>
+                    <span className="min-w-0 text-sm font-semibold leading-5">
+                      {option.label}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <p className="mt-3 rounded-2xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs leading-5 text-stone-600 dark:border-stone-700 dark:bg-stone-900/60 dark:text-stone-300">
+              <span className="font-semibold text-stone-800 dark:text-stone-100">
+                {selectedProviderOption.label}:
+              </span>{" "}
+              {selectedProviderOption.description}
+            </p>
+          </div>
+        </>
+      ) : null}
     </PageShell>
   );
 }

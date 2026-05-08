@@ -3,6 +3,10 @@
 import { NextRequest } from "next/server";
 import { describe, expect, it } from "vitest";
 
+import { MAX_DICTIONARY_SEARCH_QUERY_LENGTH } from "@/features/dictionary/search";
+
+import { GET as getDictionarySearch } from "./v1/dictionary/search/route";
+
 type RouteHandlerModule = {
   GET?: (...args: unknown[]) => Response | Promise<Response>;
   OPTIONS?: (...args: unknown[]) => Response | Promise<Response>;
@@ -143,6 +147,8 @@ describe("public API CORS", () => {
 
       if (getResponse) {
         expectCorsHeaders(getResponse);
+        expect(getResponse.headers.get("Cache-Control")).toContain("public");
+        expect(getResponse.headers.get("Cache-Control")).toContain("s-maxage=");
       }
 
       const optionsResponse = await routeModule.OPTIONS?.();
@@ -154,5 +160,20 @@ describe("public API CORS", () => {
         expectCorsHeaders(optionsResponse);
       }
     }
+  });
+
+  it("rejects oversized dictionary queries before scanning the index", async () => {
+    const oversizedQuery = "a".repeat(MAX_DICTIONARY_SEARCH_QUERY_LENGTH + 1);
+    const response = await getDictionarySearch(
+      new NextRequest(
+        `https://example.com/api/v1/dictionary/search?q=${oversizedQuery}`,
+      ),
+    );
+
+    expect(response.status).toBe(400);
+    expect(response.headers.get("Cache-Control")).toBeNull();
+    await expect(response.json()).resolves.toEqual({
+      error: `Search query is too long. Maximum length is ${MAX_DICTIONARY_SEARCH_QUERY_LENGTH} characters.`,
+    });
   });
 });

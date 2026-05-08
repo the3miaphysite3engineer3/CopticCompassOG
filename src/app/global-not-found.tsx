@@ -4,19 +4,13 @@ import { NotFoundAppFrame } from "@/components/NotFoundAppFrame";
 import { NotFoundPage } from "@/components/NotFoundPage";
 import { ObservabilityScripts } from "@/components/ObservabilityScripts";
 import { antinoou } from "@/lib/fonts";
-import { getCspNonce } from "@/lib/server/csp";
-import { getPreferredLanguage } from "@/lib/server/preferredLanguage";
+import { DEFAULT_LANGUAGE } from "@/lib/i18n";
 
-export default async function GlobalNotFound() {
-  const [preferredLanguage, nonce] = await Promise.all([
-    getPreferredLanguage(),
-    getCspNonce(),
-  ]);
-
+export default function GlobalNotFound() {
   return (
-    <html lang={preferredLanguage} suppressHydrationWarning>
+    <html lang={DEFAULT_LANGUAGE} suppressHydrationWarning>
       <body className={antinoou.variable}>
-        <NotFoundAppFrame nonce={nonce} preferredLanguage={preferredLanguage}>
+        <NotFoundAppFrame preferredLanguage={DEFAULT_LANGUAGE}>
           <NotFoundPage />
         </NotFoundAppFrame>
         <ObservabilityScripts />

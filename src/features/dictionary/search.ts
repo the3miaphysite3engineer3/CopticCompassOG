@@ -7,6 +7,7 @@ import { normalizeCopticSearchText } from "@/lib/copticSearch";
 
 export const DEFAULT_DICTIONARY_SEARCH_PAGE_SIZE = 50;
 export const MAX_DICTIONARY_SEARCH_PAGE_SIZE = 100;
+export const MAX_DICTIONARY_SEARCH_QUERY_LENGTH = 120;
 
 interface PreparedLexicalEntry {
   englishSearchText: string;

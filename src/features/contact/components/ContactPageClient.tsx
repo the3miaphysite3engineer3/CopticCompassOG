@@ -4,12 +4,11 @@ import { ArrowRight, Mail, MessageSquare, User } from "lucide-react";
 import { useActionState } from "react";
 
 import { sendContactEmail, type ContactFormState } from "@/actions/contact";
-import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { AppPageIntro } from "@/components/AppPageIntro";
 import { Button } from "@/components/Button";
 import { CheckboxField } from "@/components/CheckboxField";
 import { FormField } from "@/components/FormField";
 import { useLanguage } from "@/components/LanguageProvider";
-import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
@@ -33,20 +32,15 @@ export default function ContactPageClient() {
         pageShellAccents.bottomRightEmeraldOrb,
       ]}
     >
-      <div className="app-page-heading">
-        <BreadcrumbTrail
-          items={[
-            { label: t("nav.home"), href: getLocalizedHomePath(language) },
-            { label: t("nav.contact") },
-          ]}
-        />
-
-        <PageHeader
-          title={t("contact.title")}
-          description={t("contact.subtitle")}
-          tone="brand"
-        />
-      </div>
+      <AppPageIntro
+        align="center"
+        breadcrumbs={[
+          { label: t("nav.home"), href: getLocalizedHomePath(language) },
+          { label: t("nav.contact") },
+        ]}
+        description={t("contact.subtitle")}
+        title={t("contact.title")}
+      />
 
       <div className="mx-auto w-full max-w-3xl">
         <SurfacePanel rounded="3xl" className="p-8 md:p-10">

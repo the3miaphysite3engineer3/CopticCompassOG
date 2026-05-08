@@ -4,6 +4,7 @@ import { buildSecurityHeaders } from "./src/lib/securityHeaders";
 const securityHeaders = buildSecurityHeaders({
   includeContentSecurityPolicy: false,
 });
+const localizedStaticSecurityHeaders = buildSecurityHeaders();
 
 const nextConfig: NextConfig = {
   experimental: {
@@ -11,6 +12,14 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/:locale(en|nl)",
+        headers: localizedStaticSecurityHeaders,
+      },
+      {
+        source: "/:locale(en|nl)/:path*",
+        headers: localizedStaticSecurityHeaders,
+      },
       {
         source: "/:path*",
         headers: securityHeaders,

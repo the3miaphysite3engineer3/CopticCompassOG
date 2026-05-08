@@ -24,7 +24,7 @@ export function BreadcrumbTrail({ items, className }: BreadcrumbTrailProps) {
   return (
     <nav
       aria-label="Breadcrumb"
-      className={cx("text-sm text-stone-500 dark:text-stone-400", className)}
+      className={cx("text-sm leading-6 text-muted", className)}
     >
       <ol className="flex flex-wrap items-center gap-2">
         {items.map((item, index) => {
@@ -33,11 +33,11 @@ export function BreadcrumbTrail({ items, className }: BreadcrumbTrailProps) {
           return (
             <li
               key={`${item.label}-${index}`}
-              className="flex items-center gap-2"
+              className="flex min-h-6 items-center gap-2"
             >
               {index > 0 ? (
                 <ChevronRight
-                  className="h-3.5 w-3.5 text-stone-400 dark:text-stone-500"
+                  className="h-3.5 w-3.5 text-muted/65"
                   aria-hidden="true"
                 />
               ) : null}
@@ -47,7 +47,7 @@ export function BreadcrumbTrail({ items, className }: BreadcrumbTrailProps) {
                   href={item.href}
                   prefetch={false}
                   className={cx(
-                    "transition-colors hover:text-stone-900 dark:hover:text-stone-200",
+                    "transition-colors hover:text-ink",
                     item.labelClassName,
                   )}
                 >
@@ -58,8 +58,7 @@ export function BreadcrumbTrail({ items, className }: BreadcrumbTrailProps) {
                   aria-current={isCurrentPage ? "page" : undefined}
                   className={cx(
                     item.labelClassName,
-                    isCurrentPage &&
-                      "font-semibold text-stone-700 dark:text-stone-200",
+                    isCurrentPage && "font-semibold text-ink",
                   )}
                 >
                   {item.label}

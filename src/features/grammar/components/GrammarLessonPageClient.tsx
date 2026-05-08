@@ -246,7 +246,7 @@ export function GrammarLessonPageClient({
   return (
     <PageShell
       className="app-page-shell"
-      contentClassName="w-full space-y-0 pt-8 md:pt-10"
+      contentClassName="app-page-content space-y-0"
       width="standard"
       accents={[
         pageShellAccents.topRightSkyOrb,

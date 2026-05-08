@@ -3,10 +3,9 @@
 import { BarChart3 } from "lucide-react";
 import Link from "next/link";
 
-import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { AppPageIntro } from "@/components/AppPageIntro";
 import { buttonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
-import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { useDictionarySearch } from "@/features/dictionary/hooks/useDictionarySearch";
 import { getAnalyticsPath, getLocalizedHomePath } from "@/lib/locale";
@@ -57,15 +56,8 @@ function DictionaryPageBody({ searchPath }: DictionaryPageBodyProps) {
         pageShellAccents.topRightEmeraldOrbInset,
       ]}
     >
-      <div className="mb-8 space-y-4 md:mb-10">
-        <BreadcrumbTrail
-          items={[
-            { label: t("nav.home"), href: getLocalizedHomePath(language) },
-            { label: t("nav.dictionary") },
-          ]}
-        />
-
-        <div className="flex items-center justify-end gap-3">
+      <AppPageIntro
+        actions={
           <Link
             href={getAnalyticsPath(language)}
             className={buttonClassName({ variant: "secondary" })}
@@ -73,15 +65,13 @@ function DictionaryPageBody({ searchPath }: DictionaryPageBodyProps) {
             <BarChart3 className="h-4 w-4" />
             {t("nav.analytics")}
           </Link>
-        </div>
-      </div>
-
-      <PageHeader
-        title={t("dict.title")}
+        }
+        breadcrumbs={[
+          { label: t("nav.home"), href: getLocalizedHomePath(language) },
+          { label: t("nav.dictionary") },
+        ]}
         description={t("dict.subtitle")}
-        size="workspace"
-        tone="brand"
-        className="mb-8 md:mb-12"
+        title={t("dict.title")}
       />
 
       <div className="app-sticky-panel relative isolate mb-8 flex flex-col gap-3 md:mb-12 md:gap-4">

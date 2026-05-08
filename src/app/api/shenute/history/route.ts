@@ -84,6 +84,32 @@ function parseMessages(value: unknown): SavedChatMessage[] {
     .filter((message) => message.id && message.content);
 }
 
+function normalizeSavedChatMessages(messages: readonly SavedChatMessage[]) {
+  const messageIndexesById = new Map<string, number>();
+  const normalizedMessages: SavedChatMessage[] = [];
+
+  for (const message of messages) {
+    const normalizedId = message.id.trim();
+    if (!normalizedId) {
+      continue;
+    }
+
+    const normalizedMessage =
+      normalizedId === message.id ? message : { ...message, id: normalizedId };
+    const existingIndex = messageIndexesById.get(normalizedId);
+
+    if (typeof existingIndex === "number") {
+      normalizedMessages[existingIndex] = normalizedMessage;
+      continue;
+    }
+
+    messageIndexesById.set(normalizedId, normalizedMessages.length);
+    normalizedMessages.push(normalizedMessage);
+  }
+
+  return normalizedMessages;
+}
+
 export async function GET(request: Request) {
   try {
     if (!hasSupabaseRuntimeEnv()) {
@@ -155,16 +181,18 @@ export async function GET(request: Request) {
       );
     }
 
-    const sanitizedMessages: SavedChatMessage[] = (messages ?? [])
-      .map((message) => message as SavedChatRow)
-      .map((message) => ({
-        id: message.client_message_id ?? message.id,
-        role: message.role,
-        content: message.content,
-        parts: Array.isArray(message.metadata?.parts)
-          ? message.metadata.parts
-          : undefined,
-      }));
+    const sanitizedMessages = normalizeSavedChatMessages(
+      (messages ?? [])
+        .map((message) => message as SavedChatRow)
+        .map((message) => ({
+          id: message.client_message_id ?? message.id,
+          role: message.role,
+          content: message.content,
+          parts: Array.isArray(message.metadata?.parts)
+            ? message.metadata.parts
+            : undefined,
+        })),
+    );
 
     return NextResponse.json({
       success: true,
@@ -206,7 +234,7 @@ export async function POST(request: Request) {
     const body = (await request.json()) as HistoryRequestPayload;
     const sessionId =
       toOptionalUuidString(body.sessionId) ?? crypto.randomUUID();
-    const messages = parseMessages(body.messages);
+    const messages = normalizeSavedChatMessages(parseMessages(body.messages));
 
     if (messages.length === 0) {
       return NextResponse.json(
@@ -282,9 +310,83 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ success: true, sessionId });
+    const { data: refreshedSessions, error: refreshedSessionsError } =
+      await supabase
+        .from("chat_sessions")
+        .select("id, title, updated_at")
+        .eq("user_id", user.id)
+        .order("updated_at", { ascending: false });
+
+    if (refreshedSessionsError) {
+      console.error(
+        "Failed to refresh Shenute history sessions:",
+        refreshedSessionsError,
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      sessionId,
+      sessions: refreshedSessions ?? [],
+    });
   } catch (error) {
     console.error("Shenute history POST failed:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 },
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    if (!hasSupabaseRuntimeEnv()) {
+      return NextResponse.json(
+        { success: false, error: "Shenute history is unavailable right now." },
+        { status: 503 },
+      );
+    }
+
+    const url = new URL(request.url);
+    const sessionId = toOptionalUuidString(url.searchParams.get("sessionId"));
+
+    if (!sessionId) {
+      return NextResponse.json(
+        { success: false, error: "A valid session id is required." },
+        { status: 400 },
+      );
+    }
+
+    const supabase = await createClient();
+    const user = await getAuthenticatedUser(supabase);
+
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: "Sign in required." },
+        { status: 401 },
+      );
+    }
+
+    const { error } = await supabase
+      .from("chat_sessions")
+      .delete()
+      .eq("id", sessionId)
+      .eq("user_id", user.id);
+
+    if (error) {
+      console.error("Failed to delete Shenute history session:", error);
+      return NextResponse.json(
+        { success: false, error: "Could not clear conversation." },
+        { status: 500 },
+      );
+    }
+
+    return NextResponse.json({ success: true, sessionId });
+  } catch (error) {
+    console.error("Shenute history DELETE failed:", error);
     return NextResponse.json(
       {
         success: false,

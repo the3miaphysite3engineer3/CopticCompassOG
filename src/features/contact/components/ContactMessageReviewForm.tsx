@@ -49,7 +49,7 @@ export function ContactMessageReviewForm({
             id={`contact-message-status-${contactMessageId}`}
             name="status"
             defaultValue={status}
-            className="select-base h-11 rounded-xl text-sm"
+            className="select-base h-11 text-sm"
           >
             {CONTACT_MESSAGE_STATUSES.map((nextStatus) => (
               <option key={nextStatus} value={nextStatus}>
