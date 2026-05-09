@@ -67,6 +67,53 @@ type PageContextPayload = {
 
 const SITE_TITLE_SUFFIX_PATTERN = /\s+\|\s+Coptic Compass$/;
 
+const PAGE_CONTEXT_LABELS: Record<Language, Record<string, string>> = {
+  en: {
+    admin: "Admin",
+    analytics: "Analytics",
+    "api-docs": "API docs",
+    communications: "Communications",
+    contact: "Contact",
+    contributors: "Contributors",
+    dashboard: "Dashboard",
+    developers: "Developers",
+    dictionary: "Dictionary",
+    entry: "Dictionary",
+    "forgot-password": "Forgot password",
+    grammar: "Grammar",
+    home: "Home",
+    login: "Sign in",
+    ocr: "OCR",
+    privacy: "Privacy",
+    publications: "Publications",
+    shenute: "Shenute AI",
+    terms: "Terms",
+    "update-password": "Update password",
+  },
+  nl: {
+    admin: "Admin",
+    analytics: "Analytics",
+    "api-docs": "API-documentatie",
+    communications: "Communicatie",
+    contact: "Contact",
+    contributors: "Bijdragers",
+    dashboard: "Dashboard",
+    developers: "Ontwikkelaars",
+    dictionary: "Woordenboek",
+    entry: "Woordenboek",
+    "forgot-password": "Wachtwoord vergeten",
+    grammar: "Grammatica",
+    home: "Home",
+    login: "Inloggen",
+    ocr: "OCR",
+    privacy: "Privacy",
+    publications: "Publicaties",
+    shenute: "Shenute AI",
+    terms: "Voorwaarden",
+    "update-password": "Wachtwoord bijwerken",
+  },
+};
+
 const floatingShenuteCopy = {
   en: {
     addImage: "Add image",
@@ -81,7 +128,7 @@ const floatingShenuteCopy = {
     capture: "Capture",
     captureFailed: "Could not capture image from camera.",
     close: "Close",
-    contextAware: "Page context on",
+    contextAware: "Page context",
     dislike: "Not helpful",
     emptyPrompt:
       "Ask anything about this page, Coptic grammar, vocabulary, or translation.",
@@ -134,7 +181,7 @@ const floatingShenuteCopy = {
     capture: "Vastleggen",
     captureFailed: "Afbeelding kon niet uit de camera worden vastgelegd.",
     close: "Sluiten",
-    contextAware: "Pagina-context aan",
+    contextAware: "Pagina-context",
     dislike: "Niet behulpzaam",
     emptyPrompt:
       "Stel een vraag over deze pagina, Koptische grammatica, woordenschat of vertaling.",
@@ -316,6 +363,45 @@ function buildPageContext(pathname: string): PageContextPayload {
   };
 }
 
+function getPageContextSegments(pathname: string) {
+  const segments = pathname.split("/").filter(Boolean);
+  const firstSegment = segments[0];
+
+  if (firstSegment === "en" || firstSegment === "nl") {
+    return segments.slice(1);
+  }
+
+  return segments;
+}
+
+function formatFallbackPageContextLabel(segment: string) {
+  return segment
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ");
+}
+
+function getPageContextLabel(
+  pageContext: PageContextPayload,
+  language: Language,
+) {
+  const labels = PAGE_CONTEXT_LABELS[language];
+  const [section] = getPageContextSegments(pageContext.path);
+
+  if (!section) {
+    return labels.home;
+  }
+
+  const routeLabel = labels[section];
+  if (routeLabel) {
+    return routeLabel;
+  }
+
+  const title = pageContext.title.replace(SITE_TITLE_SUFFIX_PATTERN, "").trim();
+  return title || formatFallbackPageContextLabel(section) || pageContext.path;
+}
+
 type FloatingAiAssistantPanelProps = {
   initialOpen?: boolean;
 };
@@ -359,13 +445,10 @@ export function FloatingAiAssistantPanel({
   const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
   const pageContext = useMemo(() => buildPageContext(pathname), [pathname]);
-  const pageContextLabel = useMemo(() => {
-    const title = pageContext.title
-      .replace(SITE_TITLE_SUFFIX_PATTERN, "")
-      .trim();
-
-    return title || pageContext.path || "/";
-  }, [pageContext.path, pageContext.title]);
+  const pageContextLabel = useMemo(
+    () => getPageContextLabel(pageContext, language),
+    [language, pageContext],
+  );
 
   const transport = useMemo(
     () =>
@@ -998,11 +1081,10 @@ export function FloatingAiAssistantPanel({
                     Shenute AI
                   </p>
                   <p
-                    className="flex min-w-0 items-center gap-1 text-xs text-muted"
+                    className="truncate text-xs text-muted"
                     title={`${copy.contextAware}: ${pageContextLabel}`}
                   >
-                    <span className="shrink-0">{copy.contextAware}:</span>
-                    <span className="min-w-0 truncate">{pageContextLabel}</span>
+                    {copy.contextAware}: {pageContextLabel}
                   </p>
                 </div>
               </div>

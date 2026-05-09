@@ -57,9 +57,19 @@ test("floating Shenute assistant opens on demand", async ({ page }) => {
 
   await page.getByRole("button", { name: "Open Shenute AI" }).click();
 
-  await expect(page.getByText("Page context on")).toBeVisible();
+  await expect(page.getByText("Page context: Home")).toBeVisible();
   await expect(page.getByRole("button", { name: "Minimize" })).toBeVisible();
   await expect(page.getByText("Sign in required")).toBeVisible();
+});
+
+test("floating Shenute assistant labels dictionary context", async ({
+  page,
+}) => {
+  await page.goto("/en/dictionary");
+
+  await page.getByRole("button", { name: "Open Shenute AI" }).click();
+
+  await expect(page.getByText("Page context: Dictionary")).toBeVisible();
 });
 
 test("floating Shenute assistant is hidden on the Shenute route", async ({
