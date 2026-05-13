@@ -13,8 +13,6 @@ import type { LexicalEntry } from "../types";
 type BuildEntryOpenGraphPreviewOptions = {
   entry: LexicalEntry;
   language: Language;
-  parentEntry?: LexicalEntry | null;
-  relatedEntries?: readonly LexicalEntry[];
 };
 
 type EntryOpenGraphPreview = {
@@ -22,7 +20,6 @@ type EntryOpenGraphPreview = {
   gloss: string;
   heading: string;
   headingParts: EntryPreviewHeadingPart[];
-  relatedForms: string[];
   strapline: string;
 };
 
@@ -49,14 +46,10 @@ export function buildEntryOpenGraphImageUrl(
 export function buildEntryOpenGraphPreview({
   entry,
   language,
-  parentEntry = null,
-  relatedEntries = [],
 }: BuildEntryOpenGraphPreviewOptions): EntryOpenGraphPreview {
   const preview = buildEntryPreview({
     entry,
     language,
-    parentEntry,
-    relatedEntries,
   });
 
   return {
@@ -68,7 +61,6 @@ export function buildEntryOpenGraphPreview({
         : "Coptic dictionary entry"),
     heading: preview.heading,
     headingParts: preview.headingParts,
-    relatedForms: preview.relatedForms,
     strapline: language === "nl" ? "Koptisch woordenboek" : "Coptic Dictionary",
   };
 }

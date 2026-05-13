@@ -5,7 +5,6 @@ import {
   DICTIONARY_PART_OF_SPEECH_FILTER_CODES,
   getPartOfSpeechDisplayCode,
   getPartOfSpeechLabelKey,
-  normalizePartOfSpeechCode,
 } from "./grammarRegistry.ts";
 
 export const DICTIONARY_DIALECT_CODES = [
@@ -157,14 +156,6 @@ export function getPartOfSpeechFilterLabel(
   );
 
   return option ? translate(option.labelKey) : partOfSpeech;
-}
-
-/**
- * Normalizes dictionary part-of-speech codes into the compact set used by the
- * current dictionary UI.
- */
-export function normalizePartOfSpeech(value: string): PartOfSpeech {
-  return normalizePartOfSpeechCode(value);
 }
 
 /**

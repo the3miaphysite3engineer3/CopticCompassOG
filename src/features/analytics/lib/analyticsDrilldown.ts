@@ -1,6 +1,12 @@
 import type { EtymologyFilter } from "@/features/analytics/lib/analytics";
 import type { AnalyticsDialect } from "@/features/dictionary/config";
-import { isVerbPartOfSpeech } from "@/features/dictionary/grammarRegistry";
+import {
+  entryHasNounGrammar,
+  entryHasPartOfSpeech,
+  entryHasVerbGrammar,
+  getEntryNounGender,
+} from "@/features/dictionary/lib/entryGrammar";
+import { getLocalizedMeaningValues } from "@/features/dictionary/lib/entryText";
 import {
   DEFAULT_DICTIONARY_SEARCH_PAGE_SIZE,
   MAX_DICTIONARY_SEARCH_PAGE_SIZE,
@@ -13,7 +19,6 @@ export type AnalyticsChartDrilldownType =
   | "etymology"
   | "gender"
   | "pos"
-  | "relations"
   | "verb";
 
 export type AnalyticsDrilldown =
@@ -74,8 +79,7 @@ export function buildAnalyticsStatDrilldown(options: {
 
 /**
  * Builds the serializable drilldown descriptor for chart segments such as
- * part of speech, gender, etymology, derivation, verb completeness, and
- * relation type.
+ * part of speech, gender, etymology, derivation, and verb completeness.
  */
 export function buildAnalyticsChartDrilldown(options: {
   originalName: string;
@@ -189,7 +193,9 @@ function matchesAnalyticsDrilldownEntry(
       return true;
     }
 
-    const meaningString = entry.english_meanings.join(" ").toLowerCase();
+    const meaningString = getLocalizedMeaningValues(entry, "en")
+      .join(" ")
+      .toLowerCase();
     return drilldown.type === "unknown"
       ? meaningString.includes("meaning unknown")
       : meaningString.includes("meaning uncertain");
@@ -197,53 +203,61 @@ function matchesAnalyticsDrilldownEntry(
 
   if (drilldown.chartType === "pos") {
     if (drilldown.originalName === "Verbs") {
-      return isVerbPartOfSpeech(entry.pos);
+      return entryHasVerbGrammar(entry);
     }
     if (drilldown.originalName === "Nouns") {
-      return entry.pos === "N";
+      return entryHasPartOfSpeech(entry, "N");
     }
     if (drilldown.originalName === "Adjectives") {
-      return entry.pos === "ADJ";
+      return entryHasPartOfSpeech(entry, "ADJ");
     }
     if (drilldown.originalName === "Adverbs") {
-      return entry.pos === "ADV";
+      return entryHasPartOfSpeech(entry, "ADV");
     }
     if (drilldown.originalName === "Conjunctions") {
-      return entry.pos === "CONJ";
+      return entryHasPartOfSpeech(entry, "CONJ");
     }
     if (drilldown.originalName === "Prepositions") {
-      return entry.pos === "PREP";
+      return entryHasPartOfSpeech(entry, "PREP");
     }
 
     return (
-      entry.pos === "OTHER" || entry.pos === "INTJ" || entry.pos === "UNKNOWN"
+      entryHasPartOfSpeech(entry, "OTHER") ||
+      entryHasPartOfSpeech(entry, "INTJ") ||
+      entryHasPartOfSpeech(entry, "UNKNOWN")
     );
   }
 
   if (drilldown.chartType === "gender") {
-    if (entry.pos !== "N") {
+    const gender = getEntryNounGender(entry);
+
+    if (gender === undefined) {
       return false;
     }
     if (drilldown.originalName.startsWith("Masculine")) {
-      return entry.gender === "M";
+      return gender === "M";
     }
     if (drilldown.originalName.startsWith("Feminine")) {
-      return entry.gender === "F";
+      return gender === "F";
     }
     if (drilldown.originalName.startsWith("Epicene")) {
-      return entry.gender === "BOTH";
+      return gender === "BOTH";
     }
-    return entry.gender === "";
+    return !gender;
   }
 
   if (drilldown.chartType === "etymology") {
-    return drilldown.originalName === "analytics.grEtymology"
-      ? entry.etymology === "Gr"
-      : entry.etymology !== "Gr";
+    if (drilldown.originalName === "analytics.grEtymology") {
+      return entry.etymology === "Gr";
+    }
+    if (drilldown.originalName === "analytics.unknownEtymology") {
+      return entry.etymology === "Unknown";
+    }
+    return entry.etymology === "Egy";
   }
 
   if (drilldown.chartType === "derivation") {
-    if (entry.pos !== "N") {
+    if (!entryHasNounGrammar(entry)) {
       return false;
     }
 
@@ -279,7 +293,7 @@ function matchesAnalyticsDrilldownEntry(
   }
 
   if (drilldown.chartType === "verb") {
-    if (!isVerbPartOfSpeech(entry.pos)) {
+    if (!entryHasVerbGrammar(entry)) {
       return false;
     }
 
@@ -292,9 +306,7 @@ function matchesAnalyticsDrilldownEntry(
       : !hasAnyStative;
   }
 
-  return drilldown.originalName === "analytics.baseRoots"
-    ? !entry.relationType
-    : Boolean(entry.relationType);
+  return false;
 }
 
 function matchesAnalyticsEntryFilters(
@@ -313,7 +325,5 @@ function matchesAnalyticsEntryFilters(
     return true;
   }
 
-  return selectedEtymology === "Gr"
-    ? entry.etymology === "Gr"
-    : entry.etymology !== "Gr";
+  return entry.etymology === selectedEtymology;
 }

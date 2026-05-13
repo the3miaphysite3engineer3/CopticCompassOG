@@ -29,10 +29,11 @@ const COMPACT_DICTIONARY_MAX_ENTRIES = 12;
 const COMPACT_DICTIONARY_TARGET_CHARS = 2400;
 
 type DictionaryEntry = {
+  dialectMeanings?: unknown;
   dialects?: unknown;
-  english_meanings?: unknown;
+  genderedMeanings?: unknown;
   headword?: unknown;
-  pos?: unknown;
+  meaningGroups?: unknown;
 };
 
 function normalizeWhitespace(value: string) {
@@ -137,10 +138,113 @@ function pickFirstText(...values: unknown[]) {
   return "";
 }
 
+function collectStringArray(value: unknown) {
+  return Array.isArray(value)
+    ? uniqueStrings(
+        value.filter((item): item is string => typeof item === "string"),
+      )
+    : [];
+}
+
+function collectEnglishMeaningGroups(value: unknown) {
+  if (!value || typeof value !== "object") {
+    return [];
+  }
+
+  const groups = Array.isArray(value)
+    ? value
+    : Object.values(value as Record<string, unknown>);
+
+  return uniqueStrings(
+    groups.flatMap((group) => {
+      if (!group || typeof group !== "object" || Array.isArray(group)) {
+        return [];
+      }
+
+      return collectStringArray(
+        (group as { english_meanings?: unknown }).english_meanings,
+      );
+    }),
+  );
+}
+
+function collectPartOfSpeechValues(value: unknown) {
+  if (!value || typeof value !== "object") {
+    return [];
+  }
+
+  const groups = Array.isArray(value)
+    ? value
+    : Object.values(value as Record<string, unknown>);
+
+  return uniqueStrings(
+    groups.flatMap((group) => {
+      if (!group || typeof group !== "object" || Array.isArray(group)) {
+        return [];
+      }
+
+      const grammar = (group as { grammar?: unknown }).grammar;
+      if (!grammar || typeof grammar !== "object" || Array.isArray(grammar)) {
+        return [];
+      }
+
+      const pos = (grammar as { pos?: unknown }).pos;
+      return typeof pos === "string" ? [pos] : [];
+    }),
+  );
+}
+
+function collectEnglishGenderedMeanings(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return uniqueStrings(
+    value.flatMap((group) => {
+      if (!group || typeof group !== "object" || Array.isArray(group)) {
+        return [];
+      }
+
+      return collectTextSegments((group as { english?: unknown }).english);
+    }),
+  );
+}
+
+function collectEnglishDialectMeanings(value: unknown) {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return uniqueStrings(
+    value.flatMap((group) => {
+      if (!group || typeof group !== "object" || Array.isArray(group)) {
+        return [];
+      }
+
+      return collectStringArray(
+        (group as { english_meanings?: unknown }).english_meanings,
+      );
+    }),
+  );
+}
+
+function collectDictionaryEnglishMeanings(entry: DictionaryEntry) {
+  return uniqueStrings([
+    ...collectEnglishGenderedMeanings(entry.genderedMeanings),
+    ...collectEnglishMeaningGroups(entry.meaningGroups),
+    ...collectEnglishDialectMeanings(entry.dialectMeanings),
+  ]);
+}
+
 function formatDictionaryEntry(
   entry: DictionaryEntry,
 ): StructuredJsonChunk | null {
-  if (typeof entry.headword !== "string" || typeof entry.pos !== "string") {
+  if (typeof entry.headword !== "string") {
+    return null;
+  }
+
+  const partsOfSpeech = collectPartOfSpeechValues(entry.meaningGroups);
+  if (partsOfSpeech.length === 0) {
     return null;
   }
 
@@ -160,16 +264,12 @@ function formatDictionaryEntry(
     })
     .filter((dialect) => dialect.length > 0);
 
-  const meanings = Array.isArray(entry.english_meanings)
-    ? entry.english_meanings
-        .filter((value): value is string => typeof value === "string")
-        .map((value) => normalizeWhitespace(value))
-        .filter((value) => value.length > 0)
-    : [];
+  const meanings = collectDictionaryEnglishMeanings(entry);
+  const partOfSpeech = partsOfSpeech.join(", ");
 
   const contentParts = [
     `Coptic dictionary entry: ${entry.headword}.`,
-    `Part of speech: ${entry.pos}.`,
+    `Part of speech: ${partOfSpeech}.`,
     dialectSummaries.length > 0
       ? `Dialects: ${dialectSummaries.join(", ")}.`
       : "",
@@ -184,7 +284,8 @@ function formatDictionaryEntry(
       englishTranslation: meanings.join(", "),
       englishTranslations: meanings,
       translation: meanings.join(", "),
-      partOfSpeech: entry.pos,
+      partOfSpeech,
+      partsOfSpeech,
     },
   };
 }

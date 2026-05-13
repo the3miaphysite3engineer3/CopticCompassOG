@@ -21,8 +21,6 @@ type EntryActionBarProps = {
   compact?: boolean;
   entry: LexicalEntry;
   initialIntent?: "favorite" | "report" | "share";
-  parentEntry?: LexicalEntry | null;
-  relatedEntries?: readonly LexicalEntry[];
 };
 
 const compactActionButtonClassName =
@@ -32,8 +30,6 @@ export function EntryActionBarPanel({
   compact = false,
   entry,
   initialIntent,
-  parentEntry = null,
-  relatedEntries = [],
 }: EntryActionBarProps) {
   const { language, t } = useLanguage();
   const authGate = useOptionalAuthGate();
@@ -70,8 +66,6 @@ export function EntryActionBarPanel({
     entry,
     language,
     onNoticeChange: setShareNotice,
-    parentEntry,
-    relatedEntries,
   });
   const initialIntentAppliedRef = useRef(false);
 

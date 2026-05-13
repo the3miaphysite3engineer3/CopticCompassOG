@@ -86,10 +86,6 @@ export function useAnalyticsThemeColors() {
         readThemeColor("chart-6", COLOR_FALLBACKS.chart6),
         readThemeColor("chart-7", COLOR_FALLBACKS.chart7),
       ],
-      relations: [
-        readThemeColor("chart-1", COLOR_FALLBACKS.chart1),
-        readThemeColor("chart-5", COLOR_FALLBACKS.chart5),
-      ],
       verb: [
         readThemeColor("chart-2", COLOR_FALLBACKS.chart2),
         readThemeColor("chart-3", COLOR_FALLBACKS.chart3),

@@ -14,6 +14,7 @@ import {
 } from "@/features/dictionary/config";
 import type { EntryFavoriteWithEntry } from "@/features/dictionary/lib/entryActions";
 import { getPreferredEntryDisplaySpelling } from "@/features/dictionary/lib/entryDisplay";
+import { getPrimaryEntryPartOfSpeech } from "@/features/dictionary/lib/entryGrammar";
 import { getEntryMeaningPreview } from "@/features/dictionary/lib/entryText";
 import { antinoou } from "@/lib/fonts";
 import { getTranslation } from "@/lib/i18n";
@@ -111,9 +112,12 @@ export function DictionaryFavoritesOverview({
                       </Badge>
                       {entry ? (
                         <LinguisticGloss
-                          code={getPartOfSpeechCode(entry.pos)}
-                          label={getPartOfSpeechLabel(entry.pos, (key) =>
-                            getTranslation(language, key),
+                          code={getPartOfSpeechCode(
+                            getPrimaryEntryPartOfSpeech(entry),
+                          )}
+                          label={getPartOfSpeechLabel(
+                            getPrimaryEntryPartOfSpeech(entry),
+                            (key) => getTranslation(language, key),
                           )}
                           size="body"
                         />

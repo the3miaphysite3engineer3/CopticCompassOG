@@ -5,7 +5,6 @@ import {
   getLocalizedGenderedMeanings,
   getLocalizedMeaningGroups,
   getLocalizedMeaningValues,
-  getLocalizedUngroupedMeanings,
 } from "@/features/dictionary/lib/entryText";
 import type { LexicalEntry } from "@/features/dictionary/types";
 
@@ -20,9 +19,8 @@ const fallbackEntry: LexicalEntry = {
       stative: "",
     },
   },
-  pos: "N",
-  gender: "",
-  english_meanings: [""],
+  meaningGroups: [{ grammar: { pos: "N" } }],
+  etymology: "Egy",
   greek_equivalents: [],
 };
 
@@ -54,28 +52,31 @@ describe("entry descriptions", () => {
 describe("localized meaning groups", () => {
   const groupedVerbEntry: Pick<
     LexicalEntry,
-    "dialectMeanings" | "dutch_meanings" | "english_meanings" | "meaningGroups"
+    "dialectMeanings" | "meaningGroups"
   > = {
     dialectMeanings: [],
-    dutch_meanings: [],
-    english_meanings: [],
-    meaningGroups: {
-      IMP: {
-        english_meanings: ["imperative meaning"],
-      },
-      INTR: {
+    meaningGroups: [
+      {
+        grammar: { pos: "V", valency: "INTR" },
         english_meanings: ["intransitive meaning"],
       },
-      PC: {
-        english_meanings: ["construct participle meaning"],
-      },
-      STA: {
-        english_meanings: ["stative meaning"],
-      },
-      TR: {
+      {
+        grammar: { pos: "V", valency: "TR" },
         english_meanings: ["transitive meaning"],
       },
-    },
+      {
+        grammar: { form: "STA", pos: "V" },
+        english_meanings: ["stative meaning"],
+      },
+      {
+        grammar: { mood: "IMP", pos: "V" },
+        english_meanings: ["imperative meaning"],
+      },
+      {
+        grammar: { form: "PC", pos: "V" },
+        english_meanings: ["construct participle meaning"],
+      },
+    ],
   };
 
   it("hides form-dependent groups when the active dialect lacks that form", () => {
@@ -83,11 +84,11 @@ describe("localized meaning groups", () => {
       getLocalizedMeaningGroups(groupedVerbEntry, "en", {
         dialectForms: {
           absolute: "ϯ",
-          imperatives: ["ⲙⲟⲓ"],
           nominal: "ϯ-",
           pronominal: "ⲧⲏⲓ=",
           stative: "ⲧⲟⲓ†",
         },
+        hasImperativeForms: true,
       }).map((group) => group.code),
     ).toEqual(["INTR", "TR", "STA", "IMP"]);
   });
@@ -98,9 +99,9 @@ describe("localized meaning groups", () => {
         dialectForms: {
           absolute: "ϯ",
           constructParticiples: ["ⲧⲁⲓ~"],
-          imperatives: ["ⲙⲁ"],
           stative: "ⲧⲁⲓ†",
         },
+        hasImperativeForms: true,
       }).map((group) => group.code),
     ).toEqual(["INTR", "TR", "STA", "IMP", "PC"]);
   });
@@ -110,12 +111,13 @@ describe("localized meaning groups", () => {
       getLocalizedMeaningGroups(
         {
           ...groupedVerbEntry,
-          meaningGroups: {
-            PC: {
+          meaningGroups: [
+            {
+              grammar: { form: "PC", pos: "V" },
               english_meanings: ["receiver"],
               english_notes: ["BL"],
             },
-          },
+          ],
         },
         "en",
         {
@@ -138,12 +140,13 @@ describe("localized meaning groups", () => {
     expect(
       getLocalizedMeaningGroups({
         ...groupedVerbEntry,
-        meaningGroups: {
-          INTR: {
+        meaningGroups: [
+          {
+            grammar: { pos: "V", valency: "INTR" },
             english_meanings: ["be valid"],
             english_notes: ["B only"],
           },
-        },
+        ],
       }),
     ).toEqual([
       {
@@ -153,20 +156,86 @@ describe("localized meaning groups", () => {
       },
     ]);
   });
+
+  it("attaches structured gendered rows to the noun meaning group", () => {
+    expect(
+      getLocalizedMeaningGroups({
+        dialectMeanings: [],
+        genderedMeanings: [
+          {
+            english: {
+              f: "queen",
+              m: "king",
+              pl: "royals",
+            },
+          },
+        ],
+        meaningGroups: [
+          { grammar: { gender: "M", pos: "N" } },
+          { grammar: { pos: "ADJ" }, english_meanings: ["royal"] },
+        ],
+      }),
+    ).toEqual([
+      {
+        code: "N",
+        genderedRows: [
+          {
+            values: [
+              { marker: "m", meaning: "king" },
+              { marker: "f", meaning: "queen" },
+              { marker: "pl", meaning: "royals" },
+            ],
+          },
+        ],
+        meanings: [],
+        notes: [],
+      },
+      {
+        code: "ADJ",
+        meanings: ["royal"],
+        notes: [],
+      },
+    ]);
+  });
+
+  it("hides imperative groups when the active dialect lacks structured imperatives", () => {
+    expect(
+      getLocalizedMeaningGroups(groupedVerbEntry, "en", {
+        dialectForms: {
+          absolute: "ϯ",
+          nominal: "ϯ-",
+          pronominal: "ⲧⲏⲓ=",
+          stative: "ⲧⲟⲓ†",
+        },
+        hasImperativeForms: false,
+      }).map((group) => group.code),
+    ).toEqual(["INTR", "TR", "STA"]);
+  });
+
+  it("uses meaning groups as the primary gloss source", () => {
+    const groupedOnlyEntry: Pick<LexicalEntry, "meaningGroups"> = {
+      meaningGroups: [
+        {
+          grammar: { pos: "V", valency: "TR" },
+          dutch_meanings: ["geven"],
+          english_meanings: ["give"],
+        },
+      ],
+    };
+
+    expect(getLocalizedMeaningValues(groupedOnlyEntry, "en")).toEqual(["give"]);
+    expect(getLocalizedMeaningValues(groupedOnlyEntry, "nl")).toEqual([
+      "geven",
+    ]);
+  });
 });
 
 describe("localized gendered meanings", () => {
   const genderedEntry: Pick<
     LexicalEntry,
-    | "dialectMeanings"
-    | "dutch_meanings"
-    | "english_meanings"
-    | "genderedMeanings"
-    | "meaningGroups"
+    "dialectMeanings" | "genderedMeanings" | "meaningGroups"
   > = {
     dialectMeanings: [],
-    dutch_meanings: ["mannelijke slaaf; vrouwelijke slaaf; slaven"],
-    english_meanings: ["male slave; female slave; slaves"],
     genderedMeanings: [
       {
         dutch: {
@@ -181,7 +250,7 @@ describe("localized gendered meanings", () => {
         },
       },
     ],
-    meaningGroups: {},
+    meaningGroups: [],
   };
 
   it("localizes gendered meaning rows without display numbering", () => {
@@ -196,8 +265,7 @@ describe("localized gendered meanings", () => {
     ]);
   });
 
-  it("does not repeat matching top-level meanings after structured rows", () => {
-    expect(getLocalizedUngroupedMeanings(genderedEntry, "en")).toEqual([]);
+  it("keeps structured gendered rows first in flat meaning values", () => {
     expect(getLocalizedMeaningValues(genderedEntry, "en")[0]).toBe(
       "male slave; female slave; slaves",
     );

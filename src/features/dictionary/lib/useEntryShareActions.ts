@@ -16,8 +16,6 @@ type UseEntryShareActionsOptions = {
   entry: LexicalEntry;
   language: Language;
   onNoticeChange: (notice: EntryActionNotice) => void;
-  parentEntry: LexicalEntry | null;
-  relatedEntries: readonly LexicalEntry[];
 };
 
 /**
@@ -28,15 +26,11 @@ export function useEntryShareActions({
   entry,
   language,
   onNoticeChange,
-  parentEntry,
-  relatedEntries,
 }: UseEntryShareActionsOptions) {
   const { t } = useLanguage();
   const sharePayload = buildEntrySharePayload({
     entry,
     language,
-    parentEntry,
-    relatedEntries,
     url: resolveEntryShareUrl(
       entry.id,
       language,

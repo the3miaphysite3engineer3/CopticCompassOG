@@ -12,15 +12,23 @@ describe("buildStructuredJsonChunks", () => {
               absolute: "rome",
             },
           },
-          english_meanings: ["man", "person"],
           headword: "rome",
-          pos: "noun",
+          meaningGroups: [
+            {
+              grammar: { pos: "N" },
+              english_meanings: ["man", "person"],
+            },
+          ],
         },
         {
           dialects: {},
-          english_meanings: ["woman"],
           headword: "shimi",
-          pos: "noun",
+          meaningGroups: [
+            {
+              grammar: { pos: "N" },
+              english_meanings: ["woman"],
+            },
+          ],
         },
       ]),
     );
@@ -32,14 +40,52 @@ describe("buildStructuredJsonChunks", () => {
       "man",
       "person",
     ]);
+    expect(chunks?.[0]?.metadata.partOfSpeech).toBe("N");
+  });
+
+  it("uses structured dictionary meanings", () => {
+    const chunks = buildStructuredJsonChunks(
+      JSON.stringify([
+        {
+          dialects: {
+            B: {
+              absolute: "ti",
+            },
+          },
+          headword: "ti",
+          meaningGroups: [
+            {
+              grammar: { pos: "V", valency: "TR" },
+              english_meanings: ["give"],
+            },
+            {
+              grammar: { form: "PC", pos: "V" },
+              english_meanings: ["giver"],
+            },
+          ],
+        },
+      ]),
+    );
+
+    expect(chunks).toHaveLength(1);
+    expect(chunks?.[0]?.content).toContain("English meanings: give, giver.");
+    expect(chunks?.[0]?.metadata.englishTranslation).toBe("give, giver");
+    expect(chunks?.[0]?.metadata.englishTranslations).toEqual([
+      "give",
+      "giver",
+    ]);
   });
 
   it("compacts dictionary entries for bulk ingestion", () => {
     const entries = Array.from({ length: 13 }, (_, index) => ({
       dialects: {},
-      english_meanings: [`meaning-${index + 1}`],
       headword: `word-${index + 1}`,
-      pos: "noun",
+      meaningGroups: [
+        {
+          grammar: { pos: "N" },
+          english_meanings: [`meaning-${index + 1}`],
+        },
+      ],
     }));
 
     const chunks = buildStructuredJsonChunks(JSON.stringify(entries), {

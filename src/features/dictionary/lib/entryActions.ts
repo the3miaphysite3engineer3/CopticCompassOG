@@ -73,14 +73,14 @@ const ENTRY_REPORT_REASON_LABELS = {
     typo: "Typo or spelling issue",
     translation: "Translation issue",
     grammar: "Grammar issue",
-    relation: "Wrong relation or grouping",
+    relation: "Wrong grouping",
     other: "Other",
   },
   nl: {
     typo: "Type- of spelfout",
     translation: "Vertaalprobleem",
     grammar: "Grammaticaal probleem",
-    relation: "Verkeerde relatie of groepering",
+    relation: "Verkeerde groepering",
     other: "Overig",
   },
 } as const satisfies Record<Language, Record<EntryReportReason, string>>;

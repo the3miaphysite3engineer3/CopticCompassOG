@@ -4,6 +4,10 @@ import type {
 } from "@/content/grammar/schema";
 import { getPartOfSpeechLabel } from "@/features/dictionary/config";
 import {
+  getEntryNounGender,
+  getPrimaryEntryPartOfSpeech,
+} from "@/features/dictionary/lib/entryGrammar";
+import {
   buildEntryDescription,
   toPlainText,
 } from "@/features/dictionary/lib/entryText";
@@ -473,6 +477,7 @@ export function createDefinedTermStructuredData(
   const headword = options.name ?? toPlainText(entry.headword);
   const entryPath = getEntryPath(entry.id, locale);
   const copy = getStructuredDataCopy(locale);
+  const greekEquivalents = entry.greek_equivalents ?? [];
   const alternateNames = Array.from(
     new Set(
       Object.values(entry.dialects)
@@ -485,22 +490,22 @@ export function createDefinedTermStructuredData(
     {
       "@type": "PropertyValue",
       name: copy.definedTerm.partOfSpeech,
-      value: getPartOfSpeechLabel(entry.pos, (key) =>
+      value: getPartOfSpeechLabel(getPrimaryEntryPartOfSpeech(entry), (key) =>
         getTranslation(locale, key),
       ),
     },
-    entry.gender
+    getEntryNounGender(entry)
       ? {
           "@type": "PropertyValue",
           name: copy.definedTerm.gender,
-          value: entry.gender,
+          value: getEntryNounGender(entry),
         }
       : null,
-    entry.greek_equivalents.length > 0
+    greekEquivalents.length > 0
       ? {
           "@type": "PropertyValue",
           name: copy.definedTerm.greekEquivalents,
-          value: entry.greek_equivalents.join("; "),
+          value: greekEquivalents.join("; "),
         }
       : null,
   ].filter(Boolean);

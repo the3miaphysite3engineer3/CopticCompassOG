@@ -1,15 +1,16 @@
 import {
   type DictionaryDialectCode,
   DICTIONARY_MEANING_GROUP_CODES,
-  type DictionaryMeaningGroupCode,
   getPartOfSpeechLabel,
 } from "@/features/dictionary/config";
 import { DICTIONARY_GRAMMAR_SUMMARY_LEAD_INS } from "@/features/dictionary/grammarRegistry";
+import { getPrimaryEntryPartOfSpeech } from "@/features/dictionary/lib/entryGrammar";
 import type {
   DialectForms,
   DictionaryClientEntry,
   DictionaryGenderedMeaningMarker,
   DictionaryGenderedMeaningValues,
+  DictionaryMeaningGroup,
   LexicalEntry,
 } from "@/features/dictionary/types";
 import { getTranslation } from "@/lib/i18n";
@@ -23,18 +24,16 @@ const entryLeadIns = [
 
 type EntryMeaningSource = Pick<
   DictionaryClientEntry,
-  | "dialectMeanings"
-  | "dutch_meanings"
-  | "english_meanings"
-  | "genderedMeanings"
-  | "meaningGroups"
+  "dialectMeanings" | "genderedMeanings" | "meaningGroups"
 >;
 type MeaningGroupDisplayOptions = {
   dialectForms?: DialectForms;
+  hasImperativeForms?: boolean;
 };
 
 type LocalizedDictionaryMeaningGroup = {
-  code: DictionaryMeaningGroupCode;
+  code: string;
+  genderedRows?: LocalizedDictionaryGenderedMeaning[];
   meanings: string[];
   notes: string[];
 };
@@ -114,13 +113,16 @@ function normalizeMeaningKey(value: string) {
   return stripLeadIn(value).toLocaleLowerCase();
 }
 
-function getLocalizedTopLevelMeanings(
-  entry: EntryMeaningSource,
+function getLocalizedTextValues(
+  englishValues: string[] | undefined,
+  dutchValues: string[] | undefined,
   locale: Language,
 ) {
-  return locale === "nl" && entry.dutch_meanings?.length
-    ? entry.dutch_meanings
-    : entry.english_meanings;
+  if (locale === "nl") {
+    return dutchValues?.length ? dutchValues : (englishValues ?? []);
+  }
+
+  return englishValues?.length ? englishValues : (dutchValues ?? []);
 }
 
 function getLocalizedGenderedMeaningValues(
@@ -148,6 +150,7 @@ function hasVisibleValues(values: readonly string[] | undefined) {
 
 const COMPACT_DIALECT_MEANING_GROUP_NOTE_PATTERN =
   /^(?:(?:Fb|La|Sa|Sf|Sl)|[ABFLOMS])+$/u;
+const MEANING_GROUP_CODE_SET = new Set<string>(DICTIONARY_MEANING_GROUP_CODES);
 
 function isDisplayableMeaningGroupNote(note: string) {
   const normalizedNote = note.trim();
@@ -158,9 +161,60 @@ function isDisplayableMeaningGroupNote(note: string) {
   );
 }
 
+function getMeaningGroups(
+  entry: EntryMeaningSource,
+): readonly DictionaryMeaningGroup[] {
+  const groups = entry.meaningGroups as unknown;
+
+  if (!groups) {
+    return [];
+  }
+
+  if (Array.isArray(groups)) {
+    return groups as DictionaryMeaningGroup[];
+  }
+
+  if (typeof groups === "object") {
+    const groupMap = groups as Partial<Record<string, DictionaryMeaningGroup>>;
+
+    return DICTIONARY_MEANING_GROUP_CODES.flatMap((code) => {
+      const group = groupMap[code];
+
+      return group ? [group] : [];
+    });
+  }
+
+  return [];
+}
+
+function toMeaningGroupCode(value: string | undefined) {
+  return value && MEANING_GROUP_CODE_SET.has(value) ? value : "";
+}
+
+function getMeaningGroupDisplayCode(group: DictionaryMeaningGroup) {
+  const grammar = group.grammar;
+
+  return (
+    toMeaningGroupCode(grammar.valency) ||
+    toMeaningGroupCode(grammar.mood) ||
+    toMeaningGroupCode(grammar.form) ||
+    toMeaningGroupCode(grammar.voice) ||
+    toMeaningGroupCode(grammar.derivation) ||
+    toMeaningGroupCode(grammar.affix) ||
+    toMeaningGroupCode(grammar.caseRole) ||
+    toMeaningGroupCode(grammar.polarity) ||
+    toMeaningGroupCode(grammar.number) ||
+    toMeaningGroupCode(grammar.tags?.[0]) ||
+    toMeaningGroupCode(grammar.pos) ||
+    grammar.pos ||
+    ""
+  );
+}
+
 function isMeaningGroupAvailableForDialect(
-  code: DictionaryMeaningGroupCode,
+  code: string,
   dialectForms: DialectForms | undefined,
+  options: MeaningGroupDisplayOptions,
 ) {
   if (!dialectForms) {
     return true;
@@ -168,7 +222,7 @@ function isMeaningGroupAvailableForDialect(
 
   switch (code) {
     case "IMP":
-      return hasVisibleValues(dialectForms.imperatives);
+      return options.hasImperativeForms ?? true;
     case "PC":
       return (
         hasVisibleValues(dialectForms.constructParticiples) ||
@@ -208,29 +262,45 @@ export function getLocalizedMeaningGroups(
   locale: Language = "en",
   options: MeaningGroupDisplayOptions = {},
 ): LocalizedDictionaryMeaningGroup[] {
-  const groups = entry.meaningGroups ?? {};
+  const genderedMeanings = getLocalizedGenderedMeanings(entry, locale);
+  let attachedGenderedMeanings = false;
 
-  return DICTIONARY_MEANING_GROUP_CODES.flatMap((code) => {
-    const group = groups[code];
+  return getMeaningGroups(entry).flatMap((group) => {
+    const code = getMeaningGroupDisplayCode(group);
 
     if (
-      !group ||
-      !isMeaningGroupAvailableForDialect(code, options.dialectForms)
+      !code ||
+      !isMeaningGroupAvailableForDialect(code, options.dialectForms, options)
     ) {
       return [];
     }
 
-    const meanings =
-      locale === "nl" && group.dutch_meanings?.length
-        ? group.dutch_meanings
-        : (group.english_meanings ?? []);
-    const notes =
-      locale === "nl" && group.dutch_notes?.length
-        ? group.dutch_notes
-        : (group.english_notes ?? []);
+    const meanings = getLocalizedTextValues(
+      group.english_meanings,
+      group.dutch_meanings,
+      locale,
+    );
+    const notes = getLocalizedTextValues(
+      group.english_notes,
+      group.dutch_notes,
+      locale,
+    );
+    const genderedRows =
+      group.grammar.pos === "N" && !attachedGenderedMeanings
+        ? genderedMeanings
+        : [];
+
+    if (genderedRows.length > 0) {
+      attachedGenderedMeanings = true;
+    }
 
     return [
-      { code, meanings, notes: notes.filter(isDisplayableMeaningGroupNote) },
+      {
+        code,
+        ...(genderedRows.length > 0 ? { genderedRows } : {}),
+        meanings,
+        notes: notes.filter(isDisplayableMeaningGroupNote),
+      },
     ];
   });
 }
@@ -241,14 +311,16 @@ function getLocalizedDialectMeanings(
 ): LocalizedDictionaryDialectMeaning[] {
   return (entry.dialectMeanings ?? [])
     .map((dialectMeaning) => {
-      const meanings =
-        locale === "nl" && dialectMeaning.dutch_meanings?.length
-          ? dialectMeaning.dutch_meanings
-          : (dialectMeaning.english_meanings ?? []);
-      const notes =
-        locale === "nl" && dialectMeaning.dutch_notes?.length
-          ? dialectMeaning.dutch_notes
-          : (dialectMeaning.english_notes ?? []);
+      const meanings = getLocalizedTextValues(
+        dialectMeaning.english_meanings,
+        dialectMeaning.dutch_meanings,
+        locale,
+      );
+      const notes = getLocalizedTextValues(
+        dialectMeaning.english_notes,
+        dialectMeaning.dutch_notes,
+        locale,
+      );
 
       return {
         dialects: dialectMeaning.dialects,
@@ -289,38 +361,12 @@ export function getLocalizedDisplayDialectMeanings(
     );
 }
 
-export function getLocalizedUngroupedMeanings(
-  entry: EntryMeaningSource,
-  locale: Language = "en",
-) {
-  const groupedMeaningKeys = new Set(
-    [
-      ...getLocalizedGenderedMeaningTexts(entry, locale),
-      ...getLocalizedMeaningGroups(entry, locale).flatMap(
-        (group) => group.meanings,
-      ),
-      ...getLocalizedDialectMeanings(entry, locale).flatMap(
-        (dialectMeaning) => dialectMeaning.meanings,
-      ),
-    ]
-      .map((meaning) => normalizeMeaningKey(meaning))
-      .filter(Boolean),
-  );
-
-  return getLocalizedTopLevelMeanings(entry, locale).filter((meaning) => {
-    const meaningKey = normalizeMeaningKey(meaning);
-
-    return meaningKey && !groupedMeaningKeys.has(meaningKey);
-  });
-}
-
 export function getLocalizedMeaningValues(
   entry: EntryMeaningSource,
   locale: Language = "en",
 ) {
   const values = [
     ...getLocalizedGenderedMeaningTexts(entry, locale),
-    ...getLocalizedUngroupedMeanings(entry, locale),
     ...getLocalizedMeaningGroups(entry, locale).flatMap((group) => [
       ...group.meanings,
       ...group.notes,
@@ -381,8 +427,9 @@ export function buildEntryDescription(
 ) {
   const headword = options.displayHeadword ?? toPlainText(entry.headword);
   const firstMeaning = options.summary ?? getEntrySummary(entry, locale);
-  const partOfSpeech = getPartOfSpeechLabel(entry.pos, (key) =>
-    getTranslation(locale, key),
+  const partOfSpeech = getPartOfSpeechLabel(
+    getPrimaryEntryPartOfSpeech(entry),
+    (key) => getTranslation(locale, key),
   );
 
   if (locale === "nl") {

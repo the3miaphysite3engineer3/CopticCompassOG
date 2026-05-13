@@ -19,7 +19,6 @@ const ANALYTICS_DRILLDOWN_CHART_TYPES = new Set<AnalyticsChartDrilldownType>([
   "etymology",
   "gender",
   "pos",
-  "relations",
   "verb",
 ]);
 const ANALYTICS_DRILLDOWN_STAT_TYPES = new Set<AnalyticsStatDrilldownType>([

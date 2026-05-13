@@ -31,8 +31,6 @@ type EntryCardOptions = {
   headingParts?: OpenGraphHeadingPart[];
   partOfSpeech: string;
   partOfSpeechLabel: string;
-  relatedForms: string[];
-  relatedLabel: string;
   strapline: string;
 };
 
@@ -598,8 +596,8 @@ export function renderSiteOpenGraphCard({
 }
 
 /**
- * Renders the dictionary-entry Open Graph card with gloss, part-of-speech, and
- * related-form callouts.
+ * Renders the dictionary-entry Open Graph card with gloss and part-of-speech
+ * metadata.
  */
 export function renderEntryOpenGraphCard({
   footerLabel,
@@ -609,8 +607,6 @@ export function renderEntryOpenGraphCard({
   headingParts = [],
   partOfSpeech,
   partOfSpeechLabel,
-  relatedForms,
-  relatedLabel,
   strapline,
 }: EntryCardOptions) {
   return (
@@ -663,53 +659,6 @@ export function renderEntryOpenGraphCard({
           gap: 18,
         }}
       >
-        {relatedForms.length > 0 ? (
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 12,
-            }}
-          >
-            <div
-              style={{
-                display: "flex",
-                fontSize: 22,
-                textTransform: "uppercase",
-                letterSpacing: 1.2,
-                color: CARD_THEMES.sky.textMuted,
-              }}
-            >
-              {relatedLabel}
-            </div>
-            <div
-              style={{
-                display: "flex",
-                gap: 14,
-                flexWrap: "wrap",
-              }}
-            >
-              {relatedForms.map((form) => (
-                <div
-                  key={form}
-                  style={{
-                    display: "flex",
-                    padding: "12px 18px",
-                    borderRadius: 18,
-                    background: CARD_THEMES.sky.panelBackground,
-                    border: CARD_THEMES.sky.panelBorder,
-                    fontSize: 28,
-                    color: CARD_THEMES.sky.textPrimary,
-                    fontFamily: "Antinoou",
-                  }}
-                >
-                  {form}
-                </div>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
         <OpenGraphFooter
           left={siteDomain}
           right={footerLabel}

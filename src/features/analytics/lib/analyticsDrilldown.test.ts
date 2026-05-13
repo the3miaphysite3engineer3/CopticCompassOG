@@ -17,12 +17,11 @@ const dictionary: DictionaryClientEntry[] = [
         stative: "",
       },
     },
-    english_meanings: ["lord"],
-    gender: "",
+    etymology: "Egy",
     greek_equivalents: [],
     headword: "ϭⲱⲓⲥ",
     id: "cd_17",
-    pos: "N",
+    meaningGroups: [{ grammar: { pos: "N" }, english_meanings: ["lord"] }],
   },
   {
     dialects: {
@@ -33,13 +32,16 @@ const dictionary: DictionaryClientEntry[] = [
         stative: "",
       },
     },
-    english_meanings: ["meaning unknown"],
     etymology: "Gr",
-    gender: "M",
     greek_equivalents: [],
     headword: "ⲉⲓⲱⲧ",
     id: "cd_18",
-    pos: "N",
+    meaningGroups: [
+      {
+        grammar: { gender: "M", pos: "N" },
+        english_meanings: ["meaning unknown"],
+      },
+    ],
   },
   {
     dialects: {
@@ -50,12 +52,24 @@ const dictionary: DictionaryClientEntry[] = [
         stative: "ⲃⲏⲕ",
       },
     },
-    english_meanings: ["run"],
-    gender: "",
+    etymology: "Egy",
     greek_equivalents: [],
     headword: "ⲃⲱⲕ",
     id: "cd_19",
-    pos: "V",
+    meaningGroups: [{ grammar: { pos: "V" }, english_meanings: ["run"] }],
+  },
+  {
+    dialects: {
+      M: {
+        absolute: "ϯϫⲣⲉ ⲛϩⲏⲧ",
+      },
+    },
+    etymology: "Unknown",
+    headword: "ϯϫⲣⲉ ⲛϩⲏⲧ",
+    id: "cd_7348",
+    meaningGroups: [
+      { grammar: { pos: "V" }, english_meanings: ["encourage, console"] },
+    ],
   },
 ];
 
@@ -78,7 +92,40 @@ describe("analytics drilldown", () => {
     expect(page).toMatchObject({
       entries: [{ id: "cd_18" }],
       hasMore: false,
-      totalEntries: 3,
+      totalEntries: 4,
+      totalMatches: 1,
+    });
+  });
+
+  it("matches explicit unknown etymology filters and chart slices", () => {
+    const filteredPage = getAnalyticsDrilldownPage({
+      dictionary,
+      drilldown: buildAnalyticsStatDrilldown({
+        totalTitle: "All entries",
+        type: "total",
+        uncertainTitle: "Meaning uncertain",
+        unknownTitle: "Meaning unknown",
+      }),
+      selectedDialect: "ALL",
+      selectedEtymology: "Unknown",
+    });
+    const chartPage = getAnalyticsDrilldownPage({
+      dictionary,
+      drilldown: buildAnalyticsChartDrilldown({
+        originalName: "analytics.unknownEtymology",
+        title: "Unknown etymology",
+        type: "etymology",
+      }),
+      selectedDialect: "ALL",
+      selectedEtymology: "ALL",
+    });
+
+    expect(filteredPage).toMatchObject({
+      entries: [{ id: "cd_7348" }],
+      totalMatches: 1,
+    });
+    expect(chartPage).toMatchObject({
+      entries: [{ id: "cd_7348" }],
       totalMatches: 1,
     });
   });
@@ -102,6 +149,52 @@ describe("analytics drilldown", () => {
       hasMore: false,
       nextOffset: null,
       totalMatches: 2,
+    });
+  });
+
+  it("matches part-of-speech chart drilldowns through meaning-group grammar", () => {
+    const page = getAnalyticsDrilldownPage({
+      dictionary: [
+        {
+          dialects: {
+            B: {
+              absolute: "ⲉⲛⲉϩ",
+            },
+          },
+          headword: "ⲉⲛⲉϩ",
+          etymology: "Egy",
+          id: "cd_adjectival_noun",
+          meaningGroups: [
+            {
+              grammar: {
+                gender: "M",
+                pos: "N",
+              },
+              english_meanings: ["eternity"],
+            },
+            {
+              grammar: {
+                pos: "ADJ",
+              },
+              english_meanings: ["eternal"],
+            },
+          ],
+        },
+      ],
+      drilldown: buildAnalyticsChartDrilldown({
+        originalName: "Adjectives",
+        title: "Adjectives",
+        type: "pos",
+      }),
+      limit: 10,
+      offset: 0,
+      selectedDialect: "ALL",
+      selectedEtymology: "ALL",
+    });
+
+    expect(page).toMatchObject({
+      entries: [{ id: "cd_adjectival_noun" }],
+      totalMatches: 1,
     });
   });
 });

@@ -14,7 +14,6 @@ type AnalyticsChartType =
   | "etymology"
   | "gender"
   | "pos"
-  | "relations"
   | "verb";
 
 type AnalyticsChartsSectionProps = {
@@ -79,16 +78,6 @@ export function AnalyticsChartsSection({
       })),
     [stats.verbCompletenessData, t],
   );
-  const relationChartData = useMemo(
-    () =>
-      stats.relationTypeData.map((datum) => ({
-        ...datum,
-        originalName: datum.name,
-        name: t(datum.name as TranslationKey),
-      })),
-    [stats.relationTypeData, t],
-  );
-
   return (
     <>
       <div className="mb-8 grid items-start gap-8 lg:grid-cols-2">
@@ -174,18 +163,6 @@ export function AnalyticsChartsSection({
           tooltipItemStyle={colors.tooltipItemStyle}
           tooltipLabelStyle={colors.tooltipLabelStyle}
           onSliceClick={(data) => onChartClick(data, "verb")}
-        />
-
-        <AnalyticsPieChartCard
-          title={t("analytics.relations" as TranslationKey)}
-          data={relationChartData}
-          palette={colors.palettes.relations}
-          chartCellStroke={colors.chartCellStroke}
-          isThemeReady={isThemeReady}
-          tooltipContentStyle={colors.tooltipContentStyle}
-          tooltipItemStyle={colors.tooltipItemStyle}
-          tooltipLabelStyle={colors.tooltipLabelStyle}
-          onSliceClick={(data) => onChartClick(data, "relations")}
         />
       </div>
     </>

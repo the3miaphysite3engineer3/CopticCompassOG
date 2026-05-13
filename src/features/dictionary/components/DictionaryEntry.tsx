@@ -17,7 +17,9 @@ import { getGrammarAbbreviationTooltips } from "@/features/dictionary/grammarReg
 import {
   formatDialectForms,
   formatImperativeForms,
+  getAllPluralForms,
   getDialectImperativeForms,
+  getDialectPluralForms,
   getDialectVariantRows,
   getGenderedDialectFormParts,
   getGenderedHeadingParts,
@@ -25,15 +27,17 @@ import {
   type GenderedHeadingMarker,
 } from "@/features/dictionary/lib/entryDisplay";
 import {
+  getEntryNounGender,
+  getPrimaryEntryPartOfSpeech,
+} from "@/features/dictionary/lib/entryGrammar";
+import {
   getLocalizedDisplayDialectMeanings,
   getLocalizedGenderedMeanings,
   getLocalizedMeaningGroups,
-  getLocalizedUngroupedMeanings,
 } from "@/features/dictionary/lib/entryText";
 import type {
   ConstructParticipleCompound,
   DictionaryClientEntry,
-  DictionaryGenderedCounterpart,
   LexicalGender,
 } from "@/features/dictionary/types";
 import { cx } from "@/lib/classes";
@@ -54,7 +58,6 @@ type DictionaryEntryCardProps = {
   headingLevel?: "h1" | "h2";
   linkHeadword?: boolean;
   actions?: ReactNode;
-  genderedCounterparts?: readonly DictionaryGenderedCounterpart[];
 };
 
 type DialectEntryTuple = [
@@ -146,7 +149,6 @@ function getGenderedHeadingMarkerLabel(
 export default function DictionaryEntryCard({
   actions,
   entry,
-  genderedCounterparts = [],
   query = "",
   selectedDialect = DEFAULT_DICTIONARY_DIALECT_FILTER,
   headingLevel = "h2",
@@ -195,32 +197,22 @@ export default function DictionaryEntryCard({
   }`;
   const formSymbolTooltips = getFormSymbolTooltips(t);
   const grammarAbbreviationTooltips = getGrammarAbbreviationTooltips(t);
-  const mainGenderMarkers = getMainGenderMarkers(entry.gender, t);
-  const genderedCounterpartEntries = [
-    ...(entry.genderedCounterparts ?? []),
-    ...genderedCounterparts,
-  ].filter(
-    (counterpart, index, counterparts) =>
-      counterparts.findIndex((candidate) => candidate.id === counterpart.id) ===
-      index,
-  );
-  const genderedHeadingParts = getGenderedHeadingParts(
-    entry,
-    genderedCounterpartEntries,
-    viewDialect,
-  );
+  const mainGenderMarkers = getMainGenderMarkers(getEntryNounGender(entry), t);
+  const genderedHeadingParts = getGenderedHeadingParts(entry, viewDialect);
   const hasGenderedHeading = genderedHeadingParts.length > 0;
-  const primaryDialectPlurals =
-    primaryDialectKey && entry.pluralForms?.[primaryDialectKey]
-      ? entry.pluralForms[primaryDialectKey]
-      : [];
+  const primaryDialectPlurals = primaryDialectKey
+    ? getDialectPluralForms(entry, primaryDialectKey, {
+        includeUnscoped: true,
+      })
+    : getAllPluralForms(entry);
   const visiblePrimaryDialectPlurals = primaryDialectPlurals.filter(
     (pluralForm) => pluralForm.trim() !== headerSpelling.trim(),
   );
   const headingPluralForm = visiblePrimaryDialectPlurals[0] ?? "";
 
-  const partOfSpeechLabel = getPartOfSpeechLabel(entry.pos, t);
-  const partOfSpeechCode = getPartOfSpeechCode(entry.pos);
+  const primaryPartOfSpeech = getPrimaryEntryPartOfSpeech(entry);
+  const partOfSpeechLabel = getPartOfSpeechLabel(primaryPartOfSpeech, t);
+  const partOfSpeechCode = getPartOfSpeechCode(primaryPartOfSpeech);
   const showInlinePos = partOfSpeechCode !== "" && partOfSpeechCode !== "n";
   const focusableHeadingGlosses = !linkHeadword;
 
@@ -305,11 +297,19 @@ export default function DictionaryEntryCard({
       )}
     </HeadingTag>
   );
-  const ungroupedMeanings = getLocalizedUngroupedMeanings(entry, language);
-  const genderedMeanings = getLocalizedGenderedMeanings(entry, language);
+  const imperativeForms = primaryDialectKey
+    ? getDialectImperativeForms(entry, primaryDialectKey)
+    : [];
   const meaningGroups = getLocalizedMeaningGroups(entry, language, {
     dialectForms: primaryForms,
+    hasImperativeForms: imperativeForms.length > 0,
   });
+  const hasGroupedGenderedMeanings = meaningGroups.some(
+    (group) => (group.genderedRows?.length ?? 0) > 0,
+  );
+  const genderedMeanings = hasGroupedGenderedMeanings
+    ? []
+    : getLocalizedGenderedMeanings(entry, language);
   const dialectMeanings = getLocalizedDisplayDialectMeanings(entry, language);
   const variantRows = [
     ...(primaryDialectKey && primaryForms
@@ -318,17 +318,7 @@ export default function DictionaryEntryCard({
           ...row,
         }))
       : []),
-    ...(primaryDialectKey && visiblePrimaryDialectPlurals.length > 1
-      ? [
-          {
-            dialect: primaryDialectKey,
-            state: "plural",
-            forms: visiblePrimaryDialectPlurals.slice(1),
-          },
-        ]
-      : []),
   ];
-  const imperativeForms = getDialectImperativeForms(primaryForms);
   const constructParticipleCompounds =
     primaryForms?.constructParticipleCompounds ?? [];
   const compactBadgeClassName = "h-8 min-h-8 min-w-8 justify-center px-3";
@@ -476,77 +466,108 @@ export default function DictionaryEntryCard({
             ))}
           </ul>
         )}
-        {ungroupedMeanings.length > 0 && (
-          <ul
-            className={`space-y-2 text-stone-800 dark:text-stone-200 list-disc ml-5 marker:text-sky-500 ${
-              isDetailView ? "text-lg md:text-xl" : "text-lg"
-            }`}
-          >
-            {ungroupedMeanings.map((meaning, idx) => (
-              <li key={idx} className="leading-relaxed pl-1">
-                <HighlightText
-                  text={meaning}
-                  query={query}
-                  emphasizeLeadingLabel
-                  grammarAbbreviationTooltips={grammarAbbreviationTooltips}
-                />
-              </li>
-            ))}
-          </ul>
-        )}
         {meaningGroups.length > 0 && (
           <div className="grid gap-3">
-            {meaningGroups.map((group) => (
-              <div
-                key={group.code}
-                className="grid gap-2 border-l-2 border-sky-200 pl-3 dark:border-sky-900/70"
-              >
-                <div className="flex min-w-0 flex-wrap items-baseline gap-2">
-                  <LinguisticGloss
-                    code={group.code}
-                    label={
-                      grammarAbbreviationTooltips[
-                        group.code.toLocaleLowerCase()
-                      ] ?? group.code
-                    }
-                    size="body"
-                  />
-                  {group.notes.map((note, idx) => (
-                    <span
-                      key={`${group.code}-note-${idx}`}
-                      className="text-sm text-stone-500 dark:text-stone-400"
-                    >
-                      <HighlightText
-                        text={note}
-                        query={query}
-                        grammarAbbreviationTooltips={
-                          grammarAbbreviationTooltips
-                        }
-                      />
-                    </span>
-                  ))}
-                </div>
-                {group.meanings.length > 0 && (
-                  <ul
-                    className={`space-y-1.5 text-stone-800 dark:text-stone-200 list-disc ml-5 marker:text-sky-500 ${
-                      isDetailView ? "text-lg md:text-xl" : "text-lg"
-                    }`}
-                  >
-                    {group.meanings.map((meaning, idx) => (
-                      <li key={idx} className="leading-relaxed pl-1">
+            {meaningGroups.map((group, groupIndex) => {
+              const groupGenderedRows = group.genderedRows ?? [];
+              const hasMeaningRows =
+                groupGenderedRows.length > 0 || group.meanings.length > 0;
+
+              return (
+                <div
+                  key={`${group.code}-${groupIndex}`}
+                  className="grid gap-2 border-l-2 border-sky-200 pl-3 dark:border-sky-900/70"
+                >
+                  <div className="flex min-w-0 flex-wrap items-baseline gap-2">
+                    <LinguisticGloss
+                      code={group.code}
+                      label={
+                        grammarAbbreviationTooltips[
+                          group.code.toLocaleLowerCase()
+                        ] ?? group.code
+                      }
+                      size="body"
+                    />
+                    {group.notes.map((note, idx) => (
+                      <span
+                        key={`${group.code}-note-${idx}`}
+                        className="text-sm text-stone-500 dark:text-stone-400"
+                      >
                         <HighlightText
-                          text={meaning}
+                          text={note}
                           query={query}
                           grammarAbbreviationTooltips={
                             grammarAbbreviationTooltips
                           }
                         />
-                      </li>
+                      </span>
                     ))}
-                  </ul>
-                )}
-              </div>
-            ))}
+                  </div>
+                  {hasMeaningRows && (
+                    <ul
+                      className={`space-y-1.5 text-stone-800 dark:text-stone-200 list-disc ml-5 marker:text-sky-500 ${
+                        isDetailView ? "text-lg md:text-xl" : "text-lg"
+                      }`}
+                    >
+                      {groupGenderedRows.map((row, idx) => (
+                        <li
+                          key={`${group.code}-gendered-${idx}`}
+                          className="leading-relaxed pl-1"
+                        >
+                          <span className="inline-flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                            {row.values.map(
+                              ({ marker, meaning }, valueIndex) => (
+                                <span
+                                  key={`${marker}-${valueIndex}`}
+                                  className="inline-flex items-baseline gap-x-1.5"
+                                >
+                                  <LinguisticGloss
+                                    code={marker}
+                                    label={getGenderedHeadingMarkerLabel(
+                                      marker,
+                                      t,
+                                    )}
+                                    size="inline"
+                                  />
+                                  <span>
+                                    <HighlightText
+                                      text={meaning}
+                                      query={query}
+                                      grammarAbbreviationTooltips={
+                                        grammarAbbreviationTooltips
+                                      }
+                                    />
+                                    {valueIndex < row.values.length - 1 && (
+                                      <span className="text-stone-400 dark:text-stone-500">
+                                        ;
+                                      </span>
+                                    )}
+                                  </span>
+                                </span>
+                              ),
+                            )}
+                          </span>
+                        </li>
+                      ))}
+                      {group.meanings.map((meaning, idx) => (
+                        <li
+                          key={`${group.code}-meaning-${idx}`}
+                          className="leading-relaxed pl-1"
+                        >
+                          <HighlightText
+                            text={meaning}
+                            query={query}
+                            grammarAbbreviationTooltips={
+                              grammarAbbreviationTooltips
+                            }
+                          />
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              );
+            })}
           </div>
         )}
         {dialectMeanings.length > 0 && (
@@ -740,10 +761,12 @@ export default function DictionaryEntryCard({
           <div className="flex flex-wrap gap-3">
             {remainingDialects.map(([dialect, forms]) => {
               const spelling = formatDialectForms(forms, entry.headword);
-              const dialectPlurals = entry.pluralForms?.[dialect] || [];
+              const dialectPlurals = getDialectPluralForms(entry, dialect);
+              const visibleDialectPlurals = dialectPlurals.filter(
+                (pluralForm) => pluralForm.trim() !== spelling.trim(),
+              );
               const genderedDialectParts = getGenderedDialectFormParts(
                 entry,
-                genderedCounterpartEntries,
                 dialect,
               );
               const hasGenderedDialectParts = genderedDialectParts.length > 0;
@@ -822,15 +845,17 @@ export default function DictionaryEntryCard({
                       )}
                     {dialectPlurals.length > 0 && !hasGenderedDialectParts && (
                       <>
-                        <span
-                          className={`${antinoou.className} block break-words text-lg leading-snug text-stone-800 [overflow-wrap:anywhere] dark:text-stone-300`}
-                        >
-                          <HighlightText
-                            text={dialectPlurals[0]}
-                            query={query}
-                            symbolTooltips={formSymbolTooltips}
-                          />
-                        </span>
+                        {visibleDialectPlurals[0] && (
+                          <span
+                            className={`${antinoou.className} block break-words text-lg leading-snug text-stone-800 [overflow-wrap:anywhere] dark:text-stone-300`}
+                          >
+                            <HighlightText
+                              text={visibleDialectPlurals[0]}
+                              query={query}
+                              symbolTooltips={formSymbolTooltips}
+                            />
+                          </span>
+                        )}
                         <LinguisticGloss
                           code="pl"
                           label={t("entry.abbreviation.pl")}

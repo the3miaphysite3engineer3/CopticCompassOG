@@ -220,7 +220,11 @@
               { "type": "coptic", "text": "ⲧⲉ" },
               { "type": "text", "text": ", and " },
               { "type": "text", "text": "≡" },
-              { "type": "coptic", "text": "ⲛⲉ" },
+              {
+                "type": "coptic",
+                "text": "ⲛⲉ",
+                "dictionaryEntryId": "cd_5101"
+              },
               {
                 "type": "text",
                 "text": " that structure the bipartite nominal sentence."
@@ -243,7 +247,11 @@
               { "type": "coptic", "text": "ⲧⲉ" },
               { "type": "text", "text": " en " },
               { "type": "text", "text": "≡" },
-              { "type": "coptic", "text": "ⲛⲉ" },
+              {
+                "type": "coptic",
+                "text": "ⲛⲉ",
+                "dictionaryEntryId": "cd_5101"
+              },
               {
                 "type": "text",
                 "text": " die de tweeledige nominale zin structureren."

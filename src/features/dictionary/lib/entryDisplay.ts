@@ -2,17 +2,17 @@ import {
   DEFAULT_DICTIONARY_DIALECT_FILTER,
   type DictionaryDialectCode,
 } from "@/features/dictionary/config";
+import { getEntryNounGender } from "@/features/dictionary/lib/entryGrammar";
 import type {
   DialectFormVariants,
   DictionaryClientEntry,
-  DictionaryGenderedCounterpart,
 } from "@/features/dictionary/types";
 
 type EntryDisplayCandidate = Pick<
   DictionaryClientEntry,
-  "dialects" | "headword"
+  "dialects" | "headword" | "meaningGroups"
 > &
-  Partial<Pick<DictionaryClientEntry, "gender" | "id" | "pluralForms">>;
+  Partial<Pick<DictionaryClientEntry, "id" | "inflectedForms">>;
 type DialectEntryTuple = [
   DictionaryDialectCode,
   NonNullable<EntryDisplayCandidate["dialects"][DictionaryDialectCode]>,
@@ -30,6 +30,12 @@ type GenderedHeadingPart = {
   spelling: string;
 };
 
+function getGenderedPartKey(
+  part: Pick<GenderedHeadingPart, "marker" | "spelling">,
+) {
+  return `${part.marker}:${part.spelling}`;
+}
+
 const DIALECT_VARIANT_STATE_ORDER: readonly DialectVariantState[] = [
   "absolute",
   "nominal",
@@ -37,6 +43,14 @@ const DIALECT_VARIANT_STATE_ORDER: readonly DialectVariantState[] = [
   "stative",
   "constructParticiples",
 ] as const;
+
+function addUniqueForm(forms: string[], form: string) {
+  const normalizedForm = form.trim();
+
+  if (normalizedForm && !forms.includes(normalizedForm)) {
+    forms.push(normalizedForm);
+  }
+}
 
 function formatBoundForms(nominal = "", pronominal = "") {
   if (!nominal) {
@@ -105,8 +119,8 @@ export function formatDialectForms(
 
 /**
  * Joins only the principal absolute and bound forms. This is the compact
- * relation-card spelling, where stative and construct-participle data belongs
- * in the entry body instead of the linked-entry title.
+ * entry-card spelling, where stative and construct-participle data belongs in
+ * the entry body instead of the compact title.
  */
 export function formatPrincipalDialectForms(
   forms: DialectEntryTuple[1],
@@ -149,12 +163,90 @@ export function getDialectVariantRows(
 }
 
 /**
- * Returns dialect-specific imperative forms for their dedicated entry section.
+ * Returns structured feminine forms for one dialect.
+ */
+function getDialectFeminineForms(
+  entry: EntryDisplayCandidate,
+  dialect: DictionaryDialectCode,
+  options: { includeUnscoped?: boolean } = {},
+) {
+  const feminineForms: string[] = [];
+
+  for (const inflectedForm of entry.inflectedForms ?? []) {
+    if (inflectedForm.kind !== "feminine") {
+      continue;
+    }
+
+    if (
+      inflectedForm.dialect === dialect ||
+      (options.includeUnscoped && !inflectedForm.dialect)
+    ) {
+      addUniqueForm(feminineForms, inflectedForm.form);
+    }
+  }
+
+  return feminineForms;
+}
+
+/**
+ * Returns structured plural forms for one dialect.
+ */
+export function getDialectPluralForms(
+  entry: EntryDisplayCandidate,
+  dialect: DictionaryDialectCode,
+  options: { includeUnscoped?: boolean } = {},
+) {
+  const pluralForms: string[] = [];
+
+  for (const inflectedForm of entry.inflectedForms ?? []) {
+    if (inflectedForm.kind !== "plural") {
+      continue;
+    }
+
+    if (
+      inflectedForm.dialect === dialect ||
+      (options.includeUnscoped && !inflectedForm.dialect)
+    ) {
+      addUniqueForm(pluralForms, inflectedForm.form);
+    }
+  }
+
+  return pluralForms;
+}
+
+/**
+ * Returns every structured plural form in source order.
+ */
+export function getAllPluralForms(entry: EntryDisplayCandidate) {
+  const pluralForms: string[] = [];
+
+  for (const inflectedForm of entry.inflectedForms ?? []) {
+    if (inflectedForm.kind === "plural") {
+      addUniqueForm(pluralForms, inflectedForm.form);
+    }
+  }
+
+  return pluralForms;
+}
+
+/**
+ * Returns dialect-specific structured imperative forms for their dedicated
+ * entry section.
  */
 export function getDialectImperativeForms(
-  forms: DialectEntryTuple[1] | undefined,
+  entry: EntryDisplayCandidate,
+  dialect: DictionaryDialectCode,
+  options: { includeUnscoped?: boolean } = {},
 ) {
-  return (forms?.imperatives ?? []).filter(Boolean);
+  return (entry.inflectedForms ?? [])
+    .filter(
+      (inflectedForm) =>
+        inflectedForm.kind === "imperative" &&
+        (inflectedForm.dialect === dialect ||
+          (options.includeUnscoped && !inflectedForm.dialect)),
+    )
+    .map((inflectedForm) => inflectedForm.form)
+    .filter(Boolean);
 }
 
 /**
@@ -239,28 +331,26 @@ export function getPreferredEntryPrincipalSpelling(
 }
 
 /**
- * Builds the compact base + feminine counterpart + plural heading sequence for
- * masculine nouns whose feminine counterpart is stored as a related entry.
+ * Builds the compact base + feminine + plural heading sequence for masculine
+ * nouns with structured feminine forms.
  */
 export function getGenderedHeadingParts(
   entry: EntryDisplayCandidate,
-  genderedCounterparts: readonly DictionaryGenderedCounterpart[] = [],
   selectedDialect: EntryDialectSelection = DEFAULT_DICTIONARY_DIALECT_FILTER,
 ): GenderedHeadingPart[] {
-  if (entry.gender !== "M") {
+  if (getEntryNounGender(entry) !== "M") {
     return [];
   }
 
-  const feminineCounterparts = genderedCounterparts.filter(
-    (counterpart) =>
-      counterpart.relationType === "feminine-counterpart" &&
-      counterpart.gender === "F",
+  const hasFeminineForms = (entry.inflectedForms ?? []).some(
+    (inflectedForm) => inflectedForm.kind === "feminine",
   );
 
-  if (feminineCounterparts.length === 0) {
+  if (!hasFeminineForms) {
     return [];
   }
 
+  const usedGenderedPartKeys = new Set<string>();
   const usedSpellings = new Set<string>();
   const baseSpelling = getPreferredEntryPrincipalSpelling(
     entry,
@@ -269,38 +359,52 @@ export function getGenderedHeadingParts(
   const headingParts: GenderedHeadingPart[] = [];
 
   if (baseSpelling) {
-    headingParts.push({
+    const basePart = {
       entryId: entry.id,
       marker: "m",
       spelling: baseSpelling,
-    });
+    } satisfies GenderedHeadingPart;
+
+    headingParts.push(basePart);
+    usedGenderedPartKeys.add(getGenderedPartKey(basePart));
     usedSpellings.add(baseSpelling);
   }
 
-  for (const counterpart of feminineCounterparts) {
-    const counterpartSpelling = getPreferredEntryPrincipalSpelling(
-      counterpart,
-      selectedDialect,
-    ).trim();
-
-    if (!counterpartSpelling || usedSpellings.has(counterpartSpelling)) {
-      continue;
+  const primaryDialectKey = getPreferredEntryDialectKey(entry, selectedDialect);
+  const feminineCandidates = primaryDialectKey
+    ? getDialectFeminineForms(entry, primaryDialectKey, {
+        includeUnscoped: true,
+      })
+    : [];
+  const feminineSpelling = feminineCandidates.find((feminineForm) => {
+    if (!feminineForm) {
+      return false;
     }
 
-    headingParts.push({
-      entryId: counterpart.id,
+    return !usedGenderedPartKeys.has(
+      getGenderedPartKey({ marker: "f", spelling: feminineForm }),
+    );
+  });
+
+  if (feminineSpelling) {
+    const femininePart = {
       marker: "f",
-      spelling: counterpartSpelling,
-    });
-    usedSpellings.add(counterpartSpelling);
+      spelling: feminineSpelling,
+    } satisfies GenderedHeadingPart;
+
+    headingParts.push(femininePart);
+    usedGenderedPartKeys.add(getGenderedPartKey(femininePart));
+    usedSpellings.add(feminineSpelling);
   }
 
-  const primaryDialectKey = getPreferredEntryDialectKey(entry, selectedDialect);
-  const pluralSpelling = (
-    (primaryDialectKey ? entry.pluralForms?.[primaryDialectKey] : []) ?? []
-  )
-    .map((pluralForm) => pluralForm.trim())
-    .find((pluralForm) => pluralForm && !usedSpellings.has(pluralForm));
+  const pluralCandidates = primaryDialectKey
+    ? getDialectPluralForms(entry, primaryDialectKey, {
+        includeUnscoped: true,
+      })
+    : getAllPluralForms(entry);
+  const pluralSpelling = pluralCandidates.find(
+    (pluralForm) => pluralForm && !usedSpellings.has(pluralForm),
+  );
 
   if (pluralSpelling) {
     headingParts.push({
@@ -332,20 +436,18 @@ export function formatGenderedHeadingParts(
  */
 export function getGenderedDialectFormParts(
   entry: EntryDisplayCandidate,
-  genderedCounterparts: readonly DictionaryGenderedCounterpart[] = [],
   dialect: DictionaryDialectCode,
 ): GenderedHeadingPart[] {
-  if (entry.gender !== "M") {
+  if (getEntryNounGender(entry) !== "M") {
     return [];
   }
 
-  const feminineCounterparts = genderedCounterparts.filter(
-    (counterpart) =>
-      counterpart.relationType === "feminine-counterpart" &&
-      counterpart.gender === "F",
+  const hasDialectFeminineForms = (entry.inflectedForms ?? []).some(
+    (inflectedForm) =>
+      inflectedForm.kind === "feminine" && inflectedForm.dialect === dialect,
   );
 
-  if (feminineCounterparts.length === 0) {
+  if (!hasDialectFeminineForms) {
     return [];
   }
 
@@ -354,6 +456,7 @@ export function getGenderedDialectFormParts(
     return [];
   }
 
+  const usedGenderedPartKeys = new Set<string>();
   const usedSpellings = new Set<string>();
   const baseSpelling = formatPrincipalDialectForms(
     forms,
@@ -362,40 +465,43 @@ export function getGenderedDialectFormParts(
   const parts: GenderedHeadingPart[] = [];
 
   if (baseSpelling) {
-    parts.push({
+    const basePart = {
       entryId: entry.id,
       marker: "m",
       spelling: baseSpelling,
-    });
+    } satisfies GenderedHeadingPart;
+
+    parts.push(basePart);
+    usedGenderedPartKeys.add(getGenderedPartKey(basePart));
     usedSpellings.add(baseSpelling);
   }
 
-  for (const counterpart of feminineCounterparts) {
-    const counterpartForms = counterpart.dialects[dialect];
-    if (!counterpartForms) {
-      continue;
-    }
+  const feminineSpelling = getDialectFeminineForms(entry, dialect).find(
+    (feminineForm) => {
+      if (!feminineForm) {
+        return false;
+      }
 
-    const counterpartSpelling = formatPrincipalDialectForms(
-      counterpartForms,
-      counterpart.headword,
-    ).trim();
+      return !usedGenderedPartKeys.has(
+        getGenderedPartKey({ marker: "f", spelling: feminineForm }),
+      );
+    },
+  );
 
-    if (!counterpartSpelling || usedSpellings.has(counterpartSpelling)) {
-      continue;
-    }
-
-    parts.push({
-      entryId: counterpart.id,
+  if (feminineSpelling) {
+    const femininePart = {
       marker: "f",
-      spelling: counterpartSpelling,
-    });
-    usedSpellings.add(counterpartSpelling);
+      spelling: feminineSpelling,
+    } satisfies GenderedHeadingPart;
+
+    parts.push(femininePart);
+    usedGenderedPartKeys.add(getGenderedPartKey(femininePart));
+    usedSpellings.add(feminineSpelling);
   }
 
-  const pluralSpelling = (entry.pluralForms?.[dialect] ?? [])
-    .map((pluralForm) => pluralForm.trim())
-    .find((pluralForm) => pluralForm && !usedSpellings.has(pluralForm));
+  const pluralSpelling = getDialectPluralForms(entry, dialect).find(
+    (pluralForm) => pluralForm && !usedSpellings.has(pluralForm),
+  );
 
   if (pluralSpelling) {
     parts.push({

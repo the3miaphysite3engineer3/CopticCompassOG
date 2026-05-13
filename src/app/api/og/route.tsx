@@ -4,10 +4,8 @@ import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
 import { getPartOfSpeechLabel } from "@/features/dictionary/config";
-import {
-  getDictionaryEntryById,
-  getDictionaryEntryRelations,
-} from "@/features/dictionary/lib/dictionary";
+import { getDictionaryEntryById } from "@/features/dictionary/lib/dictionary";
+import { getPrimaryEntryPartOfSpeech } from "@/features/dictionary/lib/entryGrammar";
 import { buildEntryOpenGraphPreview } from "@/features/dictionary/lib/entryOpenGraph";
 import {
   getPublishedGrammarLessonBundleBySlug,
@@ -98,18 +96,15 @@ function renderEntryCard(id: string, locale: string) {
     return renderGenericCard(locale);
   }
 
-  const { parentEntry, relatedEntries } = getDictionaryEntryRelations(entry);
   const preview = buildEntryOpenGraphPreview({
     entry,
     language,
-    parentEntry,
-    relatedEntries,
   });
   const footerLabel = getOpenGraphSectionFooter("dictionary", language);
-  const relatedLabel = language === "nl" ? "Verwante vormen" : "Related forms";
   const partOfSpeechLabel = language === "nl" ? "Woordsoort" : "Part of speech";
-  const partOfSpeech = getPartOfSpeechLabel(entry.pos, (key) =>
-    getTranslation(language, key),
+  const partOfSpeech = getPartOfSpeechLabel(
+    getPrimaryEntryPartOfSpeech(entry),
+    (key) => getTranslation(language, key),
   );
 
   return renderEntryOpenGraphCard({
@@ -120,8 +115,6 @@ function renderEntryCard(id: string, locale: string) {
     headingParts: preview.headingParts,
     partOfSpeech,
     partOfSpeechLabel,
-    relatedForms: preview.relatedForms,
-    relatedLabel,
     strapline: preview.strapline,
   });
 }

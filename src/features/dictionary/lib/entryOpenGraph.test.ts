@@ -1,26 +1,38 @@
 import { describe, expect, it } from "vitest";
 
-import type { LexicalEntry } from "@/features/dictionary/types";
+import type {
+  DictionaryMeaningGroupGrammarGender,
+  LexicalEntry,
+} from "@/features/dictionary/types";
 
 import {
   buildEntryOpenGraphImageUrl,
   buildEntryOpenGraphPreview,
 } from "./entryOpenGraph";
 
-function createEntry(
-  overrides: Partial<LexicalEntry> & Pick<LexicalEntry, "id" | "headword">,
-): LexicalEntry {
-  const { id, headword, ...rest } = overrides;
+type TestEntryOverrides = Partial<LexicalEntry> &
+  Pick<LexicalEntry, "id" | "headword"> & {
+    grammarGender?: DictionaryMeaningGroupGrammarGender;
+  };
+
+function createEntry(overrides: TestEntryOverrides): LexicalEntry {
+  const { grammarGender, id, headword, ...rest } = overrides;
+  const meaningGroups = rest.meaningGroups ?? [
+    {
+      grammar: grammarGender
+        ? { gender: grammarGender, pos: "N" }
+        : { pos: "N" },
+    },
+  ];
 
   return {
     id,
     headword,
     dialects: {},
-    pos: "N",
-    gender: "",
-    english_meanings: [],
+    etymology: "Egy",
     greek_equivalents: [],
     ...rest,
+    meaningGroups,
   };
 }
 
@@ -31,7 +43,7 @@ describe("entry Open Graph helpers", () => {
     ).toBe("https://example.com/api/og?type=entry&locale=nl&id=cd_173");
   });
 
-  it("builds a preview with gloss and capped related forms", () => {
+  it("builds a preview with gloss", () => {
     const entry = createEntry({
       id: "cd_173",
       headword: "ⲥⲁϫⲓ",
@@ -43,31 +55,16 @@ describe("entry Open Graph helpers", () => {
           stative: "",
         },
       },
-      english_meanings: ["N son"],
+      meaningGroups: [{ grammar: { pos: "N" }, english_meanings: ["N son"] }],
     });
 
     const preview = buildEntryOpenGraphPreview({
       entry,
       language: "en",
-      parentEntry: createEntry({
-        id: "cd_100",
-        headword: "ⲥⲁϫ",
-      }),
-      relatedEntries: [
-        createEntry({
-          id: "cd_174",
-          headword: "ⲥⲁϫⲉ",
-        }),
-        createEntry({
-          id: "cd_175",
-          headword: "ⲥⲁϫⲟ",
-        }),
-      ],
     });
 
     expect(preview.heading).toBe("ϭⲁϫⲓ ϭⲁϫ");
     expect(preview.gloss).toBe("son");
-    expect(preview.relatedForms).toEqual(["ⲥⲁϫ", "ⲥⲁϫⲉ"]);
     expect(preview.strapline).toBe("Coptic Dictionary");
   });
 
@@ -80,8 +77,11 @@ describe("entry Open Graph helpers", () => {
           absolute: "ⲟⲩⲣⲟ",
         },
       },
-      english_meanings: ["king; queen; royals"],
-      gender: "M",
+      meaningGroups: [
+        { grammar: { gender: "M", pos: "N" } },
+        { grammar: { pos: "ADJ" }, english_meanings: ["royal"] },
+      ],
+      grammarGender: "M",
       genderedMeanings: [
         {
           english: {
@@ -91,28 +91,23 @@ describe("entry Open Graph helpers", () => {
           },
         },
       ],
-      pluralForms: {
-        B: ["ⲟⲩⲣⲱⲟⲩ"],
-      },
-    });
-    const feminineCounterpart = createEntry({
-      id: "cd_18a",
-      headword: "ⲟⲩⲣⲱ",
-      dialects: {
-        B: {
-          absolute: "ⲟⲩⲣⲱ",
+      inflectedForms: [
+        {
+          kind: "feminine",
+          dialect: "B",
+          form: "ⲟⲩⲣⲱ",
         },
-      },
-      english_meanings: ["queen"],
-      gender: "F",
-      parentEntryId: "cd_18",
-      relationType: "feminine-counterpart",
+        {
+          kind: "plural",
+          dialect: "B",
+          form: "ⲟⲩⲣⲱⲟⲩ",
+        },
+      ],
     });
 
     const preview = buildEntryOpenGraphPreview({
       entry,
       language: "en",
-      relatedEntries: [feminineCounterpart],
     });
 
     expect(preview.heading).toBe("ⲟⲩⲣⲟ m ⲟⲩⲣⲱ f ⲟⲩⲣⲱⲟⲩ pl");
@@ -131,7 +126,6 @@ describe("entry Open Graph helpers", () => {
         ],
       },
     ]);
-    expect(preview.relatedForms).toEqual([]);
   });
 
   it("includes the primary construct participle in preview headings", () => {
@@ -150,7 +144,9 @@ describe("entry Open Graph helpers", () => {
           },
         },
       },
-      english_meanings: ["pc taker"],
+      meaningGroups: [
+        { grammar: { form: "PC", pos: "V" }, english_meanings: ["pc taker"] },
+      ],
     });
 
     const preview = buildEntryOpenGraphPreview({

@@ -3,7 +3,6 @@ import path from "path";
 
 import { cache } from "react";
 
-import { normalizePartOfSpeech } from "@/features/dictionary/config";
 import {
   prepareDictionaryForSearch,
   searchPreparedDictionaryPage,
@@ -12,7 +11,6 @@ import {
 } from "@/features/dictionary/search";
 import type {
   DictionaryClientEntry,
-  DictionaryGenderedCounterpart,
   LexicalEntry,
 } from "@/features/dictionary/types";
 import { assertServerOnly } from "@/lib/server/assertServerOnly.ts";
@@ -21,7 +19,6 @@ assertServerOnly("src/features/dictionary/lib/dictionary.ts");
 
 type DictionaryLookupIndex = {
   byId: Map<string, LexicalEntry>;
-  childIdsByParentId: Map<string, readonly string[]>;
   entryIds: readonly string[];
 };
 
@@ -39,12 +36,7 @@ const readDictionary = cache((): LexicalEntry[] => {
   if (!fs.existsSync(filePath)) {
     return [];
   }
-  return (JSON.parse(fs.readFileSync(filePath, "utf8")) as LexicalEntry[]).map(
-    (entry) => ({
-      ...entry,
-      pos: normalizePartOfSpeech(entry.pos),
-    }),
-  );
+  return JSON.parse(fs.readFileSync(filePath, "utf8")) as LexicalEntry[];
 });
 
 /**
@@ -57,7 +49,7 @@ function getDictionary(): LexicalEntry[] {
 
 /**
  * Builds the cached lookup maps used by server-only dictionary consumers so
- * repeated id and relation lookups do not require full-array scans.
+ * repeated id lookups do not require full-array scans.
  */
 function getDictionaryLookupIndex(
   dictionary: readonly LexicalEntry[] = getDictionary(),
@@ -68,36 +60,13 @@ function getDictionaryLookupIndex(
   }
 
   const byId = new Map<string, LexicalEntry>();
-  const mutableChildIdsByParentId = new Map<string, string[]>();
 
   for (const entry of dictionary) {
     byId.set(entry.id, entry);
-
-    if (!entry.parentEntryId) {
-      continue;
-    }
-
-    const childIds = mutableChildIdsByParentId.get(entry.parentEntryId) ?? [];
-    childIds.push(entry.id);
-    mutableChildIdsByParentId.set(entry.parentEntryId, childIds);
   }
 
-  const childIdsByParentId = new Map<string, readonly string[]>(
-    [...mutableChildIdsByParentId.entries()].map(([parentId, childIds]) => [
-      parentId,
-      [...childIds].sort((leftId, rightId) => {
-        const leftEntry = byId.get(leftId);
-        const rightEntry = byId.get(rightId);
-
-        return (leftEntry?.headword ?? "").localeCompare(
-          rightEntry?.headword ?? "",
-        );
-      }),
-    ]),
-  );
   const lookupIndex = {
     byId,
-    childIdsByParentId,
     entryIds: dictionary.map((entry) => entry.id),
   } satisfies DictionaryLookupIndex;
 
@@ -109,77 +78,31 @@ function getDictionaryLookupIndex(
  * Keeps client search and analytics views on the smaller transport payload
  * they need instead of shipping entry-detail-only fields.
  */
-function toDictionaryGenderedCounterpart(
-  entry: DictionaryGenderedCounterpart,
-): DictionaryGenderedCounterpart {
-  return {
-    dialects: entry.dialects,
-    gender: entry.gender,
-    headword: entry.headword,
-    id: entry.id,
-    pluralForms: entry.pluralForms,
-    relationType: entry.relationType,
-  };
-}
-
-function getGenderedCounterpartEntries(
-  entry: LexicalEntry,
-  dictionaryLookupIndex: DictionaryLookupIndex,
-) {
-  return (dictionaryLookupIndex.childIdsByParentId.get(entry.id) ?? []).flatMap(
-    (childId) => {
-      const childEntry = dictionaryLookupIndex.byId.get(childId);
-
-      return childEntry?.relationType === "feminine-counterpart"
-        ? [toDictionaryGenderedCounterpart(childEntry)]
-        : [];
-    },
-  );
-}
-
 export function toDictionaryClientEntry(
   entry: LexicalEntry,
-  genderedCounterparts: readonly DictionaryGenderedCounterpart[] = [],
 ): DictionaryClientEntry {
   const clientEntry: DictionaryClientEntry = {
     dialects: entry.dialects,
     dialectMeanings: entry.dialectMeanings,
-    dutch_meanings: entry.dutch_meanings,
-    english_meanings: entry.english_meanings,
     etymology: entry.etymology,
-    gender: entry.gender,
     genderedMeanings: entry.genderedMeanings,
     headword: entry.headword,
     id: entry.id,
+    inflectedForms: entry.inflectedForms,
     meaningGroups: entry.meaningGroups,
-    pluralForms: entry.pluralForms,
-    pos: entry.pos,
-    relationType: entry.relationType,
   };
 
-  if (genderedCounterparts.length > 0) {
-    clientEntry.genderedCounterparts = genderedCounterparts.map(
-      toDictionaryGenderedCounterpart,
-    );
-  }
+  const greekEquivalents = entry.greek_equivalents ?? [];
 
-  if (entry.greek_equivalents.length > 0) {
-    clientEntry.greek_equivalents = entry.greek_equivalents;
+  if (greekEquivalents.length > 0) {
+    clientEntry.greek_equivalents = greekEquivalents;
   }
 
   return clientEntry;
 }
 
 const readDictionaryClientEntries = cache((): DictionaryClientEntry[] => {
-  const dictionary = getDictionary();
-  const dictionaryLookupIndex = getDictionaryLookupIndex(dictionary);
-
-  return dictionary.map((entry) =>
-    toDictionaryClientEntry(
-      entry,
-      getGenderedCounterpartEntries(entry, dictionaryLookupIndex),
-    ),
-  );
+  return getDictionary().map(toDictionaryClientEntry);
 });
 
 const readPreparedDictionarySearchEntries = cache(() => {
@@ -228,32 +151,4 @@ export function getDictionaryEntryById(
   dictionary: readonly LexicalEntry[] = getDictionary(),
 ) {
   return getDictionaryLookupIndex(dictionary).byId.get(id) ?? null;
-}
-
-/**
- * Resolves the parent and directly related entries for a dictionary item. Child
- * entries return siblings under the same parent, while parent entries return
- * their attached descendants.
- */
-export function getDictionaryEntryRelations(
-  entry: LexicalEntry,
-  dictionary: readonly LexicalEntry[] = getDictionary(),
-) {
-  const dictionaryLookupIndex = getDictionaryLookupIndex(dictionary);
-  const parentEntry = entry.parentEntryId
-    ? (dictionaryLookupIndex.byId.get(entry.parentEntryId) ?? null)
-    : null;
-  const relatedEntryIds = entry.parentEntryId
-    ? (
-        dictionaryLookupIndex.childIdsByParentId.get(entry.parentEntryId) ?? []
-      ).filter((candidateId) => candidateId !== entry.id)
-    : (dictionaryLookupIndex.childIdsByParentId.get(entry.id) ?? []);
-  const relatedEntries = relatedEntryIds
-    .map((relatedEntryId) => dictionaryLookupIndex.byId.get(relatedEntryId))
-    .filter((candidate): candidate is LexicalEntry => candidate !== undefined);
-
-  return {
-    parentEntry,
-    relatedEntries,
-  };
 }

@@ -9,11 +9,40 @@ import type {
  * and entry UI.
  */
 export type LexicalGender = "" | "BOTH" | "F" | "M";
+export type DictionaryEtymology = "Egy" | "Gr" | "Unknown";
 export type DictionaryGenderedMeaningMarker = "f" | "m" | "pl";
-export type LexicalRelationType =
-  | "feminine-counterpart"
-  | "derived-subentry"
-  | "paradigm-member";
+type DictionaryInflectedFormKind =
+  | "dual"
+  | "feminine"
+  | "imperative"
+  | "masculine"
+  | "plural";
+type DictionaryInflectedFormRole = "absolute" | "nominal" | "pronominal";
+type DictionaryMeaningGroupGrammarAffix = "PFX" | "SFX";
+type DictionaryMeaningGroupGrammarCaseRole = "DAT" | "OBJ";
+type DictionaryMeaningGroupGrammarDerivation = "CAUS";
+type DictionaryMeaningGroupGrammarForm = "ABS" | "PC" | "STA" | "VBAL";
+export type DictionaryMeaningGroupGrammarGender = Exclude<LexicalGender, "">;
+type DictionaryMeaningGroupGrammarMood = "IMP";
+type DictionaryMeaningGroupGrammarNumber = "PL" | "SG";
+export type DictionaryMeaningGroupGrammarPartOfSpeech = PartOfSpeech | "PRON";
+type DictionaryMeaningGroupGrammarPolarity = "NEG";
+type DictionaryMeaningGroupGrammarValency = "INTR" | "TR";
+type DictionaryMeaningGroupGrammarVoice = "REFL";
+
+/**
+ * A structured inflected or counterpart form that may not deserve a full
+ * lexical entry.
+ */
+export interface DictionaryInflectedForm {
+  kind: DictionaryInflectedFormKind;
+  form: string;
+  dialect?: DictionaryDialectCode;
+  entryId?: string;
+  notes?: string[];
+  role?: DictionaryInflectedFormRole;
+  uncertain?: boolean;
+}
 
 export interface DialectFormVariants {
   absolute?: string[];
@@ -39,7 +68,6 @@ export interface DialectForms {
   absolute?: string;
   constructParticipleCompounds?: ConstructParticipleCompound[];
   constructParticiples?: string[];
-  imperatives?: string[];
   nominal?: string;
   pronominal?: string;
   stative?: string;
@@ -49,18 +77,31 @@ export interface DialectForms {
 export type DictionaryDialectFormsMap = Partial<
   Record<DictionaryDialectCode, DialectForms>
 >;
-export type DictionaryPluralFormCode = DictionaryDialectCode;
 
-interface DictionaryMeaningGroup {
+export interface DictionaryMeaningGroupGrammar {
+  affix?: DictionaryMeaningGroupGrammarAffix;
+  caseRole?: DictionaryMeaningGroupGrammarCaseRole;
+  derivation?: DictionaryMeaningGroupGrammarDerivation;
+  form?: DictionaryMeaningGroupGrammarForm;
+  gender?: DictionaryMeaningGroupGrammarGender;
+  mood?: DictionaryMeaningGroupGrammarMood;
+  number?: DictionaryMeaningGroupGrammarNumber;
+  polarity?: DictionaryMeaningGroupGrammarPolarity;
+  pos: DictionaryMeaningGroupGrammarPartOfSpeech;
+  tags?: DictionaryMeaningGroupCode[];
+  valency?: DictionaryMeaningGroupGrammarValency;
+  voice?: DictionaryMeaningGroupGrammarVoice;
+}
+
+export interface DictionaryMeaningGroup {
   dutch_meanings?: string[];
   dutch_notes?: string[];
   english_meanings?: string[];
   english_notes?: string[];
+  grammar: DictionaryMeaningGroupGrammar;
 }
 
-export type DictionaryMeaningGroups = Partial<
-  Record<DictionaryMeaningGroupCode, DictionaryMeaningGroup>
->;
+export type DictionaryMeaningGroups = DictionaryMeaningGroup[];
 
 export type DictionaryGenderedMeaningValues = Partial<
   Record<DictionaryGenderedMeaningMarker, string>
@@ -88,25 +129,13 @@ export interface LexicalEntry {
   id: string;
   headword: string;
   dialects: DictionaryDialectFormsMap;
-  pos: PartOfSpeech;
-  gender: LexicalGender;
-  parentEntryId?: string;
-  relationType?: LexicalRelationType;
-  meaningGroups?: DictionaryMeaningGroups;
+  meaningGroups: DictionaryMeaningGroups;
   genderedMeanings?: DictionaryGenderedMeaning[];
   dialectMeanings?: DictionaryDialectMeaning[];
-  english_meanings: string[];
-  dutch_meanings?: string[];
-  greek_equivalents: string[];
-  bohairicParadigmData?: unknown;
-  etymology?: "Egy" | "Gr";
-  pluralForms?: Partial<Record<DictionaryPluralFormCode, string[]>>;
+  greek_equivalents?: string[];
+  etymology: DictionaryEtymology;
+  inflectedForms?: DictionaryInflectedForm[];
 }
-
-export type DictionaryGenderedCounterpart = Pick<
-  LexicalEntry,
-  "dialects" | "gender" | "headword" | "id" | "pluralForms" | "relationType"
->;
 
 /**
  * Represents the reduced dictionary shape needed by search-result cards and
@@ -116,18 +145,12 @@ export type DictionaryClientEntry = Pick<
   LexicalEntry,
   | "dialects"
   | "dialectMeanings"
-  | "dutch_meanings"
-  | "english_meanings"
   | "etymology"
-  | "gender"
   | "genderedMeanings"
   | "headword"
   | "id"
+  | "inflectedForms"
   | "meaningGroups"
-  | "pluralForms"
-  | "pos"
-  | "relationType"
 > & {
-  genderedCounterparts?: DictionaryGenderedCounterpart[];
   greek_equivalents?: string[];
 };

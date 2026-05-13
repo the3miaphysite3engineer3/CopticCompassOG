@@ -1,28 +1,40 @@
 import { describe, expect, it } from "vitest";
 
-import type { LexicalEntry } from "@/features/dictionary/types";
+import type {
+  DictionaryMeaningGroupGrammarGender,
+  LexicalEntry,
+} from "@/features/dictionary/types";
 
 import { buildEntrySharePayload } from "./entryShare";
 
-function createEntry(
-  overrides: Partial<LexicalEntry> & Pick<LexicalEntry, "id" | "headword">,
-): LexicalEntry {
-  const { id, headword, ...rest } = overrides;
+type TestEntryOverrides = Partial<LexicalEntry> &
+  Pick<LexicalEntry, "id" | "headword"> & {
+    grammarGender?: DictionaryMeaningGroupGrammarGender;
+  };
+
+function createEntry(overrides: TestEntryOverrides): LexicalEntry {
+  const { grammarGender, id, headword, ...rest } = overrides;
+  const meaningGroups = rest.meaningGroups ?? [
+    {
+      grammar: grammarGender
+        ? { gender: grammarGender, pos: "N" }
+        : { pos: "N" },
+    },
+  ];
 
   return {
     id,
     headword,
     dialects: {},
-    pos: "N",
-    gender: "",
-    english_meanings: [],
+    etymology: "Egy",
     greek_equivalents: [],
     ...rest,
+    meaningGroups,
   };
 }
 
 describe("entry share helpers", () => {
-  it("builds an English share payload with a short gloss and related forms", () => {
+  it("builds an English share payload with a short gloss", () => {
     const entry = createEntry({
       id: "cd_173",
       headword: "ⲥⲁϫⲓ",
@@ -34,39 +46,18 @@ describe("entry share helpers", () => {
           stative: "",
         },
       },
-      english_meanings: ["N son"],
+      meaningGroups: [{ grammar: { pos: "N" }, english_meanings: ["N son"] }],
     });
-    const parentEntry = createEntry({
-      id: "cd_100",
-      headword: "ⲥⲁϫ",
-      english_meanings: ["root"],
-    });
-    const relatedEntries = [
-      createEntry({
-        id: "cd_174",
-        headword: "ⲥⲁϫⲉ",
-        english_meanings: ["daughter"],
-      }),
-      createEntry({
-        id: "cd_175",
-        headword: "ⲥⲁϫⲟ",
-        english_meanings: ["speech"],
-      }),
-    ] as const;
-
     const payload = buildEntrySharePayload({
       entry,
       language: "en",
-      parentEntry,
-      relatedEntries,
       url: "https://www.copticcompass.com/en/entry/cd_173",
     });
 
     expect(payload.title).toBe("ϭⲁϫⲓ ϭⲁϫ | Coptic Dictionary");
     expect(payload.text).toContain("Coptic dictionary entry: ϭⲁϫⲓ ϭⲁϫ");
     expect(payload.text).toContain("son.");
-    expect(payload.text).toContain("Related forms: ⲥⲁϫ • ⲥⲁϫⲉ");
-    expect(payload.text).not.toContain("ⲥⲁϫⲟ");
+    expect(payload.text).not.toContain("Related forms:");
     expect(payload.copyText).toContain(
       "https://www.copticcompass.com/en/entry/cd_173",
     );
@@ -76,34 +67,24 @@ describe("entry share helpers", () => {
     const entry = createEntry({
       id: "cd_200",
       headword: "ⲣⲱⲙⲉ",
-      english_meanings: ["man"],
-      dutch_meanings: ["mens"],
-    });
-    const relatedEntry = createEntry({
-      id: "cd_201",
-      headword: "ⲣⲱⲙⲉ",
-      dialects: {
-        B: {
-          absolute: "ⲣⲱⲙⲓ",
-          nominal: "",
-          pronominal: "",
-          stative: "",
+      meaningGroups: [
+        {
+          grammar: { pos: "N" },
+          dutch_meanings: ["mens"],
+          english_meanings: ["man"],
         },
-      },
-      dutch_meanings: ["menselijk"],
+      ],
     });
-
     const payload = buildEntrySharePayload({
       entry,
       language: "nl",
-      relatedEntries: [relatedEntry],
       url: "https://www.copticcompass.com/nl/entry/cd_200",
     });
 
     expect(payload.title).toBe("ⲣⲱⲙⲉ | Koptisch woordenboek");
     expect(payload.text).toContain("Koptisch woordenboeklemma: ⲣⲱⲙⲉ");
     expect(payload.text).toContain("mens.");
-    expect(payload.text).toContain("Verwante vormen: ⲣⲱⲙⲓ");
+    expect(payload.text).not.toContain("Verwante vormen:");
     expect(payload.copyText).toContain(
       "https://www.copticcompass.com/nl/entry/cd_200",
     );
@@ -118,11 +99,7 @@ describe("entry share helpers", () => {
           absolute: "ⲃⲱⲕ",
         },
       },
-      english_meanings: [
-        "male slave; female slave; slaves",
-        "male servant; female servant, maidservant; servants",
-      ],
-      gender: "M",
+      grammarGender: "M",
       genderedMeanings: [
         {
           english: {
@@ -139,28 +116,23 @@ describe("entry share helpers", () => {
           },
         },
       ],
-      pluralForms: {
-        B: ["ⲉⲃⲓⲁⲓⲕ"],
-      },
-    });
-    const feminineCounterpart = createEntry({
-      id: "cd_550a",
-      headword: "ⲃⲱⲕⲓ",
-      dialects: {
-        B: {
-          absolute: "ⲃⲱⲕⲓ",
+      inflectedForms: [
+        {
+          kind: "feminine",
+          dialect: "B",
+          form: "ⲃⲱⲕⲓ",
         },
-      },
-      english_meanings: ["female slave", "female servant, maidservant"],
-      gender: "F",
-      parentEntryId: "cd_550",
-      relationType: "feminine-counterpart",
+        {
+          kind: "plural",
+          dialect: "B",
+          form: "ⲉⲃⲓⲁⲓⲕ",
+        },
+      ],
     });
 
     const payload = buildEntrySharePayload({
       entry,
       language: "en",
-      relatedEntries: [feminineCounterpart],
       url: "https://www.copticcompass.com/en/entry/cd_550",
     });
 
@@ -190,7 +162,9 @@ describe("entry share helpers", () => {
           },
         },
       },
-      english_meanings: ["pc taker"],
+      meaningGroups: [
+        { grammar: { form: "PC", pos: "V" }, english_meanings: ["pc taker"] },
+      ],
     });
 
     const payload = buildEntrySharePayload({

@@ -2,6 +2,7 @@ import type {
   DialectFilter,
   DictionaryPartOfSpeechFilter,
 } from "@/features/dictionary/config";
+import { entryMatchesPartOfSpeechFilter } from "@/features/dictionary/lib/entryGrammar";
 import { getLocalizedMeaningValues } from "@/features/dictionary/lib/entryText";
 import type { DictionaryClientEntry } from "@/features/dictionary/types";
 import { normalizeCopticSearchText } from "@/lib/copticSearch";
@@ -17,7 +18,7 @@ interface PreparedLexicalEntry {
   index: number;
   normalizedHeadword: string;
   normalizedDialectForms: string;
-  normalizedPluralForms: string;
+  normalizedInflectedForms: string;
 }
 
 export interface DictionarySearchPageOptions {
@@ -53,7 +54,6 @@ function getSearchableDialectFormText(
       forms.nominal,
       forms.pronominal,
       forms.stative,
-      ...(forms.imperatives ?? []),
       ...(forms.constructParticiples ?? []),
       ...(forms.constructParticipleCompounds ?? []).flatMap((compound) => [
         compound.form,
@@ -69,6 +69,15 @@ function getSearchableDialectFormText(
     .join(" ");
 }
 
+function getSearchableInflectedFormText(
+  entry: Pick<DictionaryClientEntry, "inflectedForms">,
+) {
+  return (entry.inflectedForms ?? [])
+    .map((inflectedForm) => inflectedForm.form)
+    .filter(Boolean)
+    .join(" ");
+}
+
 /**
  * Precomputes the normalized search fields used by interactive dictionary
  * filtering so repeated queries do not rebuild the same derived strings.
@@ -80,31 +89,8 @@ export function prepareDictionaryForSearch(
     const constructParticipleCompounds = Object.values(entry.dialects).flatMap(
       (forms) => forms.constructParticipleCompounds ?? [],
     );
-    const genderedCounterpartForms = (entry.genderedCounterparts ?? [])
-      .map((counterpart) =>
-        [
-          counterpart.headword,
-          getSearchableDialectFormText(counterpart.dialects),
-        ]
-          .filter(Boolean)
-          .join(" "),
-      )
-      .join(" ");
-    const dialectForms = [
-      getSearchableDialectFormText(entry.dialects),
-      genderedCounterpartForms,
-    ]
-      .filter(Boolean)
-      .join(" ");
-
-    const pluralFormsText = [
-      ...Object.values(entry.pluralForms ?? {}).flat(),
-      ...(entry.genderedCounterparts ?? []).flatMap((counterpart) =>
-        Object.values(counterpart.pluralForms ?? {}).flat(),
-      ),
-    ]
-      .filter(Boolean)
-      .join(" ");
+    const dialectForms = getSearchableDialectFormText(entry.dialects);
+    const inflectedFormsText = getSearchableInflectedFormText(entry);
 
     return {
       englishSearchText: [
@@ -127,7 +113,7 @@ export function prepareDictionaryForSearch(
       index,
       normalizedHeadword: normalizeCopticSearchText(entry.headword),
       normalizedDialectForms: normalizeCopticSearchText(dialectForms),
-      normalizedPluralForms: normalizeCopticSearchText(pluralFormsText),
+      normalizedInflectedForms: normalizeCopticSearchText(inflectedFormsText),
     };
   });
 }
@@ -239,13 +225,16 @@ function matchesDictionaryEntryFilters(
   selectedDialect: DialectFilter,
   selectedPartOfSpeech: DictionaryPartOfSpeechFilter,
 ) {
-  if (selectedPartOfSpeech !== "ALL" && entry.pos !== selectedPartOfSpeech) {
+  if (!entryMatchesPartOfSpeechFilter(entry, selectedPartOfSpeech)) {
     return false;
   }
 
   if (
     selectedDialect !== "ALL" &&
-    entry.dialects[selectedDialect] === undefined
+    entry.dialects[selectedDialect] === undefined &&
+    !(entry.inflectedForms ?? []).some(
+      (inflectedForm) => inflectedForm.dialect === selectedDialect,
+    )
   ) {
     return false;
   }
@@ -269,8 +258,8 @@ function matchesPreparedEntryQuery(
       return true;
     }
     if (
-      entry.normalizedPluralForms &&
-      normalizedRegex.test(entry.normalizedPluralForms)
+      entry.normalizedInflectedForms &&
+      normalizedRegex.test(entry.normalizedInflectedForms)
     ) {
       return true;
     }
@@ -293,8 +282,8 @@ function matchesPreparedEntryQuery(
     return true;
   }
   if (
-    entry.normalizedPluralForms &&
-    entry.normalizedPluralForms.includes(normalizedQuery)
+    entry.normalizedInflectedForms &&
+    entry.normalizedInflectedForms.includes(normalizedQuery)
   ) {
     return true;
   }

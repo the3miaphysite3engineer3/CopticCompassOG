@@ -13,8 +13,6 @@ type EntryActionIntent = "favorite" | "report" | "share";
 type EntryActionBarProps = {
   compact?: boolean;
   entry: LexicalEntry;
-  parentEntry?: LexicalEntry | null;
-  relatedEntries?: readonly LexicalEntry[];
 };
 
 type EntryActionBarPanelProps = EntryActionBarProps & {

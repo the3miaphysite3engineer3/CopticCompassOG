@@ -22,9 +22,8 @@ const lordEntry: LexicalEntry = {
       },
     },
   },
-  pos: "N",
-  gender: "",
-  english_meanings: ["lord"],
+  meaningGroups: [{ grammar: { pos: "N" }, english_meanings: ["lord"] }],
+  etymology: "Gr",
   greek_equivalents: ["κυριοσ"],
 };
 

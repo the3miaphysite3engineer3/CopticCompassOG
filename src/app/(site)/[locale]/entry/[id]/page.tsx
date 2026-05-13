@@ -5,10 +5,8 @@ import StructuredData from "@/components/StructuredData";
 import EntryPageClient from "@/features/dictionary/components/EntryPageClient";
 import EntryPageHeader from "@/features/dictionary/components/EntryPageHeader";
 import { getPartOfSpeechLabel } from "@/features/dictionary/config";
-import {
-  getDictionaryEntryById,
-  getDictionaryEntryRelations,
-} from "@/features/dictionary/lib/dictionary";
+import { getDictionaryEntryById } from "@/features/dictionary/lib/dictionary";
+import { getPrimaryEntryPartOfSpeech } from "@/features/dictionary/lib/entryGrammar";
 import { buildEntryOpenGraphImageUrl } from "@/features/dictionary/lib/entryOpenGraph";
 import { buildEntryPreview } from "@/features/dictionary/lib/entryPreview";
 import {
@@ -58,16 +56,14 @@ export async function generateMetadata({
     };
   }
 
-  const { parentEntry, relatedEntries } = getDictionaryEntryRelations(entry);
   const preview = buildEntryPreview({
     entry,
     language: locale,
-    parentEntry,
-    relatedEntries,
   });
   const headword = preview.heading || toPlainText(entry.headword);
-  const partOfSpeech = getPartOfSpeechLabel(entry.pos, (key) =>
-    getTranslation(locale, key),
+  const partOfSpeech = getPartOfSpeechLabel(
+    getPrimaryEntryPartOfSpeech(entry),
+    (key) => getTranslation(locale, key),
   );
   const title =
     locale === "nl"
@@ -117,12 +113,9 @@ export default async function EntryPage({
     notFound();
   }
 
-  const { parentEntry, relatedEntries } = getDictionaryEntryRelations(entry);
   const preview = buildEntryPreview({
     entry,
     language: locale,
-    parentEntry,
-    relatedEntries,
   });
   const headword = preview.heading || toPlainText(entry.headword);
   const description = buildEntryDescription(entry, locale, {
@@ -164,8 +157,6 @@ export default async function EntryPage({
       <EntryPageHeader entryLabel={headword} />
       <EntryPageClient
         initialEntry={entry}
-        initialParentEntry={parentEntry}
-        initialRelatedEntries={relatedEntries}
         relatedGrammarLessons={relatedGrammarLessons}
       />
     </PageShell>

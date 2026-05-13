@@ -181,12 +181,12 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": ["cd_173a"],
+      "dictionaryRefs": ["cd_173a", "cd_5101"],
       "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
         { "text": "Ϩⲁⲛⲥⲱⲛⲓ", "dictionaryEntryId": "cd_173a" },
         { "text": " " },
-        { "text": "ⲛⲉ" },
+        { "text": "ⲛⲉ", "dictionaryEntryId": "cd_5101" },
         { "text": "." }
       ]
     },
@@ -200,12 +200,12 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": ["cd_21"],
+      "dictionaryRefs": ["cd_21", "cd_5101"],
       "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
         { "text": "Ϩⲁⲛⲣⲱⲙⲓ", "dictionaryEntryId": "cd_21" },
         { "text": " " },
-        { "text": "ⲛⲉ" },
+        { "text": "ⲛⲉ", "dictionaryEntryId": "cd_5101" },
         { "text": "." }
       ]
     },
@@ -222,12 +222,12 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": ["cd_3368"],
+      "dictionaryRefs": ["cd_3368", "cd_5101"],
       "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
         { "text": "Ⲛⲓⲁⲅⲓⲟⲥ", "dictionaryEntryId": "cd_3368" },
         { "text": " " },
-        { "text": "ⲛⲉ" },
+        { "text": "ⲛⲉ", "dictionaryEntryId": "cd_5101" },
         { "text": "." }
       ]
     }

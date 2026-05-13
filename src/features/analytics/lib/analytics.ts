@@ -2,8 +2,17 @@ import {
   ANALYTICS_DIALECTS,
   type AnalyticsDialect,
 } from "@/features/dictionary/config";
-import { isVerbPartOfSpeech } from "@/features/dictionary/grammarRegistry";
-import type { DictionaryClientEntry } from "@/features/dictionary/types";
+import {
+  entryHasNounGrammar,
+  entryHasVerbGrammar,
+  getEntryGrammarPartOfSpeechValues,
+  getEntryNounGender,
+} from "@/features/dictionary/lib/entryGrammar";
+import { getLocalizedMeaningValues } from "@/features/dictionary/lib/entryText";
+import type {
+  DictionaryClientEntry,
+  DictionaryEtymology,
+} from "@/features/dictionary/types";
 
 type AnalyticsChartDatum = {
   name: string;
@@ -19,14 +28,18 @@ export type AnalyticsSnapshot = {
   etymologyChartData: AnalyticsChartDatum[];
   verbCompletenessData: AnalyticsChartDatum[];
   derivationalMorphologyData: AnalyticsChartDatum[];
-  relationTypeData: AnalyticsChartDatum[];
   verbalNouns: number;
   totalNouns: number;
   totalMasculine: number;
 };
 
-export type EtymologyFilter = "ALL" | "Egy" | "Gr";
-export const ETYMOLOGY_FILTERS: EtymologyFilter[] = ["ALL", "Egy", "Gr"];
+export type EtymologyFilter = "ALL" | DictionaryEtymology;
+export const ETYMOLOGY_FILTERS: EtymologyFilter[] = [
+  "ALL",
+  "Egy",
+  "Gr",
+  "Unknown",
+];
 
 export type AnalyticsSnapshotMap = Record<
   AnalyticsDialect,
@@ -47,6 +60,7 @@ function createAnalyticsSnapshot(
     ADV: 0,
     CONJ: 0,
     PREP: 0,
+    PRON: 0,
     INTJ: 0,
     OTHER: 0,
     UNKNOWN: 0,
@@ -58,12 +72,10 @@ function createAnalyticsSnapshot(
 
   let egyEtymology = 0;
   let grEtymology = 0;
+  let unknownEtymology = 0;
 
   let hasStative = 0;
   let missingStative = 0;
-
-  let baseRoots = 0;
-  let derivedForms = 0;
 
   const derivationCounts = {
     abstract: 0,
@@ -74,7 +86,9 @@ function createAnalyticsSnapshot(
   };
 
   for (const entry of dictionary) {
-    const meaningString = entry.english_meanings.join(" ").toLowerCase();
+    const meaningString = getLocalizedMeaningValues(entry, "en")
+      .join(" ")
+      .toLowerCase();
 
     if (meaningString.includes("meaning unknown")) {
       unknownMeaning++;
@@ -86,23 +100,21 @@ function createAnalyticsSnapshot(
 
     if (entry.etymology === "Gr") {
       grEtymology++;
+    } else if (entry.etymology === "Unknown") {
+      unknownEtymology++;
     } else {
       egyEtymology++;
     }
 
-    if (!entry.relationType) {
-      baseRoots++;
-    } else {
-      derivedForms++;
+    for (const partOfSpeech of getEntryGrammarPartOfSpeechValues(entry)) {
+      if (posCounts[partOfSpeech] !== undefined) {
+        posCounts[partOfSpeech]++;
+      } else {
+        posCounts[partOfSpeech] = 1;
+      }
     }
 
-    if (posCounts[entry.pos] !== undefined) {
-      posCounts[entry.pos]++;
-    } else {
-      posCounts[entry.pos] = 1;
-    }
-
-    if (isVerbPartOfSpeech(entry.pos)) {
+    if (entryHasVerbGrammar(entry)) {
       const hasAnyStative = Object.values(entry.dialects).some(
         (d) => d?.stative,
       );
@@ -113,12 +125,14 @@ function createAnalyticsSnapshot(
       }
     }
 
-    if (entry.pos === "N") {
-      if (entry.gender === "M") {
+    if (entryHasNounGrammar(entry)) {
+      const gender = getEntryNounGender(entry);
+
+      if (gender === "M") {
         genderCounts.M++;
-      } else if (entry.gender === "F") {
+      } else if (gender === "F") {
         genderCounts.F++;
-      } else if (entry.gender === "BOTH") {
+      } else if (gender === "BOTH") {
         genderCounts.BOTH++;
       } else {
         genderCounts.UNSPECIFIED++;
@@ -160,7 +174,11 @@ function createAnalyticsSnapshot(
       { name: "Prepositions", value: posCounts.PREP || 0 },
       {
         name: "Other",
-        value: (posCounts.OTHER || 0) + (posCounts.INTJ || 0),
+        value:
+          (posCounts.OTHER || 0) +
+          (posCounts.INTJ || 0) +
+          (posCounts.PRON || 0) +
+          (posCounts.UNKNOWN || 0),
       },
     ].filter((item) => item.value > 0),
     genderChartData: [
@@ -172,6 +190,7 @@ function createAnalyticsSnapshot(
     etymologyChartData: [
       { name: "analytics.egyEtymology", value: egyEtymology },
       { name: "analytics.grEtymology", value: grEtymology },
+      { name: "analytics.unknownEtymology", value: unknownEtymology },
     ].filter((item) => item.value > 0),
     verbCompletenessData: [
       { name: "analytics.hasStative", value: hasStative },
@@ -183,10 +202,6 @@ function createAnalyticsSnapshot(
       { name: "analytics.prefixAction", value: derivationCounts.action },
       { name: "analytics.prefixPrivative", value: derivationCounts.privative },
       { name: "analytics.prefixCore", value: derivationCounts.core },
-    ].filter((item) => item.value > 0),
-    relationTypeData: [
-      { name: "analytics.baseRoots", value: baseRoots },
-      { name: "analytics.derivedForms", value: derivedForms },
     ].filter((item) => item.value > 0),
     verbalNouns,
     totalNouns,
@@ -214,10 +229,8 @@ export function createAnalyticsSnapshots(
         const filteredDictionary =
           etymology === "ALL"
             ? dialectDictionary
-            : dialectDictionary.filter((entry) =>
-                etymology === "Gr"
-                  ? entry.etymology === "Gr"
-                  : entry.etymology !== "Gr",
+            : dialectDictionary.filter(
+                (entry) => entry.etymology === etymology,
               );
 
         snapshots[dialect][etymology] =

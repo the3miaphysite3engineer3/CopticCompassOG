@@ -56,8 +56,79 @@ describe("public OpenAPI document", () => {
     expect(document.components.schemas).toHaveProperty(
       "GrammarLessonBundleEnvelope",
     );
+    expect(document.components.schemas).toHaveProperty(
+      "DictionaryInflectedForm",
+    );
     expect(document.components.schemas).toHaveProperty("DictionarySearchPage");
     expect(document.components.schemas).toHaveProperty("ShenuteRequest");
     expect(document.components.schemas).toHaveProperty("OcrUploadRequest");
+    const dictionaryClientEntrySchema = document.components.schemas
+      .DictionaryClientEntry as {
+      additionalProperties?: boolean;
+      properties: Record<string, { enum?: string[] }>;
+      required?: string[];
+    };
+
+    expect(dictionaryClientEntrySchema.additionalProperties).toBe(false);
+    expect(Object.keys(dictionaryClientEntrySchema.properties).sort()).toEqual(
+      [
+        "dialectMeanings",
+        "dialects",
+        "etymology",
+        "genderedMeanings",
+        "greek_equivalents",
+        "headword",
+        "id",
+        "inflectedForms",
+        "meaningGroups",
+      ].sort(),
+    );
+    expect((dictionaryClientEntrySchema.required ?? []).sort()).toEqual(
+      ["dialects", "etymology", "headword", "id", "meaningGroups"].sort(),
+    );
+    expect(dictionaryClientEntrySchema.properties.etymology?.enum).toEqual([
+      "Egy",
+      "Gr",
+      "Unknown",
+    ]);
+    expect(
+      (
+        document.components.schemas.DictionaryMeaningGroup as {
+          required?: string[];
+        }
+      ).required ?? [],
+    ).toContain("grammar");
+    expect(
+      (
+        document.components.schemas.DictionaryMeaningGroupGrammar as {
+          required?: string[];
+        }
+      ).required ?? [],
+    ).toContain("pos");
+    expect(
+      (
+        document.components.schemas.DictionaryMeaningGroups as {
+          type?: string;
+        }
+      ).type,
+    ).toBe("array");
+    const dictionaryDialectFormsSchema = document.components.schemas
+      .DictionaryDialectForms as {
+      additionalProperties?: boolean;
+      properties: Record<string, unknown>;
+    };
+
+    expect(dictionaryDialectFormsSchema.additionalProperties).toBe(false);
+    expect(Object.keys(dictionaryDialectFormsSchema.properties).sort()).toEqual(
+      [
+        "absolute",
+        "constructParticipleCompounds",
+        "constructParticiples",
+        "nominal",
+        "pronominal",
+        "stative",
+        "variants",
+      ].sort(),
+    );
   });
 });

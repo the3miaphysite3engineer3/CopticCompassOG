@@ -58,7 +58,7 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
         in: "query",
         required: false,
         description:
-          "Search query matched against Coptic headwords, dialect forms, plural forms, English, Dutch, and Greek text.",
+          "Search query matched against Coptic headwords, dialect forms, inflected forms, English, Dutch, and Greek text.",
         schema: {
           type: "string",
           maxLength: MAX_DICTIONARY_SEARCH_QUERY_LENGTH,
@@ -296,12 +296,6 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
             type: "string",
             example: "",
           },
-          imperatives: {
-            type: "array",
-            items: {
-              type: "string",
-            },
-          },
           constructParticiples: {
             type: "array",
             items: {
@@ -420,7 +414,11 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
       },
       DictionaryMeaningGroup: {
         type: "object",
+        required: ["grammar"],
         properties: {
+          grammar: {
+            $ref: "#/components/schemas/DictionaryMeaningGroupGrammar",
+          },
           english_meanings: {
             type: "array",
             items: {
@@ -448,107 +446,115 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
         },
         additionalProperties: false,
       },
-      DictionaryMeaningGroups: {
+      DictionaryMeaningGroupGrammar: {
         type: "object",
+        required: ["pos"],
         properties: {
-          N: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
+          affix: {
+            type: "string",
+            enum: ["PFX", "SFX"],
           },
-          V: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
+          caseRole: {
+            type: "string",
+            enum: ["DAT", "OBJ"],
           },
-          ADJ: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
+          derivation: {
+            type: "string",
+            enum: ["CAUS"],
           },
-          ADV: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
+          form: {
+            type: "string",
+            enum: ["ABS", "PC", "STA", "VBAL"],
           },
-          CONJ: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
+          gender: {
+            type: "string",
+            enum: ["BOTH", "F", "M"],
           },
-          PREP: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
+          mood: {
+            type: "string",
+            enum: ["IMP"],
           },
-          PRON: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
+          number: {
+            type: "string",
+            enum: ["PL", "SG"],
           },
-          INTR: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
+          polarity: {
+            type: "string",
+            enum: ["NEG"],
           },
-          TR: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
+          pos: {
+            type: "string",
+            enum: [
+              "V",
+              "N",
+              "ADJ",
+              "ADV",
+              "CONJ",
+              "INTJ",
+              "OTHER",
+              "PREP",
+              "UNKNOWN",
+              "PRON",
+            ],
           },
-          STA: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
+          tags: {
+            type: "array",
+            items: {
+              type: "string",
+              enum: [
+                "N",
+                "V",
+                "ADJ",
+                "ADV",
+                "CONJ",
+                "PREP",
+                "PRON",
+                "INTR",
+                "TR",
+                "STA",
+                "IMP",
+                "PC",
+                "REFL",
+                "AUX",
+                "IMPERS.V",
+                "IMPERS",
+                "PFX",
+                "SFX",
+                "DAT",
+                "OBJ",
+                "NEG",
+                "INDF",
+                "Q",
+                "CAUS",
+                "SIM",
+                "REL",
+                "PL",
+                "SG",
+                "LIT",
+                "VBAL",
+                "ESP",
+                "ABS",
+              ],
+            },
           },
-          IMP: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
+          valency: {
+            type: "string",
+            enum: ["INTR", "TR"],
           },
-          PC: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          REFL: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          AUX: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          "IMPERS.V": {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          IMPERS: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          PFX: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          SFX: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          DAT: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          OBJ: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          NEG: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          INDF: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          Q: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          CAUS: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          SIM: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          REL: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          PL: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          SG: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          LIT: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          VBAL: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          ESP: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
-          },
-          ABS: {
-            $ref: "#/components/schemas/DictionaryMeaningGroup",
+          voice: {
+            type: "string",
+            enum: ["REFL"],
           },
         },
         additionalProperties: false,
+      },
+      DictionaryMeaningGroups: {
+        description:
+          "Ordered grammar-scoped meaning groups. Display badges are derived from each group's grammar object.",
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/DictionaryMeaningGroup",
+        },
       },
       DictionaryDialectMeaning: {
         type: "object",
@@ -624,16 +630,45 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
         },
         additionalProperties: false,
       },
+      DictionaryInflectedForm: {
+        type: "object",
+        required: ["kind", "form"],
+        properties: {
+          kind: {
+            type: "string",
+            enum: ["dual", "feminine", "imperative", "masculine", "plural"],
+          },
+          form: {
+            type: "string",
+            example: "ⲟⲩⲣⲱⲟⲩ",
+          },
+          dialect: {
+            type: "string",
+            enum: ["A", "B", "F", "Fb", "L", "M", "O", "S", "Sa", "Sf", "Sl"],
+          },
+          entryId: {
+            type: "string",
+            example: "cd_20",
+          },
+          role: {
+            type: "string",
+            enum: ["absolute", "nominal", "pronominal"],
+          },
+          notes: {
+            type: "array",
+            items: {
+              type: "string",
+            },
+          },
+          uncertain: {
+            type: "boolean",
+          },
+        },
+        additionalProperties: false,
+      },
       DictionaryClientEntry: {
         type: "object",
-        required: [
-          "id",
-          "headword",
-          "dialects",
-          "pos",
-          "gender",
-          "english_meanings",
-        ],
+        required: ["id", "headword", "dialects", "meaningGroups", "etymology"],
         properties: {
           id: {
             type: "string",
@@ -645,38 +680,6 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
           },
           dialects: {
             $ref: "#/components/schemas/DictionaryDialectFormsMap",
-          },
-          pos: {
-            type: "string",
-            enum: [
-              "V",
-              "N",
-              "ADJ",
-              "ADV",
-              "CONJ",
-              "INTJ",
-              "OTHER",
-              "PREP",
-              "UNKNOWN",
-            ],
-            example: "V",
-          },
-          gender: {
-            type: "string",
-            enum: ["", "BOTH", "F", "M"],
-          },
-          english_meanings: {
-            type: "array",
-            items: {
-              type: "string",
-            },
-            example: ["give"],
-          },
-          dutch_meanings: {
-            type: "array",
-            items: {
-              type: "string",
-            },
           },
           greek_equivalents: {
             type: "array",
@@ -701,69 +704,13 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
           },
           etymology: {
             type: "string",
-            enum: ["Egy", "Gr"],
+            enum: ["Egy", "Gr", "Unknown"],
           },
-          pluralForms: {
-            type: "object",
-            additionalProperties: {
-              type: "array",
-              items: {
-                type: "string",
-              },
-            },
-          },
-          relationType: {
-            type: "string",
-            enum: [
-              "feminine-counterpart",
-              "derived-subentry",
-              "paradigm-member",
-            ],
-          },
-          genderedCounterparts: {
+          inflectedForms: {
             type: "array",
             items: {
-              $ref: "#/components/schemas/DictionaryGenderedCounterpart",
+              $ref: "#/components/schemas/DictionaryInflectedForm",
             },
-          },
-        },
-        additionalProperties: false,
-      },
-      DictionaryGenderedCounterpart: {
-        type: "object",
-        required: ["id", "headword", "dialects", "gender"],
-        properties: {
-          id: {
-            type: "string",
-            example: "cd_18a",
-          },
-          headword: {
-            type: "string",
-            example: "ⲟⲩⲣⲱ",
-          },
-          dialects: {
-            $ref: "#/components/schemas/DictionaryDialectFormsMap",
-          },
-          gender: {
-            type: "string",
-            enum: ["", "BOTH", "F", "M"],
-          },
-          pluralForms: {
-            type: "object",
-            additionalProperties: {
-              type: "array",
-              items: {
-                type: "string",
-              },
-            },
-          },
-          relationType: {
-            type: "string",
-            enum: [
-              "feminine-counterpart",
-              "derived-subentry",
-              "paradigm-member",
-            ],
           },
         },
         additionalProperties: false,

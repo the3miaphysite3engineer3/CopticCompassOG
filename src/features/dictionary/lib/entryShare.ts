@@ -7,7 +7,6 @@ import type { LexicalEntry } from "../types";
 
 export type EntrySharePayload = {
   copyText: string;
-  relatedForms: string[];
   text: string;
   title: string;
   url: string;
@@ -16,8 +15,6 @@ export type EntrySharePayload = {
 type BuildEntrySharePayloadOptions = {
   entry: LexicalEntry;
   language: Language;
-  parentEntry?: LexicalEntry | null;
-  relatedEntries?: readonly LexicalEntry[];
   url: string;
 };
 
@@ -66,39 +63,24 @@ export function resolveEntryShareUrl(
 export function buildEntrySharePayload({
   entry,
   language,
-  parentEntry = null,
-  relatedEntries = [],
   url,
 }: BuildEntrySharePayloadOptions): EntrySharePayload {
   const preview = buildEntryPreview({
     entry,
     language,
-    parentEntry,
-    relatedEntries,
   });
   const displayForm = preview.heading;
   const summary = ensureSentence(preview.gloss);
-  const relatedForms = preview.relatedForms;
-  let relatedLine = "";
-
-  if (relatedForms.length > 0) {
-    relatedLine =
-      language === "nl"
-        ? `Verwante vormen: ${relatedForms.join(" • ")}`
-        : `Related forms: ${relatedForms.join(" • ")}`;
-  }
 
   const lines =
     language === "nl"
       ? [
           `Koptisch woordenboeklemma: ${displayForm}`,
           summary || "Een lemma uit het Koptische woordenboek.",
-          relatedLine,
         ]
       : [
           `Coptic dictionary entry: ${displayForm}`,
           summary || "A featured entry from the Coptic dictionary.",
-          relatedLine,
         ];
 
   const text = lines.filter(Boolean).join("\n");
@@ -109,7 +91,6 @@ export function buildEntrySharePayload({
 
   return {
     copyText: `${text}\n${url}`,
-    relatedForms,
     text,
     title,
     url,

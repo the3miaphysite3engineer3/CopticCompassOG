@@ -18,6 +18,7 @@ import {
   formatEntryReportReason,
   type EntryReportWithEntry,
 } from "@/features/dictionary/lib/entryActions";
+import { getEntryMeaningPreview } from "@/features/dictionary/lib/entryText";
 import { formatSubmissionDate } from "@/features/submissions/utils";
 import { cx } from "@/lib/classes";
 import { antinoou } from "@/lib/fonts";
@@ -245,13 +246,9 @@ export function AdminEntryReportDisclosure({
   const { language } = useLanguage();
   const copy = adminItemDisclosureCopy[language];
   const { entry, report } = reportWithEntry;
-  const meaningPreview =
-    (language === "nl" && entry?.dutch_meanings?.length
-      ? entry.dutch_meanings
-      : entry?.english_meanings
-    )
-      ?.slice(0, 2)
-      .join("; ") ?? null;
+  const meaningPreview = entry
+    ? getEntryMeaningPreview(entry, language).join("; ") || null
+    : null;
 
   return (
     <AdminItemDisclosure

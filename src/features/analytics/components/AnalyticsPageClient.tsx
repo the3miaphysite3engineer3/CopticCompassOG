@@ -13,6 +13,7 @@ import { PageShell, pageShellAccents } from "@/components/PageShell";
 import { SurfacePanel, surfacePanelClassName } from "@/components/SurfacePanel";
 import {
   type AnalyticsSnapshotMap,
+  ETYMOLOGY_FILTERS,
   type EtymologyFilter,
 } from "@/features/analytics/lib/analytics";
 import {
@@ -61,6 +62,22 @@ type AnalyticsChartsCalloutProps = {
   onLoadCharts: () => void;
   title: string;
 };
+
+function getEtymologyFilterLabel(
+  etymology: EtymologyFilter,
+  t: ReturnType<typeof useLanguage>["t"],
+) {
+  switch (etymology) {
+    case "ALL":
+      return t("analytics.filterEtymologyAll" as TranslationKey);
+    case "Egy":
+      return t("analytics.filterEtymologyEgy" as TranslationKey);
+    case "Gr":
+      return t("analytics.filterEtymologyGr" as TranslationKey);
+    case "Unknown":
+      return t("analytics.filterEtymologyUnknown" as TranslationKey);
+  }
+}
 
 function AnalyticsStatCard({
   accentClassName,
@@ -420,13 +437,7 @@ export default function AnalyticsPageClient({
       buildAnalyticsChartDrilldown({
         originalName: data.payload.originalName,
         title: data.name ?? data.payload.originalName,
-        type: type as
-          | "derivation"
-          | "etymology"
-          | "gender"
-          | "pos"
-          | "relations"
-          | "verb",
+        type: type as "derivation" | "etymology" | "gender" | "pos" | "verb",
       }),
     );
   };
@@ -504,15 +515,11 @@ export default function AnalyticsPageClient({
                   }
                   className="text-stone-700 dark:text-stone-200"
                 >
-                  <option value="ALL">
-                    {t("analytics.filterEtymologyAll" as TranslationKey)}
-                  </option>
-                  <option value="Egy">
-                    {t("analytics.filterEtymologyEgy" as TranslationKey)}
-                  </option>
-                  <option value="Gr">
-                    {t("analytics.filterEtymologyGr" as TranslationKey)}
-                  </option>
+                  {ETYMOLOGY_FILTERS.map((etymology) => (
+                    <option key={etymology} value={etymology}>
+                      {getEtymologyFilterLabel(etymology, t)}
+                    </option>
+                  ))}
                 </CompactSelect>
               </div>
             </div>

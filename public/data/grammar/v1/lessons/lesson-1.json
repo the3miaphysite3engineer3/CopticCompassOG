@@ -460,13 +460,7 @@
                       "feminineWord": [
                         {
                           "type": "paragraph",
-                          "content": [
-                            {
-                              "type": "coptic",
-                              "text": "Ϣⲉⲣⲓ",
-                              "dictionaryEntryId": "cd_20a"
-                            }
-                          ]
+                          "content": [{ "type": "coptic", "text": "Ϣⲉⲣⲓ" }]
                         }
                       ],
                       "feminineMeaning": [
@@ -889,13 +883,7 @@
                       "feminineWord": [
                         {
                           "type": "paragraph",
-                          "content": [
-                            {
-                              "type": "coptic",
-                              "text": "Ϣⲉⲣⲓ",
-                              "dictionaryEntryId": "cd_20a"
-                            }
-                          ]
+                          "content": [{ "type": "coptic", "text": "Ϣⲉⲣⲓ" }]
                         }
                       ],
                       "feminineMeaning": [
@@ -2495,7 +2483,11 @@
                         "type": "paragraph",
                         "content": [
                           { "type": "text", "text": "≡" },
-                          { "type": "coptic", "text": "ⲛⲉ" },
+                          {
+                            "type": "coptic",
+                            "text": "ⲛⲉ",
+                            "dictionaryEntryId": "cd_5101"
+                          },
                           { "type": "text", "text": " " },
                           {
                             "type": "smallCaps",
@@ -2619,7 +2611,11 @@
                         "type": "paragraph",
                         "content": [
                           { "type": "text", "text": "≡" },
-                          { "type": "coptic", "text": "ⲛⲉ" },
+                          {
+                            "type": "coptic",
+                            "text": "ⲛⲉ",
+                            "dictionaryEntryId": "cd_5101"
+                          },
                           { "type": "text", "text": " " },
                           {
                             "type": "smallCaps",
@@ -3627,7 +3623,10 @@
                           "content": [
                             {
                               "type": "copticSpan",
-                              "children": [{ "type": "text", "text": "Ⲓⲏⲥⲟⲩⲥ" }]
+                              "children": [
+                                { "type": "text", "text": "Ⲓⲏⲥⲟⲩⲥ" }
+                              ],
+                              "dictionaryEntryId": "cd_4548"
                             },
                             { "type": "text", "text": " " },
                             { "type": "text", "text": "N" },
@@ -4272,7 +4271,10 @@
                           "content": [
                             {
                               "type": "copticSpan",
-                              "children": [{ "type": "text", "text": "Ⲓⲏⲥⲟⲩⲥ" }]
+                              "children": [
+                                { "type": "text", "text": "Ⲓⲏⲥⲟⲩⲥ" }
+                              ],
+                              "dictionaryEntryId": "cd_4548"
                             },
                             { "type": "text", "text": " " },
                             { "type": "text", "text": "N" },
@@ -4771,7 +4773,11 @@
                 { "type": "coptic", "text": "ⲧⲉ" },
                 { "type": "text", "text": ", and " },
                 { "type": "text", "text": "≡" },
-                { "type": "coptic", "text": "ⲛⲉ" },
+                {
+                  "type": "coptic",
+                  "text": "ⲛⲉ",
+                  "dictionaryEntryId": "cd_5101"
+                },
                 {
                   "type": "text",
                   "text": " that structure the bipartite nominal sentence."
@@ -4794,7 +4800,11 @@
                 { "type": "coptic", "text": "ⲧⲉ" },
                 { "type": "text", "text": " en " },
                 { "type": "text", "text": "≡" },
-                { "type": "coptic", "text": "ⲛⲉ" },
+                {
+                  "type": "coptic",
+                  "text": "ⲛⲉ",
+                  "dictionaryEntryId": "cd_5101"
+                },
                 {
                   "type": "text",
                   "text": " die de tweeledige nominale zin structureren."
@@ -5145,12 +5155,12 @@
           "grammar.concept.bipartite-nominal-sentence",
           "grammar.concept.nexus-pronouns"
         ],
-        "dictionaryRefs": ["cd_173a"],
+        "dictionaryRefs": ["cd_173a", "cd_5101"],
         "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
         "copticSegments": [
           { "text": "Ϩⲁⲛⲥⲱⲛⲓ", "dictionaryEntryId": "cd_173a" },
           { "text": " " },
-          { "text": "ⲛⲉ" },
+          { "text": "ⲛⲉ", "dictionaryEntryId": "cd_5101" },
           { "text": "." }
         ]
       },
@@ -5164,12 +5174,12 @@
           "grammar.concept.bipartite-nominal-sentence",
           "grammar.concept.nexus-pronouns"
         ],
-        "dictionaryRefs": ["cd_21"],
+        "dictionaryRefs": ["cd_21", "cd_5101"],
         "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
         "copticSegments": [
           { "text": "Ϩⲁⲛⲣⲱⲙⲓ", "dictionaryEntryId": "cd_21" },
           { "text": " " },
-          { "text": "ⲛⲉ" },
+          { "text": "ⲛⲉ", "dictionaryEntryId": "cd_5101" },
           { "text": "." }
         ]
       },
@@ -5186,12 +5196,12 @@
           "grammar.concept.bipartite-nominal-sentence",
           "grammar.concept.nexus-pronouns"
         ],
-        "dictionaryRefs": ["cd_3368"],
+        "dictionaryRefs": ["cd_3368", "cd_5101"],
         "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
         "copticSegments": [
           { "text": "Ⲛⲓⲁⲅⲓⲟⲥ", "dictionaryEntryId": "cd_3368" },
           { "text": " " },
-          { "text": "ⲛⲉ" },
+          { "text": "ⲛⲉ", "dictionaryEntryId": "cd_5101" },
           { "text": "." }
         ]
       }
