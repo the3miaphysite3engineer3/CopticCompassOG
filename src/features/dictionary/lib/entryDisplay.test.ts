@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type {
-  DictionaryMeaningGroupGrammarGender,
+  DictionarySenseGrammarGender,
   LexicalEntry,
 } from "@/features/dictionary/types";
 
@@ -22,12 +22,12 @@ import {
 
 type TestEntryOverrides = Partial<LexicalEntry> &
   Pick<LexicalEntry, "id" | "headword"> & {
-    grammarGender?: DictionaryMeaningGroupGrammarGender;
+    grammarGender?: DictionarySenseGrammarGender;
   };
 
 function createEntry(overrides: TestEntryOverrides): LexicalEntry {
   const { grammarGender, id, headword, ...rest } = overrides;
-  const meaningGroups = rest.meaningGroups ?? [
+  const senses = rest.senses ?? [
     {
       grammar: grammarGender
         ? { gender: grammarGender, pos: "N" }
@@ -39,17 +39,17 @@ function createEntry(overrides: TestEntryOverrides): LexicalEntry {
     id,
     headword,
     dialects: {},
-    etymology: "Egy",
-    greek_equivalents: [],
+    etym: "Egy",
+    greek: [],
     ...rest,
-    meaningGroups,
+    senses,
   };
 }
 
 describe("dictionary entry display helpers", () => {
   it("prefers Bohairic forms when the app default dialect is Bohairic", () => {
     const entry = createEntry({
-      id: "cd_173",
+      id: 173,
       headword: "ⲥⲁϫⲓ",
       dialects: {
         B: {
@@ -76,7 +76,7 @@ describe("dictionary entry display helpers", () => {
 
   it("falls back to Sahidic when Bohairic is unavailable", () => {
     const entry = createEntry({
-      id: "cd_174",
+      id: 174,
       headword: "ⲥⲁϫⲓ",
       dialects: {
         S: {
@@ -94,7 +94,7 @@ describe("dictionary entry display helpers", () => {
 
   it("does not prepend the headword when a dialect only has bound forms", () => {
     const entry = createEntry({
-      id: "cd_361",
+      id: 361,
       headword: "ϩⲛ-",
       dialects: {
         B: {
@@ -114,7 +114,7 @@ describe("dictionary entry display helpers", () => {
 
   it("shows the Bohairic with entry as nominal plus pronominal bound forms", () => {
     const entry = createEntry({
-      id: "cd_892",
+      id: 892,
       headword: "ⲙⲛ-",
       dialects: {
         B: {
@@ -124,8 +124,8 @@ describe("dictionary entry display helpers", () => {
           stative: "",
         },
       },
-      meaningGroups: [
-        { grammar: { pos: "PREP" }, english_meanings: ["preposition, with"] },
+      senses: [
+        { grammar: { pos: "PREP" }, meanings: { en: ["preposition, with"] } },
       ],
     });
 
@@ -137,7 +137,7 @@ describe("dictionary entry display helpers", () => {
 
   it("shows the primary construct participle after verbal forms", () => {
     const entry = createEntry({
-      id: "cd_130",
+      id: 130,
       headword: "ϫⲓ",
       dialects: {
         B: {
@@ -145,7 +145,7 @@ describe("dictionary entry display helpers", () => {
           nominal: "ϭⲓ-",
           pronominal: "ϭⲓⲧ=",
           stative: "ϭⲏⲟⲩ†",
-          constructParticiples: ["ϭⲁⲓ~"],
+          participles: ["ϭⲁⲓ~"],
           variants: {
             constructParticiples: ["ϭⲁⲩ~"],
           },
@@ -166,7 +166,7 @@ describe("dictionary entry display helpers", () => {
 
   it("collapses matching nominal and pronominal bound stems", () => {
     const entry = createEntry({
-      id: "cd_bound_same",
+      id: 259734521,
       headword: "ⲙⲟϩ",
       dialects: {
         B: {
@@ -185,7 +185,7 @@ describe("dictionary entry display helpers", () => {
 
   it("keeps different nominal and pronominal bound stems separate", () => {
     const entry = createEntry({
-      id: "cd_bound_different",
+      id: 3738322353,
       headword: "ⲙⲛ-",
       dialects: {
         B: {
@@ -204,7 +204,7 @@ describe("dictionary entry display helpers", () => {
 
   it("returns secondary construct participles for the variants section", () => {
     const entry = createEntry({
-      id: "cd_130",
+      id: 130,
       headword: "ϫⲓ",
       dialects: {
         B: {
@@ -212,7 +212,7 @@ describe("dictionary entry display helpers", () => {
           nominal: "ϭⲓ-",
           pronominal: "ϭⲓⲧ=",
           stative: "ϭⲏⲟⲩ†",
-          constructParticiples: ["ϭⲁⲓ~"],
+          participles: ["ϭⲁⲓ~"],
           variants: {
             constructParticiples: ["ϭⲁⲩ~"],
           },
@@ -230,7 +230,7 @@ describe("dictionary entry display helpers", () => {
 
   it("returns imperative forms separately without adding them to the header", () => {
     const entry = createEntry({
-      id: "cd_2",
+      id: 2,
       headword: "ϯ",
       dialects: {
         B: {
@@ -240,16 +240,15 @@ describe("dictionary entry display helpers", () => {
           stative: "ⲧⲟⲓ†",
         },
       },
-      inflectedForms: [
-        { kind: "imperative", dialect: "B", form: "ⲙⲟⲓ", role: "absolute" },
-        { kind: "imperative", dialect: "B", form: "ⲙⲁ-", role: "nominal" },
-        {
-          kind: "imperative",
-          dialect: "B",
-          form: "ⲙⲏⲓ=",
-          role: "pronominal",
+      inflections: {
+        imperative: {
+          B: {
+            absolute: ["ⲙⲟⲓ"],
+            nominal: ["ⲙⲁ-"],
+            pronominal: ["ⲙⲏⲓ="],
+          },
         },
-      ],
+      },
     });
 
     expect(formatDialectForms(entry.dialects.B!, entry.headword)).toBe(
@@ -272,7 +271,7 @@ describe("dictionary entry display helpers", () => {
 
   it("uses absolute plus bound forms for principal spellings", () => {
     const baseEntry = createEntry({
-      id: "cd_2",
+      id: 2,
       headword: "ϯ",
       dialects: {
         B: {
@@ -284,7 +283,7 @@ describe("dictionary entry display helpers", () => {
       },
     });
     const relatedEntry = createEntry({
-      id: "cd_2b",
+      id: 4173082558,
       headword: "ⲙⲟⲓ",
       dialects: {
         B: {
@@ -304,7 +303,7 @@ describe("dictionary entry display helpers", () => {
 
   it("builds gendered noun headings from structured feminine and plural forms", () => {
     const kingEntry = createEntry({
-      id: "cd_18",
+      id: 18,
       headword: "ⲣⲣⲟ",
       dialects: {
         B: {
@@ -312,23 +311,23 @@ describe("dictionary entry display helpers", () => {
         },
       },
       grammarGender: "M",
-      inflectedForms: [
-        {
-          kind: "plural",
-          dialect: "B",
-          form: "ⲟⲩⲣⲱⲟⲩ",
+      inflections: {
+        feminine: {
+          B: {
+            default: ["ⲟⲩⲣⲱ"],
+          },
         },
-        {
-          kind: "feminine",
-          dialect: "B",
-          form: "ⲟⲩⲣⲱ",
+        plural: {
+          B: {
+            default: ["ⲟⲩⲣⲱⲟⲩ"],
+          },
         },
-      ],
+      },
     });
 
     expect(getGenderedHeadingParts(kingEntry, "B")).toEqual([
       {
-        entryId: "cd_18",
+        entryId: 18,
         marker: "m",
         spelling: "ⲟⲩⲣⲟ",
       },
@@ -345,7 +344,7 @@ describe("dictionary entry display helpers", () => {
 
   it("keeps same-spelling masculine and feminine forms visible", () => {
     const masculineEntry = createEntry({
-      id: "cd_same_m",
+      id: 4230019348,
       headword: "ⲡⲁⲣⲑⲉⲛⲟⲥ",
       dialects: {
         B: {
@@ -353,18 +352,18 @@ describe("dictionary entry display helpers", () => {
         },
       },
       grammarGender: "M",
-      inflectedForms: [
-        {
-          kind: "feminine",
-          dialect: "B",
-          form: "ⲡⲁⲣⲑⲉⲛⲟⲥ",
+      inflections: {
+        feminine: {
+          B: {
+            default: ["ⲡⲁⲣⲑⲉⲛⲟⲥ"],
+          },
         },
-      ],
+      },
     });
 
     expect(getGenderedHeadingParts(masculineEntry, "B")).toEqual([
       {
-        entryId: "cd_same_m",
+        entryId: 4230019348,
         marker: "m",
         spelling: "ⲡⲁⲣⲑⲉⲛⲟⲥ",
       },
@@ -375,7 +374,7 @@ describe("dictionary entry display helpers", () => {
     ]);
     expect(getGenderedDialectFormParts(masculineEntry, "B")).toEqual([
       {
-        entryId: "cd_same_m",
+        entryId: 4230019348,
         marker: "m",
         spelling: "ⲡⲁⲣⲑⲉⲛⲟⲥ",
       },
@@ -388,7 +387,7 @@ describe("dictionary entry display helpers", () => {
 
   it("builds exact-dialect gendered form rows without borrowing fallback forms", () => {
     const servantEntry = createEntry({
-      id: "cd_550",
+      id: 550,
       headword: "ⲃⲱⲕ",
       dialects: {
         B: {
@@ -399,23 +398,23 @@ describe("dictionary entry display helpers", () => {
         },
       },
       grammarGender: "M",
-      inflectedForms: [
-        {
-          kind: "plural",
-          dialect: "B",
-          form: "ⲉⲃⲓⲁⲓⲕ",
+      inflections: {
+        feminine: {
+          B: {
+            default: ["ⲃⲱⲕⲓ"],
+          },
         },
-        {
-          kind: "feminine",
-          dialect: "B",
-          form: "ⲃⲱⲕⲓ",
+        plural: {
+          B: {
+            default: ["ⲉⲃⲓⲁⲓⲕ"],
+          },
         },
-      ],
+      },
     });
 
     expect(getGenderedDialectFormParts(servantEntry, "B")).toEqual([
       {
-        entryId: "cd_550",
+        entryId: 550,
         marker: "m",
         spelling: "ⲃⲱⲕ",
       },
@@ -433,39 +432,23 @@ describe("dictionary entry display helpers", () => {
 
   it("collects structured plural forms for display", () => {
     const entry = createEntry({
-      id: "cd_plural_display",
+      id: 3466788471,
       headword: "ⲁϩⲟ",
-      inflectedForms: [
-        {
-          kind: "plural",
-          dialect: "B",
-          form: "ⲁϩⲱⲣ",
+      inflections: {
+        dual: {
+          S: {
+            default: ["ⲁϩⲟⲩⲉ"],
+          },
         },
-        {
-          kind: "plural",
-          dialect: "S",
-          form: "ⲁϩⲱⲱⲣ",
+        plural: {
+          B: {
+            default: ["ⲁϩⲱⲣ"],
+          },
+          S: {
+            default: ["ⲁϩⲱⲱⲣ", "ⲉϩⲱⲣ", "ⲁϩⲱⲣⲉ"],
+          },
         },
-        {
-          kind: "plural",
-          dialect: "S",
-          form: "ⲉϩⲱⲣ",
-        },
-        {
-          kind: "plural",
-          dialect: "S",
-          form: "ⲁϩⲱⲣⲉ",
-        },
-        {
-          kind: "plural",
-          form: "ⲁϩⲱⲣ",
-        },
-        {
-          kind: "dual",
-          dialect: "S",
-          form: "ⲁϩⲟⲩⲉ",
-        },
-      ],
+      },
     });
 
     expect(getDialectPluralForms(entry, "S")).toEqual([
@@ -475,7 +458,7 @@ describe("dictionary entry display helpers", () => {
     ]);
     expect(
       getDialectPluralForms(entry, "S", { includeUnscoped: true }),
-    ).toEqual(["ⲁϩⲱⲱⲣ", "ⲉϩⲱⲣ", "ⲁϩⲱⲣⲉ", "ⲁϩⲱⲣ"]);
+    ).toEqual(["ⲁϩⲱⲱⲣ", "ⲉϩⲱⲣ", "ⲁϩⲱⲣⲉ"]);
     expect(getAllPluralForms(entry)).toEqual([
       "ⲁϩⲱⲣ",
       "ⲁϩⲱⲱⲣ",
@@ -486,7 +469,7 @@ describe("dictionary entry display helpers", () => {
 
   it("does not build gendered headings without structured feminine forms", () => {
     const servantEntry = createEntry({
-      id: "cd_550",
+      id: 550,
       headword: "ⲃⲱⲕ",
       dialects: {
         B: {
@@ -494,13 +477,13 @@ describe("dictionary entry display helpers", () => {
         },
       },
       grammarGender: "M",
-      inflectedForms: [
-        {
-          kind: "plural",
-          dialect: "B",
-          form: "ⲉⲃⲓⲁⲓⲕ",
+      inflections: {
+        plural: {
+          B: {
+            default: ["ⲉⲃⲓⲁⲓⲕ"],
+          },
         },
-      ],
+      },
     });
 
     expect(getGenderedHeadingParts(servantEntry, "B")).toEqual([]);
@@ -508,7 +491,7 @@ describe("dictionary entry display helpers", () => {
 
   it("returns no variant rows without secondary forms", () => {
     const entry = createEntry({
-      id: "cd_121",
+      id: 121,
       headword: "ϣⲱⲧ",
       dialects: {
         B: {
@@ -516,7 +499,7 @@ describe("dictionary entry display helpers", () => {
           nominal: "ϣⲉⲧ-",
           pronominal: "ϣⲁⲧ=",
           stative: "ϣⲁⲧ†",
-          constructParticiples: ["ϣⲁⲧ~"],
+          participles: ["ϣⲁⲧ~"],
         },
       },
     });
@@ -527,7 +510,7 @@ describe("dictionary entry display helpers", () => {
 
   it("orders dialect variants by grammatical state", () => {
     const entry = createEntry({
-      id: "cd_variant",
+      id: 2860173517,
       headword: "ⲕⲱ",
       dialects: {
         S: {
@@ -535,7 +518,7 @@ describe("dictionary entry display helpers", () => {
           nominal: "ⲕⲁ-",
           pronominal: "ⲕⲁ=",
           stative: "ⲕⲏ†",
-          constructParticiples: ["ⲕⲁ~"],
+          participles: ["ⲕⲁ~"],
           variants: {
             constructParticiples: ["ⲕⲉ~"],
             absolute: ["ⲕⲉ"],
@@ -563,7 +546,7 @@ describe("dictionary entry display helpers", () => {
 
   it("shows the Bohairic between entry as nominal plus pronominal bound forms", () => {
     const entry = createEntry({
-      id: "cd_1713",
+      id: 1713,
       headword: "ⲟⲩⲧⲉ-",
       dialects: {
         B: {
@@ -573,8 +556,8 @@ describe("dictionary entry display helpers", () => {
           stative: "",
         },
       },
-      meaningGroups: [
-        { grammar: { pos: "PREP" }, english_meanings: ["between, among"] },
+      senses: [
+        { grammar: { pos: "PREP" }, meanings: { en: ["between, among"] } },
       ],
     });
 

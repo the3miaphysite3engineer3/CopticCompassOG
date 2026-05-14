@@ -27,6 +27,29 @@ type HistoryRequestPayload = {
   messages?: unknown;
 };
 
+const SHENUTE_HISTORY_MAX_REQUEST_BYTES = 256 * 1024;
+const SHENUTE_HISTORY_MAX_MESSAGES = 100;
+const SHENUTE_HISTORY_MAX_MESSAGE_CHARS = 24_000;
+
+function getPayloadTooLargeResponse(headers: Headers) {
+  const contentLength = Number.parseInt(
+    headers.get("content-length") ?? "",
+    10,
+  );
+
+  if (
+    !Number.isFinite(contentLength) ||
+    contentLength <= SHENUTE_HISTORY_MAX_REQUEST_BYTES
+  ) {
+    return null;
+  }
+
+  return NextResponse.json(
+    { success: false, error: "Shenute history payload is too large." },
+    { status: 413 },
+  );
+}
+
 function toOptionalUuidString(value: unknown): string | undefined {
   if (typeof value !== "string") {
     return undefined;
@@ -45,6 +68,10 @@ function toOptionalString(value: unknown): string | undefined {
   return normalized.length > 0 ? normalized : undefined;
 }
 
+function toBoundedMessageContent(value: unknown): string | undefined {
+  return toOptionalString(value)?.slice(0, SHENUTE_HISTORY_MAX_MESSAGE_CHARS);
+}
+
 function isSavedChatRole(value: unknown): value is SavedChatMessage["role"] {
   return value === "assistant" || value === "user" || value === "system";
 }
@@ -55,6 +82,7 @@ function parseMessages(value: unknown): SavedChatMessage[] {
   }
 
   return value
+    .slice(-SHENUTE_HISTORY_MAX_MESSAGES)
     .filter(
       (item): item is Record<string, unknown> =>
         typeof item === "object" && item !== null,
@@ -67,7 +95,7 @@ function parseMessages(value: unknown): SavedChatMessage[] {
       return {
         id: toOptionalString(item.id) ?? "",
         role,
-        content: toOptionalString(item.content) ?? "",
+        content: toBoundedMessageContent(item.content) ?? "",
         parts: Array.isArray(item.parts)
           ? item.parts
               .filter(
@@ -77,7 +105,10 @@ function parseMessages(value: unknown): SavedChatMessage[] {
                   part.type === "text" &&
                   typeof part.text === "string",
               )
-              .map((part) => ({ text: part.text, type: "text" as const }))
+              .map((part) => ({
+                text: part.text.slice(0, SHENUTE_HISTORY_MAX_MESSAGE_CHARS),
+                type: "text" as const,
+              }))
           : undefined,
       };
     })
@@ -205,7 +236,7 @@ export async function GET(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: "Could not load history.",
       },
       { status: 500 },
     );
@@ -214,6 +245,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const payloadTooLargeResponse = getPayloadTooLargeResponse(request.headers);
+    if (payloadTooLargeResponse) {
+      return payloadTooLargeResponse;
+    }
+
     if (!hasSupabaseRuntimeEnv()) {
       return NextResponse.json(
         { success: false, error: "Shenute history is unavailable right now." },
@@ -334,7 +370,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: "Could not save history.",
       },
       { status: 500 },
     );
@@ -390,7 +426,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: "Could not clear conversation.",
       },
       { status: 500 },
     );

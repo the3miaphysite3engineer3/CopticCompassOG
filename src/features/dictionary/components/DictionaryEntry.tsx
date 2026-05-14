@@ -17,6 +17,7 @@ import { getGrammarAbbreviationTooltips } from "@/features/dictionary/grammarReg
 import {
   formatDialectForms,
   formatImperativeForms,
+  getPreferredEntryPrincipalSpelling,
   getAllPluralForms,
   getDialectImperativeForms,
   getDialectPluralForms,
@@ -33,10 +34,9 @@ import {
 import {
   getLocalizedDisplayDialectMeanings,
   getLocalizedGenderedMeanings,
-  getLocalizedMeaningGroups,
+  getLocalizedSenseGroups,
 } from "@/features/dictionary/lib/entryText";
 import type {
-  ConstructParticipleCompound,
   DictionaryClientEntry,
   LexicalGender,
 } from "@/features/dictionary/types";
@@ -75,38 +75,6 @@ function getFormSymbolTooltips(
     "†": t("entry.symbol.stative"),
     "~": t("entry.symbol.constructParticiple"),
   };
-}
-
-function getCompoundMeanings(
-  compound: ConstructParticipleCompound,
-  language: ReturnType<typeof useLanguage>["language"],
-) {
-  return language === "nl" && compound.dutch_meanings
-    ? compound.dutch_meanings
-    : compound.english_meanings;
-}
-
-function getCompoundGenderMarkers(
-  gender: ConstructParticipleCompound["gender"],
-  t: ReturnType<typeof useLanguage>["t"],
-) {
-  if (!gender) {
-    return [];
-  }
-
-  const markers =
-    gender === "BOTH"
-      ? [
-          { code: "m", label: t("entry.gender.masculine") },
-          { code: "f", label: t("entry.gender.feminine") },
-        ]
-      : [
-          gender === "M"
-            ? { code: "m", label: t("entry.gender.masculine") }
-            : { code: "f", label: t("entry.gender.feminine") },
-        ];
-
-  return markers;
 }
 
 function getMainGenderMarkers(
@@ -300,11 +268,11 @@ export default function DictionaryEntryCard({
   const imperativeForms = primaryDialectKey
     ? getDialectImperativeForms(entry, primaryDialectKey)
     : [];
-  const meaningGroups = getLocalizedMeaningGroups(entry, language, {
+  const localizedSenses = getLocalizedSenseGroups(entry, language, {
     dialectForms: primaryForms,
     hasImperativeForms: imperativeForms.length > 0,
   });
-  const hasGroupedGenderedMeanings = meaningGroups.some(
+  const hasGroupedGenderedMeanings = localizedSenses.some(
     (group) => (group.genderedRows?.length ?? 0) > 0,
   );
   const genderedMeanings = hasGroupedGenderedMeanings
@@ -319,9 +287,18 @@ export default function DictionaryEntryCard({
         }))
       : []),
   ];
-  const constructParticipleCompounds =
-    primaryForms?.constructParticipleCompounds ?? [];
   const compactBadgeClassName = "h-8 min-h-8 min-w-8 justify-center px-3";
+  let compoundRootLabel = "";
+
+  if (entry.rootEntry) {
+    compoundRootLabel = getPreferredEntryPrincipalSpelling(
+      entry.rootEntry,
+      viewDialect,
+    );
+  } else if (entry.root_id !== undefined) {
+    compoundRootLabel = String(entry.root_id);
+  }
+
   const handleDialectViewChange = (dialect: DictionaryDialectCode) => {
     setViewDialect(dialect);
 
@@ -334,6 +311,24 @@ export default function DictionaryEntryCard({
   };
   const metadataBadges = (
     <>
+      {entry.root_id !== undefined && (
+        <Link
+          href={getEntryPath(entry.root_id, language)}
+          prefetch={false}
+          className="inline-flex min-h-8 max-w-full items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 text-xs font-semibold text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:border-sky-800 dark:hover:bg-sky-950/70"
+        >
+          <span>{t("entry.compoundOf")}</span>
+          <span
+            className={`${antinoou.className} min-w-0 truncate text-sm font-normal tracking-wide`}
+          >
+            <HighlightText
+              text={compoundRootLabel}
+              query={query}
+              symbolTooltips={formSymbolTooltips}
+            />
+          </span>
+        </Link>
+      )}
       {primaryDialectKey && (
         <Badge tone="neutral" size="sm" className={compactBadgeClassName}>
           <DialectSiglum siglum={primaryDialectKey} />
@@ -466,9 +461,9 @@ export default function DictionaryEntryCard({
             ))}
           </ul>
         )}
-        {meaningGroups.length > 0 && (
+        {localizedSenses.length > 0 && (
           <div className="grid gap-3">
-            {meaningGroups.map((group, groupIndex) => {
+            {localizedSenses.map((group, groupIndex) => {
               const groupGenderedRows = group.genderedRows ?? [];
               const hasMeaningRows =
                 groupGenderedRows.length > 0 || group.meanings.length > 0;
@@ -675,66 +670,14 @@ export default function DictionaryEntryCard({
             </div>
           </div>
         )}
-        {constructParticipleCompounds.length > 0 && (
-          <div className="mt-5 flex flex-col gap-3">
-            <span className="text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 font-semibold">
-              {t("entry.constructParticipleCompounds")}
-            </span>
-            <div className="grid gap-2.5">
-              {constructParticipleCompounds.map((compound, index) => {
-                const compoundMeanings = getCompoundMeanings(
-                  compound,
-                  language,
-                );
-                const genderMarkers = getCompoundGenderMarkers(
-                  compound.gender,
-                  t,
-                );
 
-                return (
-                  <div
-                    key={`${compound.form}-${index}`}
-                    className="grid gap-1.5 border-l-2 border-sky-200 pl-3 dark:border-sky-900/70"
-                  >
-                    <div className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1">
-                      <span
-                        className={`${antinoou.className} min-w-0 break-words text-lg leading-snug text-stone-800 [overflow-wrap:anywhere] dark:text-stone-200`}
-                      >
-                        <HighlightText
-                          text={compound.form}
-                          query={query}
-                          symbolTooltips={formSymbolTooltips}
-                        />
-                      </span>
-                      {genderMarkers.length > 0 && (
-                        <LinguisticGlossGroup
-                          markers={genderMarkers}
-                          size="compact"
-                        />
-                      )}
-                    </div>
-                    <p className="text-sm leading-relaxed text-stone-600 dark:text-stone-400">
-                      <HighlightText
-                        text={compoundMeanings.join("; ")}
-                        query={query}
-                        grammarAbbreviationTooltips={
-                          grammarAbbreviationTooltips
-                        }
-                      />
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-        {(entry.greek_equivalents?.length ?? 0) > 0 && (
+        {(entry.greek?.length ?? 0) > 0 && (
           <div className="mt-5 flex flex-col gap-3">
             <span className="text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 font-semibold">
               {t("entry.greekEquivalents")}
             </span>
             <div className="flex flex-wrap gap-2">
-              {entry.greek_equivalents?.map((gr, idx) => (
+              {entry.greek?.map((gr, idx) => (
                 <span
                   key={idx}
                   className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-400 rounded-xl text-sm font-medium"

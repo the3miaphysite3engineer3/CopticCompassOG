@@ -23,7 +23,7 @@ function createReportFormData(
 ) {
   const formData = new FormData();
   formData.set("language", overrides?.language ?? "en");
-  formData.set("entryId", overrides?.entryId ?? "cd_173");
+  formData.set("entryId", overrides?.entryId ?? "173");
   formData.set("reason", overrides?.reason ?? "translation");
   formData.set(
     "commentary",
@@ -101,7 +101,7 @@ async function loadDictionaryEntryActionsModule(options?: {
     options?.dictionaryEntry === undefined
       ? {
           headword: "ϭⲟⲗ",
-          id: "cd_173",
+          id: 173,
         }
       : options.dictionaryEntry,
   );
@@ -306,7 +306,7 @@ describe("dictionary entry actions", () => {
       commentary:
         "The Dutch translation looks too broad.\n\nMaybe use a narrower gloss.",
       entry_headword: "ϭⲟⲗ",
-      entry_id: "cd_173",
+      entry_id: "173",
       reason: "translation",
       status: "open",
       user_id: "user-123",
@@ -319,7 +319,7 @@ describe("dictionary entry actions", () => {
         payload: expect.objectContaining({
           reporter_email: "re***@example.com",
         }),
-        subject: "Coptic Compass entry report: ϭⲟⲗ (cd_173)",
+        subject: "Coptic Compass entry report: ϭⲟⲗ (173)",
         text: expect.stringContaining("Reason: translation"),
       }),
     );

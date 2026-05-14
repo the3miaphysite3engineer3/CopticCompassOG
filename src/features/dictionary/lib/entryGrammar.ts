@@ -4,16 +4,16 @@ import {
   type PartOfSpeech,
 } from "@/features/dictionary/config";
 import type {
-  DictionaryMeaningGroupGrammarPartOfSpeech,
-  DictionaryMeaningGroups,
+  DictionarySenseGrammarPartOfSpeech,
+  DictionarySenses,
   LexicalGender,
 } from "@/features/dictionary/types";
 
 type EntryGrammarSource = {
-  meaningGroups: DictionaryMeaningGroups;
+  senses?: DictionarySenses;
 };
 
-type EntryGrammarPartOfSpeech = DictionaryMeaningGroupGrammarPartOfSpeech;
+type EntryGrammarPartOfSpeech = DictionarySenseGrammarPartOfSpeech;
 
 const PART_OF_SPEECH_SET = new Set<string>(PARTS_OF_SPEECH);
 
@@ -32,7 +32,7 @@ export function getEntryGrammarPartOfSpeechValues(
 ): EntryGrammarPartOfSpeech[] {
   const values: EntryGrammarPartOfSpeech[] = [];
 
-  for (const group of entry.meaningGroups) {
+  for (const group of entry.senses ?? []) {
     const pos = group.grammar.pos;
 
     if (pos) {
@@ -86,9 +86,7 @@ export function entryHasVerbGrammar(entry: EntryGrammarSource) {
 export function getEntryNounGender(
   entry: EntryGrammarSource,
 ): LexicalGender | undefined {
-  const nounGroup = entry.meaningGroups.find(
-    (group) => group.grammar.pos === "N",
-  );
+  const nounGroup = entry.senses?.find((group) => group.grammar.pos === "N");
 
   if (!nounGroup && !entryHasNounGrammar(entry)) {
     return undefined;

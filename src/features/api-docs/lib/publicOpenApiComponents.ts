@@ -296,42 +296,10 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
             type: "string",
             example: "",
           },
-          constructParticiples: {
+          participles: {
             type: "array",
             items: {
               type: "string",
-            },
-          },
-          constructParticipleCompounds: {
-            type: "array",
-            items: {
-              type: "object",
-              required: ["form", "english_meanings"],
-              properties: {
-                form: {
-                  type: "string",
-                },
-                sourceConstructParticiple: {
-                  type: "string",
-                },
-                gender: {
-                  type: "string",
-                  enum: ["", "BOTH", "F", "M"],
-                },
-                english_meanings: {
-                  type: "array",
-                  items: {
-                    type: "string",
-                  },
-                },
-                dutch_meanings: {
-                  type: "array",
-                  items: {
-                    type: "string",
-                  },
-                },
-              },
-              additionalProperties: false,
             },
           },
           variants: {
@@ -412,32 +380,16 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
         },
         additionalProperties: false,
       },
-      DictionaryMeaningGroup: {
+      DictionaryLocalizedStringArrays: {
         type: "object",
-        required: ["grammar"],
         properties: {
-          grammar: {
-            $ref: "#/components/schemas/DictionaryMeaningGroupGrammar",
-          },
-          english_meanings: {
+          en: {
             type: "array",
             items: {
               type: "string",
             },
           },
-          dutch_meanings: {
-            type: "array",
-            items: {
-              type: "string",
-            },
-          },
-          english_notes: {
-            type: "array",
-            items: {
-              type: "string",
-            },
-          },
-          dutch_notes: {
+          nl: {
             type: "array",
             items: {
               type: "string",
@@ -446,7 +398,23 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
         },
         additionalProperties: false,
       },
-      DictionaryMeaningGroupGrammar: {
+      DictionarySense: {
+        type: "object",
+        required: ["grammar"],
+        properties: {
+          grammar: {
+            $ref: "#/components/schemas/DictionarySenseGrammar",
+          },
+          meanings: {
+            $ref: "#/components/schemas/DictionaryLocalizedStringArrays",
+          },
+          notes: {
+            $ref: "#/components/schemas/DictionaryLocalizedStringArrays",
+          },
+        },
+        additionalProperties: false,
+      },
+      DictionarySenseGrammar: {
         type: "object",
         required: ["pos"],
         properties: {
@@ -548,12 +516,12 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
         },
         additionalProperties: false,
       },
-      DictionaryMeaningGroups: {
+      DictionarySenses: {
         description:
-          "Ordered grammar-scoped meaning groups. Display badges are derived from each group's grammar object.",
+          "Ordered grammar-scoped senses. Display badges are derived from each sense's grammar object.",
         type: "array",
         items: {
-          $ref: "#/components/schemas/DictionaryMeaningGroup",
+          $ref: "#/components/schemas/DictionarySense",
         },
       },
       DictionaryDialectMeaning: {
@@ -572,29 +540,11 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
             },
             example: ["B", "S"],
           },
-          english_meanings: {
-            type: "array",
-            items: {
-              type: "string",
-            },
+          meanings: {
+            $ref: "#/components/schemas/DictionaryLocalizedStringArrays",
           },
-          dutch_meanings: {
-            type: "array",
-            items: {
-              type: "string",
-            },
-          },
-          english_notes: {
-            type: "array",
-            items: {
-              type: "string",
-            },
-          },
-          dutch_notes: {
-            type: "array",
-            items: {
-              type: "string",
-            },
+          notes: {
+            $ref: "#/components/schemas/DictionaryLocalizedStringArrays",
           },
         },
         additionalProperties: false,
@@ -619,40 +569,33 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
       },
       DictionaryGenderedMeaning: {
         type: "object",
-        required: ["english"],
         properties: {
-          english: {
-            $ref: "#/components/schemas/DictionaryGenderedMeaningValues",
-          },
-          dutch: {
-            $ref: "#/components/schemas/DictionaryGenderedMeaningValues",
+          meanings: {
+            type: "object",
+            properties: {
+              en: {
+                $ref: "#/components/schemas/DictionaryGenderedMeaningValues",
+              },
+              nl: {
+                $ref: "#/components/schemas/DictionaryGenderedMeaningValues",
+              },
+            },
+            additionalProperties: false,
           },
         },
         additionalProperties: false,
       },
-      DictionaryInflectedForm: {
+      DictionaryInflectedFormDetails: {
         type: "object",
-        required: ["kind", "form"],
+        required: ["form"],
         properties: {
-          kind: {
-            type: "string",
-            enum: ["dual", "feminine", "imperative", "masculine", "plural"],
-          },
           form: {
             type: "string",
             example: "ⲟⲩⲣⲱⲟⲩ",
           },
-          dialect: {
-            type: "string",
-            enum: ["A", "B", "F", "Fb", "L", "M", "O", "S", "Sa", "Sf", "Sl"],
-          },
           entryId: {
-            type: "string",
-            example: "cd_20",
-          },
-          role: {
-            type: "string",
-            enum: ["absolute", "nominal", "pronominal"],
+            type: "number",
+            example: 20,
           },
           notes: {
             type: "array",
@@ -666,13 +609,82 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
         },
         additionalProperties: false,
       },
-      DictionaryClientEntry: {
+      DictionaryInflectedFormValue: {
+        oneOf: [
+          {
+            type: "string",
+            example: "ⲟⲩⲣⲱⲟⲩ",
+          },
+          {
+            $ref: "#/components/schemas/DictionaryInflectedFormDetails",
+          },
+        ],
+      },
+      DictionaryInflectionRoleMap: {
         type: "object",
-        required: ["id", "headword", "dialects", "meaningGroups", "etymology"],
+        additionalProperties: {
+          type: "array",
+          items: {
+            $ref: "#/components/schemas/DictionaryInflectedFormValue",
+          },
+        },
+      },
+      DictionaryInflectionDialectMap: {
+        type: "object",
+        additionalProperties: {
+          $ref: "#/components/schemas/DictionaryInflectionRoleMap",
+        },
+      },
+      DictionaryInflections: {
+        type: "object",
+        properties: {
+          dual: {
+            $ref: "#/components/schemas/DictionaryInflectionDialectMap",
+          },
+          feminine: {
+            $ref: "#/components/schemas/DictionaryInflectionDialectMap",
+          },
+          imperative: {
+            $ref: "#/components/schemas/DictionaryInflectionDialectMap",
+          },
+          masculine: {
+            $ref: "#/components/schemas/DictionaryInflectionDialectMap",
+          },
+          plural: {
+            $ref: "#/components/schemas/DictionaryInflectionDialectMap",
+          },
+        },
+        additionalProperties: false,
+      },
+      DictionaryRootReference: {
+        type: "object",
+        required: ["id", "headword", "dialects"],
         properties: {
           id: {
+            type: "number",
+            example: 2,
+          },
+          headword: {
             type: "string",
-            example: "cd_2",
+            example: "ϯ",
+          },
+          dialects: {
+            $ref: "#/components/schemas/DictionaryDialectFormsMap",
+          },
+        },
+        additionalProperties: false,
+      },
+      DictionaryClientEntry: {
+        type: "object",
+        required: ["id", "headword", "dialects", "senses", "etym"],
+        properties: {
+          id: {
+            type: "number",
+            example: 2,
+          },
+          root_id: {
+            type: "number",
+            example: 2,
           },
           headword: {
             type: "string",
@@ -681,14 +693,14 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
           dialects: {
             $ref: "#/components/schemas/DictionaryDialectFormsMap",
           },
-          greek_equivalents: {
+          greek: {
             type: "array",
             items: {
               type: "string",
             },
           },
-          meaningGroups: {
-            $ref: "#/components/schemas/DictionaryMeaningGroups",
+          senses: {
+            $ref: "#/components/schemas/DictionarySenses",
           },
           dialectMeanings: {
             type: "array",
@@ -702,15 +714,15 @@ export function buildPublicOpenApiComponents(context: PublicOpenApiContext) {
               $ref: "#/components/schemas/DictionaryGenderedMeaning",
             },
           },
-          etymology: {
+          etym: {
             type: "string",
             enum: ["Egy", "Gr", "Unknown"],
           },
-          inflectedForms: {
-            type: "array",
-            items: {
-              $ref: "#/components/schemas/DictionaryInflectedForm",
-            },
+          inflections: {
+            $ref: "#/components/schemas/DictionaryInflections",
+          },
+          rootEntry: {
+            $ref: "#/components/schemas/DictionaryRootReference",
           },
         },
         additionalProperties: false,

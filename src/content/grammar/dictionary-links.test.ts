@@ -20,24 +20,24 @@ function getParagraphCopticNode(
 
 describe("grammar dictionary link enrichment", () => {
   it("resolves only unique Bohairic entry matches and ignores combining diacritics", () => {
-    expect(getBohairicDictionaryEntryIdForWord("Ⲥⲟⲛ")).toBe("cd_173");
-    expect(getBohairicDictionaryEntryIdForWord("ⲥ̀ϩⲓⲙⲓ")).toBe("cd_142");
-    expect(getBohairicDictionaryEntryIdForWord("Ⲥⲱⲛⲓ")).toBe("cd_173a");
-    expect(getBohairicDictionaryEntryIdForWord("Ⲟⲩⲥⲱⲛⲓ")).toBe("cd_173a");
-    expect(getBohairicDictionaryEntryIdForWord("Ⲡⲁⲓⲥⲟⲛ")).toBe("cd_173");
-    expect(getBohairicDictionaryEntryIdForWord("Ⲟⲩⲓⲱⲧ")).toBe("cd_57");
-    expect(getBohairicDictionaryEntryIdForWord("ϭⲱⲓⲥ")).toBe("cd_17");
-    expect(getBohairicDictionaryEntryIdForWord("⳪")).toBe("cd_17");
-    expect(getBohairicDictionaryEntryIdForWord("ⳳⲉⲗⲗⲱ")).toBe("cd_63a");
-    expect(getBohairicDictionaryEntryIdForWord("ⳲⲈⲖⲖⲰ")).toBe("cd_63a");
-    expect(getBohairicDictionaryEntryIdForWord("ⳳⲉⲛ-")).toBe("cd_361");
-    expect(getBohairicDictionaryEntryIdForWord("ⳲⲈⲚ-")).toBe("cd_361");
-    expect(getBohairicDictionaryEntryIdForWord("Ⲛ̀ⲑⲟⲥ")).toBe("cd_493a");
-    expect(getBohairicDictionaryEntryIdForWord("Ⲛ̀ⲑⲱⲟⲩ")).toBe("cd_493b");
+    expect(getBohairicDictionaryEntryIdForWord("Ⲥⲟⲛ")).toBe("173");
+    expect(getBohairicDictionaryEntryIdForWord("ⲥ̀ϩⲓⲙⲓ")).toBe("142");
+    expect(getBohairicDictionaryEntryIdForWord("Ⲥⲱⲛⲓ")).toBe("11422");
+    expect(getBohairicDictionaryEntryIdForWord("Ⲟⲩⲥⲱⲛⲓ")).toBe("11422");
+    expect(getBohairicDictionaryEntryIdForWord("Ⲡⲁⲓⲥⲟⲛ")).toBe("173");
+    expect(getBohairicDictionaryEntryIdForWord("Ⲟⲩⲓⲱⲧ")).toBe("57");
+    expect(getBohairicDictionaryEntryIdForWord("ϭⲱⲓⲥ")).toBe("17");
+    expect(getBohairicDictionaryEntryIdForWord("⳪")).toBe("17");
+    expect(getBohairicDictionaryEntryIdForWord("ⳳⲉⲗⲗⲱ")).toBe("11413");
+    expect(getBohairicDictionaryEntryIdForWord("ⳲⲈⲖⲖⲰ")).toBe("11413");
+    expect(getBohairicDictionaryEntryIdForWord("ⳳⲉⲛ-")).toBe("361");
+    expect(getBohairicDictionaryEntryIdForWord("ⳲⲈⲚ-")).toBe("361");
+    expect(getBohairicDictionaryEntryIdForWord("Ⲛ̀ⲑⲟⲥ")).toBe("11428");
+    expect(getBohairicDictionaryEntryIdForWord("Ⲛ̀ⲑⲱⲟⲩ")).toBe("11429");
     expect(getBohairicDictionaryEntryIdForWord("Ϣⲏⲣⲓ")).toBeNull();
     expect(getBohairicDictionaryEntryIdForWord("ⲙⲁⲩ")).toBeNull();
     expect(getBohairicDictionaryEntryIdForWord("Ⲧⲁⲙⲁⲩ")).toBeNull();
-    expect(getBohairicDictionaryEntryIdForWord("Ⲛ̀ⲑⲟϥ")).toBe("cd_1178");
+    expect(getBohairicDictionaryEntryIdForWord("Ⲛ̀ⲑⲟϥ")).toBe("1178");
   });
 
   it("annotates canonical lesson content when a unique Bohairic match exists", () => {
@@ -75,27 +75,27 @@ describe("grammar dictionary link enrichment", () => {
     expect(feminineWomanWord).toMatchObject({
       type: "coptic",
       text: "Ⲥ̀ϩⲓⲙⲓ",
-      dictionaryEntryId: "cd_142",
+      dictionaryEntryId: "142",
     });
     expect(feminineMotherWord).toMatchObject({
       type: "coptic",
       text: "Ⲙⲁⲩ",
-      dictionaryEntryId: "cd_215",
+      dictionaryEntryId: "215",
     });
     expect(feminineSisterWord).toMatchObject({
       type: "coptic",
       text: "Ⲥⲱⲛⲓ",
-      dictionaryEntryId: "cd_173a",
+      dictionaryEntryId: "11422",
     });
     expect(masculineBrotherWord).toMatchObject({
       type: "coptic",
       text: "Ⲥⲟⲛ",
-      dictionaryEntryId: "cd_173",
+      dictionaryEntryId: "173",
     });
     expect(masculineSonWord).toMatchObject({
       type: "coptic",
       text: "Ϣⲏⲣⲓ",
-      dictionaryEntryId: "cd_20",
+      dictionaryEntryId: "20",
     });
 
     const motherExample = snapshot.examples.find(
@@ -108,13 +108,13 @@ describe("grammar dictionary link enrichment", () => {
     );
 
     expect(motherExample?.copticSegments).toMatchObject([
-      { text: "Ⲧⲁⲙⲁⲩ", dictionaryEntryId: "cd_215" },
+      { text: "Ⲧⲁⲙⲁⲩ", dictionaryEntryId: "215" },
       { text: " " },
       { text: "ⲧⲉ" },
       { text: "." },
     ]);
     expect(everyManExample?.copticSegments).toMatchObject([
-      { text: "Ø-ⲣⲱⲙⲓ", dictionaryEntryId: "cd_21" },
+      { text: "Ø-ⲣⲱⲙⲓ", dictionaryEntryId: "21" },
       { text: " " },
       { text: "ⲛⲓⲃⲉⲛ" },
     ]);

@@ -58,6 +58,10 @@ function isUnexpectedFieldErrorMessage(value: string) {
   );
 }
 
+function getSafeOcrFailureMessage(status: number) {
+  return `OCR service failed with status ${status}.`;
+}
+
 function stripHtml(input: string) {
   return input
     .replace(/<br\s*\/?>/gi, "\n")
@@ -177,11 +181,16 @@ async function attemptOcrUpload(options: {
 
   if (!response.ok) {
     const errorText = await response.text();
-    const message = `OCR service failed: ${response.status} - ${errorText}`;
+    const message = getSafeOcrFailureMessage(response.status);
 
     if (isUnexpectedFieldErrorMessage(errorText)) {
       return { kind: "retry", message };
     }
+
+    console.error("OCR service request failed", {
+      status: response.status,
+      statusText: response.statusText,
+    });
 
     return { kind: "fatal", message };
   }

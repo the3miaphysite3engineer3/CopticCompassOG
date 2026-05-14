@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type {
-  DictionaryMeaningGroupGrammarGender,
+  DictionarySenseGrammarGender,
   LexicalEntry,
 } from "@/features/dictionary/types";
 
@@ -13,12 +13,12 @@ import {
 
 type TestEntryOverrides = Partial<LexicalEntry> &
   Pick<LexicalEntry, "id" | "headword"> & {
-    grammarGender?: DictionaryMeaningGroupGrammarGender;
+    grammarGender?: DictionarySenseGrammarGender;
   };
 
 function createEntry(overrides: TestEntryOverrides): LexicalEntry {
   const { grammarGender, id, headword, ...rest } = overrides;
-  const meaningGroups = rest.meaningGroups ?? [
+  const senses = rest.senses ?? [
     {
       grammar: grammarGender
         ? { gender: grammarGender, pos: "N" }
@@ -37,59 +37,52 @@ function createEntry(overrides: TestEntryOverrides): LexicalEntry {
         stative: "",
       },
     },
-    etymology: "Egy",
-    greek_equivalents: [],
+    etym: "Egy",
+    greek: [],
     ...rest,
-    meaningGroups,
+    senses,
   };
 }
 
 describe("dictionary helpers", () => {
   const dictionary = [
     createEntry({
-      id: "cd_20",
+      id: 20,
       headword: "ϣⲏⲣⲓ",
-      meaningGroups: [{ grammar: { pos: "N" }, english_meanings: ["son"] }],
-      inflectedForms: [
-        {
-          kind: "feminine",
-          dialect: "B",
-          form: "ϣⲉⲣⲓ",
+      senses: [{ grammar: { pos: "N" }, meanings: { en: ["son"] } }],
+      inflections: {
+        feminine: {
+          B: {
+            default: ["ϣⲉⲣⲓ"],
+          },
         },
-      ],
+      },
     }),
     createEntry({
-      id: "cd_493",
+      id: 493,
       headword: "ⲁⲛⲟⲕ",
-      meaningGroups: [{ grammar: { pos: "OTHER" }, english_meanings: ["I"] }],
+      senses: [{ grammar: { pos: "OTHER" }, meanings: { en: ["I"] } }],
     }),
     createEntry({
-      id: "cd_493a",
+      id: 2639720405,
       headword: "ⲛⲑⲟⲥ",
-      meaningGroups: [
-        { grammar: { pos: "OTHER" }, english_meanings: ["she, it"] },
-      ],
+      senses: [{ grammar: { pos: "OTHER" }, meanings: { en: ["she, it"] } }],
     }),
     createEntry({
-      id: "cd_493b",
+      id: 3142450453,
       headword: "ⲛⲑⲱⲟⲩ",
-      meaningGroups: [
-        { grammar: { pos: "OTHER" }, english_meanings: ["they"] },
-      ],
+      senses: [{ grammar: { pos: "OTHER" }, meanings: { en: ["they"] } }],
     }),
   ];
 
   it("resolves an entry by id from an injected dictionary", () => {
-    expect(getDictionaryEntryById("cd_20", dictionary)?.headword).toBe("ϣⲏⲣⲓ");
+    expect(getDictionaryEntryById("20", dictionary)?.headword).toBe("ϣⲏⲣⲓ");
     expect(getDictionaryEntryById("missing", dictionary)).toBeNull();
   });
 
   it("returns the stable ordered list of entry ids for sitemap and params use", () => {
     expect(listDictionaryEntryIds(dictionary)).toEqual([
-      "cd_20",
-      "cd_493",
-      "cd_493a",
-      "cd_493b",
+      20, 493, 2639720405, 3142450453,
     ]);
   });
 
@@ -97,51 +90,81 @@ describe("dictionary helpers", () => {
     const clientEntry = toDictionaryClientEntry(dictionary[0]!);
 
     expect(clientEntry).toMatchObject({
-      id: "cd_20",
+      id: 20,
       headword: "ϣⲏⲣⲓ",
-      meaningGroups: [{ english_meanings: ["son"] }],
+      senses: [{ meanings: { en: ["son"] } }],
     });
     expect(Object.keys(clientEntry).sort()).toEqual(
       [
         "dialectMeanings",
         "dialects",
-        "etymology",
+        "etym",
         "genderedMeanings",
         "headword",
         "id",
-        "inflectedForms",
-        "meaningGroups",
+        "inflections",
+        "senses",
       ].sort(),
     );
   });
 
   it("keeps structured inflected forms in the reduced client payload for search", () => {
     const pluralOnlyEntry = createEntry({
-      id: "cd_plural_only",
+      id: 1066624037,
       headword: "ϩⲁϩ",
       dialects: {},
-      meaningGroups: [
-        { grammar: { pos: "N" }, english_meanings: ["many, much"] },
-      ],
-      inflectedForms: [
+      senses: [{ grammar: { pos: "N" }, meanings: { en: ["many, much"] } }],
+      inflections: {
+        plural: {
+          S: {
+            default: ["ϩⲁϩ"],
+          },
+        },
+      },
+    });
+
+    expect(getDictionaryEntryById(1066624037, [pluralOnlyEntry])).toMatchObject(
+      {
+        id: 1066624037,
+        inflections: { plural: { S: { default: ["ϩⲁϩ"] } } },
+      },
+    );
+    expect(toDictionaryClientEntry(pluralOnlyEntry)).toMatchObject({
+      id: 1066624037,
+      inflections: { plural: { S: { default: ["ϩⲁϩ"] } } },
+    });
+  });
+
+  it("adds a compact root reference for compound client entries", () => {
+    const rootEntry = createEntry({
+      id: 2,
+      headword: "ϯ",
+      senses: [{ grammar: { pos: "V" }, meanings: { en: ["give"] } }],
+    });
+    const compoundEntry = createEntry({
+      id: 11146,
+      root_id: rootEntry.id,
+      headword: "ⲧⲁⲓ̈ⲟⲩⲧⲁϩ",
+      senses: [
         {
-          kind: "plural",
-          dialect: "S",
-          form: "ϩⲁϩ",
-          uncertain: false,
+          grammar: { gender: "BOTH", pos: "N" },
+          meanings: { en: ["fruit-bearer"] },
         },
       ],
     });
 
     expect(
-      getDictionaryEntryById("cd_plural_only", [pluralOnlyEntry]),
+      toDictionaryClientEntry(
+        compoundEntry,
+        new Map([[rootEntry.id, rootEntry]]),
+      ),
     ).toMatchObject({
-      id: "cd_plural_only",
-      inflectedForms: [{ kind: "plural", dialect: "S", form: "ϩⲁϩ" }],
-    });
-    expect(toDictionaryClientEntry(pluralOnlyEntry)).toMatchObject({
-      id: "cd_plural_only",
-      inflectedForms: [{ kind: "plural", dialect: "S", form: "ϩⲁϩ" }],
+      id: 11146,
+      root_id: 2,
+      rootEntry: {
+        headword: "ϯ",
+        id: 2,
+      },
     });
   });
 });

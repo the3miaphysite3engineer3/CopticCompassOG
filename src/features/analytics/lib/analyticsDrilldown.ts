@@ -248,12 +248,12 @@ function matchesAnalyticsDrilldownEntry(
 
   if (drilldown.chartType === "etymology") {
     if (drilldown.originalName === "analytics.grEtymology") {
-      return entry.etymology === "Gr";
+      return entry.etym === "Gr";
     }
     if (drilldown.originalName === "analytics.unknownEtymology") {
-      return entry.etymology === "Unknown";
+      return entry.etym === "Unknown";
     }
-    return entry.etymology === "Egy";
+    return entry.etym === "Egy";
   }
 
   if (drilldown.chartType === "derivation") {
@@ -325,5 +325,5 @@ function matchesAnalyticsEntryFilters(
     return true;
   }
 
-  return entry.etymology === selectedEtymology;
+  return entry.etym === selectedEtymology;
 }

@@ -56,7 +56,7 @@ function collectBohairicForms(entry: LexicalEntry): string[] {
     bohairicForms.nominal,
     bohairicForms.pronominal,
     bohairicForms.stative,
-    ...(bohairicForms.constructParticiples ?? []),
+    ...(bohairicForms.participles ?? []),
     ...(bohairicForms.variants?.absolute ?? []),
     ...(bohairicForms.variants?.nominal ?? []),
     ...(bohairicForms.variants?.pronominal ?? []),
@@ -85,7 +85,7 @@ function getBohairicDictionaryLookup() {
 
       const existingEntryIds =
         formsToEntryIds.get(normalizedForm) ?? new Set<string>();
-      existingEntryIds.add(entry.id);
+      existingEntryIds.add(String(entry.id));
       formsToEntryIds.set(normalizedForm, existingEntryIds);
     }
   }
@@ -351,7 +351,7 @@ function enrichExampleDocument(
   let dictionaryRefs: string[] = [];
 
   if (example.dictionaryRefs.length > 0) {
-    dictionaryRefs = [...example.dictionaryRefs];
+    dictionaryRefs = example.dictionaryRefs;
   } else if (tokenDictionaryRefs.length > 0) {
     dictionaryRefs = [...new Set(tokenDictionaryRefs)];
   } else if (dictionaryEntryId) {
@@ -380,7 +380,9 @@ function buildExampleCopticSegments(
   return tokenizeExampleCoptic(example.coptic).map((segment) => ({
     text: segment,
     ...(tokenOverrides[segment]
-      ? { dictionaryEntryId: tokenOverrides[segment] }
+      ? {
+          dictionaryEntryId: tokenOverrides[segment],
+        }
       : (() => {
           const dictionaryEntryId =
             getBohairicDictionaryEntryIdForWord(segment);

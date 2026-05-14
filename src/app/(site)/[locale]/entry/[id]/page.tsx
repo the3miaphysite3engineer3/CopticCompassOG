@@ -4,15 +4,12 @@ import { PageShell, pageShellAccents } from "@/components/PageShell";
 import StructuredData from "@/components/StructuredData";
 import EntryPageClient from "@/features/dictionary/components/EntryPageClient";
 import EntryPageHeader from "@/features/dictionary/components/EntryPageHeader";
-import { getPartOfSpeechLabel } from "@/features/dictionary/config";
-import { getDictionaryEntryById } from "@/features/dictionary/lib/dictionary";
-import { getPrimaryEntryPartOfSpeech } from "@/features/dictionary/lib/entryGrammar";
+import {
+  getDictionaryEntryById,
+  toDictionaryRootReference,
+} from "@/features/dictionary/lib/dictionary";
 import { buildEntryOpenGraphImageUrl } from "@/features/dictionary/lib/entryOpenGraph";
 import { buildEntryPreview } from "@/features/dictionary/lib/entryPreview";
-import {
-  buildEntryDescription,
-  toPlainText,
-} from "@/features/dictionary/lib/entryText";
 import { listPublishedGrammarLessonsForEntry } from "@/features/grammar/lib/grammarContentGraph";
 import { getTranslation } from "@/lib/i18n";
 import {
@@ -60,19 +57,12 @@ export async function generateMetadata({
     entry,
     language: locale,
   });
-  const headword = preview.heading || toPlainText(entry.headword);
-  const partOfSpeech = getPartOfSpeechLabel(
-    getPrimaryEntryPartOfSpeech(entry),
-    (key) => getTranslation(locale, key),
-  );
+  const headword = preview.heading;
   const title =
     locale === "nl"
-      ? `${headword} (${partOfSpeech}) - Koptisch woordenboek`
-      : `${headword} (${partOfSpeech}) - Coptic Dictionary`;
-  const description = buildEntryDescription(entry, locale, {
-    displayHeadword: headword,
-    summary: preview.gloss,
-  });
+      ? `${headword} (${preview.partOfSpeechLabel}) - Koptisch woordenboek`
+      : `${headword} (${preview.partOfSpeechLabel}) - Coptic Dictionary`;
+  const description = preview.description;
   const path = getEntryPath(entry.id, locale);
   const imageUrl = buildEntryOpenGraphImageUrl(entry.id, locale);
   const image = createSocialImage(
@@ -117,12 +107,20 @@ export default async function EntryPage({
     entry,
     language: locale,
   });
-  const headword = preview.heading || toPlainText(entry.headword);
-  const description = buildEntryDescription(entry, locale, {
-    displayHeadword: headword,
-    summary: preview.gloss,
-  });
-  const relatedGrammarLessons = listPublishedGrammarLessonsForEntry(entry.id);
+  const headword = preview.heading;
+  const description = preview.description;
+  const rootEntry = entry.root_id
+    ? getDictionaryEntryById(entry.root_id)
+    : null;
+  const displayEntry = rootEntry
+    ? {
+        ...entry,
+        rootEntry: toDictionaryRootReference(rootEntry),
+      }
+    : entry;
+  const relatedGrammarLessons = listPublishedGrammarLessonsForEntry(
+    String(entry.id),
+  );
 
   return (
     <PageShell
@@ -156,7 +154,7 @@ export default async function EntryPage({
 
       <EntryPageHeader entryLabel={headword} />
       <EntryPageClient
-        initialEntry={entry}
+        initialEntry={displayEntry}
         relatedGrammarLessons={relatedGrammarLessons}
       />
     </PageShell>

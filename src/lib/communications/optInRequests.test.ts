@@ -148,7 +148,7 @@ describe("opt-in request helpers", () => {
 
   it("updates an existing pending request for the same email", async () => {
     const existingRequest = {
-      id: "request_existing",
+      id: 3020505508,
       email: "reader@example.com",
       full_name: "Reader Name",
       locale: "en",

@@ -32,7 +32,7 @@ export const ANALYTICS_DIALECTS = [
 ] as const;
 
 export const PARTS_OF_SPEECH = DICTIONARY_PART_OF_SPEECH_CODES;
-export const DICTIONARY_MEANING_GROUP_CODES = [
+export const DICTIONARY_SENSE_CODES = [
   "N",
   "V",
   "ADJ",
@@ -68,8 +68,7 @@ export const DICTIONARY_MEANING_GROUP_CODES = [
 ] as const;
 
 export type DictionaryDialectCode = (typeof DICTIONARY_DIALECT_CODES)[number];
-export type DictionaryMeaningGroupCode =
-  (typeof DICTIONARY_MEANING_GROUP_CODES)[number];
+export type DictionarySenseCode = (typeof DICTIONARY_SENSE_CODES)[number];
 export type AnalyticsDialect = (typeof ANALYTICS_DIALECTS)[number];
 export type DialectFilter = AnalyticsDialect;
 export type PartOfSpeech = (typeof PARTS_OF_SPEECH)[number];

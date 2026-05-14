@@ -9,9 +9,9 @@ import {
 import type { DictionaryClientEntry } from "./types";
 
 const lordEntry: DictionaryClientEntry = {
-  id: "cd_17",
+  id: 17,
   headword: "ϭⲱⲓⲥ",
-  etymology: "Egy",
+  etym: "Egy",
   dialects: {
     B: {
       absolute: "ϭⲱⲓⲥ",
@@ -23,14 +23,14 @@ const lordEntry: DictionaryClientEntry = {
       },
     },
   },
-  meaningGroups: [{ grammar: { pos: "N" }, english_meanings: ["lord"] }],
-  greek_equivalents: ["κυριοσ"],
+  senses: [{ grammar: { pos: "N" }, meanings: { en: ["lord"] } }],
+  greek: ["κυριοσ"],
 };
 
 const fatherEntry: DictionaryClientEntry = {
-  id: "cd_18",
+  id: 18,
   headword: "ⲉⲓⲱⲧ",
-  etymology: "Egy",
+  etym: "Egy",
   dialects: {
     B: {
       absolute: "ⲉⲓⲱⲧ",
@@ -39,16 +39,16 @@ const fatherEntry: DictionaryClientEntry = {
       stative: "",
     },
   },
-  meaningGroups: [
-    { grammar: { gender: "M", pos: "N" }, english_meanings: ["father"] },
+  senses: [
+    { grammar: { gender: "M", pos: "N" }, meanings: { en: ["father"] } },
   ],
-  greek_equivalents: [],
+  greek: [],
 };
 
 const elderEntry: DictionaryClientEntry = {
-  id: "cd_63a",
+  id: 1673839349,
   headword: "ⳳⲉⲗⲗⲱ",
-  etymology: "Egy",
+  etym: "Egy",
   dialects: {
     B: {
       absolute: "ⳳⲉⲗⲗⲱ",
@@ -57,14 +57,14 @@ const elderEntry: DictionaryClientEntry = {
       stative: "",
     },
   },
-  meaningGroups: [{ grammar: { pos: "N" }, english_meanings: ["elder"] }],
-  greek_equivalents: [],
+  senses: [{ grammar: { pos: "N" }, meanings: { en: ["elder"] } }],
+  greek: [],
 };
 
 const prepositionEntry: DictionaryClientEntry = {
-  id: "cd_946",
+  id: 946,
   headword: "ⲛ-",
-  etymology: "Egy",
+  etym: "Egy",
   dialects: {
     B: {
       absolute: "",
@@ -73,14 +73,14 @@ const prepositionEntry: DictionaryClientEntry = {
       stative: "",
     },
   },
-  meaningGroups: [{ grammar: { pos: "PREP" }, english_meanings: ["with, by"] }],
-  greek_equivalents: [],
+  senses: [{ grammar: { pos: "PREP" }, meanings: { en: ["with, by"] } }],
+  greek: [],
 };
 
 const runEntry: DictionaryClientEntry = {
-  id: "cd_19",
+  id: 19,
   headword: "ⲃⲱⲕ",
-  etymology: "Egy",
+  etym: "Egy",
   dialects: {
     S: {
       absolute: "ⲃⲱⲕ",
@@ -89,57 +89,71 @@ const runEntry: DictionaryClientEntry = {
       stative: "",
     },
   },
-  meaningGroups: [{ grammar: { pos: "V" }, english_meanings: ["run"] }],
-  greek_equivalents: [],
+  senses: [{ grammar: { pos: "V" }, meanings: { en: ["run"] } }],
+  greek: [],
 };
 
 const takeEntry: DictionaryClientEntry = {
-  id: "cd_130",
+  id: 130,
   headword: "ϫⲓ",
-  etymology: "Egy",
+  etym: "Egy",
   dialects: {
     B: {
       absolute: "ϭⲓ",
       nominal: "ϭⲓ-",
       pronominal: "ϭⲓⲧ=",
       stative: "ϭⲏⲟⲩ†",
-      constructParticiples: ["ϭⲁⲓ~"],
-      constructParticipleCompounds: [
-        {
-          form: "ϭⲁⲩⲙⲱⲓⲧ",
-          sourceConstructParticiple: "ϭⲁⲩ~",
-          gender: "BOTH",
-          english_meanings: ["guide, leader"],
-          dutch_meanings: ["gids, leider"],
-        },
-      ],
+      participles: ["ϭⲁⲓ~"],
       variants: {
         constructParticiples: ["ϭⲁⲩ~"],
       },
     },
   },
-  meaningGroups: [{ grammar: { pos: "V" }, english_meanings: ["take"] }],
-  greek_equivalents: [],
+  senses: [{ grammar: { pos: "V" }, meanings: { en: ["take"] } }],
+  greek: [],
+};
+
+const guideEntry: DictionaryClientEntry = {
+  id: 11146,
+  root_id: takeEntry.id,
+  rootEntry: {
+    dialects: takeEntry.dialects,
+    headword: takeEntry.headword,
+    id: takeEntry.id,
+  },
+  headword: "ϭⲁⲩⲙⲱⲓⲧ",
+  etym: "Egy",
+  dialects: {
+    B: {
+      absolute: "ϭⲁⲩⲙⲱⲓⲧ",
+    },
+  },
+  senses: [
+    {
+      grammar: { gender: "BOTH", pos: "N" },
+      meanings: { en: ["guide, leader"], nl: ["gids, leider"] },
+    },
+  ],
 };
 
 const accentedParticipleEntry: DictionaryClientEntry = {
-  id: "cd_130",
+  id: 130,
   headword: "ϫⲓ",
-  etymology: "Egy",
+  etym: "Egy",
   dialects: {
     S: {
       absolute: "ϫⲓ",
       nominal: "ϫⲓ-",
       pronominal: "ϫⲓⲧ=",
       stative: "ϫⲏⲩ†",
-      constructParticiples: ["ϫⲁⲓ̈~"],
+      participles: ["ϫⲁⲓ̈~"],
       variants: {
         constructParticiples: ["ϫⲁⲩ~"],
       },
     },
   },
-  meaningGroups: [{ grammar: { pos: "V" }, english_meanings: ["take"] }],
-  greek_equivalents: [],
+  senses: [{ grammar: { pos: "V" }, meanings: { en: ["take"] } }],
+  greek: [],
 };
 
 describe("dictionary search", () => {
@@ -150,12 +164,12 @@ describe("dictionary search", () => {
       searchPreparedDictionary("ϭⲱⲓⲥ", preparedDictionary, [lordEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_17"]);
+    ).toEqual([17]);
     expect(
       searchPreparedDictionary("⳪", preparedDictionary, [lordEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_17"]);
+    ).toEqual([17]);
   });
 
   it("matches khei variants as the same search character", () => {
@@ -165,22 +179,22 @@ describe("dictionary search", () => {
       searchPreparedDictionary("\u03e7ⲉⲗⲗⲱ", preparedDictionary, [
         elderEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_63a"]);
+    ).toEqual([1673839349]);
     expect(
       searchPreparedDictionary("ⳳⲉⲗⲗⲱ", preparedDictionary, [elderEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_63a"]);
+    ).toEqual([1673839349]);
     expect(
       searchPreparedDictionary("\u03e6ⲈⲖⲖⲰ", preparedDictionary, [
         elderEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_63a"]);
+    ).toEqual([1673839349]);
     expect(
       searchPreparedDictionary("ⳲⲈⲖⲖⲰ", preparedDictionary, [elderEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_63a"]);
+    ).toEqual([1673839349]);
     expect(
       searchPreparedDictionary(
         "ⳲⲈⲖⲖⲰ",
@@ -188,7 +202,7 @@ describe("dictionary search", () => {
         [elderEntry],
         true,
       ).map((entry) => entry.id),
-    ).toEqual(["cd_63a"]);
+    ).toEqual([1673839349]);
   });
 
   it("treats jinkim-marked and unmarked bound forms as equivalent", () => {
@@ -198,22 +212,22 @@ describe("dictionary search", () => {
       searchPreparedDictionary("ⲙ̀ⲙⲟ=", preparedDictionary, [
         prepositionEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_946"]);
+    ).toEqual([946]);
     expect(
       searchPreparedDictionary("ⲙⲙⲟ=", preparedDictionary, [
         prepositionEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_946"]);
+    ).toEqual([946]);
     expect(
       searchPreparedDictionary("ⲛ̀-", preparedDictionary, [
         prepositionEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_946"]);
+    ).toEqual([946]);
     expect(
       searchPreparedDictionary("ⲛ-", preparedDictionary, [
         prepositionEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_946"]);
+    ).toEqual([946]);
   });
 
   it("indexes primary and variant construct participles", () => {
@@ -223,54 +237,53 @@ describe("dictionary search", () => {
       searchPreparedDictionary("ϭⲁⲓ", preparedDictionary, [takeEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_130"]);
+    ).toEqual([130]);
     expect(
       searchPreparedDictionary("ϭⲁⲓ~", preparedDictionary, [takeEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_130"]);
+    ).toEqual([130]);
     expect(
       searchPreparedDictionary("ϭⲁⲩ", preparedDictionary, [takeEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_130"]);
+    ).toEqual([130]);
   });
 
-  it("indexes construct participle compound forms and meanings", () => {
-    const preparedDictionary = prepareDictionaryForSearch([takeEntry]);
+  it("indexes construct participle compounds as distinct entries", () => {
+    const preparedDictionary = prepareDictionaryForSearch([guideEntry]);
 
     expect(
-      searchPreparedDictionary("ϭⲁⲩⲙⲱⲓⲧ", preparedDictionary, [takeEntry]).map(
+      searchPreparedDictionary("ϭⲁⲩⲙⲱⲓⲧ", preparedDictionary, [guideEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_130"]);
+    ).toEqual([11146]);
     expect(
-      searchPreparedDictionary("leader", preparedDictionary, [takeEntry]).map(
+      searchPreparedDictionary("leader", preparedDictionary, [guideEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_130"]);
+    ).toEqual([11146]);
     expect(
-      searchPreparedDictionary("leider", preparedDictionary, [takeEntry]).map(
+      searchPreparedDictionary("leider", preparedDictionary, [guideEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_130"]);
+    ).toEqual([11146]);
   });
 
   it("indexes grouped meanings", () => {
     const groupedOnlyEntry: DictionaryClientEntry = {
-      id: "cd_grouped_only",
+      id: 1143356163,
       headword: "ϯ",
-      etymology: "Egy",
+      etym: "Egy",
       dialects: {
         B: {
           absolute: "ϯ",
         },
       },
-      meaningGroups: [
+      senses: [
         {
           grammar: { pos: "V", valency: "TR" },
-          dutch_meanings: ["geven"],
-          english_meanings: ["give"],
+          meanings: { en: ["give"], nl: ["geven"] },
         },
       ],
     };
@@ -280,12 +293,12 @@ describe("dictionary search", () => {
       searchPreparedDictionary("give", preparedDictionary, [
         groupedOnlyEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_grouped_only"]);
+    ).toEqual([1143356163]);
     expect(
       searchPreparedDictionary("geven", preparedDictionary, [
         groupedOnlyEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_grouped_only"]);
+    ).toEqual([1143356163]);
   });
 
   it("matches accented construct participles with unaccented queries", () => {
@@ -297,12 +310,12 @@ describe("dictionary search", () => {
       searchPreparedDictionary("ϫⲁⲓ", preparedDictionary, [
         accentedParticipleEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_130"]);
+    ).toEqual([130]);
     expect(
       searchPreparedDictionary("ϫⲁⲓ̈~", preparedDictionary, [
         accentedParticipleEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_130"]);
+    ).toEqual([130]);
   });
 
   it("pages filtered results without building the full matched list", () => {
@@ -320,7 +333,7 @@ describe("dictionary search", () => {
         selectedPartOfSpeech: "N",
       }),
     ).toMatchObject({
-      entries: [{ id: "cd_17" }],
+      entries: [{ id: 17 }],
       hasMore: true,
       nextOffset: 1,
       totalEntries: 4,
@@ -338,7 +351,7 @@ describe("dictionary search", () => {
         selectedPartOfSpeech: "N",
       }),
     ).toMatchObject({
-      entries: [{ id: "cd_18" }],
+      entries: [{ id: 18 }],
       hasMore: true,
       nextOffset: 2,
       totalMatches: 3,
@@ -347,27 +360,27 @@ describe("dictionary search", () => {
 
   it("filters by every structured meaning-group grammar value", () => {
     const adjectivalNounEntry: DictionaryClientEntry = {
-      id: "cd_adjectival_noun",
+      id: 2639070627,
       headword: "ⲉⲛⲉϩ",
-      etymology: "Egy",
+      etym: "Egy",
       dialects: {
         B: {
           absolute: "ⲉⲛⲉϩ",
         },
       },
-      meaningGroups: [
+      senses: [
         {
           grammar: {
             pos: "N",
             gender: "M",
           },
-          english_meanings: ["eternity"],
+          meanings: { en: ["eternity"] },
         },
         {
           grammar: {
             pos: "ADJ",
           },
-          english_meanings: ["eternal"],
+          meanings: { en: ["eternal"] },
         },
       ],
     };
@@ -385,16 +398,16 @@ describe("dictionary search", () => {
         selectedPartOfSpeech: "ADJ",
       }),
     ).toMatchObject({
-      entries: [{ id: "cd_adjectival_noun" }],
+      entries: [{ id: 2639070627 }],
       totalMatches: 1,
     });
   });
 
   it("matches entries by structured plural inflected forms", () => {
     const treasureEntry: DictionaryClientEntry = {
-      id: "cd_7",
+      id: 7,
       headword: "ⲁϩⲟ",
-      etymology: "Egy",
+      etym: "Egy",
       dialects: {
         S: {
           absolute: "ⲁϩⲟ",
@@ -403,15 +416,21 @@ describe("dictionary search", () => {
           stative: "",
         },
       },
-      meaningGroups: [
-        { grammar: { pos: "N" }, english_meanings: ["treasure"] },
-      ],
-      greek_equivalents: ["θησαυροσ"],
-      inflectedForms: [
-        { kind: "plural", dialect: "S", form: "ⲁϩⲱⲱⲣ" },
-        { kind: "plural", dialect: "A", form: "ⲉϩⲱⲣ" },
-        { kind: "plural", dialect: "B", form: "ⲁϩⲱⲣ" },
-      ],
+      senses: [{ grammar: { pos: "N" }, meanings: { en: ["treasure"] } }],
+      greek: ["θησαυροσ"],
+      inflections: {
+        plural: {
+          A: {
+            default: ["ⲉϩⲱⲣ"],
+          },
+          B: {
+            default: ["ⲁϩⲱⲣ"],
+          },
+          S: {
+            default: ["ⲁϩⲱⲱⲣ"],
+          },
+        },
+      },
     };
 
     const preparedDictionary = prepareDictionaryForSearch([treasureEntry]);
@@ -420,43 +439,41 @@ describe("dictionary search", () => {
       searchPreparedDictionary("ⲁϩⲱⲱⲣ", preparedDictionary, [
         treasureEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_7"]);
+    ).toEqual([7]);
 
     expect(
       searchPreparedDictionary("ⲉϩⲱⲣ", preparedDictionary, [treasureEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_7"]);
+    ).toEqual([7]);
 
     expect(
       searchPreparedDictionary("ⲁϩⲱⲣ", preparedDictionary, [treasureEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_7"]);
+    ).toEqual([7]);
   });
 
   it("matches entries by structured inflected forms", () => {
     const pluralOnlyEntry: DictionaryClientEntry = {
-      id: "cd_plural_only",
+      id: 1066624037,
       headword: "ϩⲁϩ",
-      etymology: "Egy",
+      etym: "Egy",
       dialects: {},
-      meaningGroups: [
-        { grammar: { pos: "N" }, english_meanings: ["many, much"] },
-      ],
-      greek_equivalents: [],
-      inflectedForms: [
-        {
-          kind: "plural",
-          dialect: "S",
-          form: "ϩⲁϩ",
+      senses: [{ grammar: { pos: "N" }, meanings: { en: ["many, much"] } }],
+      greek: [],
+      inflections: {
+        feminine: {
+          B: {
+            default: ["ⳳⲁϩⲓ"],
+          },
         },
-        {
-          kind: "feminine",
-          dialect: "B",
-          form: "ⳳⲁϩⲓ",
+        plural: {
+          S: {
+            default: ["ϩⲁϩ"],
+          },
         },
-      ],
+      },
     };
 
     const preparedDictionary = prepareDictionaryForSearch([pluralOnlyEntry]);
@@ -465,12 +482,12 @@ describe("dictionary search", () => {
       searchPreparedDictionary("ϩⲁϩ", preparedDictionary, [
         pluralOnlyEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_plural_only"]);
+    ).toEqual([1066624037]);
     expect(
       searchPreparedDictionary("ⳳⲁϩⲓ", preparedDictionary, [
         pluralOnlyEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_plural_only"]);
+    ).toEqual([1066624037]);
     expect(
       searchPreparedDictionary(
         "ⳳⲁϩⲓ",
@@ -478,26 +495,24 @@ describe("dictionary search", () => {
         [pluralOnlyEntry],
         true,
       ).map((entry) => entry.id),
-    ).toEqual(["cd_plural_only"]);
+    ).toEqual([1066624037]);
   });
 
   it("matches dialect filters by structured inflected dialect coverage", () => {
     const structuredPluralEntry: DictionaryClientEntry = {
-      id: "cd_structured_plural",
+      id: 596510523,
       headword: "ϩⲁϩ",
-      etymology: "Egy",
+      etym: "Egy",
       dialects: {},
-      meaningGroups: [
-        { grammar: { pos: "N" }, english_meanings: ["many, much"] },
-      ],
-      greek_equivalents: [],
-      inflectedForms: [
-        {
-          kind: "plural",
-          dialect: "S",
-          form: "ϩⲁϩ",
+      senses: [{ grammar: { pos: "N" }, meanings: { en: ["many, much"] } }],
+      greek: [],
+      inflections: {
+        plural: {
+          S: {
+            default: ["ϩⲁϩ"],
+          },
         },
-      ],
+      },
     };
     const dictionary = [structuredPluralEntry, lordEntry];
     const preparedDictionary = prepareDictionaryForSearch(dictionary);
@@ -509,38 +524,38 @@ describe("dictionary search", () => {
         preparedDictionary,
         selectedDialect: "S",
       }).entries.map((entry) => entry.id),
-    ).toEqual(["cd_structured_plural"]);
+    ).toEqual([596510523]);
   });
 
   it("matches base entries by structured feminine and plural forms", () => {
     const servantEntry: DictionaryClientEntry = {
-      id: "cd_550",
+      id: 550,
       headword: "ⲃⲱⲕ",
-      etymology: "Egy",
+      etym: "Egy",
       dialects: {
         B: {
           absolute: "ⲃⲱⲕ",
         },
       },
-      meaningGroups: [
+      senses: [
         {
           grammar: { gender: "M", pos: "N" },
-          english_meanings: ["servant, slave"],
+          meanings: { en: ["servant, slave"] },
         },
       ],
-      greek_equivalents: [],
-      inflectedForms: [
-        {
-          kind: "plural",
-          dialect: "B",
-          form: "ⲉⲃⲓⲁⲓⲕ",
+      greek: [],
+      inflections: {
+        feminine: {
+          B: {
+            default: ["ⲃⲱⲕⲓ"],
+          },
         },
-        {
-          kind: "feminine",
-          dialect: "B",
-          form: "ⲃⲱⲕⲓ",
+        plural: {
+          B: {
+            default: ["ⲉⲃⲓⲁⲓⲕ"],
+          },
         },
-      ],
+      },
     };
 
     const preparedDictionary = prepareDictionaryForSearch([servantEntry]);
@@ -549,19 +564,19 @@ describe("dictionary search", () => {
       searchPreparedDictionary("ⲃⲱⲕⲓ", preparedDictionary, [servantEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_550"]);
+    ).toEqual([550]);
     expect(
       searchPreparedDictionary("ⲉⲃⲓⲁⲓⲕ", preparedDictionary, [
         servantEntry,
       ]).map((entry) => entry.id),
-    ).toEqual(["cd_550"]);
+    ).toEqual([550]);
   });
 
   it("matches entries by their imperative forms", () => {
     const giveEntry: DictionaryClientEntry = {
-      id: "cd_2",
+      id: 2,
       headword: "ϯ",
-      etymology: "Egy",
+      etym: "Egy",
       dialects: {
         B: {
           absolute: "ϯ",
@@ -570,11 +585,15 @@ describe("dictionary search", () => {
           stative: "ⲧⲟⲓ†",
         },
       },
-      meaningGroups: [{ grammar: { pos: "V" }, english_meanings: ["give"] }],
-      greek_equivalents: ["διδοναι"],
-      inflectedForms: [
-        { kind: "imperative", dialect: "B", form: "ⲙⲟⲓ", role: "absolute" },
-      ],
+      senses: [{ grammar: { pos: "V" }, meanings: { en: ["give"] } }],
+      greek: ["διδοναι"],
+      inflections: {
+        imperative: {
+          B: {
+            absolute: ["ⲙⲟⲓ"],
+          },
+        },
+      },
     };
 
     const preparedDictionary = prepareDictionaryForSearch([giveEntry]);
@@ -583,6 +602,6 @@ describe("dictionary search", () => {
       searchPreparedDictionary("ⲙⲟⲓ", preparedDictionary, [giveEntry]).map(
         (entry) => entry.id,
       ),
-    ).toEqual(["cd_2"]);
+    ).toEqual([2]);
   });
 });

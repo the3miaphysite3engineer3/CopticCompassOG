@@ -70,7 +70,7 @@ Then review the generated files under `public/data/grammar/v1` and spot-check th
 
 ### Dictionary Changes
 
-The site currently serves the normalized checked-in dataset at `public/data/dictionary.json`. Runtime dictionary entries should use structured fields such as `dialects`, `english_meanings`, `dutch_meanings`, `greek_equivalents`, `pluralForms`, and entry relation fields rather than raw/source-only text fields.
+The site currently serves the normalized checked-in dataset at `public/data/dictionary.json`. Runtime dictionary entries should use structured fields such as `dialects`, `senses`, `meanings.en`, `meanings.nl`, `greek`, `inflections`, and `root_id` rather than raw/source-only text fields.
 
 The historical XML source file is kept outside tracked runtime data under `backups/` when needed for local reference. Do not re-add it to `public/data` or rely on it from app code.
 

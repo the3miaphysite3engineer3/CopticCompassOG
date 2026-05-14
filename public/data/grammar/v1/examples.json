@@ -10,12 +10,12 @@
       "coptic": "Ø-ⲣⲱⲙⲓ ⲛⲓⲃⲉⲛ",
       "translation": { "en": "“every man”", "nl": "“iedere mens”" },
       "conceptRefs": ["grammar.concept.zero-determination"],
-      "dictionaryRefs": ["cd_21", "cd_1152"],
+      "dictionaryRefs": ["21", "1152"],
       "tags": ["lesson-1", "zero-determination", "quantifier"],
       "copticSegments": [
-        { "text": "Ø-ⲣⲱⲙⲓ", "dictionaryEntryId": "cd_21" },
+        { "text": "Ø-ⲣⲱⲙⲓ", "dictionaryEntryId": "21" },
         { "text": " " },
-        { "text": "ⲛⲓⲃⲉⲛ", "dictionaryEntryId": "cd_1152" }
+        { "text": "ⲛⲓⲃⲉⲛ", "dictionaryEntryId": "1152" }
       ]
     },
     {
@@ -25,12 +25,12 @@
       "coptic": "Ø-ⲥ̀ϩⲓⲙⲓ ⲛⲓⲃⲉⲛ",
       "translation": { "en": "“every woman”", "nl": "“elke vrouw”" },
       "conceptRefs": ["grammar.concept.zero-determination"],
-      "dictionaryRefs": ["cd_142", "cd_1152"],
+      "dictionaryRefs": ["142", "1152"],
       "tags": ["lesson-1", "zero-determination", "quantifier"],
       "copticSegments": [
-        { "text": "Ø-ⲥ̀ϩⲓⲙⲓ", "dictionaryEntryId": "cd_142" },
+        { "text": "Ø-ⲥ̀ϩⲓⲙⲓ", "dictionaryEntryId": "142" },
         { "text": " " },
-        { "text": "ⲛⲓⲃⲉⲛ", "dictionaryEntryId": "cd_1152" }
+        { "text": "ⲛⲓⲃⲉⲛ", "dictionaryEntryId": "1152" }
       ]
     },
     {
@@ -40,12 +40,12 @@
       "coptic": "Ø-ⲁⲅⲓⲟⲥ ⲛⲓⲃⲉⲛ",
       "translation": { "en": "“every saint”", "nl": "“iedere heilige”" },
       "conceptRefs": ["grammar.concept.zero-determination"],
-      "dictionaryRefs": ["cd_3368", "cd_1152"],
+      "dictionaryRefs": ["3368", "1152"],
       "tags": ["lesson-1", "zero-determination", "quantifier"],
       "copticSegments": [
-        { "text": "Ø-ⲁⲅⲓⲟⲥ", "dictionaryEntryId": "cd_3368" },
+        { "text": "Ø-ⲁⲅⲓⲟⲥ", "dictionaryEntryId": "3368" },
         { "text": " " },
-        { "text": "ⲛⲓⲃⲉⲛ", "dictionaryEntryId": "cd_1152" }
+        { "text": "ⲛⲓⲃⲉⲛ", "dictionaryEntryId": "1152" }
       ]
     },
     {
@@ -55,12 +55,12 @@
       "coptic": "Ø-ⲉⲕⲕ̀ⲗⲏⲥⲓⲁ̀ ⲛⲓⲃⲉⲛ",
       "translation": { "en": "“every church”", "nl": "“iedere kerk”" },
       "conceptRefs": ["grammar.concept.zero-determination"],
-      "dictionaryRefs": ["cd_4042", "cd_1152"],
+      "dictionaryRefs": ["4042", "1152"],
       "tags": ["lesson-1", "zero-determination", "quantifier"],
       "copticSegments": [
-        { "text": "Ø-ⲉⲕⲕ̀ⲗⲏⲥⲓⲁ̀", "dictionaryEntryId": "cd_4042" },
+        { "text": "Ø-ⲉⲕⲕ̀ⲗⲏⲥⲓⲁ̀", "dictionaryEntryId": "4042" },
         { "text": " " },
-        { "text": "ⲛⲓⲃⲉⲛ", "dictionaryEntryId": "cd_1152" }
+        { "text": "ⲛⲓⲃⲉⲛ", "dictionaryEntryId": "1152" }
       ]
     },
     {
@@ -73,10 +73,10 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": ["cd_57"],
+      "dictionaryRefs": ["57"],
       "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        { "text": "Ⲟⲩⲓⲱⲧ", "dictionaryEntryId": "cd_57" },
+        { "text": "Ⲟⲩⲓⲱⲧ", "dictionaryEntryId": "57" },
         { "text": " " },
         { "text": "ⲡⲉ" },
         { "text": "." }
@@ -117,10 +117,10 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": ["cd_57"],
+      "dictionaryRefs": ["57"],
       "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        { "text": "Ⲡⲁⲓⲓⲱⲧ", "dictionaryEntryId": "cd_57" },
+        { "text": "Ⲡⲁⲓⲓⲱⲧ", "dictionaryEntryId": "57" },
         { "text": " " },
         { "text": "ⲡⲉ" },
         { "text": "." }
@@ -131,7 +131,7 @@
       "lessonId": "grammar.lesson.01",
       "sectionId": "grammar.lesson.01.section.bipartite-nominal-sentence",
       "coptic": "Ⲧⲁⲙⲁⲩ ⲧⲉ.",
-      "dictionaryTokenOverrides": { "Ⲧⲁⲙⲁⲩ": "cd_215" },
+      "dictionaryTokenOverrides": { "Ⲧⲁⲙⲁⲩ": "215" },
       "translation": {
         "en": "“She is my mother.”",
         "nl": "“Zij is mijn moeder.”"
@@ -140,10 +140,10 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": ["cd_215"],
+      "dictionaryRefs": ["215"],
       "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        { "text": "Ⲧⲁⲙⲁⲩ", "dictionaryEntryId": "cd_215" },
+        { "text": "Ⲧⲁⲙⲁⲩ", "dictionaryEntryId": "215" },
         { "text": " " },
         { "text": "ⲧⲉ" },
         { "text": "." }
@@ -159,10 +159,10 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": ["cd_142"],
+      "dictionaryRefs": ["142"],
       "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        { "text": "Ⲟⲩⲥ̀ϩⲓⲙⲓ", "dictionaryEntryId": "cd_142" },
+        { "text": "Ⲟⲩⲥ̀ϩⲓⲙⲓ", "dictionaryEntryId": "142" },
         { "text": " " },
         { "text": "ⲧⲉ" },
         { "text": "." }
@@ -181,12 +181,12 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": ["cd_173a", "cd_5101"],
+      "dictionaryRefs": ["11422", "5101"],
       "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        { "text": "Ϩⲁⲛⲥⲱⲛⲓ", "dictionaryEntryId": "cd_173a" },
+        { "text": "Ϩⲁⲛⲥⲱⲛⲓ", "dictionaryEntryId": "11422" },
         { "text": " " },
-        { "text": "ⲛⲉ", "dictionaryEntryId": "cd_5101" },
+        { "text": "ⲛⲉ", "dictionaryEntryId": "5101" },
         { "text": "." }
       ]
     },
@@ -200,12 +200,12 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": ["cd_21", "cd_5101"],
+      "dictionaryRefs": ["21", "5101"],
       "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        { "text": "Ϩⲁⲛⲣⲱⲙⲓ", "dictionaryEntryId": "cd_21" },
+        { "text": "Ϩⲁⲛⲣⲱⲙⲓ", "dictionaryEntryId": "21" },
         { "text": " " },
-        { "text": "ⲛⲉ", "dictionaryEntryId": "cd_5101" },
+        { "text": "ⲛⲉ", "dictionaryEntryId": "5101" },
         { "text": "." }
       ]
     },
@@ -222,12 +222,12 @@
         "grammar.concept.bipartite-nominal-sentence",
         "grammar.concept.nexus-pronouns"
       ],
-      "dictionaryRefs": ["cd_3368", "cd_5101"],
+      "dictionaryRefs": ["3368", "5101"],
       "tags": ["lesson-1", "nominal-sentence", "nexus-pronoun"],
       "copticSegments": [
-        { "text": "Ⲛⲓⲁⲅⲓⲟⲥ", "dictionaryEntryId": "cd_3368" },
+        { "text": "Ⲛⲓⲁⲅⲓⲟⲥ", "dictionaryEntryId": "3368" },
         { "text": " " },
-        { "text": "ⲛⲉ", "dictionaryEntryId": "cd_5101" },
+        { "text": "ⲛⲉ", "dictionaryEntryId": "5101" },
         { "text": "." }
       ]
     }

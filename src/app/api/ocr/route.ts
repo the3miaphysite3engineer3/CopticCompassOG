@@ -37,6 +37,10 @@ function isUnexpectedFieldErrorMessage(value: string) {
   );
 }
 
+function getSafeUpstreamFailureMessage(status: number) {
+  return `OCR upstream request failed with status ${status}.`;
+}
+
 function buildTargetUrl(
   requestUrl: string,
   ocrServiceUrl: string,
@@ -198,11 +202,18 @@ export async function POST(request: Request) {
 
     if (!upstreamResponse.ok) {
       const upstreamErrorText = await upstreamResponse.text();
-      lastFailureMessage = `OCR upstream failed: ${upstreamResponse.status} - ${upstreamErrorText}`;
+      lastFailureMessage = getSafeUpstreamFailureMessage(
+        upstreamResponse.status,
+      );
 
       if (isUnexpectedFieldErrorMessage(upstreamErrorText)) {
         continue;
       }
+
+      console.error("OCR upstream request failed", {
+        status: upstreamResponse.status,
+        statusText: upstreamResponse.statusText,
+      });
 
       return NextResponse.json(
         {

@@ -13,11 +13,7 @@
             "content": [
               { "type": "coptic", "text": "Ⲟⲩ-" },
               { "type": "text", "text": " comes from " },
-              {
-                "type": "coptic",
-                "text": "ⲟⲩⲁⲓ",
-                "dictionaryEntryId": "cd_68"
-              },
+              { "type": "coptic", "text": "ⲟⲩⲁⲓ", "dictionaryEntryId": "68" },
               {
                 "type": "text",
                 "text": " (the number “one”). Compare with French un/une (articles), but also: un, deux, trois, ... (numbers)."
@@ -31,11 +27,7 @@
             "content": [
               { "type": "coptic", "text": "Ⲟⲩ-" },
               { "type": "text", "text": " < " },
-              {
-                "type": "coptic",
-                "text": "ⲟⲩⲁⲓ",
-                "dictionaryEntryId": "cd_68"
-              },
+              { "type": "coptic", "text": "ⲟⲩⲁⲓ", "dictionaryEntryId": "68" },
               {
                 "type": "text",
                 "text": " (het getal “een”). Vgl. Frans un/une (lidwoorden), maar ook: un, deux, trois, ... (getallen)."
@@ -54,22 +46,14 @@
           {
             "type": "paragraph",
             "content": [
-              {
-                "type": "coptic",
-                "text": "Ϩⲁⲛ-",
-                "dictionaryEntryId": "cd_100"
-              },
+              { "type": "coptic", "text": "Ϩⲁⲛ-", "dictionaryEntryId": "100" },
               { "type": "text", "text": " comes from " },
               { "type": "coptic", "text": "ϩⲟⲓ̈ⲛⲉ" },
               {
                 "type": "text",
                 "text": " “some”. There is no direct English equivalent for the indefinite plural article "
               },
-              {
-                "type": "coptic",
-                "text": "ϩⲁⲛ-",
-                "dictionaryEntryId": "cd_100"
-              },
+              { "type": "coptic", "text": "ϩⲁⲛ-", "dictionaryEntryId": "100" },
               { "type": "text", "text": "." }
             ]
           }
@@ -78,22 +62,14 @@
           {
             "type": "paragraph",
             "content": [
-              {
-                "type": "coptic",
-                "text": "Ϩⲁⲛ-",
-                "dictionaryEntryId": "cd_100"
-              },
+              { "type": "coptic", "text": "Ϩⲁⲛ-", "dictionaryEntryId": "100" },
               { "type": "text", "text": " < " },
               { "type": "coptic", "text": "ϩⲟⲓ̈ⲛⲉ" },
               {
                 "type": "text",
                 "text": " “sommige”. Er is geen Nederlands equivalent voor het onbepaald meervoud lidwoord "
               },
-              {
-                "type": "coptic",
-                "text": "ϩⲁⲛ-",
-                "dictionaryEntryId": "cd_100"
-              },
+              { "type": "coptic", "text": "ϩⲁⲛ-", "dictionaryEntryId": "100" },
               { "type": "text", "text": "." }
             ]
           }
@@ -114,7 +90,7 @@
               {
                 "type": "coptic",
                 "text": "ϯⲥⲱⲛⲓ",
-                "dictionaryEntryId": "cd_173a"
+                "dictionaryEntryId": "11422"
               },
               { "type": "text", "text": "." }
             ]
@@ -129,7 +105,7 @@
               {
                 "type": "coptic",
                 "text": "ϯⲥⲱⲛⲓ",
-                "dictionaryEntryId": "cd_173a"
+                "dictionaryEntryId": "11422"
               },
               { "type": "text", "text": "." }
             ]
@@ -184,11 +160,7 @@
                 "type": "text",
                 "text": ". The standard modern Bohairic spelling is "
               },
-              {
-                "type": "coptic",
-                "text": "ϭⲱⲓⲥ",
-                "dictionaryEntryId": "cd_17"
-              },
+              { "type": "coptic", "text": "ϭⲱⲓⲥ", "dictionaryEntryId": "17" },
               { "type": "text", "text": "." }
             ]
           }
@@ -206,11 +178,7 @@
                 "type": "text",
                 "text": ". De standaard Bohairische spelling is "
               },
-              {
-                "type": "coptic",
-                "text": "ϭⲱⲓⲥ",
-                "dictionaryEntryId": "cd_17"
-              },
+              { "type": "coptic", "text": "ϭⲱⲓⲥ", "dictionaryEntryId": "17" },
               { "type": "text", "text": "." }
             ]
           }

@@ -56,9 +56,7 @@ describe("public OpenAPI document", () => {
     expect(document.components.schemas).toHaveProperty(
       "GrammarLessonBundleEnvelope",
     );
-    expect(document.components.schemas).toHaveProperty(
-      "DictionaryInflectedForm",
-    );
+    expect(document.components.schemas).toHaveProperty("DictionaryInflections");
     expect(document.components.schemas).toHaveProperty("DictionarySearchPage");
     expect(document.components.schemas).toHaveProperty("ShenuteRequest");
     expect(document.components.schemas).toHaveProperty("OcrUploadRequest");
@@ -74,40 +72,42 @@ describe("public OpenAPI document", () => {
       [
         "dialectMeanings",
         "dialects",
-        "etymology",
+        "etym",
         "genderedMeanings",
-        "greek_equivalents",
+        "greek",
         "headword",
         "id",
-        "inflectedForms",
-        "meaningGroups",
+        "inflections",
+        "rootEntry",
+        "root_id",
+        "senses",
       ].sort(),
     );
     expect((dictionaryClientEntrySchema.required ?? []).sort()).toEqual(
-      ["dialects", "etymology", "headword", "id", "meaningGroups"].sort(),
+      ["dialects", "etym", "headword", "id", "senses"].sort(),
     );
-    expect(dictionaryClientEntrySchema.properties.etymology?.enum).toEqual([
+    expect(dictionaryClientEntrySchema.properties.etym?.enum).toEqual([
       "Egy",
       "Gr",
       "Unknown",
     ]);
     expect(
       (
-        document.components.schemas.DictionaryMeaningGroup as {
+        document.components.schemas.DictionarySense as {
           required?: string[];
         }
       ).required ?? [],
     ).toContain("grammar");
     expect(
       (
-        document.components.schemas.DictionaryMeaningGroupGrammar as {
+        document.components.schemas.DictionarySenseGrammar as {
           required?: string[];
         }
       ).required ?? [],
     ).toContain("pos");
     expect(
       (
-        document.components.schemas.DictionaryMeaningGroups as {
+        document.components.schemas.DictionarySenses as {
           type?: string;
         }
       ).type,
@@ -122,9 +122,8 @@ describe("public OpenAPI document", () => {
     expect(Object.keys(dictionaryDialectFormsSchema.properties).sort()).toEqual(
       [
         "absolute",
-        "constructParticipleCompounds",
-        "constructParticiples",
         "nominal",
+        "participles",
         "pronominal",
         "stative",
         "variants",

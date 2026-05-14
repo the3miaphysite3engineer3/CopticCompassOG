@@ -98,9 +98,9 @@ function createAnalyticsSnapshot(
       uncertainMeaning++;
     }
 
-    if (entry.etymology === "Gr") {
+    if (entry.etym === "Gr") {
       grEtymology++;
-    } else if (entry.etymology === "Unknown") {
+    } else if (entry.etym === "Unknown") {
       unknownEtymology++;
     } else {
       egyEtymology++;
@@ -229,9 +229,7 @@ export function createAnalyticsSnapshots(
         const filteredDictionary =
           etymology === "ALL"
             ? dialectDictionary
-            : dialectDictionary.filter(
-                (entry) => entry.etymology === etymology,
-              );
+            : dialectDictionary.filter((entry) => entry.etym === etymology);
 
         snapshots[dialect][etymology] =
           createAnalyticsSnapshot(filteredDictionary);

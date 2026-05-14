@@ -61,7 +61,7 @@ export function getDictionaryPath(locale?: Language) {
   return locale ? getLocalizedPath(locale, "/dictionary") : "/dictionary";
 }
 
-export function getEntryPath(id: string, locale?: Language) {
+export function getEntryPath(id: string | number, locale?: Language) {
   const path = `/entry/${id}`;
   return locale ? getLocalizedPath(locale, path) : path;
 }

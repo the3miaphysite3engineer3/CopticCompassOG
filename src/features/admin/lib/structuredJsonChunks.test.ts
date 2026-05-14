@@ -13,20 +13,20 @@ describe("buildStructuredJsonChunks", () => {
             },
           },
           headword: "rome",
-          meaningGroups: [
+          senses: [
             {
               grammar: { pos: "N" },
-              english_meanings: ["man", "person"],
+              meanings: { en: ["man", "person"] },
             },
           ],
         },
         {
           dialects: {},
           headword: "shimi",
-          meaningGroups: [
+          senses: [
             {
               grammar: { pos: "N" },
-              english_meanings: ["woman"],
+              meanings: { en: ["woman"] },
             },
           ],
         },
@@ -53,14 +53,14 @@ describe("buildStructuredJsonChunks", () => {
             },
           },
           headword: "ti",
-          meaningGroups: [
+          senses: [
             {
               grammar: { pos: "V", valency: "TR" },
-              english_meanings: ["give"],
+              meanings: { en: ["give"] },
             },
             {
               grammar: { form: "PC", pos: "V" },
-              english_meanings: ["giver"],
+              meanings: { en: ["giver"] },
             },
           ],
         },
@@ -80,10 +80,10 @@ describe("buildStructuredJsonChunks", () => {
     const entries = Array.from({ length: 13 }, (_, index) => ({
       dialects: {},
       headword: `word-${index + 1}`,
-      meaningGroups: [
+      senses: [
         {
           grammar: { pos: "N" },
-          english_meanings: [`meaning-${index + 1}`],
+          meanings: { en: [`meaning-${index + 1}`] },
         },
       ],
     }));

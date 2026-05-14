@@ -1,3 +1,6 @@
+import { getPartOfSpeechLabel } from "@/features/dictionary/config";
+import { getPrimaryEntryPartOfSpeech } from "@/features/dictionary/lib/entryGrammar";
+import { getTranslation } from "@/lib/i18n";
 import type { Language } from "@/types/i18n";
 
 import {
@@ -7,6 +10,7 @@ import {
   type GenderedHeadingMarker,
 } from "./entryDisplay";
 import {
+  buildEntryDescription,
   getEntrySummary,
   getLocalizedGenderedMeanings,
   toPlainText,
@@ -32,10 +36,12 @@ export type EntryPreviewHeadingPart = {
 };
 
 type EntryPreview = {
+  description: string;
   genderedGlossRows: EntryPreviewGenderedGlossRow[];
   gloss: string;
   heading: string;
   headingParts: EntryPreviewHeadingPart[];
+  partOfSpeechLabel: string;
 };
 
 function getDisplayForm(entry: LexicalEntry) {
@@ -106,11 +112,22 @@ export function buildEntryPreview({
 }: EntryPreviewOptions): EntryPreview {
   const { heading, headingParts } = buildPreviewHeading(entry);
   const genderedGlossRows = getGenderedGlossRows(entry, language);
+  const gloss = buildPreviewGloss(entry, language, genderedGlossRows);
+  const partOfSpeechLabel = getPartOfSpeechLabel(
+    getPrimaryEntryPartOfSpeech(entry),
+    (key) => getTranslation(language, key),
+  );
 
   return {
+    description: buildEntryDescription(entry, language, {
+      displayHeadword: heading,
+      partOfSpeechLabel,
+      summary: gloss,
+    }),
     genderedGlossRows,
-    gloss: buildPreviewGloss(entry, language, genderedGlossRows),
+    gloss,
     heading,
     headingParts,
+    partOfSpeechLabel,
   };
 }

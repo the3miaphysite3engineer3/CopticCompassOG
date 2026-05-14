@@ -54,11 +54,7 @@ function getSearchableDialectFormText(
       forms.nominal,
       forms.pronominal,
       forms.stative,
-      ...(forms.constructParticiples ?? []),
-      ...(forms.constructParticipleCompounds ?? []).flatMap((compound) => [
-        compound.form,
-        compound.sourceConstructParticiple ?? "",
-      ]),
+      ...(forms.participles ?? []),
       ...(forms.variants?.absolute ?? []),
       ...(forms.variants?.nominal ?? []),
       ...(forms.variants?.pronominal ?? []),
@@ -70,12 +66,35 @@ function getSearchableDialectFormText(
 }
 
 function getSearchableInflectedFormText(
-  entry: Pick<DictionaryClientEntry, "inflectedForms">,
+  entry: Pick<DictionaryClientEntry, "inflections">,
 ) {
-  return (entry.inflectedForms ?? [])
-    .map((inflectedForm) => inflectedForm.form)
-    .filter(Boolean)
-    .join(" ");
+  if (!entry.inflections) {
+    return "";
+  }
+
+  const texts: string[] = [];
+  for (const dialects of Object.values(entry.inflections)) {
+    if (!dialects) {
+      continue;
+    }
+
+    for (const roles of Object.values(dialects)) {
+      if (!roles) {
+        continue;
+      }
+
+      for (const forms of Object.values(roles)) {
+        if (!forms) {
+          continue;
+        }
+
+        for (const form of forms) {
+          texts.push(typeof form === "string" ? form : form.form);
+        }
+      }
+    }
+  }
+  return texts.filter(Boolean).join(" ");
 }
 
 /**
@@ -86,30 +105,17 @@ export function prepareDictionaryForSearch(
   dictionary: readonly DictionaryClientEntry[],
 ): PreparedLexicalEntry[] {
   return dictionary.map((entry, index) => {
-    const constructParticipleCompounds = Object.values(entry.dialects).flatMap(
-      (forms) => forms.constructParticipleCompounds ?? [],
-    );
     const dialectForms = getSearchableDialectFormText(entry.dialects);
     const inflectedFormsText = getSearchableInflectedFormText(entry);
 
     return {
-      englishSearchText: [
-        ...getLocalizedMeaningValues(entry, "en"),
-        ...constructParticipleCompounds.flatMap(
-          (compound) => compound.english_meanings,
-        ),
-      ]
+      englishSearchText: [...getLocalizedMeaningValues(entry, "en")]
         .join(" ")
         .toLowerCase(),
-      dutchSearchText: [
-        ...getLocalizedMeaningValues(entry, "nl"),
-        ...constructParticipleCompounds.flatMap(
-          (compound) => compound.dutch_meanings ?? [],
-        ),
-      ]
+      dutchSearchText: [...getLocalizedMeaningValues(entry, "nl")]
         .join(" ")
         .toLowerCase(),
-      greekSearchText: (entry.greek_equivalents ?? []).join(" ").toLowerCase(),
+      greekSearchText: (entry.greek ?? []).join(" ").toLowerCase(),
       index,
       normalizedHeadword: normalizeCopticSearchText(entry.headword),
       normalizedDialectForms: normalizeCopticSearchText(dialectForms),
@@ -232,8 +238,11 @@ function matchesDictionaryEntryFilters(
   if (
     selectedDialect !== "ALL" &&
     entry.dialects[selectedDialect] === undefined &&
-    !(entry.inflectedForms ?? []).some(
-      (inflectedForm) => inflectedForm.dialect === selectedDialect,
+    !(
+      entry.inflections &&
+      Object.values(entry.inflections).some(
+        (dialects) => dialects && dialects[selectedDialect] !== undefined,
+      )
     )
   ) {
     return false;

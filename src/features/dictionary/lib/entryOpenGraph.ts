@@ -27,13 +27,13 @@ type EntryOpenGraphPreview = {
  * Builds the `/api/og` image URL for one dictionary entry preview card.
  */
 export function buildEntryOpenGraphImageUrl(
-  entryId: string,
+  entryId: string | number,
   language: Language,
   baseUrl = siteConfig.liveUrl,
 ) {
   return buildOpenGraphImageUrl({
     baseUrl,
-    id: entryId,
+    id: String(entryId),
     locale: language,
     type: "entry",
   });

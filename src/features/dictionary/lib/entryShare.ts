@@ -35,7 +35,7 @@ function ensureSentence(value: string) {
  * otherwise reconstructing it from the localized entry path.
  */
 export function resolveEntryShareUrl(
-  entryId: string,
+  entryId: string | number,
   language: Language,
   currentUrl?: string,
 ) {

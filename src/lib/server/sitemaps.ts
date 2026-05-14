@@ -290,7 +290,7 @@ function buildDictionaryEntryEntries(): SitemapUrlEntry[] {
       changeFrequency: "monthly" as const,
       ...(lastModified ? { lastModified } : {}),
       priority: 0.8,
-      url: buildAbsoluteUrl(getEntryPath(entryId, locale)),
+      url: buildAbsoluteUrl(getEntryPath(String(entryId), locale)),
     })),
   );
 }

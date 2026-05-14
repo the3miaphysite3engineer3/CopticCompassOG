@@ -162,7 +162,7 @@
               {
                 "type": "coptic",
                 "text": "ⲛⲓⲃⲉⲛ",
-                "dictionaryEntryId": "cd_1152"
+                "dictionaryEntryId": "1152"
               },
               {
                 "type": "text",
@@ -183,7 +183,7 @@
               {
                 "type": "coptic",
                 "text": "ⲛⲓⲃⲉⲛ",
-                "dictionaryEntryId": "cd_1152"
+                "dictionaryEntryId": "1152"
               },
               {
                 "type": "text",
@@ -220,11 +220,7 @@
               { "type": "coptic", "text": "ⲧⲉ" },
               { "type": "text", "text": ", and " },
               { "type": "text", "text": "≡" },
-              {
-                "type": "coptic",
-                "text": "ⲛⲉ",
-                "dictionaryEntryId": "cd_5101"
-              },
+              { "type": "coptic", "text": "ⲛⲉ", "dictionaryEntryId": "5101" },
               {
                 "type": "text",
                 "text": " that structure the bipartite nominal sentence."
@@ -247,11 +243,7 @@
               { "type": "coptic", "text": "ⲧⲉ" },
               { "type": "text", "text": " en " },
               { "type": "text", "text": "≡" },
-              {
-                "type": "coptic",
-                "text": "ⲛⲉ",
-                "dictionaryEntryId": "cd_5101"
-              },
+              { "type": "coptic", "text": "ⲛⲉ", "dictionaryEntryId": "5101" },
               {
                 "type": "text",
                 "text": " die de tweeledige nominale zin structureren."
@@ -318,22 +310,18 @@
             "type": "paragraph",
             "content": [
               { "type": "text", "text": "Prepositive pronouns such as " },
-              {
-                "type": "coptic",
-                "text": "ⲛ̀ⲑⲟϥ",
-                "dictionaryEntryId": "cd_1178"
-              },
+              { "type": "coptic", "text": "ⲛ̀ⲑⲟϥ", "dictionaryEntryId": "1178" },
               { "type": "text", "text": ", " },
               {
                 "type": "coptic",
                 "text": "ⲛ̀ⲑⲟⲥ",
-                "dictionaryEntryId": "cd_493a"
+                "dictionaryEntryId": "11428"
               },
               { "type": "text", "text": ", and " },
               {
                 "type": "coptic",
                 "text": "ⲛ̀ⲑⲱⲟⲩ",
-                "dictionaryEntryId": "cd_493b"
+                "dictionaryEntryId": "11429"
               },
               {
                 "type": "text",
@@ -347,22 +335,18 @@
             "type": "paragraph",
             "content": [
               { "type": "text", "text": "Prepositieve voornaamwoorden zoals " },
-              {
-                "type": "coptic",
-                "text": "ⲛ̀ⲑⲟϥ",
-                "dictionaryEntryId": "cd_1178"
-              },
+              { "type": "coptic", "text": "ⲛ̀ⲑⲟϥ", "dictionaryEntryId": "1178" },
               { "type": "text", "text": ", " },
               {
                 "type": "coptic",
                 "text": "ⲛ̀ⲑⲟⲥ",
-                "dictionaryEntryId": "cd_493a"
+                "dictionaryEntryId": "11428"
               },
               { "type": "text", "text": " en " },
               {
                 "type": "coptic",
                 "text": "ⲛ̀ⲑⲱⲟⲩ",
-                "dictionaryEntryId": "cd_493b"
+                "dictionaryEntryId": "11429"
               },
               {
                 "type": "text",

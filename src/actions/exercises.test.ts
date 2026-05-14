@@ -86,7 +86,7 @@ async function loadExercisesModule(options?: {
     })),
   }));
   const duplicateLookupMaybeSingleMock = vi.fn().mockResolvedValue({
-    data: options?.recentDuplicate ? { id: "submission_existing" } : null,
+    data: options?.recentDuplicate ? { id: 2491727703 } : null,
     error: options?.duplicateLookupError ?? null,
   });
   const duplicateLookupQuery = {

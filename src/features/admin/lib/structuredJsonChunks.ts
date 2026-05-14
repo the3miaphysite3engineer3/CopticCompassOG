@@ -33,7 +33,7 @@ type DictionaryEntry = {
   dialects?: unknown;
   genderedMeanings?: unknown;
   headword?: unknown;
-  meaningGroups?: unknown;
+  senses?: unknown;
 };
 
 function normalizeWhitespace(value: string) {
@@ -146,23 +146,23 @@ function collectStringArray(value: unknown) {
     : [];
 }
 
-function collectEnglishMeaningGroups(value: unknown) {
+function collectEnglishSenses(value: unknown) {
   if (!value || typeof value !== "object") {
     return [];
   }
 
-  const groups = Array.isArray(value)
+  const senses = Array.isArray(value)
     ? value
     : Object.values(value as Record<string, unknown>);
 
   return uniqueStrings(
-    groups.flatMap((group) => {
-      if (!group || typeof group !== "object" || Array.isArray(group)) {
+    senses.flatMap((sense) => {
+      if (!sense || typeof sense !== "object" || Array.isArray(sense)) {
         return [];
       }
 
       return collectStringArray(
-        (group as { english_meanings?: unknown }).english_meanings,
+        (sense as { meanings?: { en?: unknown } }).meanings?.en,
       );
     }),
   );
@@ -205,7 +205,9 @@ function collectEnglishGenderedMeanings(value: unknown) {
         return [];
       }
 
-      return collectTextSegments((group as { english?: unknown }).english);
+      return collectTextSegments(
+        (group as { meanings?: { en?: unknown } }).meanings?.en,
+      );
     }),
   );
 }
@@ -222,7 +224,7 @@ function collectEnglishDialectMeanings(value: unknown) {
       }
 
       return collectStringArray(
-        (group as { english_meanings?: unknown }).english_meanings,
+        (group as { meanings?: { en?: unknown } }).meanings?.en,
       );
     }),
   );
@@ -231,7 +233,7 @@ function collectEnglishDialectMeanings(value: unknown) {
 function collectDictionaryEnglishMeanings(entry: DictionaryEntry) {
   return uniqueStrings([
     ...collectEnglishGenderedMeanings(entry.genderedMeanings),
-    ...collectEnglishMeaningGroups(entry.meaningGroups),
+    ...collectEnglishSenses(entry.senses),
     ...collectEnglishDialectMeanings(entry.dialectMeanings),
   ]);
 }
@@ -243,7 +245,7 @@ function formatDictionaryEntry(
     return null;
   }
 
-  const partsOfSpeech = collectPartOfSpeechValues(entry.meaningGroups);
+  const partsOfSpeech = collectPartOfSpeechValues(entry.senses);
   if (partsOfSpeech.length === 0) {
     return null;
   }

@@ -3,11 +3,11 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { DICTIONARY_DIALECT_CODES } from "@/features/dictionary/config";
 import {
-  DICTIONARY_DIALECT_CODES,
-  DICTIONARY_MEANING_GROUP_CODES,
-  PARTS_OF_SPEECH,
-} from "@/features/dictionary/config";
+  formatDictionaryValidationIssues,
+  validateDictionaryEntries,
+} from "@/features/dictionary/lib/dictionaryValidation";
 import { getGenderedHeadingParts } from "@/features/dictionary/lib/entryDisplay";
 import { getEntryNounGender } from "@/features/dictionary/lib/entryGrammar";
 import {
@@ -15,15 +15,19 @@ import {
   searchPreparedDictionary,
 } from "@/features/dictionary/search";
 import type {
-  ConstructParticipleCompound,
+  DictionaryInflectedFormDetails,
   DialectForms,
   LexicalEntry,
 } from "@/features/dictionary/types";
 
-function readDictionary() {
+function readDictionaryPayload(): unknown {
   const filePath = path.join(process.cwd(), "public/data/dictionary.json");
 
-  return JSON.parse(fs.readFileSync(filePath, "utf8")) as LexicalEntry[];
+  return JSON.parse(fs.readFileSync(filePath, "utf8"));
+}
+
+function readDictionary() {
+  return readDictionaryPayload() as LexicalEntry[];
 }
 
 function splitTopLevelCommaSeparatedValues(value: string) {
@@ -61,7 +65,7 @@ function hasHeadwordOrAbsoluteStructuralNotation(value: string) {
   const standalonePluralMarker = /(^|\s)\(ⲛ\)(?=\s|$|→|=|,)/u;
 
   return (
-    /[,=→]/u.test(value) ||
+    /[,→]/u.test(value) ||
     standaloneGenderMarker.test(value) ||
     standalonePluralMarker.test(value)
   );
@@ -69,7 +73,7 @@ function hasHeadwordOrAbsoluteStructuralNotation(value: string) {
 
 function collectConstructParticiples(forms: DialectForms | undefined) {
   return [
-    ...(forms?.constructParticiples ?? []),
+    ...(forms?.participles ?? []),
     ...(forms?.variants?.constructParticiples ?? []),
   ];
 }
@@ -82,123 +86,98 @@ function isNonEmptyStringArray(value: unknown): value is string[] {
   );
 }
 
-function validateConstructParticipleCompound(
-  compound: ConstructParticipleCompound,
-) {
-  return (
-    typeof compound.form === "string" &&
-    compound.form.trim().length > 0 &&
-    !compound.form.endsWith("~") &&
-    (compound.sourceConstructParticiple === undefined ||
-      compound.sourceConstructParticiple.endsWith("~")) &&
-    (compound.gender === undefined ||
-      ["", "BOTH", "F", "M"].includes(compound.gender)) &&
-    isNonEmptyStringArray(compound.english_meanings) &&
-    (compound.dutch_meanings === undefined ||
-      isNonEmptyStringArray(compound.dutch_meanings))
+type FlattenedInflection = {
+  dialect: string;
+  form: string;
+  kind: string;
+  notes?: string[];
+  role: string;
+  uncertain?: boolean;
+};
+
+function getInflectionFormText(form: string | DictionaryInflectedFormDetails) {
+  return typeof form === "string" ? form : form.form;
+}
+
+function flattenInflections(
+  entry: Pick<LexicalEntry, "inflections">,
+): FlattenedInflection[] {
+  return Object.entries(entry.inflections ?? {}).flatMap(([kind, dialects]) =>
+    Object.entries(dialects ?? {}).flatMap(([dialect, roles]) =>
+      Object.entries(roles ?? {}).flatMap(([role, forms]) =>
+        (forms ?? []).map((form) => ({
+          dialect,
+          form: getInflectionFormText(form),
+          kind,
+          role,
+          ...(typeof form !== "string" && form.notes
+            ? { notes: form.notes }
+            : {}),
+          ...(typeof form !== "string" && form.uncertain !== undefined
+            ? { uncertain: form.uncertain }
+            : {}),
+        })),
+      ),
+    ),
   );
 }
 
-function isPlainRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === "object" && !Array.isArray(value);
-}
-
 const pluralPrefixedHeadwordPattern = /^plural:/iu;
-const deprecatedTopLevelEntryFields = [
-  "dutch_meanings",
-  "english_meanings",
-  "gender",
-  "parentEntryId",
-  "pluralForms",
-  "pos",
-  "relationType",
-] as const;
-const allowedGrammarKeys = new Set([
-  "affix",
-  "caseRole",
-  "derivation",
-  "form",
-  "gender",
-  "mood",
-  "number",
-  "polarity",
-  "pos",
-  "tags",
-  "valency",
-  "voice",
-]);
-const allowedGrammarPos = new Set([...PARTS_OF_SPEECH, "PRON"]);
 const allowedEtymologies = new Set(["Egy", "Gr", "Unknown"]);
-const allowedGrammarTags = new Set<string>(DICTIONARY_MEANING_GROUP_CODES);
-const grammarEnumFields = {
-  affix: ["PFX", "SFX"],
-  caseRole: ["DAT", "OBJ"],
-  derivation: ["CAUS"],
-  form: ["ABS", "PC", "STA", "VBAL"],
-  gender: ["BOTH", "F", "M"],
-  mood: ["IMP"],
-  number: ["PL", "SG"],
-  polarity: ["NEG"],
-  valency: ["INTR", "TR"],
-  voice: ["REFL"],
-} as const;
 const absorbedDirectVariantExamples = [
-  { canonicalId: "cd_4012", form: "ⲇⲓⲛⲁⲧⲟⲥ", removedId: "cd_3973" },
-  { canonicalId: "cd_3900", form: "ⲇⲓⲡⲛⲟⲛ", removedId: "cd_3983" },
-  { canonicalId: "cd_4741", form: "ⲕⲩⲃⲱⲧⲟⲥ", removedId: "cd_4837" },
+  { canonicalId: 4012, form: "ⲇⲓⲛⲁⲧⲟⲥ", removedId: 3973 },
+  { canonicalId: 3900, form: "ⲇⲓⲡⲛⲟⲛ", removedId: 3983 },
+  { canonicalId: 4741, form: "ⲕⲩⲃⲱⲧⲟⲥ", removedId: 4837 },
 ] as const;
 const absorbedExactDuplicateExamples = [
-  { canonicalId: "cd_10", form: "ϣ-", removedId: "cd_6123" },
-  { canonicalId: "cd_826", form: "ⲕⲁⲣⲟⲩⲥ", removedId: "cd_4648" },
-  { canonicalId: "cd_957", form: "ⲗⲓⲙⲏⲛ", removedId: "cd_4907" },
-  { canonicalId: "cd_1007", form: "ⲙⲏ", removedId: "cd_5039" },
-  { canonicalId: "cd_1204", form: "ⲟ", removedId: "cd_5157" },
-  { canonicalId: "cd_1410", form: "ⲥⲁⲛⲓⲥ", removedId: "cd_5528" },
-  { canonicalId: "cd_1966", form: "ϣⲉⲩ", removedId: "cd_3156" },
-  { canonicalId: "cd_2635", form: "ⲁⲙⲛⲁ", removedId: "cd_3516" },
-  { canonicalId: "cd_5132", form: "ⲛⲟⲩⲥ", removedId: "cd_2968" },
+  { canonicalId: 10, form: "ϣ-", removedId: 6123 },
+  { canonicalId: 826, form: "ⲕⲁⲣⲟⲩⲥ", removedId: 4648 },
+  { canonicalId: 957, form: "ⲗⲓⲙⲏⲛ", removedId: 4907 },
+  { canonicalId: 1007, form: "ⲙⲏ", removedId: 5039 },
+  { canonicalId: 1204, form: "ⲟ", removedId: 5157 },
+  { canonicalId: 1410, form: "ⲥⲁⲛⲓⲥ", removedId: 5528 },
+  { canonicalId: 1966, form: "ϣⲉⲩ", removedId: 3156 },
+  { canonicalId: 2635, form: "ⲁⲙⲛⲁ", removedId: 3516 },
+  { canonicalId: 5132, form: "ⲛⲟⲩⲥ", removedId: 2968 },
 ] as const;
 const absorbedBoundaryVariantExamples = [
-  { canonicalId: "cd_126", form: "ⲥⲟⲩ", removedId: "cd_5599" },
+  { canonicalId: 126, form: "ⲥⲟⲩ", removedId: 5599 },
   {
-    canonicalId: "cd_4785",
+    canonicalId: 4785,
     form: "ⲕⲱⲙⲟⲡⲟⲗⲓⲥ",
-    removedId: "cd_4869",
+    removedId: 4869,
   },
 ] as const;
 const absorbedGreekOneLetterVariantExamples = [
-  { canonicalId: "cd_3599", form: "ⲁⲡⲁⲅⲅⲉⲗⲓⲛ", removedId: "cd_3601" },
-  { canonicalId: "cd_3798", form: "ⲃⲁⲥⲓⲗⲓⲁ", removedId: "cd_3800" },
-  { canonicalId: "cd_4887", form: "ⲗⲓⲧⲟⲩⲣⲅⲓⲁ", removedId: "cd_4913" },
-  { canonicalId: "cd_6025", form: "ⲭⲓⲣⲟⲅⲣⲁⲫⲟⲛ", removedId: "cd_6038" },
+  { canonicalId: 3599, form: "ⲁⲡⲁⲅⲅⲉⲗⲓⲛ", removedId: 3601 },
+  { canonicalId: 3798, form: "ⲃⲁⲥⲓⲗⲓⲁ", removedId: 3800 },
+  { canonicalId: 4887, form: "ⲗⲓⲧⲟⲩⲣⲅⲓⲁ", removedId: 4913 },
+  { canonicalId: 6025, form: "ⲭⲓⲣⲟⲅⲣⲁⲫⲟⲛ", removedId: 6038 },
 ] as const;
 const absorbedEgyptianOneLetterVariantExamples = [
-  { canonicalId: "cd_37", form: "ⲕⲱⲡ", removedId: "cd_806" },
-  { canonicalId: "cd_193", form: "ϩⲣⲧⲉ", removedId: "cd_2231" },
-  { canonicalId: "cd_285", form: "ϣⲁⲁⲃ", removedId: "cd_1824" },
+  { canonicalId: 37, form: "ⲕⲱⲡ", removedId: 806 },
+  { canonicalId: 193, form: "ϩⲣⲧⲉ", removedId: 2231 },
+  { canonicalId: 285, form: "ϣⲁⲁⲃ", removedId: 1824 },
 ] as const;
 const foldedRegularFeminineCounterpartExamples = [
   {
     feminineForm: "ⲟⲩⲣⲱ",
-    parentId: "cd_18",
-    removedId: "cd_18a",
+    parentId: 18,
   },
   {
     feminineForm: "ϣⲉⲣⲓ",
-    parentId: "cd_20",
-    removedId: "cd_20a",
+    parentId: 20,
   },
   {
     feminineForm: "ⲃⲱⲕⲓ",
-    parentId: "cd_550",
-    removedId: "cd_550a",
+    parentId: 550,
   },
 ] as const;
 const independentGreekErPrefixComplexVerbExamples = [
-  { baseId: "cd_3348", complexId: "cd_4146", form: "ⲉⲣⲁⲅⲁⲡⲁⲛ" },
-  { baseId: "cd_4867", complexId: "cd_4240", form: "ⲉⲣⲕⲱⲗⲩⲉⲓⲛ" },
-  { baseId: "cd_5522", complexId: "cd_4300", form: "ⲉⲣⲥⲁⲗⲡⲓⲍⲉⲓⲛ" },
-  { baseId: "cd_6046", complexId: "cd_4336", form: "ⲉⲣⲭⲟⲣⲉⲩⲉⲓⲛ" },
+  { baseId: 3348, complexId: 4146, form: "ⲉⲣⲁⲅⲁⲡⲁⲛ" },
+  { baseId: 4867, complexId: 4240, form: "ⲉⲣⲕⲱⲗⲩⲉⲓⲛ" },
+  { baseId: 5522, complexId: 4300, form: "ⲉⲣⲥⲁⲗⲡⲓⲍⲉⲓⲛ" },
+  { baseId: 6046, complexId: 4336, form: "ⲉⲣⲭⲟⲣⲉⲩⲉⲓⲛ" },
 ] as const;
 const numberMeaningPatterns = [
   /\b(?:plural|singular|meervoud|enkelvoud):/iu,
@@ -213,17 +192,17 @@ const placeholderMeaningPatterns = [/^(?:which|welke):$/iu] as const;
 
 function collectMeaningTexts(entry: LexicalEntry) {
   return [
-    ...entry.meaningGroups.flatMap((group) => [
-      ...(group.english_meanings ?? []),
-      ...(group.dutch_meanings ?? []),
+    ...entry.senses.flatMap((group) => [
+      ...(group.meanings?.en ?? []),
+      ...(group.meanings?.nl ?? []),
     ]),
     ...(entry.dialectMeanings ?? []).flatMap((meaning) => [
-      ...(meaning.english_meanings ?? []),
-      ...(meaning.dutch_meanings ?? []),
+      ...(meaning.meanings?.en ?? []),
+      ...(meaning.meanings?.nl ?? []),
     ]),
     ...(entry.genderedMeanings ?? []).flatMap((meaning) => [
-      ...Object.values(meaning.english),
-      ...Object.values(meaning.dutch ?? {}),
+      ...Object.values(meaning.meanings?.en ?? {}),
+      ...Object.values(meaning.meanings?.nl ?? {}),
     ]),
   ];
 }
@@ -240,23 +219,27 @@ function hasPlaceholderMeaning(value: string) {
   );
 }
 
-function findMeaningGroup(
+function findSense(
   entry: LexicalEntry | undefined,
-  predicate: (
-    group: NonNullable<LexicalEntry["meaningGroups"]>[number],
-  ) => boolean,
+  predicate: (sense: NonNullable<LexicalEntry["senses"]>[number]) => boolean,
 ) {
-  return entry?.meaningGroups.find(predicate);
+  return entry?.senses.find(predicate);
 }
 
 describe("dictionary dataset guardrails", () => {
+  it("matches the dictionary schema", () => {
+    const result = validateDictionaryEntries(readDictionaryPayload());
+
+    expect(formatDictionaryValidationIssues(result.issues, 200)).toEqual([]);
+  });
+
   it("keeps dialect and inflected-form keys within the configured dictionary sigla", () => {
     const dictionary = readDictionary();
     const allowedDialectCodes = new Set<string>(DICTIONARY_DIALECT_CODES);
-    const unexpectedDialectKeys: Array<{ dialect: string; id: string }> = [];
+    const unexpectedDialectKeys: Array<{ dialect: string; id: number }> = [];
     const unexpectedInflectedFormDialectKeys: Array<{
       dialect: string;
-      id: string;
+      id: number;
     }> = [];
 
     for (const entry of dictionary) {
@@ -266,7 +249,7 @@ describe("dictionary dataset guardrails", () => {
         }
       }
 
-      for (const inflectedForm of entry.inflectedForms ?? []) {
+      for (const inflectedForm of flattenInflections(entry)) {
         if (
           inflectedForm.dialect &&
           !allowedDialectCodes.has(inflectedForm.dialect)
@@ -283,15 +266,8 @@ describe("dictionary dataset guardrails", () => {
     expect(unexpectedInflectedFormDialectKeys).toEqual([]);
   });
 
-  it("omits deprecated entry-shape artifacts from the dataset", () => {
+  it("omits plural-prefixed headword artifacts from the dataset", () => {
     const dictionary = readDictionary();
-    const entriesWithDeprecatedFields = dictionary.flatMap((entry) =>
-      deprecatedTopLevelEntryFields.flatMap((field) =>
-        Object.prototype.hasOwnProperty.call(entry, field)
-          ? [{ field, id: entry.id }]
-          : [],
-      ),
-    );
     const pluralPrefixedHeadwordEntries = dictionary
       .filter((entry) => pluralPrefixedHeadwordPattern.test(entry.headword))
       .map((entry) => ({
@@ -299,213 +275,58 @@ describe("dictionary dataset guardrails", () => {
         id: entry.id,
       }));
 
-    expect(entriesWithDeprecatedFields).toEqual([]);
     expect(pluralPrefixedHeadwordEntries).toEqual([]);
   });
 
   it("requires explicit etymology values on every entry", () => {
     const dictionary = readDictionary();
     const invalidEtymologyEntries = dictionary.flatMap((entry) =>
-      typeof entry.etymology !== "string" ||
-      !allowedEtymologies.has(entry.etymology)
-        ? [{ etymology: entry.etymology, id: entry.id }]
+      typeof entry.etym !== "string" || !allowedEtymologies.has(entry.etym)
+        ? [{ etym: entry.etym, id: entry.id }]
         : [],
     );
 
     expect(invalidEtymologyEntries).toEqual([]);
-    expect(dictionary.filter((entry) => entry.etymology === "Unknown")).toEqual(
-      [
-        expect.objectContaining({ headword: "ϫⲗⲉ", id: "cd_7166" }),
-        expect.objectContaining({
-          headword: "ϯϫⲣⲉ ⲛϩⲏⲧ",
-          id: "cd_7348",
-        }),
-      ],
-    );
+    expect(dictionary.filter((entry) => entry.etym === "Unknown")).toEqual([
+      expect.objectContaining({ headword: "ϫⲗⲉ", id: 7166 }),
+      expect.objectContaining({
+        headword: "ϯϫⲣⲉ ⲛϩⲏⲧ",
+        id: 7348,
+      }),
+    ]);
   });
 
-  it("omits empty Greek equivalent arrays", () => {
+  it("omits empty Greek arrays", () => {
     const dictionary = readDictionary();
-    const invalidGreekEquivalentEntries = dictionary
+    const invalidGreekEntries = dictionary
       .filter(
-        (entry) =>
-          Object.prototype.hasOwnProperty.call(entry, "greek_equivalents") &&
-          !isNonEmptyStringArray(entry.greek_equivalents),
+        (entry) => "greek" in entry && !isNonEmptyStringArray(entry.greek),
       )
       .map((entry) => entry.id);
 
-    expect(invalidGreekEquivalentEntries).toEqual([]);
+    expect(invalidGreekEntries).toEqual([]);
   });
 
-  it("keeps meaning groups annotated with structured grammar", () => {
+  it("keeps structured senses annotated with structured grammar", () => {
     const dictionary = readDictionary();
-    const emptyMeaningGroupEntries: string[] = [];
-    const invalidMeaningGroupEntries: string[] = [];
-    const missingMeaningGroupEntries: string[] = [];
-    const missingGrammarGroups: Array<{ id: string; index: number }> = [];
-    const invalidGrammarGroups: Array<{
-      id: string;
-      index: number;
-      reason: string;
-      value: unknown;
-    }> = [];
-
-    for (const entry of dictionary) {
-      if (!Object.prototype.hasOwnProperty.call(entry, "meaningGroups")) {
-        missingMeaningGroupEntries.push(entry.id);
-        continue;
-      }
-
-      if (!Array.isArray(entry.meaningGroups)) {
-        invalidMeaningGroupEntries.push(entry.id);
-        continue;
-      }
-
-      if (entry.meaningGroups.length === 0) {
-        emptyMeaningGroupEntries.push(entry.id);
-        continue;
-      }
-
-      for (const [index, group] of entry.meaningGroups.entries()) {
-        const grammar = group.grammar;
-
-        if (!isPlainRecord(grammar)) {
-          missingGrammarGroups.push({ id: entry.id, index });
-          continue;
-        }
-
-        const grammarEntries = Object.entries(grammar);
-
-        if (grammarEntries.length === 0) {
-          invalidGrammarGroups.push({
-            id: entry.id,
-            index,
-            reason: "empty grammar",
-            value: grammar,
-          });
-        }
-
-        if (grammar.pos === undefined) {
-          invalidGrammarGroups.push({
-            id: entry.id,
-            index,
-            reason: "missing pos",
-            value: grammar,
-          });
-        }
-
-        for (const [key, value] of grammarEntries) {
-          if (!allowedGrammarKeys.has(key)) {
-            invalidGrammarGroups.push({
-              id: entry.id,
-              index,
-              reason: `unexpected key ${key}`,
-              value,
-            });
-            continue;
-          }
-
-          if (key === "pos" && !allowedGrammarPos.has(String(value))) {
-            invalidGrammarGroups.push({
-              id: entry.id,
-              index,
-              reason: "invalid pos",
-              value,
-            });
-          }
-
-          if (key === "tags") {
-            const tags = Array.isArray(value) ? value : [];
-
-            if (
-              tags.length === 0 ||
-              tags.some(
-                (tag) =>
-                  typeof tag !== "string" || !allowedGrammarTags.has(tag),
-              )
-            ) {
-              invalidGrammarGroups.push({
-                id: entry.id,
-                index,
-                reason: "invalid tags",
-                value,
-              });
-            }
-            continue;
-          }
-
-          if (
-            key in grammarEnumFields &&
-            !grammarEnumFields[key as keyof typeof grammarEnumFields].includes(
-              value as never,
-            )
-          ) {
-            invalidGrammarGroups.push({
-              id: entry.id,
-              index,
-              reason: `invalid ${key}`,
-              value,
-            });
-          }
-        }
-
-        if (grammar.gender !== undefined && grammar.pos !== "N") {
-          invalidGrammarGroups.push({
-            id: entry.id,
-            index,
-            reason: "gender without noun pos",
-            value: grammar,
-          });
-        }
-
-        if (
-          (grammar.valency !== undefined ||
-            grammar.mood !== undefined ||
-            grammar.voice !== undefined ||
-            grammar.derivation !== undefined ||
-            grammar.form === "PC" ||
-            grammar.form === "STA") &&
-          grammar.pos !== "V"
-        ) {
-          invalidGrammarGroups.push({
-            id: entry.id,
-            index,
-            reason: "verbal grammar without verb pos",
-            value: grammar,
-          });
-        }
-      }
-    }
-
     const entriesById = new Map(dictionary.map((entry) => [entry.id, entry]));
 
-    expect(emptyMeaningGroupEntries).toEqual([]);
-    expect(invalidMeaningGroupEntries).toEqual([]);
-    expect(missingMeaningGroupEntries).toEqual([]);
-    expect(missingGrammarGroups).toEqual([]);
-    expect(invalidGrammarGroups).toEqual([]);
     expect(
-      findMeaningGroup(
-        entriesById.get("cd_2"),
-        (group) => group.grammar.valency === "INTR",
-      )?.grammar,
+      findSense(entriesById.get(2), (sense) => sense.grammar.valency === "INTR")
+        ?.grammar,
     ).toEqual({ pos: "V", valency: "INTR" });
     expect(
-      findMeaningGroup(
-        entriesById.get("cd_25"),
-        (group) => group.grammar.pos === "N",
-      )?.grammar,
+      findSense(entriesById.get(25), (sense) => sense.grammar.pos === "N")
+        ?.grammar,
     ).toEqual({ gender: "M", pos: "N" });
     expect(
-      findMeaningGroup(
-        entriesById.get("cd_100"),
-        (group) => group.grammar.number === "PL",
-      )?.grammar,
+      findSense(entriesById.get(100), (sense) => sense.grammar.number === "PL")
+        ?.grammar,
     ).toEqual({ number: "PL", pos: "N" });
     expect(
-      findMeaningGroup(
-        entriesById.get("cd_2639"),
-        (group) => group.grammar.polarity === "NEG",
+      findSense(
+        entriesById.get(2639),
+        (sense) => sense.grammar.polarity === "NEG",
       )?.grammar,
     ).toEqual({ polarity: "NEG", pos: "N" });
   });
@@ -565,19 +386,19 @@ describe("dictionary dataset guardrails", () => {
         removedExists: false,
       })),
     );
-    const souEntry = dictionary.find((entry) => entry.id === "cd_126");
+    const souEntry = dictionary.find((entry) => entry.id === 126);
 
     expect(
-      findMeaningGroup(souEntry, (group) => group.grammar.pos === "V"),
+      findSense(souEntry, (group) => group.grammar.pos === "V"),
     ).toBeDefined();
-    const komopolisEntry = dictionary.find((entry) => entry.id === "cd_4785");
+    const komopolisEntry = dictionary.find((entry) => entry.id === 4785);
 
     expect(
-      findMeaningGroup(komopolisEntry, (group) => group.grammar.pos === "N"),
+      findSense(komopolisEntry, (group) => group.grammar.pos === "N"),
     ).toMatchObject({ grammar: { gender: "BOTH", pos: "N" } });
     expect(
-      findMeaningGroup(
-        dictionary.find((entry) => entry.id === "cd_5345"),
+      findSense(
+        dictionary.find((entry) => entry.id === 5345),
         (group) => group.grammar.pos === "N",
       ),
     ).toMatchObject({ grammar: { gender: "F", pos: "N" } });
@@ -628,7 +449,7 @@ describe("dictionary dataset guardrails", () => {
     for (const example of foldedRegularFeminineCounterpartExamples) {
       const parentEntry = entriesById.get(example.parentId);
 
-      expect(parentEntry?.inflectedForms).toEqual(
+      expect(parentEntry ? flattenInflections(parentEntry) : []).toEqual(
         expect.arrayContaining([
           expect.objectContaining({
             form: example.feminineForm,
@@ -636,18 +457,16 @@ describe("dictionary dataset guardrails", () => {
           }),
         ]),
       );
-      expect(entriesById.has(example.removedId)).toBe(false);
     }
-    expect(entriesById.get("cd_1698")).toMatchObject({
+    expect(entriesById.get(1698)).toMatchObject({
       headword: "ⲟⲩⲣⲱ",
     });
     expect(
-      findMeaningGroup(entriesById.get("cd_1698"), (group) =>
-        Boolean(group.english_meanings?.includes("bean")),
+      findSense(entriesById.get(1698), (group) =>
+        Boolean(group.meanings?.en?.includes("bean")),
       ),
     ).toMatchObject({
-      dutch_meanings: ["boon"],
-      english_meanings: ["bean"],
+      meanings: { en: ["bean"], nl: ["boon"] },
       grammar: { gender: "M", pos: "N" },
     });
   });
@@ -658,14 +477,14 @@ describe("dictionary dataset guardrails", () => {
 
     for (const example of independentGreekErPrefixComplexVerbExamples) {
       expect(entriesById.get(example.baseId)).toMatchObject({
-        etymology: "Gr",
+        etym: "Gr",
       });
       expect(entriesById.get(example.complexId)).toMatchObject({
-        etymology: "Gr",
+        etym: "Gr",
         headword: example.form,
       });
       expect(
-        findMeaningGroup(
+        findSense(
           entriesById.get(example.complexId),
           (group) => group.grammar.pos === "V",
         ),
@@ -678,7 +497,7 @@ describe("dictionary dataset guardrails", () => {
     const structuredPluralFormCount = dictionary.reduce(
       (count, entry) =>
         count +
-        (entry.inflectedForms ?? []).filter((form) => form.kind === "plural")
+        flattenInflections(entry).filter((form) => form.kind === "plural")
           .length,
       0,
     );
@@ -686,7 +505,7 @@ describe("dictionary dataset guardrails", () => {
     expect(structuredPluralFormCount).toBe(598);
   });
 
-  it("keeps number-marked meaning prose in structured meaning groups", () => {
+  it("keeps number-marked meaning prose in structured sense groups", () => {
     const dictionary = readDictionary();
     const numberMarkedEntries = dictionary
       .filter(hasNumberMarkedMeaningProse)
@@ -706,9 +525,9 @@ describe("dictionary dataset guardrails", () => {
         (entry) => entry.id,
       );
 
-    expect(searchIds("ⲁϩⲱⲱⲣ")).toContain("cd_7");
-    expect(searchIds("ⲟⲩⲣⲱⲟⲩ")).toContain("cd_18");
-    expect(searchIds("ⲉⲃⲓⲁⲓⲕ")).toContain("cd_550");
+    expect(searchIds("ⲁϩⲱⲱⲣ")).toContain(7);
+    expect(searchIds("ⲟⲩⲣⲱⲟⲩ")).toContain(18);
+    expect(searchIds("ⲉⲃⲓⲁⲓⲕ")).toContain(550);
   });
 
   it("keeps absorbed duplicate headwords searchable on canonical entries", () => {
@@ -773,9 +592,8 @@ describe("dictionary dataset guardrails", () => {
       const ids = searchIds(example.feminineForm);
 
       expect(ids).toContain(example.parentId);
-      expect(ids).not.toContain(example.removedId);
     }
-    expect(searchIds("ⲟⲩⲣⲱ")).toContain("cd_1698");
+    expect(searchIds("ⲟⲩⲣⲱ")).toContain(1698);
   });
 
   it("omits source-only metadata from runtime dictionary entries", () => {
@@ -803,7 +621,7 @@ describe("dictionary dataset guardrails", () => {
     const dictionary = readDictionary();
     const structurallyNoisyFields: Array<{
       field: string;
-      id: string;
+      id: number;
       value: string;
     }> = [];
     const primaryFormFields = [
@@ -859,19 +677,6 @@ describe("dictionary dataset guardrails", () => {
 
   it("keeps imperative forms structured on parent entries", () => {
     const dictionary = readDictionary();
-    const entryIds = new Set(dictionary.map((entry) => entry.id));
-    const foldedImperativeEntryIds = [
-      "cd_2b",
-      "cd_8b",
-      "cd_23b",
-      "cd_30b",
-      "cd_34b",
-      "cd_43a",
-      "cd_123b",
-      "cd_219b",
-      "cd_312c",
-      "cd_312d",
-    ];
     const entriesWithLegacyImperativeFields = dictionary
       .filter((entry) =>
         Object.values(entry.dialects).some((forms) =>
@@ -882,17 +687,13 @@ describe("dictionary dataset guardrails", () => {
     const imperativeFormCount = dictionary.reduce(
       (count, entry) =>
         count +
-        (entry.inflectedForms ?? []).filter(
-          (form) => form.kind === "imperative",
-        ).length,
+        flattenInflections(entry).filter((form) => form.kind === "imperative")
+          .length,
       0,
     );
-    const parentEntry = dictionary.find((entry) => entry.id === "cd_2");
+    const parentEntry = dictionary.find((entry) => entry.id === 2);
 
     expect(entriesWithLegacyImperativeFields).toEqual([]);
-    expect(foldedImperativeEntryIds.filter((id) => entryIds.has(id))).toEqual(
-      [],
-    );
     expect(imperativeFormCount).toBe(84);
     expect(parentEntry?.dialects.B).toMatchObject({
       absolute: "ϯ",
@@ -900,7 +701,7 @@ describe("dictionary dataset guardrails", () => {
         pronominal: ["ⲧⲏⲓⲧ="],
       },
     });
-    expect(parentEntry?.inflectedForms).toEqual(
+    expect(parentEntry ? flattenInflections(parentEntry) : []).toEqual(
       expect.arrayContaining([
         {
           dialect: "B",
@@ -938,95 +739,95 @@ describe("dictionary dataset guardrails", () => {
       .filter(
         (entry) =>
           getEntryNounGender(entry) === "M" &&
-          (entry.inflectedForms ?? []).some((form) => form.kind === "feminine"),
+          flattenInflections(entry).some((form) => form.kind === "feminine"),
       )
       .map((entry) => entry.id)
-      .sort((left, right) => left.localeCompare(right));
+      .sort((left, right) => left - right);
 
-    expect(masculineEntriesWithFeminineForms).toEqual([
-      "cd_18",
-      "cd_20",
-      "cd_550",
-    ]);
+    expect(masculineEntriesWithFeminineForms).toEqual([18, 20, 550]);
     expect(
-      getGenderedHeadingParts(entriesById.get("cd_18")!, "B").map(
+      getGenderedHeadingParts(entriesById.get(18)!, "B").map(
         (part) => `${part.spelling} ${part.marker}`,
       ),
     ).toEqual(["ⲟⲩⲣⲟ m", "ⲟⲩⲣⲱ f", "ⲟⲩⲣⲱⲟⲩ pl"]);
     expect(
-      getGenderedHeadingParts(entriesById.get("cd_20")!, "B").map(
+      getGenderedHeadingParts(entriesById.get(20)!, "B").map(
         (part) => `${part.spelling} ${part.marker}`,
       ),
     ).toEqual(["ϣⲏⲣⲓ ϣⲟⲩ- m", "ϣⲉⲣⲓ f"]);
-    expect(entriesById.get("cd_20")?.genderedMeanings).toEqual([
+    expect(entriesById.get(20)?.genderedMeanings).toEqual([
       {
-        dutch: {
-          f: "dochter",
-          m: "zoon, kind",
-        },
-        english: {
-          f: "daughter",
-          m: "son, child",
+        meanings: {
+          en: {
+            f: "daughter",
+            m: "son, child",
+          },
+          nl: {
+            f: "dochter",
+            m: "zoon, kind",
+          },
         },
       },
     ]);
-    expect(entriesById.get("cd_18")?.genderedMeanings).toEqual([
+    expect(entriesById.get(18)?.genderedMeanings).toEqual([
       {
-        dutch: {
-          f: "koningin",
-          m: "koning",
-          pl: "koninklijken",
-        },
-        english: {
-          f: "queen",
-          m: "king",
-          pl: "royals",
+        meanings: {
+          en: {
+            f: "queen",
+            m: "king",
+            pl: "royals",
+          },
+          nl: {
+            f: "koningin",
+            m: "koning",
+            pl: "koninklijken",
+          },
         },
       },
     ]);
-    expect(entriesById.get("cd_17")?.genderedMeanings).toEqual([
+    expect(entriesById.get(17)?.genderedMeanings).toEqual([
       {
-        dutch: {
-          f: "dame",
-          m: "heer",
-          pl: "edelen",
-        },
-        english: {
-          f: "lady",
-          m: "lord",
-          pl: "nobles",
+        meanings: {
+          en: {
+            f: "lady",
+            m: "lord",
+            pl: "nobles",
+          },
+          nl: {
+            f: "dame",
+            m: "heer",
+            pl: "edelen",
+          },
         },
       },
+    ]);
+    expect(entriesById.get(18)?.senses.map((group) => group.grammar)).toEqual([
+      { gender: "M", pos: "N" },
+      { pos: "ADJ" },
     ]);
     expect(
-      entriesById.get("cd_18")?.meaningGroups.map((group) => group.grammar),
-    ).toEqual([{ gender: "M", pos: "N" }, { pos: "ADJ" }]);
-    expect(
-      findMeaningGroup(
-        entriesById.get("cd_18"),
-        (group) => group.grammar.pos === "ADJ",
-      )?.english_meanings,
+      findSense(entriesById.get(18), (group) => group.grammar.pos === "ADJ")
+        ?.meanings?.en,
     ).toEqual(["royal"]);
+    expect(entriesById.get(17)?.senses.map((group) => group.grammar)).toEqual([
+      { gender: "BOTH", pos: "N" },
+      { pos: "ADJ" },
+    ]);
     expect(
-      entriesById.get("cd_17")?.meaningGroups.map((group) => group.grammar),
-    ).toEqual([{ gender: "BOTH", pos: "N" }, { pos: "ADJ" }]);
-    expect(
-      findMeaningGroup(
-        entriesById.get("cd_17"),
-        (group) => group.grammar.pos === "ADJ",
-      )?.english_meanings,
+      findSense(entriesById.get(17), (group) => group.grammar.pos === "ADJ")
+        ?.meanings?.en,
     ).toEqual(["noble"]);
-    expect(entriesById.get("cd_550")?.meaningGroups).toEqual([
+    expect(entriesById.get(550)?.senses).toEqual([
       { grammar: { gender: "M", pos: "N" } },
     ]);
     expect(
-      getGenderedHeadingParts(entriesById.get("cd_550")!, "B").map(
+      getGenderedHeadingParts(entriesById.get(550)!, "B").map(
         (part) => `${part.spelling} ${part.marker}`,
       ),
     ).toEqual(["ⲃⲱⲕ m", "ⲃⲱⲕⲓ f", "ⲉⲃⲓⲁⲓⲕ pl"]);
-    expect(entriesById.get("cd_5345")).toMatchObject({
+    expect(entriesById.get(5345)).toMatchObject({
       headword: "ⲡⲏⲣⲁ",
-      meaningGroups: [
+      senses: [
         {
           grammar: { gender: "F", pos: "N" },
         },
@@ -1040,13 +841,13 @@ describe("dictionary dataset guardrails", () => {
 
     expect(oxyrhynchiteEntries.length).toBeGreaterThanOrEqual(484);
     expect(
-      dictionary.find((entry) => entry.id === "cd_493")?.dialects.M,
+      dictionary.find((entry) => entry.id === 493)?.dialects.M,
     ).toMatchObject({
       absolute: "ⲁⲛⲁⲕ",
       nominal: "ⲁⲛⲕ-",
     });
     const oxyrhynchiteFenceEntry = dictionary.find(
-      (entry) => entry.id === "cd_7166",
+      (entry) => entry.id === 7166,
     );
 
     expect(oxyrhynchiteFenceEntry).toMatchObject({
@@ -1057,12 +858,11 @@ describe("dictionary dataset guardrails", () => {
       },
     });
     expect(
-      findMeaningGroup(oxyrhynchiteFenceEntry, (group) =>
-        Boolean(group.english_meanings?.includes("fence")),
+      findSense(oxyrhynchiteFenceEntry, (group) =>
+        Boolean(group.meanings?.en?.includes("fence")),
       ),
     ).toMatchObject({
-      dutch_meanings: ["omheining"],
-      english_meanings: ["fence"],
+      meanings: { en: ["fence"], nl: ["omheining"] },
       grammar: { pos: "N" },
     });
   });
@@ -1072,17 +872,17 @@ describe("dictionary dataset guardrails", () => {
     const invalidConstructParticiples: Array<{
       dialect: string;
       form: string;
-      id: string;
+      id: number;
     }> = [];
     const secondaryCanonicalConstructParticiples: Array<{
       dialect: string;
       forms: string[];
-      id: string;
+      id: number;
     }> = [];
     const nominalConstructParticiples: Array<{
       dialect: string;
       form: string;
-      id: string;
+      id: number;
     }> = [];
 
     for (const entry of dictionary) {
@@ -1095,10 +895,10 @@ describe("dictionary dataset guardrails", () => {
           });
         }
 
-        if ((forms.constructParticiples?.length ?? 0) > 1) {
+        if ((forms.participles?.length ?? 0) > 1) {
           secondaryCanonicalConstructParticiples.push({
             dialect,
-            forms: forms.constructParticiples ?? [],
+            forms: forms.participles ?? [],
             id: entry.id,
           });
         }
@@ -1119,10 +919,10 @@ describe("dictionary dataset guardrails", () => {
     expect(secondaryCanonicalConstructParticiples).toEqual([]);
     expect(invalidConstructParticiples).toEqual([]);
     expect(
-      dictionary.find((entry) => entry.id === "cd_130")?.dialects.B,
+      dictionary.find((entry) => entry.id === 130)?.dialects.B,
     ).toMatchObject({
-      constructParticiples: ["ϭⲁⲓ~"],
       nominal: "ϭⲓ-",
+      participles: ["ϭⲁⲓ~"],
       pronominal: "ϭⲓⲧ=",
       stative: "ϭⲏⲟⲩ†",
       variants: {
@@ -1131,54 +931,60 @@ describe("dictionary dataset guardrails", () => {
     });
   });
 
-  it("validates construct participle compound records when present", () => {
+  it("validates distinct construct participle compound entries", () => {
     const dictionary = readDictionary();
+    const rootIds = new Set(dictionary.map((entry) => entry.id));
     const malformedCompounds: Array<{
-      dialect: string;
-      form: string;
-      id: string;
+      headword: string;
+      id: number;
+      reason: string;
     }> = [];
-    let compoundCount = 0;
 
-    for (const entry of dictionary) {
-      for (const [dialect, forms] of Object.entries(entry.dialects)) {
-        for (const compound of forms.constructParticipleCompounds ?? []) {
-          compoundCount += 1;
+    const compoundEntries = dictionary.filter(
+      (entry) => entry.root_id !== undefined,
+    );
 
-          if (!validateConstructParticipleCompound(compound)) {
-            malformedCompounds.push({
-              dialect,
-              form: compound.form,
-              id: entry.id,
-            });
-          }
-        }
+    for (const entry of compoundEntries) {
+      if (!rootIds.has(entry.root_id!)) {
+        malformedCompounds.push({
+          headword: entry.headword,
+          id: entry.id,
+          reason: "missing root",
+        });
+      }
+
+      if (!entry.senses.some((sense) => sense.grammar.pos === "N")) {
+        malformedCompounds.push({
+          headword: entry.headword,
+          id: entry.id,
+          reason: "missing noun sense",
+        });
       }
     }
 
     expect(malformedCompounds).toEqual([]);
-    expect(compoundCount).toBeGreaterThanOrEqual(260);
+    expect(compoundEntries.length).toBeGreaterThanOrEqual(260);
   });
 
-  it("keeps meaning group gloss arrays populated when present", () => {
+  it("keeps sense gloss arrays populated when present", () => {
     const dictionary = readDictionary();
 
-    const malformedGroups = dictionary.flatMap((entry) =>
-      entry.meaningGroups.flatMap((group, groupIndex) =>
+    const malformedSenses = dictionary.flatMap((entry) =>
+      entry.senses.flatMap((sense, senseIndex) =>
         (
           [
-            ["english_meanings", group.english_meanings],
-            ["dutch_meanings", group.dutch_meanings],
+            ["meanings.en", sense.meanings?.en],
+            ["meanings.nl", sense.meanings?.nl],
           ] as const
         ).flatMap(([field, values]) =>
           values === undefined || isNonEmptyStringArray(values)
             ? []
-            : [{ field, groupIndex, id: entry.id }],
+            : [{ field, id: entry.id, senseIndex }],
         ),
       ),
     );
 
-    expect(malformedGroups).toEqual([]);
+    expect(malformedSenses).toEqual([]);
   });
 
   it("omits placeholder meaning stubs", () => {
@@ -1196,19 +1002,19 @@ describe("dictionary dataset guardrails", () => {
     const dictionary = readDictionary();
     const boundOnlyEntries = [
       {
-        id: "cd_361",
+        id: 361,
         dialect: "B",
         nominal: "ⳳⲉⲛ-",
         pronominal: "ⲛ̀ⳳⲏⲧ=",
       },
       {
-        id: "cd_892",
+        id: 892,
         dialect: "B",
         nominal: "ⲛⲉⲙ-",
         pronominal: "ⲛⲉⲙⲁ=",
       },
       {
-        id: "cd_1713",
+        id: 1713,
         dialect: "B",
         nominal: "ⲟⲩⲧⲉ-",
         pronominal: "ⲟⲩⲧⲱ=",

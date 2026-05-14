@@ -145,7 +145,7 @@ function getEntryReportInsertPayload(options: {
   return {
     commentary: options.commentary,
     entry_headword: options.entry.headword,
-    entry_id: options.entry.id,
+    entry_id: String(options.entry.id),
     reason: options.reason,
     status: "open",
     user_id: options.userId,
@@ -214,7 +214,7 @@ async function dispatchEntryReportNotification(options: {
       aggregateId: options.reportId,
       commentary: options.commentary,
       entryHeadword: options.entry.headword,
-      entryId: options.entry.id,
+      entryId: String(options.entry.id),
       locale: options.language,
       reason: options.reason,
       userEmail: options.user.email,
@@ -222,7 +222,7 @@ async function dispatchEntryReportNotification(options: {
 
     if (!notificationResult.success) {
       console.error("Failed to send dictionary entry report notification", {
-        entryId: options.entry.id,
+        entryId: String(options.entry.id),
         error: notificationResult.error,
         reportId: options.reportId,
         userId: options.user.id,
@@ -351,7 +351,7 @@ export async function submitEntryReport(
   const { supabase, user } = authContext;
   const rateLimitError = await getEntryReportRateLimitError({
     copy,
-    entryId: entry.id,
+    entryId: String(entry.id),
     userId: user.id,
   });
   if (rateLimitError) {

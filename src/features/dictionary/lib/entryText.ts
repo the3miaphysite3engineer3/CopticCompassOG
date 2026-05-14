@@ -1,6 +1,6 @@
 import {
   type DictionaryDialectCode,
-  DICTIONARY_MEANING_GROUP_CODES,
+  DICTIONARY_SENSE_CODES,
   getPartOfSpeechLabel,
 } from "@/features/dictionary/config";
 import { DICTIONARY_GRAMMAR_SUMMARY_LEAD_INS } from "@/features/dictionary/grammarRegistry";
@@ -10,7 +10,7 @@ import type {
   DictionaryClientEntry,
   DictionaryGenderedMeaningMarker,
   DictionaryGenderedMeaningValues,
-  DictionaryMeaningGroup,
+  DictionarySense,
   LexicalEntry,
 } from "@/features/dictionary/types";
 import { getTranslation } from "@/lib/i18n";
@@ -24,14 +24,14 @@ const entryLeadIns = [
 
 type EntryMeaningSource = Pick<
   DictionaryClientEntry,
-  "dialectMeanings" | "genderedMeanings" | "meaningGroups"
+  "dialectMeanings" | "genderedMeanings" | "senses"
 >;
-type MeaningGroupDisplayOptions = {
+type SenseDisplayOptions = {
   dialectForms?: DialectForms;
   hasImperativeForms?: boolean;
 };
 
-type LocalizedDictionaryMeaningGroup = {
+type LocalizedDictionarySense = {
   code: string;
   genderedRows?: LocalizedDictionaryGenderedMeaning[];
   meanings: string[];
@@ -114,15 +114,18 @@ function normalizeMeaningKey(value: string) {
 }
 
 function getLocalizedTextValues(
-  englishValues: string[] | undefined,
-  dutchValues: string[] | undefined,
+  localizedValues: { en?: string[]; nl?: string[] } | undefined,
   locale: Language,
 ) {
   if (locale === "nl") {
-    return dutchValues?.length ? dutchValues : (englishValues ?? []);
+    return localizedValues?.nl?.length
+      ? localizedValues.nl
+      : (localizedValues?.en ?? []);
   }
 
-  return englishValues?.length ? englishValues : (dutchValues ?? []);
+  return localizedValues?.en?.length
+    ? localizedValues.en
+    : (localizedValues?.nl ?? []);
 }
 
 function getLocalizedGenderedMeaningValues(
@@ -148,73 +151,51 @@ function hasVisibleValues(values: readonly string[] | undefined) {
   return values?.some((value) => value.trim().length > 0) ?? false;
 }
 
-const COMPACT_DIALECT_MEANING_GROUP_NOTE_PATTERN =
+const COMPACT_DIALECT_SENSE_NOTE_PATTERN =
   /^(?:(?:Fb|La|Sa|Sf|Sl)|[ABFLOMS])+$/u;
-const MEANING_GROUP_CODE_SET = new Set<string>(DICTIONARY_MEANING_GROUP_CODES);
+const SENSE_CODE_SET = new Set<string>(DICTIONARY_SENSE_CODES);
 
-function isDisplayableMeaningGroupNote(note: string) {
+function isDisplayableSenseNote(note: string) {
   const normalizedNote = note.trim();
 
   return (
     normalizedNote.length > 0 &&
-    !COMPACT_DIALECT_MEANING_GROUP_NOTE_PATTERN.test(normalizedNote)
+    !COMPACT_DIALECT_SENSE_NOTE_PATTERN.test(normalizedNote)
   );
 }
 
-function getMeaningGroups(
-  entry: EntryMeaningSource,
-): readonly DictionaryMeaningGroup[] {
-  const groups = entry.meaningGroups as unknown;
-
-  if (!groups) {
-    return [];
-  }
-
-  if (Array.isArray(groups)) {
-    return groups as DictionaryMeaningGroup[];
-  }
-
-  if (typeof groups === "object") {
-    const groupMap = groups as Partial<Record<string, DictionaryMeaningGroup>>;
-
-    return DICTIONARY_MEANING_GROUP_CODES.flatMap((code) => {
-      const group = groupMap[code];
-
-      return group ? [group] : [];
-    });
-  }
-
-  return [];
+function getSenses(entry: EntryMeaningSource): readonly DictionarySense[] {
+  return Array.isArray(entry.senses) ? entry.senses : [];
 }
 
-function toMeaningGroupCode(value: string | undefined) {
-  return value && MEANING_GROUP_CODE_SET.has(value) ? value : "";
+function toSenseCode(value: string | undefined) {
+  return value && SENSE_CODE_SET.has(value) ? value : "";
 }
 
-function getMeaningGroupDisplayCode(group: DictionaryMeaningGroup) {
-  const grammar = group.grammar;
+function getSenseDisplayCode(sense: DictionarySense) {
+  const grammar = sense.grammar;
 
   return (
-    toMeaningGroupCode(grammar.valency) ||
-    toMeaningGroupCode(grammar.mood) ||
-    toMeaningGroupCode(grammar.form) ||
-    toMeaningGroupCode(grammar.voice) ||
-    toMeaningGroupCode(grammar.derivation) ||
-    toMeaningGroupCode(grammar.affix) ||
-    toMeaningGroupCode(grammar.caseRole) ||
-    toMeaningGroupCode(grammar.polarity) ||
-    toMeaningGroupCode(grammar.number) ||
-    toMeaningGroupCode(grammar.tags?.[0]) ||
-    toMeaningGroupCode(grammar.pos) ||
+    toSenseCode(grammar.valency) ||
+    toSenseCode(grammar.mood) ||
+    toSenseCode(grammar.form) ||
+    toSenseCode(grammar.voice) ||
+    toSenseCode(grammar.derivation) ||
+    toSenseCode(grammar.affix) ||
+    toSenseCode(grammar.caseRole) ||
+    toSenseCode(grammar.polarity) ||
+    toSenseCode(grammar.number) ||
+    toSenseCode(grammar.tags?.[0]) ||
+    toSenseCode(grammar.pos) ||
     grammar.pos ||
     ""
   );
 }
 
-function isMeaningGroupAvailableForDialect(
+function isSenseAvailableForDialect(
   code: string,
   dialectForms: DialectForms | undefined,
-  options: MeaningGroupDisplayOptions,
+  options: SenseDisplayOptions,
 ) {
   if (!dialectForms) {
     return true;
@@ -225,9 +206,8 @@ function isMeaningGroupAvailableForDialect(
       return options.hasImperativeForms ?? true;
     case "PC":
       return (
-        hasVisibleValues(dialectForms.constructParticiples) ||
-        hasVisibleValues(dialectForms.variants?.constructParticiples) ||
-        (dialectForms.constructParticipleCompounds?.length ?? 0) > 0
+        hasVisibleValues(dialectForms.participles) ||
+        hasVisibleValues(dialectForms.variants?.constructParticiples)
       );
     case "STA":
       return Boolean(
@@ -246,9 +226,9 @@ export function getLocalizedGenderedMeanings(
   return (entry.genderedMeanings ?? [])
     .map((genderedMeaning) => {
       const localizedValues =
-        locale === "nl" && genderedMeaning.dutch
-          ? genderedMeaning.dutch
-          : genderedMeaning.english;
+        locale === "nl" && genderedMeaning.meanings?.nl
+          ? genderedMeaning.meanings.nl
+          : genderedMeaning.meanings?.en;
 
       return {
         values: getLocalizedGenderedMeaningValues(localizedValues),
@@ -257,36 +237,28 @@ export function getLocalizedGenderedMeanings(
     .filter((genderedMeaning) => genderedMeaning.values.length > 0);
 }
 
-export function getLocalizedMeaningGroups(
+export function getLocalizedSenseGroups(
   entry: EntryMeaningSource,
   locale: Language = "en",
-  options: MeaningGroupDisplayOptions = {},
-): LocalizedDictionaryMeaningGroup[] {
+  options: SenseDisplayOptions = {},
+): LocalizedDictionarySense[] {
   const genderedMeanings = getLocalizedGenderedMeanings(entry, locale);
   let attachedGenderedMeanings = false;
 
-  return getMeaningGroups(entry).flatMap((group) => {
-    const code = getMeaningGroupDisplayCode(group);
+  return getSenses(entry).flatMap((sense) => {
+    const code = getSenseDisplayCode(sense);
 
     if (
       !code ||
-      !isMeaningGroupAvailableForDialect(code, options.dialectForms, options)
+      !isSenseAvailableForDialect(code, options.dialectForms, options)
     ) {
       return [];
     }
 
-    const meanings = getLocalizedTextValues(
-      group.english_meanings,
-      group.dutch_meanings,
-      locale,
-    );
-    const notes = getLocalizedTextValues(
-      group.english_notes,
-      group.dutch_notes,
-      locale,
-    );
+    const meanings = getLocalizedTextValues(sense.meanings, locale);
+    const notes = getLocalizedTextValues(sense.notes, locale);
     const genderedRows =
-      group.grammar.pos === "N" && !attachedGenderedMeanings
+      sense.grammar.pos === "N" && !attachedGenderedMeanings
         ? genderedMeanings
         : [];
 
@@ -299,7 +271,7 @@ export function getLocalizedMeaningGroups(
         code,
         ...(genderedRows.length > 0 ? { genderedRows } : {}),
         meanings,
-        notes: notes.filter(isDisplayableMeaningGroupNote),
+        notes: notes.filter(isDisplayableSenseNote),
       },
     ];
   });
@@ -311,16 +283,8 @@ function getLocalizedDialectMeanings(
 ): LocalizedDictionaryDialectMeaning[] {
   return (entry.dialectMeanings ?? [])
     .map((dialectMeaning) => {
-      const meanings = getLocalizedTextValues(
-        dialectMeaning.english_meanings,
-        dialectMeaning.dutch_meanings,
-        locale,
-      );
-      const notes = getLocalizedTextValues(
-        dialectMeaning.english_notes,
-        dialectMeaning.dutch_notes,
-        locale,
-      );
+      const meanings = getLocalizedTextValues(dialectMeaning.meanings, locale);
+      const notes = getLocalizedTextValues(dialectMeaning.notes, locale);
 
       return {
         dialects: dialectMeaning.dialects,
@@ -340,7 +304,7 @@ export function getLocalizedDisplayDialectMeanings(
   locale: Language = "en",
 ): LocalizedDictionaryDialectMeaning[] {
   const groupedMeaningKeys = new Set(
-    getLocalizedMeaningGroups(entry, locale)
+    getLocalizedSenseGroups(entry, locale)
       .flatMap((group) => group.meanings)
       .map((meaning) => normalizeMeaningKey(meaning))
       .filter(Boolean),
@@ -367,7 +331,7 @@ export function getLocalizedMeaningValues(
 ) {
   const values = [
     ...getLocalizedGenderedMeaningTexts(entry, locale),
-    ...getLocalizedMeaningGroups(entry, locale).flatMap((group) => [
+    ...getLocalizedSenseGroups(entry, locale).flatMap((group) => [
       ...group.meanings,
       ...group.notes,
     ]),
@@ -422,15 +386,17 @@ export function buildEntryDescription(
   locale: Language = "en",
   options: {
     displayHeadword?: string;
+    partOfSpeechLabel?: string;
     summary?: string;
   } = {},
 ) {
   const headword = options.displayHeadword ?? toPlainText(entry.headword);
   const firstMeaning = options.summary ?? getEntrySummary(entry, locale);
-  const partOfSpeech = getPartOfSpeechLabel(
-    getPrimaryEntryPartOfSpeech(entry),
-    (key) => getTranslation(locale, key),
-  );
+  const partOfSpeech =
+    options.partOfSpeechLabel ??
+    getPartOfSpeechLabel(getPrimaryEntryPartOfSpeech(entry), (key) =>
+      getTranslation(locale, key),
+    );
 
   if (locale === "nl") {
     return firstMeaning

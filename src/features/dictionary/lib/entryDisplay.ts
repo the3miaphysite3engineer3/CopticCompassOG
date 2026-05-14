@@ -6,13 +6,14 @@ import { getEntryNounGender } from "@/features/dictionary/lib/entryGrammar";
 import type {
   DialectFormVariants,
   DictionaryClientEntry,
+  DictionaryInflectedFormDetails,
 } from "@/features/dictionary/types";
 
 type EntryDisplayCandidate = Pick<
   DictionaryClientEntry,
-  "dialects" | "headword" | "meaningGroups"
+  "dialects" | "headword"
 > &
-  Partial<Pick<DictionaryClientEntry, "id" | "inflectedForms">>;
+  Partial<Pick<DictionaryClientEntry, "id" | "inflections" | "senses">>;
 type DialectEntryTuple = [
   DictionaryDialectCode,
   NonNullable<EntryDisplayCandidate["dialects"][DictionaryDialectCode]>,
@@ -25,7 +26,7 @@ type DialectVariantRow = {
 };
 export type GenderedHeadingMarker = "f" | "m" | "pl";
 type GenderedHeadingPart = {
-  entryId?: string;
+  entryId?: number;
   marker: GenderedHeadingMarker;
   spelling: string;
 };
@@ -50,6 +51,47 @@ function addUniqueForm(forms: string[], form: string) {
   if (normalizedForm && !forms.includes(normalizedForm)) {
     forms.push(normalizedForm);
   }
+}
+
+function getInflectedFormText(form: string | DictionaryInflectedFormDetails) {
+  return typeof form === "string" ? form : form.form;
+}
+
+function collectInflectionForms(
+  entry: EntryDisplayCandidate,
+  kind: keyof NonNullable<EntryDisplayCandidate["inflections"]>,
+  options: {
+    dialect?: DictionaryDialectCode;
+    includeUnscoped?: boolean;
+  } = {},
+) {
+  const collectedForms: string[] = [];
+  const dialectInflections = entry.inflections?.[kind];
+
+  if (!dialectInflections) {
+    return collectedForms;
+  }
+
+  for (const [inflectionDialect, roleForms] of Object.entries(
+    dialectInflections,
+  )) {
+    const isRequestedDialect =
+      !options.dialect || inflectionDialect === options.dialect;
+    const isUnscopedFallback =
+      options.includeUnscoped && inflectionDialect === "default";
+
+    if (!isRequestedDialect && !isUnscopedFallback) {
+      continue;
+    }
+
+    for (const forms of Object.values(roleForms ?? {})) {
+      for (const form of forms ?? []) {
+        addUniqueForm(collectedForms, getInflectedFormText(form));
+      }
+    }
+  }
+
+  return collectedForms;
 }
 
 function formatBoundForms(nominal = "", pronominal = "") {
@@ -83,7 +125,7 @@ export function formatDialectForms(
   headwordFallback: string,
 ) {
   const parts: string[] = [];
-  const primaryConstructParticiple = forms.constructParticiples?.[0] ?? "";
+  const primaryConstructParticiple = forms.participles?.[0] ?? "";
   const hasDerivedForm = Boolean(
     forms.nominal ||
     forms.pronominal ||
@@ -170,22 +212,10 @@ function getDialectFeminineForms(
   dialect: DictionaryDialectCode,
   options: { includeUnscoped?: boolean } = {},
 ) {
-  const feminineForms: string[] = [];
-
-  for (const inflectedForm of entry.inflectedForms ?? []) {
-    if (inflectedForm.kind !== "feminine") {
-      continue;
-    }
-
-    if (
-      inflectedForm.dialect === dialect ||
-      (options.includeUnscoped && !inflectedForm.dialect)
-    ) {
-      addUniqueForm(feminineForms, inflectedForm.form);
-    }
-  }
-
-  return feminineForms;
+  return collectInflectionForms(entry, "feminine", {
+    dialect,
+    includeUnscoped: options.includeUnscoped,
+  });
 }
 
 /**
@@ -196,37 +226,17 @@ export function getDialectPluralForms(
   dialect: DictionaryDialectCode,
   options: { includeUnscoped?: boolean } = {},
 ) {
-  const pluralForms: string[] = [];
-
-  for (const inflectedForm of entry.inflectedForms ?? []) {
-    if (inflectedForm.kind !== "plural") {
-      continue;
-    }
-
-    if (
-      inflectedForm.dialect === dialect ||
-      (options.includeUnscoped && !inflectedForm.dialect)
-    ) {
-      addUniqueForm(pluralForms, inflectedForm.form);
-    }
-  }
-
-  return pluralForms;
+  return collectInflectionForms(entry, "plural", {
+    dialect,
+    includeUnscoped: options.includeUnscoped,
+  });
 }
 
 /**
  * Returns every structured plural form in source order.
  */
 export function getAllPluralForms(entry: EntryDisplayCandidate) {
-  const pluralForms: string[] = [];
-
-  for (const inflectedForm of entry.inflectedForms ?? []) {
-    if (inflectedForm.kind === "plural") {
-      addUniqueForm(pluralForms, inflectedForm.form);
-    }
-  }
-
-  return pluralForms;
+  return collectInflectionForms(entry, "plural");
 }
 
 /**
@@ -238,15 +248,10 @@ export function getDialectImperativeForms(
   dialect: DictionaryDialectCode,
   options: { includeUnscoped?: boolean } = {},
 ) {
-  return (entry.inflectedForms ?? [])
-    .filter(
-      (inflectedForm) =>
-        inflectedForm.kind === "imperative" &&
-        (inflectedForm.dialect === dialect ||
-          (options.includeUnscoped && !inflectedForm.dialect)),
-    )
-    .map((inflectedForm) => inflectedForm.form)
-    .filter(Boolean);
+  return collectInflectionForms(entry, "imperative", {
+    dialect,
+    includeUnscoped: options.includeUnscoped,
+  });
 }
 
 /**
@@ -342,9 +347,7 @@ export function getGenderedHeadingParts(
     return [];
   }
 
-  const hasFeminineForms = (entry.inflectedForms ?? []).some(
-    (inflectedForm) => inflectedForm.kind === "feminine",
-  );
+  const hasFeminineForms = Boolean(entry.inflections?.["feminine"]);
 
   if (!hasFeminineForms) {
     return [];
@@ -442,9 +445,8 @@ export function getGenderedDialectFormParts(
     return [];
   }
 
-  const hasDialectFeminineForms = (entry.inflectedForms ?? []).some(
-    (inflectedForm) =>
-      inflectedForm.kind === "feminine" && inflectedForm.dialect === dialect,
+  const hasDialectFeminineForms = Boolean(
+    entry.inflections?.["feminine"]?.[dialect],
   );
 
   if (!hasDialectFeminineForms) {

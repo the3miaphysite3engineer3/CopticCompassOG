@@ -17,11 +17,11 @@ const dictionary: DictionaryClientEntry[] = [
         stative: "",
       },
     },
-    etymology: "Egy",
-    greek_equivalents: [],
+    etym: "Egy",
+    greek: [],
     headword: "ϭⲱⲓⲥ",
-    id: "cd_17",
-    meaningGroups: [{ grammar: { pos: "N" }, english_meanings: ["lord"] }],
+    id: 17,
+    senses: [{ grammar: { pos: "N" }, meanings: { en: ["lord"] } }],
   },
   {
     dialects: {
@@ -32,14 +32,14 @@ const dictionary: DictionaryClientEntry[] = [
         stative: "",
       },
     },
-    etymology: "Gr",
-    greek_equivalents: [],
+    etym: "Gr",
+    greek: [],
     headword: "ⲉⲓⲱⲧ",
-    id: "cd_18",
-    meaningGroups: [
+    id: 18,
+    senses: [
       {
         grammar: { gender: "M", pos: "N" },
-        english_meanings: ["meaning unknown"],
+        meanings: { en: ["meaning unknown"] },
       },
     ],
   },
@@ -52,11 +52,11 @@ const dictionary: DictionaryClientEntry[] = [
         stative: "ⲃⲏⲕ",
       },
     },
-    etymology: "Egy",
-    greek_equivalents: [],
+    etym: "Egy",
+    greek: [],
     headword: "ⲃⲱⲕ",
-    id: "cd_19",
-    meaningGroups: [{ grammar: { pos: "V" }, english_meanings: ["run"] }],
+    id: 19,
+    senses: [{ grammar: { pos: "V" }, meanings: { en: ["run"] } }],
   },
   {
     dialects: {
@@ -64,11 +64,11 @@ const dictionary: DictionaryClientEntry[] = [
         absolute: "ϯϫⲣⲉ ⲛϩⲏⲧ",
       },
     },
-    etymology: "Unknown",
+    etym: "Unknown",
     headword: "ϯϫⲣⲉ ⲛϩⲏⲧ",
-    id: "cd_7348",
-    meaningGroups: [
-      { grammar: { pos: "V" }, english_meanings: ["encourage, console"] },
+    id: 7348,
+    senses: [
+      { grammar: { pos: "V" }, meanings: { en: ["encourage, console"] } },
     ],
   },
 ];
@@ -90,7 +90,7 @@ describe("analytics drilldown", () => {
     });
 
     expect(page).toMatchObject({
-      entries: [{ id: "cd_18" }],
+      entries: [{ id: 18 }],
       hasMore: false,
       totalEntries: 4,
       totalMatches: 1,
@@ -121,11 +121,11 @@ describe("analytics drilldown", () => {
     });
 
     expect(filteredPage).toMatchObject({
-      entries: [{ id: "cd_7348" }],
+      entries: [{ id: 7348 }],
       totalMatches: 1,
     });
     expect(chartPage).toMatchObject({
-      entries: [{ id: "cd_7348" }],
+      entries: [{ id: 7348 }],
       totalMatches: 1,
     });
   });
@@ -145,7 +145,7 @@ describe("analytics drilldown", () => {
     });
 
     expect(page).toMatchObject({
-      entries: [{ id: "cd_18" }],
+      entries: [{ id: 18 }],
       hasMore: false,
       nextOffset: null,
       totalMatches: 2,
@@ -162,21 +162,21 @@ describe("analytics drilldown", () => {
             },
           },
           headword: "ⲉⲛⲉϩ",
-          etymology: "Egy",
-          id: "cd_adjectival_noun",
-          meaningGroups: [
+          etym: "Egy",
+          id: 2639070627,
+          senses: [
             {
               grammar: {
                 gender: "M",
                 pos: "N",
               },
-              english_meanings: ["eternity"],
+              meanings: { en: ["eternity"] },
             },
             {
               grammar: {
                 pos: "ADJ",
               },
-              english_meanings: ["eternal"],
+              meanings: { en: ["eternal"] },
             },
           ],
         },
@@ -193,7 +193,7 @@ describe("analytics drilldown", () => {
     });
 
     expect(page).toMatchObject({
-      entries: [{ id: "cd_adjectival_noun" }],
+      entries: [{ id: 2639070627 }],
       totalMatches: 1,
     });
   });

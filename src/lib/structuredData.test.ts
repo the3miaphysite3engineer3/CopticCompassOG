@@ -9,7 +9,7 @@ import {
 } from "./structuredData";
 
 const lordEntry: LexicalEntry = {
-  id: "cd_17",
+  id: 17,
   headword: "ϭⲱⲓⲥ",
   dialects: {
     B: {
@@ -22,9 +22,9 @@ const lordEntry: LexicalEntry = {
       },
     },
   },
-  meaningGroups: [{ grammar: { pos: "N" }, english_meanings: ["lord"] }],
-  etymology: "Gr",
-  greek_equivalents: ["κυριοσ"],
+  senses: [{ grammar: { pos: "N" }, meanings: { en: ["lord"] } }],
+  etym: "Gr",
+  greek: ["κυριοσ"],
 };
 
 describe("structured dictionary data", () => {

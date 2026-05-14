@@ -15,7 +15,10 @@ import type {
  * Loads and toggles the current user's favorite state for a dictionary entry,
  * including optimistic updates and table-availability handling.
  */
-export function useEntryFavorite(entryId: string, userId: string | null) {
+export function useEntryFavorite(
+  entryId: string | number,
+  userId: string | null,
+) {
   const [favorite, setFavorite] = useState<EntryFavoriteRow | null>(null);
   const [errorCode, setErrorCode] = useState<EntryFavoriteErrorCode | null>(
     null,
@@ -66,7 +69,7 @@ export function useEntryFavorite(entryId: string, userId: string | null) {
         .from("entry_favorites")
         .select("*")
         .eq("user_id", userId)
-        .eq("entry_id", entryId)
+        .eq("entry_id", String(entryId))
         .maybeSingle();
 
       if (!isMounted) {
@@ -127,7 +130,7 @@ export function useEntryFavorite(entryId: string, userId: string | null) {
         .from("entry_favorites")
         .delete()
         .eq("user_id", userId)
-        .eq("entry_id", entryId);
+        .eq("entry_id", String(entryId));
 
       if (error) {
         setFavorite(previousFavorite);
@@ -144,7 +147,7 @@ export function useEntryFavorite(entryId: string, userId: string | null) {
     }
 
     const favoritePayload: EntryFavoriteInsert = {
-      entry_id: entryId,
+      entry_id: String(entryId),
       user_id: userId,
     };
     const optimisticFavorite: EntryFavoriteRow = {

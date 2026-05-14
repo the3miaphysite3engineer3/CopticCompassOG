@@ -213,6 +213,28 @@ describe("Shenute history route", () => {
     });
   });
 
+  it("rejects oversized history payloads before saving", async () => {
+    const { POST, messageUpsertMock } = await loadHistoryRoute({});
+
+    const response = await POST(
+      new Request("https://www.copticcompass.com/api/shenute/history", {
+        method: "POST",
+        headers: {
+          "content-length": String(256 * 1024 + 1),
+        },
+        body: JSON.stringify({ messages: [] }),
+      }),
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(413);
+    expect(payload).toEqual({
+      success: false,
+      error: "Shenute history payload is too large.",
+    });
+    expect(messageUpsertMock).not.toHaveBeenCalled();
+  });
+
   it("deletes a user's selected chat session", async () => {
     const { DELETE, sessionDeleteBuilder, sessionDeleteMock } =
       await loadHistoryRoute({});

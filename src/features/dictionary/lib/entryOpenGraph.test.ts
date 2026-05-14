@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type {
-  DictionaryMeaningGroupGrammarGender,
+  DictionarySenseGrammarGender,
   LexicalEntry,
 } from "@/features/dictionary/types";
 
@@ -12,12 +12,12 @@ import {
 
 type TestEntryOverrides = Partial<LexicalEntry> &
   Pick<LexicalEntry, "id" | "headword"> & {
-    grammarGender?: DictionaryMeaningGroupGrammarGender;
+    grammarGender?: DictionarySenseGrammarGender;
   };
 
 function createEntry(overrides: TestEntryOverrides): LexicalEntry {
   const { grammarGender, id, headword, ...rest } = overrides;
-  const meaningGroups = rest.meaningGroups ?? [
+  const senses = rest.senses ?? [
     {
       grammar: grammarGender
         ? { gender: grammarGender, pos: "N" }
@@ -29,23 +29,23 @@ function createEntry(overrides: TestEntryOverrides): LexicalEntry {
     id,
     headword,
     dialects: {},
-    etymology: "Egy",
-    greek_equivalents: [],
+    etym: "Egy",
+    greek: [],
     ...rest,
-    meaningGroups,
+    senses,
   };
 }
 
 describe("entry Open Graph helpers", () => {
   it("builds a stable entry-specific Open Graph image URL", () => {
-    expect(
-      buildEntryOpenGraphImageUrl("cd_173", "nl", "https://example.com"),
-    ).toBe("https://example.com/api/og?type=entry&locale=nl&id=cd_173");
+    expect(buildEntryOpenGraphImageUrl(173, "nl", "https://example.com")).toBe(
+      "https://example.com/api/og?type=entry&locale=nl&id=173",
+    );
   });
 
   it("builds a preview with gloss", () => {
     const entry = createEntry({
-      id: "cd_173",
+      id: 173,
       headword: "ⲥⲁϫⲓ",
       dialects: {
         B: {
@@ -55,7 +55,7 @@ describe("entry Open Graph helpers", () => {
           stative: "",
         },
       },
-      meaningGroups: [{ grammar: { pos: "N" }, english_meanings: ["N son"] }],
+      senses: [{ grammar: { pos: "N" }, meanings: { en: ["N son"] } }],
     });
 
     const preview = buildEntryOpenGraphPreview({
@@ -70,39 +70,41 @@ describe("entry Open Graph helpers", () => {
 
   it("uses gendered heading and gloss data for social previews", () => {
     const entry = createEntry({
-      id: "cd_18",
+      id: 18,
       headword: "ⲣⲣⲟ",
       dialects: {
         B: {
           absolute: "ⲟⲩⲣⲟ",
         },
       },
-      meaningGroups: [
+      senses: [
         { grammar: { gender: "M", pos: "N" } },
-        { grammar: { pos: "ADJ" }, english_meanings: ["royal"] },
+        { grammar: { pos: "ADJ" }, meanings: { en: ["royal"] } },
       ],
       grammarGender: "M",
       genderedMeanings: [
         {
-          english: {
-            f: "queen",
-            m: "king",
-            pl: "royals",
+          meanings: {
+            en: {
+              f: "queen",
+              m: "king",
+              pl: "royals",
+            },
           },
         },
       ],
-      inflectedForms: [
-        {
-          kind: "feminine",
-          dialect: "B",
-          form: "ⲟⲩⲣⲱ",
+      inflections: {
+        feminine: {
+          B: {
+            default: ["ⲟⲩⲣⲱ"],
+          },
         },
-        {
-          kind: "plural",
-          dialect: "B",
-          form: "ⲟⲩⲣⲱⲟⲩ",
+        plural: {
+          B: {
+            default: ["ⲟⲩⲣⲱⲟⲩ"],
+          },
         },
-      ],
+      },
     });
 
     const preview = buildEntryOpenGraphPreview({
@@ -130,7 +132,7 @@ describe("entry Open Graph helpers", () => {
 
   it("includes the primary construct participle in preview headings", () => {
     const entry = createEntry({
-      id: "cd_130",
+      id: 130,
       headword: "ϫⲓ",
       dialects: {
         B: {
@@ -138,14 +140,14 @@ describe("entry Open Graph helpers", () => {
           nominal: "ϭⲓ-",
           pronominal: "ϭⲓⲧ=",
           stative: "ϭⲏⲟⲩ†",
-          constructParticiples: ["ϭⲁⲓ~"],
+          participles: ["ϭⲁⲓ~"],
           variants: {
             constructParticiples: ["ϭⲁⲩ~"],
           },
         },
       },
-      meaningGroups: [
-        { grammar: { form: "PC", pos: "V" }, english_meanings: ["pc taker"] },
+      senses: [
+        { grammar: { form: "PC", pos: "V" }, meanings: { en: ["pc taker"] } },
       ],
     });
 

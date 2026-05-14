@@ -11,6 +11,7 @@ import {
 } from "@/features/dictionary/search";
 import type {
   DictionaryClientEntry,
+  DictionaryRootReference,
   LexicalEntry,
 } from "@/features/dictionary/types";
 import { assertServerOnly } from "@/lib/server/assertServerOnly.ts";
@@ -18,8 +19,8 @@ import { assertServerOnly } from "@/lib/server/assertServerOnly.ts";
 assertServerOnly("src/features/dictionary/lib/dictionary.ts");
 
 type DictionaryLookupIndex = {
-  byId: Map<string, LexicalEntry>;
-  entryIds: readonly string[];
+  byId: Map<number, LexicalEntry>;
+  entryIds: readonly number[];
 };
 
 const dictionaryLookupIndexCache = new WeakMap<
@@ -59,7 +60,7 @@ function getDictionaryLookupIndex(
     return cachedIndex;
   }
 
-  const byId = new Map<string, LexicalEntry>();
+  const byId = new Map<number, LexicalEntry>();
 
   for (const entry of dictionary) {
     byId.set(entry.id, entry);
@@ -74,35 +75,59 @@ function getDictionaryLookupIndex(
   return lookupIndex;
 }
 
+export function toDictionaryRootReference(
+  entry: LexicalEntry,
+): DictionaryRootReference {
+  return {
+    dialects: entry.dialects,
+    headword: entry.headword,
+    id: entry.id,
+  };
+}
+
 /**
  * Keeps client search and analytics views on the smaller transport payload
  * they need instead of shipping entry-detail-only fields.
  */
 export function toDictionaryClientEntry(
   entry: LexicalEntry,
+  rootEntries?: ReadonlyMap<number, LexicalEntry>,
 ): DictionaryClientEntry {
   const clientEntry: DictionaryClientEntry = {
     dialects: entry.dialects,
     dialectMeanings: entry.dialectMeanings,
-    etymology: entry.etymology,
+    etym: entry.etym,
     genderedMeanings: entry.genderedMeanings,
     headword: entry.headword,
     id: entry.id,
-    inflectedForms: entry.inflectedForms,
-    meaningGroups: entry.meaningGroups,
+    inflections: entry.inflections,
+    senses: entry.senses,
   };
 
-  const greekEquivalents = entry.greek_equivalents ?? [];
+  if (entry.root_id !== undefined) {
+    clientEntry.root_id = entry.root_id;
 
-  if (greekEquivalents.length > 0) {
-    clientEntry.greek_equivalents = greekEquivalents;
+    const rootEntry = rootEntries?.get(entry.root_id);
+
+    if (rootEntry) {
+      clientEntry.rootEntry = toDictionaryRootReference(rootEntry);
+    }
+  }
+
+  const greek = entry.greek ?? [];
+
+  if (greek.length > 0) {
+    clientEntry.greek = greek;
   }
 
   return clientEntry;
 }
 
 const readDictionaryClientEntries = cache((): DictionaryClientEntry[] => {
-  return getDictionary().map(toDictionaryClientEntry);
+  const dictionary = getDictionary();
+  const { byId } = getDictionaryLookupIndex(dictionary);
+
+  return dictionary.map((entry) => toDictionaryClientEntry(entry, byId));
 });
 
 const readPreparedDictionarySearchEntries = cache(() => {
@@ -147,8 +172,9 @@ export function getDictionarySearchPage(
  * the cached JSON export when callers do not already have a list in memory.
  */
 export function getDictionaryEntryById(
-  id: string,
+  id: number | string,
   dictionary: readonly LexicalEntry[] = getDictionary(),
 ) {
-  return getDictionaryLookupIndex(dictionary).byId.get(id) ?? null;
+  const numericId = typeof id === "string" ? parseInt(id, 10) : id;
+  return getDictionaryLookupIndex(dictionary).byId.get(numericId) ?? null;
 }

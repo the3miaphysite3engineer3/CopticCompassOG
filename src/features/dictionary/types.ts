@@ -1,6 +1,6 @@
 import type {
   DictionaryDialectCode,
-  DictionaryMeaningGroupCode,
+  DictionarySenseCode,
   PartOfSpeech,
 } from "@/features/dictionary/config";
 
@@ -18,31 +18,45 @@ type DictionaryInflectedFormKind =
   | "masculine"
   | "plural";
 type DictionaryInflectedFormRole = "absolute" | "nominal" | "pronominal";
-type DictionaryMeaningGroupGrammarAffix = "PFX" | "SFX";
-type DictionaryMeaningGroupGrammarCaseRole = "DAT" | "OBJ";
-type DictionaryMeaningGroupGrammarDerivation = "CAUS";
-type DictionaryMeaningGroupGrammarForm = "ABS" | "PC" | "STA" | "VBAL";
-export type DictionaryMeaningGroupGrammarGender = Exclude<LexicalGender, "">;
-type DictionaryMeaningGroupGrammarMood = "IMP";
-type DictionaryMeaningGroupGrammarNumber = "PL" | "SG";
-export type DictionaryMeaningGroupGrammarPartOfSpeech = PartOfSpeech | "PRON";
-type DictionaryMeaningGroupGrammarPolarity = "NEG";
-type DictionaryMeaningGroupGrammarValency = "INTR" | "TR";
-type DictionaryMeaningGroupGrammarVoice = "REFL";
+type DictionarySenseGrammarAffix = "PFX" | "SFX";
+type DictionarySenseGrammarCaseRole = "DAT" | "OBJ";
+type DictionarySenseGrammarDerivation = "CAUS";
+type DictionarySenseGrammarForm = "ABS" | "PC" | "STA" | "VBAL";
+export type DictionarySenseGrammarGender = Exclude<LexicalGender, "">;
+type DictionarySenseGrammarMood = "IMP";
+type DictionarySenseGrammarNumber = "PL" | "SG";
+export type DictionarySenseGrammarPartOfSpeech = PartOfSpeech | "PRON";
+type DictionarySenseGrammarPolarity = "NEG";
+type DictionarySenseGrammarValency = "INTR" | "TR";
+type DictionarySenseGrammarVoice = "REFL";
 
 /**
  * A structured inflected or counterpart form that may not deserve a full
  * lexical entry.
  */
-export interface DictionaryInflectedForm {
-  kind: DictionaryInflectedFormKind;
+export interface DictionaryInflectedFormDetails {
   form: string;
-  dialect?: DictionaryDialectCode;
-  entryId?: string;
+  entryId?: number;
   notes?: string[];
-  role?: DictionaryInflectedFormRole;
   uncertain?: boolean;
 }
+
+export type DictionaryInflections = Partial<
+  Record<
+    DictionaryInflectedFormKind,
+    Partial<
+      Record<
+        DictionaryDialectCode,
+        Partial<
+          Record<
+            DictionaryInflectedFormRole | "default",
+            (string | DictionaryInflectedFormDetails)[]
+          >
+        >
+      >
+    >
+  >
+>;
 
 export interface DialectFormVariants {
   absolute?: string[];
@@ -52,22 +66,9 @@ export interface DialectFormVariants {
   stative?: string[];
 }
 
-/**
- * A derived lexical compound built from a dialect-specific construct
- * participle. These are not variants of the base form.
- */
-export interface ConstructParticipleCompound {
-  form: string;
-  sourceConstructParticiple?: string;
-  gender?: LexicalGender;
-  english_meanings: string[];
-  dutch_meanings?: string[];
-}
-
 export interface DialectForms {
   absolute?: string;
-  constructParticipleCompounds?: ConstructParticipleCompound[];
-  constructParticiples?: string[];
+  participles?: string[];
   nominal?: string;
   pronominal?: string;
   stative?: string;
@@ -78,47 +79,57 @@ export type DictionaryDialectFormsMap = Partial<
   Record<DictionaryDialectCode, DialectForms>
 >;
 
-export interface DictionaryMeaningGroupGrammar {
-  affix?: DictionaryMeaningGroupGrammarAffix;
-  caseRole?: DictionaryMeaningGroupGrammarCaseRole;
-  derivation?: DictionaryMeaningGroupGrammarDerivation;
-  form?: DictionaryMeaningGroupGrammarForm;
-  gender?: DictionaryMeaningGroupGrammarGender;
-  mood?: DictionaryMeaningGroupGrammarMood;
-  number?: DictionaryMeaningGroupGrammarNumber;
-  polarity?: DictionaryMeaningGroupGrammarPolarity;
-  pos: DictionaryMeaningGroupGrammarPartOfSpeech;
-  tags?: DictionaryMeaningGroupCode[];
-  valency?: DictionaryMeaningGroupGrammarValency;
-  voice?: DictionaryMeaningGroupGrammarVoice;
+export interface DictionarySenseGrammar {
+  affix?: DictionarySenseGrammarAffix;
+  caseRole?: DictionarySenseGrammarCaseRole;
+  derivation?: DictionarySenseGrammarDerivation;
+  form?: DictionarySenseGrammarForm;
+  gender?: DictionarySenseGrammarGender;
+  mood?: DictionarySenseGrammarMood;
+  number?: DictionarySenseGrammarNumber;
+  polarity?: DictionarySenseGrammarPolarity;
+  pos: DictionarySenseGrammarPartOfSpeech;
+  tags?: DictionarySenseCode[];
+  valency?: DictionarySenseGrammarValency;
+  voice?: DictionarySenseGrammarVoice;
 }
 
-export interface DictionaryMeaningGroup {
-  dutch_meanings?: string[];
-  dutch_notes?: string[];
-  english_meanings?: string[];
-  english_notes?: string[];
-  grammar: DictionaryMeaningGroupGrammar;
+export interface DictionarySense {
+  meanings?: {
+    en?: string[];
+    nl?: string[];
+  };
+  notes?: {
+    en?: string[];
+    nl?: string[];
+  };
+  grammar: DictionarySenseGrammar;
 }
 
-export type DictionaryMeaningGroups = DictionaryMeaningGroup[];
+export type DictionarySenses = DictionarySense[];
 
 export type DictionaryGenderedMeaningValues = Partial<
   Record<DictionaryGenderedMeaningMarker, string>
 >;
 
 export interface DictionaryGenderedMeaning {
-  english: DictionaryGenderedMeaningValues;
-  dutch?: DictionaryGenderedMeaningValues;
+  meanings?: {
+    en?: DictionaryGenderedMeaningValues;
+    nl?: DictionaryGenderedMeaningValues;
+  };
 }
 
 export interface DictionaryDialectMeaning {
   sourceLabel: string;
   dialects: DictionaryDialectCode[];
-  dutch_meanings?: string[];
-  dutch_notes?: string[];
-  english_meanings?: string[];
-  english_notes?: string[];
+  meanings?: {
+    en?: string[];
+    nl?: string[];
+  };
+  notes?: {
+    en?: string[];
+    nl?: string[];
+  };
 }
 
 /**
@@ -126,16 +137,22 @@ export interface DictionaryDialectMeaning {
  * generated public JSON snapshot.
  */
 export interface LexicalEntry {
-  id: string;
+  id: number;
+  root_id?: number;
   headword: string;
   dialects: DictionaryDialectFormsMap;
-  meaningGroups: DictionaryMeaningGroups;
+  senses: DictionarySenses;
   genderedMeanings?: DictionaryGenderedMeaning[];
   dialectMeanings?: DictionaryDialectMeaning[];
-  greek_equivalents?: string[];
-  etymology: DictionaryEtymology;
-  inflectedForms?: DictionaryInflectedForm[];
+  greek?: string[];
+  etym: DictionaryEtymology;
+  inflections?: DictionaryInflections;
 }
+
+export type DictionaryRootReference = Pick<
+  LexicalEntry,
+  "dialects" | "headword" | "id"
+>;
 
 /**
  * Represents the reduced dictionary shape needed by search-result cards and
@@ -145,12 +162,14 @@ export type DictionaryClientEntry = Pick<
   LexicalEntry,
   | "dialects"
   | "dialectMeanings"
-  | "etymology"
+  | "etym"
   | "genderedMeanings"
   | "headword"
   | "id"
-  | "inflectedForms"
-  | "meaningGroups"
+  | "inflections"
+  | "root_id"
+  | "senses"
 > & {
-  greek_equivalents?: string[];
+  rootEntry?: DictionaryRootReference;
+  greek?: string[];
 };
