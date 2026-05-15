@@ -19,6 +19,10 @@ import { getLoginPath } from "@/lib/supabase/config";
 
 import { useLanguage } from "./LanguageProvider";
 import { LanguageToggle } from "./LanguageToggle";
+import {
+  getNavbarLinkClasses,
+  type NavbarLinkVariant,
+} from "./navbarLinkStyles";
 import { ThemeToggle } from "./ThemeToggle";
 
 type NavbarAuthLinkProps = {
@@ -28,35 +32,10 @@ type NavbarAuthLinkProps = {
   loginLabel: string;
   onNavigate?: () => void;
   pathname: string;
-  variant: "desktop" | "mobile";
+  variant: NavbarLinkVariant;
 };
 
 type NavbarAuthLinkComponent = ComponentType<NavbarAuthLinkProps>;
-
-function getFallbackAuthLinkClasses(
-  variant: NavbarAuthLinkProps["variant"],
-  isActive: boolean,
-) {
-  if (variant === "mobile") {
-    return {
-      labelClassName: `col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`,
-      linkClassName: `group grid justify-items-center rounded-lg px-4 py-3 text-center text-sm tracking-[0.02em] transition-colors before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] ${
-        isActive
-          ? "bg-accent-soft text-accent-strong dark:bg-accent-soft/35 dark:text-accent"
-          : "text-muted hover:bg-elevated hover:text-ink"
-      }`,
-    };
-  }
-
-  return {
-    labelClassName: `col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`,
-    linkClassName: `group inline-grid h-10 items-center justify-items-center rounded-lg px-4 text-center text-sm tracking-[0.02em] transition-all duration-200 before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 ${
-      isActive
-        ? "bg-accent-soft text-accent-strong dark:bg-accent-soft/35 dark:text-accent"
-        : "text-muted hover:bg-elevated hover:text-ink"
-    }`,
-  };
-}
 
 function LazyNavbarAuthLink(props: NavbarAuthLinkProps) {
   const [AuthLink, setAuthLink] = useState<NavbarAuthLinkComponent | null>(
@@ -66,10 +45,10 @@ function LazyNavbarAuthLink(props: NavbarAuthLinkProps) {
   const isActive =
     props.pathname === hrefPathname ||
     props.pathname.startsWith(`${hrefPathname}/`);
-  const { labelClassName, linkClassName } = getFallbackAuthLinkClasses(
-    props.variant,
+  const { labelClassName, linkClassName } = getNavbarLinkClasses({
     isActive,
-  );
+    variant: props.variant,
+  });
 
   const loadAuthLink = useCallback(() => {
     if (AuthLink) {
@@ -93,6 +72,7 @@ function LazyNavbarAuthLink(props: NavbarAuthLinkProps) {
       onMouseEnter={loadAuthLink}
       data-label={props.loginLabel}
       className={linkClassName}
+      aria-current={isActive ? "page" : undefined}
     >
       <span className={labelClassName}>{props.loginLabel}</span>
     </Link>
@@ -153,22 +133,19 @@ export function Navbar() {
             {links.map((link) => {
               const isActive =
                 pathname === link.href || pathname.startsWith(`${link.href}/`);
+              const { labelClassName, linkClassName } = getNavbarLinkClasses({
+                isActive,
+                variant: "desktop",
+              });
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   data-label={link.label}
-                  className={`group inline-grid h-10 items-center justify-items-center rounded-lg px-4 text-sm tracking-[0.02em] text-center transition-all duration-200 before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 ${
-                    isActive
-                      ? "bg-accent-soft text-accent-strong dark:bg-accent-soft/35 dark:text-accent"
-                      : "text-muted hover:bg-elevated hover:text-ink"
-                  }`}
+                  className={linkClassName}
+                  aria-current={isActive ? "page" : undefined}
                 >
-                  <span
-                    className={`col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`}
-                  >
-                    {link.label}
-                  </span>
+                  <span className={labelClassName}>{link.label}</span>
                 </Link>
               );
             })}
@@ -211,23 +188,20 @@ export function Navbar() {
             {links.map((link) => {
               const isActive =
                 pathname === link.href || pathname.startsWith(`${link.href}/`);
+              const { labelClassName, linkClassName } = getNavbarLinkClasses({
+                isActive,
+                variant: "mobile",
+              });
               return (
                 <Link
                   key={link.href}
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   data-label={link.label}
-                  className={`group grid justify-items-center rounded-lg px-4 py-3 text-center text-sm tracking-[0.02em] transition-colors before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] ${
-                    isActive
-                      ? "bg-accent-soft text-accent-strong dark:bg-accent-soft/35 dark:text-accent"
-                      : "text-muted hover:bg-elevated hover:text-ink"
-                  }`}
+                  className={linkClassName}
+                  aria-current={isActive ? "page" : undefined}
                 >
-                  <span
-                    className={`col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`}
-                  >
-                    {link.label}
-                  </span>
+                  <span className={labelClassName}>{link.label}</span>
                 </Link>
               );
             })}
