@@ -41,8 +41,6 @@ function getDictionaryPath() {
 function getGrammarDirectoryCandidates() {
   return [
     path.join(process.cwd(), "public", "data", "grammar", "v1"),
-    path.join(process.cwd(), "public", "data", "grammer", "v1"),
-    path.join(process.cwd(), "public", "data", "grammer"),
     path.join(process.cwd(), "public", "data", "grammar"),
   ];
 }

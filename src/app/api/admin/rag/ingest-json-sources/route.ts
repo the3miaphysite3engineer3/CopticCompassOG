@@ -44,9 +44,7 @@ console.warn(`[RAG:JSON] DATA_ROOT is: ${DATA_ROOT}`);
 const DICTIONARY_JSON_PATH = path.join(DATA_ROOT, "dictionary.json");
 const GRAMMAR_JSON_CANDIDATE_DIRECTORIES = [
   path.join(DATA_ROOT, "grammar", "v1"),
-  path.join(DATA_ROOT, "grammer", "v1"),
   path.join(DATA_ROOT, "grammar"),
-  path.join(DATA_ROOT, "grammer"),
 ];
 
 async function collectJsonFilesRecursively(
