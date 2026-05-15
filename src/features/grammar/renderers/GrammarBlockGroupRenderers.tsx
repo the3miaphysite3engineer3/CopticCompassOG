@@ -89,11 +89,45 @@ function getExampleGroupItems(
   );
 }
 
+function normalizeTitleForComparison(value: string) {
+  return value.trim().replace(/\s+/g, " ").toLocaleLowerCase();
+}
+
+function shouldUseParentSectionExerciseChrome({
+  currentSectionId,
+  exercise,
+  language,
+  lessonBundle,
+}: {
+  currentSectionId: string | undefined;
+  exercise: NonNullable<GrammarLessonBundle["exercises"][number]>;
+  language: Language;
+  lessonBundle: GrammarLessonBundle | undefined;
+}) {
+  if (!currentSectionId || exercise.sectionId !== currentSectionId) {
+    return false;
+  }
+
+  const parentSection = lessonBundle?.lesson.sections.find(
+    (section) => section.id === currentSectionId,
+  );
+
+  if (!parentSection) {
+    return false;
+  }
+
+  return (
+    normalizeTitleForComparison(exercise.title[language]) ===
+    normalizeTitleForComparison(parentSection.title[language])
+  );
+}
+
 /**
  * Resolves and renders the exercise-group block referenced by a lesson
  * document.
  */
 export function GrammarExerciseGroupBlock({
+  currentSectionId,
   exerciseIds,
   language,
   lessonBundle,
@@ -107,33 +141,57 @@ export function GrammarExerciseGroupBlock({
 
   return (
     <div className="space-y-4">
-      {exercises.map((exercise) => (
-        <GrammarLessonCard
-          key={exercise.id}
-          tone="sky"
-          className="space-y-4 p-5"
-        >
+      {exercises.map((exercise) => {
+        const useParentSectionChrome = shouldUseParentSectionExerciseChrome({
+          currentSectionId,
+          exercise,
+          language,
+          lessonBundle,
+        });
+        const exerciseContent = (
           <div>
-            <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
-              {exercise.title[language]}
-            </h3>
-            <div className="mt-2 text-sm leading-7 text-stone-700 dark:text-stone-300">
+            {useParentSectionChrome ? null : (
+              <h3 className="text-lg font-semibold text-ink">
+                {exercise.title[language]}
+              </h3>
+            )}
+            <div
+              className={
+                useParentSectionChrome
+                  ? "text-sm leading-7 text-muted"
+                  : "mt-2 text-sm leading-7 text-muted"
+              }
+            >
               {renderBlocks(exercise.prompt[language])}
             </div>
+            <ExerciseForm
+              lessonSlug={lessonBundle?.lesson.slug ?? exercise.lessonId}
+              exerciseId={exercise.id}
+              language={language}
+              questions={exercise.items.map((item) => ({
+                id: item.id,
+                prompt: item.prompt[language],
+                minLength: item.answerSchema?.minLength,
+                maxLength: item.answerSchema?.maxLength,
+              }))}
+            />
           </div>
-          <ExerciseForm
-            lessonSlug={lessonBundle?.lesson.slug ?? exercise.lessonId}
-            exerciseId={exercise.id}
-            language={language}
-            questions={exercise.items.map((item) => ({
-              id: item.id,
-              prompt: item.prompt[language],
-              minLength: item.answerSchema?.minLength,
-              maxLength: item.answerSchema?.maxLength,
-            }))}
-          />
-        </GrammarLessonCard>
-      ))}
+        );
+
+        if (useParentSectionChrome && exercises.length === 1) {
+          return <div key={exercise.id}>{exerciseContent}</div>;
+        }
+
+        return (
+          <GrammarLessonCard
+            key={exercise.id}
+            tone="coptic"
+            className="space-y-4 p-5"
+          >
+            {exerciseContent}
+          </GrammarLessonCard>
+        );
+      })}
     </div>
   );
 }
@@ -192,11 +250,8 @@ export function GrammarExampleGroupBlock({
   const renderExampleList = (items: typeof examples) => (
     <ul className="space-y-3">
       {items.map((example) => (
-        <li
-          key={example.id}
-          className="leading-7 text-stone-700 dark:text-stone-300"
-        >
-          <span className="font-coptic text-xl text-emerald-600 dark:text-emerald-400">
+        <li key={example.id} className="leading-7 text-muted">
+          <span className="font-coptic text-xl text-coptic">
             {renderExampleContent(example)}
           </span>
           <span className="ml-3">{example.translation[language]}</span>

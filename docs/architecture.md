@@ -101,6 +101,7 @@ Examples:
 - locale and routing helpers
 - metadata and SEO helpers
 - structured data builders
+- communication brand constants and notification email shells
 - CSP and security headers
 - Supabase client/server wiring
 - validation helpers
@@ -162,6 +163,24 @@ The app uses Supabase in three layers:
 Shared Edge Function logic lives under `supabase/functions/_shared`.
 
 More involved workers should stay decomposed by responsibility instead of growing into single long files. The content release worker is a good example: its env/config, REST helpers, notification persistence, and broadcast delivery logic now live in separate modules under `supabase/functions/process-content-release`.
+
+## Communications and Public Docs
+
+Communication code is split between feature-level templates and shared delivery
+infrastructure:
+
+- audience preferences, content releases, and release email builders live under
+  `src/features/communications`
+- contact-message email templates live under `src/features/contact`
+- shared notification dispatch, queueing, and generic branded fallback HTML live
+  under `src/lib/notifications`
+- product communication constants and email color tokens live in
+  `src/lib/communications/mailBrand.ts`
+
+Public-facing documentation is part of the product surface. Keep `README.md`,
+the docs in `docs/`, and README screenshots in `public/readme` aligned with the
+current brand assets, typography, and product vocabulary. The brand book is the
+source of truth for naming, logo usage, and public copy posture.
 
 ## Testing Strategy
 

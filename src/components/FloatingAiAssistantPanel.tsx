@@ -27,7 +27,10 @@ import {
   AuthGateNotice,
 } from "@/components/AuthGateNotice";
 import { Badge } from "@/components/Badge";
-import { buttonClassName } from "@/components/Button";
+import {
+  buttonClassName,
+  iconButtonClassName as sharedIconButtonClassName,
+} from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
 import { cx } from "@/lib/classes";
 import { useOptionalAuthGate } from "@/lib/supabase/useOptionalAuthGate";
@@ -326,14 +329,14 @@ function isDenseStudyRoute(pathname: string | null) {
 
 function getFeedbackStatusClass(status: "error" | "pending" | "success") {
   if (status === "error") {
-    return "text-rose-700 dark:text-rose-300";
+    return "text-danger";
   }
 
   if (status === "pending") {
     return "text-muted";
   }
 
-  return "text-emerald-700 dark:text-emerald-300";
+  return "text-coptic";
 }
 
 function buildPageContext(pathname: string): PageContextPayload {
@@ -467,8 +470,9 @@ export function FloatingAiAssistantPanel({
   const typedMessages = messages as ChatMessageLike[];
   const isAttachmentMenuDisabled =
     isLoading || ocrPending || isShenuteAccessBlocked;
-  const iconButtonClassName =
-    "inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-line/80 bg-surface/80 text-muted shadow-sm transition-colors hover:bg-elevated hover:text-ink disabled:cursor-not-allowed disabled:opacity-45 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30";
+  const iconButtonClassName = sharedIconButtonClassName({
+    className: "h-9 w-9 shrink-0 border-line/80 bg-surface/80",
+  });
   const floatingContainerClassName = cx(
     "fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-4 z-50 sm:bottom-5 sm:right-5",
     !isOpen && isDenseStudyRoute(pathname) && "hidden sm:block",
@@ -491,7 +495,7 @@ export function FloatingAiAssistantPanel({
   } else if (messages.length === 0) {
     conversationContent = (
       <div className="rounded-2xl border border-dashed border-accent/20 bg-accent-soft/55 px-3 py-4 text-sm leading-6 text-muted dark:bg-accent-soft/25">
-        <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-2xl bg-surface text-sky-700 shadow-sm dark:text-sky-300">
+        <div className="mb-3 inline-flex h-9 w-9 items-center justify-center rounded-lg bg-surface text-coptic shadow-sm">
           <span className="font-coptic leading-none">Ϣ</span>
         </div>
         <p>{copy.emptyPrompt}</p>
@@ -514,7 +518,7 @@ export function FloatingAiAssistantPanel({
           key={message.id}
           className={
             message.role === "user"
-              ? "ml-8 rounded-2xl rounded-br-sm bg-sky-600 px-3.5 py-2.5 font-coptic text-[0.98rem] leading-6 text-white shadow-sm dark:bg-sky-500"
+              ? "ml-8 rounded-2xl rounded-br-sm bg-coptic px-3.5 py-2.5 font-coptic text-[0.98rem] leading-6 text-white shadow-sm dark:text-paper"
               : "mr-5 rounded-2xl rounded-bl-sm border border-line/80 bg-surface/95 px-3.5 py-2.5 font-coptic text-[0.98rem] leading-6 text-ink shadow-sm ring-1 ring-line/60"
           }
         >
@@ -537,7 +541,7 @@ export function FloatingAiAssistantPanel({
                         "underline underline-offset-4",
                         message.role === "user"
                           ? "decoration-white/60 hover:decoration-white"
-                          : "decoration-stone-400 hover:decoration-sky-500",
+                          : "decoration-accent/45 hover:decoration-accent",
                       )}
                     />
                   ),
@@ -583,7 +587,7 @@ export function FloatingAiAssistantPanel({
                     className: cx(
                       "h-8 gap-1.5 px-2 text-xs",
                       selectedReaction === "like" &&
-                        "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+                        "border-coptic/35 bg-coptic-soft text-coptic",
                     ),
                   })}
                 >
@@ -634,7 +638,7 @@ export function FloatingAiAssistantPanel({
                     placeholder={copy.adminNotePlaceholder}
                     rows={3}
                     disabled={!isAuthenticated || isFeedbackPending}
-                    className="w-full rounded-xl border border-line bg-surface px-2 py-1 text-[11px] text-ink focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-300/35"
+                    className="w-full rounded-xl border border-line bg-surface px-2 py-1 text-[11px] text-ink focus:border-accent/55 focus:outline-none focus:ring-2 focus:ring-accent/30"
                   />
                   <button
                     type="button"
@@ -1069,11 +1073,11 @@ export function FloatingAiAssistantPanel({
   return (
     <div className={floatingContainerClassName}>
       {isOpen ? (
-        <section className="flex h-[560px] max-h-[calc(100dvh-7rem)] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-3xl border border-line/80 bg-surface/95 shadow-panel backdrop-blur-xl sm:w-[400px]">
+        <section className="flex h-[560px] max-h-[calc(100dvh-7rem)] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg border border-line/80 bg-surface/95 shadow-panel backdrop-blur-xl sm:w-[400px]">
           <header className="border-b border-line/80 bg-surface/90 px-4 py-3">
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
-                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-sky-700 shadow-sm dark:bg-sky-900/30 dark:text-sky-300">
+                <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-coptic-soft text-coptic shadow-sm">
                   <span className="font-coptic leading-none">Ϣ</span>
                 </span>
                 <div className="min-w-0">
@@ -1090,7 +1094,7 @@ export function FloatingAiAssistantPanel({
               </div>
               <div className="flex shrink-0 items-center gap-1.5">
                 {saveStatus ? (
-                  <span className="hidden max-w-24 truncate text-[11px] font-medium text-emerald-700 dark:text-emerald-300 sm:inline">
+                  <span className="hidden max-w-24 truncate text-[11px] font-medium text-coptic sm:inline">
                     {saveStatus}
                   </span>
                 ) : null}
@@ -1164,7 +1168,7 @@ export function FloatingAiAssistantPanel({
               </p>
             ) : null}
             {cameraError ? (
-              <p className="mb-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:border-amber-900/40 dark:bg-amber-950/40 dark:text-amber-300">
+              <p className="mb-2 rounded-xl border border-warning/20 bg-accent-soft/75 px-3 py-2 text-xs text-accent-strong dark:text-accent">
                 {cameraError}
               </p>
             ) : null}
@@ -1360,7 +1364,7 @@ export function FloatingAiAssistantPanel({
                   size: "sm",
                   variant: "primary",
                   className:
-                    "h-10 w-10 shrink-0 rounded-xl px-0 disabled:hover:bg-sky-500 dark:disabled:hover:bg-sky-400",
+                    "h-10 w-10 shrink-0 rounded-lg px-0 disabled:hover:opacity-55",
                 })}
               >
                 <SendHorizontal className="h-4 w-4" />
@@ -1378,7 +1382,7 @@ export function FloatingAiAssistantPanel({
           onClick={() => {
             setIsOpen(true);
           }}
-          className="inline-flex h-12 w-12 items-center justify-center gap-2 rounded-2xl bg-sky-600 text-white shadow-panel transition-colors hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 dark:bg-sky-500 dark:hover:bg-sky-400 sm:h-auto sm:w-auto sm:px-5 sm:py-3 sm:text-sm sm:font-semibold"
+          className="inline-flex h-12 w-12 items-center justify-center gap-2 rounded-lg border border-transparent bg-ink text-paper shadow-panel transition-colors hover:bg-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 dark:border-accent/35 dark:bg-accent-soft dark:text-ink dark:hover:bg-elevated sm:h-auto sm:w-auto sm:px-5 sm:py-3 sm:text-sm sm:font-semibold"
         >
           <MessageCircle className="h-5 w-5" aria-hidden="true" />
           <span className="sr-only sm:not-sr-only">

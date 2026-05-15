@@ -28,7 +28,7 @@ export function GrammarLessonCard({
 }: GrammarLessonCardProps) {
   const isAvailable = lesson.status === "published";
   const sharedClassName =
-    "group relative min-h-[20rem] overflow-hidden rounded-3xl border p-8 shadow-panel backdrop-blur-md transition-all duration-300 md:p-9 flex flex-col justify-between";
+    "group relative flex min-h-[20rem] flex-col justify-between overflow-hidden rounded-lg border p-7 text-left shadow-soft backdrop-blur-sm transition-all duration-200 md:p-8";
 
   const content = (
     <>
@@ -36,10 +36,10 @@ export function GrammarLessonCard({
         <div className="mb-5 flex items-center justify-between gap-3">
           <div
             className={cx(
-              "flex h-12 w-12 items-center justify-center rounded-xl",
+              "flex h-12 w-12 items-center justify-center rounded-lg",
               isAvailable
-                ? "bg-sky-100 text-sky-600 dark:bg-sky-900/30 dark:text-sky-400"
-                : "bg-stone-200 text-stone-500 dark:bg-stone-800 dark:text-stone-400",
+                ? "bg-coptic-soft text-coptic"
+                : "bg-elevated text-muted",
             )}
           >
             {isAvailable ? (
@@ -53,15 +53,10 @@ export function GrammarLessonCard({
           </Badge>
         </div>
 
-        <Badge tone="neutral" size="xs" className="mb-4 tracking-[0.14em]">
-          {String(lesson.number).padStart(2, "0")}
-        </Badge>
         <h2
           className={cx(
             "mb-3 text-2xl font-semibold",
-            isAvailable
-              ? "text-stone-800 dark:text-stone-200"
-              : "text-stone-500 dark:text-stone-400",
+            isAvailable ? "text-ink" : "text-muted",
           )}
         >
           {lesson.title[language]}
@@ -69,9 +64,7 @@ export function GrammarLessonCard({
         <p
           className={cx(
             "text-sm leading-7",
-            isAvailable
-              ? "text-stone-500 dark:text-stone-400"
-              : "text-stone-400 dark:text-stone-500",
+            isAvailable ? "text-muted" : "text-muted/70",
           )}
         >
           {lesson.summary[language]}
@@ -81,9 +74,7 @@ export function GrammarLessonCard({
       <span
         className={cx(
           "relative mt-8 inline-flex items-center gap-2 text-sm font-semibold",
-          isAvailable
-            ? "text-sky-600 dark:text-sky-400"
-            : "text-stone-400 dark:text-stone-500",
+          isAvailable ? "text-coptic" : "text-muted/70",
         )}
       >
         {isAvailable ? t("grammar.openLesson") : t("grammar.inPreparation")}
@@ -99,7 +90,7 @@ export function GrammarLessonCard({
       <div
         className={cx(
           sharedClassName,
-          "cursor-not-allowed border-line/80 bg-surface/60 opacity-90",
+          "cursor-not-allowed border-line bg-surface/60 opacity-90",
         )}
       >
         {content}
@@ -112,10 +103,10 @@ export function GrammarLessonCard({
       href={getGrammarLessonPath(lesson.slug, language)}
       className={cx(
         sharedClassName,
-        "cursor-pointer border-line/80 bg-surface/75 hover:-translate-y-1 hover:border-accent/25 hover:bg-surface/95 hover:shadow-sky-500/10",
+        "cursor-pointer border-line bg-surface/88 hover:-translate-y-0.5 hover:border-coptic/35 hover:bg-surface",
       )}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-sky-500/5 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
+      <div className="absolute inset-x-0 top-0 h-1 bg-coptic/70 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
       {content}
     </Link>
   );

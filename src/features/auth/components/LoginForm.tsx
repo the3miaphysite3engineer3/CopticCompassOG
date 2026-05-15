@@ -69,8 +69,8 @@ export function LoginForm({
       contentClassName="pt-8"
       width="narrow"
       accents={[
-        pageShellAccents.topLeftSkyOrb,
-        pageShellAccents.bottomRightEmeraldOrb,
+        pageShellAccents.topLeftGoldWash,
+        pageShellAccents.bottomRightCopticWash,
       ]}
     >
       <PageHeader
@@ -84,7 +84,7 @@ export function LoginForm({
 
       <div className="max-w-xl mx-auto">
         <SurfacePanel rounded="3xl" className="p-8 md:p-10">
-          <form className="space-y-6 text-stone-800 dark:text-stone-200">
+          <form className="space-y-6 text-ink">
             {redirectTo && (
               <input type="hidden" name="redirectTo" value={redirectTo} />
             )}
@@ -136,10 +136,10 @@ export function LoginForm({
 
             <div className="relative py-2">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-stone-200 dark:border-stone-800" />
+                <span className="w-full border-t border-line" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white dark:bg-stone-900 px-2 text-stone-500">
+                <span className="bg-surface px-2 text-muted">
                   {t("login.orContinueWith")}
                 </span>
               </div>

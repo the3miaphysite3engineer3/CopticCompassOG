@@ -36,7 +36,7 @@ export function EntryReportReviewForm({
   return (
     <form
       action={updateEntryReportStatus}
-      className="space-y-4 rounded-2xl border border-stone-100 bg-stone-50/60 p-5 dark:border-stone-800 dark:bg-stone-900/20"
+      className="space-y-4 rounded-lg border border-line bg-surface/88 p-5"
     >
       <input type="hidden" name="report_id" value={reportId} />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end">

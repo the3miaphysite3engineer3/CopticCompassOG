@@ -10,13 +10,13 @@ import type { Metadata } from "next";
 function buildHomeDescription(locale: "en" | "nl") {
   if (locale === "nl") {
     return siteConfig.dictionaryEntryCount
-      ? `Verken Coptic Compass: een digitaal thuis voor de studie van het Koptisch met ${siteConfig.dictionaryEntryCount.toLocaleString()} doorzoekbare woordenboeklemma's, grammaticalessen, publicaties, Shenute AI en leertools.`
-      : "Verken Coptic Compass: een digitaal thuis voor de studie van het Koptisch met een doorzoekbaar woordenboek, grammaticalessen, publicaties, Shenute AI en leertools.";
+      ? `Verken Coptic Compass, een betrouwbaar digitaal Koptologieplatform voor lezen, onderzoek en Koptisch taalwerk. Bevat ${siteConfig.dictionaryEntryCount.toLocaleString()} doorzoekbare woordenboeklemma's, grammaticalessen, publicaties en begeleide tools.`
+      : "Verken Coptic Compass, een betrouwbaar digitaal Koptologieplatform voor lezen, onderzoek en Koptisch taalwerk.";
   }
 
   return siteConfig.dictionaryEntryCount
-    ? `Explore Coptic Compass, a digital home for Coptic study with ${siteConfig.dictionaryEntryCount.toLocaleString()} searchable dictionary entries, grammar lessons, publications, Shenute AI, and learning tools.`
-    : "Explore Coptic Compass, a digital home for Coptic study with a searchable dictionary, grammar lessons, publications, Shenute AI, and learning tools.";
+    ? `Explore Coptic Compass, a trusted digital Coptology platform for reading, research, and Coptic language work. Includes ${siteConfig.dictionaryEntryCount.toLocaleString()} searchable dictionary entries, grammar lessons, publications, and guided tools.`
+    : "Explore Coptic Compass, a trusted digital Coptology platform for reading, research, and Coptic language work.";
 }
 
 export async function generateMetadata({
@@ -28,10 +28,7 @@ export async function generateMetadata({
   const resolvedLocale = resolvePublicLocale(locale);
 
   return createLocalizedPageMetadata({
-    title:
-      resolvedLocale === "nl"
-        ? "Koptisch woordenboek, grammatica, publicaties en Shenute AI"
-        : "Coptic Dictionary, Grammar, Publications, and Shenute AI",
+    title: "Coptic Compass",
     description: buildHomeDescription(resolvedLocale),
     path: "/",
     locale: resolvedLocale,

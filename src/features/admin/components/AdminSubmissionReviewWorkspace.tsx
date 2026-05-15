@@ -119,11 +119,11 @@ function AdminSubmissionQueueItem({
           rounded: "3xl",
           variant: active ? "elevated" : "subtle",
           className:
-            "w-full p-5 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50",
+            "w-full cursor-pointer select-none p-5 text-left transition-all duration-200 hover:-translate-y-px active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
         }),
         active
-          ? "border-sky-200/90 bg-sky-50/90 shadow-lg shadow-sky-100/40 dark:border-sky-900/50 dark:bg-sky-950/30 dark:shadow-black/20"
-          : "hover:border-stone-300 hover:bg-white/80 dark:hover:border-stone-700 dark:hover:bg-stone-900/70",
+          ? "border-accent/35 bg-accent-soft/75 shadow-panel dark:bg-accent-soft/25 dark:shadow-black/20"
+          : "hover:border-accent/40 hover:bg-surface dark:hover:bg-elevated",
       )}
     >
       <div className="flex items-start justify-between gap-4">
@@ -142,12 +142,12 @@ function AdminSubmissionQueueItem({
             )}
           </div>
 
-          <h3 className="mt-3 text-lg font-semibold text-stone-950 dark:text-stone-50">
+          <h3 className="mt-3 text-lg font-semibold text-ink">
             {formatLessonSlug(submission.lesson_slug)}
           </h3>
 
-          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-600 dark:text-stone-400">
-            <span className="font-medium text-stone-800 dark:text-stone-200">
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
+            <span className="font-medium text-ink">
               {copy.student}: {submission.studentEmail || copy.unknownUser}
             </span>
             <span>
@@ -156,19 +156,19 @@ function AdminSubmissionQueueItem({
             </span>
           </div>
 
-          <p className="mt-3 text-sm leading-6 text-stone-600 dark:text-stone-400">
-            {preview}
-          </p>
+          <p className="mt-3 text-sm leading-6 text-muted">{preview}</p>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2 pt-1 text-sm font-medium text-stone-500 dark:text-stone-400">
+        <div className="flex shrink-0 items-center gap-2 pt-1 text-sm font-medium text-muted">
           <span className="hidden sm:inline">
             {active ? copy.open : copy.review}
           </span>
           <ChevronRight
             className={cx(
               "h-5 w-5 transition-transform duration-200",
-              active ? "translate-x-0.5 text-sky-600 dark:text-sky-300" : "",
+              active
+                ? "translate-x-0.5 text-accent-strong dark:text-accent"
+                : "",
             )}
           />
         </div>
@@ -197,10 +197,8 @@ function AdminSubmissionReviewPanel({
         })}
       >
         <div className="space-y-3">
-          <p className="text-base font-semibold text-stone-900 dark:text-stone-100">
-            {copy.panelTitle}
-          </p>
-          <p className="max-w-sm text-sm leading-6 text-stone-600 dark:text-stone-400">
+          <p className="text-base font-semibold text-ink">{copy.panelTitle}</p>
+          <p className="max-w-sm text-sm leading-6 text-muted">
             {copy.panelDescription}
           </p>
         </div>
@@ -218,7 +216,7 @@ function AdminSubmissionReviewPanel({
           "overflow-hidden xl:max-h-[calc(100vh-8.5rem)] xl:overflow-y-auto",
       })}
     >
-      <div className="border-b border-stone-200/80 px-6 py-5 dark:border-stone-800 md:px-7">
+      <div className="border-b border-line px-6 py-5 md:px-7">
         <div className="flex flex-wrap gap-2">
           {submission.status === "reviewed" ? (
             <SubmissionStatusBadge
@@ -236,18 +234,18 @@ function AdminSubmissionReviewPanel({
           </Badge>
         </div>
 
-        <h3 className="mt-4 text-2xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
+        <h3 className="mt-4 text-2xl font-semibold tracking-tight text-ink">
           {formatLessonSlug(submission.lesson_slug)}
         </h3>
 
-        <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
+        <p className="mt-2 text-sm leading-6 text-muted">
           {copy.submittedOn}{" "}
           {formatSubmissionDate(submission.created_at, language)}
         </p>
       </div>
 
       <div className="space-y-6 px-6 py-6 md:px-7">
-        <div className="rounded-2xl border border-stone-100 bg-stone-50 p-5 whitespace-pre-wrap font-coptic text-lg text-stone-700 dark:border-stone-800/50 dark:bg-stone-950 dark:text-stone-300 md:text-xl">
+        <div className="rounded-lg border border-line bg-elevated p-5 whitespace-pre-wrap font-coptic text-lg text-muted md:text-xl">
           {submission.submitted_text}
         </div>
 
@@ -255,7 +253,7 @@ function AdminSubmissionReviewPanel({
 
         <form
           action={deleteSubmission}
-          className="rounded-2xl border border-rose-200/80 bg-rose-50/70 p-5 dark:border-rose-900/40 dark:bg-rose-950/20"
+          className="rounded-lg border border-rose-200/80 bg-rose-50/70 p-5 dark:border-rose-900/40 dark:bg-rose-950/20"
           onSubmit={(event) => {
             if (!window.confirm(copy.deleteConfirm)) {
               event.preventDefault();
@@ -287,7 +285,7 @@ function AdminSubmissionReviewPanel({
             <Button
               type="submit"
               variant="secondary"
-              className="border-rose-200 bg-white text-rose-700 hover:bg-rose-50 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-200 dark:hover:bg-rose-950/50"
+              className="border-rose-200 bg-surface text-rose-700 hover:bg-rose-50 dark:border-rose-900/40 dark:bg-rose-950/30 dark:text-rose-200 dark:hover:bg-rose-950/50"
             >
               {copy.removeSubmission}
             </Button>
@@ -336,7 +334,7 @@ export function AdminSubmissionReviewWorkspace({
 
   return (
     <div className="space-y-5">
-      <div className="rounded-3xl border border-line/80 bg-elevated/70 p-4 text-sm leading-6 text-muted">
+      <div className="rounded-xl border border-line/80 bg-elevated/70 p-4 text-sm leading-6 text-muted">
         {copy.intro}
       </div>
 

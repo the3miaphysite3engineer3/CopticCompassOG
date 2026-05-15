@@ -31,14 +31,14 @@ export default function Error({
       description={copy.errorDescription}
       details={copy.errorDetails}
       noticeTitle={copy.errorNoticeTitle}
-      tone="analytics"
+      tone="brand"
       primaryHref={getDashboardPath(language)}
       primaryLabel={copy.errorPrimaryLabel}
       reset={reset}
       retryLabel={copy.errorRetryLabel}
       accents={[
-        pageShellAccents.heroEmeraldArc,
-        pageShellAccents.topRightSkyOrbInset,
+        pageShellAccents.heroGoldBand,
+        pageShellAccents.topRightCopticWashInset,
       ]}
     />
   );

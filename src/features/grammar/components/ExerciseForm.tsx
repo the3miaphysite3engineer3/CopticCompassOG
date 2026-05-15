@@ -6,6 +6,7 @@ import { useState, useEffect, useActionState } from "react";
 
 import { submitExercise } from "@/actions/exercises";
 import { AuthGateNotice } from "@/components/AuthGateNotice";
+import { buttonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
 import { getDashboardPath } from "@/lib/locale";
@@ -128,7 +129,7 @@ export function ExerciseForm({
 
   if (loading) {
     return (
-      <div className="animate-pulse h-20 bg-sky-50 dark:bg-sky-900/20 rounded-xl mt-6"></div>
+      <div className="mt-6 h-20 animate-pulse rounded-lg border border-line bg-elevated/70" />
     );
   }
 
@@ -164,7 +165,10 @@ export function ExerciseForm({
         actions={
           <Link
             href={getDashboardPath(language)}
-            className="inline-flex h-11 items-center justify-center rounded-xl bg-emerald-600 px-6 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-emerald-500 dark:bg-emerald-500 dark:hover:bg-emerald-400"
+            className={buttonClassName({
+              className: "px-6",
+              variant: "primary",
+            })}
           >
             {t("exercise.viewDashboard")}
           </Link>
@@ -188,10 +192,10 @@ export function ExerciseForm({
       {questions.map((question, idx) => (
         <div
           key={question.id}
-          className="space-y-3 rounded-2xl border border-stone-200 dark:border-stone-800 bg-stone-50/70 dark:bg-stone-950/30 p-5"
+          className="space-y-3 rounded-lg border border-line bg-elevated/65 p-5"
         >
-          <label className="block text-stone-700 dark:text-stone-300 font-medium text-lg leading-8">
-            <span className="mr-2 inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-sky-100 text-sky-700 dark:bg-sky-950/40 dark:text-sky-400 text-sm font-semibold tabular-nums px-2">
+          <label className="block text-lg font-medium leading-8 text-ink">
+            <span className="mr-2 inline-flex h-7 min-w-7 items-center justify-center rounded-full bg-coptic-soft px-2 text-sm font-semibold tabular-nums text-coptic">
               {idx + 1}
             </span>
             {question.prompt}
@@ -212,7 +216,7 @@ export function ExerciseForm({
         <button
           type="submit"
           disabled={isPending || !submissionIntentId}
-          className="btn-primary w-full sm:w-auto flex justify-center items-center gap-2 px-8"
+          className="btn-primary flex w-full items-center justify-center gap-2 px-8 sm:w-auto"
         >
           {submitLabel}
           <ArrowRight size={20} />

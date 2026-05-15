@@ -125,7 +125,7 @@ export function DictionaryFavoritesOverview({
                     </div>
 
                     <h4
-                      className={`${antinoou.className} text-3xl tracking-wide text-sky-700 dark:text-sky-300`}
+                      className={`${antinoou.className} text-3xl tracking-wide text-coptic`}
                     >
                       {entry
                         ? getPreferredEntryDisplaySpelling(

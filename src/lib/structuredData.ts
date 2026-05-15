@@ -57,8 +57,8 @@ const STRUCTURED_DATA_COPY = {
     copticLanguageName: "Coptic",
     publicationCreativeWorkStatus: "In preparation",
     websiteDescription: siteConfig.dictionaryEntryCount
-      ? `Coptic Compass is a digital home for Coptic study, with ${siteConfig.dictionaryEntryCount.toLocaleString()} searchable dictionary entries, grammar lessons, publications, Shenute AI, and research tools.`
-      : "Coptic Compass is a digital home for Coptic study, with a searchable dictionary, grammar lessons, publications, Shenute AI, and research tools.",
+      ? `Coptic Compass is a trusted digital Coptology platform for reading, research, publication, and Coptic language work. It includes ${siteConfig.dictionaryEntryCount.toLocaleString()} searchable dictionary entries and connected Coptic studies tools.`
+      : "Coptic Compass is a trusted digital Coptology platform for reading, research, publication, and Coptic language work.",
     dictionary: {
       pageName: "Coptic Dictionary",
       pageDescription:
@@ -90,8 +90,8 @@ const STRUCTURED_DATA_COPY = {
     copticLanguageName: "Koptisch",
     publicationCreativeWorkStatus: "In voorbereiding",
     websiteDescription: siteConfig.dictionaryEntryCount
-      ? `Coptic Compass is een digitaal thuis voor de studie van het Koptisch, met ${siteConfig.dictionaryEntryCount.toLocaleString()} doorzoekbare woordenboeklemma's, grammaticalessen, publicaties, Shenute AI en onderzoekstools.`
-      : "Coptic Compass is een digitaal thuis voor de studie van het Koptisch, met een doorzoekbaar woordenboek, grammaticalessen, publicaties, Shenute AI en onderzoekstools.",
+      ? `Coptic Compass is een betrouwbaar digitaal platform voor Koptologie, lezen, onderzoek, publicatie en Koptisch taalwerk. Het bevat ${siteConfig.dictionaryEntryCount.toLocaleString()} doorzoekbare woordenboeklemma's en verbonden Koptologietools.`
+      : "Coptic Compass is een betrouwbaar digitaal platform voor Koptologie, lezen, onderzoek, publicatie en Koptisch taalwerk.",
     dictionary: {
       pageName: "Koptisch woordenboek",
       pageDescription:

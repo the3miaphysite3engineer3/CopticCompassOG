@@ -5,9 +5,7 @@ import { buildPageTitle, siteConfig } from "./site";
 describe("site config", () => {
   it("models the product brand separately from founder attribution", () => {
     expect(siteConfig.brandName).toBe("Coptic Compass");
-    expect(siteConfig.descriptor).toBe(
-      "Coptic Dictionary, Grammar, Publications, and Shenute AI",
-    );
+    expect(siteConfig.descriptor).toBe("Digital Coptology Platform");
     expect(siteConfig.founderLine).toBe("by Kyrillos Wannes");
     expect(siteConfig.founderCreditLine).toBe("Built by Copts for Copts");
   });

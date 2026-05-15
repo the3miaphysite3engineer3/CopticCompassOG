@@ -37,10 +37,10 @@ export function AdminFilterToggle({
       type="button"
       onClick={onClick}
       className={cx(
-        "rounded-full border px-4 py-2 text-sm font-semibold transition",
+        "cursor-pointer select-none rounded-full border px-4 py-2 text-sm font-semibold transition-all duration-200 hover:-translate-y-px active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
         active
-          ? "border-sky-200 bg-sky-50 text-sky-700 shadow-sm dark:border-sky-900/50 dark:bg-sky-950/40 dark:text-sky-300"
-          : "border-stone-200 bg-white/70 text-stone-600 hover:border-stone-300 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-900/40 dark:text-stone-300 dark:hover:border-stone-600 dark:hover:bg-stone-900/70",
+          ? "border-accent/25 bg-accent-soft text-accent-strong shadow-sm dark:text-accent"
+          : "border-line bg-surface/70 text-muted hover:border-accent/40 hover:bg-elevated hover:text-ink",
       )}
     >
       {label}: {count.toLocaleString(language === "nl" ? "nl-BE" : "en-US")}
@@ -93,8 +93,8 @@ export function AdminOverflowDisclosure({
   const copy = adminListPrimitivesCopy[language];
 
   return (
-    <details className="group rounded-3xl border border-dashed border-stone-200 bg-stone-50/70 p-4 dark:border-stone-700 dark:bg-stone-950/30">
-      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-2xl px-2 py-1 text-sm font-medium text-stone-600 [&::-webkit-details-marker]:hidden dark:text-stone-300">
+    <details className="group rounded-xl border border-dashed border-line bg-elevated/70 p-4">
+      <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-lg px-2 py-1 text-sm font-medium text-muted [&::-webkit-details-marker]:hidden">
         <div className="flex flex-wrap items-center gap-3">
           <Badge tone={badgeTone} size="xs">
             {formatOverflowLabel({ count, label, language, pluralLabel })}

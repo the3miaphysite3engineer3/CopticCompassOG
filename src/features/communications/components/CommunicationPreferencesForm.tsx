@@ -45,11 +45,8 @@ export function CommunicationPreferencesForm({
   }
 
   return (
-    <form
-      action={handleSubmit}
-      className="space-y-6 text-stone-800 dark:text-stone-200"
-    >
-      <p className="text-sm leading-6 text-stone-600 dark:text-stone-300">
+    <form action={handleSubmit} className="space-y-6 text-ink">
+      <p className="text-sm leading-6 text-muted">
         {copy.account.communicationLead}
       </p>
 
@@ -60,7 +57,7 @@ export function CommunicationPreferencesForm({
         <input
           id="communication_email"
           type="email"
-          className="input-base bg-stone-50 text-stone-500 dark:bg-stone-900"
+          className="input-base bg-elevated text-muted"
           defaultValue={deliveryEmail ?? ""}
           disabled
         />
@@ -79,7 +76,7 @@ export function CommunicationPreferencesForm({
         <FormHint>{copy.account.communicationLocaleHint}</FormHint>
       </FormField>
 
-      <div className="space-y-4 rounded-2xl border border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/30">
+      <div className="space-y-4 rounded-lg border border-line bg-elevated/70 p-4">
         <CheckboxField
           name="lessons_opt_in"
           value="true"
@@ -105,7 +102,7 @@ export function CommunicationPreferencesForm({
         />
       </div>
 
-      <p className="text-sm leading-6 text-stone-500 dark:text-stone-400">
+      <p className="text-sm leading-6 text-muted">
         {copy.account.communicationHint}
       </p>
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 
 import { Button, buttonClassName } from "@/components/Button";
 import { PageHeader } from "@/components/PageHeader";
+import type { PageHeaderTone } from "@/components/PageHeader";
 import { PageShell } from "@/components/PageShell";
 import { StatusNotice } from "@/components/StatusNotice";
 import { SurfacePanel } from "@/components/SurfacePanel";
@@ -24,7 +25,7 @@ type RouteErrorStateProps = {
   reset?: () => void;
   retryLabel?: string;
   title: string;
-  tone?: "default" | "brand" | "sky" | "analytics";
+  tone?: PageHeaderTone;
 };
 
 export function RouteErrorState({

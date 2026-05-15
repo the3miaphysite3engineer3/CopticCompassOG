@@ -45,13 +45,11 @@ function renderGenericCard(locale: string) {
 
   return renderSiteOpenGraphCard({
     descriptor:
-      language === "nl"
-        ? "Koptisch woordenboek, grammatica, publicaties en Shenute AI"
-        : siteConfig.descriptor,
+      language === "nl" ? "Digitaal Koptologieplatform" : siteConfig.descriptor,
     eyebrow:
       language === "nl"
-        ? "Digitaal thuis voor Koptologie"
-        : "Digital home for Coptology",
+        ? "Gebouwd door Kopten voor Kopten"
+        : "Built by Copts for Copts",
     footerLabel: getOpenGraphSectionFooter("site", language),
     stats: [
       {
@@ -78,8 +76,8 @@ function renderGenericCard(locale: string) {
     ],
     summary:
       language === "nl"
-        ? "Doorzoek het woordenboek, volg grammaticallessen en verken publicaties in een rustige Koptische werkruimte."
-        : "Search the dictionary, follow grammar lessons, and browse publications in one calm Coptic workspace.",
+        ? "Een betrouwbaar digitaal Koptologieplatform voor lezen, onderzoek en Koptisch taalwerk."
+        : "A trusted digital Coptology platform for reading, research, and Coptic language work.",
     title: getOpenGraphBrandLabel(language),
   });
 }

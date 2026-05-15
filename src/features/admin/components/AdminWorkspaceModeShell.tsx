@@ -252,10 +252,8 @@ export function AdminWorkspaceModeShell({
 
   return (
     <div className="space-y-6">
-      <nav className="app-sticky-panel rounded-3xl border border-stone-200/80 bg-white/90 p-3 shadow-md backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/80 dark:shadow-black/20">
-        <p className="mb-3 text-xs leading-5 text-stone-600 dark:text-stone-400">
-          {copy.description}
-        </p>
+      <nav className="app-sticky-panel rounded-xl border border-line bg-surface/90 p-3 shadow-soft backdrop-blur-xl dark:shadow-black/20">
+        <p className="mb-3 text-xs leading-5 text-muted">{copy.description}</p>
 
         <div className="grid gap-2 md:grid-cols-3">
           {ADMIN_WORKSPACE_MODES.map((nextMode) => {
@@ -268,19 +266,17 @@ export function AdminWorkspaceModeShell({
                 type="button"
                 onClick={() => handleModeChange(nextMode)}
                 className={cx(
-                  "rounded-2xl border px-3 py-3 text-left transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50",
+                  "cursor-pointer select-none rounded-lg border px-3 py-3 text-left transition-all duration-200 hover:-translate-y-px active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
                   isActive
-                    ? "border-sky-200 bg-sky-50/90 shadow-sm dark:border-sky-900/50 dark:bg-sky-950/40"
-                    : "border-stone-200 bg-stone-50/70 hover:border-stone-300 hover:bg-white dark:border-stone-800 dark:bg-stone-900/40 dark:hover:border-stone-700 dark:hover:bg-stone-900/70",
+                    ? "border-accent/35 bg-accent-soft/75 shadow-sm dark:bg-accent-soft/25"
+                    : "border-line bg-surface/70 hover:border-accent/40 hover:bg-elevated",
                 )}
               >
                 <div className="flex items-center justify-between gap-3">
                   <span
                     className={cx(
                       "text-sm font-semibold",
-                      isActive
-                        ? "text-sky-900 dark:text-sky-100"
-                        : "text-stone-900 dark:text-stone-100",
+                      isActive ? "text-ink" : "text-ink",
                     )}
                   >
                     {getModeLabel(nextMode, language)}
@@ -289,15 +285,15 @@ export function AdminWorkspaceModeShell({
                     className={cx(
                       "text-xs font-semibold",
                       isActive
-                        ? "text-sky-700 dark:text-sky-200"
-                        : "text-stone-500 dark:text-stone-400",
+                        ? "text-accent-strong dark:text-accent"
+                        : "text-muted",
                     )}
                   >
                     {summaryCount}
                   </span>
                 </div>
 
-                <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
+                <p className="mt-1.5 text-xs leading-5 text-muted">
                   {getModeDescription(nextMode, overview, language)}
                 </p>
               </button>

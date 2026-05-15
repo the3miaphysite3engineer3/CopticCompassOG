@@ -19,8 +19,7 @@ export function GrammarAbbreviation({
 }: GrammarAbbreviationProps) {
   const resolvedClassName = cx(
     GRAMMAR_ABBREVIATION_BASE_CLASS_NAME,
-    href &&
-      "no-underline transition-colors hover:text-sky-700 dark:hover:text-sky-200",
+    href && "no-underline transition-colors hover:text-coptic",
     className,
   );
 

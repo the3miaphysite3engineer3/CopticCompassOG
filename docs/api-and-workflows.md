@@ -144,6 +144,40 @@ Docs and developer pages:
 - `/en/developers`
 - `/nl/developers`
 
+## Communications and Public Docs
+
+Communications surfaces share the same public product framing as the website:
+`Coptic Compass` as the brand name, `Digital Coptology Platform` as the concise
+descriptor, and a calm scholarly voice for release, notification, and contact
+copy.
+
+Implementation references:
+
+- `src/lib/communications/mailBrand.ts` centralizes the communication brand
+  name, descriptor, public URL, and email color tokens.
+- `src/features/communications/components/AudienceOptInConfirmationEmail.tsx`
+  renders the audience opt-in confirmation email.
+- `src/features/contact/components/ContactEmailTemplate.tsx` renders owner
+  contact-message notifications.
+- `src/features/communications/lib/releases.ts` builds content release email
+  text and HTML.
+- `src/lib/notifications/events.ts` wraps generic notification text in the
+  same branded email shell when no richer React or HTML template is supplied.
+
+Public documentation and repository presentation live in:
+
+- `README.md`
+- `docs/coptic-compass-brand-guide.md`
+- `docs/architecture.md`
+- `docs/environment-setup.md`
+- `docs/dutch-localization-style-guide.md`
+- `public/readme/*` for README screenshots and social preview images.
+
+When public screenshots are updated, keep README image paths in sync and remove
+references to deleted files. When communication copy changes, update both the
+runtime templates and any public setup notes that mention the affected sender,
+segment, or worker behavior.
+
 Additional app API surfaces:
 
 - `/api/shenute`

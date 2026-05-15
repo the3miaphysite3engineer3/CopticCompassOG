@@ -29,8 +29,8 @@ export default function Error({
       primaryLabel="Open grammar hub"
       reset={reset}
       accents={[
-        pageShellAccents.topLeftSkyOrb,
-        pageShellAccents.bottomRightEmeraldOrb,
+        pageShellAccents.topLeftGoldWashInset,
+        pageShellAccents.bottomRightCopticWash,
       ]}
     />
   );

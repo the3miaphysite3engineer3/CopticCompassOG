@@ -468,7 +468,7 @@ function formatAdminNumber(value: number, language: Language) {
 
 function AdminDatabaseErrorState({ message }: { message: string }) {
   return (
-    <div className="rounded-3xl border border-red-200 bg-red-50 p-8 text-center font-bold text-red-500 dark:border-red-900/40 dark:bg-red-950/20">
+    <div className="rounded-xl border border-danger/25 bg-rose-50 p-8 text-center font-bold text-danger dark:bg-rose-950/20">
       {message}
     </div>
   );
@@ -557,20 +557,18 @@ export function AdminWorkspaceQuickJump({
   const modeDescription = copy.descriptions[mode];
 
   return (
-    <nav className="app-sticky-panel mb-6 rounded-3xl border border-stone-200/80 bg-white/85 p-3 shadow-md backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/75 dark:shadow-black/20">
-      <p className="mb-2 text-xs leading-5 text-stone-600 dark:text-stone-400">
-        {modeDescription}
-      </p>
+    <nav className="app-sticky-panel mb-6 rounded-xl border border-line bg-surface/85 p-3 shadow-soft backdrop-blur-xl dark:shadow-black/20">
+      <p className="mb-2 text-xs leading-5 text-muted">{modeDescription}</p>
 
       <div className="flex flex-wrap gap-2">
         {links.map((link) => (
           <a
             key={link.href}
             href={link.href}
-            className="inline-flex items-center gap-2 rounded-2xl border border-stone-200/80 bg-stone-50/80 px-3 py-2 text-xs font-semibold text-stone-700 transition hover:border-sky-200 hover:bg-white hover:text-sky-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 dark:border-stone-800 dark:bg-stone-900/45 dark:text-stone-300 dark:hover:border-sky-900/50 dark:hover:bg-stone-900/70 dark:hover:text-sky-100"
+            className="inline-flex cursor-pointer select-none items-center gap-2 rounded-lg border border-line bg-surface/70 px-3 py-2 text-xs font-semibold text-muted transition-all duration-200 hover:-translate-y-px hover:border-accent/40 hover:bg-elevated hover:text-ink active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
           >
             <span>{link.label}</span>
-            <span className="text-stone-500 dark:text-stone-400">
+            <span className="text-muted">
               {formatAdminNumber(link.count, language)}
             </span>
           </a>
@@ -617,16 +615,16 @@ export function AdminReviewInboxSummary({
   ] as const;
 
   return (
-    <section className="rounded-3xl border border-stone-200/80 bg-white/80 p-5 shadow-md backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/70 dark:shadow-black/20">
+    <section className="rounded-xl border border-line bg-surface/88 p-5 shadow-soft backdrop-blur-md dark:shadow-black/20">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
+            <h2 className="text-xl font-semibold tracking-tight text-ink">
               {reviewQueueTotal > 0
                 ? `${formatAdminNumber(reviewQueueTotal, language)} ${copy.activeTitleSuffix}`
                 : copy.clearTitle}
             </h2>
-            <p className="max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
+            <p className="max-w-3xl text-sm leading-6 text-muted">
               {reviewQueueTotal > 0
                 ? copy.activeDescription
                 : copy.clearDescription}
@@ -634,7 +632,7 @@ export function AdminReviewInboxSummary({
           </div>
         </div>
 
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
           {copy.liveQueues}: {formatAdminNumber(reviewQueueTotal, language)}
         </p>
       </div>
@@ -644,19 +642,17 @@ export function AdminReviewInboxSummary({
           <a
             key={queue.href}
             href={queue.href}
-            className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-3 transition hover:border-sky-200 hover:bg-white hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 dark:border-stone-800 dark:bg-stone-900/40 dark:hover:border-sky-900/50 dark:hover:bg-stone-900/70"
+            className="cursor-pointer select-none rounded-lg border border-line bg-surface/70 p-3 transition-all duration-200 hover:-translate-y-px hover:border-accent/40 hover:bg-elevated hover:shadow-sm active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30"
           >
             <div className="flex items-center justify-between gap-3">
-              <span className="text-base font-semibold text-stone-900 dark:text-stone-100">
+              <span className="text-base font-semibold text-ink">
                 {queue.label}
               </span>
-              <span className="text-sm font-semibold text-stone-500 dark:text-stone-400">
+              <span className="text-sm font-semibold text-muted">
                 {formatAdminNumber(queue.count, language)}
               </span>
             </div>
-            <p className="mt-2 text-xs leading-5 text-stone-600 dark:text-stone-400">
-              {queue.note}
-            </p>
+            <p className="mt-2 text-xs leading-5 text-muted">{queue.note}</p>
           </a>
         ))}
       </div>
@@ -683,20 +679,20 @@ export function AdminCommunicationsDesk({
     audience.metrics.subscribedAudienceContactsCount;
 
   return (
-    <section className="rounded-3xl border border-stone-200/80 bg-white/80 p-5 shadow-md backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/70 dark:shadow-black/20">
+    <section className="rounded-xl border border-line bg-surface/88 p-5 shadow-soft backdrop-blur-md dark:shadow-black/20">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
+            <h2 className="text-xl font-semibold tracking-tight text-ink">
               {copy.title}
             </h2>
-            <p className="max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
+            <p className="max-w-3xl text-sm leading-6 text-muted">
               {copy.description}
             </p>
           </div>
         </div>
 
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
           {copy.activeReleases}:{" "}
           {formatAdminNumber(overview.actionableReleaseCount, language)}
         </p>
@@ -710,13 +706,13 @@ export function AdminCommunicationsDesk({
             className: "p-3",
           })}
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {copy.reachableAudienceLabel}
           </p>
-          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-ink">
             {formatAdminNumber(reachableAudienceCount, language)}
           </p>
-          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-muted">
             {copy.reachableAudienceDescription}
           </p>
         </div>
@@ -728,13 +724,13 @@ export function AdminCommunicationsDesk({
             className: "p-3",
           })}
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {copy.syncHealthLabel}
           </p>
-          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-ink">
             {formatAdminNumber(audience.metrics.resendSyncErrorCount, language)}
           </p>
-          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-muted">
             {copy.syncHealthDescription}
           </p>
         </div>
@@ -746,13 +742,13 @@ export function AdminCommunicationsDesk({
             className: "p-3",
           })}
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {copy.draftInputsLabel}
           </p>
-          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-ink">
             {formatAdminNumber(totalCandidates, language)}
           </p>
-          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-muted">
             {copy.draftInputsDescription}
           </p>
         </div>
@@ -764,10 +760,10 @@ export function AdminCommunicationsDesk({
             className: "p-3",
           })}
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {copy.inQueueLabel}
           </p>
-          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-ink">
             {formatAdminNumber(
               contentReleases.items.filter(
                 (release) =>
@@ -776,7 +772,7 @@ export function AdminCommunicationsDesk({
               language,
             )}
           </p>
-          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-muted">
             {copy.inQueueDescription}
           </p>
         </div>
@@ -795,7 +791,7 @@ export function AdminCommunicationsDesk({
             className: "p-5",
           })}
         >
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
             <span>
               {copy.synced}:{" "}
               {formatAdminNumber(
@@ -817,31 +813,31 @@ export function AdminCommunicationsDesk({
             </span>
           </div>
 
-          <h3 className="mt-4 text-lg font-semibold text-stone-950 dark:text-stone-50">
+          <h3 className="mt-4 text-lg font-semibold text-ink">
             {copy.audienceSyncTitle}
           </h3>
-          <p className="mt-2 text-sm leading-6 text-stone-600 dark:text-stone-400">
+          <p className="mt-2 text-sm leading-6 text-muted">
             {copy.audienceSyncDescription}
           </p>
 
           <div className="mt-5 space-y-4">
             <div className="grid gap-3 sm:grid-cols-2">
-              <div className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-4 dark:border-stone-800 dark:bg-stone-950/40">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+              <div className="rounded-lg border border-line bg-elevated/70 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
                   {copy.lessons}
                 </p>
-                <p className="mt-2 text-lg font-semibold text-stone-950 dark:text-stone-50">
+                <p className="mt-2 text-lg font-semibold text-ink">
                   {formatAdminNumber(
                     audience.metrics.lessonAudienceCount,
                     language,
                   )}
                 </p>
               </div>
-              <div className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-4 dark:border-stone-800 dark:bg-stone-950/40">
-                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+              <div className="rounded-lg border border-line bg-elevated/70 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
                   {copy.booksGeneral}
                 </p>
-                <p className="mt-2 text-lg font-semibold text-stone-950 dark:text-stone-50">
+                <p className="mt-2 text-lg font-semibold text-ink">
                   {formatAdminNumber(
                     audience.metrics.bookAudienceCount +
                       audience.metrics.generalAudienceCount,
@@ -874,11 +870,11 @@ export function AdminSystemHealthSummary({
   ).length;
 
   return (
-    <section className="rounded-3xl border border-stone-200/80 bg-white/80 p-5 shadow-md backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/70 dark:shadow-black/20">
+    <section className="rounded-xl border border-line bg-surface/88 p-5 shadow-soft backdrop-blur-md dark:shadow-black/20">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="space-y-3">
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight text-stone-950 dark:text-stone-50">
+            <h2 className="text-xl font-semibold tracking-tight text-ink">
               {overview.failedNotificationCount > 0
                 ? `${formatAdminNumber(
                     overview.failedNotificationCount,
@@ -890,7 +886,7 @@ export function AdminSystemHealthSummary({
                   }`
                 : copy.steadyTitle}
             </h2>
-            <p className="max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
+            <p className="max-w-3xl text-sm leading-6 text-muted">
               {copy.description}
             </p>
           </div>
@@ -898,7 +894,7 @@ export function AdminSystemHealthSummary({
 
         <p
           className={cx(
-            "text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400",
+            "text-xs font-semibold uppercase tracking-[0.18em] text-muted",
             overview.failedNotificationCount > 0 &&
               "text-rose-600 dark:text-rose-300",
           )}
@@ -916,16 +912,16 @@ export function AdminSystemHealthSummary({
             className: "p-3",
           })}
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {copy.failedLabel}
           </p>
-          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-ink">
             {formatAdminNumber(
               notifications.metrics.failedNotificationCount,
               language,
             )}
           </p>
-          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-muted">
             {copy.failedDescription}
           </p>
         </div>
@@ -937,13 +933,13 @@ export function AdminSystemHealthSummary({
             className: "p-3",
           })}
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {copy.queuedLabel}
           </p>
-          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-ink">
             {formatAdminNumber(queuedNotificationCount, language)}
           </p>
-          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-muted">
             {copy.queuedDescription}
           </p>
         </div>
@@ -955,16 +951,16 @@ export function AdminSystemHealthSummary({
             className: "p-3",
           })}
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {copy.recentSentLabel}
           </p>
-          <p className="mt-2 text-xl font-semibold text-stone-950 dark:text-stone-50">
+          <p className="mt-2 text-xl font-semibold text-ink">
             {formatAdminNumber(
               notifications.metrics.sentNotificationCount,
               language,
             )}
           </p>
-          <p className="mt-1.5 text-xs leading-5 text-stone-600 dark:text-stone-400">
+          <p className="mt-1.5 text-xs leading-5 text-muted">
             {copy.recentSentDescription}
           </p>
         </div>
@@ -1244,7 +1240,7 @@ export function AdminNotificationsSection({
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span
               className={cx(
-                "text-xs font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400",
+                "text-xs font-semibold uppercase tracking-[0.16em] text-muted",
                 attentionNotifications.length > 0 &&
                   "text-rose-600 dark:text-rose-300",
               )}
@@ -1252,13 +1248,11 @@ export function AdminNotificationsSection({
               {copy.attentionLabel}:{" "}
               {formatAdminNumber(attentionNotifications.length, language)}
             </span>
-            <p className="text-sm text-stone-600 dark:text-stone-400">
-              {copy.attentionDescription}
-            </p>
+            <p className="text-sm text-muted">{copy.attentionDescription}</p>
           </div>
 
           {attentionNotifications.length === 0 ? (
-            <div className="rounded-2xl border border-stone-200/80 bg-stone-50/80 px-5 py-4 text-sm leading-7 text-stone-600 dark:border-stone-800 dark:bg-stone-950/40 dark:text-stone-400">
+            <div className="rounded-lg border border-line bg-elevated/70 px-5 py-4 text-sm leading-7 text-muted">
               {copy.emptyIssues}
             </div>
           ) : (
@@ -1284,17 +1278,15 @@ export function AdminNotificationsSection({
 
         <div className="space-y-4">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
+            <span className="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
               {copy.historyLabel}:{" "}
               {formatAdminNumber(historyNotifications.length, language)}
             </span>
-            <p className="text-sm text-stone-600 dark:text-stone-400">
-              {copy.historyDescription}
-            </p>
+            <p className="text-sm text-muted">{copy.historyDescription}</p>
           </div>
 
           {historyNotifications.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-stone-200/80 bg-stone-50/60 px-5 py-4 text-sm leading-7 text-stone-500 dark:border-stone-800 dark:bg-stone-950/25 dark:text-stone-400">
+            <div className="rounded-lg border border-dashed border-line bg-elevated/60 px-5 py-4 text-sm leading-7 text-muted">
               {copy.emptyHistory}
             </div>
           ) : (

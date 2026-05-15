@@ -11,7 +11,7 @@ import {
 } from "@react-email/components";
 import * as React from "react";
 
-import { mailBrand } from "@/lib/communications/mailBrand";
+import { mailBrand, mailBrandColors } from "@/lib/communications/mailBrand";
 import type { Language } from "@/types/i18n";
 
 type AudienceOptInConfirmationEmailProps = {
@@ -57,6 +57,9 @@ export function AudienceOptInConfirmationEmail({
       <Head />
       <Body style={main}>
         <Container style={container}>
+          <Text style={brandLine}>
+            {mailBrand.brandName} • {mailBrand.descriptor}
+          </Text>
           <Heading as="h2" style={heading}>
             {localizedCopy.title}
           </Heading>
@@ -90,24 +93,37 @@ export function getAudienceOptInConfirmationSubject(language: Language) {
 }
 
 const main = {
-  backgroundColor: "#f6f9fc",
+  backgroundColor: mailBrandColors.paper,
   fontFamily:
     '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
 };
 
 const container = {
-  backgroundColor: "#ffffff",
+  backgroundColor: mailBrandColors.surface,
+  border: `1px solid ${mailBrandColors.line}`,
+  borderRadius: "10px",
   margin: "0 auto",
-  padding: "20px 32px 48px",
+  padding: "28px 32px 48px",
   marginBottom: "64px",
+};
+
+const brandLine = {
+  borderTop: `6px solid ${mailBrandColors.gold}`,
+  color: mailBrandColors.goldStrong,
+  fontSize: "12px",
+  fontWeight: "700",
+  letterSpacing: "0.08em",
+  margin: "-28px -32px 24px",
+  padding: "18px 32px 0",
+  textTransform: "uppercase" as const,
 };
 
 const heading = {
   fontSize: "24px",
-  letterSpacing: "-0.5px",
+  letterSpacing: "0",
   lineHeight: "1.3",
-  fontWeight: "500",
-  color: "#1f2937",
+  fontWeight: "600",
+  color: mailBrandColors.ink,
   padding: "17px 0 0",
 };
 
@@ -115,18 +131,18 @@ const paragraph = {
   margin: "0 0 15px",
   fontSize: "15px",
   lineHeight: "1.6",
-  color: "#374151",
+  color: mailBrandColors.ink,
 };
 
 const hr = {
-  borderColor: "#dfe1e4",
+  borderColor: mailBrandColors.line,
   margin: "32px 0 20px",
 };
 
 const button = {
-  backgroundColor: "#0f766e",
-  borderRadius: "999px",
-  color: "#ffffff",
+  backgroundColor: mailBrandColors.ink,
+  borderRadius: "8px",
+  color: mailBrandColors.paper,
   display: "inline-block",
   fontSize: "15px",
   fontWeight: "600",
@@ -135,7 +151,7 @@ const button = {
 };
 
 const link = {
-  color: "#0f766e",
+  color: mailBrandColors.coptic,
   fontSize: "13px",
   lineHeight: "1.6",
   wordBreak: "break-all" as const,
@@ -145,5 +161,5 @@ const footer = {
   marginTop: "24px",
   fontSize: "13px",
   lineHeight: "1.6",
-  color: "#6b7280",
+  color: mailBrandColors.muted,
 };

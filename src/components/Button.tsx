@@ -12,16 +12,23 @@ type ButtonClassNameOptions = {
   variant?: ButtonVariant;
 };
 
+type ControlButtonClassNameOptions = {
+  className?: string;
+};
+
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
   ButtonClassNameOptions;
 
 const BUTTON_BASE_CLASS =
-  "inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:opacity-55";
+  "inline-flex cursor-pointer select-none items-center justify-center gap-2 font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55";
+
+const CONTROL_BUTTON_BASE_CLASS =
+  "inline-flex cursor-pointer select-none items-center justify-center gap-2 rounded-lg border border-line bg-surface/88 text-muted shadow-sm transition-all duration-200 hover:-translate-y-px hover:border-accent/40 hover:bg-elevated hover:text-ink active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55 dark:bg-surface/88 dark:text-muted dark:hover:text-ink";
 
 const BUTTON_SIZE_CLASSES: Record<ButtonSize, string> = {
-  sm: "h-10 rounded-xl px-3 text-sm",
-  md: "h-11 rounded-2xl px-4 text-sm",
-  lg: "h-12 rounded-2xl px-5 text-sm",
+  sm: "h-10 rounded-md px-3 text-sm",
+  md: "h-11 rounded-lg px-4 text-sm",
+  lg: "h-12 rounded-lg px-5 text-sm",
 };
 
 const LINK_SIZE_CLASSES: Record<ButtonSize, string> = {
@@ -32,14 +39,14 @@ const LINK_SIZE_CLASSES: Record<ButtonSize, string> = {
 
 const BUTTON_VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary:
-    "bg-sky-600 text-white shadow-sm hover:-translate-y-px hover:bg-sky-500 hover:shadow-soft focus-visible:ring-accent/35 dark:bg-sky-500 dark:hover:bg-sky-400",
+    "border border-transparent bg-ink text-paper shadow-sm hover:-translate-y-px hover:opacity-90 hover:shadow-soft active:translate-y-0 focus-visible:ring-accent/35 dark:border-accent/35 dark:bg-accent-soft dark:text-ink dark:hover:bg-elevated",
   secondary:
-    "border border-line/80 bg-surface/75 text-ink shadow-sm backdrop-blur-md hover:-translate-y-px hover:bg-surface hover:shadow-soft focus-visible:ring-accent/25",
+    "border border-line bg-surface/88 text-ink shadow-sm backdrop-blur-sm hover:-translate-y-px hover:border-accent/40 hover:bg-surface active:translate-y-0 focus-visible:ring-accent/30 dark:bg-surface/88 dark:text-ink dark:hover:bg-elevated",
   ghost:
-    "text-muted hover:-translate-y-px hover:bg-elevated hover:text-ink focus-visible:ring-accent/25",
+    "text-muted hover:-translate-y-px hover:bg-elevated hover:text-ink active:translate-y-0 focus-visible:ring-accent/30 dark:text-muted dark:hover:text-ink",
   social:
-    "border border-line/80 bg-surface text-ink shadow-sm hover:-translate-y-px hover:bg-elevated hover:shadow-soft focus-visible:ring-accent/25",
-  link: "text-sky-600 hover:text-sky-700 hover:underline focus-visible:ring-sky-500/25 dark:text-sky-400 dark:hover:text-sky-300",
+    "border border-line bg-surface text-ink shadow-sm hover:-translate-y-px hover:border-accent/40 hover:bg-elevated active:translate-y-0 focus-visible:ring-accent/30 dark:text-ink",
+  link: "text-accent-strong hover:text-ink hover:underline focus-visible:ring-accent/30 dark:text-accent dark:hover:text-accent-strong",
 };
 
 export function buttonClassName({
@@ -55,6 +62,18 @@ export function buttonClassName({
     fullWidth && "w-full",
     className,
   );
+}
+
+export function controlButtonClassName({
+  className,
+}: ControlButtonClassNameOptions = {}) {
+  return cx(CONTROL_BUTTON_BASE_CLASS, className);
+}
+
+export function iconButtonClassName({
+  className,
+}: ControlButtonClassNameOptions = {}) {
+  return controlButtonClassName({ className: cx("h-10 w-10 px-0", className) });
 }
 
 export function Button({

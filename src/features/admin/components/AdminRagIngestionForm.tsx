@@ -278,7 +278,7 @@ function StatusDot({ healthy }: { healthy: boolean }) {
     <span
       aria-hidden
       className={`mt-2 inline-block h-2.5 w-2.5 rounded-full ${
-        healthy ? "bg-emerald-400" : "bg-red-500"
+        healthy ? "bg-coptic" : "bg-red-500"
       }`}
     />
   );
@@ -292,12 +292,12 @@ function RagStatusCard({
   status: RagStatusItem;
 }) {
   return (
-    <li className="flex min-h-20 items-start gap-3 rounded-2xl border border-stone-200 bg-white/65 p-4 shadow-sm dark:border-stone-800 dark:bg-stone-950/30">
+    <li className="flex min-h-20 items-start gap-3 rounded-lg border border-line bg-surface/80 p-4 shadow-sm">
       <StatusDot healthy={status.healthy} />
-      <span className="min-w-0 text-sm leading-6 text-stone-700 dark:text-stone-200">
+      <span className="min-w-0 text-sm leading-6 text-ink">
         <span className="block font-semibold">{status.label}</span>
         {status.note ? (
-          <span className="block text-xs leading-5 text-stone-500 dark:text-stone-400">
+          <span className="block text-xs leading-5 text-muted">
             {status.note}
           </span>
         ) : null}
@@ -315,13 +315,11 @@ function RagMetricCard({
   label: string;
 }) {
   return (
-    <div className="rounded-2xl border border-stone-200 bg-white/65 p-4 text-sm shadow-sm dark:border-stone-800 dark:bg-stone-950/30">
-      <dt className="text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">
+    <div className="rounded-lg border border-line bg-surface/80 p-4 text-sm shadow-sm">
+      <dt className="text-xs font-semibold uppercase tracking-widest text-muted">
         {label}
       </dt>
-      <dd className="mt-2 font-semibold text-stone-800 dark:text-stone-100">
-        {children}
-      </dd>
+      <dd className="mt-2 font-semibold text-ink">{children}</dd>
     </div>
   );
 }
@@ -614,7 +612,7 @@ export function AdminRagIngestionForm() {
         className="p-5"
       >
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {copy.systemStatus}
           </p>
           <button
@@ -629,13 +627,13 @@ export function AdminRagIngestionForm() {
         </div>
 
         {statusLoading ? (
-          <p className="rounded-2xl border border-stone-200 bg-white/65 px-4 py-3 text-sm text-stone-500 shadow-sm dark:border-stone-800 dark:bg-stone-950/30 dark:text-stone-400">
+          <p className="rounded-lg border border-line bg-surface/80 px-4 py-3 text-sm text-muted shadow-sm">
             {copy.checking}
           </p>
         ) : null}
 
         {!statusLoading && ragStatusError ? (
-          <p className="rounded-2xl border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-700 shadow-sm dark:border-red-950 dark:bg-red-950/30 dark:text-red-300">
+          <p className="rounded-lg border border-red-200 bg-red-50/80 px-4 py-3 text-sm text-red-700 shadow-sm dark:border-red-950 dark:bg-red-950/30 dark:text-red-300">
             {ragStatusError}
           </p>
         ) : null}
@@ -650,7 +648,7 @@ export function AdminRagIngestionForm() {
             <RagStatusCard
               status={ragStatus.statuses.knowledgeBase}
               detail={
-                <span className="mt-1 block text-xs font-semibold text-sky-700 dark:text-sky-300">
+                <span className="mt-1 block text-xs font-semibold text-coptic">
                   {formatNumber(ragStatus.chunkCount, language)} {copy.chunks}
                 </span>
               }
@@ -667,7 +665,7 @@ export function AdminRagIngestionForm() {
       >
         <div className="grid gap-4 md:grid-cols-2">
           <label className="space-y-2">
-            <span className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+            <span className="text-sm font-semibold text-ink">
               {copy.sourceLabel}
             </span>
             <input
@@ -679,7 +677,7 @@ export function AdminRagIngestionForm() {
           </label>
 
           <label className="space-y-2">
-            <span className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+            <span className="text-sm font-semibold text-ink">
               {copy.knowledgeFile}
             </span>
             <input
@@ -687,39 +685,39 @@ export function AdminRagIngestionForm() {
               type="file"
               accept="application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain,text/markdown,text/csv,application/json,text/xml,text/html,image/*,.pdf,.docx,.txt,.md,.markdown,.csv,.tsv,.json,.xml,.html,.htm,.yaml,.yml"
               required
-              className="input-base h-auto py-2 text-sm file:mr-4 file:rounded-xl file:border-0 file:bg-sky-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-sky-800 dark:file:bg-sky-900/40 dark:file:text-sky-200"
+              className="input-base h-auto py-2 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-accent-soft file:px-3 file:py-2 file:text-sm file:font-semibold file:text-accent-strong"
             />
           </label>
         </div>
 
         <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(14rem,18rem)]">
           <div className="grid gap-2 sm:grid-cols-2">
-            <label className="checkbox-row border border-stone-200/80 bg-white/55 shadow-sm dark:border-stone-800 dark:bg-stone-950/25">
+            <label className="checkbox-row border border-line bg-surface/75 shadow-sm">
               <input
                 name="enable_ocr"
                 type="checkbox"
                 defaultChecked
                 className="checkbox-base"
               />
-              <span className="text-sm leading-6 text-stone-700 dark:text-stone-300">
+              <span className="text-sm leading-6 text-muted">
                 {copy.runOcr}
               </span>
             </label>
 
-            <label className="checkbox-row border border-stone-200/80 bg-white/55 shadow-sm dark:border-stone-800 dark:bg-stone-950/25">
+            <label className="checkbox-row border border-line bg-surface/75 shadow-sm">
               <input
                 name="force_ocr"
                 type="checkbox"
                 className="checkbox-base"
               />
-              <span className="text-sm leading-6 text-stone-700 dark:text-stone-300">
+              <span className="text-sm leading-6 text-muted">
                 {copy.forceOcr}
               </span>
             </label>
           </div>
 
-          <label className="flex flex-col gap-2 text-sm text-stone-700 dark:text-stone-300">
-            <span className="font-semibold text-stone-700 dark:text-stone-200">
+          <label className="flex flex-col gap-2 text-sm text-muted">
+            <span className="font-semibold text-ink">
               {copy.embeddingProvider}
             </span>
             <select
@@ -760,7 +758,7 @@ export function AdminRagIngestionForm() {
           </button>
         </div>
 
-        <div className="mt-4 grid gap-2 text-xs leading-5 text-stone-500 dark:text-stone-400 md:grid-cols-2">
+        <div className="mt-4 grid gap-2 text-xs leading-5 text-muted md:grid-cols-2">
           <p>{copy.supports}</p>
           <p>{copy.defaultChunkProfile}</p>
         </div>
@@ -809,7 +807,7 @@ export function AdminRagIngestionForm() {
           rounded="3xl"
           variant="subtle"
           shadow="soft"
-          className="border-amber-300/80 bg-amber-50/80 p-4 text-xs text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200"
+          className="border-warning/35 bg-accent-soft p-4 text-xs text-accent-strong dark:text-accent"
         >
           <p className="mb-2 font-semibold">
             {copy.partialFailures}: {copy.failedJsonSources}
@@ -834,39 +832,37 @@ export function AdminRagIngestionForm() {
         className="p-5"
       >
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {copy.logs}
           </p>
-          <p className="text-[11px] text-stone-500 dark:text-stone-400">
+          <p className="text-[11px] text-muted">
             {formatNumber(dashboardLogs.length, language)} {copy.entries}
           </p>
         </div>
 
         {dashboardLogs.length === 0 ? (
-          <p className="rounded-2xl border border-stone-200 bg-white/65 px-4 py-3 text-xs text-stone-500 shadow-sm dark:border-stone-800 dark:bg-stone-950/30 dark:text-stone-400">
+          <p className="rounded-lg border border-line bg-surface/80 px-4 py-3 text-xs text-muted shadow-sm">
             {isPending || bulkJsonPending ? copy.logsRunning : copy.logsEmpty}
           </p>
         ) : (
           <div
-            className="max-h-64 space-y-1 overflow-y-auto rounded-2xl border border-stone-200 bg-white/65 p-3 font-mono text-[11px] shadow-sm dark:border-stone-800 dark:bg-stone-950/30"
+            className="max-h-64 space-y-1 overflow-y-auto rounded-lg border border-line bg-surface/80 p-3 font-mono text-[11px] shadow-sm"
             aria-live="polite"
           >
             {dashboardLogs.map((log, index) => (
               <p
                 key={`${log.timestamp}-${index}`}
-                className="leading-relaxed text-stone-600 dark:text-stone-300"
+                className="leading-relaxed text-muted"
               >
                 {log.line ? (
                   <span>{log.line}</span>
                 ) : (
                   <>
-                    <span className="text-sky-600 dark:text-sky-300">
+                    <span className="text-accent-strong dark:text-accent">
                       [{formatLogTimestamp(log.timestamp, language)}]
                     </span>{" "}
                     {log.sourcePath ? (
-                      <span className="text-emerald-700 dark:text-emerald-300">
-                        {log.sourcePath}{" "}
-                      </span>
+                      <span className="text-coptic">{log.sourcePath} </span>
                     ) : null}
                     <span>{log.message}</span>
                   </>
@@ -903,7 +899,7 @@ export function AdminRagIngestionForm() {
           rounded="3xl"
           variant="subtle"
           shadow="soft"
-          className="p-5 text-stone-700 dark:text-stone-200"
+          className="p-5 text-ink"
         >
           <p className="mb-3 font-semibold">{copy.chunkDetails}</p>
           <dl className="grid gap-3 sm:grid-cols-2">

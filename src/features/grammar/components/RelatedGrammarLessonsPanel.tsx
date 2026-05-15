@@ -31,13 +31,13 @@ export function RelatedGrammarLessonsPanel({
         <h2
           className={
             contained
-              ? "text-xl font-semibold tracking-tight text-stone-800 dark:text-stone-100 md:text-2xl"
-              : "text-2xl font-bold tracking-tight text-stone-800 dark:text-stone-100"
+              ? "text-xl font-semibold tracking-tight text-ink md:text-2xl"
+              : "text-2xl font-bold tracking-tight text-ink"
           }
         >
           {title}
         </h2>
-        <p className="text-stone-500 dark:text-stone-400">{description}</p>
+        <p className="text-muted">{description}</p>
       </div>
 
       <div
@@ -50,23 +50,23 @@ export function RelatedGrammarLessonsPanel({
             className="group"
           >
             <SurfacePanel
-              rounded="3xl"
+              rounded="lg"
               shadow={contained ? "soft" : "panel"}
               variant={contained ? "elevated" : "default"}
-              className="flex h-full flex-col justify-between p-5 transition-colors hover:border-sky-300 dark:hover:border-sky-700"
+              className="flex h-full flex-col justify-between p-5 transition-colors hover:border-coptic/35"
             >
               <div className="space-y-3">
                 <div>
-                  <h3 className="text-lg font-semibold text-stone-800 dark:text-stone-100">
+                  <h3 className="text-lg font-semibold text-ink">
                     {lesson.title[language]}
                   </h3>
-                  <p className="mt-2 text-sm leading-7 text-stone-600 dark:text-stone-300">
+                  <p className="mt-2 text-sm leading-7 text-muted">
                     {lesson.summary[language]}
                   </p>
                 </div>
               </div>
 
-              <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-sky-600 transition-colors group-hover:text-sky-500 dark:text-sky-400 dark:group-hover:text-sky-300">
+              <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-coptic transition-colors group-hover:text-ink dark:group-hover:text-coptic">
                 {language === "nl" ? "Open les" : "Open lesson"}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </span>
@@ -81,7 +81,7 @@ export function RelatedGrammarLessonsPanel({
     return (
       <SurfacePanel
         as="section"
-        rounded="3xl"
+        rounded="lg"
         variant="subtle"
         className="p-6 md:p-7"
       >

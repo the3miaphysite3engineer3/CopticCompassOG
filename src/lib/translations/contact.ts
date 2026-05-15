@@ -7,7 +7,7 @@ export const contactMessages = defineMessages({
   en: {
     "contact.title": "Get in Touch",
     "contact.subtitle":
-      "Academic inquiries, dictionary feedback, grammar questions, or just to say hello. I'd love to hear from you.",
+      "Reach Coptic Compass for dictionary feedback, grammar questions, publication inquiries, research collaboration, or platform support.",
     "contact.name": "Full Name",
     "contact.email": "Email Address",
     "contact.inquiry": "Type of Inquiry",
@@ -16,13 +16,13 @@ export const contactMessages = defineMessages({
     "contact.namePlaceholder": "First name Last name",
     "contact.emailPlaceholder": "you@email.com",
     "contact.messagePlaceholder":
-      "Hi Kyrillos, I really enjoyed your Coptic dictionary and had a question about...",
+      "Share the context for your question, correction, collaboration idea, or publication inquiry.",
     "contact.updatesLabel": "Release Updates",
     "contact.updatesHint":
       "Email me a confirmation link for updates about new lessons, book releases, and major project announcements.",
     "contact.send": "Send Message",
     "contact.sending": "Sending...",
-    "contact.success": "Message sent successfully. I'll reply soon!",
+    "contact.success": "Message sent successfully. We'll reply soon.",
     "contact.successConfirmation":
       "Message sent successfully. Check your inbox to confirm update emails.",
     "contact.successConfirmationIssue":
@@ -47,7 +47,7 @@ export const contactMessages = defineMessages({
   nl: {
     "contact.title": "Neem contact op",
     "contact.subtitle":
-      "Academische vragen, feedback over het woordenboek, grammaticale kwesties of gewoon een vriendelijk bericht. Ik hoor graag van u.",
+      "Bereik Coptic Compass voor woordenboekfeedback, grammaticavragen, publicatievragen, onderzoekssamenwerking of platformondersteuning.",
     "contact.name": "Volledige naam",
     "contact.email": "E-mailadres",
     "contact.inquiry": "Type vraag",
@@ -56,13 +56,13 @@ export const contactMessages = defineMessages({
     "contact.namePlaceholder": "Voornaam Achternaam",
     "contact.emailPlaceholder": "u@email.com",
     "contact.messagePlaceholder":
-      "Dag Kyrillos, ik vond uw Koptische woordenboek erg waardevol en had een vraag over...",
+      "Deel de context voor uw vraag, correctie, samenwerkingsidee of publicatieverzoek.",
     "contact.updatesLabel": "Updates ontvangen",
     "contact.updatesHint":
       "Stuur mij een bevestigingslink voor updates over nieuwe lessen, boekuitgaven en belangrijke projectaankondigingen.",
     "contact.send": "Verstuur bericht",
     "contact.sending": "Verzenden...",
-    "contact.success": "Bericht succesvol verzonden. Ik antwoord binnenkort!",
+    "contact.success": "Bericht succesvol verzonden. We antwoorden binnenkort.",
     "contact.successConfirmation":
       "Bericht succesvol verzonden. Controleer uw inbox om e-mailupdates te bevestigen.",
     "contact.successConfirmationIssue":

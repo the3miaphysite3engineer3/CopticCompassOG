@@ -130,14 +130,17 @@ export function NotFoundPage() {
     <PageShell
       className="min-h-[calc(100vh-10rem)] px-6 py-16 md:px-10"
       contentClassName="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(18rem,24rem)] lg:items-center"
-      accents={[pageShellAccents.heroSkyArc]}
+      accents={[
+        pageShellAccents.heroGoldBand,
+        pageShellAccents.topRightCopticWashInset,
+      ]}
     >
       <section className="space-y-8">
         <div className="flex flex-wrap items-center gap-4">
-          <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-sky-200 bg-sky-50/80 text-sky-700 shadow-sm backdrop-blur-md dark:border-sky-900/60 dark:bg-sky-950/30 dark:text-sky-300">
+          <div className="flex h-16 w-16 items-center justify-center rounded-lg border border-accent/20 bg-accent-soft/80 text-accent-strong shadow-sm backdrop-blur-md dark:text-accent">
             <Compass className="h-8 w-8" aria-hidden="true" />
           </div>
-          <p className="text-6xl font-extrabold leading-none text-stone-200 dark:text-stone-800 md:text-7xl">
+          <p className="text-6xl font-extrabold leading-none text-line dark:text-line/60 md:text-7xl">
             404
           </p>
         </div>
@@ -171,7 +174,7 @@ export function NotFoundPage() {
       <section className="space-y-4" aria-labelledby="not-found-routes">
         <h2
           id="not-found-routes"
-          className="text-sm font-semibold uppercase text-stone-500 dark:text-stone-400"
+          className="text-sm font-semibold uppercase text-muted"
         >
           {t("notFound.helpTitle")}
         </h2>
@@ -184,21 +187,21 @@ export function NotFoundPage() {
               <Link
                 key={destination.href}
                 href={destination.href}
-                className="group flex min-h-24 items-start gap-4 rounded-lg border border-stone-200 bg-white/70 p-4 shadow-sm backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:bg-white hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25 dark:border-stone-800 dark:bg-stone-900/50 dark:hover:bg-stone-800/70"
+                className="group flex min-h-24 items-start gap-4 rounded-lg border border-line bg-surface/80 p-4 shadow-sm backdrop-blur-md transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/35 hover:bg-surface hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25"
               >
                 <span
                   className={cx(
                     "mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-md border transition-colors",
-                    "border-sky-100 bg-sky-50 text-sky-700 group-hover:border-sky-200 dark:border-sky-900/50 dark:bg-sky-950/30 dark:text-sky-300",
+                    "border-coptic/15 bg-coptic-soft text-coptic group-hover:border-coptic/30",
                   )}
                 >
                   <Icon className="h-5 w-5" aria-hidden="true" />
                 </span>
                 <span className="min-w-0 space-y-1">
-                  <span className="block text-sm font-semibold text-stone-800 dark:text-stone-100">
+                  <span className="block text-sm font-semibold text-ink">
                     {t(destination.labelKey)}
                   </span>
-                  <span className="block text-sm leading-6 text-stone-500 dark:text-stone-400">
+                  <span className="block text-sm leading-6 text-muted">
                     {t(destination.descriptionKey)}
                   </span>
                 </span>

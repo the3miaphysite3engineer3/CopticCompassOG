@@ -59,39 +59,33 @@ function AccountSettingsSection({
   title: string;
 }) {
   return (
-    <section className="border-t border-stone-200/80 first:border-t-0 dark:border-stone-800/80">
+    <section className="border-t border-line first:border-t-0">
       <button
         type="button"
         onClick={onToggle}
         aria-expanded={isOpen}
-        className="flex w-full items-start gap-4 px-6 py-5 text-left transition-colors hover:bg-white/40 dark:hover:bg-stone-900/20"
+        className="flex w-full cursor-pointer select-none items-start gap-4 px-6 py-5 text-left transition-all duration-200 hover:bg-elevated/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/30"
       >
-        <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-sky-50 text-sky-700 dark:bg-sky-950/40 dark:text-sky-300">
+        <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-accent-soft text-accent-strong dark:text-accent">
           {icon}
         </span>
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-3">
-            <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
-              {title}
-            </h3>
+            <h3 className="text-lg font-semibold text-ink">{title}</h3>
             {badge}
           </div>
-          <p className="mt-1 text-sm leading-6 text-stone-600 dark:text-stone-300">
-            {description}
-          </p>
+          <p className="mt-1 text-sm leading-6 text-muted">{description}</p>
         </div>
         <ChevronDown
           className={cx(
-            "mt-1 h-5 w-5 shrink-0 text-stone-400 transition-transform dark:text-stone-500",
+            "mt-1 h-5 w-5 shrink-0 text-muted transition-transform",
             isOpen && "rotate-180",
           )}
         />
       </button>
 
       {isOpen ? (
-        <div className="border-t border-stone-200/80 px-6 py-6 dark:border-stone-800/80">
-          {children}
-        </div>
+        <div className="border-t border-line px-6 py-6">{children}</div>
       ) : null}
     </section>
   );
@@ -151,10 +145,7 @@ function PasswordSettingsForm({
   }
 
   return (
-    <form
-      action={handleSubmit}
-      className="space-y-5 text-stone-800 dark:text-stone-200"
-    >
+    <form action={handleSubmit} className="space-y-5 text-ink">
       <FormField htmlFor="password" label={copy.account.newPasswordLabel}>
         <input
           id="password"
@@ -182,7 +173,7 @@ function PasswordSettingsForm({
         />
       </FormField>
 
-      <p className="text-sm leading-6 text-stone-500 dark:text-stone-400">
+      <p className="text-sm leading-6 text-muted">
         {copy.account.passwordHint}
       </p>
 
@@ -215,7 +206,7 @@ function DeleteProfileNotice() {
         {copy.account.deleteNoticeLead}
       </StatusNotice>
 
-      <div className="space-y-3 text-sm leading-6 text-stone-600 dark:text-stone-300">
+      <div className="space-y-3 text-sm leading-6 text-muted">
         <p>{copy.account.deleteNoticeBody}</p>
       </div>
 
@@ -249,19 +240,19 @@ export function AccountSettingsPanel({
 
   return (
     <SurfacePanel rounded="3xl" className="overflow-hidden p-0">
-      <div className="border-b border-stone-200/80 px-6 py-5 dark:border-stone-800/80">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+      <div className="border-b border-line px-6 py-5">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
           {copy.account.eyebrow}
         </p>
         <div className="mt-2 flex flex-wrap items-center gap-3">
-          <h2 className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
+          <h2 className="text-2xl font-semibold text-ink">
             {copy.account.title}
           </h2>
           <Badge tone="surface" size="xs">
             {copy.account.privateBadge}
           </Badge>
         </div>
-        <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600 dark:text-stone-300">
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">
           {copy.account.description}
         </p>
       </div>

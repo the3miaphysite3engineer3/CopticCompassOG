@@ -111,8 +111,8 @@ export default function OCRPage() {
       contentClassName="app-page-content mx-auto max-w-4xl"
       width="standard"
       accents={[
-        pageShellAccents.heroSkyArc,
-        pageShellAccents.topRightEmeraldOrbInset,
+        pageShellAccents.heroGoldBand,
+        pageShellAccents.topRightCopticWashInset,
       ]}
     >
       <AppPageIntro
@@ -123,7 +123,7 @@ export default function OCRPage() {
         ]}
         title={copy.title}
         description={copy.description}
-        tone="sky"
+        tone="coptic"
       />
 
       <div className="space-y-8">
@@ -131,14 +131,14 @@ export default function OCRPage() {
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(240px,280px)]">
             <div className="space-y-5">
               <label className="block space-y-2">
-                <span className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+                <span className="text-sm font-semibold text-ink">
                   {copy.imageLabel}
                 </span>
                 <input
                   type="file"
                   accept="image/*"
                   onChange={handleFileChange}
-                  className="input-base h-auto py-2 text-sm file:mr-4 file:rounded-xl file:border-0 file:bg-sky-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-sky-800 dark:file:bg-sky-900/40 dark:file:text-sky-200"
+                  className="input-base h-auto py-2 text-sm file:mr-4 file:rounded-lg file:border-0 file:bg-accent-soft file:px-3 file:py-2 file:text-sm file:font-semibold file:text-accent-strong dark:file:bg-accent-soft dark:file:text-accent"
                 />
               </label>
 
@@ -160,9 +160,7 @@ export default function OCRPage() {
                   <ScanSearch className="h-4 w-4" />
                   {loading ? copy.running : copy.extract}
                 </button>
-                <p className="text-sm text-stone-500 dark:text-stone-400">
-                  {copy.bestFor}
-                </p>
+                <p className="text-sm text-muted">{copy.bestFor}</p>
               </div>
             </div>
 
@@ -173,19 +171,19 @@ export default function OCRPage() {
               className="p-5"
             >
               <div className="space-y-4">
-                <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">
+                <div className="inline-flex h-12 w-12 items-center justify-center rounded-lg bg-coptic-soft text-coptic">
                   <Camera className="h-5 w-5" />
                 </div>
                 <div className="space-y-2">
-                  <h2 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+                  <h2 className="text-lg font-semibold text-ink">
                     {copy.workflowTitle}
                   </h2>
-                  <p className="text-sm leading-6 text-stone-600 dark:text-stone-400">
+                  <p className="text-sm leading-6 text-muted">
                     {copy.workflowDescription}
                   </p>
                 </div>
                 {image ? (
-                  <div className="rounded-2xl border border-stone-200 bg-stone-50/80 px-4 py-3 text-sm text-stone-600 dark:border-stone-700 dark:bg-stone-950/40 dark:text-stone-300">
+                  <div className="rounded-lg border border-line bg-elevated/80 px-4 py-3 text-sm text-muted">
                     {copy.selectedFile}{" "}
                     <span className="font-semibold">{image.name}</span>
                   </div>
@@ -198,19 +196,19 @@ export default function OCRPage() {
         {result ? (
           <SurfacePanel rounded="3xl" shadow="panel" className="p-6 md:p-8">
             <div className="mb-4 flex items-center gap-3">
-              <div className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+              <div className="inline-flex h-11 w-11 items-center justify-center rounded-lg bg-coptic-soft text-coptic">
                 <FileText className="h-5 w-5" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
+                <h2 className="text-xl font-semibold text-ink">
                   {copy.extractedTitle}
                 </h2>
-                <p className="text-sm text-stone-500 dark:text-stone-400">
+                <p className="text-sm text-muted">
                   {copy.extractedDescription}
                 </p>
               </div>
             </div>
-            <pre className="whitespace-pre-wrap rounded-3xl border border-stone-200 bg-stone-50/80 p-5 font-coptic text-lg leading-8 text-stone-800 dark:border-stone-700 dark:bg-stone-950/40 dark:text-stone-200">
+            <pre className="whitespace-pre-wrap rounded-lg border border-line bg-elevated/80 p-5 font-coptic text-lg leading-8 text-ink">
               {result}
             </pre>
           </SurfacePanel>

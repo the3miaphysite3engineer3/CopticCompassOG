@@ -25,7 +25,9 @@ const PDF_BUTTON_COPY = {
     download: "Download PDF",
     generating: "Generating...",
     loginPrompt: "Sign in or sign up to download lessons as PDF",
-    footerLeadIn: "Downloaded from Coptic Compass (www.copticcompass.com) on",
+    footerBrand: "Coptic Compass",
+    footerDescriptor: "Digital Coptology Platform",
+    footerDownloadedOn: "Downloaded on",
     errorPrefix: "PDF generation encountered an error:",
   },
   nl: {
@@ -33,7 +35,9 @@ const PDF_BUTTON_COPY = {
     generating: "PDF wordt gemaakt...",
     loginPrompt:
       "Inloggen of een account aanmaken om lessen als pdf te downloaden",
-    footerLeadIn: "Gedownload van Coptic Compass (www.copticcompass.com) op",
+    footerBrand: "Coptic Compass",
+    footerDescriptor: "Digitaal Koptologieplatform",
+    footerDownloadedOn: "Gedownload op",
     errorPrefix: "Er is een fout opgetreden bij het maken van de pdf:",
   },
 } as const;
@@ -115,27 +119,51 @@ export function DownloadPdfButton({
       let heightLeft = imgHeight;
       let position = margin;
 
-      /**
-       * Add white margin guards and a timestamped footer so each generated page
-       * remains printable even when the captured lesson image extends edge to
-       * edge.
-       */
-      const addProtectedMarginsAndFooter = (doc: JsPdfInstance) => {
+      const addProtectedMargins = (doc: JsPdfInstance) => {
         doc.setFillColor(255, 255, 255);
         doc.rect(0, 0, pdfWidth, margin, "F");
         doc.rect(0, pageHeight - margin, pdfWidth, margin, "F");
+      };
 
+      /**
+       * Add a branded footer after pagination so every generated page carries
+       * the same Coptic Compass export signature and page count.
+       */
+      const addBrandedFooter = (
+        doc: JsPdfInstance,
+        pageNumber: number,
+        totalPages: number,
+      ) => {
         const now = new Date().toLocaleString(
           language === "nl" ? "nl-BE" : "en-US",
         );
+        const footerY = pageHeight - margin / 2 + 2;
+
+        doc.setDrawColor(235, 193, 125);
+        doc.setLineWidth(0.3);
+        doc.line(
+          margin,
+          pageHeight - margin + 2,
+          pdfWidth - margin,
+          pageHeight - margin + 2,
+        );
+
         doc.setFontSize(9);
-        doc.setTextColor(150);
+        doc.setTextColor(30, 29, 29);
+        doc.text(copy.footerBrand, margin, footerY, { align: "left" });
+
+        doc.setFontSize(9);
+        doc.setTextColor(94, 88, 79);
         doc.text(
-          `${copy.footerLeadIn} ${now}`,
+          `${copy.footerDescriptor} • ${copy.footerDownloadedOn} ${now}`,
           pdfWidth / 2,
-          pageHeight - margin / 2 + 2,
+          footerY,
           { align: "center" },
         );
+
+        doc.text(`${pageNumber}/${totalPages}`, pdfWidth - margin, footerY, {
+          align: "right",
+        });
       };
 
       /**
@@ -143,15 +171,21 @@ export function DownloadPdfButton({
        * the full lesson has been written into the PDF.
        */
       pdf.addImage(dataUrl, "PNG", margin, position, contentWidth, imgHeight);
-      addProtectedMarginsAndFooter(pdf);
+      addProtectedMargins(pdf);
       heightLeft -= contentHeight;
 
       while (heightLeft > 0) {
         position = position - contentHeight;
         pdf.addPage();
         pdf.addImage(dataUrl, "PNG", margin, position, contentWidth, imgHeight);
-        addProtectedMarginsAndFooter(pdf);
+        addProtectedMargins(pdf);
         heightLeft -= contentHeight;
+      }
+
+      const totalPages = pdf.getNumberOfPages();
+      for (let pageNumber = 1; pageNumber <= totalPages; pageNumber += 1) {
+        pdf.setPage(pageNumber);
+        addBrandedFooter(pdf, pageNumber, totalPages);
       }
 
       pdf.save(fileName);

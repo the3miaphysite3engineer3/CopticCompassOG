@@ -7,7 +7,7 @@ type OpenGraphStat = {
   value: string;
 };
 
-type OpenGraphThemeName = "mixed" | "sky" | "emerald" | "stone";
+type OpenGraphThemeName = "dictionary" | "grammar" | "platform" | "publication";
 
 type OpenGraphGlossMarker = "f" | "m" | "pl";
 
@@ -68,6 +68,7 @@ const CARD_THEMES: Record<
   OpenGraphThemeName,
   {
     background: string;
+    brandRail: string;
     overlay: string;
     mutedPillBackground: string;
     panelBackground: string;
@@ -82,73 +83,73 @@ const CARD_THEMES: Record<
     textPrimary: string;
   }
 > = {
-  mixed: {
-    background:
-      "linear-gradient(135deg, #f8fafc 0%, #eff6ff 44%, #ecfdf5 100%)",
+  platform: {
+    background: "#f9f8f5",
+    brandRail: "linear-gradient(180deg, #ebc17d 0%, #008329 100%)",
     overlay:
-      "radial-gradient(circle at top right, rgba(14, 165, 233, 0.16), transparent 34%), radial-gradient(circle at bottom left, rgba(5, 150, 105, 0.16), transparent 28%)",
-    mutedPillBackground: "rgba(15, 23, 42, 0.08)",
-    panelBackground: "rgba(255, 255, 255, 0.78)",
-    panelBorder: "1px solid rgba(148, 163, 184, 0.26)",
-    primaryPillBackground: "rgba(15, 118, 110, 0.12)",
-    primaryPillText: "#0f766e",
-    secondaryPillBackground: "rgba(15, 23, 42, 0.08)",
-    secondaryPillText: "#334155",
-    textBody: "#334155",
-    textFooter: "#475569",
-    textMuted: "#0f766e",
-    textPrimary: "#0f172a",
+      "linear-gradient(90deg, rgba(235, 193, 125, 0.26) 0%, rgba(252, 246, 235, 0.72) 27%, rgba(249, 248, 245, 0) 27%), linear-gradient(180deg, rgba(0, 131, 41, 0.08) 0%, rgba(249, 248, 245, 0) 58%)",
+    mutedPillBackground: "rgba(30, 29, 29, 0.07)",
+    panelBackground: "rgba(255, 255, 255, 0.84)",
+    panelBorder: "1px solid rgba(137, 89, 24, 0.18)",
+    primaryPillBackground: "#1e1d1d",
+    primaryPillText: "#f9f8f5",
+    secondaryPillBackground: "rgba(235, 193, 125, 0.2)",
+    secondaryPillText: "#895918",
+    textBody: "#4f493f",
+    textFooter: "#5e584f",
+    textMuted: "#895918",
+    textPrimary: "#1e1d1d",
   },
-  sky: {
-    background:
-      "linear-gradient(135deg, #f8fafc 0%, #ecfeff 40%, #dbeafe 100%)",
+  dictionary: {
+    background: "#f9f8f5",
+    brandRail: "linear-gradient(180deg, #008329 0%, #ebc17d 100%)",
     overlay:
-      "radial-gradient(circle at top right, rgba(14, 165, 233, 0.18), transparent 34%), radial-gradient(circle at bottom left, rgba(20, 184, 166, 0.16), transparent 30%)",
-    mutedPillBackground: "rgba(15, 23, 42, 0.08)",
-    panelBackground: "rgba(255, 255, 255, 0.72)",
-    panelBorder: "1px solid rgba(148, 163, 184, 0.35)",
-    primaryPillBackground: "rgba(14, 116, 144, 0.12)",
-    primaryPillText: "#0f766e",
-    secondaryPillBackground: "rgba(15, 23, 42, 0.08)",
-    secondaryPillText: "#334155",
-    textBody: "#334155",
-    textFooter: "#475569",
-    textMuted: "#0f766e",
-    textPrimary: "#0f172a",
+      "linear-gradient(90deg, rgba(0, 131, 41, 0.12) 0%, rgba(236, 250, 240, 0.64) 24%, rgba(249, 248, 245, 0) 24%), linear-gradient(180deg, rgba(235, 193, 125, 0.13) 0%, rgba(249, 248, 245, 0) 62%)",
+    mutedPillBackground: "rgba(30, 29, 29, 0.07)",
+    panelBackground: "rgba(255, 255, 255, 0.86)",
+    panelBorder: "1px solid rgba(0, 131, 41, 0.2)",
+    primaryPillBackground: "#008329",
+    primaryPillText: "#ffffff",
+    secondaryPillBackground: "rgba(30, 29, 29, 0.07)",
+    secondaryPillText: "#3e382f",
+    textBody: "#4f493f",
+    textFooter: "#5e584f",
+    textMuted: "#008329",
+    textPrimary: "#1e1d1d",
   },
-  emerald: {
-    background:
-      "linear-gradient(135deg, #f8fafc 0%, #ecfdf5 42%, #dcfce7 100%)",
+  grammar: {
+    background: "#f9f8f5",
+    brandRail: "linear-gradient(180deg, #008329 0%, #4acf73 100%)",
     overlay:
-      "radial-gradient(circle at top right, rgba(5, 150, 105, 0.16), transparent 34%), radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.14), transparent 28%)",
-    mutedPillBackground: "rgba(15, 23, 42, 0.08)",
-    panelBackground: "rgba(255, 255, 255, 0.76)",
-    panelBorder: "1px solid rgba(148, 163, 184, 0.26)",
-    primaryPillBackground: "rgba(5, 150, 105, 0.12)",
-    primaryPillText: "#047857",
-    secondaryPillBackground: "rgba(15, 23, 42, 0.08)",
-    secondaryPillText: "#334155",
-    textBody: "#334155",
-    textFooter: "#475569",
-    textMuted: "#047857",
-    textPrimary: "#0f172a",
+      "linear-gradient(90deg, rgba(0, 131, 41, 0.14) 0%, rgba(236, 250, 240, 0.68) 25%, rgba(249, 248, 245, 0) 25%), linear-gradient(180deg, rgba(235, 193, 125, 0.1) 0%, rgba(249, 248, 245, 0) 58%)",
+    mutedPillBackground: "rgba(30, 29, 29, 0.07)",
+    panelBackground: "rgba(255, 255, 255, 0.86)",
+    panelBorder: "1px solid rgba(0, 131, 41, 0.2)",
+    primaryPillBackground: "#008329",
+    primaryPillText: "#ffffff",
+    secondaryPillBackground: "rgba(235, 193, 125, 0.18)",
+    secondaryPillText: "#895918",
+    textBody: "#4f493f",
+    textFooter: "#5e584f",
+    textMuted: "#008329",
+    textPrimary: "#1e1d1d",
   },
-  stone: {
-    background:
-      "linear-gradient(135deg, #fafaf9 0%, #f5f5f4 42%, #ecfccb 100%)",
+  publication: {
+    background: "#f9f8f5",
+    brandRail: "linear-gradient(180deg, #ebc17d 0%, #895918 100%)",
     overlay:
-      "radial-gradient(circle at top right, rgba(132, 204, 22, 0.12), transparent 34%), radial-gradient(circle at bottom left, rgba(14, 165, 233, 0.12), transparent 28%)",
-    mutedPillBackground: "rgba(15, 23, 42, 0.08)",
-    panelBackground: "rgba(255, 255, 255, 0.8)",
-    panelBorder: "1px solid rgba(168, 162, 158, 0.25)",
-    primaryPillBackground: "rgba(132, 204, 22, 0.14)",
-    primaryPillText: "#3f6212",
-    secondaryPillBackground: "rgba(15, 23, 42, 0.08)",
-    secondaryPillText: "#44403c",
-    textBody: "#44403c",
-    textFooter: "#57534e",
-    textMuted: "#3f6212",
-    textPrimary: "#1c1917",
+      "linear-gradient(90deg, rgba(235, 193, 125, 0.24) 0%, rgba(252, 246, 235, 0.78) 27%, rgba(249, 248, 245, 0) 27%), linear-gradient(180deg, rgba(0, 131, 41, 0.06) 0%, rgba(249, 248, 245, 0) 60%)",
+    mutedPillBackground: "rgba(30, 29, 29, 0.07)",
+    panelBackground: "rgba(255, 255, 255, 0.88)",
+    panelBorder: "1px solid rgba(137, 89, 24, 0.2)",
+    primaryPillBackground: "#895918",
+    primaryPillText: "#ffffff",
+    secondaryPillBackground: "rgba(235, 193, 125, 0.2)",
+    secondaryPillText: "#895918",
+    textBody: "#4f493f",
+    textFooter: "#5e584f",
+    textMuted: "#895918",
+    textPrimary: "#1e1d1d",
   },
 };
 
@@ -171,9 +172,19 @@ function OpenGraphCardFrame({
         color: theme.textPrimary,
         position: "relative",
         overflow: "hidden",
-        fontFamily: "Georgia, serif",
+        fontFamily: "Arial, Helvetica, sans-serif",
       }}
     >
+      <div
+        style={{
+          position: "absolute",
+          bottom: 0,
+          left: 0,
+          top: 0,
+          width: 20,
+          background: theme.brandRail,
+        }}
+      />
       <div
         style={{
           position: "absolute",
@@ -183,6 +194,7 @@ function OpenGraphCardFrame({
       />
       <div
         style={{
+          borderTop: "1px solid rgba(137, 89, 24, 0.22)",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
@@ -214,7 +226,7 @@ function OpenGraphPill({
       style={{
         display: "flex",
         padding: "10px 18px",
-        borderRadius: 999,
+        borderRadius: 8,
         background: isPrimary
           ? theme.primaryPillBackground
           : theme.secondaryPillBackground,
@@ -248,7 +260,7 @@ function OpenGraphLinguisticGloss({
         display: "flex",
         alignItems: "center",
         alignSelf: "center",
-        color: CARD_THEMES.sky.textFooter,
+        color: CARD_THEMES.dictionary.textFooter,
         fontFamily: "Arial, Helvetica, sans-serif",
         fontSize: size === "heading" ? 30 : 22,
         fontVariant: "small-caps",
@@ -326,7 +338,7 @@ function OpenGraphEntryGloss({
     display: "flex",
     fontSize: 34,
     lineHeight: 1.25,
-    color: CARD_THEMES.sky.textBody,
+    color: CARD_THEMES.dictionary.textBody,
     maxWidth: 920,
   } as const;
 
@@ -392,7 +404,7 @@ function OpenGraphBanner({
         display: "flex",
         width: "100%",
         padding: "16px 28px",
-        borderRadius: 28,
+        borderRadius: 8,
         background: theme.primaryPillBackground,
         border: theme.panelBorder,
         fontSize: 28,
@@ -435,7 +447,7 @@ function OpenGraphStatGrid({
             minWidth: 0,
             flex: 1,
             padding: compact ? "16px 18px" : "20px 22px",
-            borderRadius: compact ? 20 : 24,
+            borderRadius: 10,
             background: theme.panelBackground,
             border: theme.panelBorder,
           }}
@@ -510,7 +522,7 @@ export function renderSiteOpenGraphCard({
   title,
 }: SiteCardOptions) {
   return (
-    <OpenGraphCardFrame themeName="mixed">
+    <OpenGraphCardFrame themeName="platform">
       <div
         style={{
           display: "flex",
@@ -520,7 +532,7 @@ export function renderSiteOpenGraphCard({
           width: "100%",
         }}
       >
-        <OpenGraphBanner label={eyebrow} themeName="mixed" />
+        <OpenGraphBanner label={eyebrow} themeName="platform" />
         <div
           style={{
             display: "flex",
@@ -534,8 +546,8 @@ export function renderSiteOpenGraphCard({
               fontSize: 82,
               lineHeight: 0.98,
               fontWeight: 700,
-              letterSpacing: -2.4,
-              color: CARD_THEMES.mixed.textPrimary,
+              letterSpacing: 0,
+              color: CARD_THEMES.platform.textPrimary,
               marginTop: 4,
             }}
           >
@@ -546,7 +558,7 @@ export function renderSiteOpenGraphCard({
               display: "flex",
               fontSize: 34,
               lineHeight: 1.2,
-              color: CARD_THEMES.mixed.textBody,
+              color: CARD_THEMES.platform.textBody,
               maxWidth: 920,
               marginTop: 2,
               marginBottom: 4,
@@ -559,7 +571,7 @@ export function renderSiteOpenGraphCard({
               display: "flex",
               fontSize: 28,
               lineHeight: 1.35,
-              color: CARD_THEMES.mixed.textBody,
+              color: CARD_THEMES.platform.textBody,
               maxWidth: 920,
               marginTop: 4,
             }}
@@ -577,7 +589,7 @@ export function renderSiteOpenGraphCard({
           paddingBottom: 12,
         }}
       >
-        <OpenGraphStatGrid compact stats={stats} themeName="mixed" />
+        <OpenGraphStatGrid compact stats={stats} themeName="platform" />
         <div
           style={{
             display: "flex",
@@ -587,7 +599,7 @@ export function renderSiteOpenGraphCard({
           <OpenGraphFooter
             left={siteDomain}
             right={footerLabel}
-            themeName="mixed"
+            themeName="platform"
           />
         </div>
       </div>
@@ -610,7 +622,7 @@ export function renderEntryOpenGraphCard({
   strapline,
 }: EntryCardOptions) {
   return (
-    <OpenGraphCardFrame themeName="sky">
+    <OpenGraphCardFrame themeName="dictionary">
       <div
         style={{
           display: "flex",
@@ -626,10 +638,10 @@ export function renderEntryOpenGraphCard({
             gap: 16,
           }}
         >
-          <OpenGraphPill label={strapline} themeName="sky" />
+          <OpenGraphPill label={strapline} themeName="dictionary" />
           <OpenGraphPill
             label={`${partOfSpeechLabel}: ${partOfSpeech}`}
-            themeName="sky"
+            themeName="dictionary"
             tone="secondary"
           />
         </div>
@@ -662,7 +674,7 @@ export function renderEntryOpenGraphCard({
         <OpenGraphFooter
           left={siteDomain}
           right={footerLabel}
-          themeName="sky"
+          themeName="dictionary"
         />
       </div>
     </OpenGraphCardFrame>
@@ -682,7 +694,7 @@ export function renderLessonOpenGraphCard({
   title,
 }: LessonCardOptions) {
   return (
-    <OpenGraphCardFrame themeName="emerald">
+    <OpenGraphCardFrame themeName="grammar">
       <div
         style={{
           display: "flex",
@@ -698,10 +710,10 @@ export function renderLessonOpenGraphCard({
             alignItems: "center",
           }}
         >
-          <OpenGraphPill label={eyebrow} themeName="emerald" />
+          <OpenGraphPill label={eyebrow} themeName="grammar" />
           <OpenGraphPill
             label={lessonLabel}
-            themeName="emerald"
+            themeName="grammar"
             tone="secondary"
           />
         </div>
@@ -718,8 +730,8 @@ export function renderLessonOpenGraphCard({
               fontSize: 66,
               lineHeight: 1.04,
               fontWeight: 700,
-              letterSpacing: -1.8,
-              color: CARD_THEMES.emerald.textPrimary,
+              letterSpacing: 0,
+              color: CARD_THEMES.grammar.textPrimary,
             }}
           >
             {title}
@@ -729,7 +741,7 @@ export function renderLessonOpenGraphCard({
               display: "flex",
               fontSize: 30,
               lineHeight: 1.3,
-              color: CARD_THEMES.emerald.textBody,
+              color: CARD_THEMES.grammar.textBody,
               maxWidth: 920,
             }}
           >
@@ -745,11 +757,11 @@ export function renderLessonOpenGraphCard({
           gap: 22,
         }}
       >
-        <OpenGraphStatGrid stats={stats} themeName="emerald" />
+        <OpenGraphStatGrid stats={stats} themeName="grammar" />
         <OpenGraphFooter
           left={siteDomain}
           right={footerLabel}
-          themeName="emerald"
+          themeName="grammar"
         />
       </div>
     </OpenGraphCardFrame>
@@ -770,7 +782,7 @@ export function renderPublicationOpenGraphCard({
   title,
 }: PublicationCardOptions) {
   return (
-    <OpenGraphCardFrame themeName="stone">
+    <OpenGraphCardFrame themeName="publication">
       <div
         style={{
           display: "flex",
@@ -786,10 +798,10 @@ export function renderPublicationOpenGraphCard({
             alignItems: "center",
           }}
         >
-          <OpenGraphPill label={eyebrow} themeName="stone" />
+          <OpenGraphPill label={eyebrow} themeName="publication" />
           <OpenGraphPill
             label={statusLabel}
-            themeName="stone"
+            themeName="publication"
             tone="secondary"
           />
         </div>
@@ -806,8 +818,8 @@ export function renderPublicationOpenGraphCard({
               fontSize: 60,
               lineHeight: 1.05,
               fontWeight: 700,
-              letterSpacing: -1.6,
-              color: CARD_THEMES.stone.textPrimary,
+              letterSpacing: 0,
+              color: CARD_THEMES.publication.textPrimary,
             }}
           >
             {title}
@@ -818,7 +830,7 @@ export function renderPublicationOpenGraphCard({
                 display: "flex",
                 fontSize: 28,
                 lineHeight: 1.3,
-                color: CARD_THEMES.stone.textBody,
+                color: CARD_THEMES.publication.textBody,
               }}
             >
               {subtitle}
@@ -829,7 +841,7 @@ export function renderPublicationOpenGraphCard({
               display: "flex",
               fontSize: 28,
               lineHeight: 1.35,
-              color: CARD_THEMES.stone.textBody,
+              color: CARD_THEMES.publication.textBody,
               maxWidth: 920,
             }}
           >
@@ -852,12 +864,12 @@ export function renderPublicationOpenGraphCard({
             flexWrap: "wrap",
           }}
         >
-          <OpenGraphPill label={languageLabel} themeName="stone" />
+          <OpenGraphPill label={languageLabel} themeName="publication" />
         </div>
         <OpenGraphFooter
           left={siteDomain}
           right={footerLabel}
-          themeName="stone"
+          themeName="publication"
         />
       </div>
     </OpenGraphCardFrame>

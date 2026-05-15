@@ -1,20 +1,20 @@
 <div align="center">
-  <img src="public/readme/social-preview-1280x640.png" alt="Coptic Compass Hero Banner" width="100%" />
+  <img src="public/readme/social-preview-1280-640.png" alt="Coptic Compass digital Coptology platform preview" width="100%" />
 
-  <h3>A digital home for Coptic study.</h3>
-  
-  <p>Dictionary · Grammar · AI Assistant · Public API</p>
+  <h3>A trusted digital Coptology platform.</h3>
+
+  <p>Dictionary · Grammar · Shenute AI · Publications · Public API</p>
 
   <div>
-    <a href="https://www.copticcompass.com"><img src="https://img.shields.io/badge/Live_Site-www.copticcompass.com-0ea5e9?style=flat-square" alt="Live Site"></a>
+    <a href="https://www.copticcompass.com"><img src="https://img.shields.io/badge/Live_Site-www.copticcompass.com-C08329?style=flat-square" alt="Live Site"></a>
     <a href="https://github.com/KyroHub/CopticCompass/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-black?style=flat-square" alt="License"></a>
-    <a href="https://github.com/KyroHub/CopticCompass/pulls"><img src="https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square" alt="PRs Welcome"></a>
+    <a href="https://github.com/KyroHub/CopticCompass/pulls"><img src="https://img.shields.io/badge/PRs-welcome-008329?style=flat-square" alt="PRs Welcome"></a>
   </div>
 </div>
 
 ---
 
-**Coptic Compass** brings together a searchable dictionary, published grammar lessons, academic publications, Shenute AI, and private learning workspaces—built by Copts, for Copts.
+**Coptic Compass** brings together a searchable dictionary, structured grammar lessons, publications, Shenute AI, public APIs, and private learning workspaces for Coptic language study and research.
 
 ## Features
 
@@ -28,8 +28,18 @@
 ## Interface
 
 <p align="center">
+  <img src="public/readme/homepage-preview-1.png" alt="Coptic Compass homepage hero preview" width="49%" />
+  <img src="public/readme/homepage-preview-2.png" alt="Coptic Compass platform overview preview" width="49%" />
+</p>
+
+<p align="center">
   <img src="public/readme/dictionary-search-preview.png" alt="Dictionary search interface preview" width="49%" />
   <img src="public/readme/lesson-preview.png" alt="Grammar lesson preview" width="49%" />
+</p>
+
+<p align="center">
+  <img src="public/readme/publications-preview.png" alt="Publications catalog preview" width="49%" />
+  <img src="public/readme/shenute-preview.png" alt="Shenute AI workspace preview" width="49%" />
 </p>
 
 ## Quickstart
@@ -116,6 +126,7 @@ npm run test:e2e
 For deep dives into the technical architecture, environment setup, API surfaces, or localization guidelines, see the `docs/` directory:
 
 - [Architecture & Workflows](docs/architecture.md)
+- [Coptic Compass Brand Book](docs/coptic-compass-brand-guide.md)
 - [Environment & Deployment Setup](docs/environment-setup.md)
 - [API, AI, and Data Workflows](docs/api-and-workflows.md)
 - [AI & RAG Distillation Pipeline](docs/distillation.md)

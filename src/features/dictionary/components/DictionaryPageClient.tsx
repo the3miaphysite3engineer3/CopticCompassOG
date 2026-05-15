@@ -52,8 +52,8 @@ function DictionaryPageBody({ searchPath }: DictionaryPageBodyProps) {
       contentClassName="app-page-content"
       width="standard"
       accents={[
-        pageShellAccents.heroSkyArc,
-        pageShellAccents.topRightEmeraldOrbInset,
+        pageShellAccents.heroGoldBand,
+        pageShellAccents.topRightCopticWashInset,
       ]}
     >
       <AppPageIntro

@@ -19,6 +19,7 @@ export type RenderGrammarBlocks = (
 ) => ReactNode;
 
 export type GrammarBlockRenderHelperProps = {
+  currentSectionId?: string;
   inheritTextColor: boolean;
   language: Language;
   lessonBundle?: GrammarLessonBundle;

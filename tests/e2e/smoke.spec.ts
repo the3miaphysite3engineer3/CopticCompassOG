@@ -13,7 +13,7 @@ test("root route redirects to the English homepage", async ({ page }) => {
   await expect(page).toHaveURL(/\/en$/);
   await expect(page.locator("html")).toHaveAttribute("lang", "en");
   await expect(
-    page.getByRole("heading", { name: "Coptic Compass" }),
+    page.getByRole("heading", { level: 1, name: "Coptic Compass" }),
   ).toBeVisible();
 });
 
@@ -35,7 +35,7 @@ test("English locale renders English navigation", async ({ page }) => {
       .getByRole("link", { name: "Publications", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Coptic Compass" }),
+    page.getByRole("heading", { level: 1, name: "Coptic Compass" }),
   ).toBeVisible();
 });
 
@@ -49,16 +49,16 @@ test("Dutch locale renders Dutch navigation", async ({ page }) => {
       .getByRole("link", { name: "Publicaties", exact: true }),
   ).toBeVisible();
   await expect(
-    page.getByRole("heading", { name: "Coptic Compass" }),
+    page.getByRole("heading", { level: 1, name: "Coptic Compass" }),
   ).toBeVisible();
 });
 
 test("floating Shenute assistant opens on demand", async ({ page }) => {
-  await page.goto("/en");
+  await page.goto("/en/contact");
 
   await page.getByRole("button", { name: "Open Shenute AI" }).click();
 
-  await expect(page.getByText("Page context: Home")).toBeVisible({
+  await expect(page.getByText("Page context: Contact")).toBeVisible({
     timeout: FLOATING_ASSISTANT_TIMEOUT_MS,
   });
   await expect(page.getByRole("button", { name: "Minimize" })).toBeVisible();

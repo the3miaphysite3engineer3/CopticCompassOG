@@ -2,6 +2,7 @@ import { X } from "lucide-react";
 import { useEffect } from "react";
 import { createPortal } from "react-dom";
 
+import { iconButtonClassName } from "@/components/Button";
 import { cx } from "@/lib/classes";
 
 import type { ReactNode } from "react";
@@ -76,7 +77,7 @@ export function AnalyticsSlideOver({
           </h2>
           <button
             onClick={onClose}
-            className="rounded-full p-2 text-stone-500 hover:bg-stone-200 transition-colors dark:text-stone-400 dark:hover:bg-stone-800"
+            className={iconButtonClassName({ className: "rounded-full" })}
             aria-label="Close panel"
           >
             <X className="h-5 w-5" />

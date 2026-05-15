@@ -57,7 +57,7 @@ export function EntryReportPanel({
   }, [onClose, onSubmitted, state?.message, state?.success]);
 
   return (
-    <div className="rounded-2xl border border-stone-200 bg-stone-50/85 p-5 shadow-sm backdrop-blur-md dark:border-stone-800 dark:bg-stone-950/35">
+    <div className="rounded-lg border border-line bg-surface/88 p-5 shadow-soft backdrop-blur-md">
       <div className="mb-4">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800 dark:text-stone-200">
           <MessageSquareText className="h-4 w-4 text-amber-600 dark:text-amber-400" />
@@ -108,7 +108,7 @@ export function EntryReportPanel({
               minLength={ENTRY_REPORT_MIN_COMMENTARY_LENGTH}
               maxLength={ENTRY_REPORT_MAX_COMMENTARY_LENGTH}
               rows={5}
-              className="textarea-base min-h-[8rem] resize-y rounded-2xl text-sm leading-6"
+              className="textarea-base min-h-[8rem] resize-y text-sm leading-6"
               placeholder={t("entry.actions.commentaryPlaceholder")}
             />
           </FormField>

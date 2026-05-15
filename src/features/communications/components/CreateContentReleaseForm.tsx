@@ -113,7 +113,7 @@ export function CreateContentReleaseForm({
   return (
     <details
       ref={detailsRef}
-      className="group overflow-hidden rounded-3xl border border-stone-200/80 bg-white/70 shadow-sm dark:border-stone-800 dark:bg-stone-900/40"
+      className="group overflow-hidden rounded-xl border border-line bg-surface/82 shadow-sm"
       open={totalCandidates === 0}
     >
       <summary className="flex cursor-pointer list-none items-start justify-between gap-4 p-6 [&::-webkit-details-marker]:hidden md:p-7">
@@ -141,12 +141,12 @@ export function CreateContentReleaseForm({
             ) : null}
           </div>
 
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
             {copy.description}
           </p>
         </div>
 
-        <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-stone-500 dark:text-stone-400">
+        <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-muted">
           <span className="group-open:hidden">{copy.compose}</span>
           <span className="hidden group-open:inline">{copy.collapse}</span>
           <ChevronDown className="mt-1 h-5 w-5 transition-transform duration-200 group-open:rotate-180" />
@@ -156,7 +156,7 @@ export function CreateContentReleaseForm({
       <form
         ref={formRef}
         action={formAction}
-        className="space-y-6 border-t border-stone-200/80 p-6 dark:border-stone-800 md:p-7"
+        className="space-y-6 border-t border-line p-6 md:p-7"
       >
         <div className="grid gap-5 md:grid-cols-2">
           <FormField htmlFor="audience_segment" label={copy.audienceSegment}>
@@ -241,27 +241,25 @@ export function CreateContentReleaseForm({
             label={`${copy.publishedLessons} (${lessonCandidates.length.toLocaleString(
               language === "nl" ? "nl-BE" : "en-US",
             )})`}
-            className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/30"
+            className="rounded-lg border border-line bg-elevated/70 p-4"
           >
             <div className="space-y-3">
               {lessonCandidates.length === 0 ? (
-                <p className="text-sm text-stone-500 dark:text-stone-400">
-                  {copy.noLessons}
-                </p>
+                <p className="text-sm text-muted">{copy.noLessons}</p>
               ) : (
                 lessonCandidates.map((candidate) => (
                   <label
                     key={candidate.id}
-                    className="flex items-start gap-3 text-sm leading-6 text-stone-600 dark:text-stone-300"
+                    className="flex items-start gap-3 text-sm leading-6 text-muted"
                   >
                     <input
                       type="checkbox"
                       name="release_item"
                       value={candidate.id}
-                      className="mt-1 h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-sky-500/40 dark:border-stone-700 dark:bg-stone-950"
+                      className="mt-1 h-4 w-4 rounded border-line text-accent-strong focus:ring-accent/30"
                     />
                     <span>
-                      <span className="block font-semibold text-stone-800 dark:text-stone-100">
+                      <span className="block font-semibold text-ink">
                         {candidate.title}
                       </span>
                       {(() => {
@@ -271,7 +269,7 @@ export function CreateContentReleaseForm({
                             : candidate.summaryEn;
 
                         return summary ? (
-                          <span className="block text-xs text-stone-500 dark:text-stone-400">
+                          <span className="block text-xs text-muted">
                             {summary}
                           </span>
                         ) : null;
@@ -287,27 +285,25 @@ export function CreateContentReleaseForm({
             label={`${copy.publishedPublications} (${publicationCandidates.length.toLocaleString(
               language === "nl" ? "nl-BE" : "en-US",
             )})`}
-            className="rounded-2xl border border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/30"
+            className="rounded-lg border border-line bg-elevated/70 p-4"
           >
             <div className="space-y-3">
               {publicationCandidates.length === 0 ? (
-                <p className="text-sm text-stone-500 dark:text-stone-400">
-                  {copy.noPublications}
-                </p>
+                <p className="text-sm text-muted">{copy.noPublications}</p>
               ) : (
                 publicationCandidates.map((candidate) => (
                   <label
                     key={candidate.id}
-                    className="flex items-start gap-3 text-sm leading-6 text-stone-600 dark:text-stone-300"
+                    className="flex items-start gap-3 text-sm leading-6 text-muted"
                   >
                     <input
                       type="checkbox"
                       name="release_item"
                       value={candidate.id}
-                      className="mt-1 h-4 w-4 rounded border-stone-300 text-sky-600 focus:ring-sky-500/40 dark:border-stone-700 dark:bg-stone-950"
+                      className="mt-1 h-4 w-4 rounded border-line text-accent-strong focus:ring-accent/30"
                     />
                     <span>
-                      <span className="block font-semibold text-stone-800 dark:text-stone-100">
+                      <span className="block font-semibold text-ink">
                         {candidate.title}
                       </span>
                       {(() => {
@@ -317,7 +313,7 @@ export function CreateContentReleaseForm({
                             : candidate.summaryEn;
 
                         return summary ? (
-                          <span className="block text-xs text-stone-500 dark:text-stone-400">
+                          <span className="block text-xs text-muted">
                             {summary}
                           </span>
                         ) : null;
@@ -334,9 +330,7 @@ export function CreateContentReleaseForm({
           <Button type="submit" disabled={isPending}>
             {isPending ? copy.saving : copy.create}
           </Button>
-          <p className="text-sm text-stone-500 dark:text-stone-400">
-            {copy.draftsNotice}
-          </p>
+          <p className="text-sm text-muted">{copy.draftsNotice}</p>
         </div>
 
         {state?.error ? (

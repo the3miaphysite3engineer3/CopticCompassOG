@@ -26,21 +26,13 @@ export function EmptyState({
       className={cx("px-6 py-20 text-center", className)}
     >
       <h3
-        className={cx(
-          "mb-2 text-2xl font-semibold text-stone-800 dark:text-stone-200",
-          titleClassName,
-        )}
+        className={cx("mb-2 text-2xl font-semibold text-ink", titleClassName)}
       >
         {title}
       </h3>
 
       {description && (
-        <p
-          className={cx(
-            "font-medium text-stone-500 dark:text-stone-400",
-            descriptionClassName,
-          )}
-        >
+        <p className={cx("font-medium text-muted", descriptionClassName)}>
           {description}
         </p>
       )}

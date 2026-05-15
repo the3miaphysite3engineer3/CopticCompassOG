@@ -24,6 +24,7 @@ type GrammarBlockRendererProps = {
   language: Language;
   lessonBundle?: GrammarLessonBundle;
   className?: string;
+  currentSectionId?: string;
   inheritTextColor?: boolean;
 };
 
@@ -43,10 +44,7 @@ function renderFootnoteRef(
 
   if (!footnote || !lessonBundle) {
     return (
-      <sup
-        key={key}
-        className="text-xs font-semibold text-sky-700 dark:text-sky-300"
-      >
+      <sup key={key} className="text-xs font-semibold text-coptic">
         [{ref}]
       </sup>
     );
@@ -75,6 +73,7 @@ function renderBlock(
   index: number,
   language: Language,
   lessonBundle: GrammarLessonBundle | undefined,
+  currentSectionId: string | undefined,
   inheritTextColor: boolean,
   renderMode: "web" | "pdf",
   renderBlocks: RenderGrammarBlocks,
@@ -86,9 +85,7 @@ function renderBlock(
           key={`${block.type}-${index}`}
           className={cx(
             "leading-7",
-            inheritTextColor
-              ? "text-inherit"
-              : "text-stone-700 dark:text-stone-300",
+            inheritTextColor ? "text-inherit" : "text-muted",
           )}
         >
           <GrammarInlineRenderer
@@ -116,7 +113,7 @@ function renderBlock(
           key={`${block.type}-${block.id}`}
           id={block.id}
           className={cx(
-            "font-semibold text-stone-900 dark:text-stone-100",
+            "font-semibold text-ink",
             block.level === 2 ? "text-2xl" : "text-xl",
           )}
         >
@@ -154,15 +151,14 @@ function renderBlock(
               key={item.id}
               className={cx(
                 "space-y-3",
-                inheritTextColor
-                  ? "text-inherit"
-                  : "text-stone-700 dark:text-stone-300",
+                inheritTextColor ? "text-inherit" : "text-muted",
               )}
             >
               <GrammarBlockRenderer
                 blocks={item.blocks}
                 language={language}
                 lessonBundle={lessonBundle}
+                currentSectionId={currentSectionId}
                 inheritTextColor={inheritTextColor}
               />
             </li>
@@ -187,7 +183,7 @@ function renderBlock(
       return (
         <GrammarLessonCard
           key={`${block.type}-${index}`}
-          tone={block.tone === "info" ? "sky" : "stone"}
+          tone={block.tone === "info" ? "coptic" : "neutral"}
           className={cx(
             "space-y-3",
             block.tone === "warning" &&
@@ -195,7 +191,7 @@ function renderBlock(
           )}
         >
           {block.title ? (
-            <h3 className="text-sm font-bold uppercase tracking-widest text-stone-500 dark:text-stone-400">
+            <h3 className="text-sm font-bold uppercase tracking-widest text-muted">
               {block.title[language]}
             </h3>
           ) : null}
@@ -203,6 +199,7 @@ function renderBlock(
             blocks={block.blocks}
             language={language}
             lessonBundle={lessonBundle}
+            currentSectionId={currentSectionId}
             inheritTextColor={inheritTextColor}
           />
         </GrammarLessonCard>
@@ -213,6 +210,7 @@ function renderBlock(
           <GrammarExampleGroupBlock
             columns={block.columns}
             exampleIds={block.refs}
+            currentSectionId={currentSectionId}
             inheritTextColor={inheritTextColor}
             language={language}
             lessonBundle={lessonBundle}
@@ -225,6 +223,7 @@ function renderBlock(
         <div key={`${block.type}-${index}`}>
           <GrammarExerciseGroupBlock
             exerciseIds={block.refs}
+            currentSectionId={currentSectionId}
             inheritTextColor={inheritTextColor}
             language={language}
             lessonBundle={lessonBundle}
@@ -248,6 +247,7 @@ export function GrammarBlockRenderer({
   language,
   lessonBundle,
   className,
+  currentSectionId,
   inheritTextColor = false,
 }: GrammarBlockRendererProps) {
   const { renderMode } = useGrammarLessonRenderContext();
@@ -257,6 +257,7 @@ export function GrammarBlockRenderer({
       language={language}
       lessonBundle={lessonBundle}
       className={options?.className}
+      currentSectionId={currentSectionId}
       inheritTextColor={options?.inheritTextColor ?? inheritTextColor}
     />
   );
@@ -273,6 +274,7 @@ export function GrammarBlockRenderer({
           index,
           language,
           lessonBundle,
+          currentSectionId,
           inheritTextColor,
           renderMode,
           renderNestedBlocks,

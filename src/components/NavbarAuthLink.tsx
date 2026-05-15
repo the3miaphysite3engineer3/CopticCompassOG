@@ -24,20 +24,20 @@ function getLinkClasses(
 ) {
   if (variant === "mobile") {
     return {
-      linkClassName: `group grid justify-items-center rounded-xl px-4 py-3 text-center text-sm tracking-[0.02em] transition-colors before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] ${
+      linkClassName: `group grid justify-items-center rounded-lg px-4 py-3 text-center text-sm tracking-[0.02em] transition-colors before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] ${
         isActive
-          ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
-          : "text-stone-600 hover:bg-stone-50 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-900/60 dark:hover:text-stone-200"
+          ? "bg-accent-soft text-accent-strong dark:bg-accent-soft/35 dark:text-accent"
+          : "text-muted hover:bg-elevated hover:text-ink"
       }`,
       labelClassName: `col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`,
     };
   }
 
   return {
-    linkClassName: `group inline-grid h-10 items-center justify-items-center rounded-full px-4 text-center text-sm tracking-[0.02em] transition-all duration-200 before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25 ${
+    linkClassName: `group inline-grid h-10 items-center justify-items-center rounded-lg px-4 text-center text-sm tracking-[0.02em] transition-all duration-200 before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 ${
       isActive
-        ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
-        : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+        ? "bg-accent-soft text-accent-strong dark:bg-accent-soft/35 dark:text-accent"
+        : "text-muted hover:bg-elevated hover:text-ink"
     }`,
     labelClassName: `col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`,
   };

@@ -123,7 +123,7 @@ function AdminItemDisclosure({
 
           <h3
             className={cx(
-              "mt-3 text-xl font-semibold text-stone-900 dark:text-stone-100 md:text-2xl",
+              "mt-3 text-xl font-semibold text-ink md:text-2xl",
               titleClassName,
             )}
           >
@@ -131,26 +131,26 @@ function AdminItemDisclosure({
           </h3>
 
           {metadata ? (
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-stone-600 dark:text-stone-400">
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-muted">
               {metadata}
             </div>
           ) : null}
 
           {preview ? (
-            <p className="mt-3 max-w-4xl text-sm leading-6 text-stone-600 line-clamp-2 dark:text-stone-400">
+            <p className="mt-3 max-w-4xl text-sm leading-6 text-muted line-clamp-2">
               {preview}
             </p>
           ) : null}
         </div>
 
-        <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-stone-500 dark:text-stone-400">
+        <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-muted">
           <span className="group-open:hidden">{copy.review}</span>
           <span className="hidden group-open:inline">{copy.collapse}</span>
           <ChevronDown className="mt-1 h-5 w-5 transition-transform duration-200 group-open:rotate-180" />
         </div>
       </summary>
 
-      <div className="border-t border-stone-200/80 px-6 pb-6 pt-6 dark:border-stone-800 md:px-7 md:pb-7">
+      <div className="border-t border-line px-6 pb-6 pt-6 md:px-7 md:pb-7">
         {children}
       </div>
     </details>
@@ -196,9 +196,7 @@ export function AdminContactMessageDisclosure({
       title={message.name}
       metadata={
         <>
-          <span className="font-medium text-stone-800 dark:text-stone-200">
-            {message.email}
-          </span>
+          <span className="font-medium text-ink">{message.email}</span>
           <span>
             {copy.receivedOn}{" "}
             {formatSubmissionDate(message.created_at, message.locale)}
@@ -215,15 +213,13 @@ export function AdminContactMessageDisclosure({
     >
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <p className="text-sm text-stone-500 dark:text-stone-400">
-            {copy.replyDescription}
-          </p>
+          <p className="text-sm text-muted">{copy.replyDescription}</p>
           <a href={`mailto:${message.email}`} className="btn-secondary px-5">
             {copy.replyByEmail}
           </a>
         </div>
 
-        <div className="rounded-2xl border border-stone-100 bg-stone-50 p-5 text-base leading-7 whitespace-pre-wrap text-stone-700 dark:border-stone-800/50 dark:bg-stone-950 dark:text-stone-300">
+        <div className="rounded-lg border border-line bg-elevated p-5 text-base leading-7 whitespace-pre-wrap text-muted">
           {message.message}
         </div>
 
@@ -262,10 +258,10 @@ export function AdminEntryReportDisclosure({
         </>
       }
       title={report.entry_headword}
-      titleClassName={`${antinoou.className} tracking-wide text-sky-700 dark:text-sky-300`}
+      titleClassName={`${antinoou.className} tracking-wide text-coptic`}
       metadata={
         <>
-          <span className="font-medium text-stone-800 dark:text-stone-200">
+          <span className="font-medium text-ink">
             {copy.reporter}:{" "}
             {report.reporterName ?? report.reporterEmail ?? copy.unknownUser}
           </span>
@@ -282,7 +278,7 @@ export function AdminEntryReportDisclosure({
     >
       <div className="space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="text-sm text-stone-600 dark:text-stone-400">
+          <div className="text-sm text-muted">
             {meaningPreview ? (
               <span>
                 {copy.currentMeaning}: {meaningPreview}
@@ -300,7 +296,7 @@ export function AdminEntryReportDisclosure({
           </Link>
         </div>
 
-        <div className="rounded-2xl border border-stone-100 bg-stone-50 p-5 text-base leading-7 whitespace-pre-wrap text-stone-700 dark:border-stone-800/50 dark:bg-stone-950 dark:text-stone-300">
+        <div className="rounded-lg border border-line bg-elevated p-5 text-base leading-7 whitespace-pre-wrap text-muted">
           {report.commentary}
         </div>
 

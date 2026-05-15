@@ -56,13 +56,13 @@ const SECTION_EYEBROW_CLASS =
   "text-xs font-semibold uppercase tracking-[0.18em] text-muted";
 const BODY_TEXT_CLASS = "text-sm leading-7 text-muted";
 const LIST_ITEM_CLASS =
-  "rounded-2xl border border-line/80 bg-elevated/65 px-4 py-3";
+  "rounded-lg border border-line/80 bg-elevated/65 px-4 py-3";
 const LINK_CARD_CLASS =
-  "rounded-2xl border border-line/80 bg-elevated/65 px-5 py-4 transition-colors hover:border-accent/25 hover:bg-accent-soft/45";
+  "rounded-lg border border-line/80 bg-elevated/65 px-5 py-4 transition-colors hover:border-accent/35 hover:bg-accent-soft/45";
 const RESOURCE_CARD_CLASS =
-  "block rounded-2xl border border-line/80 bg-elevated/65 px-4 py-4 transition-colors hover:border-accent/25 hover:bg-accent-soft/45";
+  "block rounded-lg border border-line/80 bg-elevated/65 px-4 py-4 transition-colors hover:border-accent/35 hover:bg-accent-soft/45";
 const CODE_BLOCK_CLASS =
-  "mt-5 overflow-x-auto rounded-2xl border border-line/70 bg-stone-950 px-4 py-4 text-sm leading-6 text-stone-100";
+  "mt-5 overflow-x-auto rounded-lg border border-line/70 bg-ink px-4 py-4 text-sm leading-6 text-paper dark:bg-black/60";
 
 export function DevelopersPageClient() {
   const { t, language } = useLanguage();
@@ -177,8 +177,8 @@ export function DevelopersPageClient() {
       contentClassName="app-page-content"
       width="standard"
       accents={[
-        pageShellAccents.heroSkyArc,
-        pageShellAccents.topRightEmeraldOrbInset,
+        pageShellAccents.heroGoldBand,
+        pageShellAccents.topRightCopticWashInset,
       ]}
     >
       <AppPageIntro
@@ -192,13 +192,13 @@ export function DevelopersPageClient() {
         ]}
         title={t("developers.heroTitle")}
         description={t("developers.heroDescription")}
-        tone="sky"
+        tone="brand"
       />
 
       <div className="space-y-8 md:space-y-9">
         <section className="grid gap-4 md:grid-cols-[minmax(0,1.4fr)_minmax(18rem,1fr)]">
           <SurfacePanel rounded="3xl" variant="elevated" className="p-6 md:p-8">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-700 dark:text-sky-300">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-strong dark:text-accent">
               {t("developers.discoveryTitle")}
             </p>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-muted">
@@ -253,7 +253,7 @@ export function DevelopersPageClient() {
                   href={endpoint.href}
                   className={LINK_CARD_CLASS}
                 >
-                  <p className="font-mono text-sm text-sky-700 dark:text-sky-300">
+                  <p className="font-mono text-sm text-accent-strong dark:text-accent">
                     {endpoint.label}
                   </p>
                   <p className="mt-2 text-sm leading-7 text-muted">

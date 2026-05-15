@@ -179,7 +179,7 @@ const SHENUTE_COPY = {
     providerOpenRouterDescription:
       "More step-by-step structure for harder questions.",
     providerThoth: "Best answer",
-    providerThothDescription: "The strongest default for Coptic-focused study.",
+    providerThothDescription: "The strongest default for Coptology questions.",
     ragWarning: "Saved, but the learning sync warned:",
     rateLimit: "Rate limit reached. Please try again later.",
     regenerateResponse: "Regenerate",
@@ -201,7 +201,7 @@ const SHENUTE_COPY = {
     viewNmtCredits: "View NMT credits",
     viewShenuteCredits: "View Shenute credits",
     welcomeDescription:
-      "Start with a word, a grammar question, or an image attachment and Shenute AI will keep the conversation grounded in your Coptic study workflow.",
+      "Start with a word, a grammar question, or an image attachment and Shenute AI will keep the conversation grounded in your Coptology work.",
     welcomeTitle: "Welcome to Shenute AI",
     writeAdminFeedback: "Write admin feedback before sending.",
     play: "Speak",
@@ -298,7 +298,7 @@ const SHENUTE_COPY = {
       "Meer stapsgewijze structuur voor moeilijkere vragen.",
     providerThoth: "Beste antwoord",
     providerThothDescription:
-      "De sterkste standaard voor Koptisch gerichte studie.",
+      "De sterkste standaard voor Koptologische vragen.",
     ragWarning: "Opgeslagen, maar de leersynchronisatie waarschuwde:",
     rateLimit: "De limiet is bereikt. Probeer het later opnieuw.",
     regenerateResponse: "Opnieuw genereren",
@@ -320,7 +320,7 @@ const SHENUTE_COPY = {
     viewNmtCredits: "Bekijk NMT-credits",
     viewShenuteCredits: "Bekijk Shenute-credits",
     welcomeDescription:
-      "Begin met een woord, een grammaticavraag of een afbeelding. Shenute AI houdt het gesprek verbonden met uw Koptische studiewerkstroom.",
+      "Begin met een woord, een grammaticavraag of een afbeelding. Shenute AI houdt het gesprek verbonden met uw Koptologiewerk.",
     welcomeTitle: "Welkom bij Shenute AI",
     writeAdminFeedback: "Schrijf beheerdersfeedback voordat u die verstuurt.",
     play: "Spreken",
@@ -561,26 +561,26 @@ function getFeedbackStatusClass(status: "error" | "pending" | "success") {
   }
 
   if (status === "pending") {
-    return "text-slate-600 dark:text-slate-300";
+    return "text-muted";
   }
 
-  return "text-emerald-700 dark:text-emerald-300";
+  return "text-coptic";
 }
 
 function getMessageAvatarClassName(role: ChatMessageLike["role"]) {
   if (role === "user") {
-    return "bg-sky-600 text-white ring-2 ring-sky-100 dark:bg-sky-500 dark:ring-sky-950/70";
+    return "bg-accent-strong text-paper ring-2 ring-accent/20 dark:bg-accent-soft dark:text-ink dark:ring-accent/30";
   }
 
-  return "bg-emerald-600 text-white ring-2 ring-emerald-100 dark:bg-emerald-500 dark:ring-emerald-950/70";
+  return "bg-coptic-soft text-coptic ring-2 ring-coptic/20";
 }
 
 function getMessageBubbleClassName(role: ChatMessageLike["role"]) {
   if (role === "user") {
-    return "rounded-br-sm bg-sky-600 text-white shadow-sm dark:bg-sky-500";
+    return "rounded-br-md bg-accent-strong text-paper shadow-sm dark:bg-accent-soft dark:text-ink";
   }
 
-  return "rounded-bl-sm border border-stone-200 bg-white/95 text-stone-800 shadow-sm ring-1 ring-white/70 dark:border-stone-700 dark:bg-stone-900/85 dark:text-stone-200 dark:ring-stone-800/50";
+  return "rounded-bl-md border border-line bg-surface/95 text-ink shadow-soft ring-1 ring-line/60";
 }
 
 function getReactionButtonClassName(
@@ -588,14 +588,14 @@ function getReactionButtonClassName(
   tone: "negative" | "positive",
 ) {
   if (active && tone === "positive") {
-    return "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300";
+    return "border-coptic/60 bg-coptic-soft text-coptic";
   }
 
   if (active && tone === "negative") {
     return "border-rose-500 bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300";
   }
 
-  return "border-stone-300 text-stone-700 hover:bg-stone-100 dark:border-stone-600 dark:text-stone-200 dark:hover:bg-stone-800";
+  return "border-line text-muted hover:bg-elevated hover:text-ink";
 }
 
 function getProviderLabel(provider: ShenuteProvider, copy: ShenuteCopy) {
@@ -802,11 +802,11 @@ export default function ShenuteAI() {
   } else if (hasUnsavedConversationChanges) {
     historyStatusMessage = copy.unsavedChanges;
   }
-  let historyStatusDotClassName = "bg-stone-300 dark:bg-stone-600";
+  let historyStatusDotClassName = "bg-muted/40";
   if (isHistorySaving || hasUnsavedConversationChanges) {
-    historyStatusDotClassName = "bg-amber-400";
+    historyStatusDotClassName = "bg-warning";
   } else if (typedMessages.length > 0) {
-    historyStatusDotClassName = "bg-emerald-500";
+    historyStatusDotClassName = "bg-coptic";
   }
 
   const updateTranscriptScrollState = useCallback(() => {
@@ -1761,8 +1761,8 @@ export default function ShenuteAI() {
       contentClassName="app-page-content space-y-3"
       width="standard"
       accents={[
-        pageShellAccents.heroSkyArc,
-        pageShellAccents.topRightEmeraldOrbInset,
+        pageShellAccents.heroCopticBand,
+        pageShellAccents.topRightGoldWashInset,
       ]}
     >
       <AppPageIntro
@@ -1773,6 +1773,7 @@ export default function ShenuteAI() {
         description={copy.intro}
         spacing="compact"
         title={copy.title}
+        tone="coptic"
       />
 
       <SurfacePanel
@@ -1784,13 +1785,13 @@ export default function ShenuteAI() {
           <>
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 z-10 bg-white/10 backdrop-brightness-95 dark:bg-stone-950/10"
+              className="pointer-events-none absolute inset-0 z-10 bg-surface/10 backdrop-brightness-95 dark:bg-paper/10"
             />
             <div className="absolute inset-0 z-20 flex items-center justify-center p-6 md:p-10">
               <AuthGateNotice
                 actionClassName="px-6"
                 align="center"
-                className="w-full max-w-lg shadow-xl"
+                className="w-full max-w-lg shadow-panel"
                 size="comfortable"
                 title={copy.title}
               >
@@ -1808,28 +1809,28 @@ export default function ShenuteAI() {
           )}
         >
           {sessions.length > 0 ? (
-            <details className="border-b border-stone-200/80 bg-white/65 px-4 py-2 dark:border-stone-800 dark:bg-stone-950/35 md:px-5">
+            <details className="border-b border-line bg-surface/70 px-4 py-2 md:px-5">
               <summary className="flex cursor-pointer list-none flex-wrap items-center justify-between gap-2 text-sm [&::-webkit-details-marker]:hidden">
                 <div className="flex min-w-0 items-center gap-2">
-                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-stone-500 dark:bg-stone-900 dark:text-stone-300">
+                  <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-elevated text-muted">
                     <Clock3 className="h-3.5 w-3.5" />
                   </span>
-                  <p className="truncate text-sm font-semibold text-stone-900 dark:text-stone-100">
+                  <p className="truncate text-sm font-semibold text-ink">
                     {copy.historySessions}
                   </p>
                 </div>
                 <div className="flex min-w-0 items-center gap-2">
                   {sessionStatus ? (
-                    <span className="hidden truncate text-xs text-stone-500 dark:text-stone-400 sm:inline">
+                    <span className="hidden truncate text-xs text-muted sm:inline">
                       {sessionStatus}
                     </span>
                   ) : null}
-                  <span className="inline-flex h-7 shrink-0 items-center rounded-full bg-stone-100 px-3 text-xs font-semibold uppercase tracking-wide text-stone-600 dark:bg-stone-900 dark:text-stone-300">
+                  <span className="inline-flex h-7 shrink-0 items-center rounded-full bg-elevated px-3 text-xs font-semibold uppercase tracking-wide text-muted">
                     {sessionCountLabel}
                   </span>
                 </div>
               </summary>
-              <div className="mt-2 rounded-2xl border border-stone-200 bg-white/80 p-3 shadow-sm dark:border-stone-700 dark:bg-stone-950/70">
+              <div className="mt-2 rounded-lg border border-line bg-surface/85 p-3 shadow-soft">
                 <div
                   aria-label={copy.historySessions}
                   className="flex snap-x gap-2 overflow-x-auto pb-2 [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch]"
@@ -1849,10 +1850,10 @@ export default function ShenuteAI() {
                         onClick={() => void loadShenuteSession(session.id)}
                         disabled={isActive}
                         className={cx(
-                          "flex w-64 shrink-0 snap-start flex-col gap-1 rounded-2xl border px-3 py-2.5 text-left text-sm transition sm:w-72",
+                          "flex w-64 shrink-0 snap-start flex-col gap-1 rounded-lg border px-3 py-2.5 text-left text-sm transition sm:w-72",
                           isActive
-                            ? "border-sky-500 bg-sky-50 text-sky-900 dark:border-sky-400 dark:bg-sky-950/70 dark:text-sky-100"
-                            : "border-stone-200 bg-white text-stone-900 hover:border-stone-400 hover:bg-stone-50 dark:border-stone-700 dark:bg-stone-950/70 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-900",
+                            ? "border-coptic/55 bg-coptic-soft text-ink"
+                            : "border-line bg-surface text-ink hover:border-accent/35 hover:bg-elevated",
                         )}
                       >
                         <div className="flex items-center justify-between gap-3">
@@ -1863,24 +1864,24 @@ export default function ShenuteAI() {
                             className={cx(
                               "shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold",
                               isActive
-                                ? "bg-sky-100 text-sky-700 dark:bg-sky-900/50 dark:text-sky-300"
-                                : "bg-stone-100 text-stone-500 dark:bg-stone-900 dark:text-stone-400",
+                                ? "bg-surface/80 text-coptic"
+                                : "bg-elevated text-muted",
                             )}
                           >
                             {isActive ? copy.currentSession : copy.loadSession}
                           </span>
                         </div>
-                        <div className="flex flex-wrap items-center gap-2 text-xs text-stone-500 dark:text-stone-400">
+                        <div className="flex flex-wrap items-center gap-2 text-xs text-muted">
                           <Clock3 className="h-3 w-3" />
                           <span>{formattedSessionDate}</span>
                           {isActive && hasUnsavedConversationChanges ? (
-                            <span className="rounded-full bg-amber-50 px-2 py-0.5 font-semibold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
+                            <span className="rounded-full bg-accent-soft px-2 py-0.5 font-semibold text-accent-strong dark:text-accent">
                               {copy.sessionUnsavedBadge}
                             </span>
                           ) : null}
                         </div>
                         {sessionLoadingId === session.id ? (
-                          <p className="text-xs text-slate-500 dark:text-slate-400">
+                          <p className="text-xs text-muted">
                             {copy.loadingSession}
                           </p>
                         ) : null}
@@ -1891,7 +1892,7 @@ export default function ShenuteAI() {
               </div>
             </details>
           ) : null}
-          <div className="grid gap-2 border-b border-stone-200/80 bg-white/70 px-4 py-2 text-sm text-stone-600 dark:border-stone-800 dark:bg-stone-950/40 dark:text-stone-300 md:px-5 sm:flex sm:items-center sm:justify-between">
+          <div className="grid gap-2 border-b border-line bg-surface/75 px-4 py-2 text-sm text-muted md:px-5 sm:flex sm:items-center sm:justify-between">
             <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1">
               <span
                 aria-hidden="true"
@@ -1903,7 +1904,7 @@ export default function ShenuteAI() {
               <p className="min-w-0 truncate text-xs sm:text-sm">
                 {historyStatusMessage}
               </p>
-              <span className="inline-flex max-w-full items-center rounded-full bg-stone-100 px-2 py-0.5 text-xs font-semibold text-stone-600 dark:bg-stone-900 dark:text-stone-300">
+              <span className="inline-flex max-w-full items-center rounded-full bg-elevated px-2 py-0.5 text-xs font-semibold text-muted">
                 <span className="truncate">
                   {copy.aiMode}: {selectedProviderOption.label}
                 </span>
@@ -1938,8 +1939,7 @@ export default function ShenuteAI() {
                   variant: "secondary",
                   className: cx(
                     "h-9 w-9 shrink-0 px-0",
-                    isAnswerStylePanelOpen &&
-                      "border-sky-300 text-sky-700 dark:border-sky-500/70 dark:text-sky-300",
+                    isAnswerStylePanelOpen && "border-coptic/45 text-coptic",
                   ),
                 })}
               >
@@ -1974,7 +1974,7 @@ export default function ShenuteAI() {
                 >
                   <MoreHorizontal className="h-3.5 w-3.5" />
                 </summary>
-                <div className="absolute right-0 top-full z-30 mt-2 w-64 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl dark:border-stone-700 dark:bg-stone-950">
+                <div className="absolute right-0 top-full z-30 mt-2 w-64 rounded-lg border border-line bg-surface p-2 shadow-panel">
                   <button
                     type="button"
                     onClick={handleSaveHistory}
@@ -2031,23 +2031,23 @@ export default function ShenuteAI() {
             </div>
           </div>
           {typedMessages.length === 0 ? (
-            <div className="min-h-0 flex-1 overflow-y-auto border-b border-stone-200/80 bg-stone-50/60 p-4 dark:border-stone-800 dark:bg-stone-950/30 md:p-5">
+            <div className="min-h-0 flex-1 overflow-y-auto border-b border-line bg-elevated/55 p-4 md:p-5">
               <div className="mx-auto flex w-full max-w-5xl flex-col gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-sky-100 text-2xl text-sky-700 shadow-sm dark:bg-sky-900/30 dark:text-sky-300">
+                  <div className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-coptic-soft text-2xl text-coptic shadow-sm">
                     <span className="font-coptic leading-none">Ϣ</span>
                   </div>
                   <div className="min-w-0">
-                    <h2 className="truncate text-base font-semibold leading-6 text-stone-900 dark:text-stone-100 md:text-lg">
+                    <h2 className="truncate text-base font-semibold leading-6 text-ink md:text-lg">
                       {copy.welcomeTitle}
                     </h2>
-                    <p className="hidden max-w-2xl truncate text-sm text-stone-600 dark:text-stone-400 lg:block">
+                    <p className="hidden max-w-2xl truncate text-sm text-muted lg:block">
                       {copy.welcomeDescription}
                     </p>
                   </div>
                 </div>
                 <div>
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
                     {copy.starterPromptsTitle}
                   </p>
                   <div className="flex snap-x gap-2 overflow-x-auto pb-1 [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] md:grid md:grid-cols-3 md:overflow-visible md:pb-0">
@@ -2062,9 +2062,9 @@ export default function ShenuteAI() {
                             handleStarterPrompt(starterPrompt.prompt);
                           }}
                           disabled={isLoading || isShenuteAccessBlocked}
-                          className="group flex min-h-14 w-72 shrink-0 snap-start items-start gap-3 rounded-2xl border border-stone-200 bg-white/85 px-3 py-3 text-left text-sm font-medium leading-5 text-stone-700 shadow-sm transition hover:border-sky-300 hover:bg-sky-50 hover:text-sky-900 disabled:cursor-not-allowed disabled:opacity-60 dark:border-stone-700 dark:bg-stone-950/60 dark:text-stone-200 dark:hover:border-sky-700 dark:hover:bg-sky-950/30 dark:hover:text-sky-100 md:w-auto"
+                          className="group flex min-h-14 w-72 shrink-0 snap-start items-start gap-3 rounded-lg border border-line bg-surface/85 px-3 py-3 text-left text-sm font-medium leading-5 text-ink shadow-sm transition hover:border-coptic/35 hover:bg-coptic-soft/45 disabled:cursor-not-allowed disabled:opacity-60 md:w-auto"
                         >
-                          <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-xl bg-stone-100 text-stone-500 transition group-hover:bg-sky-100 group-hover:text-sky-700 dark:bg-stone-800 dark:text-stone-300 dark:group-hover:bg-sky-950/60 dark:group-hover:text-sky-300">
+                          <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-elevated text-muted transition group-hover:bg-coptic-soft group-hover:text-coptic">
                             <Icon className="h-3.5 w-3.5" />
                           </span>
                           <span className="min-w-0">
@@ -2082,7 +2082,7 @@ export default function ShenuteAI() {
               ref={transcriptScrollRef}
               aria-live="polite"
               onScroll={updateTranscriptScrollState}
-              className="min-h-0 flex-1 overscroll-contain scroll-pb-6 space-y-5 overflow-y-auto border-b border-stone-200/80 bg-stone-50/60 p-4 dark:border-stone-800 dark:bg-stone-950/30 md:p-6"
+              className="min-h-0 flex-1 overscroll-contain scroll-pb-6 space-y-5 overflow-y-auto border-b border-line bg-elevated/55 p-4 md:p-6"
             >
               {typedMessages.map((m, index) => {
                 const assistantMessage = m as ChatMessageLike;
@@ -2131,7 +2131,7 @@ export default function ShenuteAI() {
                     >
                       <div
                         className={cx(
-                          "mb-1 flex flex-wrap items-center gap-2 px-1 text-xs font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400",
+                          "mb-1 flex flex-wrap items-center gap-2 px-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted",
                           m.role === "user" && "justify-end text-right",
                         )}
                       >
@@ -2141,14 +2141,14 @@ export default function ShenuteAI() {
                             : copy.assistantLabel}
                         </span>
                         {isLatestAssistantMessage ? (
-                          <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-[0.65rem] tracking-normal text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                          <span className="rounded-full bg-coptic-soft px-2 py-0.5 text-[0.65rem] tracking-normal text-coptic">
                             {getProviderLabel(inferenceProvider, copy)}
                           </span>
                         ) : null}
                       </div>
                       <div
                         className={cx(
-                          "max-w-full rounded-2xl px-4 py-3",
+                          "max-w-full rounded-lg px-4 py-3",
                           m.role === "assistant" && "w-full sm:px-5 sm:py-4",
                           getMessageBubbleClassName(m.role),
                         )}
@@ -2164,8 +2164,8 @@ export default function ShenuteAI() {
                               className={cx(
                                 "font-coptic text-[1.05rem] leading-7 md:text-lg md:leading-8",
                                 m.role === "user"
-                                  ? "text-white"
-                                  : "text-stone-800 dark:text-stone-200",
+                                  ? "text-paper dark:text-ink"
+                                  : "text-ink",
                               )}
                             >
                               <ReactMarkdown
@@ -2179,8 +2179,8 @@ export default function ShenuteAI() {
                                       className={cx(
                                         "underline underline-offset-4",
                                         m.role === "user"
-                                          ? "decoration-white/60 hover:decoration-white"
-                                          : "decoration-stone-400 hover:decoration-sky-500",
+                                          ? "decoration-paper/60 hover:decoration-paper dark:decoration-ink/60 dark:hover:decoration-ink"
+                                          : "decoration-line hover:decoration-coptic",
                                       )}
                                     />
                                   ),
@@ -2190,8 +2190,8 @@ export default function ShenuteAI() {
                                       className={cx(
                                         "my-3 border-l-2 pl-3",
                                         m.role === "user"
-                                          ? "border-white/45 text-white/85"
-                                          : "border-stone-300 text-stone-600 dark:border-stone-600 dark:text-stone-300",
+                                          ? "border-paper/45 text-paper/85 dark:border-ink/45 dark:text-ink/85"
+                                          : "border-line text-muted",
                                       )}
                                     />
                                   ),
@@ -2200,8 +2200,8 @@ export default function ShenuteAI() {
                                       className={cx(
                                         "rounded px-1 py-0.5 text-[0.95em]",
                                         m.role === "user"
-                                          ? "bg-white/15 text-white"
-                                          : "bg-stone-200/70 dark:bg-stone-800",
+                                          ? "bg-paper/15 text-paper dark:bg-ink/10 dark:text-ink"
+                                          : "bg-elevated text-ink",
                                         className,
                                       )}
                                       {...props}
@@ -2235,7 +2235,7 @@ export default function ShenuteAI() {
                           );
                         })()}
                         {m.role === "assistant" ? (
-                          <div className="mt-3 space-y-2 border-t border-stone-200/80 pt-3 text-xs dark:border-stone-700">
+                          <div className="mt-3 space-y-2 border-t border-line pt-3 text-xs">
                             <div className="flex max-w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1 [scrollbar-gutter:stable] [-webkit-overflow-scrolling:touch] sm:flex-wrap sm:overflow-visible sm:pb-0">
                               <button
                                 type="button"
@@ -2304,7 +2304,7 @@ export default function ShenuteAI() {
                                   className: cx(
                                     MESSAGE_ACTION_BUTTON_CLASS,
                                     isSpeaking &&
-                                      "border-sky-500 text-sky-600 dark:border-sky-400 dark:text-sky-300",
+                                      "border-coptic/55 text-coptic",
                                   ),
                                 })}
                               >
@@ -2380,8 +2380,8 @@ export default function ShenuteAI() {
                             ) : null}
 
                             {canSubmitAdminFeedback ? (
-                              <details className="rounded-2xl border border-stone-200 bg-stone-50/70 p-3 dark:border-stone-700 dark:bg-stone-950/30">
-                                <summary className="cursor-pointer font-semibold text-stone-700 dark:text-stone-200">
+                              <details className="rounded-lg border border-line bg-elevated/70 p-3">
+                                <summary className="cursor-pointer font-semibold text-ink">
                                   {copy.adminNoteSummary}
                                 </summary>
                                 <div className="mt-2 space-y-2">
@@ -2399,7 +2399,7 @@ export default function ShenuteAI() {
                                     placeholder={copy.adminNotePlaceholder}
                                     rows={3}
                                     disabled={isFeedbackPending}
-                                    className="w-full rounded-xl border border-stone-200 bg-white/85 px-3 py-2 text-xs text-stone-900 shadow-sm focus:border-sky-400 focus:outline-none focus:ring-2 focus:ring-sky-300/35 dark:border-stone-700 dark:bg-stone-950 dark:text-stone-100"
+                                    className="w-full rounded-lg border border-line bg-surface/85 px-3 py-2 text-xs text-ink shadow-sm focus:border-accent/55 focus:outline-none focus:ring-2 focus:ring-accent/25"
                                   />
                                   <button
                                     type="button"
@@ -2458,11 +2458,11 @@ export default function ShenuteAI() {
                     </span>
                   </div>
                   <div className="min-w-0">
-                    <p className="mb-1 px-1 text-xs font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+                    <p className="mb-1 px-1 text-xs font-semibold uppercase tracking-[0.14em] text-muted">
                       {copy.assistantLabel}
                     </p>
-                    <div className="flex flex-wrap items-center gap-3 rounded-2xl rounded-bl-sm border border-stone-200 bg-white/95 px-4 py-3 shadow-sm ring-1 ring-white/70 dark:border-stone-700 dark:bg-stone-900/85 dark:ring-stone-800/50">
-                      <span className="text-sm font-semibold text-stone-700 dark:text-stone-200">
+                    <div className="flex flex-wrap items-center gap-3 rounded-lg rounded-bl-sm border border-line bg-surface/95 px-4 py-3 shadow-soft ring-1 ring-line/60">
+                      <span className="text-sm font-semibold text-ink">
                         {copy.thinking}{" "}
                         {formatElapsedTime(thinkingElapsedSeconds)}
                       </span>
@@ -2470,9 +2470,9 @@ export default function ShenuteAI() {
                         aria-hidden="true"
                         className="flex items-center gap-1"
                       >
-                        <span className="h-2 w-2 animate-bounce rounded-full bg-stone-400 delay-100" />
-                        <span className="h-2 w-2 animate-bounce rounded-full bg-stone-400 delay-200" />
-                        <span className="h-2 w-2 animate-bounce rounded-full bg-stone-400 delay-300" />
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-coptic delay-100" />
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-coptic delay-200" />
+                        <span className="h-2 w-2 animate-bounce rounded-full bg-coptic delay-300" />
                       </span>
                       <button
                         type="button"
@@ -2496,7 +2496,7 @@ export default function ShenuteAI() {
 
           <form
             onSubmit={handleFormSubmit}
-            className="sticky bottom-0 z-20 border-t border-stone-200/80 bg-white/90 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-18px_30px_rgba(15,23,42,0.08)] backdrop-blur-xl dark:border-stone-800 dark:bg-stone-950/90 dark:shadow-[0_-18px_30px_rgba(0,0,0,0.35)] md:p-4 md:pb-4"
+            className="sticky bottom-0 z-20 border-t border-line bg-surface/90 p-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] shadow-[0_-18px_30px_rgba(30,29,29,0.08)] backdrop-blur-xl dark:shadow-[0_-18px_30px_rgba(0,0,0,0.35)] md:p-4 md:pb-4"
           >
             {shenuteAccessError || error || ocrError || cameraError ? (
               <div className="mb-3 space-y-3">
@@ -2548,7 +2548,7 @@ export default function ShenuteAI() {
                   autoPlay
                   playsInline
                   muted
-                  className="mb-3 w-full rounded-2xl border border-stone-200 dark:border-stone-700"
+                  className="mb-3 w-full rounded-lg border border-line"
                 />
                 <canvas ref={captureCanvasRef} className="hidden" />
                 <div className="mt-3 flex justify-end gap-2">
@@ -2587,18 +2587,18 @@ export default function ShenuteAI() {
               className="p-2"
             >
               {selectedImagePreviewUrl ? (
-                <div className="mb-2 flex items-center gap-3 rounded-2xl border border-stone-200 bg-white/85 p-2 shadow-sm dark:border-stone-700 dark:bg-stone-950/60">
+                <div className="mb-2 flex items-center gap-3 rounded-lg border border-line bg-surface/85 p-2 shadow-sm">
                   <Image
                     unoptimized
                     src={selectedImagePreviewUrl}
                     alt={copy.selectedImageAlt}
                     width={72}
                     height={72}
-                    className="h-14 w-14 shrink-0 rounded-xl border border-stone-200 bg-stone-50 object-contain dark:border-stone-700 dark:bg-stone-900"
+                    className="h-14 w-14 shrink-0 rounded-lg border border-line bg-elevated object-contain"
                   />
                   <div className="min-w-0 flex-1">
                     <div className="mb-1 flex flex-wrap items-center gap-2">
-                      <span className="text-xs font-semibold text-stone-900 dark:text-stone-100">
+                      <span className="text-xs font-semibold text-ink">
                         {copy.attachmentReady}
                       </span>
                       <Badge tone="accent" size="xs">
@@ -2612,11 +2612,11 @@ export default function ShenuteAI() {
                         </Badge>
                       ) : null}
                     </div>
-                    <p className="truncate text-xs text-stone-600 dark:text-stone-400">
+                    <p className="truncate text-xs text-muted">
                       {selectedImage?.name ?? copy.imageAttached}
                     </p>
                     {selectedImageSizeLabel ? (
-                      <p className="text-xs text-stone-500 dark:text-stone-500">
+                      <p className="text-xs text-muted">
                         {selectedImageSizeLabel}
                       </p>
                     ) : null}
@@ -2648,7 +2648,7 @@ export default function ShenuteAI() {
                         size: "sm",
                         variant: "secondary",
                         className:
-                          "h-12 w-12 cursor-pointer list-none rounded-2xl px-0 [&::-webkit-details-marker]:hidden",
+                          "h-12 w-12 cursor-pointer list-none rounded-lg px-0 [&::-webkit-details-marker]:hidden",
                       }),
                       isAttachmentMenuDisabled &&
                         "pointer-events-none opacity-55",
@@ -2656,7 +2656,7 @@ export default function ShenuteAI() {
                   >
                     <ImagePlus className="h-4 w-4" />
                   </summary>
-                  <div className="absolute bottom-full left-0 z-30 mb-2 w-52 rounded-2xl border border-stone-200 bg-white p-2 shadow-xl dark:border-stone-700 dark:bg-stone-950">
+                  <div className="absolute bottom-full left-0 z-30 mb-2 w-52 rounded-lg border border-line bg-surface p-2 shadow-panel">
                     <button
                       type="button"
                       onClick={(event) => {
@@ -2703,7 +2703,7 @@ export default function ShenuteAI() {
                   name="shenute_message"
                   rows={1}
                   enterKeyHint="send"
-                  className="max-h-40 min-h-12 min-w-0 flex-1 resize-none overflow-y-auto rounded-2xl border-0 bg-transparent px-4 py-3 font-coptic text-lg leading-7 text-stone-900 outline-none ring-0 placeholder:text-stone-400 focus:outline-none focus:ring-0 dark:text-stone-100 dark:placeholder:text-stone-500 md:text-xl"
+                  className="max-h-40 min-h-12 min-w-0 flex-1 resize-none overflow-y-auto rounded-lg border-0 bg-transparent px-4 py-3 font-coptic text-lg leading-7 text-ink outline-none ring-0 placeholder:text-muted/65 focus:outline-none focus:ring-0 md:text-xl"
                   value={inputValue}
                   onChange={(event) => {
                     setInputValue(event.target.value);
@@ -2727,8 +2727,7 @@ export default function ShenuteAI() {
                   className={buttonClassName({
                     size: "sm",
                     variant: "primary",
-                    className:
-                      "h-12 w-12 shrink-0 rounded-2xl px-0 disabled:hover:bg-sky-500 dark:disabled:hover:bg-sky-400",
+                    className: "h-12 w-12 shrink-0 rounded-lg px-0",
                   })}
                 >
                   <SendHorizontal className="h-5 w-5" />
@@ -2752,15 +2751,15 @@ export default function ShenuteAI() {
             id="shenute-answer-style-panel"
             role="dialog"
             aria-labelledby="shenute-answer-style-label"
-            className="fixed left-1/2 top-[calc(var(--app-sticky-offset)_+_0.75rem)] z-[70] max-h-[calc(100dvh_-_var(--app-sticky-offset)_-_1.5rem)] w-[min(28rem,calc(100vw_-_2rem))] -translate-x-1/2 overflow-y-auto rounded-2xl border border-stone-200 bg-white p-3 shadow-2xl shadow-stone-950/20 dark:border-stone-700 dark:bg-stone-950 dark:shadow-black/40"
+            className="fixed left-1/2 top-[calc(var(--app-sticky-offset)_+_0.75rem)] z-[70] max-h-[calc(100dvh_-_var(--app-sticky-offset)_-_1.5rem)] w-[min(28rem,calc(100vw_-_2rem))] -translate-x-1/2 overflow-y-auto rounded-lg border border-line bg-surface p-3 shadow-panel"
           >
             <p
               id="shenute-answer-style-label"
-              className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400"
+              className="text-xs font-semibold uppercase tracking-[0.18em] text-muted"
             >
               {copy.aiMode}
             </p>
-            <p className="mt-1 text-xs leading-5 text-stone-500 dark:text-stone-400">
+            <p className="mt-1 text-xs leading-5 text-muted">
               {copy.aiModeDescription}
             </p>
             <div
@@ -2785,18 +2784,18 @@ export default function ShenuteAI() {
                     }}
                     disabled={isLoading || isShenuteAccessBlocked}
                     className={cx(
-                      "flex min-h-11 items-center gap-2 rounded-2xl border px-3 py-2 text-left transition disabled:cursor-not-allowed disabled:opacity-60",
+                      "flex min-h-11 items-center gap-2 rounded-lg border px-3 py-2 text-left transition disabled:cursor-not-allowed disabled:opacity-60",
                       isActive
-                        ? "border-sky-400 bg-sky-50 text-sky-950 shadow-sm dark:border-sky-500/70 dark:bg-sky-950/40 dark:text-sky-100"
-                        : "border-stone-200 bg-white/80 text-stone-700 hover:border-stone-300 hover:bg-white dark:border-stone-700 dark:bg-stone-950/60 dark:text-stone-200 dark:hover:border-stone-600 dark:hover:bg-stone-900",
+                        ? "border-coptic/55 bg-coptic-soft text-ink shadow-sm"
+                        : "border-line bg-surface/80 text-muted hover:border-accent/35 hover:bg-elevated hover:text-ink",
                     )}
                   >
                     <span
                       className={cx(
                         "inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl",
                         isActive
-                          ? "bg-sky-600 text-white dark:bg-sky-400 dark:text-sky-950"
-                          : "bg-stone-100 text-stone-500 dark:bg-stone-800 dark:text-stone-300",
+                          ? "bg-coptic text-paper"
+                          : "bg-elevated text-muted",
                       )}
                     >
                       <Icon className="h-4 w-4" />
@@ -2808,8 +2807,8 @@ export default function ShenuteAI() {
                 );
               })}
             </div>
-            <p className="mt-3 rounded-2xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs leading-5 text-stone-600 dark:border-stone-700 dark:bg-stone-900/60 dark:text-stone-300">
-              <span className="font-semibold text-stone-800 dark:text-stone-100">
+            <p className="mt-3 rounded-lg border border-line bg-elevated px-3 py-2 text-xs leading-5 text-muted">
+              <span className="font-semibold text-ink">
                 {selectedProviderOption.label}:
               </span>{" "}
               {selectedProviderOption.description}

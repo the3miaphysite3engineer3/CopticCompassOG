@@ -142,7 +142,7 @@ export function ProfileForm({
   const content = (
     <div className="flex flex-col items-start gap-8 md:flex-row">
       <div className="flex flex-col items-center gap-4">
-        <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-white bg-stone-100 shadow-sm dark:border-stone-700 dark:bg-stone-800">
+        <div className="flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-4 border-surface bg-elevated shadow-sm">
           {avatarUrl ? (
             <Image
               unoptimized
@@ -153,9 +153,7 @@ export function ProfileForm({
               className="h-full w-full object-cover"
             />
           ) : (
-            <span className="text-sm text-stone-400 dark:text-stone-500">
-              {copy.profile.noAvatar}
-            </span>
+            <span className="text-sm text-muted">{copy.profile.noAvatar}</span>
           )}
         </div>
         <div>
@@ -183,10 +181,7 @@ export function ProfileForm({
         </div>
       </div>
 
-      <form
-        action={handleSubmit}
-        className="flex-1 w-full space-y-6 text-stone-800 dark:text-stone-200"
-      >
+      <form action={handleSubmit} className="w-full flex-1 space-y-6 text-ink">
         <FormField htmlFor="full_name" label={copy.profile.fullNameLabel}>
           <input
             id="full_name"
@@ -202,13 +197,11 @@ export function ProfileForm({
           <input
             id="email"
             type="email"
-            className="input-base bg-stone-50 text-stone-500 dark:bg-stone-900"
+            className="input-base bg-elevated text-muted"
             defaultValue={profile.email || ""}
             disabled
           />
-          <p className="mt-1 text-xs text-stone-500">
-            {copy.profile.emailHint}
-          </p>
+          <p className="mt-1 text-xs text-muted">{copy.profile.emailHint}</p>
         </FormField>
 
         <Button
@@ -235,7 +228,7 @@ export function ProfileForm({
 
   return (
     <SurfacePanel rounded="3xl" className="p-6 md:p-8">
-      <h3 className="mb-6 text-xl font-semibold text-stone-800 dark:text-stone-200">
+      <h3 className="mb-6 text-xl font-semibold text-ink">
         {copy.profile.sectionTitle}
       </h3>
       {content}

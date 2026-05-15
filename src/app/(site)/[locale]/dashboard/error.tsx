@@ -35,8 +35,8 @@ export default function Error({
       primaryLabel={copy.error.primaryLabel}
       reset={reset}
       accents={[
-        pageShellAccents.topLeftSkyOrb,
-        pageShellAccents.bottomRightEmeraldOrb,
+        pageShellAccents.topLeftGoldWashInset,
+        pageShellAccents.bottomRightCopticWash,
       ]}
     />
   );

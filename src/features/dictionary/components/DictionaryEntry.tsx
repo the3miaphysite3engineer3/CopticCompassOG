@@ -158,10 +158,8 @@ export default function DictionaryEntryCard({
   const HeadingTag = headingLevel;
   const headingClassName = `${antinoou.className} ${
     isDetailView ? "text-5xl md:text-6xl" : "text-4xl"
-  } text-sky-600 dark:text-sky-400 tracking-wider drop-shadow-sm transition-colors ${
-    linkHeadword
-      ? "hover:text-sky-500 dark:hover:text-sky-300 cursor-pointer"
-      : ""
+  } text-coptic tracking-wide transition-colors ${
+    linkHeadword ? "hover:text-accent-strong cursor-pointer" : ""
   }`;
   const formSymbolTooltips = getFormSymbolTooltips(t);
   const grammarAbbreviationTooltips = getGrammarAbbreviationTooltips(t);
@@ -315,7 +313,7 @@ export default function DictionaryEntryCard({
         <Link
           href={getEntryPath(entry.root_id, language)}
           prefetch={false}
-          className="inline-flex min-h-8 max-w-full items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 text-xs font-semibold text-sky-700 transition hover:border-sky-300 hover:bg-sky-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:border-sky-800 dark:hover:bg-sky-950/70"
+          className="inline-flex min-h-8 max-w-full items-center gap-2 rounded-lg border border-accent/25 bg-accent-soft/80 px-3 text-xs font-semibold text-accent-strong transition hover:border-accent/45 hover:bg-accent-soft focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent dark:text-accent"
         >
           <span>{t("entry.compoundOf")}</span>
           <span
@@ -341,18 +339,15 @@ export default function DictionaryEntryCard({
     <article
       ref={articleRef}
       className={surfacePanelClassName({
-        rounded: "3xl",
+        rounded: "lg",
         interactive: linkHeadword,
         className: cx(
           "group relative overflow-hidden",
-          linkHeadword &&
-            "hover:border-stone-300 dark:hover:border-stone-700 dark:hover:bg-stone-800/50",
+          linkHeadword && "hover:border-accent/40 hover:bg-surface",
           isDetailView ? "p-8 md:p-10" : "p-6 md:p-7",
         ),
       })}
     >
-      <div className="pointer-events-none absolute top-0 right-0 h-32 w-32 bg-sky-500/10 dark:bg-sky-500/10 rounded-full blur-3xl opacity-70" />
-
       {isDetailView ? (
         <div className="relative mb-5 flex min-w-0 flex-col gap-4">
           <div className="min-w-0">
@@ -373,7 +368,7 @@ export default function DictionaryEntryCard({
               {canSpeakPrimarySpelling && (
                 <SpeakButton
                   copticText={headerSpelling}
-                  className="h-8 w-8 rounded-full border border-stone-200 bg-stone-50 text-stone-500 hover:border-stone-300 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300 dark:hover:border-stone-600"
+                  className="h-8 w-8 border border-line bg-elevated text-muted hover:border-accent/40"
                 />
               )}
               {metadataBadges}
@@ -415,15 +410,15 @@ export default function DictionaryEntryCard({
         </div>
       )}
 
-      <div className="h-px w-full bg-gradient-to-r from-stone-200 dark:from-stone-800 via-stone-300 dark:via-stone-700 to-stone-200 dark:to-stone-800 mb-6" />
+      <div className="mb-6 h-px w-full bg-line" />
 
       <div className="mb-6 space-y-3">
-        <h3 className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-widest font-semibold">
+        <h3 className="text-xs font-semibold uppercase tracking-widest text-muted">
           {t("entry.translation")}
         </h3>
         {genderedMeanings.length > 0 && (
           <ul
-            className={`space-y-2 text-stone-800 dark:text-stone-200 list-disc ml-5 marker:text-sky-500 ${
+            className={`ml-5 list-disc space-y-2 text-ink marker:text-coptic ${
               isDetailView ? "text-lg md:text-xl" : "text-lg"
             }`}
           >
@@ -449,9 +444,7 @@ export default function DictionaryEntryCard({
                           }
                         />
                         {valueIndex < row.values.length - 1 && (
-                          <span className="text-stone-400 dark:text-stone-500">
-                            ;
-                          </span>
+                          <span className="text-muted/70">;</span>
                         )}
                       </span>
                     </span>
@@ -471,7 +464,7 @@ export default function DictionaryEntryCard({
               return (
                 <div
                   key={`${group.code}-${groupIndex}`}
-                  className="grid gap-2 border-l-2 border-sky-200 pl-3 dark:border-sky-900/70"
+                  className="grid gap-2 border-l-2 border-coptic/25 pl-3"
                 >
                   <div className="flex min-w-0 flex-wrap items-baseline gap-2">
                     <LinguisticGloss
@@ -486,7 +479,7 @@ export default function DictionaryEntryCard({
                     {group.notes.map((note, idx) => (
                       <span
                         key={`${group.code}-note-${idx}`}
-                        className="text-sm text-stone-500 dark:text-stone-400"
+                        className="text-sm text-muted"
                       >
                         <HighlightText
                           text={note}
@@ -500,7 +493,7 @@ export default function DictionaryEntryCard({
                   </div>
                   {hasMeaningRows && (
                     <ul
-                      className={`space-y-1.5 text-stone-800 dark:text-stone-200 list-disc ml-5 marker:text-sky-500 ${
+                      className={`ml-5 list-disc space-y-1.5 text-ink marker:text-coptic ${
                         isDetailView ? "text-lg md:text-xl" : "text-lg"
                       }`}
                     >
@@ -533,9 +526,7 @@ export default function DictionaryEntryCard({
                                       }
                                     />
                                     {valueIndex < row.values.length - 1 && (
-                                      <span className="text-stone-400 dark:text-stone-500">
-                                        ;
-                                      </span>
+                                      <span className="text-muted/70">;</span>
                                     )}
                                   </span>
                                 </span>
@@ -570,13 +561,13 @@ export default function DictionaryEntryCard({
             {dialectMeanings.map((dialectMeaning) => (
               <div
                 key={dialectMeaning.sourceLabel}
-                className="grid gap-2 border-l-2 border-sky-200 pl-3 dark:border-sky-900/70"
+                className="grid gap-2 border-l-2 border-coptic/25 pl-3"
               >
                 <div className="flex min-w-0 flex-wrap items-baseline gap-2">
                   {dialectMeaning.dialects.map((dialect) => (
                     <span
                       key={`${dialectMeaning.sourceLabel}-${dialect}`}
-                      className="inline-flex min-h-6 items-center rounded-md bg-stone-200 px-2 text-[10px] font-bold text-stone-700 dark:bg-stone-700 dark:text-stone-200"
+                      className="inline-flex min-h-6 items-center rounded-md bg-elevated px-2 text-[10px] font-bold text-muted"
                     >
                       <DialectSiglum siglum={dialect} />
                     </span>
@@ -584,7 +575,7 @@ export default function DictionaryEntryCard({
                   {dialectMeaning.notes.map((note, idx) => (
                     <span
                       key={`${dialectMeaning.sourceLabel}-note-${idx}`}
-                      className="text-sm text-stone-500 dark:text-stone-400"
+                      className="text-sm text-muted"
                     >
                       <HighlightText
                         text={note}
@@ -598,7 +589,7 @@ export default function DictionaryEntryCard({
                 </div>
                 {dialectMeaning.meanings.length > 0 && (
                   <ul
-                    className={`space-y-1.5 text-stone-800 dark:text-stone-200 list-disc ml-5 marker:text-sky-500 ${
+                    className={`ml-5 list-disc space-y-1.5 text-ink marker:text-coptic ${
                       isDetailView ? "text-lg md:text-xl" : "text-lg"
                     }`}
                   >
@@ -621,16 +612,16 @@ export default function DictionaryEntryCard({
         )}
         {variantRows.length > 0 && (
           <div className="mt-5 flex flex-col gap-3">
-            <span className="text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 font-semibold">
+            <span className="text-xs font-semibold uppercase tracking-widest text-muted">
               {t("entry.variants")}
             </span>
             <div className="flex flex-wrap gap-2.5">
               {variantRows.map(({ dialect, forms, state }, index) => (
                 <span
                   key={`${dialect}-${state}-${index}`}
-                  className="inline-flex max-w-full items-start gap-2 rounded-xl border border-stone-200 bg-stone-50/90 px-3 py-2 text-sm text-stone-700 dark:border-stone-800/60 dark:bg-stone-950/50 dark:text-stone-300"
+                  className="inline-flex max-w-full items-start gap-2 rounded-lg border border-line bg-elevated/65 px-3 py-2 text-sm text-ink"
                 >
-                  <span className="inline-flex min-h-6 shrink-0 items-center rounded-md bg-stone-200 px-2 text-[10px] font-bold text-stone-700 dark:bg-stone-700 dark:text-stone-200">
+                  <span className="inline-flex min-h-6 shrink-0 items-center rounded-md bg-surface px-2 text-[10px] font-bold text-muted">
                     <DialectSiglum siglum={dialect} />
                   </span>
                   <span
@@ -649,12 +640,12 @@ export default function DictionaryEntryCard({
         )}
         {imperativeForms.length > 0 && primaryDialectKey && (
           <div className="mt-5 flex flex-col gap-3">
-            <span className="text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 font-semibold">
+            <span className="text-xs font-semibold uppercase tracking-widest text-muted">
               {t("entry.imperatives")}
             </span>
             <div className="flex flex-wrap gap-2.5">
-              <span className="inline-flex max-w-full items-start gap-2 rounded-xl border border-stone-200 bg-stone-50/90 px-3 py-2 text-sm text-stone-700 dark:border-stone-800/60 dark:bg-stone-950/50 dark:text-stone-300">
-                <span className="inline-flex min-h-6 shrink-0 items-center rounded-md bg-stone-200 px-2 text-[10px] font-bold text-stone-700 dark:bg-stone-700 dark:text-stone-200">
+              <span className="inline-flex max-w-full items-start gap-2 rounded-lg border border-line bg-elevated/65 px-3 py-2 text-sm text-ink">
+                <span className="inline-flex min-h-6 shrink-0 items-center rounded-md bg-surface px-2 text-[10px] font-bold text-muted">
                   <DialectSiglum siglum={primaryDialectKey} />
                 </span>
                 <span
@@ -673,14 +664,14 @@ export default function DictionaryEntryCard({
 
         {(entry.greek?.length ?? 0) > 0 && (
           <div className="mt-5 flex flex-col gap-3">
-            <span className="text-xs uppercase tracking-widest text-stone-500 dark:text-stone-400 font-semibold">
+            <span className="text-xs font-semibold uppercase tracking-widest text-muted">
               {t("entry.greekEquivalents")}
             </span>
             <div className="flex flex-wrap gap-2">
               {entry.greek?.map((gr, idx) => (
                 <span
                   key={idx}
-                  className="px-3 py-1.5 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900/50 text-emerald-700 dark:text-emerald-400 rounded-xl text-sm font-medium"
+                  className="rounded-lg border border-coptic/20 bg-coptic-soft px-3 py-1.5 text-sm font-medium text-coptic"
                 >
                   <HighlightText text={gr} query={query} />
                 </span>
@@ -691,14 +682,12 @@ export default function DictionaryEntryCard({
       </div>
 
       {actions && !isDetailView ? (
-        <div className="mt-7 border-t border-stone-200 pt-5 dark:border-stone-800/50">
-          {actions}
-        </div>
+        <div className="mt-7 border-t border-line pt-5">{actions}</div>
       ) : null}
 
       {remainingDialects.length > 0 && (
-        <div className="mt-7 pt-5 border-t border-stone-200 dark:border-stone-800/50">
-          <h4 className="text-xs text-stone-500 dark:text-stone-400 uppercase tracking-widest font-semibold mb-3">
+        <div className="mt-7 border-t border-line pt-5">
+          <h4 className="mb-3 text-xs font-semibold uppercase tracking-widest text-muted">
             {t("entry.dialectForms")}
           </h4>
           <div className="flex flex-wrap gap-3">
@@ -725,9 +714,9 @@ export default function DictionaryEntryCard({
                   type="button"
                   onClick={() => handleDialectViewChange(dialect)}
                   aria-label={`${t("entry.dialectForms")}: ${dialect} ${dialectAriaSpelling}`}
-                  className="flex min-w-0 max-w-full basis-full items-start gap-3 rounded-xl border border-stone-200 bg-stone-50/90 px-3 py-2.5 text-left transition hover:border-sky-300 hover:bg-sky-50/80 focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white focus-visible:outline-none dark:border-stone-800/60 dark:bg-stone-950/50 dark:hover:border-sky-700 dark:hover:bg-sky-950/30 dark:focus-visible:ring-offset-stone-950 sm:basis-auto"
+                  className="flex min-w-0 max-w-full basis-full cursor-pointer select-none items-start gap-3 rounded-lg border border-line bg-elevated/65 px-3 py-2.5 text-left transition-all duration-200 hover:-translate-y-px hover:border-coptic/35 hover:bg-coptic-soft/45 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coptic/30 focus-visible:ring-offset-2 focus-visible:ring-offset-paper sm:basis-auto"
                 >
-                  <span className="inline-flex min-h-7 shrink-0 items-center rounded-md bg-stone-200 px-2.5 py-2 text-[10px] font-bold text-stone-700 dark:bg-stone-700 dark:text-stone-200">
+                  <span className="inline-flex min-h-7 shrink-0 items-center rounded-md bg-surface px-2.5 py-2 text-[10px] font-bold text-muted">
                     <DialectSiglum focusableTooltip={false} siglum={dialect} />
                   </span>
                   <span className="min-w-0 flex flex-wrap items-baseline gap-x-2 gap-y-1">
@@ -739,7 +728,7 @@ export default function DictionaryEntryCard({
                             className="inline-flex min-w-0 items-baseline gap-x-1.5"
                           >
                             <span
-                              className={`${antinoou.className} block break-words text-lg leading-snug text-stone-800 [overflow-wrap:anywhere] dark:text-stone-300`}
+                              className={`${antinoou.className} block break-words text-lg leading-snug text-ink [overflow-wrap:anywhere]`}
                             >
                               <HighlightText
                                 text={part.spelling}
@@ -761,7 +750,7 @@ export default function DictionaryEntryCard({
                       </>
                     ) : (
                       <span
-                        className={`${antinoou.className} block break-words text-lg leading-snug text-stone-800 [overflow-wrap:anywhere] dark:text-stone-300`}
+                        className={`${antinoou.className} block break-words text-lg leading-snug text-ink [overflow-wrap:anywhere]`}
                       >
                         <HighlightText
                           text={spelling}
@@ -790,7 +779,7 @@ export default function DictionaryEntryCard({
                       <>
                         {visibleDialectPlurals[0] && (
                           <span
-                            className={`${antinoou.className} block break-words text-lg leading-snug text-stone-800 [overflow-wrap:anywhere] dark:text-stone-300`}
+                            className={`${antinoou.className} block break-words text-lg leading-snug text-ink [overflow-wrap:anywhere]`}
                           >
                             <HighlightText
                               text={visibleDialectPlurals[0]}

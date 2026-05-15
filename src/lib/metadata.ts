@@ -35,7 +35,7 @@ function getSocialImages() {
       buildOpenGraphImageUrl({
         type: "site",
       }),
-      "Coptic Compass social preview",
+      "Coptic Compass digital Coptology platform social preview",
     ),
   ];
 }

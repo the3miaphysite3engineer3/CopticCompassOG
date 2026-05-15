@@ -141,10 +141,10 @@ export function Footnote({ number, content, align = "center" }: FootnoteProps) {
         arrowClassName={tooltipArrowClassName}
         className={cx(
           richTooltipBubbleClassName,
-          "[&_p]:text-stone-700 dark:[&_p]:text-stone-200 [&_li]:text-stone-700 dark:[&_li]:text-stone-200",
-          "[&_strong]:text-stone-950 dark:[&_strong]:text-stone-50 [&_em]:text-stone-800 dark:[&_em]:text-stone-100 [&_.small-caps]:text-stone-800 dark:[&_.small-caps]:text-stone-100",
-          "[&_a]:text-sky-700 [&_a]:decoration-sky-400 [&_a:hover]:text-sky-600 dark:[&_a]:text-sky-300 dark:[&_a:hover]:text-sky-200",
-          "[&_.font-coptic]:text-emerald-700 dark:[&_.font-coptic]:text-emerald-300 [&_sup]:text-current",
+          "[&_p]:text-muted [&_li]:text-muted",
+          "[&_strong]:text-ink [&_em]:text-ink [&_.small-caps]:text-ink",
+          "[&_a]:text-coptic [&_a]:decoration-coptic/40 [&_a:hover]:text-ink",
+          "[&_.font-coptic]:text-coptic [&_sup]:text-current",
         )}
         id={tooltipId}
         isOpen={isOpen}
@@ -161,7 +161,7 @@ export function Footnote({ number, content, align = "center" }: FootnoteProps) {
     <>
       <sup className="ml-0.5 align-super">
         {renderMode === "pdf" ? (
-          <span className="inline-flex rounded-sm font-bold text-sky-600 dark:text-sky-400">
+          <span className="inline-flex rounded-sm font-bold text-coptic">
             [{number}]
           </span>
         ) : (
@@ -170,7 +170,7 @@ export function Footnote({ number, content, align = "center" }: FootnoteProps) {
             type="button"
             aria-describedby={isOpen ? tooltipId : undefined}
             aria-expanded={isOpen}
-            className="inline-flex cursor-help rounded-sm font-bold text-sky-600 outline-none transition-colors hover:text-sky-700 focus-visible:ring-2 focus-visible:ring-sky-500/35 dark:text-sky-400 dark:hover:text-sky-300"
+            className="inline-flex cursor-help rounded-sm font-bold text-coptic outline-none transition-colors hover:text-ink focus-visible:ring-2 focus-visible:ring-coptic/35"
             onClick={handleClick}
             onFocus={openTooltip}
             onBlur={canHover ? scheduleClose : undefined}

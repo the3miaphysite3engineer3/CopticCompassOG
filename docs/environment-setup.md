@@ -147,6 +147,25 @@ Set these app environment variables where your Next.js server runs:
 - `RESEND_GENERAL_SEGMENT_ID`
 - (And optional EN/NL localized segments)
 
+### Communication Branding
+
+Email and release copy should identify the product as `Coptic Compass` with the
+descriptor `Digital Coptology Platform`. The shared runtime constants live in
+`src/lib/communications/mailBrand.ts`; update that file first when the public
+communication identity changes.
+
+The branded email surfaces currently include:
+
+- contact-message owner notifications
+- audience opt-in confirmation emails
+- content release previews and sends
+- generic notification emails that do not provide a custom HTML or React email
+  template
+
+Keep `NOTIFICATION_FROM_EMAIL` configured with a verified sender identity in
+Resend. If the sender display name is managed in Resend rather than the env var,
+it should still read as Coptic Compass in delivered mail clients.
+
 ## CI/CD (GitHub Actions + Vercel)
 
 The CI workflow in `.github/workflows/ci.yml` now includes Vercel deployment jobs:

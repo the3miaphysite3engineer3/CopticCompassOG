@@ -1,15 +1,15 @@
 import {
-  Html,
-  Head,
   Body,
   Container,
-  Text,
+  Head,
   Heading,
+  Html,
   Hr,
+  Text,
 } from "@react-email/components";
 import * as React from "react";
 
-import { mailBrand } from "@/lib/communications/mailBrand";
+import { mailBrand, mailBrandColors } from "@/lib/communications/mailBrand";
 
 type ContactEmailTemplateProps = {
   name: string;
@@ -29,6 +29,9 @@ export function ContactEmailTemplate({
       <Head />
       <Body style={main}>
         <Container style={container}>
+          <Text style={brandLine}>
+            {mailBrand.brandName} • {mailBrand.descriptor}
+          </Text>
           <Heading as="h2" style={heading}>
             {mailBrand.brandName} contact message: {inquiryLabel}
           </Heading>
@@ -52,35 +55,48 @@ export function ContactEmailTemplate({
 }
 
 const main = {
-  backgroundColor: "#f6f9fc",
+  backgroundColor: mailBrandColors.paper,
   fontFamily:
     '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Ubuntu,sans-serif',
 };
 
 const container = {
-  backgroundColor: "#ffffff",
+  backgroundColor: mailBrandColors.surface,
+  border: `1px solid ${mailBrandColors.line}`,
+  borderRadius: "10px",
   margin: "0 auto",
-  padding: "20px 0 48px",
+  padding: "28px 32px 48px",
   marginBottom: "64px",
+};
+
+const brandLine = {
+  borderTop: `6px solid ${mailBrandColors.gold}`,
+  color: mailBrandColors.goldStrong,
+  fontSize: "12px",
+  fontWeight: "700",
+  letterSpacing: "0.08em",
+  margin: "-28px -32px 24px",
+  padding: "18px 32px 0",
+  textTransform: "uppercase" as const,
 };
 
 const heading = {
   fontSize: "24px",
-  letterSpacing: "-0.5px",
+  letterSpacing: "0",
   lineHeight: "1.3",
-  fontWeight: "400",
-  color: "#484848",
+  fontWeight: "600",
+  color: mailBrandColors.ink,
   padding: "17px 0 0",
 };
 
 const paragraph = {
   margin: "0 0 15px",
   fontSize: "15px",
-  lineHeight: "1.4",
-  color: "#3c4149",
+  lineHeight: "1.6",
+  color: mailBrandColors.ink,
 };
 
 const hr = {
-  borderColor: "#dfe1e4",
-  margin: "42px 0 26px",
+  borderColor: mailBrandColors.line,
+  margin: "32px 0 24px",
 };

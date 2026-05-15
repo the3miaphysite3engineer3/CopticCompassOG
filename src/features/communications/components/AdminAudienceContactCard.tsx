@@ -85,12 +85,10 @@ export function AdminAudienceContactCard({
     <SurfacePanel rounded="3xl" className="space-y-5 p-6">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+          <h3 className="text-lg font-semibold text-ink">
             {contact.full_name || contact.email}
           </h3>
-          <p className="mt-1 text-sm text-stone-600 dark:text-stone-400">
-            {contact.email}
-          </p>
+          <p className="mt-1 text-sm text-muted">{contact.email}</p>
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -134,11 +132,9 @@ export function AdminAudienceContactCard({
         ) : null}
       </div>
 
-      <dl className="grid gap-3 text-sm text-stone-600 dark:text-stone-300 md:grid-cols-2">
+      <dl className="grid gap-3 text-sm text-muted md:grid-cols-2">
         <div>
-          <dt className="font-semibold text-stone-800 dark:text-stone-100">
-            {copy.consented}
-          </dt>
+          <dt className="font-semibold text-ink">{copy.consented}</dt>
           <dd>
             {formatAdminAudienceDate(
               contact.consented_at,
@@ -148,9 +144,7 @@ export function AdminAudienceContactCard({
           </dd>
         </div>
         <div>
-          <dt className="font-semibold text-stone-800 dark:text-stone-100">
-            {copy.lastChanged}
-          </dt>
+          <dt className="font-semibold text-ink">{copy.lastChanged}</dt>
           <dd>
             {formatAdminAudienceDate(
               contact.updated_at,
@@ -160,9 +154,7 @@ export function AdminAudienceContactCard({
           </dd>
         </div>
         <div>
-          <dt className="font-semibold text-stone-800 dark:text-stone-100">
-            {copy.resendSynced}
-          </dt>
+          <dt className="font-semibold text-ink">{copy.resendSynced}</dt>
           <dd>
             {formatAdminAudienceDate(
               syncState?.last_synced_at ?? null,
@@ -172,9 +164,7 @@ export function AdminAudienceContactCard({
           </dd>
         </div>
         <div>
-          <dt className="font-semibold text-stone-800 dark:text-stone-100">
-            {copy.resendStatus}
-          </dt>
+          <dt className="font-semibold text-ink">{copy.resendStatus}</dt>
           <dd>{syncState?.last_error ?? copy.ready}</dd>
         </div>
       </dl>

@@ -88,12 +88,6 @@ export function ContributorsPageClient() {
         },
       ],
     },
-    {
-      name: t("contributors.person.mina.name"),
-      role: t("contributors.person.mina.role"),
-      description: t("contributors.person.mina.description"),
-      contacts: [],
-    },
   ];
 
   const shenuteCredits = {
@@ -189,7 +183,7 @@ export function ContributorsPageClient() {
   };
 
   const contactLinkClassName =
-    "underline decoration-sky-400 underline-offset-4 hover:text-sky-700 dark:hover:text-sky-300";
+    "underline decoration-accent/45 underline-offset-4 transition-colors hover:text-ink dark:decoration-accent/55";
 
   const renderContributorContact = (contact: ContributorContact) => {
     if (contact.external) {
@@ -234,7 +228,7 @@ export function ContributorsPageClient() {
         href={link.href}
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center gap-1.5 text-sm font-semibold text-sky-700 transition-colors hover:text-sky-900 dark:text-sky-400 dark:hover:text-sky-200"
+        className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-strong transition-colors hover:text-ink dark:text-accent"
       >
         <ExternalLink className="h-3.5 w-3.5" />
         {link.label}
@@ -250,8 +244,8 @@ export function ContributorsPageClient() {
       contentClassName="app-page-content"
       width="standard"
       accents={[
-        pageShellAccents.heroSkyArc,
-        pageShellAccents.topRightEmeraldOrbInset,
+        pageShellAccents.heroGoldBand,
+        pageShellAccents.topRightCopticWashInset,
       ]}
     >
       <AppPageIntro
@@ -265,33 +259,31 @@ export function ContributorsPageClient() {
         ]}
         title={t("contributors.title")}
         description={t("contributors.subtitle")}
-        tone="sky"
+        tone="coptic"
       />
 
       <div className="space-y-8 md:space-y-9">
         <SurfacePanel rounded="3xl" variant="elevated" className="p-6 md:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {language === "nl" ? "Oprichter" : "Founder"}
           </p>
 
           <div className="mt-5">
-            <article className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-5 dark:border-stone-800/80 dark:bg-stone-950/50">
-              <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
-                {founder.name}
-              </h2>
-              <p className="mt-1 text-sm font-medium text-sky-700 dark:text-sky-300">
+            <article className="rounded-lg border border-line bg-elevated/60 p-5">
+              <h2 className="text-xl font-semibold text-ink">{founder.name}</h2>
+              <p className="mt-1 text-sm font-medium text-coptic">
                 {founder.role}
               </p>
-              <p className="mt-3 max-w-3xl text-sm leading-7 text-stone-600 dark:text-stone-300">
+              <p className="mt-3 max-w-3xl text-sm leading-7 text-muted">
                 {founder.description}
               </p>
 
               {founder.contacts.length > 0 ? (
                 <>
-                  <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
+                  <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
                     {t("contributors.contactsHeading")}
                   </p>
-                  <ul className="mt-2 space-y-2 text-sm text-stone-700 dark:text-stone-200">
+                  <ul className="mt-2 space-y-2 text-sm text-ink">
                     {founder.contacts.map((contact) => (
                       <li key={`${founder.name}-${contact.href}`}>
                         {renderContributorContact(contact)}
@@ -305,7 +297,7 @@ export function ContributorsPageClient() {
         </SurfacePanel>
 
         <SurfacePanel rounded="3xl" variant="elevated" className="p-6 md:p-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {t("contributors.sectionTitle")}
           </p>
 
@@ -313,24 +305,24 @@ export function ContributorsPageClient() {
             {contributors.map((contributor) => (
               <article
                 key={contributor.name}
-                className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-5 dark:border-stone-800/80 dark:bg-stone-950/50"
+                className="rounded-lg border border-line bg-elevated/60 p-5"
               >
-                <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
+                <h2 className="text-xl font-semibold text-ink">
                   {contributor.name}
                 </h2>
-                <p className="mt-1 text-sm font-medium text-sky-700 dark:text-sky-300">
+                <p className="mt-1 text-sm font-medium text-coptic">
                   {contributor.role}
                 </p>
-                <p className="mt-3 text-sm leading-7 text-stone-600 dark:text-stone-300">
+                <p className="mt-3 text-sm leading-7 text-muted">
                   {contributor.description}
                 </p>
 
                 {contributor.contacts.length > 0 ? (
                   <>
-                    <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
+                    <p className="mt-4 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
                       {t("contributors.contactsHeading")}
                     </p>
-                    <ul className="mt-2 space-y-2 text-sm text-stone-700 dark:text-stone-200">
+                    <ul className="mt-2 space-y-2 text-sm text-ink">
                       {contributor.contacts.map((contact) => (
                         <li key={`${contributor.name}-${contact.href}`}>
                           {renderContributorContact(contact)}
@@ -351,10 +343,10 @@ export function ContributorsPageClient() {
           variant="elevated"
           className="scroll-mt-28 p-6 md:p-8"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {shenuteCredits.title}
           </p>
-          <p className="mt-3 max-w-2xl text-sm leading-7 text-stone-600 dark:text-stone-300">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">
             {shenuteCredits.description}
           </p>
 
@@ -365,13 +357,13 @@ export function ContributorsPageClient() {
               return (
                 <article
                   key={section.title}
-                  className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-5 dark:border-stone-800/80 dark:bg-stone-950/50"
+                  className="rounded-lg border border-line bg-elevated/60 p-5"
                 >
-                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-stone-900 dark:text-stone-100">
-                    <Icon className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+                  <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-ink">
+                    <Icon className="h-4 w-4 text-coptic" />
                     <h2>{section.title}</h2>
                   </div>
-                  <ul className="space-y-2 text-sm leading-6 text-stone-600 dark:text-stone-300">
+                  <ul className="space-y-2 text-sm leading-6 text-muted">
                     {section.items.map((item) => (
                       <li key={item}>{item}</li>
                     ))}
@@ -389,7 +381,7 @@ export function ContributorsPageClient() {
             })}
           </div>
 
-          <div className="mt-6 border-t border-stone-200/80 pt-4 dark:border-stone-800/80">
+          <div className="mt-6 border-t border-line pt-4">
             <div className="flex flex-wrap gap-3">
               {shenuteCredits.links.map((link) => (
                 <div key={link.href}>{renderCreditLink(link)}</div>
@@ -405,10 +397,10 @@ export function ContributorsPageClient() {
           variant="elevated"
           className="scroll-mt-28 p-6 md:p-8"
         >
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {researchCredits.title}
           </p>
-          <p className="mt-3 text-sm leading-7 text-stone-600 dark:text-stone-300 max-w-2xl">
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-muted">
             {researchCredits.description}
           </p>
 
@@ -419,13 +411,11 @@ export function ContributorsPageClient() {
                   href={item.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="text-sm font-semibold text-sky-700 hover:text-sky-900 dark:text-sky-400 dark:hover:text-sky-200 transition-colors"
+                  className="text-sm font-semibold text-accent-strong transition-colors hover:text-ink dark:text-accent"
                 >
                   {item.label} →
                 </a>
-                <p className="text-xs text-stone-500 dark:text-stone-400 italic">
-                  {item.description}
-                </p>
+                <p className="text-xs italic text-muted">{item.description}</p>
               </div>
             ))}
           </div>

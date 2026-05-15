@@ -80,23 +80,19 @@ function GrammarTableMobileCards({
       className="space-y-3 sm:hidden"
     >
       {block.rows.map((row) => (
-        <GrammarLessonCard
-          key={row.id}
-          className="space-y-3 bg-stone-50/80 dark:bg-stone-950/45"
-        >
+        <GrammarLessonCard key={row.id} className="space-y-3 bg-elevated/70">
           {block.columns.map((column, columnIndex) => (
             <div
               key={column.id}
               className={cx(
                 "space-y-1.5",
-                columnIndex > 0 &&
-                  "border-t border-stone-200/80 pt-3 dark:border-stone-800/80",
+                columnIndex > 0 && "border-t border-line pt-3",
               )}
             >
-              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
                 {renderTableColumnLabel(column, language, lessonBundle)}
               </p>
-              <div className="text-sm leading-6 text-stone-800 dark:text-stone-200 [&_.font-coptic]:text-base [&_p]:leading-6">
+              <div className="text-sm leading-6 text-ink [&_.font-coptic]:text-base [&_p]:leading-6">
                 {renderBlocks(row.cells[column.id] ?? [], {
                   className: "space-y-2",
                   inheritTextColor,
@@ -140,14 +136,14 @@ export function GrammarTableBlockRenderer({
       return (
         <thead>
           {block.headerRows?.map((headerRow) => (
-            <tr key={headerRow.id} className="bg-stone-100 dark:bg-stone-800">
+            <tr key={headerRow.id} className="bg-elevated">
               {headerRow.cells.map((cell) => (
                 <th
                   key={cell.id}
                   colSpan={cell.colSpan}
                   rowSpan={cell.rowSpan}
                   className={cx(
-                    "border-b px-3 py-2 text-sm font-semibold leading-5 dark:border-stone-700 sm:p-3 sm:text-base",
+                    "border-b border-line px-3 py-2 text-sm font-semibold leading-5 sm:p-3 sm:text-base",
                     cell.align === "center" && "text-center",
                     cell.align === "right" && "text-right",
                     (!cell.align || cell.align === "left") && "text-center",
@@ -176,11 +172,11 @@ export function GrammarTableBlockRenderer({
 
     return (
       <thead>
-        <tr className="bg-stone-100 dark:bg-stone-800">
+        <tr className="bg-elevated">
           {block.columns.map((column) => (
             <th
               key={column.id}
-              className="border-b px-3 py-2 text-center text-sm font-semibold leading-5 dark:border-stone-700 sm:p-3 sm:text-base"
+              className="border-b border-line px-3 py-2 text-center text-sm font-semibold leading-5 sm:p-3 sm:text-base"
             >
               {renderTableColumnLabel(column, language, lessonBundle)}
             </th>
@@ -210,7 +206,7 @@ export function GrammarTableBlockRenderer({
         </colgroup>
       ) : null}
       {tableHeader}
-      <tbody className="divide-y divide-stone-200 dark:divide-stone-800">
+      <tbody className="divide-y divide-line">
         {block.rows.map((row) => (
           <tr
             key={row.id}
@@ -227,7 +223,7 @@ export function GrammarTableBlockRenderer({
                   <th
                     key={column.id}
                     scope="row"
-                    className="sticky left-0 z-10 w-28 border-r border-stone-200 bg-stone-100 px-3 py-2 text-left text-sm font-semibold text-stone-900 shadow-[10px_0_16px_-14px_rgba(28,25,23,0.45)] transition-colors group-hover/row:border-sky-200 group-hover/row:bg-sky-100/90 dark:border-stone-700 dark:bg-stone-800/95 dark:text-stone-100 dark:shadow-[10px_0_18px_-14px_rgba(0,0,0,0.7)] dark:group-hover/row:border-sky-800/70 dark:group-hover/row:bg-sky-950/40 sm:static sm:w-32 sm:px-4 sm:py-3 sm:text-base sm:shadow-none [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7"
+                    className="sticky left-0 z-10 w-28 border-r border-line bg-elevated px-3 py-2 text-left text-sm font-semibold text-ink shadow-[10px_0_16px_-14px_rgba(30,29,29,0.45)] transition-colors group-hover/row:border-coptic/25 group-hover/row:bg-coptic-soft/60 sm:static sm:w-32 sm:px-4 sm:py-3 sm:text-base sm:shadow-none [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7"
                   >
                     {renderBlocks(row.cells[column.id] ?? [], {
                       inheritTextColor: true,
@@ -240,10 +236,10 @@ export function GrammarTableBlockRenderer({
                 <td
                   key={column.id}
                   className={cx(
-                    "transition-colors group-hover/row:bg-sky-50/85 dark:group-hover/row:bg-sky-950/24",
+                    "transition-colors group-hover/row:bg-coptic-soft/35",
                     useRowHeaderLayout
-                      ? "w-[22.66%] px-2.5 py-2 text-center align-middle text-sm group-hover/row:text-sky-950 sm:px-4 sm:py-3 sm:text-base dark:group-hover/row:text-stone-100 [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7"
-                      : "px-3 py-2 text-sm group-hover/row:text-sky-950 sm:p-3 sm:text-base dark:group-hover/row:text-stone-100 [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7",
+                      ? "w-[22.66%] px-2.5 py-2 text-center align-middle text-sm group-hover/row:text-ink sm:px-4 sm:py-3 sm:text-base [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7"
+                      : "px-3 py-2 text-sm group-hover/row:text-ink sm:p-3 sm:text-base [&_.font-coptic]:text-base sm:[&_.font-coptic]:text-lg [&_p]:leading-6 sm:[&_p]:leading-7",
                   )}
                 >
                   {renderBlocks(row.cells[column.id] ?? [], {

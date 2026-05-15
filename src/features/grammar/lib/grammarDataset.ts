@@ -66,8 +66,8 @@ export function buildGrammarLessonSeoDescription(
   ].join(", ");
 
   return locale === "nl"
-    ? `${description} Bevat ${lessonFootprint} voor gestructureerde studie van het Koptisch.`
-    : `${description} Includes ${lessonFootprint} for structured Coptic study.`;
+    ? `${description} Bevat ${lessonFootprint} voor gestructureerde Koptologie.`
+    : `${description} Includes ${lessonFootprint} for structured Coptology work.`;
 }
 
 /**

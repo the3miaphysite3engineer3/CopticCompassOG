@@ -13,6 +13,9 @@ export const publicationsMessages = defineMessages({
     "publications.language": "Language",
     "publications.language.all": "All languages",
     "publications.format": "Format",
+    "publications.catalogLabel": "Catalog",
+    "publications.indexDescription":
+      "A curated catalog of books, editions, reference works, and research projects for Coptic language work and Coptology.",
     "publications.filters": "Browse publications",
     "publications.searchPlaceholder": "Search by title, summary, or language",
     "publications.clearSearch": "Clear search",
@@ -27,6 +30,7 @@ export const publicationsMessages = defineMessages({
     "publications.noResultsDesc":
       "Try another search term, status, or language.",
     "publications.viewDetails": "View details",
+    "publications.externalAvailable": "External listing available",
     "publications.externalLink": "View external listing",
     "publications.noExternalLink":
       "A public purchase or reference link has not been added yet for this publication.",
@@ -44,6 +48,9 @@ export const publicationsMessages = defineMessages({
     "publications.language": "Taal",
     "publications.language.all": "Alle talen",
     "publications.format": "Type",
+    "publications.catalogLabel": "Catalogus",
+    "publications.indexDescription":
+      "Een gecureerde catalogus van boeken, edities, naslagwerken en onderzoeksprojecten voor werk rond de Koptische taal en Koptologie.",
     "publications.filters": "Publicaties verkennen",
     "publications.searchPlaceholder": "Zoek op titel, samenvatting of taal",
     "publications.clearSearch": "Zoekopdracht wissen",
@@ -58,6 +65,7 @@ export const publicationsMessages = defineMessages({
     "publications.noResultsDesc":
       "Probeer een andere zoekterm, status of taal.",
     "publications.viewDetails": "Bekijk details",
+    "publications.externalAvailable": "Externe vermelding beschikbaar",
     "publications.externalLink": "Bekijk externe vermelding",
     "publications.noExternalLink":
       "Er is nog geen openbare aankoop- of referentielink toegevoegd voor deze publicatie.",

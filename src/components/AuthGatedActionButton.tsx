@@ -12,6 +12,7 @@ import {
   type ReactNode,
 } from "react";
 
+import { buttonClassName } from "@/components/Button";
 import { FloatingTooltip } from "@/components/FloatingTooltip";
 import { useLanguage } from "@/components/LanguageProvider";
 import {
@@ -233,7 +234,10 @@ export function AuthGatedActionButton({
             <p>{lockedMessage}</p>
             <Link
               href={loginHref}
-              className="inline-flex h-9 items-center justify-center rounded-lg bg-stone-900 px-3 text-xs font-semibold text-white transition-colors hover:bg-stone-700 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-white"
+              className={buttonClassName({
+                className: "h-9 px-3 text-xs",
+                size: "sm",
+              })}
             >
               {t("nav.login")}
             </Link>

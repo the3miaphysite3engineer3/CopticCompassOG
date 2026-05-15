@@ -272,7 +272,7 @@ function renderSearchableText(
         i % 2 === 1 ? (
           <mark
             key={i}
-            className="bg-sky-200 dark:bg-sky-500/40 text-sky-900 dark:text-sky-100 rounded-[2px] px-[1px] font-bold"
+            className="rounded-[2px] bg-accent-soft px-[1px] font-bold text-accent-strong dark:text-accent"
           >
             {renderWithCopticTypography(
               part,

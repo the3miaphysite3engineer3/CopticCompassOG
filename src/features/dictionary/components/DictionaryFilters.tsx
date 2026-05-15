@@ -59,13 +59,13 @@ export function DictionaryFilters({
     : t("dict.showFilters");
 
   return (
-    <div className="relative z-0 rounded-2xl border border-stone-200 bg-white/60 p-3 shadow-sm backdrop-blur-md dark:border-stone-800 dark:bg-stone-900/60 sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-4 sm:p-4">
+    <div className="relative z-0 rounded-lg border border-line bg-surface/88 p-3 shadow-soft backdrop-blur-md sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-4 sm:p-4">
       <button
         type="button"
         aria-expanded={isExpandedOnMobile}
         aria-label={mobileToggleLabel}
         onClick={() => setIsExpandedOnMobile((current) => !current)}
-        className="flex w-full items-center justify-between gap-3 rounded-xl p-1 text-left text-stone-600 transition-colors hover:bg-stone-100/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/30 dark:text-stone-300 dark:hover:bg-stone-800/60 sm:hidden"
+        className="flex w-full cursor-pointer select-none items-center justify-between gap-3 rounded-lg p-1 text-left text-muted transition-colors hover:bg-elevated/75 active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 sm:hidden"
       >
         <span className="flex min-w-0 items-center gap-2">
           <SlidersHorizontal className="h-4 w-4 shrink-0" />
@@ -74,7 +74,7 @@ export function DictionaryFilters({
           </span>
           {activeFilterCount > 0 ? (
             <span
-              className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-sky-600 px-1.5 text-xs font-semibold text-white dark:bg-sky-500"
+              className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-ink px-1.5 text-xs font-semibold text-paper dark:bg-elevated dark:text-ink dark:ring-1 dark:ring-line"
               aria-label={`${t("dict.activeFilters")}: ${activeFilterCount}`}
             >
               {activeFilterCount}
@@ -96,12 +96,12 @@ export function DictionaryFilters({
           !isExpandedOnMobile && "hidden sm:flex",
         )}
       >
-        <div className="hidden items-center gap-2 text-stone-500 dark:text-stone-400 sm:flex">
+        <div className="hidden items-center gap-2 text-muted sm:flex">
           <SlidersHorizontal className="h-4 w-4" />
           <FormLabel tone="muted">{t("dict.filters")}</FormLabel>
           {activeFilterCount > 0 ? (
             <span
-              className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-sky-600 px-1.5 text-xs font-semibold text-white dark:bg-sky-500"
+              className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-ink px-1.5 text-xs font-semibold text-paper dark:bg-elevated dark:text-ink dark:ring-1 dark:ring-line"
               aria-label={`${t("dict.activeFilters")}: ${activeFilterCount}`}
             >
               {activeFilterCount}
@@ -109,7 +109,7 @@ export function DictionaryFilters({
           ) : null}
         </div>
 
-        <div className="hidden h-6 w-px bg-stone-300 dark:bg-stone-700 md:block" />
+        <div className="hidden h-6 w-px bg-line md:block" />
 
         <CompactSelect
           label={t("dict.pos")}
@@ -129,7 +129,7 @@ export function DictionaryFilters({
           ))}
         </CompactSelect>
 
-        <div className="hidden h-6 w-px bg-stone-300 dark:bg-stone-700 sm:block" />
+        <div className="hidden h-6 w-px bg-line sm:block" />
 
         <CompactSelect
           label={t("dict.dialect")}
@@ -147,14 +147,14 @@ export function DictionaryFilters({
           ))}
         </CompactSelect>
 
-        <div className="hidden h-6 w-px bg-stone-300 dark:bg-stone-700 sm:block" />
+        <div className="hidden h-6 w-px bg-line sm:block" />
 
         <CheckboxField
           checked={exactMatch}
           label={t("dict.exactMatch")}
-          labelClassName="text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400"
+          labelClassName="text-xs font-semibold uppercase tracking-widest text-muted"
           onChange={(event) => setExactMatch(event.target.checked)}
-          wrapperClassName="rounded-lg p-2 hover:bg-stone-100 dark:hover:bg-stone-800 sm:-m-2"
+          wrapperClassName="rounded-lg p-2 hover:bg-elevated/75 sm:-m-2"
         />
 
         {activeFilterCount > 0 && onClearFilters ? (
@@ -171,10 +171,10 @@ export function DictionaryFilters({
 
         {selectedDialect === "ALL" || selectedDialect === "B" ? (
           <>
-            <div className="h-px w-full bg-stone-200 dark:bg-stone-800 sm:hidden" />
-            <div className="hidden h-6 w-px bg-stone-300 dark:bg-stone-700 sm:block" />
+            <div className="h-px w-full bg-line sm:hidden" />
+            <div className="hidden h-6 w-px bg-line sm:block" />
 
-            <div className="flex items-center gap-2 text-stone-500 dark:text-stone-400">
+            <div className="flex items-center gap-2 text-muted">
               <Volume2 className="h-4 w-4" />
               <FormLabel tone="muted">{t("dict.ttsMode")}</FormLabel>
             </div>
@@ -196,7 +196,7 @@ export function DictionaryFilters({
 
                 {settings.mode === "premium" ? (
                   <>
-                    <div className="hidden h-6 w-px bg-stone-300 dark:bg-stone-700 sm:block" />
+                    <div className="hidden h-6 w-px bg-line sm:block" />
 
                     <CompactSelect
                       label={t("dict.ttsVoice")}

@@ -3,7 +3,7 @@ import { connection } from "next/server";
 import "@/app/globals.css";
 import { AppFrame } from "@/components/AppFrame";
 import { ObservabilityScripts } from "@/components/ObservabilityScripts";
-import { antinoou } from "@/lib/fonts";
+import { fontVariables } from "@/lib/fonts";
 import { createRootLayoutMetadata } from "@/lib/metadata";
 import { getCspNonce } from "@/lib/server/csp";
 import { withScalabilityTimer } from "@/lib/server/observability";
@@ -42,7 +42,7 @@ export default async function AppLayout({
 
   return (
     <html lang={language} suppressHydrationWarning>
-      <body className={antinoou.variable}>
+      <body className={fontVariables}>
         <AppFrame initialLanguage={language} nonce={nonce}>
           {children}
         </AppFrame>

@@ -6,10 +6,24 @@ import type { Language } from "@/types/i18n";
  */
 export const mailBrand = {
   brandName: "Coptic Compass",
-  descriptor: "Coptic Dictionary, Grammar, Publications, and Shenute AI",
+  descriptor: "Digital Coptology Platform",
   fromDisplayName: "Coptic Compass",
   founderLine: "by Kyrillos Wannes",
   liveUrl: "https://www.copticcompass.com",
+} as const;
+
+export const mailBrandColors = {
+  coptic: "#008329",
+  copticSoft: "#ecfaf0",
+  elevated: "#f6f4ef",
+  gold: "#ebc17d",
+  goldSoft: "#fcf6eb",
+  goldStrong: "#895918",
+  ink: "#1e1d1d",
+  line: "#e2ddd3",
+  muted: "#5e584f",
+  paper: "#f9f8f5",
+  surface: "#ffffff",
 } as const;
 
 /**
@@ -19,15 +33,14 @@ function getMailFooterCopy(language: Language) {
   if (language === "nl") {
     return {
       browseLabel: "Verder lezen op Coptic Compass",
-      descriptor:
-        "Koptisch woordenboek, grammatica, publicaties en Shenute AI.",
+      descriptor: "Een betrouwbaar digitaal Koptologieplatform.",
       signoff: "Met vriendelijke groet,",
     };
   }
 
   return {
     browseLabel: "Continue reading on Coptic Compass",
-    descriptor: "Coptic dictionary, grammar, publications, and Shenute AI.",
+    descriptor: "A trusted digital Coptology platform.",
     signoff: "Kind regards,",
   };
 }

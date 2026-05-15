@@ -28,8 +28,8 @@ export default function ContactPageClient() {
       contentClassName="app-page-content"
       width="standard"
       accents={[
-        pageShellAccents.topLeftSkyOrb,
-        pageShellAccents.bottomRightEmeraldOrb,
+        pageShellAccents.topLeftGoldWash,
+        pageShellAccents.bottomRightCopticWash,
       ]}
     >
       <AppPageIntro
@@ -58,7 +58,7 @@ export default function ContactPageClient() {
               <FormField htmlFor="name" label={t("contact.name")}>
                 <div className="relative">
                   <User
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"
                     size={20}
                   />
                   <input
@@ -76,7 +76,7 @@ export default function ContactPageClient() {
               <FormField htmlFor="email" label={t("contact.email")}>
                 <div className="relative">
                   <Mail
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400 dark:text-stone-500"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 text-muted"
                     size={20}
                   />
                   <input
@@ -117,7 +117,7 @@ export default function ContactPageClient() {
             <FormField htmlFor="message" label={t("contact.message")}>
               <div className="relative">
                 <MessageSquare
-                  className="absolute left-4 top-4 text-stone-400 dark:text-stone-500"
+                  className="absolute left-4 top-4 text-muted"
                   size={20}
                 />
                 <textarea
@@ -134,7 +134,7 @@ export default function ContactPageClient() {
             <FormField
               htmlFor="wants_updates"
               label={t("contact.updatesLabel")}
-              className="rounded-2xl border border-stone-200/80 bg-stone-50/80 p-4 dark:border-stone-800 dark:bg-stone-950/30"
+              className="rounded-lg border border-line bg-elevated/70 p-4"
             >
               <CheckboxField
                 id="wants_updates"

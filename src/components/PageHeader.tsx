@@ -3,7 +3,7 @@ import { cx } from "@/lib/classes";
 
 import type { ReactNode } from "react";
 
-export type PageHeaderTone = "default" | "brand" | "sky" | "analytics";
+export type PageHeaderTone = "default" | "brand" | "coptic" | "analytics";
 type PageHeaderSize = "hero" | "page" | "compact" | "workspace";
 type PageHeaderAlign = "center" | "left";
 type EyebrowVariant = "text" | "badge";
@@ -23,11 +23,10 @@ type PageHeaderProps = {
 };
 
 const TITLE_TONE_CLASSES: Record<PageHeaderTone, string> = {
-  default: "from-stone-800 to-stone-500 dark:from-stone-100 dark:to-stone-400",
-  brand: "from-sky-600 to-emerald-500 dark:from-sky-400 dark:to-emerald-400",
-  sky: "from-sky-600 to-stone-500 dark:from-sky-400 dark:to-stone-400",
-  analytics:
-    "from-emerald-500 to-sky-600 dark:from-emerald-400 dark:to-sky-400",
+  default: "text-ink",
+  brand: "text-ink",
+  coptic: "text-coptic",
+  analytics: "text-coptic",
 };
 
 const TITLE_SIZE_CLASSES: Record<PageHeaderSize, string> = {
@@ -80,7 +79,7 @@ export function PageHeader({
         ) : (
           <span
             className={cx(
-              "text-xs font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-400",
+              "text-xs font-semibold uppercase tracking-widest text-accent-strong dark:text-accent",
               centered && "mx-auto",
               eyebrowClassName,
             )}
@@ -91,7 +90,7 @@ export function PageHeader({
 
       <h1
         className={cx(
-          "bg-gradient-to-tr bg-clip-text pb-2 font-extrabold tracking-tight text-transparent drop-shadow-sm",
+          "pb-2 font-extrabold tracking-tight",
           TITLE_SIZE_CLASSES[size],
           TITLE_TONE_CLASSES[tone],
           titleClassName,
@@ -103,7 +102,7 @@ export function PageHeader({
       {description && (
         <p
           className={cx(
-            "font-medium text-stone-500 dark:text-stone-400",
+            "font-medium text-muted",
             DESCRIPTION_SIZE_CLASSES[size],
             centered ? "mx-auto max-w-3xl" : "max-w-3xl",
             descriptionClassName,

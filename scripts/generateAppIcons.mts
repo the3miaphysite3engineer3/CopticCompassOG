@@ -9,7 +9,7 @@ type IconTarget = {
   size: number;
 };
 
-const DEFAULT_SOURCE = "public/logo/logo-colored.png";
+const DEFAULT_SOURCE = "public/logo/square_logo_1.jpg";
 const targets: readonly IconTarget[] = [
   { label: "app icon", path: "src/app/icon.png", size: 512 },
   { label: "apple touch icon", path: "src/app/apple-icon.png", size: 180 },
@@ -51,10 +51,8 @@ async function generateIcon(sourcePath: string, target: IconTarget) {
 
   await sharp(sourcePath)
     .rotate()
-    .trim({ threshold: 5 })
     .resize(target.size, target.size, {
-      background: { alpha: 0, b: 0, g: 0, r: 0 },
-      fit: "contain",
+      fit: "cover",
       withoutEnlargement: false,
     })
     .png({

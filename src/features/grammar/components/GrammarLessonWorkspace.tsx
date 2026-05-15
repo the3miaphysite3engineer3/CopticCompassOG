@@ -8,7 +8,7 @@ import {
   PanelRightOpen,
 } from "lucide-react";
 
-import { Button } from "@/components/Button";
+import { Button, controlButtonClassName } from "@/components/Button";
 import { SurfacePanel } from "@/components/SurfacePanel";
 import { GrammarLessonOutline } from "@/features/grammar/components/GrammarLessonPrimitives";
 import { cx } from "@/lib/classes";
@@ -119,7 +119,7 @@ function DesktopRailToggle({
       size="sm"
       onClick={onToggle}
       aria-label={collapsed ? expandLabel : collapseLabel}
-      className="h-9 w-9 rounded-xl px-0"
+      className="h-9 w-9 px-0"
     >
       <Icon className="h-4 w-4" />
       <span className="sr-only">{collapsed ? expandLabel : collapseLabel}</span>
@@ -151,7 +151,10 @@ function CollapsedRailCard({
         type="button"
         onClick={onToggle}
         aria-label={expandLabel}
-        className="flex w-full flex-col items-center gap-2 rounded-xl px-2 py-3 text-center text-stone-500 transition-colors hover:bg-stone-100/80 hover:text-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25 dark:text-stone-400 dark:hover:bg-stone-800/70 dark:hover:text-sky-300"
+        className={controlButtonClassName({
+          className:
+            "w-full flex-col border-transparent bg-transparent px-2 py-3 text-center shadow-none hover:bg-elevated",
+        })}
       >
         <Icon className="h-4 w-4" />
         <span className="text-[10px] font-semibold uppercase tracking-[0.14em]">
@@ -173,25 +176,25 @@ function MobileLessonTools({
   lessonToolsTitle,
 }: ReadingWorkspaceProps) {
   return (
-    <details className="group mb-6 overflow-hidden rounded-2xl border border-stone-200/90 bg-white/70 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/40 xl:hidden">
+    <details className="group mb-6 overflow-hidden rounded-lg border border-line bg-surface/88 shadow-soft backdrop-blur-sm xl:hidden">
       <summary className="flex cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 [&::-webkit-details-marker]:hidden">
         <div className="min-w-0">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {lessonOutlineEyebrow}
           </p>
-          <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">
+          <h2 className="text-base font-semibold text-ink">
             {lessonToolsTitle}
           </h2>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[11px] font-semibold tracking-[0.12em] text-stone-400 dark:text-stone-500">
+          <span className="text-[11px] font-semibold tracking-[0.12em] text-muted">
             {String(lessonOutlineSections.length).padStart(2, "0")}
           </span>
-          <ChevronDown className="h-5 w-5 shrink-0 text-stone-400 transition-transform duration-200 group-open:rotate-180 dark:text-stone-500" />
+          <ChevronDown className="h-5 w-5 shrink-0 text-muted transition-transform duration-200 group-open:rotate-180" />
         </div>
       </summary>
 
-      <div className="space-y-4 border-t border-stone-200/80 p-4 dark:border-stone-800/80">
+      <div className="space-y-4 border-t border-line p-4">
         <GrammarLessonOutline
           activeSectionId={activeSectionId}
           eyebrow={lessonOutlineEyebrow}

@@ -34,23 +34,23 @@ export function DashboardRecentExerciseDisclosure({
       <summary className="flex cursor-pointer list-none items-start justify-between gap-4 p-6 [&::-webkit-details-marker]:hidden md:p-8">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-3">
-            <h4 className="truncate text-xl font-semibold uppercase tracking-wide text-stone-800 dark:text-stone-200 md:text-2xl">
+            <h4 className="truncate text-xl font-semibold uppercase tracking-wide text-ink md:text-2xl">
               {formatLessonSlug(submission.lesson_slug)}
             </h4>
             {submission.status === "reviewed" ? (
-              <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+              <span className="rounded-full bg-coptic-soft px-3 py-1 text-xs font-bold text-coptic">
                 {copy.reviewedLabel}
                 {submission.rating ? ` · ${submission.rating} / 5` : ""}
               </span>
             ) : (
-              <span className="rounded-full bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-500 dark:bg-stone-800 dark:text-stone-400">
+              <span className="rounded-full bg-elevated px-3 py-1 text-xs font-semibold text-muted">
                 {copy.submissions.awaitingReviewLabel}
               </span>
             )}
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-stone-500 dark:text-stone-400">
-            <span className="rounded-lg bg-stone-100 px-3 py-1 text-xs font-semibold text-stone-500 dark:bg-stone-800 dark:text-stone-400">
+          <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-muted">
+            <span className="rounded-lg bg-elevated px-3 py-1 text-xs font-semibold text-muted">
               {formatSubmissionDate(submission.created_at, locale)}
             </span>
             <span className="group-open:hidden">
@@ -62,15 +62,15 @@ export function DashboardRecentExerciseDisclosure({
           </div>
         </div>
 
-        <ChevronDown className="mt-1 h-5 w-5 shrink-0 text-stone-400 transition-transform duration-200 group-open:rotate-180 dark:text-stone-500" />
+        <ChevronDown className="mt-1 h-5 w-5 shrink-0 text-muted transition-transform duration-200 group-open:rotate-180" />
       </summary>
 
-      <div className="border-t border-stone-200 px-6 pb-6 pt-6 dark:border-stone-800 md:px-8 md:pb-8 md:pt-7">
-        <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+      <div className="border-t border-line px-6 pb-6 pt-6 md:px-8 md:pb-8 md:pt-7">
+        <div className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
           {copy.submissions.responseLabel}
         </div>
 
-        <div className="mb-6 rounded-2xl border border-stone-100 bg-stone-50 p-5 whitespace-pre-wrap font-coptic text-lg text-stone-700 dark:border-stone-800/50 dark:bg-stone-950 dark:text-stone-300 md:text-xl">
+        <div className="mb-6 rounded-lg border border-line bg-elevated p-5 whitespace-pre-wrap font-coptic text-lg text-muted md:text-xl">
           {submission.submitted_text}
         </div>
 

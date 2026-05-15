@@ -2,7 +2,9 @@
 
 import { Keyboard, Search, X } from "lucide-react";
 
+import { iconButtonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
+import { cx } from "@/lib/classes";
 import { antinoou } from "@/lib/fonts";
 
 import CopticKeyboard from "./CopticKeyboard";
@@ -35,9 +37,9 @@ export function DictionarySearchBar({
   const { t } = useLanguage();
 
   return (
-    <div className="group relative z-30 rounded-2xl border border-line/80 bg-surface/80 shadow-panel backdrop-blur-xl sm:rounded-3xl">
+    <div className="group relative z-30 rounded-lg border border-line bg-surface/92 shadow-panel backdrop-blur-xl">
       <div className="relative flex items-center">
-        <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-stone-500 transition-colors group-focus-within:text-sky-400 sm:left-6">
+        <div className="pointer-events-none absolute inset-y-0 left-4 flex items-center text-muted transition-colors group-focus-within:text-coptic sm:left-6">
           <Search className="h-5 w-5 sm:h-6 sm:w-6" />
         </div>
 
@@ -82,7 +84,7 @@ export function DictionarySearchBar({
               event.currentTarget.selectionEnd,
             )
           }
-          className={`${antinoou.className} w-full rounded-2xl bg-transparent p-4 pl-12 pr-24 text-base text-stone-900 transition-all focus:outline-none focus:ring-2 focus:ring-sky-500/50 placeholder:font-sans placeholder:text-stone-400 dark:text-stone-100 dark:placeholder:text-stone-500 sm:rounded-3xl sm:p-6 sm:pl-16 sm:pr-28 sm:text-lg md:text-2xl`}
+          className={`${antinoou.className} w-full rounded-lg bg-transparent p-4 pl-12 pr-24 text-base text-ink transition-all placeholder:font-sans placeholder:text-muted/65 focus:outline-none focus:ring-2 focus:ring-accent/30 sm:p-6 sm:pl-16 sm:pr-28 sm:text-lg md:text-2xl`}
         />
 
         <div className="absolute inset-y-0 right-3 flex items-center gap-1.5 sm:right-4 sm:gap-2">
@@ -90,7 +92,9 @@ export function DictionarySearchBar({
             <button
               type="button"
               onClick={() => onQueryChange("")}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-stone-500 transition-colors hover:text-stone-700 dark:bg-stone-800/70 dark:text-stone-400 dark:hover:text-stone-200 sm:h-10 sm:w-10"
+              className={iconButtonClassName({
+                className: "h-9 w-9 border-transparent sm:h-10 sm:w-10",
+              })}
               aria-label={t("dict.clearSearch")}
             >
               <X className="h-5 w-5" />
@@ -99,11 +103,13 @@ export function DictionarySearchBar({
           <button
             type="button"
             onClick={onToggleKeyboard}
-            className={`inline-flex h-9 w-9 items-center justify-center rounded-full transition-colors sm:h-10 sm:w-10 ${
-              isKeyboardOpen
-                ? "bg-sky-100 text-sky-600 dark:bg-sky-500/20 dark:text-sky-400"
-                : "bg-stone-100 text-stone-500 hover:text-stone-700 dark:bg-stone-800/70 dark:text-stone-400 dark:hover:text-stone-200"
-            }`}
+            className={iconButtonClassName({
+              className: cx(
+                "h-9 w-9 border-transparent sm:h-10 sm:w-10",
+                isKeyboardOpen &&
+                  "border-coptic/25 bg-coptic-soft text-coptic hover:border-coptic/35 hover:bg-coptic-soft hover:text-coptic",
+              ),
+            })}
             aria-label={t("dict.keyboardToggle")}
             title={t("dict.keyboardOpen")}
           >

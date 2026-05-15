@@ -71,11 +71,11 @@ export function SwaggerDocsClient({ specUrl }: SwaggerDocsClientProps) {
   return (
     <div className="space-y-4">
       {hasLoadError ? (
-        <p className="rounded-3xl border border-amber-300/70 bg-amber-50/90 px-4 py-3 text-sm text-amber-900">
+        <p className="rounded-lg border border-accent/30 bg-accent-soft/70 px-4 py-3 text-sm text-ink">
           The interactive docs could not load in this browser. You can still use
           the raw{" "}
           <a
-            className="underline decoration-amber-500 underline-offset-2"
+            className="underline decoration-accent underline-offset-2"
             href={specUrl}
           >
             OpenAPI document

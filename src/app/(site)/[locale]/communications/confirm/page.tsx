@@ -64,8 +64,8 @@ export default async function CommunicationConfirmPage({
       contentClassName="app-page-content"
       width="standard"
       accents={[
-        pageShellAccents.topLeftSkyOrb,
-        pageShellAccents.bottomRightEmeraldOrb,
+        pageShellAccents.topLeftGoldWash,
+        pageShellAccents.bottomRightCopticWash,
       ]}
     >
       <div className="app-page-heading">
@@ -90,9 +90,9 @@ export default async function CommunicationConfirmPage({
       </div>
 
       <div className="mx-auto w-full max-w-3xl">
-        <SurfacePanel rounded="3xl" className="p-8 md:p-10">
+        <SurfacePanel rounded="lg" className="p-8 md:p-10">
           <div className="space-y-6 text-center">
-            <p className="text-base leading-7 text-stone-600 dark:text-stone-300">
+            <p className="text-base leading-7 text-muted">
               {getTranslation(resolvedLocale, messageKey)}
             </p>
 

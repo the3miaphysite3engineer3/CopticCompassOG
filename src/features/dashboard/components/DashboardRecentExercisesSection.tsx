@@ -16,7 +16,7 @@ export function DashboardRecentExercisesSection({
 
   return (
     <section className="space-y-8">
-      <h3 className="text-2xl font-bold tracking-tight text-stone-800 dark:text-stone-200">
+      <h3 className="text-2xl font-bold tracking-tight text-ink">
         {copy.recentExercisesTitle}
       </h3>
 

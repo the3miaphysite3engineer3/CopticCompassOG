@@ -94,11 +94,11 @@ export function AuthGateInlinePrompt({
   const loginHref = getLoginPath(redirectTo ?? pathname ?? undefined);
 
   return (
-    <p className={cx("text-stone-500 dark:text-stone-400", className)}>
+    <p className={cx("text-muted", className)}>
       {message}{" "}
       <Link
         href={loginHref}
-        className="font-semibold text-sky-600 transition-colors hover:text-sky-700 hover:underline dark:text-sky-400 dark:hover:text-sky-300"
+        className="font-semibold text-accent-strong transition-colors hover:text-ink hover:underline dark:text-accent dark:hover:text-ink"
       >
         {actionLabel ?? t("nav.login")}
       </Link>

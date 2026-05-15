@@ -11,6 +11,7 @@ import Link from "next/link";
 
 import { AuthGateNotice } from "@/components/AuthGateNotice";
 import { Badge } from "@/components/Badge";
+import { buttonClassName } from "@/components/Button";
 import type { GrammarLessonLearnerSummary } from "@/features/grammar/lib/grammarLearnerState";
 import { cx } from "@/lib/classes";
 import { getDashboardPath } from "@/lib/locale";
@@ -85,7 +86,7 @@ export function GrammarLessonLearnerPanel({
 
   if (status === "loading") {
     return (
-      <div className="h-40 animate-pulse rounded-2xl border border-stone-200/90 bg-white/70 shadow-sm dark:border-stone-800/90 dark:bg-stone-950/40" />
+      <div className="h-40 animate-pulse rounded-lg border border-line bg-surface/88 shadow-soft" />
     );
   }
 
@@ -121,13 +122,13 @@ export function GrammarLessonLearnerPanel({
   }
 
   return (
-    <section className="overflow-hidden rounded-2xl border border-stone-200/90 bg-white/70 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/40">
-      <div className="border-b border-stone-200/80 px-4 py-3 dark:border-stone-800/80">
-        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+    <section className="overflow-hidden rounded-lg border border-line bg-surface/88 shadow-soft backdrop-blur-sm">
+      <div className="border-b border-line px-4 py-3">
+        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
           {language === "nl" ? "Studietracking" : "Study tracking"}
         </p>
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">
+          <h2 className="text-base font-semibold text-ink">
             {language === "nl" ? "Uw voortgang" : "Your progress"}
           </h2>
           {summary.isCompleted ? (
@@ -141,16 +142,16 @@ export function GrammarLessonLearnerPanel({
       <div className="space-y-3.5 px-4 py-3.5">
         <div>
           <div className="mb-2 flex items-center justify-between gap-4 text-sm">
-            <span className="font-medium text-stone-700 dark:text-stone-300">
+            <span className="font-medium text-muted">
               {formatProgressLabel(language, summary)}
             </span>
-            <span className="font-semibold text-sky-700 dark:text-sky-300">
+            <span className="font-semibold text-coptic">
               {summary.progressPercent}%
             </span>
           </div>
-          <div className="h-2 rounded-full bg-stone-200 dark:bg-stone-800">
+          <div className="h-2 rounded-full bg-elevated">
             <div
-              className="h-2 rounded-full bg-gradient-to-r from-sky-500 to-emerald-500 transition-all"
+              className="h-2 rounded-full bg-coptic transition-all"
               style={{ width: `${summary.progressPercent}%` }}
             />
           </div>
@@ -175,9 +176,7 @@ export function GrammarLessonLearnerPanel({
         </div>
 
         {lastViewedLabel ? (
-          <p className="text-xs text-stone-500 dark:text-stone-400">
-            {lastViewedLabel}
-          </p>
+          <p className="text-xs text-muted">{lastViewedLabel}</p>
         ) : null}
 
         <div className="flex flex-wrap gap-3">
@@ -187,12 +186,11 @@ export function GrammarLessonLearnerPanel({
               void onToggleBookmark();
             }}
             disabled={isBookmarkPending}
-            className={cx(
-              "inline-flex min-h-10 items-center justify-center gap-2 rounded-xl px-3.5 py-2 text-sm font-semibold transition-colors",
-              summary.isBookmarked
-                ? "bg-stone-900 text-white hover:bg-stone-800 dark:bg-stone-100 dark:text-stone-900 dark:hover:bg-stone-200"
-                : "border border-stone-200 bg-white/80 text-stone-700 hover:border-sky-200 hover:text-sky-700 dark:border-stone-700 dark:bg-stone-900/60 dark:text-stone-300 dark:hover:border-sky-900/70 dark:hover:text-sky-300",
-            )}
+            className={buttonClassName({
+              className: "min-h-10 px-3.5 py-2 text-sm",
+              size: "sm",
+              variant: summary.isBookmarked ? "primary" : "secondary",
+            })}
           >
             <Bookmark className="h-4 w-4" />
             {bookmarkLabel}
@@ -206,9 +204,7 @@ export function GrammarLessonLearnerPanel({
         </div>
 
         {errorMessage ? (
-          <p className="text-sm text-rose-600 dark:text-rose-400">
-            {errorMessage}
-          </p>
+          <p className="text-sm text-danger">{errorMessage}</p>
         ) : null}
       </div>
     </section>
@@ -240,15 +236,13 @@ function LessonNavigationCard({
     <>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-stone-500 dark:text-stone-400">
+          <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-muted">
             {eyebrow}
           </p>
           <p
             className={cx(
               "line-clamp-2 text-sm font-semibold",
-              lesson
-                ? "text-stone-900 dark:text-stone-100"
-                : "text-stone-400 dark:text-stone-500",
+              lesson ? "text-ink" : "text-muted/65",
             )}
           >
             {lesson
@@ -259,9 +253,7 @@ function LessonNavigationCard({
         <Icon
           className={cx(
             "mt-0.5 h-4 w-4 shrink-0",
-            lesson
-              ? "text-sky-600 dark:text-sky-300"
-              : "text-stone-300 dark:text-stone-600",
+            lesson ? "text-coptic" : "text-muted/45",
           )}
         />
       </div>
@@ -272,7 +264,7 @@ function LessonNavigationCard({
     return (
       <div
         className={cx(
-          "rounded-xl border border-stone-200/90 bg-stone-50/80 px-3.5 py-3 opacity-70 dark:border-stone-800/90 dark:bg-stone-900/40",
+          "rounded-lg border border-line bg-elevated/70 px-3.5 py-3 opacity-70",
           className,
         )}
       >
@@ -285,7 +277,7 @@ function LessonNavigationCard({
     <Link
       href={lesson.href}
       className={cx(
-        "rounded-xl border border-stone-200/90 bg-white/80 px-3.5 py-3 transition-colors hover:border-sky-200 hover:bg-sky-50/70 dark:border-stone-800/90 dark:bg-stone-900/60 dark:hover:border-sky-900/70 dark:hover:bg-sky-950/30",
+        "rounded-lg border border-line bg-surface/80 px-3.5 py-3 transition-all duration-200 hover:-translate-y-px hover:border-coptic/35 hover:bg-coptic-soft/45",
         className,
       )}
     >
@@ -300,12 +292,12 @@ export function GrammarLessonNavigationPanel({
   previousLesson,
 }: GrammarLessonNavigationPanelProps) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-stone-200/90 bg-white/70 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/40">
-      <div className="border-b border-stone-200/80 px-4 py-3 dark:border-stone-800/80">
-        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+    <section className="overflow-hidden rounded-lg border border-line bg-surface/88 shadow-soft backdrop-blur-sm">
+      <div className="border-b border-line px-4 py-3">
+        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
           {language === "nl" ? "Navigatie" : "Navigation"}
         </p>
-        <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">
+        <h2 className="text-base font-semibold text-ink">
           {language === "nl" ? "Andere lessen" : "Other lessons"}
         </h2>
       </div>
@@ -332,12 +324,12 @@ export function GrammarLessonBottomNavigation({
   previousLesson,
 }: GrammarLessonNavigationPanelProps) {
   return (
-    <section className="mt-10 border-t border-stone-200/80 pt-8 dark:border-stone-800/80">
+    <section className="mt-10 border-t border-line pt-8">
       <div className="mb-4 space-y-1">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
           {language === "nl" ? "Vervolg" : "Continue"}
         </p>
-        <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
+        <h2 className="text-xl font-semibold text-ink">
           {language === "nl"
             ? "Navigeer tussen lessen"
             : "Move between lessons"}
@@ -388,12 +380,15 @@ export function GrammarLessonSectionProgressButton({
         void onToggle();
       }}
       disabled={isPending}
-      className={cx(
-        "inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition-colors",
-        isCompleted
-          ? "bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-950/60"
-          : "border border-stone-200 bg-white/80 text-stone-700 hover:border-sky-200 hover:text-sky-700 dark:border-stone-700 dark:bg-stone-900/60 dark:text-stone-300 dark:hover:border-sky-900/70 dark:hover:text-sky-300",
-      )}
+      className={buttonClassName({
+        className: cx(
+          "h-auto px-4 py-2",
+          isCompleted &&
+            "border-coptic/25 bg-coptic-soft text-coptic hover:border-coptic/35 hover:bg-coptic-soft hover:text-coptic",
+        ),
+        size: "sm",
+        variant: "secondary",
+      })}
     >
       <CheckCircle2 className="h-4 w-4" />
       {buttonLabel}
@@ -423,17 +418,17 @@ export function GrammarLessonNotesPanel({
   }
 
   return (
-    <section className="overflow-hidden rounded-3xl border border-stone-200/90 bg-white/70 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/40">
-      <div className="border-b border-stone-200/80 px-6 py-5 dark:border-stone-800/80">
+    <section className="overflow-hidden rounded-lg border border-line bg-surface/88 shadow-soft backdrop-blur-sm">
+      <div className="border-b border-line px-6 py-5">
         <div className="flex items-center gap-3">
-          <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-sky-50 text-sky-700 dark:bg-sky-950/50 dark:text-sky-300">
+          <span className="inline-flex h-10 w-10 items-center justify-center rounded-lg bg-coptic-soft text-coptic">
             <NotebookPen className="h-5 w-5" />
           </span>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
               {language === "nl" ? "Persoonlijk" : "Personal"}
             </p>
-            <h2 className="text-xl font-semibold text-stone-900 dark:text-stone-100">
+            <h2 className="text-xl font-semibold text-ink">
               {language === "nl" ? "Lesnotities" : "Lesson notes"}
             </h2>
           </div>
@@ -441,7 +436,7 @@ export function GrammarLessonNotesPanel({
       </div>
 
       <div className="space-y-4 px-6 py-5">
-        <p className="text-sm leading-7 text-stone-600 dark:text-stone-300">
+        <p className="text-sm leading-7 text-muted">
           {language === "nl"
             ? "Bewaar hier uw eigen aantekeningen bij deze les. Ze blijven gekoppeld aan dit les-ID in uw dashboard."
             : "Keep your own notes for this lesson here. They stay attached to this lesson id in your dashboard."}
@@ -460,7 +455,7 @@ export function GrammarLessonNotesPanel({
         />
 
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-xs text-stone-500 dark:text-stone-400">
+          <p className="text-xs text-muted">
             {formatSavedDate(language, noteUpdatedAt) ??
               (language === "nl"
                 ? "Nog geen notities opgeslagen"
@@ -479,9 +474,7 @@ export function GrammarLessonNotesPanel({
         </div>
 
         {errorMessage ? (
-          <p className="text-sm text-rose-600 dark:text-rose-400">
-            {errorMessage}
-          </p>
+          <p className="text-sm text-danger">{errorMessage}</p>
         ) : null}
       </div>
     </section>

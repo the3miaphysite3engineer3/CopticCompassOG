@@ -128,8 +128,8 @@ export default async function EntryPage({
       contentClassName="app-page-content"
       width="standard"
       accents={[
-        pageShellAccents.heroSkyArc,
-        pageShellAccents.topRightEmeraldOrbOffset,
+        pageShellAccents.heroGoldBand,
+        pageShellAccents.topRightCopticWashOffset,
       ]}
     >
       <StructuredData

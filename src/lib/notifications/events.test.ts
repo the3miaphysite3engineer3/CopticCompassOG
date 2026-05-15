@@ -199,8 +199,14 @@ describe("logged notification events", () => {
     expect(notificationEventsInsertMock).toHaveBeenCalledOnce();
     expect(sendNotificationEmailMock).toHaveBeenCalledWith(
       expect.objectContaining({
+        html: expect.stringContaining("Coptic Compass"),
         subject: "New contact",
         to: "owner@example.com",
+      }),
+    );
+    expect(sendNotificationEmailMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        html: expect.stringContaining("A new contact message arrived."),
       }),
     );
     expect(notificationDeliveriesInsertMock).toHaveBeenCalledWith(

@@ -136,6 +136,15 @@ Examples:
 - Prefer calm operational language.
 - Avoid casual phrasing in deletion, privacy, password, and account-management flows.
 
+### Communication Emails
+
+- Keep the sender/product identity as `Coptic Compass`.
+- Translate the surrounding body copy naturally, but preserve product, provider,
+  endpoint, and environment variable names.
+- Prefer `e-mailupdates`, `e-mailadres`, `bevestigen`, `release`, and
+  `contentrelease` according to context.
+- Keep signoffs formal and concise, such as `Met vriendelijke groet,`.
+
 ### Developer Documentation
 
 - Preserve exact endpoint paths, method names, JSON fields, environment variables, and provider names.

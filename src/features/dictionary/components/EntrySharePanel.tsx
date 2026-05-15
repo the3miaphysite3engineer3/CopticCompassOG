@@ -34,10 +34,10 @@ export function EntrySharePanel({
   const { t } = useLanguage();
 
   return (
-    <div className="rounded-2xl border border-sky-200 bg-sky-50/75 p-5 shadow-sm backdrop-blur-md dark:border-sky-900/40 dark:bg-sky-950/20">
+    <div className="rounded-lg border border-accent/25 bg-accent-soft/60 p-5 shadow-soft backdrop-blur-md">
       <div className="mb-4">
         <h3 className="flex items-center gap-2 text-sm font-semibold text-stone-800 dark:text-stone-200">
-          <Share2 className="h-4 w-4 text-sky-600 dark:text-sky-400" />
+          <Share2 className="h-4 w-4 text-accent-strong dark:text-accent" />
           {t("entry.actions.shareTitle")}
         </h3>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-stone-600 dark:text-stone-400">
@@ -46,8 +46,8 @@ export function EntrySharePanel({
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(0,1fr)]">
-        <div className="rounded-2xl border border-white/80 bg-white/80 p-4 shadow-sm dark:border-stone-800/70 dark:bg-stone-950/40">
-          <p className="text-xs font-semibold uppercase tracking-widest text-sky-700 dark:text-sky-300">
+        <div className="rounded-lg border border-line bg-surface/88 p-4 shadow-sm">
+          <p className="text-xs font-semibold uppercase tracking-widest text-accent-strong dark:text-accent">
             {t("entry.actions.sharePreviewLabel")}
           </p>
           <p className="mt-3 whitespace-pre-line text-sm leading-6 text-stone-700 dark:text-stone-300">

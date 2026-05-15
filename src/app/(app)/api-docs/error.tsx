@@ -52,14 +52,14 @@ export default function Error({
       description={copy.description}
       details={copy.details}
       noticeTitle={copy.noticeTitle}
-      tone="sky"
+      tone="coptic"
       primaryHref="/api/openapi.json"
       primaryLabel={copy.primaryLabel}
       reset={reset}
       retryLabel={copy.retryLabel}
       accents={[
-        pageShellAccents.topRightSkyOrb,
-        pageShellAccents.bottomLeftEmeraldOrbSoft,
+        pageShellAccents.topRightGoldWash,
+        pageShellAccents.bottomLeftCopticWashSoft,
       ]}
     />
   );

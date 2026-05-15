@@ -4,6 +4,7 @@ import { Flag, Heart, Share2 } from "lucide-react";
 import { useCallback, useState, type ComponentType } from "react";
 
 import { AuthGatedActionButton } from "@/components/AuthGatedActionButton";
+import { iconButtonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
 import type { LexicalEntry } from "@/features/dictionary/types";
 import { cx } from "@/lib/classes";
@@ -21,8 +22,9 @@ type EntryActionBarPanelProps = EntryActionBarProps & {
 
 type EntryActionBarPanelComponent = ComponentType<EntryActionBarPanelProps>;
 
-const compactActionButtonClassName =
-  "inline-flex h-8 w-8 items-center justify-center rounded-full border border-stone-200 bg-stone-50 text-stone-500 transition hover:border-stone-300 hover:bg-stone-100 hover:text-stone-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300 dark:hover:border-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-100";
+const compactActionButtonClassName = iconButtonClassName({
+  className: "h-8 w-8 bg-elevated",
+});
 
 export function EntryActionBar({
   compact = false,
@@ -125,7 +127,7 @@ export function EntryActionBar({
     <div className="space-y-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-2xl space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-400">
+          <p className="text-xs font-semibold uppercase tracking-widest text-accent-strong dark:text-accent">
             {t("entry.actions.eyebrow")}
           </p>
           <p className="text-sm leading-6 text-stone-600 dark:text-stone-400">

@@ -138,15 +138,15 @@ export async function AdminDashboardPage({
       contentClassName="min-h-[80vh] animate-in fade-in slide-in-from-bottom-8 duration-700"
       width="standard"
       accents={[
-        pageShellAccents.heroEmeraldArc,
-        pageShellAccents.topRightSkyOrbInset,
+        pageShellAccents.heroGoldBand,
+        pageShellAccents.topRightCopticWashInset,
       ]}
     >
       <PageHeader
         title={copy.pageTitle}
         description={copy.pageDescription}
         align="left"
-        tone="analytics"
+        tone="brand"
         size="workspace"
         className="mb-8 md:mb-12"
       />

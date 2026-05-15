@@ -53,30 +53,30 @@ function SemanticPanel({
   return (
     <section
       className={cx(
-        "overflow-hidden rounded-2xl border border-stone-200/90 bg-white/70 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/40",
+        "overflow-hidden rounded-lg border border-line bg-surface/88 shadow-soft backdrop-blur-sm",
         className,
       )}
     >
       <div
         className={cx(
-          "border-b border-stone-200/80 dark:border-stone-800/80",
+          "border-b border-line",
           density === "compact" ? "px-4 py-3" : "px-5 py-4",
         )}
       >
-        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
           {eyebrow}
         </p>
         <div className="flex items-center justify-between gap-4">
           <h2
             className={cx(
-              "font-semibold text-stone-900 dark:text-stone-100",
+              "font-semibold text-ink",
               density === "compact" ? "text-base" : "text-lg",
             )}
           >
             {title}
           </h2>
           {typeof count === "number" ? (
-            <span className="text-[11px] font-semibold tracking-[0.12em] text-stone-400 dark:text-stone-500">
+            <span className="text-[11px] font-semibold tracking-[0.12em] text-muted">
               {String(count).padStart(2, "0")}
             </span>
           ) : null}
@@ -113,7 +113,7 @@ export function GrammarLessonConceptSummary({
           <a
             key={concept.id}
             href={`#${getGrammarConceptAnchorId(concept.id)}`}
-            className="inline-flex items-center rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-xs font-medium text-sky-700 transition-colors hover:border-sky-300 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/60 dark:bg-sky-950/40 dark:text-sky-300 dark:hover:border-sky-800 dark:hover:bg-sky-950/60 dark:hover:text-sky-200"
+            className="inline-flex items-center rounded-full border border-coptic/20 bg-coptic-soft/70 px-2.5 py-1 text-xs font-medium text-coptic transition-colors hover:border-coptic/35 hover:bg-coptic-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-coptic/30"
           >
             {concept.title[language]}
           </a>
@@ -155,10 +155,10 @@ export function GrammarLessonConceptGlossary({
             <article
               key={concept.id}
               id={getGrammarConceptAnchorId(concept.id)}
-              className="app-anchor-inline rounded-xl border border-stone-200/80 bg-stone-50/60 px-4 py-4 dark:border-stone-800/80 dark:bg-stone-950/40"
+              className="app-anchor-inline rounded-lg border border-line bg-elevated/65 px-4 py-4"
             >
               <div className="flex flex-wrap items-center gap-2">
-                <h3 className="text-lg font-semibold text-stone-900 dark:text-stone-100">
+                <h3 className="text-lg font-semibold text-ink">
                   {concept.title[language]}
                 </h3>
                 {visibleTags.map((tag) => (
@@ -177,7 +177,7 @@ export function GrammarLessonConceptGlossary({
 
               {relatedConcepts.length > 0 ? (
                 <div className="mt-4">
-                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-stone-500 dark:text-stone-400">
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-[0.16em] text-muted">
                     {language === "en"
                       ? "Related concepts"
                       : "Verwante begrippen"}
@@ -187,7 +187,7 @@ export function GrammarLessonConceptGlossary({
                       <a
                         key={relatedConcept.id}
                         href={`#${getGrammarConceptAnchorId(relatedConcept.id)}`}
-                        className="inline-flex items-center rounded-full border border-stone-200 bg-white/80 px-3 py-1.5 text-sm font-medium text-stone-700 transition-colors hover:border-sky-200 hover:text-sky-700 dark:border-stone-700 dark:bg-stone-900/70 dark:text-stone-300 dark:hover:border-sky-900/70 dark:hover:text-sky-300"
+                        className="inline-flex items-center rounded-full border border-line bg-surface/80 px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:border-coptic/35 hover:text-coptic"
                       >
                         {relatedConcept.title[language]}
                       </a>
@@ -223,9 +223,7 @@ export function GrammarLessonBibliography({
       count={sources.length > 0 ? sources.length : undefined}
     >
       {rightsStatement ? (
-        <p className="mb-4 text-sm leading-7 text-stone-600 dark:text-stone-300">
-          {rightsStatement}
-        </p>
+        <p className="mb-4 text-sm leading-7 text-muted">{rightsStatement}</p>
       ) : null}
 
       {sources.length > 0 ? (
@@ -239,29 +237,29 @@ export function GrammarLessonBibliography({
               <li
                 key={source.id}
                 id={getGrammarSourceAnchorId(source.id)}
-                className="app-anchor-inline rounded-xl border border-stone-200/80 bg-stone-50/70 px-4 py-4 dark:border-stone-800/80 dark:bg-stone-950/40"
+                className="app-anchor-inline rounded-lg border border-line bg-elevated/65 px-4 py-4"
               >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     {sourceHref ? (
                       <a
                         href={sourceHref}
-                        className="text-base font-semibold text-sky-700 underline underline-offset-4 transition-colors hover:text-sky-600 dark:text-sky-300 dark:hover:text-sky-200"
+                        className="text-base font-semibold text-coptic underline underline-offset-4 transition-colors hover:text-ink"
                       >
                         {source.title}
                       </a>
                     ) : (
-                      <p className="text-base font-semibold text-stone-900 dark:text-stone-100">
+                      <p className="text-base font-semibold text-ink">
                         {source.title}
                       </p>
                     )}
                     {source.subtitle ? (
-                      <p className="mt-1 text-sm text-stone-500 dark:text-stone-400">
+                      <p className="mt-1 text-sm text-muted">
                         {source.subtitle}
                       </p>
                     ) : null}
                     {source.author || source.year ? (
-                      <p className="mt-2 text-sm text-stone-600 dark:text-stone-300">
+                      <p className="mt-2 text-sm text-muted">
                         {[source.author, source.year]
                           .filter(Boolean)
                           .join(", ")}

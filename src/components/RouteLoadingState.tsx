@@ -1,4 +1,5 @@
 import { PageHeader } from "@/components/PageHeader";
+import type { PageHeaderTone } from "@/components/PageHeader";
 import { PageShell } from "@/components/PageShell";
 import type { PageShellWidth } from "@/components/PageShell";
 import { SurfacePanel } from "@/components/SurfacePanel";
@@ -13,7 +14,7 @@ type RouteLoadingStateProps = {
   panelClassName?: string;
   skeleton?: ReactNode;
   title: string;
-  tone?: "default" | "brand" | "sky" | "analytics";
+  tone?: PageHeaderTone;
   width?: PageShellWidth;
 };
 
@@ -22,7 +23,7 @@ function LoadingBlock({ className }: { className: string }) {
     <div
       aria-hidden="true"
       className={cx(
-        "animate-pulse rounded-2xl bg-stone-200/80 dark:bg-stone-800/80",
+        "animate-pulse rounded-lg border border-line/60 bg-elevated/80 dark:bg-elevated/60",
         className,
       )}
     />

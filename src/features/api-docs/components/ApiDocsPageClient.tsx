@@ -92,10 +92,10 @@ curl -X POST "https://www.copticcompass.com/api/ocr?lang=cop" \\
 
 const BODY_TEXT_CLASS = "text-sm leading-7 text-muted";
 const API_HIGHLIGHT_CLASS =
-  "rounded-2xl border border-line/80 bg-elevated/65 px-4 py-3 text-center text-sm font-medium leading-6 text-ink";
+  "rounded-lg border border-line/80 bg-elevated/65 px-4 py-3 text-center text-sm font-medium leading-6 text-ink";
 const API_CARD_TITLE_CLASS = "text-xl font-semibold text-ink";
 const CODE_BLOCK_CLASS =
-  "overflow-x-auto rounded-2xl border border-line/70 bg-stone-950 px-4 py-4 text-sm leading-6 text-stone-100";
+  "overflow-x-auto rounded-lg border border-line/70 bg-ink px-4 py-4 text-sm leading-6 text-paper dark:bg-black/60";
 
 function ApiDocsOverview() {
   const { t } = useLanguage();
@@ -171,8 +171,8 @@ export function ApiDocsPageClient() {
       contentClassName="app-page-content"
       width="standard"
       accents={[
-        pageShellAccents.heroSkyArc,
-        pageShellAccents.topRightEmeraldOrbInset,
+        pageShellAccents.heroGoldBand,
+        pageShellAccents.topRightCopticWashInset,
       ]}
     >
       <AppPageIntro
@@ -190,7 +190,7 @@ export function ApiDocsPageClient() {
         ]}
         title={t("apiDocs.title")}
         description={t("apiDocs.description")}
-        tone="sky"
+        tone="brand"
       />
 
       <div className="space-y-8 md:space-y-9">

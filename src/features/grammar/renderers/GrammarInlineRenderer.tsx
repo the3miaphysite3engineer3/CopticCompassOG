@@ -182,7 +182,7 @@ function renderInlineNode(
       return renderCopticNode(
         key,
         node.dictionaryEntryId,
-        "font-coptic text-emerald-600 dark:text-emerald-400",
+        "font-coptic text-coptic",
         language,
         node.text,
       );
@@ -190,7 +190,7 @@ function renderInlineNode(
       return renderCopticNode(
         key,
         node.dictionaryEntryId,
-        "font-coptic text-lg text-emerald-600 dark:text-emerald-400",
+        "font-coptic text-lg text-coptic",
         language,
         <>
           <GrammarInlineRenderer
@@ -286,7 +286,7 @@ function renderInlineNode(
           key={key}
           href={`#${getGrammarConceptAnchorId(node.ref)}`}
           data-concept-ref={node.ref}
-          className="font-medium text-sky-700 decoration-sky-300 underline decoration-dashed underline-offset-4 transition-colors hover:text-sky-600 hover:decoration-sky-500 dark:text-sky-300 dark:decoration-sky-700 dark:hover:text-sky-200 dark:hover:decoration-sky-400"
+          className="font-medium text-coptic decoration-coptic/35 underline decoration-dashed underline-offset-4 transition-colors hover:text-ink hover:decoration-coptic"
         >
           {node.fallback ?? node.ref}
         </a>
@@ -297,10 +297,7 @@ function renderInlineNode(
       }
 
       return (
-        <sup
-          key={key}
-          className="text-xs font-semibold text-sky-700 dark:text-sky-300"
-        >
+        <sup key={key} className="text-xs font-semibold text-coptic">
           [{node.ref}]
         </sup>
       );
@@ -309,7 +306,7 @@ function renderInlineNode(
         <a
           key={key}
           href={node.href}
-          className="text-sky-700 underline underline-offset-4 transition-colors hover:text-sky-600 dark:text-sky-300 dark:hover:text-sky-200"
+          className="text-coptic underline underline-offset-4 transition-colors hover:text-ink"
         >
           <GrammarInlineRenderer
             nodes={node.children}

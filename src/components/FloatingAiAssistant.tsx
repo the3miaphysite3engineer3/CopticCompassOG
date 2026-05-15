@@ -9,16 +9,20 @@ import { useLanguage } from "@/components/LanguageProvider";
 import { cx } from "@/lib/classes";
 
 const FLOATING_ASSISTANT_CONTAINER_CLASS =
-  "fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-4 z-50 sm:bottom-5 sm:right-5";
+  "fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-4 z-50 hidden sm:bottom-5 sm:right-5 sm:block";
 
 const FLOATING_ASSISTANT_BUTTON_CLASS =
-  "inline-flex h-12 w-12 items-center justify-center gap-2 rounded-2xl bg-sky-600 text-white shadow-panel transition-colors hover:bg-sky-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 dark:bg-sky-500 dark:hover:bg-sky-400 sm:h-auto sm:w-auto sm:px-5 sm:py-3 sm:text-sm sm:font-semibold";
+  "inline-flex h-12 w-12 items-center justify-center gap-2 rounded-lg border border-transparent bg-ink text-paper shadow-panel transition-colors hover:bg-accent-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 dark:border-accent/35 dark:bg-accent-soft dark:text-ink dark:hover:bg-elevated sm:h-auto sm:w-auto sm:px-5 sm:py-3 sm:text-sm sm:font-semibold";
 
 function isDenseStudyRoute(pathname: string | null) {
   return Boolean(
     pathname &&
     /(^|\/)(analytics|dictionary|entry|grammar)(?:\/|$)/.test(pathname),
   );
+}
+
+function isHomeRoute(pathname: string | null) {
+  return Boolean(pathname && /^\/(?:en|nl)?\/?$/.test(pathname));
 }
 
 function preloadFloatingAiAssistantPanel() {
@@ -71,7 +75,7 @@ export function FloatingAiAssistant() {
   );
 
   useEffect(() => {
-    if (isShenuteRoute) {
+    if (isShenuteRoute || isHomeRoute(pathname)) {
       return;
     }
 
@@ -94,7 +98,7 @@ export function FloatingAiAssistant() {
     };
   }, [isShenuteRoute, pathname]);
 
-  if (isShenuteRoute) {
+  if (isShenuteRoute || isHomeRoute(pathname)) {
     return null;
   }
 

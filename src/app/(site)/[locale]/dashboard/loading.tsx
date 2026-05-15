@@ -10,7 +10,7 @@ function LoadingBlock({ className }: { className: string }) {
   return (
     <div
       aria-hidden="true"
-      className={`animate-pulse rounded-2xl bg-stone-200/80 dark:bg-stone-800/80 ${className}`}
+      className={`animate-pulse rounded-lg bg-elevated ${className}`}
     />
   );
 }
@@ -29,8 +29,8 @@ export default function Loading() {
       tone="brand"
       panelClassName="max-w-5xl"
       accents={[
-        pageShellAccents.topLeftSkyOrb,
-        pageShellAccents.bottomRightEmeraldOrb,
+        pageShellAccents.topLeftGoldWashInset,
+        pageShellAccents.bottomRightCopticWash,
       ]}
       skeleton={
         <div className="space-y-8">

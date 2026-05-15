@@ -11,6 +11,13 @@ vi.mock("next/font/local", () => ({
   }),
 }));
 
+vi.mock("next/font/google", () => ({
+  Manrope: () => ({
+    className: "font-sans",
+    variable: "--font-ui",
+  }),
+}));
+
 describe("HighlightText", () => {
   it("renders dictionary grammar abbreviations in lesson abbreviation style", () => {
     const markup = renderToStaticMarkup(

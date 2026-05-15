@@ -40,20 +40,20 @@ function getFallbackAuthLinkClasses(
   if (variant === "mobile") {
     return {
       labelClassName: `col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`,
-      linkClassName: `group grid justify-items-center rounded-xl px-4 py-3 text-center text-sm tracking-[0.02em] transition-colors before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] ${
+      linkClassName: `group grid justify-items-center rounded-lg px-4 py-3 text-center text-sm tracking-[0.02em] transition-colors before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] ${
         isActive
-          ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
-          : "text-stone-600 hover:bg-stone-50 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-900/60 dark:hover:text-stone-200"
+          ? "bg-accent-soft text-accent-strong dark:bg-accent-soft/35 dark:text-accent"
+          : "text-muted hover:bg-elevated hover:text-ink"
       }`,
     };
   }
 
   return {
     labelClassName: `col-start-1 row-start-1 ${isActive ? "font-semibold" : "font-medium group-hover:font-semibold"}`,
-    linkClassName: `group inline-grid h-10 items-center justify-items-center rounded-full px-4 text-center text-sm tracking-[0.02em] transition-all duration-200 before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25 ${
+    linkClassName: `group inline-grid h-10 items-center justify-items-center rounded-lg px-4 text-center text-sm tracking-[0.02em] transition-all duration-200 before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 ${
       isActive
-        ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
-        : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+        ? "bg-accent-soft text-accent-strong dark:bg-accent-soft/35 dark:text-accent"
+        : "text-muted hover:bg-elevated hover:text-ink"
     }`,
   };
 }
@@ -116,24 +116,32 @@ export function Navbar() {
   ];
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-stone-200 bg-white/70 backdrop-blur-md shadow-sm transition-colors duration-300 dark:border-stone-800 dark:bg-stone-950/70">
+    <header className="sticky top-0 z-50 w-full border-b border-line bg-paper/86 shadow-sm backdrop-blur-md transition-colors duration-300">
       <div className="site-container">
         <div className="flex min-h-[4.75rem] items-center justify-between gap-4 py-3">
           <Link
             href={getLocalizedHomePath(language)}
-            className="group flex min-w-0 items-center gap-3 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25"
+            className="group flex min-w-0 items-center gap-2.5 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 sm:gap-3"
           >
-            <div className="relative h-10 w-10 shrink-0">
+            <div className="relative h-12 w-12 shrink-0 lg:h-[52px] lg:w-[52px]">
               <Image
-                src="/logo/logo-colored.png"
+                src="/logo/Coptic_Compass_Primary.svg"
                 alt={`${brandLabel} logo`}
                 fill
-                sizes="40px"
+                sizes="(max-width: 1024px) 48px, 52px"
                 loading="eager"
-                className="object-contain drop-shadow"
+                className="object-contain dark:hidden"
+              />
+              <Image
+                src="/logo/Coptic_Compass_Secondary.svg"
+                alt={`${brandLabel} logo`}
+                fill
+                sizes="(max-width: 1024px) 48px, 52px"
+                loading="eager"
+                className="hidden object-contain dark:block"
               />
             </div>
-            <span className="whitespace-nowrap text-xl font-bold text-transparent bg-gradient-to-r from-stone-800 to-stone-500 bg-clip-text transition-colors dark:from-stone-100 dark:to-stone-400">
+            <span className="hidden min-w-0 whitespace-nowrap font-coptic text-2xl font-normal leading-none tracking-normal text-ink transition-colors lg:inline">
               {brandLabel}
             </span>
           </Link>
@@ -150,10 +158,10 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   data-label={link.label}
-                  className={`group inline-grid h-10 items-center justify-items-center rounded-full px-4 text-sm tracking-[0.02em] text-center transition-all duration-200 before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/25 ${
+                  className={`group inline-grid h-10 items-center justify-items-center rounded-lg px-4 text-sm tracking-[0.02em] text-center transition-all duration-200 before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 ${
                     isActive
-                      ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
-                      : "text-stone-600 hover:text-stone-900 dark:text-stone-400 dark:hover:text-stone-200"
+                      ? "bg-accent-soft text-accent-strong dark:bg-accent-soft/35 dark:text-accent"
+                      : "text-muted hover:bg-elevated hover:text-ink"
                   }`}
                 >
                   <span
@@ -198,7 +206,7 @@ export function Navbar() {
           <nav
             id="mobile-navigation"
             aria-label="Mobile"
-            className="mb-3 flex flex-col gap-1 rounded-2xl border border-stone-200 bg-white/80 p-2 shadow-md backdrop-blur-md lg:hidden dark:border-stone-800 dark:bg-stone-900/70 dark:shadow-black/20"
+            className="mb-3 flex flex-col gap-1 rounded-lg border border-line bg-surface/88 p-2 shadow-soft backdrop-blur-md lg:hidden"
           >
             {links.map((link) => {
               const isActive =
@@ -209,10 +217,10 @@ export function Navbar() {
                   href={link.href}
                   onClick={() => setIsMobileMenuOpen(false)}
                   data-label={link.label}
-                  className={`group grid justify-items-center rounded-xl px-4 py-3 text-center text-sm tracking-[0.02em] transition-colors before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] ${
+                  className={`group grid justify-items-center rounded-lg px-4 py-3 text-center text-sm tracking-[0.02em] transition-colors before:invisible before:col-start-1 before:row-start-1 before:h-0 before:overflow-hidden before:font-semibold before:content-[attr(data-label)] ${
                     isActive
-                      ? "bg-sky-50 text-sky-600 dark:bg-sky-950/40 dark:text-sky-400"
-                      : "text-stone-600 hover:bg-stone-50 hover:text-stone-900 dark:text-stone-400 dark:hover:bg-stone-900/60 dark:hover:text-stone-200"
+                      ? "bg-accent-soft text-accent-strong dark:bg-accent-soft/35 dark:text-accent"
+                      : "text-muted hover:bg-elevated hover:text-ink"
                   }`}
                 >
                   <span

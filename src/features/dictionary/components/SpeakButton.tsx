@@ -117,10 +117,10 @@ export function SpeakButton({ copticText, className }: SpeakButtonProps) {
         aria-label={isSpeaking ? stopLabel : `${hearLabel}: ${copticText}`}
         aria-pressed={isSpeaking}
         className={cx(
-          "inline-flex shrink-0 items-center justify-center rounded-lg p-1.5 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500",
+          "inline-flex cursor-pointer select-none shrink-0 items-center justify-center rounded-lg p-1.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
           isSpeaking
-            ? "bg-sky-100 text-sky-600 dark:bg-sky-900/40 dark:text-sky-400"
-            : "text-stone-400 hover:bg-stone-100 hover:text-stone-900 dark:text-stone-500 dark:hover:bg-stone-800 dark:hover:text-stone-200",
+            ? "bg-coptic-soft text-coptic"
+            : "text-muted hover:bg-elevated hover:text-ink",
           isPremiumLoading && "animate-pulse",
           className,
         )}

@@ -4,6 +4,7 @@ import { Heart, Flag, Loader2, Share2 } from "lucide-react";
 import { useEffect, useRef } from "react";
 
 import { AuthGatedActionButton } from "@/components/AuthGatedActionButton";
+import { iconButtonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
 import { StatusNotice } from "@/components/StatusNotice";
 import type { LexicalEntry } from "@/features/dictionary/types";
@@ -23,8 +24,9 @@ type EntryActionBarProps = {
   initialIntent?: "favorite" | "report" | "share";
 };
 
-const compactActionButtonClassName =
-  "inline-flex h-8 w-8 items-center justify-center rounded-full border border-stone-200 bg-stone-50 text-stone-500 transition hover:border-stone-300 hover:bg-stone-100 hover:text-stone-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-500 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-300 dark:hover:border-stone-600 dark:hover:bg-stone-800 dark:hover:text-stone-100";
+const compactActionButtonClassName = iconButtonClassName({
+  className: "h-8 w-8 bg-elevated",
+});
 
 export function EntryActionBarPanel({
   compact = false,
@@ -144,7 +146,7 @@ export function EntryActionBarPanel({
             className={cx(
               compactActionButtonClassName,
               isShareOpen &&
-                "border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/25 dark:text-sky-300 dark:hover:bg-sky-950/40",
+                "border-accent/30 bg-accent-soft text-accent-strong hover:bg-accent-soft hover:text-ink dark:text-accent",
             )}
             onClick={toggleSharePanel}
           >
@@ -287,7 +289,7 @@ export function EntryActionBarPanel({
     <div className="space-y-4">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div className="max-w-2xl space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-400">
+          <p className="text-xs font-semibold uppercase tracking-widest text-accent-strong dark:text-accent">
             {t("entry.actions.eyebrow")}
           </p>
           <p className="text-sm leading-6 text-stone-600 dark:text-stone-400">
@@ -303,7 +305,7 @@ export function EntryActionBarPanel({
             className={cx(
               "btn-secondary gap-2 px-4",
               isShareOpen &&
-                "border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 hover:text-sky-800 dark:border-sky-900/50 dark:bg-sky-950/25 dark:text-sky-300 dark:hover:bg-sky-950/40",
+                "border-accent/30 bg-accent-soft text-accent-strong hover:bg-accent-soft hover:text-ink dark:text-accent",
             )}
             onClick={toggleSharePanel}
           >

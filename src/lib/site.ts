@@ -33,18 +33,17 @@ function buildSiteDescription(entryCount: number) {
     ? ` It currently includes ${entryCount.toLocaleString()} searchable entries.`
     : "";
 
-  return `Coptic Compass is a digital home for Coptic study, bringing together a searchable dictionary, grammar lessons, publications, Shenute AI, and research tools.${searchableEntries}`;
+  return `Coptic Compass is a trusted digital Coptology platform for reading, researching, publishing, and carrying the Coptic language forward.${searchableEntries}`;
 }
 
 export const siteConfig = {
   brandName: "Coptic Compass",
-  descriptor: "Coptic Dictionary, Grammar, Publications, and Shenute AI",
+  descriptor: "Digital Coptology Platform",
   founderLine: `by ${siteAuthor.name}`,
   founderCreditLine: "Built by Copts for Copts",
   name: "Coptic Compass",
-  title:
-    "Coptic Compass | Coptic Dictionary, Grammar, Publications, and Shenute AI",
-  shortDescription: "A digital home for Coptic study and Shenute AI.",
+  title: "Coptic Compass | Digital Coptology Platform",
+  shortDescription: "A trusted digital Coptology platform.",
   description: buildSiteDescription(dictionaryEntryCount),
   liveUrl: "https://www.copticcompass.com",
   repoUrl: "https://github.com/KyroHub/CopticCompass",

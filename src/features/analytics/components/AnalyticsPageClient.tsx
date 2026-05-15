@@ -120,8 +120,8 @@ function AnalyticsStatCard({
       className={surfacePanelClassName({
         className: cx(
           "relative overflow-hidden text-left",
-          "cursor-pointer transition hover:bg-white active:scale-[0.99] dark:hover:bg-stone-900/70",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40",
+          "cursor-pointer select-none transition-all duration-200 hover:-translate-y-px hover:border-accent/40 hover:bg-surface active:translate-y-0 dark:hover:bg-elevated",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30",
           "p-4 pl-5 md:p-5 md:pl-6",
         ),
         rounded: "2xl",
@@ -459,8 +459,8 @@ export default function AnalyticsPageClient({
       contentClassName="app-page-content"
       width="standard"
       accents={[
-        pageShellAccents.heroEmeraldArc,
-        pageShellAccents.topRightSkyOrbInset,
+        pageShellAccents.heroCopticBand,
+        pageShellAccents.topRightGoldWashInset,
       ]}
     >
       <AppPageIntro

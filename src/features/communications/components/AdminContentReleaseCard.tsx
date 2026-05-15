@@ -122,7 +122,7 @@ export function AdminContentReleaseCard({
     release.status === "sending" ||
     Boolean(release.last_delivery_error);
   let deliveryStatusLabel = (
-    <span className="text-stone-500 dark:text-stone-400">
+    <span className="text-muted">
       {copy.createdOn}{" "}
       {formatContentReleaseTimestamp(
         release.created_at,
@@ -134,13 +134,13 @@ export function AdminContentReleaseCard({
 
   if (release.sent_at) {
     deliveryStatusLabel = (
-      <span className="text-stone-500 dark:text-stone-400">
+      <span className="text-muted">
         {copy.sentOn} {formatContentReleaseTimestamp(release.sent_at, language)}
       </span>
     );
   } else if (release.delivery_started_at) {
     deliveryStatusLabel = (
-      <span className="text-stone-500 dark:text-stone-400">
+      <span className="text-muted">
         {copy.started}{" "}
         {formatContentReleaseTimestamp(release.delivery_started_at, language)}
       </span>
@@ -172,7 +172,7 @@ export function AdminContentReleaseCard({
             </Badge>
           </div>
 
-          <h2 className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
+          <h2 className="text-2xl font-semibold text-ink">
             {release.subject_en ?? release.subject_nl ?? copy.untitled}
           </h2>
 
@@ -210,16 +210,16 @@ export function AdminContentReleaseCard({
 
           <div className="mt-4">
             <details
-              className="group rounded-2xl border border-stone-200/80 bg-stone-50/70 p-4 dark:border-stone-800 dark:bg-stone-950/40"
+              className="group rounded-lg border border-line bg-elevated/70 p-4"
               open={shouldOpenDeliveryLog}
             >
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium text-stone-700 [&::-webkit-details-marker]:hidden dark:text-stone-200">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-sm font-medium text-ink [&::-webkit-details-marker]:hidden">
                 <div className="flex flex-wrap items-center gap-3">
                   <span>{copy.deliveryLog}</span>
                   {deliveryStatusLabel}
                 </div>
 
-                <div className="flex items-center gap-2 text-stone-500 dark:text-stone-400">
+                <div className="flex items-center gap-2 text-muted">
                   <span className="group-open:hidden">{copy.showDetails}</span>
                   <span className="hidden group-open:inline">
                     {copy.hideDetails}
@@ -228,7 +228,7 @@ export function AdminContentReleaseCard({
                 </div>
               </summary>
 
-              <div className="mt-4 space-y-2 text-sm text-stone-600 dark:text-stone-400">
+              <div className="mt-4 space-y-2 text-sm text-muted">
                 <p>
                   {copy.createdOn}{" "}
                   {formatContentReleaseTimestamp(release.created_at, language)}
@@ -321,46 +321,46 @@ export function AdminContentReleaseCard({
       </div>
 
       {release.last_delivery_error ? (
-        <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+        <div className="mb-6 rounded-lg border border-warning/35 bg-accent-soft px-5 py-4 text-sm text-accent-strong dark:text-accent">
           {release.last_delivery_error}
         </div>
       ) : null}
 
       <div className="mb-6 grid gap-4 lg:grid-cols-2">
-        <div className="rounded-2xl border border-stone-100 bg-stone-50 p-5 dark:border-stone-800/50 dark:bg-stone-950">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+        <div className="rounded-lg border border-line bg-elevated p-5">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {copy.englishCopy}
           </p>
-          <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
+          <p className="text-sm font-semibold text-ink">
             {release.subject_en ?? copy.notSet}
           </p>
-          <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-stone-600 dark:text-stone-300">
+          <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-muted">
             {release.body_en ?? copy.noEnglishBody}
           </p>
         </div>
 
-        <div className="rounded-2xl border border-stone-100 bg-stone-50 p-5 dark:border-stone-800/50 dark:bg-stone-950">
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+        <div className="rounded-lg border border-line bg-elevated p-5">
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {copy.dutchCopy}
           </p>
-          <p className="text-sm font-semibold text-stone-800 dark:text-stone-100">
+          <p className="text-sm font-semibold text-ink">
             {release.subject_nl ?? copy.notSet}
           </p>
-          <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-stone-600 dark:text-stone-300">
+          <p className="mt-3 whitespace-pre-wrap text-sm leading-7 text-muted">
             {release.body_nl ?? copy.noDutchBody}
           </p>
         </div>
       </div>
 
       <div className="mb-6 space-y-3">
-        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">
           {copy.snapshottedItems}
         </p>
         <div className="space-y-3">
           {release.items.map((item) => (
             <div
               key={item.id}
-              className="rounded-2xl border border-stone-100 bg-stone-50 px-5 py-4 dark:border-stone-800/50 dark:bg-stone-950"
+              className="rounded-lg border border-line bg-elevated px-5 py-4"
             >
               <div className="flex flex-wrap items-center gap-2">
                 <Badge tone="surface" size="xs">
@@ -370,12 +370,10 @@ export function AdminContentReleaseCard({
                   {item.item_id}
                 </Badge>
               </div>
-              <p className="mt-3 text-base font-semibold text-stone-900 dark:text-stone-100">
+              <p className="mt-3 text-base font-semibold text-ink">
                 {item.title_snapshot}
               </p>
-              <p className="mt-2 text-sm text-stone-600 dark:text-stone-400">
-                {item.url_snapshot}
-              </p>
+              <p className="mt-2 text-sm text-muted">{item.url_snapshot}</p>
             </div>
           ))}
         </div>

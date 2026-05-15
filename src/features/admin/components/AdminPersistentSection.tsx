@@ -53,29 +53,25 @@ export function AdminPersistentSection({
       <summary className="flex cursor-pointer list-none items-start justify-between gap-4 p-5 [&::-webkit-details-marker]:hidden md:p-6">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-xl font-bold tracking-tight text-stone-900 dark:text-stone-100">
+            <h2 className="text-xl font-bold tracking-tight text-ink">
               {title}
             </h2>
-            <span className="text-xs font-semibold text-stone-500 dark:text-stone-400">
-              {summary}
-            </span>
+            <span className="text-xs font-semibold text-muted">{summary}</span>
           </div>
 
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-stone-600 dark:text-stone-400">
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
             {description}
           </p>
         </div>
 
-        <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-stone-500 dark:text-stone-400">
+        <div className="flex shrink-0 items-center gap-3 text-sm font-medium text-muted">
           <span className="group-open:hidden">{copy.open}</span>
           <span className="hidden group-open:inline">{copy.collapse}</span>
           <ChevronDown className="h-5 w-5 transition-transform duration-200 group-open:rotate-180" />
         </div>
       </summary>
 
-      <div className="border-t border-stone-200/80 p-5 dark:border-stone-800 md:p-6">
-        {children}
-      </div>
+      <div className="border-t border-line p-5 md:p-6">{children}</div>
     </details>
   );
 }

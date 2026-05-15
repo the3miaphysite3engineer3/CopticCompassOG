@@ -249,8 +249,9 @@ export function GrammarLessonPageClient({
       contentClassName="app-page-content space-y-0"
       width="standard"
       accents={[
-        pageShellAccents.topRightSkyOrb,
-        pageShellAccents.bottomLeftEmeraldOrbSoft,
+        pageShellAccents.heroCopticBand,
+        pageShellAccents.topRightGoldWashInset,
+        pageShellAccents.bottomLeftCopticWashSoft,
       ]}
     >
       <div className="mb-8 space-y-4">
@@ -312,7 +313,7 @@ export function GrammarLessonPageClient({
             <PageHeader
               title={`${t("nav.grammar")} - ${lesson.title[language]}`}
               description={lessonDescription}
-              tone="sky"
+              tone="coptic"
               size="workspace"
               className="mb-6 md:mb-10"
             />

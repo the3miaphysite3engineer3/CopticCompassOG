@@ -6,6 +6,7 @@ import Link from "next/link";
 
 import { Badge } from "@/components/Badge";
 import { BreadcrumbTrail } from "@/components/BreadcrumbTrail";
+import { buttonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
 import { PageHeader } from "@/components/PageHeader";
 import { PageShell, pageShellAccents } from "@/components/PageShell";
@@ -13,25 +14,11 @@ import { SurfacePanel } from "@/components/SurfacePanel";
 import { RelatedGrammarLessonsPanel } from "@/features/grammar/components/RelatedGrammarLessonsPanel";
 import type { GrammarLessonReference } from "@/features/grammar/lib/grammarContentGraph";
 import {
+  getPublicationFormatLabel,
   getPublicationPath,
   type Publication,
 } from "@/features/publications/lib/publications";
 import { getLocalizedHomePath, getPublicationsPath } from "@/lib/locale";
-
-function getFormatLabel(
-  publication: Publication,
-  language: ReturnType<typeof useLanguage>["language"],
-) {
-  if (publication.schemaType === "Book") {
-    return language === "nl" ? "Boek" : "Book";
-  }
-
-  if (publication.schemaType === "ScholarlyArticle") {
-    return language === "nl" ? "Onderzoeksartikel" : "Research Article";
-  }
-
-  return language === "nl" ? "Creatief werk" : "Creative Work";
-}
 
 type PublicationDetailPageClientProps = {
   grammarLessons: readonly GrammarLessonReference[];
@@ -49,6 +36,7 @@ export default function PublicationDetailPageClient({
     publication.status === "published"
       ? t("publications.status.published")
       : t("publications.status.forthcoming");
+  const formatLabel = getPublicationFormatLabel(publication, language);
 
   return (
     <PageShell
@@ -56,8 +44,8 @@ export default function PublicationDetailPageClient({
       contentClassName="app-page-stack"
       width="standard"
       accents={[
-        pageShellAccents.topRightEmeraldOrb,
-        pageShellAccents.topLeftSkyOrbInset,
+        pageShellAccents.heroGoldBand,
+        pageShellAccents.topRightCopticWashInset,
       ]}
     >
       <div className="space-y-4">
@@ -74,7 +62,11 @@ export default function PublicationDetailPageClient({
 
         <Link
           href={getPublicationsPath(language)}
-          className="btn-secondary inline-flex gap-2 px-4"
+          className={buttonClassName({
+            className: "inline-flex gap-2",
+            size: "md",
+            variant: "secondary",
+          })}
         >
           <ArrowLeft className="h-4 w-4" />
           {t("publications.back")}
@@ -82,8 +74,13 @@ export default function PublicationDetailPageClient({
       </div>
 
       <div className="grid gap-8 lg:grid-cols-[minmax(18rem,22rem)_minmax(0,1fr)]">
-        <SurfacePanel rounded="3xl" className="relative overflow-hidden p-5">
-          <div className="relative aspect-[3/4.1] overflow-hidden rounded-3xl border border-line/80 bg-white">
+        <SurfacePanel
+          rounded="lg"
+          shadow="soft"
+          variant="elevated"
+          className="relative overflow-hidden p-5"
+        >
+          <div className="relative aspect-[3/4.1] overflow-hidden rounded-lg border border-line/80 bg-paper">
             {publication.image ? (
               <Image
                 src={publication.image}
@@ -110,6 +107,24 @@ export default function PublicationDetailPageClient({
 
         <div className="space-y-6">
           <div className="space-y-4">
+            <div className="flex flex-wrap gap-2">
+              <Badge
+                tone={publication.status === "published" ? "accent" : "neutral"}
+                size="sm"
+              >
+                {statusLabel}
+              </Badge>
+              <Badge
+                tone={publication.lang === "COP" ? "coptic" : "surface"}
+                size="sm"
+              >
+                {publication.lang}
+              </Badge>
+              <Badge tone="surface" size="sm">
+                {formatLabel}
+              </Badge>
+            </div>
+
             <PageHeader
               align="left"
               title={publication.title}
@@ -128,7 +143,7 @@ export default function PublicationDetailPageClient({
             </p>
           </div>
 
-          <SurfacePanel rounded="3xl" className="p-6">
+          <SurfacePanel rounded="lg" shadow="soft" className="p-6">
             <dl className="grid gap-5 sm:grid-cols-3">
               <div>
                 <dt className="text-xs font-semibold uppercase tracking-widest text-muted">
@@ -151,7 +166,7 @@ export default function PublicationDetailPageClient({
                   {t("publications.format")}
                 </dt>
                 <dd className="mt-2 text-base font-semibold text-ink">
-                  {getFormatLabel(publication, language)}
+                  {formatLabel}
                 </dd>
               </div>
             </dl>
@@ -162,13 +177,17 @@ export default function PublicationDetailPageClient({
               href={publication.link}
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-primary inline-flex items-center gap-2 px-6"
+              className={buttonClassName({
+                className: "inline-flex items-center gap-2 px-6",
+                size: "lg",
+                variant: "primary",
+              })}
             >
               {t("publications.externalLink")}
               <ArrowUpRight className="h-4 w-4" />
             </a>
           ) : (
-            <SurfacePanel rounded="3xl" variant="subtle" className="p-5">
+            <SurfacePanel rounded="lg" variant="subtle" className="p-5">
               <p className="text-sm leading-7 text-muted">
                 {t("publications.noExternalLink")}
               </p>
@@ -209,18 +228,21 @@ export default function PublicationDetailPageClient({
                 className="group"
               >
                 <SurfacePanel
-                  rounded="3xl"
-                  className="flex h-full flex-col justify-between p-5 transition-colors hover:border-accent/25"
+                  rounded="lg"
+                  className="flex h-full flex-col justify-between p-5 transition-colors hover:border-accent/35"
                 >
                   <div className="space-y-3">
                     <div className="flex flex-wrap gap-2">
                       <Badge tone="surface" size="xs">
-                        {getFormatLabel(relatedPublication, language)}
+                        {getPublicationFormatLabel(
+                          relatedPublication,
+                          language,
+                        )}
                       </Badge>
                       <Badge
                         tone={
                           relatedPublication.status === "published"
-                            ? "coptic"
+                            ? "accent"
                             : "neutral"
                         }
                         size="xs"
@@ -228,6 +250,16 @@ export default function PublicationDetailPageClient({
                         {relatedPublication.status === "published"
                           ? t("publications.status.published")
                           : t("publications.status.forthcoming")}
+                      </Badge>
+                      <Badge
+                        tone={
+                          relatedPublication.lang === "COP"
+                            ? "coptic"
+                            : "surface"
+                        }
+                        size="xs"
+                      >
+                        {relatedPublication.lang}
                       </Badge>
                     </div>
 
@@ -247,7 +279,7 @@ export default function PublicationDetailPageClient({
                     </p>
                   </div>
 
-                  <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-sky-600 transition-colors group-hover:text-sky-500 dark:text-sky-400 dark:group-hover:text-sky-300">
+                  <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-accent-strong transition-colors group-hover:text-ink dark:text-accent dark:group-hover:text-accent-strong">
                     {t("publications.viewDetails")}
                     <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
                   </span>

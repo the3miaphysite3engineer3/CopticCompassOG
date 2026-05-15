@@ -119,18 +119,18 @@ function GrammarLessonAbbreviationAppendix({
       openOnHashMatch
     >
       <div className="space-y-4">
-        <p className="leading-7 text-stone-700 dark:text-stone-300">{intro}</p>
+        <p className="leading-7 text-muted">{intro}</p>
         <div className="grid gap-3 sm:grid-cols-2">
           {entries.map((entry) => (
             <article
               key={entry.key}
               id={getGrammarLessonAbbreviationAnchorId(lessonId, entry.key)}
-              className="app-anchor-inline rounded-xl border border-stone-200/80 bg-stone-50/70 px-4 py-3 dark:border-stone-800/80 dark:bg-stone-950/40"
+              className="app-anchor-inline rounded-lg border border-line bg-elevated/65 px-4 py-3"
             >
-              <h3 className="text-base font-semibold text-stone-900 dark:text-stone-100">
+              <h3 className="text-base font-semibold text-ink">
                 {entry.label}
               </h3>
-              <p className="mt-2 text-sm leading-7 text-stone-600 dark:text-stone-300">
+              <p className="mt-2 text-sm leading-7 text-muted">
                 {entry.description}
               </p>
             </article>
@@ -174,7 +174,7 @@ export function GrammarLessonDocumentRenderer({
   const appendixIndex = orderedSections.length + 1;
 
   return (
-    <div className="space-y-4 font-sans leading-relaxed text-stone-800 dark:text-stone-200">
+    <div className="space-y-4 font-sans leading-relaxed text-ink">
       {orderedSections.map((section, index) => (
         <GrammarLessonSection
           key={section.id}
@@ -185,6 +185,7 @@ export function GrammarLessonDocumentRenderer({
         >
           <GrammarBlockRenderer
             blocks={section.blocks[language]}
+            currentSectionId={section.id}
             language={language}
             lessonBundle={lessonBundle}
           />

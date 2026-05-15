@@ -4,8 +4,8 @@
 
 @theme inline {
   --font-sans:
-    "Aptos", "Segoe UI", "SF Pro Text", "Helvetica Neue", ui-sans-serif,
-    system-ui, sans-serif;
+    var(--font-ui), "Manrope", "Aptos", "Segoe UI", "SF Pro Text",
+    "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
   --font-serif:
     "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Constantia, Georgia,
     serif;
@@ -20,6 +20,9 @@
   --color-accent: rgb(var(--accent));
   --color-accent-soft: rgb(var(--accent-soft));
   --color-accent-strong: rgb(var(--accent-strong));
+  --color-gold: rgb(var(--gold));
+  --color-gold-soft: rgb(var(--gold-soft));
+  --color-gold-strong: rgb(var(--gold-strong));
   --color-coptic: rgb(var(--coptic));
   --color-coptic-soft: rgb(var(--coptic-soft));
   --color-success: rgb(var(--success));
@@ -27,31 +30,35 @@
   --color-danger: rgb(var(--danger));
 
   --shadow-soft:
-    0 1px 2px rgba(24, 30, 27, 0.04), 0 12px 28px rgba(24, 30, 27, 0.06);
-  --shadow-panel: 0 8px 32px rgba(24, 30, 27, 0.08);
+    0 1px 2px rgba(30, 29, 29, 0.04), 0 10px 24px rgba(30, 29, 29, 0.05);
+  --shadow-panel:
+    0 1px 2px rgba(30, 29, 29, 0.04), 0 16px 40px rgba(30, 29, 29, 0.07);
 }
 
 :root {
   color-scheme: light;
-  --paper: 245 245 244;
+  --paper: 249 248 245;
   --surface: 255 255 255;
-  --elevated: 250 250 249;
-  --ink: 28 25 23;
-  --muted: 87 83 78;
-  --line: 231 229 228;
-  --accent: 2 132 199;
-  --accent-soft: 240 249 255;
-  --accent-strong: 3 105 161;
-  --coptic: 5 150 105;
-  --coptic-soft: 236 253 245;
-  --success: 5 150 105;
-  --warning: 217 119 6;
+  --elevated: 246 244 239;
+  --ink: 30 29 29;
+  --muted: 94 88 79;
+  --line: 226 221 211;
+  --gold: 235 193 125;
+  --gold-soft: 252 246 235;
+  --gold-strong: 137 89 24;
+  --accent: 191 131 41;
+  --accent-soft: 252 246 235;
+  --accent-strong: 137 89 24;
+  --coptic: 0 131 41;
+  --coptic-soft: 236 250 240;
+  --success: 0 131 41;
+  --warning: 191 131 41;
   --danger: 220 38 38;
-  --chart-1: 2 132 199;
-  --chart-2: 5 150 105;
-  --chart-3: 244 114 182;
-  --chart-4: 217 119 6;
-  --chart-5: 139 92 246;
+  --chart-1: 191 131 41;
+  --chart-2: 0 131 41;
+  --chart-3: 64 66 77;
+  --chart-4: 110 113 128;
+  --chart-5: 156 104 35;
   --chart-6: 220 38 38;
   --chart-7: 120 113 108;
   --app-sticky-offset: 5rem;
@@ -61,25 +68,28 @@
 
 .dark {
   color-scheme: dark;
-  --paper: 12 10 9;
-  --surface: 28 25 23;
-  --elevated: 41 37 36;
-  --ink: 245 245 244;
-  --muted: 168 162 158;
-  --line: 41 37 36;
-  --accent: 56 189 248;
-  --accent-soft: 8 47 73;
-  --accent-strong: 125 211 252;
-  --coptic: 52 211 153;
-  --coptic-soft: 6 78 59;
-  --success: 52 211 153;
-  --warning: 251 191 36;
+  --paper: 14 13 12;
+  --surface: 30 29 29;
+  --elevated: 43 40 37;
+  --ink: 249 248 245;
+  --muted: 190 184 174;
+  --line: 61 56 49;
+  --gold: 235 193 125;
+  --gold-soft: 55 39 20;
+  --gold-strong: 253 220 166;
+  --accent: 235 193 125;
+  --accent-soft: 55 39 20;
+  --accent-strong: 253 220 166;
+  --coptic: 74 207 115;
+  --coptic-soft: 10 52 27;
+  --success: 74 207 115;
+  --warning: 235 193 125;
   --danger: 248 113 113;
-  --chart-1: 56 189 248;
-  --chart-2: 52 211 153;
-  --chart-3: 251 113 133;
-  --chart-4: 251 191 36;
-  --chart-5: 167 139 250;
+  --chart-1: 235 193 125;
+  --chart-2: 74 207 115;
+  --chart-3: 188 181 169;
+  --chart-4: 143 111 66;
+  --chart-5: 230 210 178;
   --chart-6: 248 113 113;
   --chart-7: 168 162 158;
 }
@@ -93,6 +103,9 @@
   body {
     background-color: rgb(var(--paper));
     color: rgb(var(--ink));
+    font-family:
+      var(--font-ui), "Manrope", "Aptos", "Segoe UI", "SF Pro Text",
+      "Helvetica Neue", ui-sans-serif, system-ui, sans-serif;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
     transition:
@@ -166,59 +179,59 @@
   }
 
   .page-eyebrow {
-    @apply text-xs font-semibold uppercase tracking-widest text-sky-600 dark:text-sky-400;
+    @apply text-xs font-semibold uppercase tracking-widest text-accent-strong dark:text-accent;
   }
 
   .page-title {
-    @apply text-5xl font-extrabold tracking-tight text-transparent bg-gradient-to-tr from-stone-800 to-stone-500 bg-clip-text drop-shadow-sm md:text-6xl lg:text-7xl dark:from-stone-100 dark:to-stone-400;
+    @apply text-5xl font-extrabold tracking-tight text-ink md:text-6xl lg:text-7xl;
   }
 
   .page-lead {
-    @apply mx-auto max-w-3xl text-lg font-medium text-stone-500 dark:text-stone-400 md:text-xl;
+    @apply mx-auto max-w-3xl text-lg font-medium text-muted md:text-xl;
   }
 
   .surface-card {
-    @apply rounded-2xl border border-line/80 bg-surface/75 shadow-panel backdrop-blur-md;
+    @apply rounded-lg border border-line bg-surface/88 shadow-soft backdrop-blur-sm;
   }
 
   .section-card {
-    @apply rounded-2xl border border-line/80 bg-surface/75 p-6 shadow-panel backdrop-blur-md md:p-7;
+    @apply rounded-lg border border-line bg-surface/88 p-6 shadow-soft backdrop-blur-sm md:p-7;
   }
 
   .interactive-card {
-    @apply rounded-2xl border border-line/80 bg-surface/75 p-6 shadow-panel backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:border-accent/25 hover:bg-surface/95 md:p-7;
+    @apply rounded-lg border border-line bg-surface/88 p-6 shadow-soft backdrop-blur-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-accent/40 hover:bg-surface md:p-7;
   }
 
   .icon-button {
-    @apply inline-flex h-10 w-10 items-center justify-center rounded-xl border border-line/80 bg-surface/70 text-muted shadow-sm transition-all duration-200 hover:-translate-y-px hover:bg-elevated hover:text-ink hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25;
+    @apply inline-flex h-10 w-10 cursor-pointer select-none items-center justify-center rounded-lg border border-line bg-surface/88 px-0 text-muted shadow-sm transition-all duration-200 hover:-translate-y-px hover:border-accent/40 hover:bg-elevated hover:text-ink active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55 dark:bg-surface/88 dark:text-muted dark:hover:text-ink;
   }
 
   .topbar-control {
-    @apply inline-flex h-10 min-w-10 items-center justify-center rounded-xl border border-line bg-surface px-0 text-muted shadow-soft transition-colors hover:bg-elevated hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25;
+    @apply inline-flex h-10 min-w-10 cursor-pointer select-none items-center justify-center rounded-lg border border-line bg-surface/88 px-0 text-muted shadow-sm transition-all duration-200 hover:-translate-y-px hover:border-accent/40 hover:bg-elevated hover:text-ink active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55 dark:bg-surface/88 dark:text-muted dark:hover:text-ink;
   }
 
   .btn-primary {
-    @apply inline-flex h-11 items-center justify-center rounded-2xl bg-sky-600 px-4 text-sm font-semibold text-white shadow-sm transition-all duration-200 hover:-translate-y-px hover:bg-sky-500 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 disabled:pointer-events-none disabled:opacity-55 dark:bg-sky-500 dark:hover:bg-sky-400;
+    @apply inline-flex h-11 cursor-pointer select-none items-center justify-center gap-2 rounded-lg border border-transparent bg-ink px-4 text-sm font-semibold text-paper shadow-sm transition-all duration-200 hover:-translate-y-px hover:opacity-90 hover:shadow-soft active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/35 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55 dark:border-accent/35 dark:bg-accent-soft dark:text-ink dark:hover:bg-elevated;
   }
 
   .btn-secondary {
-    @apply inline-flex h-11 items-center justify-center rounded-2xl border border-line/80 bg-surface/75 px-4 text-sm font-semibold text-ink shadow-sm backdrop-blur-md transition-all duration-200 hover:-translate-y-px hover:bg-surface hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25;
+    @apply inline-flex h-11 cursor-pointer select-none items-center justify-center gap-2 rounded-lg border border-line bg-surface/88 px-4 text-sm font-semibold text-ink shadow-sm backdrop-blur-sm transition-all duration-200 hover:-translate-y-px hover:border-accent/40 hover:bg-surface active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55 dark:bg-surface/88 dark:text-ink dark:hover:bg-elevated;
   }
 
   .btn-ghost {
-    @apply inline-flex h-10 items-center justify-center rounded-xl px-3 text-sm font-semibold text-muted transition-all duration-200 hover:-translate-y-px hover:bg-elevated hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25;
+    @apply inline-flex h-10 cursor-pointer select-none items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold text-muted transition-all duration-200 hover:-translate-y-px hover:bg-elevated hover:text-ink active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55 dark:text-muted dark:hover:text-ink;
   }
 
   .input-base {
-    @apply h-12 w-full rounded-2xl border border-line/80 bg-surface/85 px-4 text-base text-ink shadow-sm outline-none transition-[border-color,box-shadow,background-color,color] placeholder:text-muted/65 focus:border-accent/55 focus:ring-2 focus:ring-accent/25;
+    @apply h-12 w-full rounded-lg border border-line bg-surface/90 px-4 text-base text-ink shadow-sm outline-none transition-[border-color,box-shadow,background-color,color] placeholder:text-muted/65 focus:border-accent/60 focus:ring-2 focus:ring-accent/25;
   }
 
   .select-base {
-    @apply h-12 w-full rounded-2xl border border-line/80 bg-surface/85 px-4 text-base text-ink shadow-sm outline-none transition-[border-color,box-shadow,background-color,color] focus:border-accent/55 focus:ring-2 focus:ring-accent/25;
+    @apply h-12 w-full rounded-lg border border-line bg-surface/90 px-4 text-base text-ink shadow-sm outline-none transition-[border-color,box-shadow,background-color,color] focus:border-accent/60 focus:ring-2 focus:ring-accent/25;
   }
 
   .compact-select-base {
-    @apply h-auto min-h-10 w-full cursor-pointer rounded-xl border border-line/80 bg-surface/85 px-3 py-2 text-sm font-medium text-ink shadow-sm outline-none transition-[border-color,box-shadow,background-color,color] focus:border-accent/55 focus:ring-2 focus:ring-accent/25;
+    @apply h-auto min-h-10 w-full cursor-pointer rounded-lg border border-line/80 bg-surface/85 px-3 py-2 text-sm font-medium text-ink shadow-sm outline-none transition-[border-color,box-shadow,background-color,color] focus:border-accent/55 focus:ring-2 focus:ring-accent/25;
   }
 
   .select-base,
@@ -238,7 +251,7 @@
   }
 
   .textarea-base {
-    @apply min-h-[10rem] w-full rounded-2xl border border-line/80 bg-surface/85 px-4 py-3 text-base leading-7 text-ink shadow-sm outline-none transition-[border-color,box-shadow,background-color,color] placeholder:text-muted/65 focus:border-accent/55 focus:ring-2 focus:ring-accent/25;
+    @apply min-h-[10rem] w-full rounded-lg border border-line bg-surface/90 px-4 py-3 text-base leading-7 text-ink shadow-sm outline-none transition-[border-color,box-shadow,background-color,color] placeholder:text-muted/65 focus:border-accent/60 focus:ring-2 focus:ring-accent/25;
   }
 
   .checkbox-base {
@@ -246,7 +259,7 @@
   }
 
   .checkbox-row {
-    @apply flex cursor-pointer items-start gap-3 rounded-xl p-2 transition-colors hover:bg-elevated/70;
+    @apply flex cursor-pointer items-start gap-3 rounded-lg p-2 transition-colors hover:bg-elevated/70;
   }
 
   .field-hint {
@@ -258,11 +271,11 @@
   }
 
   .badge-accent {
-    @apply inline-flex items-center rounded-full border border-accent/20 bg-accent-soft/75 px-2.5 py-1 text-xs font-semibold text-accent-strong;
+    @apply inline-flex items-center rounded-full border border-accent/25 bg-accent-soft/80 px-2.5 py-1 text-xs font-semibold text-accent-strong;
   }
 
   .badge-coptic {
-    @apply inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-emerald-400;
+    @apply inline-flex items-center rounded-full border border-coptic/20 bg-coptic-soft/80 px-2.5 py-1 text-xs font-semibold text-coptic;
   }
 }
 

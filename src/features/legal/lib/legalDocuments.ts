@@ -34,7 +34,7 @@ const PRIVACY_DOCUMENTS = {
       },
       {
         title: "5. Contact Us",
-        body: "If you have any questions or concerns about this Privacy Policy, please contact the developer directly.",
+        body: "If you have any questions or concerns about this Privacy Policy, please contact Coptic Compass through the contact page.",
       },
     ],
   },
@@ -60,7 +60,7 @@ const PRIVACY_DOCUMENTS = {
       },
       {
         title: "5. Contact",
-        body: "Als u vragen of zorgen heeft over dit privacybeleid, neem dan rechtstreeks contact op met de ontwikkelaar.",
+        body: "Als u vragen of zorgen heeft over dit privacybeleid, neem dan contact op met Coptic Compass via de contactpagina.",
       },
     ],
   },
@@ -73,7 +73,7 @@ const TERMS_DOCUMENTS = {
     sections: [
       {
         title: "1. Terms",
-        body: "By accessing Coptic Compass and using the digital Coptic dictionary, you agree to be bound by these terms of service and all applicable laws and regulations, and you agree that you are responsible for compliance with any applicable local laws.",
+        body: "By accessing Coptic Compass and using the digital Coptology platform and its tools, you agree to be bound by these terms of service and all applicable laws and regulations, and you agree that you are responsible for compliance with any applicable local laws.",
       },
       {
         title: "2. Use License",
@@ -81,7 +81,7 @@ const TERMS_DOCUMENTS = {
       },
       {
         title: "3. Disclaimer",
-        body: "The materials on Coptic Compass are provided on an 'as is' basis. The developer makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.",
+        body: "The materials on Coptic Compass are provided on an 'as is' basis. Coptic Compass makes no warranties, expressed or implied, and hereby disclaims and negates all other warranties including, without limitation, implied warranties or conditions of merchantability, fitness for a particular purpose, or non-infringement of intellectual property or other violation of rights.",
       },
       {
         title: "4. Limitations",
@@ -100,7 +100,7 @@ const TERMS_DOCUMENTS = {
     sections: [
       {
         title: "1. Voorwaarden",
-        body: "Door Coptic Compass te bezoeken en het digitale Koptische woordenboek te gebruiken, gaat u akkoord met deze gebruiksvoorwaarden en alle toepasselijke wet- en regelgeving. U erkent ook zelf verantwoordelijk te zijn voor naleving van eventueel geldende lokale wetten.",
+        body: "Door Coptic Compass te bezoeken en het digitale Koptologieplatform en de bijbehorende tools te gebruiken, gaat u akkoord met deze gebruiksvoorwaarden en alle toepasselijke wet- en regelgeving. U erkent ook zelf verantwoordelijk te zijn voor naleving van eventueel geldende lokale wetten.",
       },
       {
         title: "2. Gebruikslicentie",
@@ -108,7 +108,7 @@ const TERMS_DOCUMENTS = {
       },
       {
         title: "3. Disclaimer",
-        body: "De materialen op Coptic Compass worden aangeboden op een 'as is'-basis. De ontwikkelaar geeft geen enkele uitdrukkelijke of impliciete garantie en wijst, voor zover wettelijk toegestaan, alle overige garanties af, waaronder impliciete garanties van verhandelbaarheid, geschiktheid voor een bepaald doel of niet-inbreuk op intellectuele eigendom of andere rechten.",
+        body: "De materialen op Coptic Compass worden aangeboden op een 'as is'-basis. Coptic Compass geeft geen enkele uitdrukkelijke of impliciete garantie en wijst, voor zover wettelijk toegestaan, alle overige garanties af, waaronder impliciete garanties van verhandelbaarheid, geschiktheid voor een bepaald doel of niet-inbreuk op intellectuele eigendom of andere rechten.",
       },
       {
         title: "4. Beperkingen van aansprakelijkheid",

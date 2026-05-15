@@ -22,7 +22,7 @@ type GrammarLessonSectionProps = {
 type GrammarLessonCardProps = {
   children: ReactNode;
   className?: string;
-  tone?: "sky" | "stone";
+  tone?: "coptic" | "neutral";
 };
 
 type GrammarLessonTableProps = {
@@ -105,27 +105,25 @@ export function GrammarLessonSection({
       id={id}
       open={renderMode === "pdf" ? true : defaultOpen}
       className={cx(
-        "group app-anchor-section overflow-hidden rounded-2xl border border-stone-200/90 bg-white/55 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/30",
+        "group app-anchor-section overflow-hidden rounded-lg border border-line bg-surface/88 shadow-soft backdrop-blur-sm",
         className,
       )}
     >
       <summary className="flex cursor-pointer list-none items-start justify-between gap-4 px-4 py-3 [&::-webkit-details-marker]:hidden sm:px-5 sm:py-4">
         <div className="flex min-w-0 items-start gap-4">
-          <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-sky-100 bg-sky-50 text-xs font-semibold text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/50 dark:text-sky-300">
+          <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-coptic/20 bg-coptic-soft text-xs font-semibold text-coptic">
             {String(index).padStart(2, "0")}
           </span>
-          <h2 className="min-w-0 text-lg font-semibold text-stone-900 dark:text-stone-100 sm:text-xl md:text-2xl">
+          <h2 className="min-w-0 text-lg font-semibold text-ink sm:text-xl md:text-2xl">
             {title}
           </h2>
         </div>
-        <ChevronDown className="mt-1 h-5 w-5 shrink-0 text-stone-400 transition-transform duration-200 group-open:rotate-180 dark:text-stone-500" />
+        <ChevronDown className="mt-1 h-5 w-5 shrink-0 text-muted transition-transform duration-200 group-open:rotate-180" />
       </summary>
-      <div className="border-t border-stone-200/80 px-4 pb-4 pt-4 dark:border-stone-800/80 sm:px-5 sm:pb-5">
+      <div className="border-t border-line px-4 pb-4 pt-4 sm:px-5 sm:pb-5">
         {children}
         {renderMode !== "pdf" && footer ? (
-          <div className="mt-5 border-t border-stone-200/80 pt-4 dark:border-stone-800/80">
-            {footer}
-          </div>
+          <div className="mt-5 border-t border-line pt-4">{footer}</div>
         ) : null}
       </div>
     </details>
@@ -146,27 +144,25 @@ export function GrammarLessonOutline({
   return (
     <nav
       className={cx(
-        "overflow-hidden rounded-2xl border border-stone-200/90 bg-white/70 shadow-sm backdrop-blur-sm dark:border-stone-800/90 dark:bg-stone-950/40",
+        "overflow-hidden rounded-lg border border-line bg-surface/88 shadow-soft backdrop-blur-sm",
         className,
       )}
     >
-      <div className="border-b border-stone-200/80 px-4 py-3 dark:border-stone-800/80">
+      <div className="border-b border-line px-4 py-3">
         {eyebrow && (
-          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-stone-500 dark:text-stone-400">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em] text-muted">
             {eyebrow}
           </p>
         )}
         <div className="flex items-center justify-between gap-4">
-          <h2 className="text-base font-semibold text-stone-900 dark:text-stone-100">
-            {title}
-          </h2>
-          <span className="text-[11px] font-semibold tracking-[0.12em] text-stone-400 dark:text-stone-500">
+          <h2 className="text-base font-semibold text-ink">{title}</h2>
+          <span className="text-[11px] font-semibold tracking-[0.12em] text-muted">
             {String(sections.length).padStart(2, "0")}
           </span>
         </div>
       </div>
 
-      <ol className="divide-y divide-stone-200/80 dark:divide-stone-800/80">
+      <ol className="divide-y divide-line">
         {sections.map((section, index) => {
           const isActive = activeSectionId === section.id;
 
@@ -176,22 +172,22 @@ export function GrammarLessonOutline({
                 href={`#${section.id}`}
                 aria-current={isActive ? "location" : undefined}
                 className={cx(
-                  "group flex items-start gap-3 px-4 py-2.5 transition-colors hover:bg-stone-50/80 dark:hover:bg-stone-900/60",
-                  isActive && "bg-sky-50/90 dark:bg-sky-950/30",
+                  "group flex items-start gap-3 px-4 py-2.5 transition-colors hover:bg-elevated/70",
+                  isActive && "bg-coptic-soft/70 dark:bg-coptic-soft/35",
                 )}
               >
                 <span
                   className={cx(
-                    "w-5 shrink-0 pt-0.5 text-[11px] font-semibold tracking-[0.08em] text-stone-400 transition-colors group-hover:text-sky-600 dark:text-stone-500 dark:group-hover:text-sky-400",
-                    isActive && "text-sky-700 dark:text-sky-300",
+                    "w-5 shrink-0 pt-0.5 text-[11px] font-semibold tracking-[0.08em] text-muted transition-colors group-hover:text-coptic",
+                    isActive && "text-coptic",
                   )}
                 >
                   {String(index + 1).padStart(2, "0")}
                 </span>
                 <span
                   className={cx(
-                    "min-w-0 text-sm leading-5 font-medium text-stone-700 transition-colors group-hover:text-sky-700 dark:text-stone-300 dark:group-hover:text-sky-300",
-                    isActive && "text-sky-700 dark:text-sky-300",
+                    "min-w-0 text-sm font-medium leading-5 text-muted transition-colors group-hover:text-coptic",
+                    isActive && "text-coptic",
                   )}
                 >
                   {section.title}
@@ -208,15 +204,15 @@ export function GrammarLessonOutline({
 export function GrammarLessonCard({
   children,
   className,
-  tone = "stone",
+  tone = "neutral",
 }: GrammarLessonCardProps) {
   return (
     <div
       className={cx(
         "rounded-xl border p-4",
-        tone === "sky"
-          ? "border-sky-100 bg-sky-50 dark:border-sky-800 dark:bg-sky-900/30"
-          : "border-stone-200 bg-stone-50 dark:border-stone-800 dark:bg-stone-900",
+        tone === "coptic"
+          ? "border-coptic/20 bg-coptic-soft/55 dark:bg-coptic-soft/20"
+          : "border-line bg-elevated/75",
         className,
       )}
     >
@@ -313,7 +309,7 @@ export function GrammarLessonTable({
       data-grammar-table-mobile-layout={mobileLayout}
       data-grammar-table-rendering="table"
       className={cx(
-        "mt-4 -mx-4 overflow-hidden border border-stone-200 dark:border-stone-800 sm:mx-0 sm:rounded-lg",
+        "mt-4 -mx-4 overflow-hidden border border-line sm:mx-0 sm:rounded-lg",
         className,
       )}
     >
@@ -337,17 +333,17 @@ export function GrammarLessonTable({
         {renderMode !== "pdf" && canScrollHorizontally ? (
           <>
             {!hasStickyLeadingColumn && !isScrolledToStart ? (
-              <div className="pointer-events-none absolute inset-y-0 left-0 w-5 bg-gradient-to-r from-white via-white/80 to-transparent dark:from-stone-950 dark:via-stone-950/80 sm:hidden" />
+              <div className="pointer-events-none absolute inset-y-0 left-0 w-5 bg-gradient-to-r from-surface via-surface/80 to-transparent sm:hidden" />
             ) : null}
             {!isScrolledToEnd ? (
-              <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-white via-white/85 to-transparent dark:from-stone-950 dark:via-stone-950/85 sm:hidden" />
+              <div className="pointer-events-none absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-surface via-surface/85 to-transparent sm:hidden" />
             ) : null}
           </>
         ) : null}
       </div>
 
       {renderMode !== "pdf" && canScrollHorizontally && isScrolledToStart ? (
-        <div className="border-t border-stone-200/80 bg-stone-50/80 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.14em] text-stone-500 dark:border-stone-800/80 dark:bg-stone-950/45 dark:text-stone-400 sm:hidden">
+        <div className="border-t border-line bg-elevated/80 px-4 py-2 text-[11px] font-medium uppercase tracking-[0.14em] text-muted sm:hidden">
           {mobileScrollHint}
         </div>
       ) : null}
@@ -373,20 +369,18 @@ export function GrammarLessonEndnotes({
   return (
     <section
       className={cx(
-        "rounded-2xl border border-stone-200/90 bg-white/70 px-5 py-5 shadow-sm dark:border-stone-800/90 dark:bg-stone-950/35",
+        "rounded-lg border border-line bg-surface/88 px-5 py-5 shadow-soft",
         className,
       )}
     >
-      <h2 className="mb-4 text-2xl font-semibold text-stone-900 dark:text-stone-100">
-        {title}
-      </h2>
+      <h2 className="mb-4 text-2xl font-semibold text-ink">{title}</h2>
       <ol className="space-y-4">
         {footnotes.map((footnote) => (
           <li key={footnote.number} className="flex items-start gap-3">
-            <span className="w-8 shrink-0 text-sm font-semibold text-sky-700 dark:text-sky-300">
+            <span className="w-8 shrink-0 text-sm font-semibold text-coptic">
               [{footnote.number}]
             </span>
-            <div className="min-w-0 text-sm leading-7 text-stone-700 dark:text-stone-300">
+            <div className="min-w-0 text-sm leading-7 text-muted">
               {footnote.content}
             </div>
           </li>

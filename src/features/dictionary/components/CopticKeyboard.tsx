@@ -1,5 +1,6 @@
 import { Delete, X } from "lucide-react";
 
+import { iconButtonClassName } from "@/components/Button";
 import { useLanguage } from "@/components/LanguageProvider";
 import { antinoou } from "@/lib/fonts";
 
@@ -72,13 +73,13 @@ export default function CopticKeyboard({
   }
 
   return (
-    <div className="absolute right-0 top-[calc(100%+0.75rem)] z-[70] max-h-[70vh] w-full overflow-y-auto rounded-2xl border border-line/80 bg-surface/95 p-3 shadow-panel backdrop-blur-xl sm:rounded-3xl sm:p-4 md:w-[640px] md:p-5">
+    <div className="absolute right-0 top-[calc(100%+0.75rem)] z-[70] max-h-[70vh] w-full overflow-y-auto rounded-lg border border-line bg-surface/95 p-3 shadow-panel backdrop-blur-xl sm:rounded-xl sm:p-4 md:w-[640px] md:p-5">
       <div className="mb-3 flex items-start justify-between gap-3 sm:mb-4">
         <div>
-          <h3 className="text-stone-600 dark:text-stone-300 font-semibold text-sm tracking-widest uppercase">
+          <h3 className="text-sm font-semibold uppercase tracking-widest text-ink">
             {t("dict.keyboardTitle")}
           </h3>
-          <p className="mt-1 hidden text-xs text-stone-400 dark:text-stone-500 sm:block">
+          <p className="mt-1 hidden text-xs text-muted sm:block">
             {t("dict.keyboardDescription")}
           </p>
         </div>
@@ -86,7 +87,9 @@ export default function CopticKeyboard({
           type="button"
           onClick={onClose}
           aria-label={t("dict.keyboardClose")}
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-stone-100 text-stone-500 hover:text-stone-700 dark:bg-stone-800/70 dark:text-stone-400 dark:hover:text-stone-200 transition-colors"
+          className={iconButtonClassName({
+            className: "h-9 w-9 border-transparent",
+          })}
         >
           <X className="h-4 w-4" />
         </button>
@@ -98,7 +101,7 @@ export default function CopticKeyboard({
             type="button"
             key={char}
             onClick={() => onAppend(char)}
-            className="flex h-10 items-center justify-center rounded-lg border border-stone-200 bg-stone-100/80 font-coptic text-xl text-stone-700 shadow-sm transition-colors hover:bg-sky-100 hover:text-sky-700 active:scale-95 dark:border-stone-700 dark:bg-stone-800/80 dark:text-stone-200 dark:hover:bg-sky-600/50 dark:hover:text-white sm:h-12 sm:rounded-xl sm:text-2xl"
+            className="flex h-10 cursor-pointer select-none items-center justify-center rounded-lg border border-line bg-elevated/80 font-coptic text-xl text-ink shadow-sm transition-colors hover:border-coptic/35 hover:bg-coptic-soft hover:text-coptic active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 sm:h-12 sm:text-2xl"
           >
             {char}
           </button>
@@ -111,7 +114,7 @@ export default function CopticKeyboard({
             type="button"
             key={d.label}
             onClick={() => onAppend(d.char)}
-            className="flex h-10 flex-1 items-center justify-center rounded-lg border border-emerald-200 bg-emerald-50 text-base text-stone-700 transition-colors hover:bg-emerald-100 active:scale-95 dark:border-emerald-900/50 dark:bg-emerald-950/40 dark:text-stone-300 dark:hover:bg-emerald-900/60 sm:h-11 sm:rounded-xl sm:text-lg"
+            className="flex h-10 flex-1 cursor-pointer select-none items-center justify-center rounded-lg border border-accent/25 bg-accent-soft/70 text-base text-ink transition-colors hover:border-accent/45 hover:bg-accent-soft active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 sm:h-11 sm:text-lg"
             title={t("dict.keyboardCombine")}
           >
             <span
@@ -119,7 +122,7 @@ export default function CopticKeyboard({
             >
               {`◌${d.char}`}
             </span>
-            <span className="text-[11px] font-sans font-medium text-emerald-600 dark:text-emerald-500/80 sm:text-xs">
+            <span className="text-[11px] font-sans font-medium text-accent-strong dark:text-accent sm:text-xs">
               {d.label.replace(d.char, "").trim()}
             </span>
           </button>
@@ -128,7 +131,7 @@ export default function CopticKeyboard({
         <button
           type="button"
           onClick={onBackspace}
-          className="flex h-10 flex-1 flex-col items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-100 active:scale-95 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/60 sm:h-11 sm:rounded-xl"
+          className="flex h-10 flex-1 cursor-pointer select-none flex-col items-center justify-center rounded-lg border border-rose-200 bg-rose-50 text-sm font-semibold text-rose-600 transition-colors hover:bg-rose-100 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 dark:border-rose-900/50 dark:bg-rose-950/40 dark:text-rose-300 dark:hover:bg-rose-900/60 sm:h-11 sm:rounded-xl"
           aria-label={t("dict.keyboardBackspace")}
         >
           <Delete className="h-5 w-5" />
@@ -138,7 +141,7 @@ export default function CopticKeyboard({
         <button
           type="button"
           onClick={() => onAppend(" ")}
-          className="flex h-10 w-full items-center justify-center rounded-lg border border-stone-300 bg-stone-200 text-sm font-semibold uppercase tracking-widest text-stone-600 transition-colors hover:bg-stone-300 active:scale-95 dark:border-stone-700 dark:bg-stone-800 dark:text-stone-400 dark:hover:bg-stone-700 sm:h-11 sm:rounded-xl"
+          className="flex h-10 w-full cursor-pointer select-none items-center justify-center rounded-lg border border-line bg-elevated text-sm font-semibold uppercase tracking-widest text-muted transition-colors hover:bg-surface hover:text-ink active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 sm:h-11"
         >
           {t("dict.keyboardSpace")}
         </button>

@@ -43,8 +43,8 @@ export async function DashboardPageContent({
       contentClassName="app-page-content min-h-[80vh]"
       width="standard"
       accents={[
-        pageShellAccents.topLeftSkyOrb,
-        pageShellAccents.bottomRightEmeraldOrb,
+        pageShellAccents.topLeftGoldWashInset,
+        pageShellAccents.bottomRightCopticWash,
       ]}
     >
       <AppPageIntro

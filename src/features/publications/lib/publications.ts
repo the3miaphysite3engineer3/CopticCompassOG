@@ -158,6 +158,24 @@ export function buildPublicationTitle(publication: Publication) {
 }
 
 /**
+ * Returns the localized format label used by catalog and publication detail UI.
+ */
+export function getPublicationFormatLabel(
+  publication: Publication,
+  language: Language,
+) {
+  if (publication.schemaType === "Book") {
+    return language === "nl" ? "Boek" : "Book";
+  }
+
+  if (publication.schemaType === "ScholarlyArticle") {
+    return language === "nl" ? "Onderzoeksartikel" : "Research Article";
+  }
+
+  return language === "nl" ? "Creatief werk" : "Creative Work";
+}
+
+/**
  * Builds the localized publication description used by metadata and share
  * surfaces from the summary, format, availability, and author details.
  */

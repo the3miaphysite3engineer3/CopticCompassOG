@@ -6,8 +6,8 @@ import type { Metadata } from "next";
 
 function buildContactDescription(locale: "en" | "nl") {
   return locale === "nl"
-    ? "Neem contact op met Kyrillos Wannes voor feedback over het woordenboek, grammaticavragen, onderzoekssamenwerking, vragen over publicaties of algemene wetenschappelijke correspondentie."
-    : "Contact Kyrillos Wannes for dictionary feedback, grammar questions, research collaboration, publication inquiries, or general scholarly correspondence.";
+    ? "Neem contact op met Coptic Compass voor woordenboekfeedback, grammaticavragen, onderzoekssamenwerking, publicatievragen of platformondersteuning."
+    : "Contact Coptic Compass for dictionary feedback, grammar questions, research collaboration, publication inquiries, or platform support.";
 }
 
 export async function generateMetadata({

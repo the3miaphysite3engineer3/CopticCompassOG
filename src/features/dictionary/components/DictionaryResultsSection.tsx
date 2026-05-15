@@ -135,7 +135,7 @@ export function DictionaryResultsSection({
 
       {loading && (
         <div className="flex items-center justify-center py-20">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-stone-700 border-t-sky-500"></div>
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-line border-t-accent"></div>
         </div>
       )}
 
@@ -143,9 +143,9 @@ export function DictionaryResultsSection({
         <EmptyState
           title={t("dict.noMatch")}
           description={t("dict.tryFuzzy")}
-          className="dark:border-stone-800/60 dark:bg-stone-900/40 dark:shadow-lg"
-          titleClassName="font-medium text-stone-700 dark:text-stone-300"
-          descriptionClassName="mt-2 text-stone-500 dark:text-stone-500"
+          className="border-line bg-surface/88 shadow-soft"
+          titleClassName="font-medium text-ink"
+          descriptionClassName="mt-2 text-muted"
         />
       )}
 
@@ -173,7 +173,7 @@ export function DictionaryResultsSection({
           >
             {loadingMore ? (
               <span
-                className="h-4 w-4 animate-spin rounded-full border-2 border-stone-400 border-t-sky-500"
+                className="h-4 w-4 animate-spin rounded-full border-2 border-line border-t-accent"
                 aria-hidden="true"
               />
             ) : null}

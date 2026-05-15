@@ -58,8 +58,8 @@ export default async function ForgotPasswordPage({
       contentClassName="pt-8"
       width="narrow"
       accents={[
-        pageShellAccents.topLeftSkyOrb,
-        pageShellAccents.bottomRightEmeraldOrb,
+        pageShellAccents.topLeftGoldWash,
+        pageShellAccents.bottomRightCopticWash,
       ]}
     >
       <PageHeader
@@ -73,7 +73,7 @@ export default async function ForgotPasswordPage({
 
       <div className="mx-auto max-w-xl">
         <SurfacePanel rounded="3xl" className="p-8 md:p-10">
-          <form className="space-y-6 text-stone-800 dark:text-stone-200">
+          <form className="space-y-6 text-ink">
             <FormField
               htmlFor="email"
               label={getTranslation(language, "forgot.email")}

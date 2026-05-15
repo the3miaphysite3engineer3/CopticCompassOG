@@ -67,16 +67,12 @@ export function AdminNotificationEventCard({
             </Badge>
           </div>
 
-          <h2 className="text-2xl font-semibold text-stone-900 dark:text-stone-100">
-            {event.subject}
-          </h2>
+          <h2 className="text-2xl font-semibold text-ink">{event.subject}</h2>
 
-          <div className="mt-3 space-y-2 text-sm text-stone-600 dark:text-stone-400">
+          <div className="mt-3 space-y-2 text-sm text-muted">
             <p>
               {copy.recipient}:{" "}
-              <span className="font-semibold text-stone-800 dark:text-stone-200">
-                {event.recipient}
-              </span>
+              <span className="font-semibold text-ink">{event.recipient}</span>
             </p>
             <p>
               {copy.createdOn}{" "}
@@ -117,14 +113,14 @@ export function AdminNotificationEventCard({
       ) : null}
 
       {event.status === "failed" && event.last_error ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 px-5 py-4 text-sm leading-7 text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">
+        <div className="rounded-lg border border-red-200 bg-red-50 px-5 py-4 text-sm leading-7 text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">
           <span className="font-semibold">{copy.lastError}:</span>{" "}
           {event.last_error}
         </div>
       ) : (
-        <div className="rounded-2xl border border-stone-100 bg-stone-50 px-5 py-4 text-sm leading-7 text-stone-600 dark:border-stone-800/50 dark:bg-stone-950 dark:text-stone-300">
+        <div className="rounded-lg border border-line bg-elevated px-5 py-4 text-sm leading-7 text-muted">
           {copy.latestDeliveryStatus}:{" "}
-          <span className="font-semibold text-stone-800 dark:text-stone-200">
+          <span className="font-semibold text-ink">
             {event.latestDelivery?.status ?? event.status}
           </span>
         </div>

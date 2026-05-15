@@ -42,7 +42,7 @@ export function ContentReleaseReviewForm({
   return (
     <form
       action={updateContentReleaseStatus}
-      className="space-y-4 rounded-2xl border border-stone-100 bg-stone-50/60 p-5 dark:border-stone-800 dark:bg-stone-900/20"
+      className="space-y-4 rounded-lg border border-line bg-elevated/60 p-5"
     >
       <input type="hidden" name="release_id" value={releaseId} />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
