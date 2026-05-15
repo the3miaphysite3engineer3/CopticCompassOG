@@ -3,7 +3,7 @@
 
   <h3>A trusted digital Coptology platform.</h3>
 
-  <p>Dictionary · Grammar · Shenute AI · Publications · Public API</p>
+  <p>Publications · Grammar · Dictionary · Public APIs · Shenute AI</p>
 
   <div>
     <a href="https://www.copticcompass.com"><img src="https://img.shields.io/badge/Live_Site-www.copticcompass.com-C08329?style=flat-square" alt="Live Site"></a>

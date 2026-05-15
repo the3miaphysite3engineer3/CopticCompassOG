@@ -2,11 +2,11 @@
 
 Copyright 2026. All rights reserved.
 
-Coptic Compass is a complete digital Coptology platform for language study,
-reference, publication, research workflows, and Coptic-learning technology. This
-brand book defines who we are, why we exist, how we speak, and how the identity
-should appear across product, publishing, documentation, and public
-communication.
+Coptic Compass is a complete digital Coptology platform and publisher for
+language study, reference, publication, research workflows, and Coptic-learning
+technology. This brand book defines who we are, why we exist, how we speak, and
+how the identity should appear across product, publishing, documentation, and
+public communication.
 
 ## Contents
 
@@ -34,8 +34,13 @@ studies the Coptic language: students, teachers, clergy, scholars, linguists,
 archaeologists, software developers, and independent learners.
 
 Coptic Compass is not just a portfolio, blog, or isolated dictionary. It is a
-publishing and learning platform with a scholarly center of gravity and a modern
+publisher and learning platform with a scholarly center of gravity and a modern
 technical surface.
+
+Coptic Compass is the publisher of the seven works currently listed in the
+publications catalog. The publication page, covers, metadata, descriptions,
+Open Graph cards, and public references should treat Coptic Compass as the
+publisher imprint for those works.
 
 ### Purpose
 
@@ -74,6 +79,7 @@ and context.
 
 - A Coptic-language learning platform.
 - A digital dictionary and grammar environment.
+- The publisher of the seven current publication catalog works.
 - A publication and reference catalog.
 - A research and developer surface for Coptic data and workflows.
 - A serious but welcoming home for Coptology.
@@ -90,9 +96,9 @@ and context.
 
 ### Positioning Statement
 
-Coptic Compass is the digital Coptology platform that unifies dictionary lookup,
-grammar learning, publications, AI-assisted study, and developer access in one
-serious, accessible, and community-rooted experience.
+Coptic Compass is the digital Coptology platform and publisher that unifies
+dictionary lookup, grammar learning, publications, AI-assisted study, and
+developer access in one serious, accessible, and community-rooted experience.
 
 ### Primary Audiences
 
@@ -116,13 +122,13 @@ serious, accessible, and community-rooted experience.
 
 ### Messaging Pillars
 
-| Pillar  | Message                                                                   |
-| :------ | :------------------------------------------------------------------------ |
-| Learn   | Structured lessons and tools help learners build real competence.         |
-| Search  | Dictionary and reference workflows make Coptic easier to explore.         |
-| Publish | Books and research material belong inside a coherent digital catalog.     |
-| Assist  | Shenute AI supports study with context-aware help and careful boundaries. |
-| Build   | Public APIs let developers extend Coptic Compass into other workflows.    |
+| Pillar  | Message                                                                                   |
+| :------ | :---------------------------------------------------------------------------------------- |
+| Learn   | Structured lessons and tools help learners build real competence.                         |
+| Search  | Dictionary and reference workflows make Coptic easier to explore.                         |
+| Publish | Coptic Compass publishes and catalogs books and research material in one coherent system. |
+| Assist  | Shenute AI supports study with context-aware help and careful boundaries.                 |
+| Build   | Public APIs let developers extend Coptic Compass into other workflows.                    |
 
 ### Core Taglines
 
@@ -386,16 +392,23 @@ Recommended hierarchy:
 
 #### Antinoou
 
-Antinoou is the Coptic-script and heritage display companion font. Use it for
-Coptic headwords, search input, dictionary forms, grammar examples,
-manuscript/OCR output, and any UI where Coptic text must remain readable and
-typographically authentic.
+Antinoou is the Coptic-script typeface, heritage display companion, and primary
+print-publication typeface. In the digital product, use it for Coptic headwords,
+search input, dictionary forms, grammar examples, manuscript/OCR output, and any
+UI where Coptic text must remain readable and typographically authentic.
 
 Antinoou may also be used for select Latin-script brand display moments,
 especially short titles or headings where the brand should feel rooted in
 Coptic typographic tradition. Good examples include the `Coptic Compass` title
 on the homepage hero, editorial title slides, publication title moments, and
 short section headings in brand-forward contexts.
+
+For printed publications, publication PDFs, cover interiors, title pages, and
+editorial layouts, Antinoou is the main typeface for both Latin and Coptic
+scripts. Use it for publication titles, running text, front matter, back matter,
+footnotes, captions, tables, and Coptic examples so Coptic Compass publications
+feel like one continuous scholarly imprint rather than a digital product
+exported to paper.
 
 Local implementation:
 
@@ -408,9 +421,11 @@ Local implementation:
 | `src/app/globals.css`                                       | Exposes `.font-coptic` and `--font-coptic`.     |
 
 Implementation rule: apply Antinoou by default to Coptic-script content. For
-Latin script, reserve it for short brand/display titles and headings only. Do
-not use Antinoou for navigation, body copy, long paragraphs, dense UI labels,
-form controls, tables, or metadata.
+Latin script in digital product UI, reserve it for short brand/display titles
+and headings only. Do not use Antinoou for product navigation, product body
+copy, dense UI labels, form controls, product tables, or product metadata. Print
+publication interiors are the exception: there, Antinoou is the default family
+for both Latin and Coptic scripts.
 
 ### Imagery And Illustration
 
