@@ -77,6 +77,66 @@ test("floating Shenute assistant labels dictionary context", async ({
   });
 });
 
+test("floating Shenute assistant stays available on mobile content pages", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/en/dictionary");
+
+  await expect(
+    page.getByRole("button", { name: "Open Shenute AI" }),
+  ).toBeVisible();
+
+  await page.getByRole("button", { name: "Open Shenute AI" }).click();
+  await expect(page.getByRole("button", { name: "Minimize" })).toBeVisible({
+    timeout: FLOATING_ASSISTANT_TIMEOUT_MS,
+  });
+  await page.getByRole("button", { name: "Minimize" }).click();
+  await expect(
+    page.getByRole("button", { name: "Open Shenute AI" }),
+  ).toBeVisible();
+});
+
+test("floating Shenute assistant is hidden on the homepage", async ({
+  page,
+}) => {
+  await page.goto("/en");
+
+  await expect(
+    page.getByRole("button", { name: "Open Shenute AI" }),
+  ).toHaveCount(0);
+});
+
+test("floating Shenute assistant fades only during active scrolling", async ({
+  page,
+}) => {
+  await page.goto("/en/dictionary");
+
+  const launcher = page.getByTestId("floating-shenute-launcher");
+  await expect(launcher).toBeVisible();
+
+  const initialOpacity = await launcher.evaluate((element) =>
+    Number(window.getComputedStyle(element).opacity),
+  );
+  await page.evaluate(() => window.scrollTo(0, 700));
+
+  await expect
+    .poll(async () =>
+      launcher.evaluate((element) =>
+        Number(window.getComputedStyle(element).opacity),
+      ),
+    )
+    .toBeLessThan(initialOpacity);
+
+  await expect
+    .poll(async () =>
+      launcher.evaluate((element) =>
+        Number(window.getComputedStyle(element).opacity),
+      ),
+    )
+    .toBe(initialOpacity);
+});
+
 test("floating Shenute assistant is hidden on the Shenute route", async ({
   page,
 }) => {

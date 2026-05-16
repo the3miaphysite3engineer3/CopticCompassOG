@@ -23,7 +23,7 @@ const BUTTON_BASE_CLASS =
   "inline-flex cursor-pointer select-none items-center justify-center gap-2 font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55";
 
 const CONTROL_BUTTON_BASE_CLASS =
-  "inline-flex cursor-pointer select-none items-center justify-center gap-2 rounded-lg border border-line bg-surface/88 text-muted shadow-sm transition-all duration-200 hover:-translate-y-px hover:border-accent/40 hover:bg-elevated hover:text-ink active:translate-y-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/30 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55 dark:bg-surface/88 dark:text-muted dark:hover:text-ink";
+  "inline-flex h-10 min-w-10 cursor-pointer select-none items-center justify-center gap-2 rounded-lg border border-line bg-surface px-0 text-muted shadow-soft transition-colors duration-200 hover:bg-elevated hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/25 disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-55";
 
 const BUTTON_SIZE_CLASSES: Record<ButtonSize, string> = {
   sm: "h-10 rounded-md px-3 text-sm",

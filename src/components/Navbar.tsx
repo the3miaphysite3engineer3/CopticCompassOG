@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 import { useCallback, useState, type ComponentType } from "react";
 
 import { controlButtonClassName } from "@/components/Button";
+import { cx } from "@/lib/classes";
 import {
   getContactPath,
   getDashboardPath,
@@ -165,7 +166,13 @@ export function Navbar() {
             <LanguageToggle />
             <button
               type="button"
-              className={controlButtonClassName({ className: "lg:hidden" })}
+              className={controlButtonClassName({
+                className: cx(
+                  "lg:hidden",
+                  isMobileMenuOpen &&
+                    "border-accent/30 bg-accent-soft text-accent-strong dark:bg-accent-soft/35 dark:text-accent",
+                ),
+              })}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-controls="mobile-navigation"
               aria-expanded={isMobileMenuOpen}

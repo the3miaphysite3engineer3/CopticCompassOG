@@ -17,7 +17,14 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 
@@ -69,6 +76,8 @@ type PageContextPayload = {
 };
 
 const SITE_TITLE_SUFFIX_PATTERN = /\s+\|\s+Coptic Compass$/;
+const LAUNCHER_SCROLLING_OPACITY = 0.52;
+const LAUNCHER_SCROLL_IDLE_DELAY_MS = 720;
 
 const PAGE_CONTEXT_LABELS: Record<Language, Record<string, string>> = {
   en: {
@@ -321,12 +330,6 @@ function toShenuteProvider(value: string): ShenuteProvider {
   return "thoth";
 }
 
-function isDenseStudyRoute(pathname: string | null) {
-  return Boolean(
-    pathname && /(^|\/)(dictionary|entry|grammar)(?:\/|$)/.test(pathname),
-  );
-}
-
 function getFeedbackStatusClass(status: "error" | "pending" | "success") {
   if (status === "error") {
     return "text-danger";
@@ -416,6 +419,7 @@ export function FloatingAiAssistantPanel({
   const { language, t } = useLanguage();
   const copy = floatingShenuteCopy[language];
   const [isOpen, setIsOpen] = useState(initialOpen);
+  const [launcherOpacity, setLauncherOpacity] = useState(1);
   const [inputValue, setInputValue] = useState("");
   const [inferenceProvider, setInferenceProvider] =
     useState<ShenuteProvider>("thoth");
@@ -475,8 +479,14 @@ export function FloatingAiAssistantPanel({
   });
   const floatingContainerClassName = cx(
     "fixed bottom-[calc(env(safe-area-inset-bottom)+1rem)] right-4 z-50 sm:bottom-5 sm:right-5",
-    !isOpen && isDenseStudyRoute(pathname) && "hidden sm:block",
+    !isOpen &&
+      "opacity-[var(--floating-shenute-opacity)] transition-opacity duration-200 ease-out hover:opacity-100 focus-within:opacity-100 motion-reduce:transition-none",
   );
+  const floatingContainerStyle = !isOpen
+    ? ({
+        "--floating-shenute-opacity": launcherOpacity.toFixed(2),
+      } as CSSProperties)
+    : undefined;
   let conversationContent: ReactNode;
 
   if (isShenuteAccessBlocked) {
@@ -845,6 +855,35 @@ export function FloatingAiAssistantPanel({
     };
   }, []);
 
+  useEffect(() => {
+    if (isOpen) {
+      return;
+    }
+
+    let restoreTimeout: number | undefined;
+    const handleScroll = () => {
+      setLauncherOpacity(LAUNCHER_SCROLLING_OPACITY);
+      if (restoreTimeout !== undefined) {
+        window.clearTimeout(restoreTimeout);
+      }
+      restoreTimeout = window.setTimeout(() => {
+        setLauncherOpacity(1);
+        restoreTimeout = undefined;
+      }, LAUNCHER_SCROLL_IDLE_DELAY_MS);
+    };
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (restoreTimeout !== undefined) {
+        window.clearTimeout(restoreTimeout);
+      }
+    };
+  }, [isOpen]);
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -1071,7 +1110,11 @@ export function FloatingAiAssistantPanel({
   }
 
   return (
-    <div className={floatingContainerClassName}>
+    <div
+      className={floatingContainerClassName}
+      data-testid={!isOpen ? "floating-shenute-launcher" : undefined}
+      style={floatingContainerStyle}
+    >
       {isOpen ? (
         <section className="flex h-[560px] max-h-[calc(100dvh-7rem)] w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-lg border border-line/80 bg-surface/95 shadow-panel backdrop-blur-xl sm:w-[400px]">
           <header className="border-b border-line/80 bg-surface/90 px-4 py-3">
